@@ -184,7 +184,7 @@ Or use color dot:
 <div class="flex items-center gap-2">
   <div
     :class="[
-      'w-3 h-3 rounded-full',
+      'size-3 rounded-full',
       COLOR_DOT_CLASSES[container.color ?? 'default']
     ]"
   />

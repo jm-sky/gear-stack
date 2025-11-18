@@ -19,7 +19,7 @@ import {
   READINESS_EXCELLENT_THRESHOLD,
   READINESS_GOOD_THRESHOLD,
 } from '../utils/constants'
-import { COLOR_DOT_CLASSES } from '../utils/containerColors'
+import { COLOR_BORDER_CLASSES, COLOR_DOT_CLASSES } from '../utils/containerColors'
 import { formatWeightFromGrams } from '../utils/formatWeight'
 
 const props = defineProps<{
@@ -78,18 +78,22 @@ const handleDelete = () => {
 </script>
 
 <template>
-  <Card class="hover:shadow-md transition-shadow cursor-pointer" @click="handleShow">
+  <Card
+    class="hover:shadow-md transition-shadow cursor-pointer"
+    :class="container.color ? COLOR_BORDER_CLASSES[container.color] : ''"
+    @click="handleShow"
+  >
     <CardHeader>
       <div class="flex items-start justify-between">
         <div class="flex-1">
           <div class="flex items-center gap-2 mb-2">
             <div
               :class="[
-                'w-3 h-3 rounded-full flex-shrink-0',
+                'size-3 rounded-full shrink-0',
                 COLOR_DOT_CLASSES[container.color ?? 'default']
               ]"
             />
-            <Package class="h-5 w-5 text-muted-foreground" />
+            <Package class="size-5" />
             <CardTitle>{{ container.name }}</CardTitle>
           </div>
           <CardDescription v-if="container.description">
@@ -99,9 +103,14 @@ const handleDelete = () => {
             {{ typeLabel }}
           </Badge>
         </div>
-        <DropdownMenu @click.stop>
+        <DropdownMenu>
           <DropdownMenuTrigger as-child>
-            <Button variant="ghost" size="sm" class="size-8 p-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              class="size-8 p-0"
+              @click.stop
+            >
               <MoreVertical class="size-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -112,7 +121,7 @@ const handleDelete = () => {
             <DropdownMenuItem @click.stop="handleEdit">
               {{ t('gear.actions.edit') }}
             </DropdownMenuItem>
-            <DropdownMenuItem class="text-destructive" @click.stop="handleDelete">
+            <DropdownMenuItem class="text-destructive hover:text-destructive! hover:bg-destructive/4!" @click.stop="handleDelete">
               {{ t('gear.actions.delete') }}
             </DropdownMenuItem>
           </DropdownMenuContent>

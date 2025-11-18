@@ -29,7 +29,7 @@ const emit = defineEmits<{
   <TableEmpty :colspan="columns.length">
     <div class="flex flex-col items-center justify-center py-12">
       <div class="w-16 h-16 mb-4 rounded-full bg-muted flex items-center justify-center">
-        <FileText class="w-8 h-8 text-muted-foreground" />
+        <FileText class="size-8 text-muted-foreground" />
       </div>
       <h3 class="text-lg font-semibold mb-2">
         {{ title }}

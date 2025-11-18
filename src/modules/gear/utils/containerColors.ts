@@ -26,6 +26,32 @@ export const COLOR_CLASSES: Record<TContainerColor, string> = {
   indigo: 'bg-indigo-100 border-indigo-300 text-indigo-800 dark:bg-indigo-900 dark:border-indigo-700 dark:text-indigo-200',
 }
 
+export const COLOR_BORDER_CLASSES: Record<TContainerColor, string> = {
+  default: 'border-gray-300',
+  blue: 'border-blue-300',
+  green: 'border-green-300',
+  red: 'border-red-300',
+  yellow: 'border-yellow-300',
+  purple: 'border-purple-300',
+  orange: 'border-orange-300',
+  pink: 'border-pink-300',
+  teal: 'border-teal-300',
+  indigo: 'border-indigo-300',
+}
+
+export const COLOR_TEXT_CLASSES: Record<TContainerColor, string> = {
+  default: 'text-gray-400',
+  blue: 'text-blue-500',
+  green: 'text-green-500',
+  red: 'text-red-500',
+  yellow: 'text-yellow-500',
+  purple: 'text-purple-500',
+  orange: 'text-orange-500',
+  pink: 'text-pink-500',
+  teal: 'text-teal-500',
+  indigo: 'text-indigo-500',
+}
+
 export const COLOR_DOT_CLASSES: Record<TContainerColor, string> = {
   default: 'bg-gray-400',
   blue: 'bg-blue-500',
@@ -38,4 +64,3 @@ export const COLOR_DOT_CLASSES: Record<TContainerColor, string> = {
   teal: 'bg-teal-500',
   indigo: 'bg-indigo-500',
 }
-
