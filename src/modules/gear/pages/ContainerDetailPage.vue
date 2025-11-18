@@ -1,11 +1,12 @@
 <script setup lang="ts">
 // File operations handled via native input element
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import type { IGearItem } from '../types/gear.types'
+import AddNestedContainerDialog from '../components/AddNestedContainerDialog.vue'
 import ContainerHeader from '../components/ContainerHeader.vue'
 import ItemsTable from '../components/ItemsTable.vue'
 import { useContainer } from '../composables/useContainer'
@@ -15,14 +16,17 @@ const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 const { container } = useContainer()
-const { deleteItem, updateItem, exportData, importData } = useGear()
+const { deleteItem, updateItem, exportData, importData, createItem, getContainerById } = useGear()
 
 const containerId = route.params.id as string
+
+// Dialog state
+const isAddContainerDialogOpen = ref(false)
 
 // File operations handled in handleImport
 
 // Items
-const items = computed<IGearItem[]>(() => container.value?.items || [])
+const items = computed<IGearItem[]>(() => container.value?.items ?? [])
 
 // Actions
 const handleEditItem = (item: IGearItem) => {
@@ -94,6 +98,37 @@ const handleImport = () => {
   input.click()
 }
 
+const handleAddContainer = () => {
+  isAddContainerDialogOpen.value = true
+}
+
+const handleAddNestedContainer = (nestedContainerId: string) => {
+  try {
+    const nestedContainer = getContainerById(nestedContainerId)
+    if (!nestedContainer) {
+      toast.error(t('common.error'))
+      return
+    }
+
+    // Create an item that references the nested container
+    // Use container name as item name
+    createItem(containerId, {
+      name: nestedContainer.name,
+      category: 'other',
+      quantity: 1,
+      weight: 0,
+      weightUnit: 'g',
+      priority: 'medium',
+      status: 'owned',
+      containerId: nestedContainerId,
+    })
+    toast.success(t('common.success'))
+  } catch (error) {
+    toast.error(t('common.error'))
+    console.error('Error adding nested container:', error)
+  }
+}
+
 // Redirect if container not found
 if (!container.value) {
   router.push('/gear')
@@ -103,7 +138,12 @@ if (!container.value) {
 <template>
   <AuthenticatedLayout>
     <div v-if="container" class="space-y-6">
-      <ContainerHeader :container="container" @export="handleExport" @import="handleImport" />
+      <ContainerHeader 
+        :container="container" 
+        @export="handleExport" 
+        @import="handleImport"
+        @add-container="handleAddContainer"
+      />
 
       <!-- Items Table -->
       <div class="bg-card rounded-lg border p-4 sm:p-6 overflow-x-auto">
@@ -114,6 +154,13 @@ if (!container.value) {
           @status-change="handleStatusChange"
         />
       </div>
+
+      <!-- Add Nested Container Dialog -->
+      <AddNestedContainerDialog
+        v-model:open="isAddContainerDialogOpen"
+        :current-container-id="containerId"
+        @confirm="handleAddNestedContainer"
+      />
     </div>
   </AuthenticatedLayout>
 </template>

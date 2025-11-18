@@ -35,6 +35,14 @@ export function useGear() {
     return gearService.getContainerById(id)
   }
 
+  const getRootContainers = (): IGearContainer[] => {
+    return gearService.getRootContainers()
+  }
+
+  const getNestedContainers = (containerId: TUUID): IGearContainer[] => {
+    return gearService.getNestedContainers(containerId)
+  }
+
   // ========== Item Operations ==========
 
   const createItem = (containerId: TUUID, data: ICreateItemDto): IGearItem => {
@@ -98,6 +106,8 @@ export function useGear() {
     updateContainer,
     deleteContainer,
     getContainerById,
+    getRootContainers,
+    getNestedContainers,
 
     // Item Actions
     createItem,

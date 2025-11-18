@@ -21,6 +21,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.6.0] - 2025-11-19
+
+### Added
+- Container nesting functionality (FEATURE-008)
+- Support for nested containers - containers can be added as items to other containers
+- `parentContainerId` field in container model for direct parent-child relationships
+- `containerId` field in item model for referencing nested containers
+- Circular reference validation to prevent infinite nesting loops
+- Recursive weight calculation for nested containers
+- `AddNestedContainerDialog` component for selecting containers to nest
+- Expandable rows in items table - click to expand and view nested container contents
+- `ItemsTableNestedContainerRow` component for displaying nested container items
+- Container color visualization in expanded nested container rows
+- Filter to show only root containers (containers without parents and not used as items)
+- Enhanced container actions menu - different actions for nested containers vs regular items
+- "View Container" action in dropdown menu for nested containers
+- Visual indicators for nested containers (icon, badge, clickable name)
+- Container nesting utilities (`containerNesting.ts`) with functions for:
+  - Circular reference detection
+  - Root container filtering
+  - Nested container retrieval
+  - Container path calculation
+
+### Changed
+- Separated "Add Item" and "Add Container" actions in container detail page
+- Container list page now filters out containers used as items when "Show only root containers" is enabled
+- Improved `getRootContainers()` to check both `parentContainerId` and usage as items
+- Container color now affects the border color of expanded nested container rows
+- Nested container names are now clickable and styled with container color
+
+### Fixed
+- Root container filter now correctly excludes containers used as items in other containers
+
+---
+
 ## [0.5.0] - 2025-11-18
 
 ### Added

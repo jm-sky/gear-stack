@@ -8,6 +8,7 @@ import type {
   TGearItemStatus,
 } from '../types/gear.types'
 import { useGearStore } from '../store/useGearStore'
+import { getAllNestedContainers, getRootContainers, wouldCreateCircularReference } from '../utils/containerNesting'
 import { convertToGrams } from '../utils/formatWeight'
 import type { TUUID } from '@/shared/types/base.type'
 
@@ -19,12 +20,30 @@ class GearService {
   // ========== Containers CRUD ==========
 
   createContainer(data: ICreateContainerDto): IGearContainer {
+    // Validate parent relationship if provided
+    if (data.parentContainerId) {
+      const allContainers = this.store.getAllContainers
+      const newContainerId = crypto.randomUUID() // Generate ID before validation
+      
+      if (wouldCreateCircularReference(newContainerId, data.parentContainerId, allContainers)) {
+        throw new Error('Cannot create container: would create circular reference')
+      }
+      
+      // Verify parent exists
+      const parent = this.store.getContainerById(data.parentContainerId)
+      if (!parent) {
+        throw new Error(`Parent container with id ${data.parentContainerId} not found`)
+      }
+    }
+
     const now = new Date().toISOString()
     const container: IGearContainer = {
       id: crypto.randomUUID(),
       name: data.name,
       description: data.description,
       type: data.type,
+      color: data.color,
+      parentContainerId: data.parentContainerId,
       items: [],
       createdAt: now,
       updatedAt: now,
@@ -38,6 +57,23 @@ class GearService {
     const container = this.store.getContainerById(id)
     if (!container) {
       throw new Error(`Container with id ${id} not found`)
+    }
+
+    // Validate parent relationship change if provided
+    if (data.parentContainerId !== undefined) {
+      const allContainers = this.store.getAllContainers
+      
+      if (data.parentContainerId) {
+        if (wouldCreateCircularReference(id, data.parentContainerId, allContainers)) {
+          throw new Error('Cannot update container: would create circular reference')
+        }
+        
+        // Verify parent exists
+        const parent = this.store.getContainerById(data.parentContainerId)
+        if (!parent) {
+          throw new Error(`Parent container with id ${data.parentContainerId} not found`)
+        }
+      }
     }
 
     const updated: IGearContainer = {
@@ -62,6 +98,14 @@ class GearService {
     return this.store.getAllContainers
   }
 
+  getRootContainers(): IGearContainer[] {
+    return getRootContainers(this.store.getAllContainers)
+  }
+
+  getNestedContainers(containerId: TUUID): IGearContainer[] {
+    return getAllNestedContainers(containerId, this.store.getAllContainers)
+  }
+
   // ========== Items CRUD ==========
 
   createItem(containerId: TUUID, data: ICreateItemDto): IGearItem {
@@ -82,6 +126,7 @@ class GearService {
       expirationDate: data.expirationDate,
       priority: data.priority,
       status: data.status,
+      containerId: data.containerId && data.containerId.trim() !== '' ? data.containerId : undefined, // Reference to nested container
       createdAt: now,
       updatedAt: now,
     }
@@ -123,6 +168,7 @@ class GearService {
       expirationDate: data.expirationDate ?? existingItem.expirationDate,
       priority: data.priority ?? existingItem.priority,
       status: data.status ?? existingItem.status,
+      containerId: data.containerId !== undefined && data.containerId !== null && data.containerId.trim() !== '' ? data.containerId : (data.containerId === '' ? undefined : existingItem.containerId),
       createdAt: existingItem.createdAt,
       updatedAt: new Date().toISOString(),
     }
@@ -173,10 +219,20 @@ class GearService {
       return 0
     }
 
-    return container.items.reduce((total, item) => {
+    // Calculate weight of direct items
+    const totalWeight = container.items.reduce((total, item) => {
+      // If item is a nested container, calculate its total weight recursively
+      if (item.containerId) {
+        const nestedContainerWeight = this.calculateTotalWeight(item.containerId)
+        return total + nestedContainerWeight * item.quantity
+      }
+      
+      // Regular item weight
       const weightInGrams = convertToGrams(item.weight, item.weightUnit ?? 'g')
       return total + weightInGrams * item.quantity
     }, 0)
+
+    return totalWeight
   }
 
   calculateReadinessPercentage(containerId: TUUID): number {

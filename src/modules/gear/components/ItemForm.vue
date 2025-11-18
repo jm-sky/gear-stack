@@ -88,7 +88,7 @@ const handleCancel = () => {
         <FormItem>
           <FormLabel :label="$t('gear.item.category')" required />
           <Select :model-value="value" @update:model-value="handleChange">
-            <SelectTrigger>
+            <SelectTrigger class="min-w-36">
               <SelectValue :placeholder="$t('gear.item.category')" />
             </SelectTrigger>
             <SelectContent>

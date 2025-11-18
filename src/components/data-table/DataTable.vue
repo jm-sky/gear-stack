@@ -255,24 +255,26 @@ const handlePageSizeChange = (newPageSize: number) => {
         </TableHeader>
         <TableBody>
           <template v-if="!isEmpty">
-            <TableRow
-              v-for="row in table.getRowModel().rows"
-              :key="row.id"
-              :data-state="row.getIsSelected() ? 'selected' : undefined"
-            >
-              <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
-                <slot
-                  :name="cell.column.columnDef.id"
-                  :row="row"
-                  :cell="cell"
-                >
-                  <FlexRender
-                    :render="cell.column.columnDef.cell"
-                    :props="cell.getContext()"
-                  />
-                </slot>
-              </TableCell>
-            </TableRow>
+            <template v-for="row in table.getRowModel().rows" :key="row.id">
+              <TableRow
+                :data-state="row.getIsSelected() ? 'selected' : undefined"
+              >
+                <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
+                  <slot
+                    :name="cell.column.columnDef.id"
+                    :row="row"
+                    :cell="cell"
+                  >
+                    <FlexRender
+                      :render="cell.column.columnDef.cell"
+                      :props="cell.getContext()"
+                    />
+                  </slot>
+                </TableCell>
+              </TableRow>
+              <!-- Slot for content after each row (e.g., expandable content) -->
+              <slot name="row-after" :row="row" :columns="columns" />
+            </template>
           </template>
           <template v-else>
             <!-- Empty State Slot -->

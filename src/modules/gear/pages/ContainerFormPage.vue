@@ -56,7 +56,7 @@ const handleNameBlur = () => {
 }
 
 // Submit handler
-const onSubmit = handleSubmit(async (data: ICreateContainerDto | IUpdateContainerDto) => {
+const onSubmit = handleSubmit(async (data: ContainerFormData) => {
   try {
     if (isEditMode && containerId) {
       updateContainer(containerId, data as IUpdateContainerDto)

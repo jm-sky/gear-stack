@@ -1,17 +1,22 @@
 <script setup lang="ts">
-import { Package } from 'lucide-vue-next'
-import { computed } from 'vue'
+import { Box, ChevronRight, Package } from 'lucide-vue-next'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import DataTable from '@/components/data-table/DataTable.vue'
 import Badge from '@/components/ui/badge/Badge.vue'
+import { Button } from '@/components/ui/button'
 import TableEmpty from '@/components/ui/table/TableEmpty.vue'
 import { useSettings } from '@/modules/settings/composables/useSettings'
 import type { IGearItem } from '../types/gear.types'
+import { useGear } from '../composables/useGear'
 import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 import { EXPIRATION_WARNING_DAYS } from '../utils/constants'
+import { COLOR_TEXT_CLASSES } from '../utils/containerColors'
 import { formatWeight } from '../utils/formatWeight'
 import { createItemsColumns } from '../utils/itemsColumns'
 import CategoryIcon from './CategoryIcon.vue'
+import ItemsTableNestedContainerRow from './ItemsTableNestedContainerRow.vue'
 import ItemsTableRowActions from './ItemsTableRowActions.vue'
 
 const props = withDefaults(
@@ -31,13 +36,16 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const router = useRouter()
 const { customCategories } = useSettings()
+const { getContainerById } = useGear()
+
+// Expanded rows state (which containers are expanded)
+const expandedRows = ref<Set<string>>(new Set())
 
 // Helper to get category label for filtering
 const getCategoryLabel = (categoryKey: string): string => {
-  console.log('[getCategoryLabel]', categoryKey)
   const customCategory = customCategories.value.find(c => c.key === categoryKey)
-  console.log('[customCategory]', customCategory)
   if (customCategory) {
     return customCategory.label
   }
@@ -75,6 +83,45 @@ function isExpiringSoon(item: IGearItem, days: number = EXPIRATION_WARNING_DAYS)
   const daysUntilExpiration = Math.ceil((expirationDate.getTime() - now.getTime()) / MILLISECONDS_PER_DAY)
   return daysUntilExpiration > 0 && daysUntilExpiration <= days
 }
+
+// Helper to check if item is a nested container
+function isNestedContainer(item: IGearItem): boolean {
+  return !!item.containerId
+}
+
+// Navigate to nested container
+function navigateToNestedContainer(item: IGearItem) {
+  if (item.containerId) {
+    router.push(`/gear/${item.containerId}`)
+  }
+}
+
+// Toggle row expansion
+function toggleRowExpansion(itemId: string) {
+  if (expandedRows.value.has(itemId)) {
+    expandedRows.value.delete(itemId)
+  } else {
+    expandedRows.value.add(itemId)
+  }
+}
+
+// Check if row is expanded
+function isRowExpanded(itemId: string): boolean {
+  return expandedRows.value.has(itemId)
+}
+
+// Get nested container items
+function getNestedContainerItems(item: IGearItem): IGearItem[] {
+  if (!item.containerId) return []
+  const container = getContainerById(item.containerId)
+  return container?.items ?? []
+}
+
+// Get nested container
+function getNestedContainer(item: IGearItem) {
+  if (!item.containerId) return undefined
+  return getContainerById(item.containerId)
+}
 </script>
 
 <template>
@@ -90,7 +137,38 @@ function isExpiringSoon(item: IGearItem, days: number = EXPIRATION_WARNING_DAYS)
   >
     <template #name="{ row }">
       <div class="flex items-center gap-2" :class="{ 'text-destructive font-semibold': isExpired(row.original), 'text-yellow-600': isExpiringSoon(row.original) }">
-        {{ row.original.name }}
+        <!-- Expand/Collapse button for nested containers -->
+        <Button
+          v-if="isNestedContainer(row.original)"
+          variant="ghost"
+          size="sm"
+          class="size-6 p-0 shrink-0"
+          @click.stop="toggleRowExpansion(row.original.id)"
+        >
+          <ChevronRight
+            :size="16"
+            class="text-muted-foreground transition-transform"
+            :class="{ 'rotate-90': isRowExpanded(row.original.id) }"
+          />
+        </Button>
+
+        <template v-if="isNestedContainer(row.original)">
+          <Box :size="16" class="text-muted-foreground shrink-0" :class="COLOR_TEXT_CLASSES[getNestedContainer(row.original)?.color ?? 'default']" />
+          <span
+            class="font-semibold cursor-pointer text-foreground/80 hover:text-primary transition-colors"
+            @click="navigateToNestedContainer(row.original)"
+          >
+            {{ row.original.name }}
+          </span>
+        </template>
+
+        <span v-else>
+          {{ row.original.name }}
+        </span>
+
+        <Badge v-if="isNestedContainer(row.original)" variant="outline" class="text-xs">
+          {{ t('gear.item.nestedContainer') }}
+        </Badge>
         <Badge v-if="isExpired(row.original)" variant="destructive" class="text-xs">
           {{ t('gear.item.expiration.expired') }}
         </Badge>
@@ -133,8 +211,20 @@ function isExpiringSoon(item: IGearItem, days: number = EXPIRATION_WARNING_DAYS)
         @edit="emit('edit', row.original)"
         @delete="emit('delete', row.original)"
         @status-change="(status) => emit('statusChange', row.original, status)"
+        @view-container="navigateToNestedContainer"
       />
     </template>
+
+    <!-- Expanded content for nested containers (rendered after each row) -->
+    <template #row-after="{ row }">
+      <ItemsTableNestedContainerRow
+        v-if="isNestedContainer(row.original) && isRowExpanded(row.original.id)"
+        :nested-items="getNestedContainerItems(row.original)"
+        :columns-length="columns.length"
+        :container="getNestedContainer(row.original)"
+      />
+    </template>
+
     <template #empty>
       <TableEmpty :colspan="columns.length">
         <div class="flex flex-col items-center justify-center text-center">

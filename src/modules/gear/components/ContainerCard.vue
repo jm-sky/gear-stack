@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MoreVertical, Package } from 'lucide-vue-next'
+import { Box, MoreVertical, Package } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -31,7 +31,7 @@ const emit = defineEmits<{
 
 const router = useRouter()
 const { t } = useI18n()
-const { calculateTotalWeight, calculateReadinessPercentage } = useGear()
+const { calculateTotalWeight, calculateReadinessPercentage, getContainerById } = useGear()
 const { customContainerTypes } = useSettings()
 
 // Computed properties
@@ -62,6 +62,25 @@ const getContainerTypeLabel = (typeKey: string): string => {
 const typeLabel = computed<string>(() => {
   return getContainerTypeLabel(props.container.type)
 })
+
+// Check if container is nested
+const isNested = computed<boolean>(() => {
+  return !!props.container.parentContainerId
+})
+
+// Get parent container
+const parentContainer = computed<IGearContainer | undefined>(() => {
+  if (!props.container.parentContainerId) return undefined
+  return getContainerById(props.container.parentContainerId)
+})
+
+// Navigate to parent container
+const navigateToParent = (e: Event) => {
+  e.stopPropagation()
+  if (props.container.parentContainerId) {
+    router.push(`/gear/${props.container.parentContainerId}`)
+  }
+}
 
 // Actions
 const handleShow = () => {
@@ -95,13 +114,28 @@ const handleDelete = () => {
             />
             <Package class="size-5" />
             <CardTitle>{{ container.name }}</CardTitle>
+            <Badge v-if="isNested" variant="outline" class="ml-auto text-xs">
+              <Box :size="12" class="mr-1" />
+              {{ t('gear.container.nested') }}
+            </Badge>
           </div>
           <CardDescription v-if="container.description">
             {{ container.description }}
           </CardDescription>
-          <Badge variant="outline" class="mt-2">
-            {{ typeLabel }}
-          </Badge>
+          <div class="flex items-center gap-2 mt-2">
+            <Badge variant="outline">
+              {{ typeLabel }}
+            </Badge>
+            <Button
+              v-if="parentContainer"
+              variant="ghost"
+              size="sm"
+              class="h-6 text-xs text-muted-foreground"
+              @click.stop="navigateToParent"
+            >
+              {{ t('gear.container.parentContainer') }}: {{ parentContainer.name }}
+            </Button>
+          </div>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
