@@ -1,5 +1,6 @@
 export const userPl = {
   user: {
+    guest: 'Gość',
     profile: {
       title: 'Profil',
       edit_button: 'Edytuj Profil',

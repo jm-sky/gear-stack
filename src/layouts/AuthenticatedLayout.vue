@@ -56,8 +56,8 @@ const handleLogout = () => {
             <LocaleToggle />
             <DarkModeToggle />
             <UserNav
-              :user-name="profile?.name ?? 'User'"
-              :user-email="profile?.email ?? 'user@example.com'"
+              :user-name="profile?.name ?? t('user.guest')"
+              :user-email="profile?.email"
               @logout="handleLogout"
             >
               <template #menu-items>

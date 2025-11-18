@@ -6,24 +6,34 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 
 ## 🌐 Internacjonalizacja
 
-### Wykrywanie języka (locale) z ustawień przeglądarki
-- Automatyczne wykrywanie języka użytkownika na podstawie ustawień przeglądarki
-- Fallback do domyślnego języka (np. polski)
-- Możliwość ręcznej zmiany języka w ustawieniach
+### ✅ Wykrywanie języka (locale) z ustawień przeglądarki
+- ✅ Automatyczne wykrywanie języka użytkownika na podstawie ustawień przeglądarki
+- ✅ Fallback do domyślnego języka (np. polski)
+- ✅ Możliwość ręcznej zmiany języka w ustawieniach
+- ✅ HTML lang attribute automatycznie ustawiany na podstawie wykrytego języka
+- ✅ Wykryty język zapisywany w localStorage
+
+### Preferowana jednostka wagi
+- Użytkownik może ustawić preferowaną jednostkę wagi w ustawieniach (g lub kg)
+- Wszystkie wyświetlane wagi na dashboard, w tabelach i kartach będą konwertowane do preferowanej jednostki
+- Formularze nadal mogą używać różnych jednostek, ale wyświetlanie będzie spójne
+- Ustawienie zapisywane w localStorage i synchronizowane w całej aplikacji
 
 ---
 
 ## 🎨 UI/UX Ulepszenia
 
-### Dedykowane ikony dla kategorii
-- Na liście przedmiotów - dedykowana ikona do każdej kategorii
-- Ikony dla kategorii: woda, ogień, jedzenie, schronienie, pierwsza pomoc, narzędzia, nawigacja, komunikacja, odzież, higiena, inne
-- Spójny system ikon (np. Lucide Icons)
+### ✅ Dedykowane ikony dla kategorii
+- ✅ Na liście przedmiotów - dedykowana ikona do każdej kategorii
+- ✅ Ikony dla kategorii: woda, ogień, jedzenie, schronienie, pierwsza pomoc, narzędzia, nawigacja, komunikacja, odzież, higiena, inne
+- ✅ Spójny system ikon (Lucide Icons)
+- ✅ Ikony wyświetlane w tabelach i selektorach kategorii
 
-### Kolorowanie kontenerów
-- Możliwość przypisania koloru do kontenera
-- Kilka dostępnych kolorów do wyboru
-- Wizualne rozróżnienie kontenerów na liście
+### ✅ Kolorowanie kontenerów
+- ✅ Możliwość przypisania koloru do kontenera
+- ✅ 10 dostępnych kolorów do wyboru (default, blue, green, red, yellow, purple, orange, pink, teal, indigo)
+- ✅ Wizualne rozróżnienie kontenerów na liście (kolorowa kropka i ramka)
+- ✅ Kolor wyświetlany w kartach kontenerów i rozwiniętych wierszach zagnieżdżonych kontenerów
 
 ### Wybór primary color (brand color)
 - Porównanie obecnego "dark orange" z alternatywnymi opcjami
@@ -36,13 +46,16 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 
 ## 🔗 Relacje i Nesting
 
-### Relacja parent-children (nesting kontenerów)
-- Kontener może zawierać na liście przedmiotów inny kontener
+### ✅ Relacja parent-children (nesting kontenerów)
+- ✅ Kontener może zawierać na liście przedmiotów inny kontener
   - Przykład: W plecaku może być Pouch, a w Pouch może być Latarka
-- Kontener, który ma rodzica, można ukryć z głównej listy kontenerów
-- Opcja wyświetlania tylko kontenerów głównych (bez zagnieżdżonych)
-- Wizualne oznaczenie kontenerów zagnieżdżonych
-- Rekurencyjne obliczanie wagi (waga kontenera + waga jego zawartości)
+- ✅ Kontener, który ma rodzica lub jest używany jako item, można ukryć z głównej listy kontenerów
+- ✅ Opcja wyświetlania tylko kontenerów głównych (bez zagnieżdżonych)
+- ✅ Wizualne oznaczenie kontenerów zagnieżdżonych (ikona, badge, klikalna nazwa)
+- ✅ Rekurencyjne obliczanie wagi (waga kontenera + waga jego zawartości)
+- ✅ Rozwijane wiersze w tabeli przedmiotów - możliwość zobaczenia zawartości zagnieżdżonego kontenera
+- ✅ Walidacja cyklicznych referencji - zapobieganie nieskończonym pętlom
+- ✅ Osobne akcje "Dodaj Przedmiot" i "Dodaj Kontener" w interfejsie
 
 ---
 
@@ -84,25 +97,28 @@ Kontener też może mieć dodatkowe pola:
 
 ## ⚡ Usprawnienia dodawania przedmiotów
 
-### Domyślne wartości dla nowych przedmiotów
-- Nowy przedmiot powinien mieć większość pól z domyślnymi wartościami (jeżeli pole jest wymagane)
-- Przykłady domyślnych wartości:
-  - Waga: 0.1 kg
-  - Ilość: 1
-  - Status: "owned"
-  - Priorytet: "medium"
-  - Kategoria: "other" (lub wykryta automatycznie)
+### ✅ Domyślne wartości dla nowych przedmiotów
+- ✅ Nowy przedmiot ma większość pól z domyślnymi wartościami
+- ✅ Domyślne wartości:
+  - ✅ Waga: 0.1 kg
+  - ✅ Ilość: 1
+  - ✅ Status: "owned"
+  - ✅ Priorytet: "medium"
+  - ✅ Kategoria: "other" (lub wykryta automatycznie)
+  - ✅ Jednostka wagi: kg
 
-### Rozpoznawanie kategorii po nazwie
-- Na podstawie słów kluczowych w nazwie dobieramy kategorię oraz ew. inne pola
-- Przykłady:
-  - `nóż`, `knife` → kategoria: narzędzia
-  - `woda`, `water` → kategoria: woda
-  - `zapałki`, `matches` → kategoria: ogień
-  - `apteczka`, `first aid` → kategoria: pierwsza pomoc
-- Podobnie dla kontenerów (rozpoznawanie typu kontenera)
-- Słownik słów kluczowych dla każdej kategorii
-- Możliwość uczenia się na podstawie wcześniejszych wyborów użytkownika
+### ✅ Rozpoznawanie kategorii po nazwie
+- ✅ Na podstawie słów kluczowych w nazwie dobieramy kategorię
+- ✅ Przykłady:
+  - ✅ `nóż`, `knife` → kategoria: narzędzia
+  - ✅ `woda`, `water` → kategoria: woda
+  - ✅ `zapałki`, `matches` → kategoria: ogień
+  - ✅ `apteczka`, `first aid` → kategoria: pierwsza pomoc
+- ✅ Podobnie dla kontenerów (rozpoznawanie typu kontenera)
+- ✅ Słownik słów kluczowych dla każdej kategorii i typu kontenera
+- ✅ Rozpoznawanie uruchamiane na zdarzeniu blur (po opuszczeniu pola nazwy)
+- ✅ Priorytetyzacja dłuższych słów kluczowych (np. "bagażnik" zamiast "bag")
+- ⏳ Możliwość uczenia się na podstawie wcześniejszych wyborów użytkownika (zaplanowane, ale nie zaimplementowane)
 
 ---
 
