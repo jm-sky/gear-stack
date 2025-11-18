@@ -67,7 +67,7 @@ const handleCreateContainer = () => {
 
       <!-- Actions -->
       <div class="flex flex-col items-center gap-4">
-        <div class="flex gap-4">
+        <div class="flex flex-col sm:flex-row gap-4">
           <Button size="lg" @click="handleGoToGear">
             <BackpackIcon class="size-5" />
             {{ t('gear.page.viewContainers', 'View Containers') }}

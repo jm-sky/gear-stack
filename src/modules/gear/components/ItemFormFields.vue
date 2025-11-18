@@ -130,7 +130,7 @@ const handleCancel = () => {
     </FormField>
 
     <!-- Quantity and Weight -->
-    <div class="grid grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <FormField v-slot="{ componentField }" name="quantity">
         <FormItem>
           <FormLabel :label="$t('gear.item.quantity')" required />
@@ -144,7 +144,7 @@ const handleCancel = () => {
         </FormItem>
       </FormField>
 
-      <div class="grid grid-cols-[1fr_auto] gap-2">
+      <div class="grid grid-cols-[1fr_80px] sm:grid-cols-[1fr_auto] gap-2">
         <FormField v-slot="{ componentField }" name="weight">
           <FormItem>
             <FormLabel :label="$t('gear.item.weight')" required />
@@ -182,7 +182,7 @@ const handleCancel = () => {
     </div>
 
     <!-- Priority and Status -->
-    <div class="grid grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <FormField v-slot="{ value, handleChange }" name="priority">
         <FormItem>
           <FormLabel :label="$t('gear.item.priority')" required />
@@ -261,7 +261,7 @@ const handleCancel = () => {
     </FormField>
 
     <!-- Actions -->
-    <div class="flex justify-end gap-3">
+    <div class="flex flex-col sm:flex-row justify-end gap-3">
       <Button type="button" variant="outline" @click="handleCancel">
         {{ $t('gear.actions.cancel') }}
       </Button>

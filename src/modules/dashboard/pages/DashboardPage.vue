@@ -9,7 +9,7 @@
     <p class="text-muted-foreground">
       Welcome back!
     </p>
-    <div class="grid md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div class="border rounded p-4">
         <div class="text-sm text-muted-foreground">
           Stat A

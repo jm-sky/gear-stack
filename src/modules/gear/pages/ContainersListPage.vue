@@ -69,7 +69,7 @@ const handleDelete = (id: TUUID) => {
   <AuthenticatedLayout>
     <div class="space-y-6">
       <!-- Header -->
-      <div class="flex items-center justify-between">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 class="text-3xl font-bold">
             {{ t('gear.page.containers') }}
@@ -78,7 +78,7 @@ const handleDelete = (id: TUUID) => {
             {{ t('gear.page.title') }}
           </p>
         </div>
-        <Button @click="handleCreate">
+        <Button class="sm:flex-shrink-0" @click="handleCreate">
           <Plus class="size-4" />
           {{ t('gear.container.create') }}
         </Button>

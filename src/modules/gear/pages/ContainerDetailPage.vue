@@ -106,7 +106,7 @@ if (!container.value) {
       <ContainerHeader :container="container" @export="handleExport" @import="handleImport" />
 
       <!-- Items Table -->
-      <div class="bg-card rounded-lg border p-6">
+      <div class="bg-card rounded-lg border p-4 sm:p-6 overflow-x-auto">
         <ItemsTable
           :items="items"
           @edit="handleEditItem"
