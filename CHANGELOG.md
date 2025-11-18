@@ -21,6 +21,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.0] - 2025-11-18
+
+### Added
+- Container color coding system
+- Color picker in container form with 10 predefined colors (default, blue, green, red, yellow, purple, orange, pink, teal, indigo)
+- Color dot indicator in container cards
+- Color utilities (`containerColors.ts`) with Tailwind CSS classes
+- Translations for all color names (English and Polish)
+
+### Changed
+- Container model now includes optional `color` field
+- Container cards display color dot for visual distinction
+- Improved visual organization of containers with color coding
+
+---
+
 ## [0.3.0] - 2025-11-18
 
 ### Added

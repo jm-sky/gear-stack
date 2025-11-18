@@ -24,6 +24,19 @@ export type TGearItemPriority = 'critical' | 'high' | 'medium' | 'low'
 // Jednostka wagi
 export type TGearWeightUnit = 'g' | 'kg'
 
+// Container color options
+export type TContainerColor =
+  | 'default'  // No color (gray/neutral)
+  | 'blue'
+  | 'green'
+  | 'red'
+  | 'yellow'
+  | 'purple'
+  | 'orange'
+  | 'pink'
+  | 'teal'
+  | 'indigo'
+
 // Kategoria przedmiotu - może być domyślna lub własna (custom)
 export type TGearItemCategory =
   | 'water'
@@ -61,6 +74,7 @@ export interface IGearContainer {
   name: string
   description?: string
   type: TGearContainerType
+  color?: TContainerColor  // Optional, defaults to 'default'
   items: IGearItem[]
   createdAt: TDateTime
   updatedAt: TDateTime
@@ -71,6 +85,7 @@ export interface ICreateContainerDto {
   name: string
   description?: string
   type: TGearContainerType
+  color?: TContainerColor
 }
 
 // DTO dla aktualizacji kontenera
@@ -78,6 +93,7 @@ export interface IUpdateContainerDto {
   name?: string
   description?: string
   type?: TGearContainerType
+  color?: TContainerColor
 }
 
 // DTO dla tworzenia przedmiotu

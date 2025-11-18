@@ -28,12 +28,14 @@ const getInitialValues = (): ContainerFormData => {
       name: container.value.name,
       description: container.value.description ?? '',
       type: container.value.type,
+      color: container.value.color ?? 'default',
     }
   }
   return {
     name: '',
     description: '',
     type: 'other' as const,
+    color: 'default' as const,
   }
 }
 

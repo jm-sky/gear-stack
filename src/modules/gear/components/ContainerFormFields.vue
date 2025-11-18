@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/select'
 import { useSettings } from '@/modules/settings/composables/useSettings'
 import type { IGearContainer } from '../types/gear.types'
+import { COLOR_DOT_CLASSES, CONTAINER_COLORS } from '../utils/containerColors'
 
 defineProps<{
   container?: IGearContainer
@@ -139,6 +140,29 @@ const handleCancel = () => {
             </template>
           </SelectContent>
         </Select>
+        <FormMessage />
+      </FormItem>
+    </FormField>
+
+    <!-- Color -->
+    <FormField v-slot="{ value, handleChange }" name="color">
+      <FormItem>
+        <FormLabel :label="$t('gear.container.color')" />
+        <div class="flex gap-2 flex-wrap">
+          <button
+            v-for="color in CONTAINER_COLORS"
+            :key="color"
+            type="button"
+            :class="[
+              'w-10 h-10 rounded-full border-2 transition-all',
+              COLOR_DOT_CLASSES[color],
+              value === color || (!value && color === 'default') ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : 'opacity-50 hover:opacity-75',
+            ]"
+            :aria-label="color"
+            :title="$t(`gear.container.colors.${color}`)"
+            @click="handleChange(color)"
+          />
+        </div>
         <FormMessage />
       </FormItem>
     </FormField>

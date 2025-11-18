@@ -19,6 +19,7 @@ import {
   READINESS_EXCELLENT_THRESHOLD,
   READINESS_GOOD_THRESHOLD,
 } from '../utils/constants'
+import { COLOR_DOT_CLASSES } from '../utils/containerColors'
 import { formatWeightFromGrams } from '../utils/formatWeight'
 
 const props = defineProps<{
@@ -82,6 +83,12 @@ const handleDelete = () => {
       <div class="flex items-start justify-between">
         <div class="flex-1">
           <div class="flex items-center gap-2 mb-2">
+            <div
+              :class="[
+                'w-3 h-3 rounded-full flex-shrink-0',
+                COLOR_DOT_CLASSES[container.color ?? 'default']
+              ]"
+            />
             <Package class="h-5 w-5 text-muted-foreground" />
             <CardTitle>{{ container.name }}</CardTitle>
           </div>

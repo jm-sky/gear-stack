@@ -6,6 +6,7 @@ export const containerSchema = z.object({
   name: z.string().min(1, 'Nazwa jest wymagana'),
   description: z.string().optional(),
   type: z.string().min(1, 'Typ jest wymagany'), // Allow any string for custom container types
+  color: z.enum(['default', 'blue', 'green', 'red', 'yellow', 'purple', 'orange', 'pink', 'teal', 'indigo']).optional(),
 })
 
 // Schema dla przedmiotu
