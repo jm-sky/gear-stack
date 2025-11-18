@@ -1,6 +1,8 @@
 # gear-stack
 A lightweight front-end application for managing survival gear and bug-out bag equipment.
 
+<img width="1527" height="547" alt="obraz" src="https://github.com/user-attachments/assets/9e71110e-0941-418b-b853-2cd9fe43aa91" />
+
 ## Product Requirements (Draft)
 
 ### Overview
