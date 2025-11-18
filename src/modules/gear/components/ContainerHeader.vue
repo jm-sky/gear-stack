@@ -82,43 +82,62 @@ const handleBack = () => {
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="flex items-start justify-between">
-      <div class="flex-1">
-        <div class="flex items-center gap-3 mb-2">
-          <Button variant="ghost" size="sm" @click="handleBack">
-            <ArrowLeft class="size-4" />
-            {{ t('common.back') }}
-          </Button>
-          <h1 class="text-3xl font-bold">
+    <div class="flex flex-col gap-4">
+      <div class="flex items-center gap-3">
+        <Button variant="ghost" size="sm" @click="handleBack">
+          <ArrowLeft class="size-4" />
+          {{ t('common.back') }}
+        </Button>
+      </div>
+
+      <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+        <div class="flex-1">
+          <h1 class="text-3xl font-bold mb-2">
             {{ container.name }}
           </h1>
+          <p v-if="container.description" class="text-muted-foreground mb-3">
+            {{ container.description }}
+          </p>
+          <div class="flex items-center gap-2">
+            <Badge variant="outline">
+              {{ typeLabel }}
+            </Badge>
+          </div>
         </div>
-        <p v-if="container.description" class="text-muted-foreground mb-3">
-          {{ container.description }}
-        </p>
-        <div class="flex items-center gap-2">
-          <Badge variant="outline">
-            {{ typeLabel }}
-          </Badge>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            class="flex-shrink-0"
+            @click="handleExport"
+          >
+            <Download class="size-4" />
+            <span class="hidden sm:inline ml-2">{{ t('gear.actions.export') }}</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            class="flex-shrink-0"
+            @click="handleImport"
+          >
+            <Upload class="size-4" />
+            <span class="hidden sm:inline ml-2">{{ t('gear.actions.import') }}</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            class="flex-shrink-0"
+            @click="handleEdit"
+          >
+            <Edit class="size-4" />
+            <span class="hidden sm:inline ml-2">{{ t('gear.actions.edit') }}</span>
+          </Button>
+          <Button class="flex-shrink-0" @click="handleAddItem">
+            <Plus class="size-4" />
+            {{ t('gear.item.create') }}
+          </Button>
         </div>
-      </div>
-      <div class="flex items-center gap-4">
-        <Button variant="outline" @click="handleExport">
-          <Download class="size-4" />
-          {{ t('gear.actions.export') }}
-        </Button>
-        <Button variant="outline" @click="handleImport">
-          <Upload class="size-4" />
-          {{ t('gear.actions.import') }}
-        </Button>
-        <Button variant="outline" @click="handleEdit">
-          <Edit class="size-4" />
-          {{ t('gear.actions.edit') }}
-        </Button>
-        <Button @click="handleAddItem">
-          <Plus class="size-4" />
-          {{ t('gear.item.create') }}
-        </Button>
       </div>
     </div>
 

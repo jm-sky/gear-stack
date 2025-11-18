@@ -144,7 +144,7 @@ const handleCancel = () => {
     </FormField>
 
     <!-- Actions -->
-    <div class="flex justify-end gap-3">
+    <div class="flex flex-col sm:flex-row justify-end gap-3">
       <Button type="button" variant="outline" @click="handleCancel">
         {{ $t('gear.actions.cancel') }}
       </Button>

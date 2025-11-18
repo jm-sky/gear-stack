@@ -115,7 +115,7 @@ const handleDelete = () => {
 
     <div class="px-6 pb-6 space-y-3">
       <!-- Stats -->
-      <div class="grid grid-cols-3 gap-4 text-sm">
+      <div class="grid grid-cols-3 gap-2 sm:gap-4 text-sm">
         <div>
           <div class="text-muted-foreground">
             {{ t('gear.container.itemsCount') }}

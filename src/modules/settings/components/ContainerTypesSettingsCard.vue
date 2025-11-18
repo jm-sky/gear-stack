@@ -125,9 +125,9 @@ const handleDelete = (id: string) => {
         <div
           v-for="containerType in customContainerTypes"
           :key="containerType.id"
-          class="flex items-center justify-between p-3 border rounded-lg"
+          class="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg gap-3"
         >
-          <div class="flex-1 grid grid-cols-2 gap-4">
+          <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <div class="text-xs text-muted-foreground">
                 {{ t('settings.containerTypes.key') }}
@@ -145,7 +145,7 @@ const handleDelete = (id: string) => {
               </div>
             </div>
           </div>
-          <div class="flex gap-2">
+          <div class="flex gap-2 sm:flex-shrink-0">
             <Button
               size="sm"
               variant="outline"
