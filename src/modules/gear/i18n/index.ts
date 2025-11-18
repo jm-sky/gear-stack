@@ -210,7 +210,7 @@ export const gearPl = {
       statuses: {
         owned: 'Posiadane',
         missing: 'Brakuje',
-        toBuy: 'Do Kupienia',
+        toBuy: 'Do kupienia',
       },
       expiration: {
         expired: 'Przeterminowane',

@@ -11,6 +11,7 @@ import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 import { EXPIRATION_WARNING_DAYS } from '../utils/constants'
 import { formatWeight } from '../utils/formatWeight'
 import { createItemsColumns } from '../utils/itemsColumns'
+import CategoryIcon from './CategoryIcon.vue'
 import ItemsTableRowActions from './ItemsTableRowActions.vue'
 
 const props = withDefaults(
@@ -100,7 +101,10 @@ function isExpiringSoon(item: IGearItem, days: number = EXPIRATION_WARNING_DAYS)
     </template>
 
     <template #category="{ row }">
-      {{ getCategoryLabel(row.original.category) }}
+      <div class="flex items-center gap-2">
+        <CategoryIcon :category="row.original.category" :size="16" class="text-muted-foreground" />
+        <span>{{ getCategoryLabel(row.original.category) }}</span>
+      </div>
     </template>
 
     <template #quantity="{ row }">

@@ -15,16 +15,12 @@ import {
 } from '@/components/ui/select'
 import type { ICreateItemDto, IGearItem, IUpdateItemDto } from '../types/gear.types'
 import { itemSchema } from '../utils/validation'
+import CategoryIcon from './CategoryIcon.vue'
 
-const props = withDefaults(
-  defineProps<{
-    item?: IGearItem
-    loading?: boolean
-  }>(),
-  {
-    loading: false,
-  },
-)
+const props = defineProps<{
+  item?: IGearItem
+  loading?: boolean
+}>()
 
 const emit = defineEmits<{
   submit: [data: ICreateItemDto | IUpdateItemDto]
@@ -57,20 +53,15 @@ const form = useForm({
       },
 })
 
-// Auto-focus na pierwszym polu
 const nameInputRef = ref<HTMLInputElement | undefined>(undefined)
 nextTick(() => {
   useFocus(nameInputRef)
 })
 
-// Submit handler
 const handleSubmit = form.handleSubmit((values) => {
   emit('submit', values as ICreateItemDto | IUpdateItemDto)
-}, () => {
-  // Validation failed
 })
 
-// Cancel handler
 const handleCancel = () => {
   emit('cancel')
 }
@@ -102,37 +93,70 @@ const handleCancel = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="water">
-                {{ $t('gear.item.categories.water') }}
+                <div class="flex items-center gap-2">
+                  <CategoryIcon category="water" :size="16" />
+                  <span>{{ $t('gear.item.categories.water') }}</span>
+                </div>
               </SelectItem>
               <SelectItem value="food">
-                {{ $t('gear.item.categories.food') }}
+                <div class="flex items-center gap-2">
+                  <CategoryIcon category="food" :size="16" />
+                  <span>{{ $t('gear.item.categories.food') }}</span>
+                </div>
               </SelectItem>
               <SelectItem value="shelter">
-                {{ $t('gear.item.categories.shelter') }}
+                <div class="flex items-center gap-2">
+                  <CategoryIcon category="shelter" :size="16" />
+                  <span>{{ $t('gear.item.categories.shelter') }}</span>
+                </div>
               </SelectItem>
               <SelectItem value="fire">
-                {{ $t('gear.item.categories.fire') }}
+                <div class="flex items-center gap-2">
+                  <CategoryIcon category="fire" :size="16" />
+                  <span>{{ $t('gear.item.categories.fire') }}</span>
+                </div>
               </SelectItem>
               <SelectItem value="firstAid">
-                {{ $t('gear.item.categories.firstAid') }}
+                <div class="flex items-center gap-2">
+                  <CategoryIcon category="firstAid" :size="16" />
+                  <span>{{ $t('gear.item.categories.firstAid') }}</span>
+                </div>
               </SelectItem>
               <SelectItem value="tools">
-                {{ $t('gear.item.categories.tools') }}
+                <div class="flex items-center gap-2">
+                  <CategoryIcon category="tools" :size="16" />
+                  <span>{{ $t('gear.item.categories.tools') }}</span>
+                </div>
               </SelectItem>
               <SelectItem value="navigation">
-                {{ $t('gear.item.categories.navigation') }}
+                <div class="flex items-center gap-2">
+                  <CategoryIcon category="navigation" :size="16" />
+                  <span>{{ $t('gear.item.categories.navigation') }}</span>
+                </div>
               </SelectItem>
               <SelectItem value="communication">
-                {{ $t('gear.item.categories.communication') }}
+                <div class="flex items-center gap-2">
+                  <CategoryIcon category="communication" :size="16" />
+                  <span>{{ $t('gear.item.categories.communication') }}</span>
+                </div>
               </SelectItem>
               <SelectItem value="clothing">
-                {{ $t('gear.item.categories.clothing') }}
+                <div class="flex items-center gap-2">
+                  <CategoryIcon category="clothing" :size="16" />
+                  <span>{{ $t('gear.item.categories.clothing') }}</span>
+                </div>
               </SelectItem>
               <SelectItem value="hygiene">
-                {{ $t('gear.item.categories.hygiene') }}
+                <div class="flex items-center gap-2">
+                  <CategoryIcon category="hygiene" :size="16" />
+                  <span>{{ $t('gear.item.categories.hygiene') }}</span>
+                </div>
               </SelectItem>
               <SelectItem value="other">
-                {{ $t('gear.item.categories.other') }}
+                <div class="flex items-center gap-2">
+                  <CategoryIcon category="other" :size="16" />
+                  <span>{{ $t('gear.item.categories.other') }}</span>
+                </div>
               </SelectItem>
             </SelectContent>
           </Select>

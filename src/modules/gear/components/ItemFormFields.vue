@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/select'
 import { useSettings } from '@/modules/settings/composables/useSettings'
 import type { IGearItem } from '../types/gear.types'
+import CategoryIcon from './CategoryIcon.vue'
 
 defineProps<{
   item?: IGearItem
@@ -77,37 +78,70 @@ const handleCancel = () => {
           <SelectContent>
             <!-- Default Categories -->
             <SelectItem value="water">
-              {{ $t('gear.item.categories.water') }}
+              <div class="flex items-center gap-2">
+                <CategoryIcon category="water" :size="16" />
+                <span>{{ $t('gear.item.categories.water') }}</span>
+              </div>
             </SelectItem>
             <SelectItem value="food">
-              {{ $t('gear.item.categories.food') }}
+              <div class="flex items-center gap-2">
+                <CategoryIcon category="food" :size="16" />
+                <span>{{ $t('gear.item.categories.food') }}</span>
+              </div>
             </SelectItem>
             <SelectItem value="shelter">
-              {{ $t('gear.item.categories.shelter') }}
+              <div class="flex items-center gap-2">
+                <CategoryIcon category="shelter" :size="16" />
+                <span>{{ $t('gear.item.categories.shelter') }}</span>
+              </div>
             </SelectItem>
             <SelectItem value="fire">
-              {{ $t('gear.item.categories.fire') }}
+              <div class="flex items-center gap-2">
+                <CategoryIcon category="fire" :size="16" />
+                <span>{{ $t('gear.item.categories.fire') }}</span>
+              </div>
             </SelectItem>
             <SelectItem value="firstAid">
-              {{ $t('gear.item.categories.firstAid') }}
+              <div class="flex items-center gap-2">
+                <CategoryIcon category="firstAid" :size="16" />
+                <span>{{ $t('gear.item.categories.firstAid') }}</span>
+              </div>
             </SelectItem>
             <SelectItem value="tools">
-              {{ $t('gear.item.categories.tools') }}
+              <div class="flex items-center gap-2">
+                <CategoryIcon category="tools" :size="16" />
+                <span>{{ $t('gear.item.categories.tools') }}</span>
+              </div>
             </SelectItem>
             <SelectItem value="navigation">
-              {{ $t('gear.item.categories.navigation') }}
+              <div class="flex items-center gap-2">
+                <CategoryIcon category="navigation" :size="16" />
+                <span>{{ $t('gear.item.categories.navigation') }}</span>
+              </div>
             </SelectItem>
             <SelectItem value="communication">
-              {{ $t('gear.item.categories.communication') }}
+              <div class="flex items-center gap-2">
+                <CategoryIcon category="communication" :size="16" />
+                <span>{{ $t('gear.item.categories.communication') }}</span>
+              </div>
             </SelectItem>
             <SelectItem value="clothing">
-              {{ $t('gear.item.categories.clothing') }}
+              <div class="flex items-center gap-2">
+                <CategoryIcon category="clothing" :size="16" />
+                <span>{{ $t('gear.item.categories.clothing') }}</span>
+              </div>
             </SelectItem>
             <SelectItem value="hygiene">
-              {{ $t('gear.item.categories.hygiene') }}
+              <div class="flex items-center gap-2">
+                <CategoryIcon category="hygiene" :size="16" />
+                <span>{{ $t('gear.item.categories.hygiene') }}</span>
+              </div>
             </SelectItem>
             <SelectItem value="other">
-              {{ $t('gear.item.categories.other') }}
+              <div class="flex items-center gap-2">
+                <CategoryIcon category="other" :size="16" />
+                <span>{{ $t('gear.item.categories.other') }}</span>
+              </div>
             </SelectItem>
 
             <!-- Custom Categories -->
@@ -120,7 +154,10 @@ const handleCancel = () => {
                 :key="category.id"
                 :value="category.key"
               >
-                {{ getCategoryLabel(category.key) }}
+                <div class="flex items-center gap-2">
+                  <CategoryIcon :category="category.key" :size="16" />
+                  <span>{{ getCategoryLabel(category.key) }}</span>
+                </div>
               </SelectItem>
             </template>
           </SelectContent>
@@ -187,7 +224,7 @@ const handleCancel = () => {
         <FormItem>
           <FormLabel :label="$t('gear.item.priority')" required />
           <Select :model-value="value" @update:model-value="handleChange">
-            <SelectTrigger>
+            <SelectTrigger class="min-w-36">
               <SelectValue :placeholder="$t('gear.item.priority')" />
             </SelectTrigger>
             <SelectContent>
@@ -213,7 +250,7 @@ const handleCancel = () => {
         <FormItem>
           <FormLabel :label="$t('gear.item.status')" required />
           <Select :model-value="value" @update:model-value="handleChange">
-            <SelectTrigger>
+            <SelectTrigger class="min-w-36">
               <SelectValue :placeholder="$t('gear.item.status')" />
             </SelectTrigger>
             <SelectContent>

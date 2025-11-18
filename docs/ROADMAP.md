@@ -25,6 +25,13 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 - Kilka dostępnych kolorów do wyboru
 - Wizualne rozróżnienie kontenerów na liście
 
+### Wybór primary color (brand color)
+- Porównanie obecnego "dark orange" z alternatywnymi opcjami
+- Rozważenie kolorów: coyote, olive, oraz inne opcje pasujące do tematyki survival/outdoor
+- Testowanie różnych wariantów kolorystycznych
+- Wybór finalnego brand color, który najlepiej oddaje charakter aplikacji
+- Aktualizacja palety kolorów w całej aplikacji po wyborze
+
 ---
 
 ## 🔗 Relacje i Nesting
