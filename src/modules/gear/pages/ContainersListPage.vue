@@ -16,12 +16,15 @@ import type { TUUID } from '@/shared/types/base.type'
 
 const router = useRouter()
 const { t } = useI18n()
-const { containers, deleteContainer } = useGear()
+const { containers, deleteContainer, getRootContainers } = useGear()
 const { customContainerTypes } = useSettings()
 
 // Search
 const searchQueryRaw = ref('')
 const searchQuery = refDebounced(searchQueryRaw, 300)
+
+// Filter: show only root containers
+const showOnlyRootContainers = ref(false)
 
 // Helper to get container type label for filtering
 const getContainerTypeLabel = (typeKey: string): string => {
@@ -34,12 +37,19 @@ const getContainerTypeLabel = (typeKey: string): string => {
 
 // Filtered containers
 const filteredContainers = computed<IGearContainer[]>(() => {
+  // First filter by root containers if enabled
+  let baseContainers = containers.value
+  if (showOnlyRootContainers.value) {
+    baseContainers = getRootContainers()
+  }
+
+  // Then filter by search query
   if (!searchQuery.value.trim()) {
-    return containers.value
+    return baseContainers
   }
 
   const query = searchQuery.value.toLowerCase()
-  return containers.value.filter(container => {
+  return baseContainers.filter(container => {
     return (
       container.name.toLowerCase().includes(query) ||
       container.description?.toLowerCase().includes(query) ||
@@ -78,20 +88,33 @@ const handleDelete = (id: TUUID) => {
             {{ t('gear.page.title') }}
           </p>
         </div>
-        <Button class="sm:flex-shrink-0" @click="handleCreate">
+        <Button class="sm:shrink-0" @click="handleCreate">
           <Plus class="size-4" />
-          {{ t('gear.container.create') }}
+          {{ t('gear.container.create.title') }}
         </Button>
       </div>
 
-      <!-- Search -->
-      <div class="relative">
-        <Search class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          v-model="searchQueryRaw"
-          :placeholder="t('gear.filters.search')"
-          class="pl-9"
-        />
+      <!-- Search and Filters -->
+      <div class="space-y-4">
+        <div class="relative">
+          <Search class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            v-model="searchQueryRaw"
+            :placeholder="t('gear.filters.search')"
+            class="pl-9"
+          />
+        </div>
+        <div class="flex items-center gap-2">
+          <input
+            id="root-containers-filter"
+            v-model="showOnlyRootContainers"
+            type="checkbox"
+            class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+          />
+          <label for="root-containers-filter" class="text-sm text-muted-foreground cursor-pointer">
+            {{ t('gear.container.showOnlyRootContainers') }}
+          </label>
+        </div>
       </div>
 
       <!-- Containers Grid -->
@@ -117,7 +140,7 @@ const handleDelete = (id: TUUID) => {
         </p>
         <Button @click="handleCreate">
           <Plus class="size-4" />
-          {{ t('gear.container.create') }}
+          {{ t('gear.container.create.title') }}
         </Button>
       </div>
     </div>

@@ -145,7 +145,7 @@ const handleDelete = (id: string) => {
               </div>
             </div>
           </div>
-          <div class="flex gap-2 sm:flex-shrink-0">
+          <div class="flex gap-2 sm:shrink-0">
             <Button
               size="sm"
               variant="outline"

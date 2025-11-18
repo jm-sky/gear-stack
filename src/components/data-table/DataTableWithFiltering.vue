@@ -50,7 +50,7 @@ const table = useVueTable({
     <div class="flex items-center py-4">
       <Input
         v-model="filtering"
-        :placeholder="searchPlaceholder || 'Filter emails...'"
+        :placeholder="searchPlaceholder ?? 'Filter emails...'"
         class="max-w-sm"
       />
     </div>

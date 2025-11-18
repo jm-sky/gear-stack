@@ -64,6 +64,7 @@ export interface IGearItem {
   expirationDate?: TDateTime // ISO date string
   priority: TGearItemPriority
   status: TGearItemStatus
+  containerId?: TUUID // Reference to a nested container (if this item is a container)
   createdAt: TDateTime
   updatedAt: TDateTime
 }
@@ -75,6 +76,7 @@ export interface IGearContainer {
   description?: string
   type: TGearContainerType
   color?: TContainerColor  // Optional, defaults to 'default'
+  parentContainerId?: TUUID // Parent container ID (if this container is nested)
   items: IGearItem[]
   createdAt: TDateTime
   updatedAt: TDateTime
@@ -86,6 +88,7 @@ export interface ICreateContainerDto {
   description?: string
   type: TGearContainerType
   color?: TContainerColor
+  parentContainerId?: TUUID
 }
 
 // DTO dla aktualizacji kontenera
@@ -94,6 +97,7 @@ export interface IUpdateContainerDto {
   description?: string
   type?: TGearContainerType
   color?: TContainerColor
+  parentContainerId?: TUUID
 }
 
 // DTO dla tworzenia przedmiotu
@@ -107,6 +111,7 @@ export interface ICreateItemDto {
   expirationDate?: TDateTime
   priority: TGearItemPriority
   status: TGearItemStatus
+  containerId?: TUUID // Reference to a nested container (if this item is a container)
 }
 
 // DTO dla aktualizacji przedmiotu
@@ -120,5 +125,6 @@ export interface IUpdateItemDto {
   expirationDate?: TDateTime
   priority?: TGearItemPriority
   status?: TGearItemStatus
+  containerId?: TUUID // Reference to a nested container (if this item is a container)
 }
 

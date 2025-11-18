@@ -7,6 +7,7 @@ export const containerSchema = z.object({
   description: z.string().optional(),
   type: z.string().min(1, 'Typ jest wymagany'), // Allow any string for custom container types
   color: z.enum(['default', 'blue', 'green', 'red', 'yellow', 'purple', 'orange', 'pink', 'teal', 'indigo']).optional(),
+  parentContainerId: z.string().uuid().optional().nullable(),
 })
 
 // Schema dla przedmiotu
@@ -21,6 +22,7 @@ export const itemSchema = z.object({
   expirationDate: z.string().optional(),
   priority: z.enum(['critical', 'high', 'medium', 'low']),
   status: z.enum(['owned', 'missing', 'toBuy']),
+  containerId: z.union([z.string().uuid(), z.literal('')]).optional(), // Reference to nested container (empty string = no container)
 })
 
 // Type inference dla TypeScript

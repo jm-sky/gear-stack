@@ -74,7 +74,7 @@ const handleCreateContainer = () => {
           </Button>
           <Button size="lg" variant="outline" @click="handleCreateContainer">
             <Plus class="size-5" />
-            {{ t('gear.container.create', 'Create Container') }}
+            {{ t('gear.container.create.title', 'Create Container') }}
           </Button>
         </div>
 
@@ -85,7 +85,7 @@ const handleCreateContainer = () => {
           </p>
           <Button size="lg" @click="handleCreateContainer">
             <Plus class="size-5" />
-            {{ t('gear.container.create', 'Create Container') }}
+            {{ t('gear.container.create.title', 'Create Container') }}
           </Button>
         </div>
       </div>
