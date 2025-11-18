@@ -1,0 +1,98 @@
+<script setup lang="ts">
+import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
+import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import type { ICreateContainerDto, IUpdateContainerDto } from '../types/gear.types'
+import ContainerFormFields from '../components/ContainerFormFields.vue'
+import { useContainer } from '../composables/useContainer'
+import { useGear } from '../composables/useGear'
+import { type ContainerFormData, containerSchema } from '../utils/validation'
+
+const router = useRouter()
+const route = useRoute()
+const { t } = useI18n()
+const { createContainer, updateContainer } = useGear()
+
+const containerId = route.params.id as string | undefined
+const isEditMode: boolean = !!containerId
+
+const { container } = useContainer(containerId)
+
+
+const getInitialValues = (): ContainerFormData => {
+  if (container.value) {
+    return {
+      name: container.value.name,
+      description: container.value.description ?? '',
+      type: container.value.type,
+    }
+  }
+  return {
+    name: '',
+    description: '',
+    type: 'other' as const,
+  }
+}
+
+const { handleSubmit, isSubmitting } = useForm({
+  validationSchema: toTypedSchema(containerSchema),
+  initialValues: getInitialValues(),
+})
+
+// Submit handler
+const onSubmit = handleSubmit(async (data: ICreateContainerDto | IUpdateContainerDto) => {
+  try {
+    if (isEditMode && containerId) {
+      updateContainer(containerId, data as IUpdateContainerDto)
+      toast.success(t('common.success'))
+      router.push(`/gear/${containerId}`)
+    } else {
+      const newContainer = createContainer(data as ICreateContainerDto)
+      toast.success(t('common.success'))
+      router.push(`/gear/${newContainer.id}`)
+    }
+  } catch (error) {
+    toast.error(t('common.error'))
+    console.error(error)
+  }
+})
+
+// Cancel handler
+const handleCancel = () => {
+  if (isEditMode && containerId) {
+    router.push(`/gear/${containerId}`)
+  } else {
+    router.push('/gear')
+  }
+}
+</script>
+
+<template>
+  <AuthenticatedLayout>
+    <div class="max-w-2xl mx-auto space-y-6">
+      <div>
+        <h1 class="text-3xl font-bold">
+          {{ isEditMode ? t('gear.container.edit') : t('gear.container.create') }}
+        </h1>
+        <p class="text-muted-foreground mt-1">
+          {{ isEditMode ? t('gear.container.edit') : t('gear.container.create') }}
+        </p>
+      </div>
+
+      <div class="bg-card rounded-lg border p-6">
+        <form @submit="onSubmit">
+          <ContainerFormFields
+            :container="container"
+            :loading="isSubmitting"
+            @submit="handleSubmit"
+            @cancel="handleCancel"
+          />
+        </form>
+      </div>
+    </div>
+  </AuthenticatedLayout>
+</template>
+

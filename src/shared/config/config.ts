@@ -5,9 +5,9 @@ export type SupportedLocale = 'en' | 'pl'
 
 export const config = {
   app: {
-    id: import.meta.env.VITE_APP_ID ?? 'my-app',
-    name: import.meta.env.VITE_APP_NAME ?? 'MyApp',
-    description: import.meta.env.VITE_APP_DESCRIPTION ?? 'My App to make life better',
+    id: import.meta.env.VITE_APP_ID ?? 'gear-stack',
+    name: import.meta.env.VITE_APP_NAME ?? 'Gear Stack',
+    description: import.meta.env.VITE_APP_DESCRIPTION ?? 'Gear Stack for managing survival gear and bug-out bag equipment.',
   },
   i18n: {
     defaultLocale: (import.meta.env.VITE_DEFAULT_LOCALE ?? 'en') as SupportedLocale,

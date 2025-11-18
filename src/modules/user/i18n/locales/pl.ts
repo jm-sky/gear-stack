@@ -1,0 +1,24 @@
+export const userPl = {
+  user: {
+    profile: {
+      title: 'Profil',
+      edit_button: 'Edytuj Profil',
+      subtitle: 'Twoje publiczne informacje i szczegóły konta.',
+      user_id_label: 'ID Użytkownika',
+      no_profile: 'Brak danych profilu',
+    },
+    edit: {
+      title: 'Edytuj Profil',
+      subtitle: 'Zaktualizuj swoje imię i email.',
+      name_label: 'Imię',
+      name_placeholder: 'Wprowadź swoje imię',
+      name_required: 'Imię jest wymagane',
+      email_label: 'Email',
+      email_placeholder: 'Wprowadź swój email',
+      email_invalid: 'Nieprawidłowy adres email',
+      cancel: 'Anuluj',
+      save_changes: 'Zapisz Zmiany',
+    },
+  },
+}
+

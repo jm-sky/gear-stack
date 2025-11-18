@@ -34,6 +34,16 @@ export default {
       copied: 'Skopiowano',
       copy: 'Skopiuj',
     },
+    pagination: {
+      totalRows: 'Łącznie {total} wierszy.',
+      rowsPerPage: 'Wierszy na stronę',
+      page: 'Strona',
+      of: 'z',
+      goToFirstPage: 'Przejdź do pierwszej strony',
+      goToPreviousPage: 'Przejdź do poprzedniej strony',
+      goToNextPage: 'Przejdź do następnej strony',
+      goToLastPage: 'Przejdź do ostatniej strony',
+    },
   },
   validation: {
     required: 'To pole jest wymagane',
@@ -56,5 +66,18 @@ export default {
     dashboard: 'Panel',
     profile: 'Profil',
     settings: 'Ustawienia',
+  },
+  auth: {
+    logout: 'Wyloguj',
+  },
+  user: {
+    profile: {
+      title: 'Profil',
+    },
+  },
+  settings: {
+    page: {
+      title: 'Ustawienia',
+    },
   },
 }

@@ -30,37 +30,9 @@ export function base64UrlEncode(str: string): string {
     .replace(/=/g, '')
 }
 
-export const generateMockJWT = (options: JWTPayloadOptions): string => {
-  const now = Math.floor(Date.now() / 1000)
-  const userId = `usr_${options.email.split('@')[0]}`
-
-  // JWT Header (unsigned JWT)
-  const header = {
-    alg: 'none',
-    typ: 'JWT',
-  }
-
-  // JWT Payload
-  const payload: JWTPayload = {
-    ...options,
-    sub: userId,
-    iat: now,
-    exp: now + 3600, // 1 hour expiration
-  }
-
-  // Encode header and payload
-  const encodedHeader = base64UrlEncode(JSON.stringify(header))
-  const encodedPayload = base64UrlEncode(JSON.stringify(payload))
-
-  // For unsigned JWT, third part is empty (ends with dot)
-  // For mock with random signature, generate random base64 string
-  const randomSignature = base64UrlEncode(
-    Math.random().toString(36) + Date.now().toString(36)
-  )
-
-  // Return JWT with random signature (can be changed to empty string for unsigned)
-  return `${encodedHeader}.${encodedPayload}.${randomSignature}`
-}
+// generateMockJWT removed - not needed for client-side only app
+// If JWT functionality is needed in the future, reinstall jwt-decode package
+// and implement with proper types
 
 export const createHttpError = (status: number, message: string, errors?: Record<string, string[]>): Error => {
   const error = new Error(message)

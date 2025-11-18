@@ -5,6 +5,10 @@
 // IMPORTANT: This file uses createI18nInstance() from @/shared/i18n
 // instead of duplicating the i18n configuration logic.
 
+// Import gear module messages
+import { gearEn, gearPl } from '@/modules/gear/i18n'
+import { settingsEn, settingsPl } from '@/modules/settings/i18n'
+import { userEn, userPl } from '@/modules/user/i18n'
 import { createI18nInstance } from '@/shared/i18n'
 // Import registry base messages (validation, errors, common)
 import registryEn from '@/shared/i18n/locales/en'
@@ -15,8 +19,8 @@ import registryPl from '@/shared/i18n/locales/pl'
 // import appPl from './locales/pl'
 
 // Merge all messages together
-const en = { ...registryEn }
-const pl = { ...registryPl }
+const en = { ...registryEn, ...gearEn, ...settingsEn, ...userEn }
+const pl = { ...registryPl, ...gearPl, ...settingsPl, ...userPl }
 
 // If you have app-specific messages, merge them here:
 // const en = { ...registryEn, ...appEn }

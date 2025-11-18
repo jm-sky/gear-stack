@@ -34,6 +34,16 @@ export default {
       copied: 'Copied',
       copy: 'Copy',
     },
+    pagination: {
+      totalRows: '{total} row(s) total.',
+      rowsPerPage: 'Rows per page',
+      page: 'Page',
+      of: 'of',
+      goToFirstPage: 'Go to first page',
+      goToPreviousPage: 'Go to previous page',
+      goToNextPage: 'Go to next page',
+      goToLastPage: 'Go to last page',
+    },
   },
   validation: {
     required: 'This field is required',
@@ -56,5 +66,18 @@ export default {
     dashboard: 'Dashboard',
     profile: 'Profile',
     settings: 'Settings',
+  },
+  auth: {
+    logout: 'Logout',
+  },
+  user: {
+    profile: {
+      title: 'Profile',
+    },
+  },
+  settings: {
+    page: {
+      title: 'Settings',
+    },
   },
 }

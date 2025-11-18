@@ -5,10 +5,13 @@ import { useI18n } from 'vue-i18n'
 import UserNav from '@/components/layout/UserNav.vue'
 import HoverLink from '@/components/ui/hover-link/HoverLink.vue'
 import LogoText from '@/components/ui/LogoText.vue'
+import { GearRoutePath } from '@/modules/gear/routes'
+import { useUser } from '@/modules/user/composables/useUser'
 import DarkModeToggle from '@/shared/components/DarkModeToggle.vue'
 import LocaleToggle from '@/shared/i18n/components/LocaleToggle.vue'
 
 const { t } = useI18n()
+const { profile } = useUser()
 
 interface Link {
   to: string
@@ -19,7 +22,7 @@ interface Link {
 // Navigation links - can be customized via props in the future
 const navLinks = computed<Link[]>(() => [
   {
-    to: '/gear',
+    to: GearRoutePath.Containers,
     label: t('gear.page.title', 'Gear'),
     icon: BackpackIcon,
   }
@@ -31,7 +34,7 @@ const handleLogout = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-muted">
+  <div class="min-h-screen bg-muted bg-radial from-card to-slate-300 dark:to-slate-800">
     <!-- Top Bar -->
     <header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div class="mx-auto flex h-14 max-w-screen-2xl items-center px-4">
@@ -53,8 +56,8 @@ const handleLogout = () => {
             <LocaleToggle />
             <DarkModeToggle />
             <UserNav
-              user-name="User"
-              user-email="user@example.com"
+              :user-name="profile?.name ?? 'User'"
+              :user-email="profile?.email ?? 'user@example.com'"
               @logout="handleLogout"
             >
               <template #menu-items>
@@ -68,7 +71,9 @@ const handleLogout = () => {
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-      <slot />
+      <div class="rounded-xl bg-card p-6 shadow-lg">
+        <slot />
+      </div>
     </main>
   </div>
 </template>

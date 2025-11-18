@@ -38,7 +38,7 @@ const emit = defineEmits<{
         {{ description }}
       </p>
       <Button v-if="showAction" @click="emit('action')">
-        <Plus class="w-4 h-4 mr-2" />
+        <Plus class="size-4" />
         {{ actionText }}
       </Button>
     </div>

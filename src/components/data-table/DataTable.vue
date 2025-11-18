@@ -7,7 +7,9 @@ import {
   getSortedRowModel,
   useVueTable,
 } from '@tanstack/vue-table'
+import { ArrowUpDown } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
+import { Button } from '@/components/ui/button'
 import {
   Table,
   TableBody,
@@ -222,11 +224,32 @@ const handlePageSizeChange = (newPageSize: number) => {
         <TableHeader>
           <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
             <TableHead v-for="header in headerGroup.headers" :key="header.id">
-              <FlexRender
-                v-if="!header.isPlaceholder"
-                :render="header.column.columnDef.header"
-                :props="header.getContext()"
-              />
+              <slot
+                :name="`header-${header.column.id}`"
+                :header="header"
+                :column="header.column"
+              >
+                <!-- Default sortable header -->
+                <template v-if="!header.isPlaceholder && enableSorting && header.column.getCanSort()">
+                  <Button
+                    variant="ghost"
+                    class="-ml-3 h-8 data-[state=open]:bg-accent"
+                    @click="header.column.toggleSorting(header.column.getIsSorted() === 'asc')"
+                  >
+                    <FlexRender
+                      :render="header.column.columnDef.header"
+                      :props="header.getContext()"
+                    />
+                    <ArrowUpDown class="ml-2 size-4" />
+                  </Button>
+                </template>
+                <!-- Default non-sortable header -->
+                <FlexRender
+                  v-else-if="!header.isPlaceholder"
+                  :render="header.column.columnDef.header"
+                  :props="header.getContext()"
+                />
+              </slot>
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -238,10 +261,16 @@ const handlePageSizeChange = (newPageSize: number) => {
               :data-state="row.getIsSelected() ? 'selected' : undefined"
             >
               <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
-                <FlexRender
-                  :render="cell.column.columnDef.cell"
-                  :props="cell.getContext()"
-                />
+                <slot
+                  :name="cell.column.columnDef.id"
+                  :row="row"
+                  :cell="cell"
+                >
+                  <FlexRender
+                    :render="cell.column.columnDef.cell"
+                    :props="cell.getContext()"
+                  />
+                </slot>
               </TableCell>
             </TableRow>
           </template>

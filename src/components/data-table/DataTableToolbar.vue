@@ -1,5 +1,6 @@
 <script setup lang="ts" generic="TData, TValue">
 import { ChevronDown } from 'lucide-vue-next'
+import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -30,6 +31,8 @@ const handleGlobalFilterChange = (value: string) => {
   globalFilter.value = value
 }
 
+const { t } = useI18n()
+
 const handleColumnVisibilityChange = (columnId: string, visible: boolean) => {
   // Toggle column visibility in table
   const column = props.table.getColumn(columnId)
@@ -40,6 +43,38 @@ const handleColumnVisibilityChange = (columnId: string, visible: boolean) => {
   // Update parent state
   const newVisibility = { ...columnVisibility.value, [columnId]: visible }
   columnVisibility.value = newVisibility
+}
+
+// Helper to get column header text
+const getColumnHeaderText = (column: ReturnType<Table<TData>['getColumn']>): string => {
+  if (!column) return ''
+
+  const headerDef = column.columnDef.header
+  if (typeof headerDef === 'function') {
+    // Try to get header context from table
+    const headerGroups = props.table.getHeaderGroups()
+    for (const headerGroup of headerGroups) {
+      const header = headerGroup.headers.find(h => h.column.id === column.id)
+      if (header) {
+        try {
+          const context = header.getContext()
+          const result = headerDef(context)
+          if (typeof result === 'string') {
+            return result
+          }
+          // If it's a VNode, we can't easily extract text, so fall back to id
+        } catch {
+          // If header function fails, fall back to id
+        }
+        break
+      }
+    }
+  } else if (typeof headerDef === 'string') {
+    return headerDef
+  }
+
+  // Fallback to column id
+  return column.id
 }
 </script>
 
@@ -58,8 +93,8 @@ const handleColumnVisibilityChange = (columnId: string, visible: boolean) => {
     <DropdownMenu v-if="enableColumnVisibility">
       <DropdownMenuTrigger as-child>
         <Button variant="outline" class="ml-auto">
-          Columns
-          <ChevronDown class="ml-2 size-4" />
+          {{ t('common.columns') }}
+          <ChevronDown class="size-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -70,7 +105,7 @@ const handleColumnVisibilityChange = (columnId: string, visible: boolean) => {
           :checked="column.getIsVisible()"
           @update:model-value="(value: boolean) => handleColumnVisibilityChange(column.id, value)"
         >
-          {{ column.id }}
+          {{ getColumnHeaderText(column) }}
         </DropdownMenuCheckboxItem>
       </DropdownMenuContent>
     </DropdownMenu>

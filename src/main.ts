@@ -9,8 +9,9 @@ import router from './router'
 import 'floating-vue/dist/style.css'
 
 const app = createApp(App)
+const pinia = createPinia()
 
-app.use(createPinia())
+app.use(pinia)
 app.use(router)
 app.use(i18n)
 app.directive('tooltip', vTooltip)

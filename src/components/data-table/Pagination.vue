@@ -5,6 +5,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
 } from 'lucide-vue-next'
+import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -39,6 +40,8 @@ const goToPage = (page: number) => {
   }
 }
 
+const { t } = useI18n()
+
 const setPageSize = (size: number) => {
   emit('update:pageSize', size)
   // Reset to first page when changing page size
@@ -49,12 +52,12 @@ const setPageSize = (size: number) => {
 <template>
   <div class="flex items-center justify-between px-2">
     <div class="flex-1 text-sm text-muted-foreground">
-      {{ total }} row(s) total.
+      {{ t('common.pagination.totalRows', { total }) }}
     </div>
     <div class="flex items-center space-x-6 lg:space-x-8">
       <div class="flex items-center space-x-2">
         <p class="text-sm font-medium">
-          Rows per page
+          {{ t('common.pagination.rowsPerPage') }}
         </p>
         <DropdownMenu>
           <DropdownMenuTrigger as-child>
@@ -74,7 +77,7 @@ const setPageSize = (size: number) => {
         </DropdownMenu>
       </div>
       <div class="flex w-[100px] items-center justify-center text-sm font-medium">
-        Page {{ page }} of {{ totalPages }}
+        {{ t('common.pagination.page') }} {{ page }} {{ t('common.pagination.of') }} {{ totalPages }}
       </div>
       <div class="flex items-center space-x-2">
         <Button
@@ -83,7 +86,7 @@ const setPageSize = (size: number) => {
           :disabled="!canPreviousPage"
           @click="goToPage(1)"
         >
-          <span class="sr-only">Go to first page</span>
+          <span class="sr-only">{{ t('common.pagination.goToFirstPage') }}</span>
           <ChevronsLeft class="size-4" />
         </Button>
         <Button
@@ -92,7 +95,7 @@ const setPageSize = (size: number) => {
           :disabled="!canPreviousPage"
           @click="goToPage(page - 1)"
         >
-          <span class="sr-only">Go to previous page</span>
+          <span class="sr-only">{{ t('common.pagination.goToPreviousPage') }}</span>
           <ChevronLeft class="size-4" />
         </Button>
         <Button
@@ -101,7 +104,7 @@ const setPageSize = (size: number) => {
           :disabled="!canNextPage"
           @click="goToPage(page + 1)"
         >
-          <span class="sr-only">Go to next page</span>
+          <span class="sr-only">{{ t('common.pagination.goToNextPage') }}</span>
           <ChevronRight class="size-4" />
         </Button>
         <Button
@@ -110,7 +113,7 @@ const setPageSize = (size: number) => {
           :disabled="!canNextPage"
           @click="goToPage(totalPages)"
         >
-          <span class="sr-only">Go to last page</span>
+          <span class="sr-only">{{ t('common.pagination.goToLastPage') }}</span>
           <ChevronsRight class="size-4" />
         </Button>
       </div>
