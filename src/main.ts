@@ -16,4 +16,8 @@ app.use(router)
 app.use(i18n)
 app.directive('tooltip', vTooltip)
 
+// Set HTML lang attribute based on initial locale
+const initialLocale = typeof i18n.global.locale === 'string' ? i18n.global.locale : i18n.global.locale.value
+document.documentElement.setAttribute('lang', initialLocale)
+
 app.mount('#app')

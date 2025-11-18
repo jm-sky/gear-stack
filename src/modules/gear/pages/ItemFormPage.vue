@@ -10,6 +10,7 @@ import ItemFormFields from '../components/ItemFormFields.vue'
 import { useContainer } from '../composables/useContainer'
 import { useGear } from '../composables/useGear'
 import { useItem } from '../composables/useItem'
+import { getDefaultItemValues } from '../utils/defaultValues'
 import { type ItemFormData, itemSchema } from '../utils/validation'
 
 const router = useRouter()
@@ -44,16 +45,8 @@ const getInitialValues = (): ItemFormData => {
     }
   }
   return {
-    name: '',
-    category: 'other' as const,
-    quantity: 1,
-    weight: 0,
-    weightUnit: 'g' as const,
-    notes: '',
-    priority: 'medium' as const,
-    expirationDate: '',
-    status: 'toBuy' as const,
-  }
+    ...getDefaultItemValues(),
+  } as ItemFormData
 }
 
 const { handleSubmit, isSubmitting } = useForm({

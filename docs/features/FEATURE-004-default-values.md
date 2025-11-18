@@ -1,6 +1,6 @@
 # FEATURE-004: Default Values for New Items
 
-**Status:** 🔄 Planned  
+**Status:** ✅ Completed  
 **Priority:** High  
 **Category:** ⚡ Item Addition Improvements  
 **Related:** ROADMAP.md - Usprawnienia dodawania przedmiotów

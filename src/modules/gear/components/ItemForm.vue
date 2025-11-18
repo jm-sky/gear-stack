@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { toFormValidator } from '@vee-validate/zod'
+import { toTypedSchema } from '@vee-validate/zod'
 import { useFocus } from '@vueuse/core'
 import { useForm } from 'vee-validate'
 import { nextTick, ref } from 'vue'
@@ -14,7 +14,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import type { ICreateItemDto, IGearItem, IUpdateItemDto } from '../types/gear.types'
-import { itemSchema } from '../utils/validation'
+import { getDefaultItemValues } from '../utils/defaultValues'
+import { type ItemFormData, itemSchema } from '../utils/validation'
 import CategoryIcon from './CategoryIcon.vue'
 
 const props = defineProps<{
@@ -27,30 +28,29 @@ const emit = defineEmits<{
   cancel: []
 }>()
 
+const getInitialValues = (): ItemFormData => {
+  if (props.item) {
+    return {
+      name: props.item.name,
+      category: props.item.category,
+      quantity: props.item.quantity,
+      weight: props.item.weight,
+      weightUnit: props.item.weightUnit,
+      notes: props.item.notes ?? '',
+      expirationDate: props.item.expirationDate ?? '',
+      priority: props.item.priority,
+      status: props.item.status,
+    }
+  }
+  return {
+    ...getDefaultItemValues(),
+  }
+}
+
 // Form validation
 const form = useForm({
-  validationSchema: toFormValidator(itemSchema),
-  initialValues: props.item
-    ? {
-        name: props.item.name,
-        category: props.item.category,
-        quantity: props.item.quantity,
-        weight: props.item.weight,
-        notes: props.item.notes || '',
-        expirationDate: props.item.expirationDate || '',
-        priority: props.item.priority,
-        status: props.item.status,
-      }
-    : {
-        name: '',
-        category: 'other' as const,
-        quantity: 1,
-        weight: 0,
-        notes: '',
-        expirationDate: '',
-        priority: 'medium' as const,
-        status: 'toBuy' as const,
-      },
+  validationSchema: toTypedSchema(itemSchema),
+  initialValues: getInitialValues(),
 })
 
 const nameInputRef = ref<HTMLInputElement | undefined>(undefined)

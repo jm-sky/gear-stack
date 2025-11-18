@@ -1,6 +1,6 @@
 # FEATURE-001: Browser Locale Detection
 
-**Status:** 🔄 Planned  
+**Status:** ✅ Completed  
 **Priority:** Medium  
 **Category:** 🌐 Internationalization  
 **Related:** ROADMAP.md - Internacjonalizacja

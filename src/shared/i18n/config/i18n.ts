@@ -33,9 +33,10 @@ export const getPreferredLocale = (browserLanguages: readonly string[]): Support
 
 /**
  * Get stored locale, browser preferred locale, or default from config
+ * Automatically saves detected browser locale to localStorage if not already stored
  */
 const getStoredLocale = (): SupportedLocale => {
-  // 1. Check localStorage
+  // 1. Check localStorage first
   const stored = localStorage.getItem(LOCALE_STORAGE_KEY)
   if (stored && SUPPORTED_LOCALES.includes(stored as SupportedLocale)) {
     return stored as SupportedLocale
@@ -45,11 +46,15 @@ const getStoredLocale = (): SupportedLocale => {
   const browserLanguages = navigator.languages.length > 0 ? navigator.languages : [navigator.language]
   const preferred = getPreferredLocale(browserLanguages)
   if (preferred) {
+    // Save detected locale to localStorage for future visits
+    localStorage.setItem(LOCALE_STORAGE_KEY, preferred)
     return preferred
   }
 
   // 3. Use default from config
-  return config.i18n.defaultLocale
+  const defaultLocale = config.i18n.defaultLocale
+  // Optionally save default to localStorage (or leave empty for browser detection on next visit)
+  return defaultLocale
 }
 
 // Default i18n configuration

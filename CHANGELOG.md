@@ -21,6 +21,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.0] - 2025-11-18
+
+### Added
+- Default values utility for new items (`defaultValues.ts`)
+- Automatic browser locale detection on first visit
+- HTML lang attribute automatically set based on detected locale
+
+### Changed
+- New item forms now pre-filled with sensible defaults:
+  - Weight: 0.1 kg (instead of 0)
+  - Weight unit: kg (instead of g)
+  - Status: owned (instead of toBuy)
+  - Quantity: 1
+  - Priority: medium
+  - Category: other
+- Browser language is automatically detected and saved to localStorage
+- Improved form initialization using `toTypedSchema` for better type safety
+
+### Fixed
+- TypeScript type issues in form initialization
+
+---
+
 ## [0.2.0] - 2025-11-18
 
 ### Added
