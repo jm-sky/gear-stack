@@ -15,8 +15,14 @@ export const gearEn = {
       name: 'Name',
       description: 'Description',
       type: 'Type',
-      create: 'Create Container',
-      edit: 'Edit Container',
+      create: {
+        title: 'Create Container',
+        description: 'Create a new container to store your gear.',
+      },
+      edit: {
+        title: 'Edit Container',
+        description: 'Edit the details of this container.',
+      },
       delete: 'Delete Container',
       deleteConfirm: 'Are you sure you want to delete this container?',
       totalWeight: 'Total Weight',
@@ -151,8 +157,14 @@ export const gearPl = {
       name: 'Nazwa',
       description: 'Opis',
       type: 'Typ',
-      create: 'Utwórz Kontener',
-      edit: 'Edytuj Kontener',
+      create: {
+        title: 'Utwórz Kontener',
+        description: 'Utwórz nowy kontener do przechowywania swojego sprzętu.',
+      },
+      edit: {
+        title: 'Edytuj Kontener',
+        description: 'Edytuj szczegóły tego kontenera.',
+      },
       delete: 'Usuń Kontener',
       deleteConfirm: 'Czy na pewno chcesz usunąć ten kontener?',
       totalWeight: 'Waga',

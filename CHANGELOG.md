@@ -21,6 +21,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.5.0] - 2025-11-18
+
+### Added
+- Category recognition system for items based on name keywords
+- Container type recognition system based on name keywords
+- Keyword dictionaries supporting both Polish and English
+- Automatic category/type detection on name field blur
+- Recognition utilities (`categoryRecognition.ts`, `containerTypeRecognition.ts`)
+
+### Changed
+- Category/type recognition now triggers on blur event (when user leaves name field) instead of during typing
+- Recognition logic prioritizes longer keywords to avoid false matches (e.g., "bagażnik" matches "bagażnik" not "bag")
+- Improved UX - users can type full names without premature category changes
+
+---
+
 ## [0.4.0] - 2025-11-18
 
 ### Added

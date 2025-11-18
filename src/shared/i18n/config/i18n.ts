@@ -58,7 +58,7 @@ const getStoredLocale = (): SupportedLocale => {
 }
 
 // Default i18n configuration
-export const defaultI18nOptions: I18nOptions = {
+export const defaultI18nOptions: I18nOptions<{ message: typeof en }> = {
   legacy: false, // Use Composition API mode
   locale: getStoredLocale(),
   fallbackLocale: config.i18n.fallbackLocale,

@@ -23,6 +23,7 @@ defineProps<{
 
 const emit = defineEmits<{
   cancel: []
+  nameBlur: []
 }>()
 
 const { t } = useI18n()
@@ -62,6 +63,7 @@ const handleCancel = () => {
           ref="nameInputRef"
           v-bind="componentField"
           :placeholder="$t('gear.container.name')"
+          @blur="emit('nameBlur')"
         />
         <FormMessage />
       </FormItem>

@@ -9,6 +9,7 @@ import type { ICreateContainerDto, IUpdateContainerDto } from '../types/gear.typ
 import ContainerFormFields from '../components/ContainerFormFields.vue'
 import { useContainer } from '../composables/useContainer'
 import { useGear } from '../composables/useGear'
+import { recognizeContainerType } from '../utils/containerTypeRecognition'
 import { type ContainerFormData, containerSchema } from '../utils/validation'
 
 const router = useRouter()
@@ -39,10 +40,20 @@ const getInitialValues = (): ContainerFormData => {
   }
 }
 
-const { handleSubmit, isSubmitting } = useForm({
+const { handleSubmit, isSubmitting, setFieldValue, values } = useForm({
   validationSchema: toTypedSchema(containerSchema),
   initialValues: getInitialValues(),
 })
+
+// Auto-detect container type from name on blur (only for new containers, not when editing)
+const handleNameBlur = () => {
+  if (!isEditMode && values.name && values.type === 'other') {
+    const detectedType = recognizeContainerType(values.name)
+    if (detectedType) {
+      setFieldValue('type', detectedType)
+    }
+  }
+}
 
 // Submit handler
 const onSubmit = handleSubmit(async (data: ICreateContainerDto | IUpdateContainerDto) => {
@@ -77,10 +88,10 @@ const handleCancel = () => {
     <div class="max-w-2xl mx-auto space-y-6">
       <div>
         <h1 class="text-3xl font-bold">
-          {{ isEditMode ? t('gear.container.edit') : t('gear.container.create') }}
+          {{ isEditMode ? t('gear.container.edit.title') : t('gear.container.create.title') }}
         </h1>
         <p class="text-muted-foreground mt-1">
-          {{ isEditMode ? t('gear.container.edit') : t('gear.container.create') }}
+          {{ isEditMode ? t('gear.container.edit.description') : t('gear.container.create.description') }}
         </p>
       </div>
 
@@ -91,6 +102,7 @@ const handleCancel = () => {
             :loading="isSubmitting"
             @submit="handleSubmit"
             @cancel="handleCancel"
+            @name-blur="handleNameBlur"
           />
         </form>
       </div>

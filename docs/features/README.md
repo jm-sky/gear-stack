@@ -12,7 +12,7 @@ This directory contains detailed implementation plans for features from the [ROA
 | [FEATURE-002](./FEATURE-002-category-icons.md) | Category Icons | ✅ Completed | High | 🎨 UI/UX |
 | [FEATURE-003](./FEATURE-003-container-colors.md) | Container Color Coding | ✅ Completed | Medium | 🎨 UI/UX |
 | [FEATURE-004](./FEATURE-004-default-values.md) | Default Values for New Items | ✅ Completed | High | ⚡ Item Addition |
-| FEATURE-005 | Category Recognition | 🔄 Planned | Medium | ⚡ Item Addition |
+| [FEATURE-005](./FEATURE-005-category-recognition.md) | Category Recognition | ✅ Completed | Medium | ⚡ Item Addition |
 | FEATURE-006 | Extended Fields (Items & Containers) | 🔄 Planned | Medium | 📝 Data Model |
 | FEATURE-007 | Quick Edit (Inline Editing) | 🔄 Planned | High | ✏️ Editing |
 | FEATURE-008 | Container Nesting (Parent-Child) | 🔄 Planned | High | 🔗 Relationships |

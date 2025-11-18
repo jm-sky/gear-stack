@@ -10,6 +10,7 @@ import ItemFormFields from '../components/ItemFormFields.vue'
 import { useContainer } from '../composables/useContainer'
 import { useGear } from '../composables/useGear'
 import { useItem } from '../composables/useItem'
+import { recognizeCategory } from '../utils/categoryRecognition'
 import { getDefaultItemValues } from '../utils/defaultValues'
 import { type ItemFormData, itemSchema } from '../utils/validation'
 
@@ -49,10 +50,20 @@ const getInitialValues = (): ItemFormData => {
   } as ItemFormData
 }
 
-const { handleSubmit, isSubmitting } = useForm({
+const { handleSubmit, isSubmitting, setFieldValue, values } = useForm({
   validationSchema: toTypedSchema(itemSchema),
   initialValues: getInitialValues(),
 })
+
+// Auto-detect category from name on blur (only for new items, not when editing)
+const handleNameBlur = () => {
+  if (!isEditMode && values.name && values.category === 'other') {
+    const detectedCategory = recognizeCategory(values.name)
+    if (detectedCategory) {
+      setFieldValue('category', detectedCategory)
+    }
+  }
+}
 
 // Submit handler
 const onSubmit = handleSubmit(async (data: ICreateItemDto | IUpdateItemDto) => {
@@ -96,6 +107,7 @@ const handleCancel = () => {
             :item="item"
             :loading="isSubmitting"
             @cancel="handleCancel"
+            @name-blur="handleNameBlur"
           />
         </form>
       </div>
