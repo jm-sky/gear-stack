@@ -144,6 +144,12 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
   - ✅ Legenda wyjaśniająca strukturę danych dla AI
   - ✅ Tłumaczenia dla wszystkich tekstów eksportu
 
+**Planowane ulepszenia:**
+- 🔄 Opcje konfiguracji eksportu:
+  - 🔄 Pokazywanie URL przedmiotu w eksporcie (opcjonalnie)
+  - 🔄 Dodatkowe podsumowanie "Do kupienia" na końcu eksportu (lista wszystkich przedmiotów ze statusem "Do kupienia")
+  - 🔄 Inne opcje konfiguracji formatu eksportu (np. poziom szczegółowości, pokazywanie cen, itp.)
+
 ---
 
 ## ⚡ Usprawnienia dodawania przedmiotów

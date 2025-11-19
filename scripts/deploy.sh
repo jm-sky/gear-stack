@@ -7,9 +7,13 @@ set -e  # Exit on any error
 
 echo "🚀 Starting Gear Stack deployment..."
 
+# Pull latest changes
+echo "📦 Pulling latest changes..."
+git pull
+
 # Install dependencies
 echo "📦 Installing dependencies..."
-pnpm install
+pnpm install --frozen-lockfile
 
 # Build the application
 echo "🔨 Building application..."
