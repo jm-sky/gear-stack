@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { BackpackIcon, Plus } from 'lucide-vue-next'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useGear } from '@/modules/gear/composables/useGear'
+import { READINESS_EXCELLENT_THRESHOLD } from '@/modules/gear/utils/constants'
 
 const router = useRouter()
 const { t } = useI18n()
@@ -17,6 +19,14 @@ const handleGoToGear = () => {
 const handleCreateContainer = () => {
   router.push('/gear/new')
 }
+
+const readyContainersCount = computed(() => {
+  return containers.value.filter(c => {
+    const ownedItems = c.items.filter(i => i.status === 'owned').length
+    const totalItems = c.items.length
+    return ownedItems / totalItems * 100 >= READINESS_EXCELLENT_THRESHOLD
+  }).length
+})
 </script>
 
 <template>
@@ -57,7 +67,7 @@ const handleCreateContainer = () => {
         </div>
         <div class="bg-card rounded-lg border p-6 text-center">
           <div class="text-3xl font-bold text-primary mb-2">
-            {{ containers.filter(c => c.items.some(i => i.status === 'owned')).length }}
+            {{ readyContainersCount }}
           </div>
           <div class="text-muted-foreground">
             {{ t('gear.page.readyContainers', 'Ready Containers') }}

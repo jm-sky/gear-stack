@@ -162,7 +162,7 @@ function getNestedContainer(item: IGearItem) {
           </span>
         </template>
 
-        <span v-else>
+        <span v-else class="cursor-pointer hover:text-primary transition-colors" @click="emit('edit', row.original)">
           {{ row.original.name }}
         </span>
 

@@ -3,6 +3,7 @@ import {
   Droplet,        // water
   Flame,          // fire
   HeartPulse,     // firstAid
+  Lightbulb,      // light
   Package,        // other (default)
   Radio,          // communication
   Shirt,          // clothing
@@ -25,6 +26,7 @@ export const CATEGORY_ICONS: Record<string, Component> = {
   communication: Radio,
   clothing: Shirt,
   hygiene: Sparkles,
+  light: Lightbulb,
   other: Package,
 }
 

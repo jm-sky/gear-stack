@@ -111,6 +111,7 @@ export const gearEn = {
         communication: 'Communication',
         clothing: 'Clothing',
         hygiene: 'Hygiene',
+        light: 'Light',
         other: 'Other',
       },
       priorities: {
@@ -269,6 +270,7 @@ export const gearPl = {
         communication: 'Komunikacja',
         clothing: 'Odzież',
         hygiene: 'Higiena',
+        light: 'Światło',
         other: 'Inne',
       },
       priorities: {

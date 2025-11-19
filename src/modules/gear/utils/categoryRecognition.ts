@@ -65,6 +65,12 @@ export const CATEGORY_KEYWORDS: Record<TGearItemCategory, string[]> = {
     // Polish
     'higiena', 'mydło', 'szczoteczka', 'pasta', 'ręcznik', 'środek', 'czysty',
   ],
+  light: [
+    // English
+    'light', 'flashlight', 'torch', 'lamp', 'lantern', 'headlamp', 'headlight', 'illumination', 'led',
+    // Polish
+    'światło', 'latarka', 'lampa', 'lampion', 'reflektor', 'oświetlenie', 'świetlówka',
+  ],
   other: [], // No keywords for "other" category
 }
 

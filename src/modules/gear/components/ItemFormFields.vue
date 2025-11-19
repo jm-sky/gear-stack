@@ -139,6 +139,12 @@ const handleCancel = () => {
                 <span>{{ $t('gear.item.categories.hygiene') }}</span>
               </div>
             </SelectItem>
+            <SelectItem value="light">
+              <div class="flex items-center gap-2">
+                <CategoryIcon category="light" :size="16" />
+                <span>{{ $t('gear.item.categories.light') }}</span>
+              </div>
+            </SelectItem>
             <SelectItem value="other">
               <div class="flex items-center gap-2">
                 <CategoryIcon category="other" :size="16" />

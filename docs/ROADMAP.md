@@ -23,6 +23,25 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 
 ## 🎨 UI/UX Ulepszenia
 
+### Strona z listą wszystkich przedmiotów
+- Nowa strona wyświetlająca listę wszystkich przedmiotów ze wszystkich kontenerów
+- Dostępna jako kolejna pozycja w topbar navigation (obok "Kontenery")
+- Tabela przedmiotów z kolumnami:
+  - Kategoria (z ikoną)
+  - Nazwa przedmiotu
+  - Kontener (nazwa kontenera, z którego pochodzi przedmiot)
+  - Ilość
+  - Waga
+  - Status
+  - Priorytet
+- Możliwość filtrowania i sortowania:
+  - Filtrowanie po kategorii, statusie, priorytecie
+  - Filtrowanie po kontenerze
+  - Sortowanie po dowolnej kolumnie
+- Możliwość szybkiego przejścia do kontenera, w którym znajduje się przedmiot (kliknięcie w nazwę kontenera)
+- Wyszukiwarka przedmiotów
+- Eksport danych (opcjonalnie)
+
 ### ✅ Dedykowane ikony dla kategorii
 - ✅ Na liście przedmiotów - dedykowana ikona do każdej kategorii
 - ✅ Ikony dla kategorii: woda, ogień, jedzenie, schronienie, pierwsza pomoc, narzędzia, nawigacja, komunikacja, odzież, higiena, inne
@@ -129,7 +148,30 @@ Kontener też może mieć dodatkowe pola:
 - Bez wchodzenia w formularz
 - Inline editing dla podstawowych pól (nazwa, ilość, status)
 - Szybkie akcje (zmiana statusu, priorytetu) bezpośrednio z listy
-- Drag & drop do zmiany kolejności przedmiotów
+
+### Kolejność przedmiotów w kontenerze
+- Dodanie pola `order` (lub `sortOrder`) do przedmiotów w kontenerze
+- Możliwość ręcznego układania przedmiotów w wybranej kolejności
+- Dwa sposoby zmiany kolejności:
+  - **Drag & drop** - przeciąganie wierszy w tabeli do zmiany kolejności (preferowane)
+  - **Akcje "Do góry" / "Do dołu"** - przyciski w menu akcji przedmiotu (alternatywa, jeśli drag & drop jest zbyt skomplikowane)
+- Kolejność zapisywana w bazie danych i wyświetlana domyślnie w tabeli przedmiotów
+- Opcja sortowania według innych kryteriów (nazwa, waga, kategoria) z możliwością powrotu do kolejności ręcznej
+- Wizualne wskaźniki podczas przeciągania (highlight, placeholder)
+
+---
+
+## 📊 Wizualizacje i analityka
+
+### Wykres kołowy kategorii w kontenerze
+- Wykres kołowy pokazujący rozkład kategorii przedmiotów w kontenerze
+- Przełącznik między dwoma trybami wyświetlania:
+  - **Pod względem wagi** - Jak dużo ważą narzędzia względem całości? (procentowy udział wagi każdej kategorii)
+  - **Pod względem ilości** - Jak dużo mam sztuk narzędzi względem wszystkich przedmiotów? (procentowy udział ilości przedmiotów w każdej kategorii)
+- Wykres wyświetlany na stronie szczegółów kontenera
+- Kolorowe segmenty odpowiadające kolorom kategorii (lub dedykowanym kolorom)
+- Legenda z nazwami kategorii i wartościami procentowymi
+- Uwzględnienie zagnieżdżonych kontenerów w obliczeniach (opcjonalnie)
 
 ---
 

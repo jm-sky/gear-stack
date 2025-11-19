@@ -49,6 +49,7 @@ export type TGearItemCategory =
   | 'communication'
   | 'clothing'
   | 'hygiene'
+  | 'light'
   | 'other'
   | string // Allow custom categories
 
