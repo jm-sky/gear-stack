@@ -181,6 +181,14 @@ export const gearEn = {
       legendStatusMissing: 'Przedmiot jest brakujący lub niedostępny',
       legendStatusToBuy: 'Przedmiot należy zakupić',
     },
+    allItems: {
+      title: 'All Items',
+      subtitle: 'View and manage all items from all containers',
+      navTitle: 'All Items',
+      container: 'Container',
+      empty: 'No items found',
+      emptyDescription: 'Create containers and add items to see them here.',
+    },
     chart: {
       title: 'Category Distribution',
       description: 'Visualization of item categories in container',
@@ -390,6 +398,14 @@ export const gearPl = {
       legendStatusOwned: 'Przedmiot jest posiadany i dostępny',
       legendStatusMissing: 'Przedmiot jest brakujący lub niedostępny',
       legendStatusToBuy: 'Przedmiot należy zakupić',
+    },
+    allItems: {
+      title: 'Wszystkie przedmioty',
+      subtitle: 'Przeglądaj i zarządzaj wszystkimi przedmiotami ze wszystkich kontenerów',
+      navTitle: 'Wszystkie przedmioty',
+      container: 'Kontener',
+      empty: 'Brak przedmiotów',
+      emptyDescription: 'Utwórz kontenery i dodaj przedmioty, aby zobaczyć je tutaj.',
     },
     chart: {
       title: 'Rozkład kategorii',

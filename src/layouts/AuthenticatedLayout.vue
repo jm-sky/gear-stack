@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BackpackIcon } from 'lucide-vue-next'
+import { BackpackIcon, Package } from 'lucide-vue-next'
 import { type Component, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppFooter from '@/components/layout/AppFooter.vue'
@@ -26,7 +26,12 @@ const navLinks = computed<Link[]>(() => [
     to: GearRoutePath.Containers,
     label: t('gear.page.title', 'Gear'),
     icon: BackpackIcon,
-  }
+  },
+  {
+    to: GearRoutePath.AllItems,
+    label: t('gear.allItems.navTitle', 'All Items'),
+    icon: Package,
+  },
 ])
 
 const handleLogout = () => {

@@ -1,5 +1,4 @@
 import axios from 'axios'
-
 import { authInterceptor } from './auth.interceptor'
 import { errorResponseInterceptor } from './error.interceptor'
 

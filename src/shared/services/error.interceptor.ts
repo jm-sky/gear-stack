@@ -10,9 +10,8 @@
  */
 
 import { HttpStatusCode } from 'axios'
-import type { AxiosError } from 'axios'
-
 import { JWT_STORE_KEY, USER_STORAGE_KEY } from '@/shared/config/config'
+import type { AxiosError } from 'axios'
 
 /**
  * Handle axios response errors

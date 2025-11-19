@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { Badge } from '@/components/ui/badge'
 import { TableCell, TableRow } from '@/components/ui/table'
 import type { IGearContainer, IGearItem, TContainerColor } from '../types/gear.types'
-import { getStatusVariant } from '../utils/badgeVariants'
+import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 import { COLOR_BORDER_CLASSES } from '../utils/containerColors'
 import { formatWeight } from '../utils/formatWeight'
 import CategoryIcon from './CategoryIcon.vue'
@@ -45,15 +45,20 @@ const borderColorClass = computed(() => {
             :key="nestedItem.id"
             class="pl-8 pr-4 py-3 flex items-center gap-4 text-sm border-b rounded hover:bg-muted/50"
           >
-            <div class="flex items-center gap-2 min-w-[200px]">
+            <div class="flex items-center gap-2 min-w-0 md:min-w-92">
               <CategoryIcon :category="nestedItem.category" :size="14" class="text-muted-foreground" />
               <span>{{ nestedItem.name }}</span>
             </div>
-            <div class="text-muted-foreground min-w-[60px]">
-              {{ nestedItem.quantity }}x
+            <div class="text-muted-foreground min-w-0 md:min-w-18">
+              {{ nestedItem.quantity }}
             </div>
-            <div class="text-muted-foreground min-w-[80px]">
+            <div class="text-muted-foreground text-end px-4 min-w-0 md:min-w-[80px]">
               {{ formatWeight(nestedItem.weight * nestedItem.quantity, nestedItem.weightUnit ?? 'g') }}
+            </div>
+            <div class="min-w-0 md:min-w-26">
+              <Badge :variant="getPriorityVariant(nestedItem.priority)">
+                {{ t(`gear.item.priorities.${nestedItem.priority}`) }}
+              </Badge>
             </div>
             <Badge :variant="getStatusVariant(nestedItem.status)" class="text-xs">
               {{ t(`gear.item.statuses.${nestedItem.status}`) }}

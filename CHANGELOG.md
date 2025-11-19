@@ -21,6 +21,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.10.0] - 2025-01-20
+
+### Added
+- All Items page - view and manage all items from all containers in one unified table
+- `AllItemsPage` component with full item listing across all containers
+- `getAllItems` utility function to aggregate items from all containers
+- `allItemsColumns` utility for All Items table column definitions
+- Navigation link to All Items page in main navigation
+- Container information column in All Items table (shows container name and color)
+- Translations for All Items page (English and Polish)
+- `ALL_ITEMS_TABLE_COLUMN_VISIBILITY_KEY` for storing All Items table column visibility preferences
+
+### Fixed
+- Nested container weight now displays sum of all items in container instead of 0g
+- Weight column alignment improved with right-aligned text in items table
+
+---
+
 ## [0.9.0] - 2025-01-19
 
 ### Added
