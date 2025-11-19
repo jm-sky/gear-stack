@@ -21,6 +21,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.13.1] - 2025-01-19
+
+### Fixed
+- **Nested Container Import**: Fixed issue where nested containers were not properly linked during markdown import
+  - Import now correctly resolves `nestedContainerId` (slug) to actual container UUID
+  - Two-phase import process: containers created first, then items with nested container relationships resolved
+  - Nested containers (e.g., "Bagażnik" inside "Samochód Opel Zafira") now properly create parent-child relationships
+
+---
+
 ## [0.13.0] - 2025-01-19
 
 ### Added

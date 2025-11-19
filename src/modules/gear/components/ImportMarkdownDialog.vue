@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import type { IGearContainer } from '../types/gear.types'
 import { useGear } from '../composables/useGear'
 import { markdownImportService } from '../services/markdownImportService'
 
@@ -77,6 +78,12 @@ const handleImport = async () => {
     let itemCount = 0
     let itemUpdatedCount = 0
 
+    // Map to store container slug/id -> container UUID for nested container resolution
+    const containerIdMap = new Map<string, string>()
+
+    // Phase 1: Create/update all containers first
+    const createdContainers: Array<{ containerData: typeof previewResult.value.containers[0]; container: IGearContainer }> = []
+
     for (const containerData of previewResult.value.containers) {
       let container
 
@@ -111,10 +118,34 @@ const handleImport = async () => {
         importedCount++
       }
 
+      // Store mapping: slug/id -> container UUID
+      if (containerData.id) {
+        containerIdMap.set(containerData.id, container.id)
+      }
+      // Also map UUID if available (for update mode)
+      if (containerData.uuid) {
+        containerIdMap.set(containerData.uuid, container.id)
+      }
+
+      createdContainers.push({ containerData, container })
+    }
+
+    // Phase 2: Create/update items with nested container resolution
+    for (const { containerData, container } of createdContainers) {
       // Import/update items
       for (const itemData of containerData.items) {
-        // Remove uuid from itemData as it's not part of ICreateItemDto
+        // Extract nestedContainerId before destructuring
         const { uuid: itemUuid, nestedContainerId, ...itemDto } = itemData
+
+        // Resolve nestedContainerId (slug) to actual container UUID
+        if (nestedContainerId) {
+          const nestedContainerUuid = containerIdMap.get(nestedContainerId)
+          if (nestedContainerUuid) {
+            itemDto.containerId = nestedContainerUuid
+          } else {
+            console.warn(`Nested container with id "${nestedContainerId}" not found`)
+          }
+        }
 
         if (importMode.value === 'update' && itemUuid) {
           // Try to find existing item by UUID
