@@ -13,9 +13,9 @@ export const CATEGORY_KEYWORDS: Record<TGearItemCategory, string[]> = {
   ],
   food: [
     // English
-    'food', 'meal', 'ration', 'snack', 'bar', 'energy', 'nutrition', 'eat',
+    'food', 'meal', 'ration', 'snack', 'bar', 'energy', 'nutrition', 'eat', 'mess', 'spork', 'utensil', 'spoon', 'fork',
     // Polish
-    'jedzenie', 'posiłek', 'racja', 'przekąska', 'bat', 'energia', 'żywność', 'jeść',
+    'jedzenie', 'posiłek', 'racja', 'przekąska', 'bat', 'energia', 'żywność', 'jeść', 'menażka', 'łyżka', 'widelec',
   ],
   shelter: [
     // English
@@ -25,9 +25,9 @@ export const CATEGORY_KEYWORDS: Record<TGearItemCategory, string[]> = {
   ],
   fire: [
     // English
-    'fire', 'lighter', 'match', 'flint', 'spark', 'ignition', 'torch', 'flame',
+    'fire', 'lighter', 'match', 'flint', 'spark', 'ignition', 'torch', 'flame', 'candle',
     // Polish
-    'ogień', 'zapałki', 'zapalniczka', 'krzesiwo', 'iskra', 'płomień', 'pochodnia',
+    'ogień', 'zapałki', 'zapalniczka', 'krzesiwo', 'iskra', 'płomień', 'pochodnia', 'świeczka',
   ],
   firstAid: [
     // English
@@ -39,7 +39,7 @@ export const CATEGORY_KEYWORDS: Record<TGearItemCategory, string[]> = {
     // English
     'tool', 'knife', 'multitool', 'axe', 'saw', 'hammer', 'screwdriver', 'wrench', 'pliers',
     // Polish
-    'narzędzie', 'nóż', 'siekiera', 'piła', 'młotek', 'śrubokręt', 'klucz', 'obcęgi',
+    'narzędzie', 'nóż', 'siekiera', 'piła', 'młotek', 'śrubokręt', 'klucz', 'obcęgi', 'niezbędnik',
   ],
   navigation: [
     // English
