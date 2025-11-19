@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ArrowLeft, BoxIcon, Download, Edit, MoreVertical, Plus, Upload } from 'lucide-vue-next'
+import { ArrowLeft, BoxIcon, Download, Edit, MessageSquare, MoreVertical, Plus, SparklesIcon, Upload } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import DropdownMenuSeparator from '@/components/ui/dropdown-menu/DropdownMenuSeparator.vue'
 import { useSettings } from '@/modules/settings/composables/useSettings'
 import type { IGearContainer } from '../types/gear.types'
 import { useGear } from '../composables/useGear'
@@ -23,6 +24,7 @@ const emit = defineEmits<{
   export: []
   import: []
   addContainer: []
+  exportToPrompt: []
 }>()
 
 const router = useRouter()
@@ -80,6 +82,10 @@ const handleImport = () => {
   emit('import')
 }
 
+const handleExportToPrompt = () => {
+  emit('exportToPrompt')
+}
+
 const handleBack = () => {
   router.push('/gear')
 }
@@ -89,10 +95,18 @@ const handleBack = () => {
   <div class="space-y-6">
     <!-- Header -->
     <div class="flex flex-col gap-4">
-      <div class="flex items-center gap-3">
+      <div class="flex items-center justify-between gap-3">
         <Button variant="ghost" size="sm" @click="handleBack">
           <ArrowLeft class="size-4" />
           {{ t('common.back') }}
+        </Button>
+        <Button
+          v-tooltip.bottom="t('gear.actions.exportToPrompt')"
+          variant="ghost"
+          size="sm"
+          @click="handleExportToPrompt"
+        >
+          <SparklesIcon class="size-4" />
         </Button>
       </div>
 
@@ -148,6 +162,11 @@ const handleBack = () => {
               <DropdownMenuItem @click="handleImport">
                 <Upload class="size-4" />
                 {{ t('gear.actions.import') }}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem @click="handleExportToPrompt">
+                <MessageSquare class="size-4" />
+                {{ t('gear.actions.exportToPrompt') }}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

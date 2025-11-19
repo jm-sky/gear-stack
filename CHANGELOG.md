@@ -21,6 +21,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.9.0] - 2025-01-19
+
+### Added
+- Export to Prompt (AI) feature - export container data to markdown format for AI prompts
+- `ExportToPromptDialog` component with markdown preview and copy functionality
+- `exportToPrompt` utility function for generating markdown exports
+- Support for nested containers in export with calculated total weight
+- Compact export format: `x4 **Name** (Brand, Color) (Expiration: date, Status) - weight`
+- AI legend explaining data structure for better AI understanding
+- Translations for all export texts (title, description, legend)
+- Export button in container header dropdown menu
+
+### Changed
+- Export format now shows quantity as `x4` before item name instead of `(4x)` in parentheses
+- Container headers in export no longer include color suffix
+- Nested containers now display calculated total weight instead of 0g
+- Export format optimized for AI consumption with compact structure
+
+### Fixed
+- Removed empty line after main title in export
+- Fixed nested container weight calculation in export
+
+---
+
 ## [0.8.0] - 2025-01-19
 
 ### Added

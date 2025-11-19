@@ -129,18 +129,20 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 
 ## 🚀 Funkcjonalności eksportu
 
-### Eksport do prompt (AI)
-**Status:** 🔄 Planned | **Priority:** Medium | **Feature:** FEATURE-009 | **Complexity:** Medium
+### ✅ Eksport do prompt (AI)
+**Status:** ✅ Completed | **Priority:** Medium | **Feature:** FEATURE-009 | **Complexity:** Medium
 
-- Kontener oraz Kontenery powinny mieć przycisk w rodzaju "Eksport do prompt"
-- Stworzy to wiadomość w markdown z kontenerem/kontenerami i ich zawartością
-- Będzie też legenda/opis dla AI, aby zrozumiał co to jest
-- Użytkownik będzie mógł wkleić to do ChatGPT i poprosić o sugestie
-- Format eksportu:
-  - Struktura kontenera z przedmiotami
-  - Metadane (waga, gotowość, status)
-  - Opcjonalnie: ceny, linki, firmy
-  - Legenda wyjaśniająca strukturę danych dla AI
+- ✅ Kontener ma przycisk "Eksport do prompt" w dropdown menu
+- ✅ Eksport tworzy markdown z kontenerem i jego zawartością
+- ✅ Legenda/opis dla AI wyjaśniająca strukturę danych
+- ✅ Dialog z markdownem i przyciskiem do kopiowania
+- ✅ Format eksportu:
+  - ✅ Struktura kontenera z przedmiotami
+  - ✅ Metadane (waga, marka, kolor, status, data ważności)
+  - ✅ Obsługa zagnieżdżonych kontenerów z wyliczoną wagą zawartości
+  - ✅ Kompaktowy format: `x4 **Nazwa** (Marka, Kolor) (Expiration: data, Status) - waga`
+  - ✅ Legenda wyjaśniająca strukturę danych dla AI
+  - ✅ Tłumaczenia dla wszystkich tekstów eksportu
 
 ---
 
@@ -258,7 +260,6 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 ### Medium Priority
 1. **Preferowana jednostka wagi** - Medium priority, Small complexity
 2. **Rozszerzone pola** - Medium priority, Medium complexity
-3. **Eksport do prompt (AI)** - Medium priority, Medium complexity
 
 ### Low Priority (Polish/Enhancement)
 1. **Wybór primary color** - Low priority, Small complexity (warianty już przygotowane)
