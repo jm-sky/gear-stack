@@ -172,7 +172,7 @@ if (!container.value) {
 
 <template>
   <AuthenticatedLayout>
-    <div v-if="container" class="space-y-6">
+    <div v-if="container" class="space-y-6 w-full max-w-full overflow-hidden">
       <ContainerHeader
         :container="container"
         @export="handleExport"
@@ -182,14 +182,12 @@ if (!container.value) {
       />
 
       <!-- Items Table -->
-      <div class="bg-card rounded-lg border p-4 sm:p-6 overflow-x-auto">
-        <ItemsTable
-          :items="items"
-          @edit="handleEditItem"
-          @delete="handleDeleteItem"
-          @status-change="handleStatusChange"
-        />
-      </div>
+      <ItemsTable
+        :items="items"
+        @edit="handleEditItem"
+        @delete="handleDeleteItem"
+        @status-change="handleStatusChange"
+      />
 
       <!-- Category Pie Chart -->
       <CategoryPieChart :container="container" />

@@ -96,7 +96,7 @@ function navigateToContainer(containerId: string) {
 
 <template>
   <AuthenticatedLayout>
-    <div class="space-y-6">
+    <div class="space-y-6 w-full max-w-full overflow-hidden">
       <!-- Header -->
       <div class="flex items-center justify-between">
         <div>

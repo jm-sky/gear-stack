@@ -230,7 +230,7 @@ const handlePageSizeChange = (newPageSize: number) => {
 </script>
 
 <template>
-  <div class="space-y-4">
+  <div class="space-y-4 w-full max-w-full overflow-hidden">
     <!-- Toolbar Slot -->
     <slot
       name="toolbar"
@@ -249,7 +249,7 @@ const handlePageSizeChange = (newPageSize: number) => {
     </slot>
 
     <!-- Table -->
-    <div class="border rounded-md overflow-x-auto">
+    <div class="border rounded-md overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">

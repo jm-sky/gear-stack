@@ -7,7 +7,8 @@ import { SUGGESTED_BRANDS, SUGGESTED_COLORS } from '../utils/suggestedValues'
 export interface IMarkdownImportResult {
   containers: Array<{
     name: string
-    items: ICreateItemDto[]
+    id?: string // Container ID from [#id] in header
+    items: Array<ICreateItemDto & { nestedContainerId?: string }> // nestedContainerId is temporary slug reference
   }>
   errors: string[]
 }
@@ -69,20 +70,35 @@ class MarkdownImportService {
     }
 
     const lines = markdown.split('\n')
-    let currentContainer: { name: string; items: ICreateItemDto[] } | null = null
+    let currentContainer: { name: string; id?: string; items: ICreateItemDto[] } | null = null
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]?.trim()
       if (!line) continue
 
-      // Container header (## Header)
+      // Container header (## Header [#id] (Type))
       if (line.startsWith('## ')) {
         if (currentContainer && currentContainer.items.length > 0) {
           result.containers.push(currentContainer)
         }
 
+        let headerText = line.substring(3).trim()
+        let containerId: string | undefined
+
+        // Extract ID from [#id]
+        const idMatch = headerText.match(/\[#([^\]]+)\]/)
+        if (idMatch) {
+          containerId = idMatch[1]?.trim()
+          headerText = headerText.replace(idMatch[0] ?? '', '').trim()
+        }
+
+        // Extract container name (remove type in parentheses if present)
+        const nameMatch = headerText.match(/^([^(]+)/)
+        const containerName = (nameMatch ? nameMatch[1]?.trim() : headerText) || headerText
+
         currentContainer = {
-          name: line.substring(3).trim(),
+          name: containerName,
+          id: containerId,
           items: [],
         }
         continue
@@ -111,81 +127,185 @@ class MarkdownImportService {
 
   /**
    * Parse a single item line
-   * Format: Item name **Brand** (params) x5
+   * New format: - **Item Name** x2 (Brand, Color) [#container-id] (Status) - 500g
+   * Old format: - Item name **Brand** (params) x5
+   * Flexible: Parser will try to guess all fields
    */
-  private parseItemLine(line: string): ICreateItemDto | null {
+  private parseItemLine(line: string): (ICreateItemDto & { nestedContainerId?: string }) | null {
     if (!line) return null
 
-    // Extract quantity (xN or ×N at the end)
+    let workingLine = line
+    let name = ''
+    let brand: string | undefined
+    let color: string | undefined
+    let status: 'owned' | 'missing' | 'toBuy' = 'owned'
     let quantity = 1
-    const quantityMatch = line.match(/[x×](\d+)\s*$/i)
+    let weight = 100 // Default weight
+    let weightUnit: 'g' | 'kg' = 'g'
+    let expirationDate: string | undefined
+    let url: string | undefined
+    let nestedContainerId: string | undefined
+
+    // 1. Extract bold text as item name (new format: **Item Name**)
+    const boldMatch = workingLine.match(/\*\*([^*]+)\*\*/)
+    if (boldMatch) {
+      name = boldMatch[1]?.trim() ?? ''
+      workingLine = workingLine.replace(boldMatch[0] ?? '', '').trim()
+    }
+
+    // 2. Extract weight at the end (- 500g or - 2.5kg)
+    const weightMatch = workingLine.match(/[-–—]\s*(\d+(?:[.,]\d+)?)\s*(g|kg)\s*$/i)
+    if (weightMatch) {
+      weight = Number.parseFloat((weightMatch[1] ?? '100').replace(',', '.'))
+      weightUnit = (weightMatch[2]?.toLowerCase() === 'kg' ? 'kg' : 'g') as 'g' | 'kg'
+      workingLine = workingLine.substring(0, weightMatch.index).trim()
+    }
+
+    // 3. Extract container ID [#id] (for nested containers)
+    const containerIdMatch = workingLine.match(/\[#([^\]]+)\]/)
+    if (containerIdMatch) {
+      nestedContainerId = containerIdMatch[1]?.trim()
+      workingLine = workingLine.replace(containerIdMatch[0] ?? '', '').trim()
+    }
+
+    // 4. Extract URL (in angle brackets <url> or plain http://|https://|www.)
+    const urlMatch = workingLine.match(/<([^>]+)>|(\bhttps?:\/\/[^\s]+)|(\bwww\.[^\s]+)/)
+    if (urlMatch) {
+      url = (urlMatch[1] ?? urlMatch[2] ?? urlMatch[3])?.trim()
+      // Add protocol if missing (www. case)
+      if (url && url.startsWith('www.') && !url.startsWith('http')) {
+        url = `https://${url}`
+      }
+      workingLine = workingLine.replace(urlMatch[0] ?? '', '').trim()
+    }
+
+    // 4. Extract quantity (xN or ×N anywhere in the line)
+    const quantityMatch = workingLine.match(/[x×](\d+)/i)
     if (quantityMatch) {
       quantity = Number.parseInt(quantityMatch[1] ?? '1', 10)
-      line = line.substring(0, quantityMatch.index).trim()
+      workingLine = workingLine.replace(quantityMatch[0] ?? '', '').trim()
     }
 
-    // Extract brand from **Bold**
-    let brand: string | undefined
-    const brandMatch = line.match(/\*\*([^*]+)\*\*/)
-    if (brandMatch) {
-      brand = this.matchBrand(brandMatch[1] ?? '')
-      line = line.replace(brandMatch[0] ?? '', '').trim()
+    // 4. Extract all parentheses groups
+    const parenthesesGroups: string[] = []
+    let parenthesesMatch
+    const parenthesesRegex = /\(([^)]+)\)/g
+    while ((parenthesesMatch = parenthesesRegex.exec(workingLine)) !== null) {
+      parenthesesGroups.push(parenthesesMatch[1] ?? '')
     }
+    workingLine = workingLine.replace(/\([^)]*\)/g, '').trim()
 
-    // Extract parameters from parentheses
-    const params = this.parseParentheses(line)
-    line = line.replace(/\([^)]*\)/g, '').trim()
+    // 5. Parse parentheses groups
+    // First group is typically (Brand, Color)
+    // Second group is typically (Status) or (Expiration: date)
+    if (parenthesesGroups.length > 0) {
+      const firstGroup = parenthesesGroups[0] ?? ''
+      const parts = firstGroup.split(',').map(p => p.trim())
 
-    // Extract measurements like ~25 m, 195×60 cm
-    const measurementMatch = line.match(/[~]?\s*(\d+(?:[.,]\d+)?)\s*([×x]\s*\d+(?:[.,]\d+)?)?\s*(m|cm|kg|g|mm|l|ml)/i)
-    let weight = 100 // Default weight: 100g
-    let weightUnit: 'g' | 'kg' = 'g'
+      for (const part of parts) {
+        // Check for expiration
+        if (part.toLowerCase().includes('expiration:')) {
+          const dateMatch = part.match(/expiration:\s*(\d{2}[./-]\d{2}[./-]\d{4})/i)
+          if (dateMatch) {
+            // Convert DD.MM.YYYY to ISO format
+            const dateParts = dateMatch[1]?.split(/[./-]/)
+            if (dateParts && dateParts.length === 3) {
+              expirationDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`
+            }
+          }
+          continue
+        }
 
-    if (measurementMatch) {
-      const value = Number.parseFloat((measurementMatch[1] ?? '0').replace(',', '.'))
-      const unit = measurementMatch[3]?.toLowerCase()
+        // Check for status
+        const statusLower = part.toLowerCase()
+        if (statusLower.includes('missing') || statusLower.includes('brakuje')) {
+          status = 'missing'
+          continue
+        }
+        if (statusLower.includes('to buy') || statusLower.includes('do kupienia')) {
+          status = 'toBuy'
+          continue
+        }
+        if (statusLower.includes('owned') || statusLower.includes('posiadane')) {
+          status = 'owned'
+          continue
+        }
 
-      if (unit === 'kg') {
-        weight = value
-        weightUnit = 'kg'
-      } else if (unit === 'g') {
-        weight = value
-        weightUnit = 'g'
+        // Check if it's a brand
+        const matchedBrand = this.matchBrand(part)
+        if (matchedBrand && !brand) {
+          brand = matchedBrand
+          continue
+        }
+
+        // Check if it's a color
+        const matchedColor = this.matchColor(part)
+        if (matchedColor && !color) {
+          color = matchedColor
+          continue
+        }
       }
-
-      line = line.replace(measurementMatch[0] ?? '', '').trim()
     }
 
-    // Override with params if provided
-    if (params.weight !== undefined) {
-      weight = params.weight
+    // Check second parentheses group for status/expiration
+    if (parenthesesGroups.length > 1) {
+      const secondGroup = parenthesesGroups[1] ?? ''
+      const parts = secondGroup.split(',').map(p => p.trim())
+
+      for (const part of parts) {
+        // Check for expiration
+        if (part.toLowerCase().includes('expiration:')) {
+          const dateMatch = part.match(/expiration:\s*(\d{2}[./-]\d{2}[./-]\d{4})/i)
+          if (dateMatch) {
+            const dateParts = dateMatch[1]?.split(/[./-]/)
+            if (dateParts && dateParts.length === 3) {
+              expirationDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`
+            }
+          }
+          continue
+        }
+
+        // Check for status
+        const statusLower = part.toLowerCase()
+        if (statusLower.includes('missing') || statusLower.includes('brakuje')) {
+          status = 'missing'
+          continue
+        }
+        if (statusLower.includes('to buy') || statusLower.includes('do kupienia')) {
+          status = 'toBuy'
+          continue
+        }
+      }
     }
-    if (params.weightUnit !== undefined) {
-      weightUnit = params.weightUnit
+
+    // 6. If name is still empty, try old format (brand in bold)
+    if (!name) {
+      name = workingLine.trim()
+      // In old format, bold was brand, so if we have bold text already extracted,
+      // and name is empty, use the remaining line as name
     }
-    if (params.brand !== undefined) {
-      brand = params.brand
+
+    // 7. Fallback: if still no name from bold, use remaining line
+    if (!name) {
+      name = workingLine.trim()
     }
 
-    // Clean up name
-    const name = line.trim()
+    // 8. Determine category from name
+    const category = this.matchCategory(name)
 
-    // Determine category
-    const category = params.category ?? this.matchCategory(name)
-
-    // Determine color
-    const color = params.color
-
-    const item: ICreateItemDto = {
+    const item: ICreateItemDto & { nestedContainerId?: string } = {
       name,
       category,
-      quantity: params.quantity ?? quantity,
+      quantity,
       weight,
       weightUnit,
       priority: 'medium',
-      status: 'owned',
+      status,
       brand,
       color,
+      expirationDate,
+      url,
+      nestedContainerId, // Temporary slug reference to container
     }
 
     return item

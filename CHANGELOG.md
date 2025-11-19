@@ -21,6 +21,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.12.0] - 2025-01-19
+
+### Added
+- **AI Prompt Export Enhancements**:
+  - "Export to Prompt (AI)" button for all containers on ContainersListPage
+  - "Guidelines" button in ExportToPromptDialog with comprehensive markdown formatting template
+  - URL support in items (auto-detected from `http://`, `https://`, `www.`)
+  - Nested container support with ID references using `[#slug-id]` format
+  - Container IDs auto-generated as slugs from container names
+
+- **Enhanced Markdown Import/Export**:
+  - Unified format for import and export with flexible parsing
+  - Parser recognizes URLs in angle brackets or plain format
+  - Parser extracts `[#id]` from container headers and items
+  - Support for nested container relationships via ID references
+  - Weight is now optional (defaults to 100g if not specified)
+  - Quantity can appear anywhere in the line (flexible regex matching)
+
+- **Mobile/RWD Improvements**:
+  - Click-based dropdown menu for UserNav (replaces hover-only)
+  - Proper overflow handling for tables on mobile devices
+  - Added `min-width: 640px` to tables with horizontal scroll
+  - Responsive dialogs with `w-[95vw]` on mobile
+  - Gap between search and column visibility in DataTable toolbar
+  - Increased card padding on mobile (p-4 instead of p-2)
+
+### Changed
+- **Table Overflow Chain**: Fixed multi-layer overflow issues by adding `max-w-full overflow-hidden` to all page wrappers and DataTable root
+- **AuthenticatedLayout**: Reduced padding on mobile (px-2) for more content space
+- **Global CSS**: Added `overflow-x-hidden` to html, body, and #app to prevent horizontal scroll
+- **UserNav**: Migrated from CSS hover to DropdownMenu component for better mobile support
+- **Export Format**: All container headers now include `[#id]` for identification
+- **Guidelines Template**: Updated with complete formatting rules, examples, and nested container documentation
+
+### Fixed
+- Tables exceeding viewport width on mobile devices
+- Dropdown menus not opening on touch devices
+- Multiple overflow wrappers causing scroll issues
+- Missing gap between DataTable toolbar elements
+- Dialog max-width issues on small screens
+
+---
+
 ## [0.11.1] - 2025-01-19
 
 ### Added

@@ -70,7 +70,7 @@ const isOpen = computed({
       @click="handleOpenChange(false)"
     >
       <div
-        class="bg-card rounded-lg border shadow-lg w-full max-w-md mx-4"
+        class="bg-card rounded-lg border shadow-lg w-[95vw] max-w-md mx-4"
         @click.stop
       >
         <div class="p-6 space-y-4">

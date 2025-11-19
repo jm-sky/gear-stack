@@ -97,7 +97,7 @@ const getColumnHeaderText = (column: ReturnType<Table<TData>['getColumn']>): str
 </script>
 
 <template>
-  <div v-if="enableFiltering || enableColumnVisibility" class="flex items-center justify-between py-4">
+  <div v-if="enableFiltering || enableColumnVisibility" class="flex items-center gap-4 py-4">
     <!-- Global Filter Input -->
     <Input
       v-if="enableFiltering"
@@ -110,7 +110,7 @@ const getColumnHeaderText = (column: ReturnType<Table<TData>['getColumn']>): str
     <!-- Column Visibility Toggle -->
     <DropdownMenu v-if="enableColumnVisibility">
       <DropdownMenuTrigger as-child>
-        <Button variant="outline" class="ml-auto">
+        <Button variant="outline" class="ml-auto shrink-0">
           {{ t('common.columns') }}
           <ChevronDown class="size-4" />
         </Button>

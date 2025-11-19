@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { refDebounced } from '@vueuse/core'
-import { ChevronDown, FileInput, Package, Plus, Trash2 } from 'lucide-vue-next'
+import { ChevronDown, FileInput, Package, Plus, Sparkles, Trash2 } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -18,13 +18,15 @@ import { useSettings } from '@/modules/settings/composables/useSettings'
 import type { IGearContainer } from '../types/gear.types'
 import ContainerCard from '../components/ContainerCard.vue'
 import ContainersFilters from '../components/ContainersFilters.vue'
+import ExportToPromptDialog from '../components/ExportToPromptDialog.vue'
 import ImportMarkdownDialog from '../components/ImportMarkdownDialog.vue'
 import { useGear } from '../composables/useGear'
+import { exportContainersToPrompt } from '../utils/exportToPrompt'
 import type { TUUID } from '@/shared/types/base.type'
 
 const router = useRouter()
 const { t } = useI18n()
-const { containers, deleteContainer, deleteAllContainers, getRootContainers } = useGear()
+const { containers, deleteContainer, deleteAllContainers, getRootContainers, getContainerById, calculateTotalWeight } = useGear()
 const { customContainerTypes } = useSettings()
 
 // Filters - using refs that will be bound to ContainersFilters via v-model
@@ -32,8 +34,10 @@ const searchQueryRaw = ref('')
 const searchQuery = refDebounced(searchQueryRaw, 300)
 const showOnlyRootContainers = ref(false)
 
-// Import dialog
+// Dialogs
 const importDialogOpen = ref(false)
+const isExportToPromptDialogOpen = ref(false)
+const exportMarkdown = ref('')
 
 // Helper to get container type label for filtering
 const getContainerTypeLabel = (typeKey: string): string => {
@@ -101,11 +105,33 @@ const handleDeleteAll = () => {
     }
   }
 }
+
+const handleExportAllToPrompt = () => {
+  if (containers.value.length === 0) {
+    toast.error(t('gear.export.noContainers'))
+    return
+  }
+
+  try {
+    const markdown = exportContainersToPrompt(containers.value, {
+      t,
+      getContainerTypeLabel,
+      getContainerById,
+      calculateTotalWeight,
+    })
+
+    exportMarkdown.value = markdown
+    isExportToPromptDialogOpen.value = true
+  } catch (error) {
+    toast.error(t('common.error'))
+    console.error('Error exporting to prompt:', error)
+  }
+}
 </script>
 
 <template>
   <AuthenticatedLayout>
-    <div class="space-y-6">
+    <div class="space-y-6 w-full max-w-full overflow-hidden">
       <!-- Header -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -133,6 +159,14 @@ const handleDeleteAll = () => {
               <DropdownMenuItem @click="handleImport">
                 <FileInput class="size-4 mr-2" />
                 {{ t('gear.import.fromMarkdown') }}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator v-if="containers.length > 0" />
+              <DropdownMenuItem
+                v-if="containers.length > 0"
+                @click="handleExportAllToPrompt"
+              >
+                <Sparkles class="size-4 mr-2" />
+                {{ t('gear.export.allToPrompt') }}
               </DropdownMenuItem>
               <DropdownMenuSeparator v-if="containers.length > 0" />
               <DropdownMenuItem
@@ -186,6 +220,12 @@ const handleDeleteAll = () => {
     <ImportMarkdownDialog
       v-model:open="importDialogOpen"
       @import-complete="handleImportComplete"
+    />
+
+    <!-- Export to Prompt Dialog -->
+    <ExportToPromptDialog
+      v-model:open="isExportToPromptDialogOpen"
+      :markdown="exportMarkdown"
     />
   </AuthenticatedLayout>
 </template>

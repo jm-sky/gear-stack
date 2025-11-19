@@ -13,6 +13,28 @@ interface ExportOptions {
 }
 
 /**
+ * Convert container name to slug for ID
+ * Example: "First Aid Pouch" -> "first-aid-pouch"
+ */
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD') // Normalize unicode characters
+    .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+    .replace(/[^a-z0-9\s-]/g, '') // Remove special chars
+    .trim()
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single
+}
+
+/**
+ * Generate ID for container from its name
+ */
+function generateContainerId(name: string): string {
+  return `#${slugify(name)}`
+}
+
+/**
  * Format item for markdown export (compact format)
  */
 function formatItem(
@@ -61,6 +83,20 @@ function formatItem(
     parts.push(`(${statusParts.join(', ')})`)
   }
 
+  // Container ID if this item is a nested container
+  if (item.containerId && options.getContainerById) {
+    const nestedContainer = options.getContainerById(item.containerId)
+    if (nestedContainer) {
+      const containerId = generateContainerId(nestedContainer.name)
+      parts.push(`[${containerId}]`)
+    }
+  }
+
+  // URL if provided
+  if (item.url) {
+    parts.push(`<${item.url}>`)
+  }
+
   // Weight at the end
   let totalWeight: number
   let weightText: string
@@ -92,11 +128,12 @@ function formatNestedContainer(
   const indentStr = '  '.repeat(indent)
   const lines: string[] = []
 
-  // Container header (without color)
+  // Container header with ID
   const typeLabel = options.getContainerTypeLabel
     ? options.getContainerTypeLabel(container.type)
     : container.type
-  lines.push(`${indentStr}## ${container.name} (${typeLabel})`)
+  const containerId = generateContainerId(container.name)
+  lines.push(`${indentStr}## ${container.name} [${containerId}] (${typeLabel})`)
 
   // Container items
   if (container.items.length === 0) {
@@ -133,11 +170,12 @@ export function exportContainerToPrompt(
   lines.push(descriptionText)
   lines.push('')
 
-  // Container header (without color)
+  // Container header with ID
   const typeLabel = getContainerTypeLabel
     ? getContainerTypeLabel(container.type)
     : container.type
-  lines.push(`## ${container.name} (${typeLabel})`)
+  const containerId = generateContainerId(container.name)
+  lines.push(`## ${container.name} [${containerId}] (${typeLabel})`)
 
   // Collect nested containers to show separately
   const nestedContainers: Array<{ item: IGearItem; container: IGearContainer }> = []

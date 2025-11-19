@@ -103,7 +103,7 @@ const handleImport = async () => {
 
 <template>
   <Dialog :open="props.open" @update:open="handleClose">
-    <DialogContent class="max-w-4xl max-h-[90vh] flex flex-col">
+    <DialogContent class="w-[95vw] max-w-4xl max-h-[90vh] flex flex-col">
       <DialogHeader>
         <DialogTitle>{{ t('gear.import.title') }}</DialogTitle>
         <DialogDescription>
