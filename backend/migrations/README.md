@@ -15,6 +15,11 @@ Each migration has two files:
 - **Description**: Adds `email_audit_log` table for tracking sent emails
 - **Model**: `app.common.models.EmailAuditLog`
 
+### 002_add_gear_tables
+- **Created**: 2025-11-19
+- **Description**: Adds `gear_containers` and `gear_items` tables for gear management
+- **Models**: `app.modules.gear.db_models.GearContainerDB`, `app.modules.gear.db_models.GearItemDB`
+
 ## Usage
 
 ### Option 1: Automatic Table Creation (Recommended for Development)
@@ -59,7 +64,8 @@ sqlite3 your_database.db < migrations/001_add_email_audit_log.sql
 
 | Version | Date       | Description                | Status |
 |---------|------------|----------------------------|--------|
-| 001     | 2025-11-13 | Add email_audit_log table | ✓      |
+| 001     | 2025-11-13 | Add email_audit_log table  | ✓      |
+| 002     | 2025-11-19 | Add gear tables            | ✓      |
 
 ## Future: Setting Up Alembic
 

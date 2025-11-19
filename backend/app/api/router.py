@@ -6,6 +6,7 @@ from fastapi import APIRouter
 # When you add modules using 'fastapi-registry add <module>', the CLI will automatically
 # add the necessary imports and include_router calls here.
 from app.modules.auth.router import router as auth_router
+from app.modules.gear.router import router as gear_router
 from app.modules.logs.router import router as logs_router
 from app.modules.settings.router import router as settings_router
 from app.modules.tenants.router import router as tenants_router
@@ -29,6 +30,7 @@ async def health_check() -> dict[str, str]:
 
 # Register module routers
 api_router.include_router(auth_router, prefix="/auth", tags=["Authentication"])
+api_router.include_router(gear_router)
 api_router.include_router(logs_router, prefix="/logs", tags=["Logs", "Monitoring"])
 api_router.include_router(users_router, prefix="/users", tags=["Users"])
 api_router.include_router(settings_router, prefix="/me/settings", tags=["Settings"])
