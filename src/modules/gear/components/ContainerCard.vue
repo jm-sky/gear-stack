@@ -33,7 +33,7 @@ const emit = defineEmits<{
 
 const router = useRouter()
 const { t } = useI18n()
-const { calculateTotalWeight, calculateReadinessPercentage, getContainerById } = useGear()
+const { calculateTotalWeight, calculateReadinessPercentage, getContainerById, containers } = useGear()
 const { customContainerTypes } = useSettings()
 
 // Computed properties
@@ -70,17 +70,48 @@ const isNested = computed<boolean>(() => {
   return !!props.container.parentContainerId
 })
 
-// Get parent container
-const parentContainer = computed<IGearContainer | undefined>(() => {
-  if (!props.container.parentContainerId) return undefined
-  return getContainerById(props.container.parentContainerId)
+// Find all containers that contain this container as an item
+const parentContainers = computed<IGearContainer[]>(() => {
+  const parents: IGearContainer[] = []
+  const containerId = props.container.id
+
+  // Add direct parent if exists
+  if (props.container.parentContainerId) {
+    const directParent = getContainerById(props.container.parentContainerId)
+    if (directParent) {
+      parents.push(directParent)
+    }
+  }
+
+  // Find all containers that have this container as an item
+  for (const container of containers.value) {
+    if (container.id === containerId) continue // Skip self
+    if (container.items.some(item => item.containerId === containerId)) {
+      // Avoid duplicates
+      if (!parents.some(p => p.id === container.id)) {
+        parents.push(container)
+      }
+    }
+  }
+
+  return parents
+})
+
+// Get first parent container
+const firstParentContainer = computed<IGearContainer | undefined>(() => {
+  return parentContainers.value[0]
+})
+
+// Get count of additional parents (beyond the first one)
+const additionalParentsCount = computed<number>(() => {
+  return Math.max(0, parentContainers.value.length - 1)
 })
 
 // Navigate to parent container
 const navigateToParent = (e: Event) => {
   e.stopPropagation()
-  if (props.container.parentContainerId) {
-    router.push(`/gear/${props.container.parentContainerId}`)
+  if (firstParentContainer.value) {
+    router.push(`/gear/${firstParentContainer.value.id}`)
   }
 }
 
@@ -122,19 +153,27 @@ const handleDelete = () => {
           <CardDescription v-if="container.description">
             {{ container.description }}
           </CardDescription>
-          <div class="flex items-center gap-2 mt-2">
+          <div class="flex items-center gap-2 mt-2 flex-wrap">
             <Badge variant="outline">
               {{ typeLabel }}
             </Badge>
-            <Button
-              v-if="parentContainer"
-              variant="ghost"
-              size="sm"
-              class="h-6 text-xs text-muted-foreground"
-              @click.stop="navigateToParent"
-            >
-              {{ t('gear.container.parentContainer') }}: {{ parentContainer.name }}
-            </Button>
+            <div v-if="firstParentContainer" class="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                class="h-6 text-xs text-muted-foreground"
+                @click.stop="navigateToParent"
+              >
+                {{ t('gear.container.parentContainer') }}: {{ firstParentContainer.name }}
+              </Button>
+              <Badge
+                v-if="additionalParentsCount > 0"
+                variant="secondary"
+                class="h-5 text-xs px-1.5"
+              >
+                +{{ additionalParentsCount }}
+              </Badge>
+            </div>
           </div>
         </div>
         <DropdownMenu>
