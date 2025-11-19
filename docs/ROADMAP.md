@@ -2,11 +2,25 @@
 
 Lista planowanych funkcjonalności i ulepszeń aplikacji.
 
+> 📋 **Zobacz też:** [Features Implementation Plans](./features/README.md) - szczegółowe plany implementacji
+
+---
+
+## 📊 Status Overview
+
+- ✅ **Completed** - Zaimplementowane i przetestowane
+- 🚧 **In Progress** - W trakcie implementacji
+- 🔄 **Planned** - Zaplanowane, nie rozpoczęte
+- ⏸️ **On Hold** - Tymczasowo wstrzymane
+- ❌ **Cancelled** - Anulowane
+
 ---
 
 ## 🌐 Internacjonalizacja
 
 ### ✅ Wykrywanie języka (locale) z ustawień przeglądarki
+**Status:** ✅ Completed | **Priority:** Medium | **Feature:** [FEATURE-001](./features/FEATURE-001-locale-detection.md)
+
 - ✅ Automatyczne wykrywanie języka użytkownika na podstawie ustawień przeglądarki
 - ✅ Fallback do domyślnego języka (np. polski)
 - ✅ Możliwość ręcznej zmiany języka w ustawieniach
@@ -14,6 +28,8 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 - ✅ Wykryty język zapisywany w localStorage
 
 ### Preferowana jednostka wagi
+**Status:** 🔄 Planned | **Priority:** Medium
+
 - Użytkownik może ustawić preferowaną jednostkę wagi w ustawieniach (g lub kg)
 - Wszystkie wyświetlane wagi na dashboard, w tabelach i kartach będą konwertowane do preferowanej jednostki
 - Formularze nadal mogą używać różnych jednostek, ale wyświetlanie będzie spójne
@@ -24,6 +40,8 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 ## 🎨 UI/UX Ulepszenia
 
 ### Strona z listą wszystkich przedmiotów
+**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium
+
 - Nowa strona wyświetlająca listę wszystkich przedmiotów ze wszystkich kontenerów
 - Dostępna jako kolejna pozycja w topbar navigation (obok "Kontenery")
 - Tabela przedmiotów z kolumnami:
@@ -43,29 +61,38 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 - Eksport danych (opcjonalnie)
 
 ### ✅ Dedykowane ikony dla kategorii
+**Status:** ✅ Completed | **Priority:** High | **Feature:** [FEATURE-002](./features/FEATURE-002-category-icons.md)
+
 - ✅ Na liście przedmiotów - dedykowana ikona do każdej kategorii
-- ✅ Ikony dla kategorii: woda, ogień, jedzenie, schronienie, pierwsza pomoc, narzędzia, nawigacja, komunikacja, odzież, higiena, inne
+- ✅ Ikony dla kategorii: woda, ogień, jedzenie, schronienie, pierwsza pomoc, narzędzia, nawigacja, komunikacja, odzież, higiena, światło, inne
 - ✅ Spójny system ikon (Lucide Icons)
 - ✅ Ikony wyświetlane w tabelach i selektorach kategorii
 
 ### ✅ Kolorowanie kontenerów
+**Status:** ✅ Completed | **Priority:** Medium | **Feature:** [FEATURE-003](./features/FEATURE-003-container-colors.md)
+
 - ✅ Możliwość przypisania koloru do kontenera
 - ✅ 10 dostępnych kolorów do wyboru (default, blue, green, red, yellow, purple, orange, pink, teal, indigo)
 - ✅ Wizualne rozróżnienie kontenerów na liście (kolorowa kropka i ramka)
 - ✅ Kolor wyświetlany w kartach kontenerów i rozwiniętych wierszach zagnieżdżonych kontenerów
 
 ### Wybór primary color (brand color)
+**Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Small
+
 - Porównanie obecnego "dark orange" z alternatywnymi opcjami
 - Rozważenie kolorów: coyote, olive, oraz inne opcje pasujące do tematyki survival/outdoor
 - Testowanie różnych wariantów kolorystycznych
 - Wybór finalnego brand color, który najlepiej oddaje charakter aplikacji
 - Aktualizacja palety kolorów w całej aplikacji po wyborze
+- **Uwaga:** Warianty kolorów są już przygotowane w `src/css/style.css` jako zakomentowany kod
 
 ---
 
 ## 🔗 Relacje i Nesting
 
 ### ✅ Relacja parent-children (nesting kontenerów)
+**Status:** ✅ Completed | **Priority:** High | **Feature:** [FEATURE-008](./features/FEATURE-008-container-nesting.md)
+
 - ✅ Kontener może zawierać na liście przedmiotów inny kontener
   - Przykład: W plecaku może być Pouch, a w Pouch może być Latarka
 - ✅ Kontener, który ma rodzica lub jest używany jako item, można ukryć z głównej listy kontenerów
@@ -80,20 +107,21 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 
 ## 📝 Rozszerzone pola
 
-### Dodatkowe pola dla przedmiotów
-Przedmioty mogą mieć dodatkowe, opcjonalne pola:
+### Dodatkowe pola dla przedmiotów i kontenerów
+**Status:** 🔄 Planned | **Priority:** Medium | **Feature:** FEATURE-006 | **Complexity:** Medium
+
+**Dla przedmiotów:**
 - **Cena** - cena zakupu przedmiotu
 - **Link URL** - link do produktu, recenzji, itp.
 - **Półka cenowa / jakość** - niska półka, średnia półka, wyższa półka
 - **Firma** - producent/marka przedmiotu
 - **Kolor** - kolor przedmiotu
 
-### Dodatkowe pola dla kontenerów
-Kontener też może mieć dodatkowe pola:
+**Dla kontenerów:**
 - **Firma** - producent/marka kontenera
 - **Cena** - cena zakupu kontenera
 
-### Ujednolicenie modelu
+**Ujednolicenie modelu:**
 - Rozważenie ujednolicenia modelu danych dla kontenerów i przedmiotów
 - Wspólne pola (np. firma, cena) w jednym miejscu
 
@@ -102,6 +130,8 @@ Kontener też może mieć dodatkowe pola:
 ## 🚀 Funkcjonalności eksportu
 
 ### Eksport do prompt (AI)
+**Status:** 🔄 Planned | **Priority:** Medium | **Feature:** FEATURE-009 | **Complexity:** Medium
+
 - Kontener oraz Kontenery powinny mieć przycisk w rodzaju "Eksport do prompt"
 - Stworzy to wiadomość w markdown z kontenerem/kontenerami i ich zawartością
 - Będzie też legenda/opis dla AI, aby zrozumiał co to jest
@@ -117,6 +147,8 @@ Kontener też może mieć dodatkowe pola:
 ## ⚡ Usprawnienia dodawania przedmiotów
 
 ### ✅ Domyślne wartości dla nowych przedmiotów
+**Status:** ✅ Completed | **Priority:** High | **Feature:** [FEATURE-004](./features/FEATURE-004-default-values.md)
+
 - ✅ Nowy przedmiot ma większość pól z domyślnymi wartościami
 - ✅ Domyślne wartości:
   - ✅ Waga: 0.1 kg
@@ -127,6 +159,8 @@ Kontener też może mieć dodatkowe pola:
   - ✅ Jednostka wagi: kg
 
 ### ✅ Rozpoznawanie kategorii po nazwie
+**Status:** ✅ Completed | **Priority:** Medium | **Feature:** [FEATURE-005](./features/FEATURE-005-category-recognition.md)
+
 - ✅ Na podstawie słów kluczowych w nazwie dobieramy kategorię
 - ✅ Przykłady:
   - ✅ `nóż`, `knife` → kategoria: narzędzia
@@ -144,12 +178,16 @@ Kontener też może mieć dodatkowe pola:
 ## ✏️ Szybka edycja
 
 ### Edycja bezpośrednio na liście
+**Status:** 🔄 Planned | **Priority:** High | **Feature:** FEATURE-007 | **Complexity:** Large
+
 - Możliwość szybkiej edycji listy - dodawanie i zmienianie przedmiotów bezpośrednio na liście
 - Bez wchodzenia w formularz
 - Inline editing dla podstawowych pól (nazwa, ilość, status)
 - Szybkie akcje (zmiana statusu, priorytetu) bezpośrednio z listy
 
 ### Kolejność przedmiotów w kontenerze
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+
 - Dodanie pola `order` (lub `sortOrder`) do przedmiotów w kontenerze
 - Możliwość ręcznego układania przedmiotów w wybranej kolejności
 - Dwa sposoby zmiany kolejności:
@@ -164,6 +202,8 @@ Kontener też może mieć dodatkowe pola:
 ## 📊 Wizualizacje i analityka
 
 ### Wykres kołowy kategorii w kontenerze
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+
 - Wykres kołowy pokazujący rozkład kategorii przedmiotów w kontenerze
 - Przełącznik między dwoma trybami wyświetlania:
   - **Pod względem wagi** - Jak dużo ważą narzędzia względem całości? (procentowy udział wagi każdej kategorii)
@@ -177,12 +217,15 @@ Kontener też może mieć dodatkowe pola:
 
 ## 📄 Informacje prawne i footer
 
-### Strona "Informacja o ciasteczkach"
+### Strona "Informacja o ciasteczkach" i Footer
+**Status:** 🔄 Planned | **Priority:** Low | **Feature:** FEATURE-010 | **Complexity:** Small
+
+**Strona "Informacja o ciasteczkach":**
 - Strona/informacja typu "Informacja o ciasteczkach"
 - Informacje o wykorzystaniu localStorage
 - Zgodność z RODO (jeśli aplikacja będzie wykorzystywać cookies w przyszłości)
 
-### Footer
+**Footer:**
 - Footer z informacją typu `2025 (R) DEV Made IT`
 - Linki do:
   - Informacji o ciasteczkach
@@ -194,6 +237,8 @@ Kontener też może mieć dodatkowe pola:
 
 ## 🔮 Przyszłe rozważenia
 
+**Status:** 🔄 Planned | **Priority:** Low
+
 - Synchronizacja między urządzeniami (cloud storage)
 - Wersjonowanie danych (historia zmian)
 - Statystyki i raporty
@@ -201,3 +246,30 @@ Kontener też może mieć dodatkowe pola:
 - Współdzielenie kontenerów między użytkownikami
 - Aplikacja mobilna (PWA)
 
+---
+
+## 📈 Priorytetyzacja
+
+### High Priority (Następne do zrobienia)
+1. **Strona z listą wszystkich przedmiotów** - High priority, Medium complexity
+2. **Edycja bezpośrednio na liście** - High priority, Large complexity
+3. **Kolejność przedmiotów w kontenerze** - Medium priority, Medium complexity
+
+### Medium Priority
+1. **Preferowana jednostka wagi** - Medium priority, Small complexity
+2. **Rozszerzone pola** - Medium priority, Medium complexity
+3. **Eksport do prompt (AI)** - Medium priority, Medium complexity
+4. **Wykres kołowy kategorii** - Medium priority, Medium complexity
+
+### Low Priority (Polish/Enhancement)
+1. **Wybór primary color** - Low priority, Small complexity (warianty już przygotowane)
+2. **Footer i strony prawne** - Low priority, Small complexity
+
+---
+
+## 📝 Notatki
+
+- Wszystkie zaimplementowane features mają dokumentację w `docs/features/`
+- Statusy są aktualizowane na bieżąco
+- Priorytety mogą się zmieniać w zależności od potrzeb użytkowników
+- Complexity: Small (1-2 dni), Medium (3-5 dni), Large (1+ tygodnie)

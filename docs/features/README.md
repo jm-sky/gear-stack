@@ -15,7 +15,7 @@ This directory contains detailed implementation plans for features from the [ROA
 | [FEATURE-005](./FEATURE-005-category-recognition.md) | Category Recognition | ✅ Completed | Medium | ⚡ Item Addition |
 | FEATURE-006 | Extended Fields (Items & Containers) | 🔄 Planned | Medium | 📝 Data Model |
 | FEATURE-007 | Quick Edit (Inline Editing) | 🔄 Planned | High | ✏️ Editing |
-| FEATURE-008 | Container Nesting (Parent-Child) | 🔄 Planned | High | 🔗 Relationships |
+| [FEATURE-008](./FEATURE-008-container-nesting.md) | Container Nesting (Parent-Child) | ✅ Completed | High | 🔗 Relationships |
 | FEATURE-009 | Export to Prompt (AI) | 🔄 Planned | Medium | 🚀 Export |
 | FEATURE-010 | Footer & Legal Pages | 🔄 Planned | Low | 📄 Legal |
 
