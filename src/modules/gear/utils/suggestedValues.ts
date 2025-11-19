@@ -29,6 +29,7 @@ export type TColor = typeof SUGGESTED_COLORS[number]
 // Suggested brands/manufacturers for gear items and containers
 export const SUGGESTED_BRANDS = [
   'Helicon',
+  'Helikon',
   'Maxpedition',
   'Mil-Tec',
   '5.11 Tactical',
@@ -48,6 +49,16 @@ export const SUGGESTED_BRANDS = [
   'Merrell',
   'Columbia',
   'Mystery Ranch',
+  'Victorinox',
+  'Olight',
+  'Black Diamond',
+  'Badger',
+  'Fiskars',
+  'MFH',
+  'Esbit',
+  'SolarForce',
+  'Leatherman',
+  'Bahco',
 ] as const
 
 
