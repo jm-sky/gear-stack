@@ -33,8 +33,8 @@ When generating or updating gear lists, use this format:
 
 ## Standard Format
 \`\`\`markdown
-## [Container Name] [#container-id] ([Container Type])
-- **[Item Name]** x[qty] ([Brand], [Color]) [#nested-id] ([Status]) <URL> - [weight]g
+## [Container Name] [#container-id] [uuid:container-uuid] ([Container Type])
+- **[Item Name]** [uuid:item-uuid] x[qty] ([Brand], [Color]) [#nested-id] ([Status]) <URL> - [weight]g
 \`\`\`
 
 ## Format Rules
@@ -65,6 +65,13 @@ When generating or updating gear lists, use this format:
 - ID is generated from container name as slug
 - Examples: \`Bug-Out Bag\` → \`[#bug-out-bag]\`, \`EDC Pouch\` → \`[#edc-pouch]\`
 - If item references container \`[#id]\`, it creates nested relationship
+
+### UUID (Optional but recommended)
+- Format: \`[uuid:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx]\`
+- Appears after item name or after container ID in header
+- Used for stable references when updating existing items/containers
+- If UUID is present during import, the item/container will be updated instead of created
+- If UUID is missing, a new item/container will be created
 
 ### URL (Optional)
 - Format: \`<URL>\` in angle brackets or plain URL
@@ -128,18 +135,18 @@ When generating or updating gear lists, use this format:
 
 ## Container Example
 \`\`\`markdown
-## Bug-Out Bag [#bug-out-bag] (Backpack)
-- **Water Bottle** x2 (Nalgene) - 300g
-- **Emergency Food** x5 (Expiration: 31.12.2025) - 1000g
-- **Tactical Knife** (Victorinox, Black) - 200g
-- **Headlamp** (Petzl, Red) - 90g
-- **First Aid Pouch** (Pouch) [#first-aid-pouch] - 350g
-- **Fire Starter** x2 - 50g
+## Bug-Out Bag [#bug-out-bag] [uuid:abc-123] (Backpack)
+- **Water Bottle** [uuid:item-1] x2 (Nalgene) - 300g
+- **Emergency Food** [uuid:item-2] x5 (Expiration: 31.12.2025) - 1000g
+- **Tactical Knife** [uuid:item-3] (Victorinox, Black) - 200g
+- **Headlamp** [uuid:item-4] (Petzl, Red) - 90g
+- **First Aid Pouch** [uuid:item-5] (Pouch) [#first-aid-pouch] - 350g
+- **Fire Starter** [uuid:item-6] x2 - 50g
 
-## First Aid Pouch [#first-aid-pouch] (Pouch)
-- **Bandages** x5 - 100g
-- **Pain Pills** (Expiration: 31.12.2025) - 50g
-- **Antiseptic** - 100g
+## First Aid Pouch [#first-aid-pouch] [uuid:def-456] (Pouch)
+- **Bandages** [uuid:item-7] x5 - 100g
+- **Pain Pills** [uuid:item-8] (Expiration: 31.12.2025) - 50g
+- **Antiseptic** [uuid:item-9] - 100g
 \`\`\`
 
 ## Nested Containers
@@ -150,13 +157,13 @@ When a container is inside another container:
 
 Example:
 \`\`\`markdown
-## Main Backpack [#main] (Backpack)
-- **EDC Pouch** (Pouch) [#edc] - 500g
-- **Water Bottle** - 150g
+## Main Backpack [#main] [uuid:main-123] (Backpack)
+- **EDC Pouch** [uuid:edc-item-1] (Pouch) [#edc] - 500g
+- **Water Bottle** [uuid:water-1] - 150g
 
-## EDC Pouch [#edc] (Pouch)
-- **Multi-tool** - 250g
-- **Flashlight** - 90g
+## EDC Pouch [#edc] [uuid:edc-456] (Pouch)
+- **Multi-tool** [uuid:tool-1] - 250g
+- **Flashlight** [uuid:light-1] - 90g
 \`\`\`
 
 ## Container Types
@@ -165,14 +172,18 @@ Backpack, Bag, Pouch, Box, Cabinet, Vehicle, Shelf, Drawer, Case, Trunk, Other
 ## Important Notes
 1. **Only item name is required** (bold \`**text**\`)
 2. Container headers must have \`[#id]\` for proper identification
-3. Nested containers: item with \`[#id]\` + separate container definition
-4. Weight should end with \`g\` or \`kg\` (if omitted, 100g default)
-5. Quantity can be anywhere but typically after name
-6. Parentheses order: (Brand, Color) then (Status/Expiration)
-7. URL can be in angle brackets \`<url>\` or plain (http://, https://, www.)
-8. All fields except item name are optional
-9. Use metric units (grams/kilograms)
-10. Parser is flexible and will guess missing fields
+3. **UUID support** - \`[uuid:...]\` enables update workflow:
+   - If UUID exists in import: item/container will be **updated**
+   - If UUID missing in import: new item/container will be **created**
+   - Always include UUIDs when re-importing edited lists
+4. Nested containers: item with \`[#id]\` + separate container definition
+5. Weight should end with \`g\` or \`kg\` (if omitted, 100g default)
+6. Quantity can be anywhere but typically after name
+7. Parentheses order: (Brand, Color) then (Status/Expiration)
+8. URL can be in angle brackets \`<url>\` or plain (http://, https://, www.)
+9. All fields except item name are optional
+10. Use metric units (grams/kilograms)
+11. Parser is flexible and will guess missing fields
 `
 
 const handleCopy = async () => {

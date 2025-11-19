@@ -36,7 +36,7 @@ const readyContainersCount = computed(() => {
       <div class="text-center space-y-4">
         <div class="flex justify-center">
           <div class="rounded-full bg-primary/10 p-6">
-            <BackpackIcon class="h-16 w-16 text-primary" />
+            <BackpackIcon class="size-16 text-primary" />
           </div>
         </div>
         <h1 class="text-4xl font-bold">

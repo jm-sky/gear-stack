@@ -48,6 +48,9 @@ function formatItem(
   // Item name
   parts.push(`**${item.name}**`)
 
+  // UUID (for stable references)
+  parts.push(`[uuid:${item.id}]`)
+
   // Quantity after name (x4 format)
   if (item.quantity > 1) {
     parts.push(`x${item.quantity}`)
@@ -128,12 +131,12 @@ function formatNestedContainer(
   const indentStr = '  '.repeat(indent)
   const lines: string[] = []
 
-  // Container header with ID
+  // Container header with ID and UUID
   const typeLabel = options.getContainerTypeLabel
     ? options.getContainerTypeLabel(container.type)
     : container.type
   const containerId = generateContainerId(container.name)
-  lines.push(`${indentStr}## ${container.name} [${containerId}] (${typeLabel})`)
+  lines.push(`${indentStr}## ${container.name} [${containerId}] [uuid:${container.id}] (${typeLabel})`)
 
   // Container items
   if (container.items.length === 0) {
@@ -170,12 +173,12 @@ export function exportContainerToPrompt(
   lines.push(descriptionText)
   lines.push('')
 
-  // Container header with ID
+  // Container header with ID and UUID
   const typeLabel = getContainerTypeLabel
     ? getContainerTypeLabel(container.type)
     : container.type
   const containerId = generateContainerId(container.name)
-  lines.push(`## ${container.name} [${containerId}] (${typeLabel})`)
+  lines.push(`## ${container.name} [${containerId}] [uuid:${container.id}] (${typeLabel})`)
 
   // Collect nested containers to show separately
   const nestedContainers: Array<{ item: IGearItem; container: IGearContainer }> = []

@@ -130,28 +130,77 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 
 ---
 
-## 🚀 Funkcjonalności eksportu
+## 🚀 Import/Export i Markdown
 
-### ✅ Eksport do prompt (AI)
-**Status:** ✅ Completed | **Priority:** Medium | **Feature:** FEATURE-009 | **Complexity:** Medium
+### ✅ Eksport i import markdown (AI-friendly format)
+**Status:** ✅ Completed | **Priority:** High | **Feature:** FEATURE-009, FEATURE-011 | **Complexity:** Large
 
-- ✅ Kontener ma przycisk "Eksport do prompt" w dropdown menu
-- ✅ Eksport tworzy markdown z kontenerem i jego zawartością
-- ✅ Legenda/opis dla AI wyjaśniająca strukturę danych
+**Eksport do markdown:**
+- ✅ Przycisk "Eksport do prompt (AI)" w dropdown menu kontenera
+- ✅ Przycisk "Eksport do prompt (AI) - Wszystkie" dla wszystkich kontenerów na liście
+- ✅ Eksport tworzy markdown z kontenerem i jego zawartością w ujednoliconym formacie
 - ✅ Dialog z markdownem i przyciskiem do kopiowania
-- ✅ Format eksportu:
-  - ✅ Struktura kontenera z przedmiotami
-  - ✅ Metadane (waga, marka, kolor, status, data ważności)
-  - ✅ Obsługa zagnieżdżonych kontenerów z wyliczoną wagą zawartości
-  - ✅ Kompaktowy format: `x4 **Nazwa** (Marka, Kolor) (Expiration: data, Status) - waga`
-  - ✅ Legenda wyjaśniająca strukturę danych dla AI
-  - ✅ Tłumaczenia dla wszystkich tekstów eksportu
+- ✅ Przycisk "Guidelines" w dialogu - kopiuje szablon formatowania dla AI
+- ✅ Legenda/opis dla AI wyjaśniająca strukturę danych
+
+**Format markdown (ujednolicony dla import/export):**
+```markdown
+## [Container Name] [#container-id] ([Container Type])
+- **[Item Name]** x[qty] ([Brand], [Color]) [#nested-id] ([Status]) <URL> - [weight]g
+```
+
+**Cechy formatu:**
+- ✅ **Nazwa przedmiotu** (bold `**text**`) - wymagane
+- ✅ **Ilość** (format: `x2`, `x10`) - opcjonalne, może być wszędzie w linii
+- ✅ **Marka i kolor** w pierwszych nawiasach: `(Marka, Kolor)` - opcjonalne
+- ✅ **Status i expiration** w drugich nawiasach: `(Status, Expiration: DD.MM.YYYY)` - opcjonalne
+- ✅ **Container ID** w formacie `[#slug-id]` - dla identyfikacji kontenerów
+  - ID generowane jako slug z nazwy: "Bug-Out Bag" → `#bug-out-bag`
+  - Użyte w nagłówku kontenera i referencjach do zagnieżdżonych kontenerów
+- ✅ **URL** w nawiasach kątowych lub plain: `<https://example.com>` lub `https://...` lub `www...` - opcjonalne
+  - Automatyczne dodawanie `https://` do linków zaczynających się od `www.`
+- ✅ **Waga** na końcu: `- 500g` lub `- 2.5kg` - opcjonalne (domyślnie 100g)
+- ✅ **Zagnieżdżone kontenery**:
+  - Item z `[#id]` w linii przedmiotu
+  - Osobna definicja kontenera z tym samym `[#id]` w nagłówku
+  - Parser automatycznie tworzy relację
+
+**Import z markdown:**
+- ✅ Przycisk "Import z markdown" w dropdown menu na liście kontenerów
+- ✅ Dialog z textarea do wklejenia markdown i przyciskiem "Preview"
+- ✅ Elastyczny parser:
+  - ✅ Rozpoznaje pola w dowolnej kolejności (nazwa, ilość, waga, marka, kolor, status, expiration, URL, container ID)
+  - ✅ Inteligentne dopasowywanie marek (fuzzy matching z SUGGESTED_BRANDS)
+  - ✅ Inteligentne dopasowywanie kolorów (z SUGGESTED_COLORS)
+  - ✅ Automatyczne rozpoznawanie kategorii po słowach kluczowych
+  - ✅ Domyślne wartości dla brakujących pól (waga: 100g, ilość: 1, status: owned)
+  - ✅ Wyciąganie `[#id]` z nagłówków kontenerów
+  - ✅ Wyciąganie `[#id]` z linii przedmiotów (dla relacji zagnieżdżonych kontenerów)
+  - ✅ Obsługa różnych formatów dat expiration
+  - ✅ Obsługa URL w nawiasach kątowych lub plain
+- ✅ Obsługa błędów - wyświetlanie błędów parsowania z numerami linii
+- ✅ Preview przed importem - podgląd kontenerów i przedmiotów przed zapisaniem
+
+**Szablon Guidelines:**
+- ✅ Kompletny szablon formatowania w markdown
+- ✅ Szczegółowe zasady dla każdego pola
+- ✅ Przykłady dla wszystkich możliwych formatów
+- ✅ Instrukcje dla AI jak rozpoznawać i formatować dane
+- ✅ Dokumentacja zagnieżdżonych kontenerów
+- ✅ Przycisk kopiowania szablonu do schowka
 
 **Planowane ulepszenia:**
+- 🔄 **UUID support dla update workflow:**
+  - 🔄 Dodanie pola `uuid` do kontenerów i przedmiotów
+  - 🔄 Export zawiera UUID w nagłówku: `## Container [#slug] [uuid:abc-123] (Type)`
+  - 🔄 Import rozpoznaje UUID i może zaktualizować istniejące kontenery/przedmioty zamiast tylko tworzyć nowe
+  - 🔄 Umożliwia cykl export → edycja w AI → import z zachowaniem relacji
+  - 🔄 Stabilne referencje nawet po zmianie nazw kontenerów
+  - 🔄 Opcja w import dialog: "Aktualizuj istniejące" vs "Twórz nowe"
 - 🔄 Opcje konfiguracji eksportu:
-  - 🔄 Pokazywanie URL przedmiotu w eksporcie (opcjonalnie)
-  - 🔄 Dodatkowe podsumowanie "Do kupienia" na końcu eksportu (lista wszystkich przedmiotów ze statusem "Do kupienia")
-  - 🔄 Inne opcje konfiguracji formatu eksportu (np. poziom szczegółowości, pokazywanie cen, itp.)
+  - 🔄 Pokazywanie cen przedmiotów w eksporcie (opcjonalnie)
+  - 🔄 Dodatkowe podsumowanie "Do kupienia" na końcu eksportu
+  - 🔄 Inne opcje konfiguracji formatu (poziom szczegółowości, metadane, itp.)
 
 ---
 

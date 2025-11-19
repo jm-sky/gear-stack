@@ -13,11 +13,12 @@ This directory contains detailed implementation plans for features from the [ROA
 | [FEATURE-003](./FEATURE-003-container-colors.md) | Container Color Coding | ✅ Completed | Medium | 🎨 UI/UX |
 | [FEATURE-004](./FEATURE-004-default-values.md) | Default Values for New Items | ✅ Completed | High | ⚡ Item Addition |
 | [FEATURE-005](./FEATURE-005-category-recognition.md) | Category Recognition | ✅ Completed | Medium | ⚡ Item Addition |
-| FEATURE-006 | Extended Fields (Items & Containers) | 🔄 Planned | Medium | 📝 Data Model |
+| FEATURE-006 | Extended Fields (Items & Containers) | ✅ Completed | Medium | 📝 Data Model |
 | FEATURE-007 | Quick Edit (Inline Editing) | 🔄 Planned | High | ✏️ Editing |
 | [FEATURE-008](./FEATURE-008-container-nesting.md) | Container Nesting (Parent-Child) | ✅ Completed | High | 🔗 Relationships |
-| FEATURE-009 | Export to Prompt (AI) | 🔄 Planned | Medium | 🚀 Export |
+| FEATURE-009 | Export to Prompt (AI) - Basic | ✅ Completed | Medium | 🚀 Export |
 | FEATURE-010 | Footer & Legal Pages | 🔄 Planned | Low | 📄 Legal |
+| [FEATURE-011](./FEATURE-011-markdown-import-export.md) | Markdown Import/Export (AI-Friendly) | ✅ Completed | High | 🚀 Import/Export |
 
 ---
 

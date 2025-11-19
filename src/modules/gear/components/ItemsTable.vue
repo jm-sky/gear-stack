@@ -294,7 +294,7 @@ function getNestedContainer(item: IGearItem) {
       <TableEmpty :colspan="columns.length">
         <div class="flex flex-col items-center justify-center text-center">
           <div class="rounded-full bg-muted p-6 mb-4">
-            <Package class="h-12 w-12 text-muted-foreground" />
+            <Package class="size-12 text-muted-foreground" />
           </div>
           <h3 class="text-lg font-semibold mb-2">
             {{ t('gear.item.empty') }}
