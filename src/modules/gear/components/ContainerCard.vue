@@ -6,6 +6,7 @@ import { useRouter } from 'vue-router'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import CardContent from '@/components/ui/card/CardContent.vue'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,8 +20,9 @@ import {
   READINESS_EXCELLENT_THRESHOLD,
   READINESS_GOOD_THRESHOLD,
 } from '../utils/constants'
-import { COLOR_BORDER_CLASSES, COLOR_DOT_CLASSES } from '../utils/containerColors'
+import { COLOR_BORDER_CLASSES, COLOR_TEXT_CLASSES } from '../utils/containerColors'
 import { formatWeightFromGrams } from '../utils/formatWeight'
+import ColorDot from './ColorDot.vue'
 
 const props = defineProps<{
   container: IGearContainer
@@ -98,20 +100,18 @@ const handleDelete = () => {
 
 <template>
   <Card
-    class="hover:shadow-md transition-shadow cursor-pointer"
-    :class="container.color ? COLOR_BORDER_CLASSES[container.color] : ''"
+    class="hover:shadow-lg hover:bg-current/5 hover:scale-102 hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+    :class="[
+      container.color ? COLOR_BORDER_CLASSES[container.color] : '',
+      container.color ? COLOR_TEXT_CLASSES[container.color] : '',
+    ]"
     @click="handleShow"
   >
-    <CardHeader>
+    <CardHeader class="text-card-foreground">
       <div class="flex items-start justify-between">
         <div class="flex-1">
           <div class="flex items-center gap-2 mb-2">
-            <div
-              :class="[
-                'size-3 rounded-full shrink-0',
-                COLOR_DOT_CLASSES[container.color ?? 'default']
-              ]"
-            />
+            <ColorDot :color="container.color" />
             <Package class="size-5" />
             <CardTitle>{{ container.name }}</CardTitle>
             <Badge v-if="isNested" variant="outline" class="ml-auto text-xs">
@@ -163,7 +163,7 @@ const handleDelete = () => {
       </div>
     </CardHeader>
 
-    <div class="px-6 pb-6 space-y-3">
+    <CardContent class="px-6 pb-4 space-y-3 text-card-foreground">
       <!-- Stats -->
       <div class="grid grid-cols-3 gap-2 sm:gap-4 text-sm">
         <div>
@@ -202,7 +202,7 @@ const handleDelete = () => {
           :style="{ width: `${readinessPercentage}%` }"
         />
       </div>
-    </div>
+    </CardContent>
   </Card>
 </template>
 

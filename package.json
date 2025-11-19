@@ -1,6 +1,6 @@
 {
   "name": "gear-stack",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -17,6 +17,8 @@
   "dependencies": {
     "@tailwindcss/vite": "4.1.16",
     "@tanstack/vue-table": "^8.21.3",
+    "@unovis/ts": "^1.6.2",
+    "@unovis/vue": "^1.6.2",
     "@vee-validate/zod": "^4.15.1",
     "@vueuse/core": "^14.0.0",
     "class-variance-authority": "^0.7.1",
@@ -32,7 +34,7 @@
     "vue-i18n": "^11.1.12",
     "vue-router": "^4.6.3",
     "vue-sonner": "^2.0.9",
-    "zod": "^4.1.12"
+    "zod": "^3.24.0"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.2",

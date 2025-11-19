@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { refDebounced } from '@vueuse/core'
-import { Package, Plus, Search } from 'lucide-vue-next'
+import { Package, Plus } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useSettings } from '@/modules/settings/composables/useSettings'
 import type { IGearContainer } from '../types/gear.types'
 import ContainerCard from '../components/ContainerCard.vue'
+import ContainersFilters from '../components/ContainersFilters.vue'
 import { useGear } from '../composables/useGear'
 import type { TUUID } from '@/shared/types/base.type'
 
@@ -19,11 +19,9 @@ const { t } = useI18n()
 const { containers, deleteContainer, getRootContainers } = useGear()
 const { customContainerTypes } = useSettings()
 
-// Search
+// Filters - using refs that will be bound to ContainersFilters via v-model
 const searchQueryRaw = ref('')
 const searchQuery = refDebounced(searchQueryRaw, 300)
-
-// Filter: show only root containers
 const showOnlyRootContainers = ref(false)
 
 // Helper to get container type label for filtering
@@ -95,27 +93,10 @@ const handleDelete = (id: TUUID) => {
       </div>
 
       <!-- Search and Filters -->
-      <div class="space-y-4">
-        <div class="relative">
-          <Search class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            v-model="searchQueryRaw"
-            :placeholder="t('gear.filters.search')"
-            class="pl-9"
-          />
-        </div>
-        <div class="flex items-center gap-2">
-          <input
-            id="root-containers-filter"
-            v-model="showOnlyRootContainers"
-            type="checkbox"
-            class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-          />
-          <label for="root-containers-filter" class="text-sm text-muted-foreground cursor-pointer">
-            {{ t('gear.container.showOnlyRootContainers') }}
-          </label>
-        </div>
-      </div>
+      <ContainersFilters
+        v-model:search-query="searchQueryRaw"
+        v-model:show-only-root-containers="showOnlyRootContainers"
+      />
 
       <!-- Containers Grid -->
       <div v-if="filteredContainers.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

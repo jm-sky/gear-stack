@@ -8,6 +8,8 @@ export const containerSchema = z.object({
   type: z.string().min(1, 'Typ jest wymagany'), // Allow any string for custom container types
   color: z.enum(['default', 'blue', 'green', 'red', 'yellow', 'purple', 'orange', 'pink', 'teal', 'indigo']).optional(),
   parentContainerId: z.string().uuid().optional().nullable(),
+  brand: z.string().optional(),
+  price: z.number().min(0, 'Cena nie może być ujemna').optional(),
 })
 
 // Schema dla przedmiotu
@@ -23,6 +25,11 @@ export const itemSchema = z.object({
   priority: z.enum(['critical', 'high', 'medium', 'low']),
   status: z.enum(['owned', 'missing', 'toBuy']),
   containerId: z.union([z.string().uuid(), z.literal('')]).optional(), // Reference to nested container (empty string = no container)
+  price: z.number().min(0, 'Cena nie może być ujemna').optional(),
+  url: z.string().url('Nieprawidłowy URL').optional().or(z.literal('')),
+  brand: z.string().optional(),
+  color: z.string().optional(),
+  quality: z.enum(['low', 'medium', 'high']).optional(),
 })
 
 // Type inference dla TypeScript

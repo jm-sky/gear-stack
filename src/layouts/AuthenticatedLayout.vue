@@ -2,6 +2,7 @@
 import { BackpackIcon } from 'lucide-vue-next'
 import { type Component, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import AppFooter from '@/components/layout/AppFooter.vue'
 import UserNav from '@/components/layout/UserNav.vue'
 import HoverLink from '@/components/ui/hover-link/HoverLink.vue'
 import LogoText from '@/components/ui/LogoText.vue'
@@ -34,7 +35,7 @@ const handleLogout = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-muted bg-radial from-card to-slate-300 dark:to-slate-800">
+  <div class="flex min-h-screen flex-col bg-muted bg-radial from-card to-slate-300 dark:to-slate-800">
     <!-- Top Bar -->
     <header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div class="mx-auto flex h-14 max-w-screen-2xl items-center px-4">
@@ -70,10 +71,13 @@ const handleLogout = () => {
     </header>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <main class="max-w-7xl mx-auto flex-1 py-6 px-4 sm:px-6 lg:px-8">
       <div class="rounded-xl bg-card p-6 shadow-lg">
         <slot />
       </div>
     </main>
+
+    <!-- Footer -->
+    <AppFooter />
   </div>
 </template>

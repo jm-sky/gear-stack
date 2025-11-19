@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ArrowLeft, BoxIcon, Download, Edit, Plus, Upload } from 'lucide-vue-next'
+import { ArrowLeft, BoxIcon, Download, Edit, MoreVertical, Plus, Upload } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useSettings } from '@/modules/settings/composables/useSettings'
 import type { IGearContainer } from '../types/gear.types'
 import { useGear } from '../composables/useGear'
@@ -115,37 +116,41 @@ const handleBack = () => {
             variant="outline"
             size="sm"
             class="shrink-0"
-            @click="handleExport"
-          >
-            <Download class="size-4" />
-            <span class="hidden sm:inline">{{ t('gear.actions.export') }}</span>
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            class="shrink-0"
-            @click="handleImport"
-          >
-            <Upload class="size-4" />
-            <span class="hidden sm:inline">{{ t('gear.actions.import') }}</span>
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            class="shrink-0"
             @click="handleEdit"
           >
             <Edit class="size-4" />
             <span class="hidden sm:inline">{{ t('gear.actions.edit') }}</span>
           </Button>
-          <Button variant="outline" class="shrink-0" @click="handleAddContainer">
+          <Button
+            variant="outline"
+            size="sm"
+            class="shrink-0"
+            @click="handleAddContainer"
+          >
             <BoxIcon class="size-4" />
             <span class="hidden sm:inline">{{ t('gear.container.addNested') }}</span>
           </Button>
-          <Button class="shrink-0" @click="handleAddItem">
+          <Button size="sm" class="shrink-0" @click="handleAddItem">
             <Plus class="size-4" />
             {{ t('gear.item.create') }}
           </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <Button variant="outline" size="sm" class="shrink-0">
+                <MoreVertical class="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem @click="handleExport">
+                <Download class="size-4" />
+                {{ t('gear.actions.export') }}
+              </DropdownMenuItem>
+              <DropdownMenuItem @click="handleImport">
+                <Upload class="size-4" />
+                {{ t('gear.actions.import') }}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </div>

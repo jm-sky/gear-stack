@@ -7,6 +7,7 @@ import { toast } from 'vue-sonner'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import type { IGearItem } from '../types/gear.types'
 import AddNestedContainerDialog from '../components/AddNestedContainerDialog.vue'
+import CategoryPieChart from '../components/CategoryPieChart.vue'
 import ContainerHeader from '../components/ContainerHeader.vue'
 import ItemsTable from '../components/ItemsTable.vue'
 import { useContainer } from '../composables/useContainer'
@@ -34,13 +35,12 @@ const handleEditItem = (item: IGearItem) => {
 }
 
 const handleDeleteItem = (item: IGearItem) => {
-  if (confirm(t('gear.item.deleteConfirm'))) {
-    try {
-      deleteItem(containerId, item.id)
-      toast.success(t('common.success'))
-    } catch {
-      toast.error(t('common.error'))
-    }
+  if (!confirm(t('gear.item.deleteConfirm'))) return
+  try {
+    deleteItem(containerId, item.id)
+    toast.success(t('common.success'))
+  } catch {
+    toast.error(t('common.error'))
   }
 }
 
@@ -138,9 +138,9 @@ if (!container.value) {
 <template>
   <AuthenticatedLayout>
     <div v-if="container" class="space-y-6">
-      <ContainerHeader 
-        :container="container" 
-        @export="handleExport" 
+      <ContainerHeader
+        :container="container"
+        @export="handleExport"
         @import="handleImport"
         @add-container="handleAddContainer"
       />
@@ -154,6 +154,9 @@ if (!container.value) {
           @status-change="handleStatusChange"
         />
       </div>
+
+      <!-- Category Pie Chart -->
+      <CategoryPieChart :container="container" />
 
       <!-- Add Nested Container Dialog -->
       <AddNestedContainerDialog

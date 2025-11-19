@@ -21,6 +21,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.7.0] - 2025-11-19
+
+### Added
+- Category pie chart visualization on container detail page
+- Interactive donut chart showing category distribution by weight or quantity
+- Chart legend with category breakdown and totals
+- Percentage labels on chart segments
+- Chart tooltips with formatted values (weight in grams, quantity with units)
+- `CategoryPieChart` component with mode switching (weight/quantity)
+- `CategoryPieChartLabels` component for segment percentage labels
+- `CategoryPieChartLegend` component for category breakdown
+- Chart UI components (`ChartContainer`, `ChartTooltip`, `ChartTooltipContent`, `ChartLegendContent`)
+- `usePieChartGeometry` composable for chart geometry calculations
+- Footer component with links to privacy, cookies, contact pages
+- Privacy policy page
+- Cookies information page
+- Contact page
+- GitHub icon component
+- Container filters component for filtering containers list
+- Color dot visualization component for containers
+
+### Changed
+- Enhanced container detail page with category visualization
+- Improved container header with chart toggle
+- Updated container card layout
+- Enhanced i18n translations for chart-related labels
+
+### Fixed
+- TypeScript type errors in pie chart geometry composable
+
+---
+
 ## [0.6.0] - 2025-11-19
 
 ### Added

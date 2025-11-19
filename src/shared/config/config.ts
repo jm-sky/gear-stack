@@ -13,6 +13,9 @@ export const config = {
     defaultLocale: (import.meta.env.VITE_DEFAULT_LOCALE ?? 'en') as SupportedLocale,
     fallbackLocale: (import.meta.env.VITE_FALLBACK_LOCALE ?? 'en') as SupportedLocale,
   },
+  contact: {
+    email: import.meta.env.VITE_CONTACT_EMAIL ?? 'contact@dev-made.it',
+  },
 }
 
 // osobna zmienna do użycia w localStorage / store
