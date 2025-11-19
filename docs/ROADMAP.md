@@ -39,26 +39,28 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 
 ## 🎨 UI/UX Ulepszenia
 
-### Strona z listą wszystkich przedmiotów
-**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium
+### ✅ Strona z listą wszystkich przedmiotów
+**Status:** ✅ Completed | **Priority:** High | **Complexity:** Medium
 
-- Nowa strona wyświetlająca listę wszystkich przedmiotów ze wszystkich kontenerów
-- Dostępna jako kolejna pozycja w topbar navigation (obok "Kontenery")
-- Tabela przedmiotów z kolumnami:
-  - Kategoria (z ikoną)
-  - Nazwa przedmiotu
-  - Kontener (nazwa kontenera, z którego pochodzi przedmiot)
-  - Ilość
-  - Waga
-  - Status
-  - Priorytet
-- Możliwość filtrowania i sortowania:
-  - Filtrowanie po kategorii, statusie, priorytecie
-  - Filtrowanie po kontenerze
-  - Sortowanie po dowolnej kolumnie
-- Możliwość szybkiego przejścia do kontenera, w którym znajduje się przedmiot (kliknięcie w nazwę kontenera)
-- Wyszukiwarka przedmiotów
-- Eksport danych (opcjonalnie)
+- ✅ Nowa strona wyświetlająca listę wszystkich przedmiotów ze wszystkich kontenerów
+- ✅ Dostępna jako kolejna pozycja w topbar navigation (obok "Kontenery")
+- ✅ Tabela przedmiotów z kolumnami:
+  - ✅ Kategoria (z ikoną)
+  - ✅ Nazwa przedmiotu
+  - ✅ Kontener (nazwa kontenera, z którego pochodzi przedmiot, z wizualizacją koloru)
+  - ✅ Ilość
+  - ✅ Waga
+  - ✅ Status
+  - ✅ Priorytet
+  - ✅ Marka (opcjonalnie, ukryta domyślnie)
+  - ✅ Kolor (opcjonalnie, ukryty domyślnie)
+- ✅ Możliwość filtrowania i sortowania:
+  - ✅ Filtrowanie po kategorii, statusie, priorytecie
+  - ✅ Filtrowanie po kontenerze (przez wyszukiwarkę)
+  - ✅ Sortowanie po dowolnej kolumnie
+- ✅ Możliwość szybkiego przejścia do kontenera, w którym znajduje się przedmiot (kliknięcie w nazwę kontenera)
+- ✅ Wyszukiwarka przedmiotów (globalne filtrowanie)
+- ✅ Zarządzanie widocznością kolumn z zapisem w localStorage
 
 ### ✅ Dedykowane ikony dla kategorii
 **Status:** ✅ Completed | **Priority:** High | **Feature:** [FEATURE-002](./features/FEATURE-002-category-icons.md)
@@ -107,23 +109,24 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 
 ## 📝 Rozszerzone pola
 
-### Dodatkowe pola dla przedmiotów i kontenerów
-**Status:** 🔄 Planned | **Priority:** Medium | **Feature:** FEATURE-006 | **Complexity:** Medium
+### ✅ Dodatkowe pola dla przedmiotów i kontenerów
+**Status:** ✅ Completed | **Priority:** Medium | **Feature:** FEATURE-006 | **Complexity:** Medium
 
 **Dla przedmiotów:**
-- **Cena** - cena zakupu przedmiotu
-- **Link URL** - link do produktu, recenzji, itp.
-- **Półka cenowa / jakość** - niska półka, średnia półka, wyższa półka
-- **Firma** - producent/marka przedmiotu
-- **Kolor** - kolor przedmiotu
+- ✅ **Cena** - cena zakupu przedmiotu
+- ✅ **Link URL** - link do produktu, recenzji, itp.
+- ✅ **Półka cenowa / jakość** - niska półka, średnia półka, wyższa półka
+- ✅ **Firma** - producent/marka przedmiotu (z ComboBox i sugerowanymi wartościami)
+- ✅ **Kolor** - kolor przedmiotu (z ComboBox i sugerowanymi wartościami)
 
 **Dla kontenerów:**
-- **Firma** - producent/marka kontenera
-- **Cena** - cena zakupu kontenera
+- ✅ **Firma** - producent/marka kontenera
+- ✅ **Cena** - cena zakupu kontenera
 
 **Ujednolicenie modelu:**
-- Rozważenie ujednolicenia modelu danych dla kontenerów i przedmiotów
-- Wspólne pola (np. firma, cena) w jednym miejscu
+- ✅ Wspólne pola (firma, cena) zaimplementowane w modelu danych
+- ✅ Wizualizacja kolorów w tabelach (kolorowa kropka)
+- ✅ Zarządzanie widocznością kolumn (marka, kolor) w tabelach
 
 ---
 
@@ -259,13 +262,13 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 ## 📈 Priorytetyzacja
 
 ### High Priority (Następne do zrobienia)
-1. **Strona z listą wszystkich przedmiotów** - High priority, Medium complexity
+1. ✅ **Strona z listą wszystkich przedmiotów** - High priority, Medium complexity (Completed in v0.10.0)
 2. **Edycja bezpośrednio na liście** - High priority, Large complexity
 3. **Kolejność przedmiotów w kontenerze** - Medium priority, Medium complexity
 
 ### Medium Priority
 1. **Preferowana jednostka wagi** - Medium priority, Small complexity
-2. **Rozszerzone pola** - Medium priority, Medium complexity
+2. ✅ **Rozszerzone pola** - Medium priority, Medium complexity (Completed in v0.8.0)
 
 ### Low Priority (Polish/Enhancement)
 1. **Wybór primary color** - Low priority, Small complexity (warianty już przygotowane)

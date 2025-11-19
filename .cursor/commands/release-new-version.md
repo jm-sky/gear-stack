@@ -3,5 +3,6 @@ Release a new version
 - Check latest changes (files staged in git, or latest commit if there are no changed files)
 - Bump version in package.json (we're using semantic versioning)
 - Add version description to CHANGELOG.md
+- Mark feature as done in ROADMAP if applies
 - Create a git commit & push
 - Create a git tag & push
