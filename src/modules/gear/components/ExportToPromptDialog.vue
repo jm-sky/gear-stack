@@ -66,12 +66,11 @@ When generating or updating gear lists, use this format:
 - Examples: \`Bug-Out Bag\` → \`[#bug-out-bag]\`, \`EDC Pouch\` → \`[#edc-pouch]\`
 - If item references container \`[#id]\`, it creates nested relationship
 
-### UUID (Optional but recommended)
+### UUID (Only when re-importing exported data)
 - Format: \`[uuid:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx]\`
 - Appears after item name or after container ID in header
-- Used for stable references when updating existing items/containers
-- If UUID is present during import, the item/container will be updated instead of created
-- If UUID is missing, a new item/container will be created
+- **Do NOT generate UUIDs for fresh/new lists** - only include UUIDs from exported data
+- UUIDs enable update workflow: if present, item/container updates; if missing, creates new
 
 ### URL (Optional)
 - Format: \`<URL>\` in angle brackets or plain URL
@@ -172,10 +171,7 @@ Backpack, Bag, Pouch, Box, Cabinet, Vehicle, Shelf, Drawer, Case, Trunk, Other
 ## Important Notes
 1. **Only item name is required** (bold \`**text**\`)
 2. Container headers must have \`[#id]\` for proper identification
-3. **UUID support** - \`[uuid:...]\` enables update workflow:
-   - If UUID exists in import: item/container will be **updated**
-   - If UUID missing in import: new item/container will be **created**
-   - Always include UUIDs when re-importing edited lists
+3. **UUIDs**: Only include when re-importing exported data. Do NOT generate UUIDs for fresh lists.
 4. Nested containers: item with \`[#id]\` + separate container definition
 5. Weight should end with \`g\` or \`kg\` (if omitted, 100g default)
 6. Quantity can be anywhere but typically after name
