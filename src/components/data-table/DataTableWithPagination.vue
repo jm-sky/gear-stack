@@ -81,7 +81,7 @@ const handlePageSizeChange = (newPageSize: number) => {
 <template>
   <div class="space-y-4">
     <!-- Table -->
-    <div class="border rounded-md">
+    <div class="border rounded-md overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">

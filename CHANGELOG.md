@@ -21,6 +21,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.11.0] - 2025-01-19
+
+### Added
+- Markdown import feature - import containers and items from markdown files
+- `ImportMarkdownDialog` component with preview and error handling
+- `markdownImportService` with intelligent parsing:
+  - Parses `## Container` headers as containers
+  - Parses `- Item` lines as items
+  - Extracts brands from bold text (`**Brand**`)
+  - Parses parameters from parentheses `(color, x5, 500g)`
+  - Detects quantity from `x5` or `×5` patterns
+  - Auto-categorizes items based on keywords
+  - Matches colors and brands against predefined lists
+  - Sets default weight (100g) for items without specified weight
+- Import button in containers page dropdown menu
+- Translations for import feature (English and Polish)
+- `.claude/commands/release-version.md` - slash command for Claude Code
+
+### Fixed
+- Mobile responsiveness - tables now have horizontal scroll on mobile devices
+- Mobile navigation - nav links now available in user dropdown menu on mobile
+- All data table components updated with `overflow-x-auto` for better mobile UX
+
+---
+
 ## [0.10.0] - 2025-01-20
 
 ### Added

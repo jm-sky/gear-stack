@@ -1,16 +1,23 @@
 <script setup lang="ts">
 import { refDebounced } from '@vueuse/core'
-import { Package, Plus } from 'lucide-vue-next'
+import { ChevronDown, FileInput, Package, Plus } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useSettings } from '@/modules/settings/composables/useSettings'
 import type { IGearContainer } from '../types/gear.types'
 import ContainerCard from '../components/ContainerCard.vue'
 import ContainersFilters from '../components/ContainersFilters.vue'
+import ImportMarkdownDialog from '../components/ImportMarkdownDialog.vue'
 import { useGear } from '../composables/useGear'
 import type { TUUID } from '@/shared/types/base.type'
 
@@ -23,6 +30,9 @@ const { customContainerTypes } = useSettings()
 const searchQueryRaw = ref('')
 const searchQuery = refDebounced(searchQueryRaw, 300)
 const showOnlyRootContainers = ref(false)
+
+// Import dialog
+const importDialogOpen = ref(false)
 
 // Helper to get container type label for filtering
 const getContainerTypeLabel = (typeKey: string): string => {
@@ -61,6 +71,14 @@ const handleCreate = () => {
   router.push('/gear/new')
 }
 
+const handleImport = () => {
+  importDialogOpen.value = true
+}
+
+const handleImportComplete = () => {
+  // Refresh is automatic via store reactivity
+}
+
 const handleDelete = (id: TUUID) => {
   if (confirm(t('gear.container.deleteConfirm'))) {
     try {
@@ -86,10 +104,27 @@ const handleDelete = (id: TUUID) => {
             {{ t('gear.page.title') }}
           </p>
         </div>
-        <Button class="sm:shrink-0" @click="handleCreate">
-          <Plus class="size-4" />
-          {{ t('gear.container.create.title') }}
-        </Button>
+        <div class="flex gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <Button variant="outline" class="sm:shrink-0">
+                <Plus class="size-4" />
+                {{ t('gear.container.create.title') }}
+                <ChevronDown class="size-4 ml-1" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem @click="handleCreate">
+                <Plus class="size-4 mr-2" />
+                {{ t('gear.container.create.new') }}
+              </DropdownMenuItem>
+              <DropdownMenuItem @click="handleImport">
+                <FileInput class="size-4 mr-2" />
+                {{ t('gear.import.fromMarkdown') }}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       <!-- Search and Filters -->
@@ -125,6 +160,12 @@ const handleDelete = (id: TUUID) => {
         </Button>
       </div>
     </div>
+
+    <!-- Import Dialog -->
+    <ImportMarkdownDialog
+      v-model:open="importDialogOpen"
+      @import-complete="handleImportComplete"
+    />
   </AuthenticatedLayout>
 </template>
 

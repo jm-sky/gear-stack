@@ -17,6 +17,7 @@ export const gearEn = {
       type: 'Type',
       create: {
         title: 'Create Container',
+        new: 'Create New',
         description: 'Create a new container to store your gear.',
       },
       edit: {
@@ -213,6 +214,27 @@ export const gearEn = {
     comboBox: {
       add: 'Add',
     },
+    import: {
+      title: 'Import from Markdown',
+      description: 'Paste markdown content to import containers and items.',
+      fromMarkdown: 'Import from Markdown',
+      markdownContent: 'Markdown Content',
+      placeholder: `## Container Name
+- Item name **Brand** (params) x5
+- Another item **Brand** ~25 m (color)`,
+      preview: 'Preview',
+      import: 'Import',
+      previewTitle: 'Preview Import',
+      emptyContent: 'Please paste markdown content first',
+      noContainersFound: 'No containers found in the markdown',
+      noPreview: 'Please preview the import first',
+      previewSuccess: '{count} container(s) found',
+      success: 'Successfully imported {containers} container(s) with {items} item(s)',
+      importedDescription: 'Imported from markdown',
+      errors: 'Parsing Errors',
+      items: 'items',
+      andMore: '+ {count} more...',
+    },
   },
 }
 
@@ -235,6 +257,7 @@ export const gearPl = {
       type: 'Typ',
       create: {
         title: 'Utwórz Kontener',
+        new: 'Utwórz Nowy',
         description: 'Utwórz nowy kontener do przechowywania swojego sprzętu.',
       },
       edit: {
@@ -430,6 +453,27 @@ export const gearPl = {
     },
     comboBox: {
       add: 'Dodaj',
+    },
+    import: {
+      title: 'Import z Markdown',
+      description: 'Wklej treść markdown, aby zaimportować kontenery i przedmioty.',
+      fromMarkdown: 'Import z Markdown',
+      markdownContent: 'Treść Markdown',
+      placeholder: `## Nazwa kontenera
+- Nazwa przedmiotu **Marka** (parametry) x5
+- Inny przedmiot **Marka** ~25 m (kolor)`,
+      preview: 'Podgląd',
+      import: 'Importuj',
+      previewTitle: 'Podgląd Importu',
+      emptyContent: 'Najpierw wklej treść markdown',
+      noContainersFound: 'Nie znaleziono kontenerów w markdown',
+      noPreview: 'Najpierw wyświetl podgląd importu',
+      previewSuccess: 'Znaleziono {count} kontener(ów)',
+      success: 'Pomyślnie zaimportowano {containers} kontener(ów) z {items} przedmiot(ami)',
+      importedDescription: 'Zaimportowano z markdown',
+      errors: 'Błędy Parsowania',
+      items: 'przedmiotów',
+      andMore: '+ {count} więcej...',
     },
   },
 }

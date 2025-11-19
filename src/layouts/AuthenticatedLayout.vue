@@ -64,6 +64,7 @@ const handleLogout = () => {
             <UserNav
               :user-name="profile?.name ?? t('user.guest')"
               :user-email="profile?.email"
+              :nav-links="navLinks"
               @logout="handleLogout"
             >
               <template #menu-items>

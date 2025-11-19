@@ -220,8 +220,8 @@ const valueFormatter = (value: number) => {
       </div>
       <div v-else class="flex flex-col md:flex-row gap-6">
         <!-- Pie Chart - Left side -->
-        <div class="shrink-0 md:w-1/2 relative">
-          <ChartContainer :config="chartConfig" class="mx-auto aspect-square max-h-[300px] w-full">
+        <div class="shrink-0 md:w-1/2 relative max-w-full overflow-hidden">
+          <ChartContainer :config="chartConfig" class="mx-auto aspect-square max-h-[300px] w-full max-w-full">
             <VisSingleContainer
               :data="chartData"
               :margin="{ top: 30, bottom: 30, left: 30, right: 30 }"

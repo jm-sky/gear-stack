@@ -1,11 +1,18 @@
 <script setup lang="ts">
 import { LogOut, User } from 'lucide-vue-next'
-import { computed } from 'vue'
+import { type Component, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+
+export interface Link {
+  to: string
+  label: string
+  icon?: Component
+}
 
 export interface UserNavProps {
   userName?: string
   userEmail?: string
+  navLinks?: Link[]
 }
 
 const { t } = useI18n()
@@ -62,6 +69,22 @@ const handleLogout = () => {
 
       <!-- Menu items -->
       <div class="py-2">
+        <!-- Navigation Links (mobile only) -->
+        <template v-if="navLinks && navLinks.length > 0">
+          <div class="md:hidden">
+            <RouterLink
+              v-for="link in navLinks"
+              :key="link.to"
+              :to="link.to"
+              class="flex items-center gap-3 px-4 py-2 text-sm text-card-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+            >
+              <component :is="link.icon" v-if="link.icon" class="size-4" />
+              {{ link.label }}
+            </RouterLink>
+            <div class="border-t border-border my-2" />
+          </div>
+        </template>
+
         <!-- Profile/Settings slot -->
         <slot name="menu-items">
           <RouterLink
