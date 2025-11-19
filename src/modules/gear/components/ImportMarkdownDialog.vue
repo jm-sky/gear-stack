@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { AlertCircle, FileText } from 'lucide-vue-next'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -13,6 +13,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { useGear } from '../composables/useGear'
 import { markdownImportService } from '../services/markdownImportService'
 
@@ -26,11 +28,18 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const { createContainer } = useGear()
+const { createContainer, updateContainer, createItem, updateItem, getContainerById } = useGear()
 
 const markdownContent = ref('')
 const importing = ref(false)
+const importMode = ref<'create' | 'update'>('update') // Default to update mode
 const previewResult = ref<ReturnType<typeof markdownImportService.parseMarkdown> | null>(null)
+
+// Check if any containers/items have UUIDs
+const hasUuids = computed(() => {
+  if (!previewResult.value) return false
+  return previewResult.value.containers.some(c => c.uuid || c.items.some(i => i.uuid))
+})
 
 const handleClose = () => {
   markdownContent.value = ''
@@ -64,31 +73,82 @@ const handleImport = async () => {
 
   try {
     let importedCount = 0
+    let updatedCount = 0
     let itemCount = 0
+    let itemUpdatedCount = 0
 
     for (const containerData of previewResult.value.containers) {
-      const container = createContainer({
-        name: containerData.name,
-        type: 'other',
-        description: t('gear.import.importedDescription'),
-      })
+      let container
 
-      // Import items
-      for (const itemData of containerData.items) {
-        const { createItem } = useGear()
-        createItem(container.id, itemData)
-        itemCount++
+      // Check if we should update existing container (has UUID and mode is update)
+      if (importMode.value === 'update' && containerData.uuid) {
+        const existing = getContainerById(containerData.uuid)
+        if (existing) {
+          // Update existing container
+          container = updateContainer(existing.id, {
+            name: containerData.name,
+            // Keep existing type and other fields
+          })
+          updatedCount++
+        } else {
+          // UUID provided but container not found - create new with same UUID
+          container = createContainer({
+            name: containerData.name,
+            type: 'other',
+            description: t('gear.import.importedDescription'),
+          })
+          // Note: We can't override the auto-generated UUID in createContainer
+          // This is a limitation - we'd need to modify the service to accept UUID
+          importedCount++
+        }
+      } else {
+        // Create new container
+        container = createContainer({
+          name: containerData.name,
+          type: 'other',
+          description: t('gear.import.importedDescription'),
+        })
+        importedCount++
       }
 
-      importedCount++
+      // Import/update items
+      for (const itemData of containerData.items) {
+        // Remove uuid from itemData as it's not part of ICreateItemDto
+        const { uuid: itemUuid, nestedContainerId, ...itemDto } = itemData
+
+        if (importMode.value === 'update' && itemUuid) {
+          // Try to find existing item by UUID
+          const existingItem = container.items.find(i => i.id === itemUuid)
+          if (existingItem) {
+            // Update existing item
+            updateItem(container.id, existingItem.id, itemDto)
+            itemUpdatedCount++
+          } else {
+            // UUID provided but item not found - create new
+            createItem(container.id, itemDto)
+            itemCount++
+          }
+        } else {
+          // Create new item
+          createItem(container.id, itemDto)
+          itemCount++
+        }
+      }
     }
 
-    toast.success(
-      t('gear.import.success', {
-        containers: importedCount,
-        items: itemCount,
-      }),
-    )
+    const message = importMode.value === 'update'
+      ? t('gear.import.successWithUpdates', {
+          created: importedCount,
+          updated: updatedCount,
+          items: itemCount,
+          itemsUpdated: itemUpdatedCount,
+        })
+      : t('gear.import.success', {
+          containers: importedCount,
+          items: itemCount,
+        })
+
+    toast.success(message)
 
     emit('import-complete')
     handleClose()
@@ -131,6 +191,31 @@ const handleImport = async () => {
             <FileText class="size-4" />
             {{ t('gear.import.preview') }}
           </Button>
+        </div>
+
+        <!-- Import Mode Selection (shown only when UUIDs detected) -->
+        <div v-if="hasUuids && previewResult" class="border rounded-lg p-4 space-y-3">
+          <Label class="text-sm font-medium">{{ t('gear.import.mode') }}</Label>
+          <RadioGroup v-model="importMode" class="gap-3">
+            <div class="flex items-center space-x-2">
+              <RadioGroupItem id="mode-update" value="update" />
+              <Label for="mode-update" class="font-normal cursor-pointer">
+                {{ t('gear.import.modeUpdate') }}
+                <span class="text-xs text-muted-foreground block">
+                  {{ t('gear.import.modeUpdateDesc') }}
+                </span>
+              </Label>
+            </div>
+            <div class="flex items-center space-x-2">
+              <RadioGroupItem id="mode-create" value="create" />
+              <Label for="mode-create" class="font-normal cursor-pointer">
+                {{ t('gear.import.modeCreate') }}
+                <span class="text-xs text-muted-foreground block">
+                  {{ t('gear.import.modeCreateDesc') }}
+                </span>
+              </Label>
+            </div>
+          </RadioGroup>
         </div>
 
         <!-- Preview Result -->

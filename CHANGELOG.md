@@ -21,6 +21,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.13.0] - 2025-01-19
+
+### Added
+- **UUID Support for Import/Export Workflow**:
+  - Export now includes `[uuid:xxx]` for both containers and items
+  - Import parser extracts UUIDs from markdown format
+  - Import mode selection: "Update Existing (by UUID)" vs "Create New"
+  - Update workflow: items/containers with matching UUIDs are updated instead of created
+  - Radio Group UI component for import mode selection
+  - Success message differentiates between created and updated items
+
+- **Enhanced Guidelines Template**:
+  - Added UUID documentation to formatting guidelines
+  - Updated examples to show UUID format in all samples
+  - Documented update vs create workflow in guidelines
+
+### Changed
+- **Export Format**: All items and containers now include `[uuid:xxx]` after name/header
+  - Container format: `## Name [#slug-id] [uuid:xxx] (Type)`
+  - Item format: `- **Name** [uuid:xxx] x2 (Brand, Color) ...`
+- **Import Dialog**: Shows mode selection only when UUIDs are detected in markdown
+- **Import Logic**: Automatically detects UUIDs and enables update workflow
+
+### Fixed
+- Import now properly handles UUID-based updates for existing items and containers
+
+---
+
 ## [0.12.0] - 2025-01-19
 
 ### Added

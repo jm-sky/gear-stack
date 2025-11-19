@@ -8,7 +8,8 @@ export interface IMarkdownImportResult {
   containers: Array<{
     name: string
     id?: string // Container ID from [#id] in header
-    items: Array<ICreateItemDto & { nestedContainerId?: string }> // nestedContainerId is temporary slug reference
+    uuid?: string // Container UUID from [uuid:xxx] in header
+    items: Array<ICreateItemDto & { nestedContainerId?: string; uuid?: string }> // nestedContainerId is temporary slug reference, uuid for updates
   }>
   errors: string[]
 }
@@ -70,13 +71,13 @@ class MarkdownImportService {
     }
 
     const lines = markdown.split('\n')
-    let currentContainer: { name: string; id?: string; items: ICreateItemDto[] } | null = null
+    let currentContainer: { name: string; id?: string; uuid?: string; items: ICreateItemDto[] } | null = null
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]?.trim()
       if (!line) continue
 
-      // Container header (## Header [#id] (Type))
+      // Container header (## Header [#id] [uuid:xxx] (Type))
       if (line.startsWith('## ')) {
         if (currentContainer && currentContainer.items.length > 0) {
           result.containers.push(currentContainer)
@@ -84,12 +85,20 @@ class MarkdownImportService {
 
         let headerText = line.substring(3).trim()
         let containerId: string | undefined
+        let containerUuid: string | undefined
 
         // Extract ID from [#id]
         const idMatch = headerText.match(/\[#([^\]]+)\]/)
         if (idMatch) {
           containerId = idMatch[1]?.trim()
           headerText = headerText.replace(idMatch[0] ?? '', '').trim()
+        }
+
+        // Extract UUID from [uuid:xxx]
+        const uuidMatch = headerText.match(/\[uuid:([^\]]+)\]/)
+        if (uuidMatch) {
+          containerUuid = uuidMatch[1]?.trim()
+          headerText = headerText.replace(uuidMatch[0] ?? '', '').trim()
         }
 
         // Extract container name (remove type in parentheses if present)
@@ -99,6 +108,7 @@ class MarkdownImportService {
         currentContainer = {
           name: containerName,
           id: containerId,
+          uuid: containerUuid,
           items: [],
         }
         continue
@@ -127,11 +137,11 @@ class MarkdownImportService {
 
   /**
    * Parse a single item line
-   * New format: - **Item Name** x2 (Brand, Color) [#container-id] (Status) - 500g
+   * New format: - **Item Name** [uuid:xxx] x2 (Brand, Color) [#container-id] (Status) - 500g
    * Old format: - Item name **Brand** (params) x5
    * Flexible: Parser will try to guess all fields
    */
-  private parseItemLine(line: string): (ICreateItemDto & { nestedContainerId?: string }) | null {
+  private parseItemLine(line: string): (ICreateItemDto & { nestedContainerId?: string; uuid?: string }) | null {
     if (!line) return null
 
     let workingLine = line
@@ -145,6 +155,7 @@ class MarkdownImportService {
     let expirationDate: string | undefined
     let url: string | undefined
     let nestedContainerId: string | undefined
+    let uuid: string | undefined
 
     // 1. Extract bold text as item name (new format: **Item Name**)
     const boldMatch = workingLine.match(/\*\*([^*]+)\*\*/)
@@ -153,7 +164,14 @@ class MarkdownImportService {
       workingLine = workingLine.replace(boldMatch[0] ?? '', '').trim()
     }
 
-    // 2. Extract weight at the end (- 500g or - 2.5kg)
+    // 2. Extract UUID from [uuid:xxx]
+    const uuidMatch = workingLine.match(/\[uuid:([^\]]+)\]/)
+    if (uuidMatch) {
+      uuid = uuidMatch[1]?.trim()
+      workingLine = workingLine.replace(uuidMatch[0] ?? '', '').trim()
+    }
+
+    // 3. Extract weight at the end (- 500g or - 2.5kg)
     const weightMatch = workingLine.match(/[-–—]\s*(\d+(?:[.,]\d+)?)\s*(g|kg)\s*$/i)
     if (weightMatch) {
       weight = Number.parseFloat((weightMatch[1] ?? '100').replace(',', '.'))
@@ -161,7 +179,7 @@ class MarkdownImportService {
       workingLine = workingLine.substring(0, weightMatch.index).trim()
     }
 
-    // 3. Extract container ID [#id] (for nested containers)
+    // 4. Extract container ID [#id] (for nested containers)
     const containerIdMatch = workingLine.match(/\[#([^\]]+)\]/)
     if (containerIdMatch) {
       nestedContainerId = containerIdMatch[1]?.trim()
@@ -293,7 +311,7 @@ class MarkdownImportService {
     // 8. Determine category from name
     const category = this.matchCategory(name)
 
-    const item: ICreateItemDto & { nestedContainerId?: string } = {
+    const item: ICreateItemDto & { nestedContainerId?: string; uuid?: string } = {
       name,
       category,
       quantity,
@@ -306,6 +324,7 @@ class MarkdownImportService {
       expirationDate,
       url,
       nestedContainerId, // Temporary slug reference to container
+      uuid, // UUID for update workflow
     }
 
     return item
