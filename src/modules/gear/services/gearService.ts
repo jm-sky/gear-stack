@@ -90,6 +90,10 @@ class GearService {
     this.store.removeContainer(id)
   }
 
+  deleteAllContainers(): void {
+    this.store.clearAllContainers()
+  }
+
   getContainerById(id: TUUID): IGearContainer | undefined {
     return this.store.getContainerById(id)
   }

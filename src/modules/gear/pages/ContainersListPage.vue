@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { refDebounced } from '@vueuse/core'
-import { ChevronDown, FileInput, Package, Plus } from 'lucide-vue-next'
+import { ChevronDown, FileInput, Package, Plus, Trash2 } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -10,6 +10,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
@@ -23,7 +24,7 @@ import type { TUUID } from '@/shared/types/base.type'
 
 const router = useRouter()
 const { t } = useI18n()
-const { containers, deleteContainer, getRootContainers } = useGear()
+const { containers, deleteContainer, deleteAllContainers, getRootContainers } = useGear()
 const { customContainerTypes } = useSettings()
 
 // Filters - using refs that will be bound to ContainersFilters via v-model
@@ -89,6 +90,17 @@ const handleDelete = (id: TUUID) => {
     }
   }
 }
+
+const handleDeleteAll = () => {
+  if (confirm(t('gear.container.deleteAllConfirm'))) {
+    try {
+      deleteAllContainers()
+      toast.success(t('gear.container.deleteAllSuccess'))
+    } catch {
+      toast.error(t('common.error'))
+    }
+  }
+}
 </script>
 
 <template>
@@ -121,6 +133,15 @@ const handleDelete = (id: TUUID) => {
               <DropdownMenuItem @click="handleImport">
                 <FileInput class="size-4 mr-2" />
                 {{ t('gear.import.fromMarkdown') }}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator v-if="containers.length > 0" />
+              <DropdownMenuItem
+                v-if="containers.length > 0"
+                class="text-destructive focus:text-destructive"
+                @click="handleDeleteAll"
+              >
+                <Trash2 class="size-4 mr-2" />
+                {{ t('gear.container.deleteAll') }}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

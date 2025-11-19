@@ -21,6 +21,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.11.1] - 2025-01-19
+
+### Added
+- "Delete All Containers" button in containers page dropdown menu
+- Confirmation dialog for deleting all containers with warning message
+- `deleteAllContainers()` method in store, service, and composable
+- Success toast notification after deleting all containers
+- Translations for delete all feature (English and Polish)
+
+---
+
 ## [0.11.0] - 2025-01-19
 
 ### Added

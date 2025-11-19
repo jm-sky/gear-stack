@@ -31,6 +31,10 @@ export function useGear() {
     gearService.deleteContainer(id)
   }
 
+  const deleteAllContainers = (): void => {
+    gearService.deleteAllContainers()
+  }
+
   const getContainerById = (id: TUUID): IGearContainer | undefined => {
     return gearService.getContainerById(id)
   }
@@ -105,6 +109,7 @@ export function useGear() {
     createContainer,
     updateContainer,
     deleteContainer,
+    deleteAllContainers,
     getContainerById,
     getRootContainers,
     getNestedContainers,
