@@ -145,7 +145,7 @@ if (config.backend.enabled) {
 
 ### Faza 1: Przygotowanie (bez zmian w kodzie)
 - [x] Utworzenie dokumentu integracji
-- [ ] Utworzenie brancha `feature/backend-integration`
+- [x] Utworzenie brancha `feature/backend-integration`
 - [ ] Analiza szczegółowa różnic w kodzie
 
 ### Faza 2: Infrastruktura (feature flag)
@@ -180,64 +180,34 @@ if (config.backend.enabled) {
 - [ ] Migracja danych z localStorage do backendu (opcjonalnie)
 - [ ] Obsługa błędów i fallback do trybu offline
 
-### Faza 8: Testy i Dokumentacja
-- [ ] Testy Playwright dla flow autentykacji
+### Faza 8: Testowanie i Dokumentacja
+- [ ] Testowanie implementacji z użyciem Playwright/browser MCP
 - [ ] Aktualizacja README.md
 - [ ] Dokumentacja zmiennych środowiskowych
 
-## 🧪 Testowanie z Playwright
+## 🧪 Testowanie Podczas Implementacji
 
-### Konfiguracja
+Podczas implementacji będziemy używać **Playwright** lub **browser MCP** do interaktywnego testowania funkcjonalności w przeglądarce. To pozwoli na:
 
-Plik `playwright.config.ts` powinien być skonfigurowany podobnie jak w projekcie `test`:
+1. **Weryfikację działania w czasie rzeczywistym** - Sprawdzanie czy formularze działają, czy routing działa poprawnie
+2. **Testowanie flow autentykacji** - Logowanie, rejestracja, wylogowanie
+3. **Sprawdzanie guardów** - Czy chronione trasy są właściwie zabezpieczone
+4. **Weryfikacja feature flag** - Czy tryb offline i online działają poprawnie
 
-```typescript
-export default defineConfig({
-  testDir: './tests/e2e',
-  use: {
-    baseURL: 'http://localhost:5173',
-  },
-  // Serwery uruchamiane ręcznie przed testami
-  // lub automatycznie przez webServer (opcjonalnie)
-})
-```
+### Narzędzia do testowania
 
-### Scenariusze testowe
+- **Playwright** - Do automatycznego testowania w przeglądarce
+- **Browser MCP** - Do interaktywnego testowania przez AI
+- **DevTools** - Do debugowania i sprawdzania network requests
 
-1. **Rejestracja użytkownika**
-   - Wypełnienie formularza
-   - Weryfikacja sukcesu
-   - Sprawdzenie przekierowania
+### Scenariusze do przetestowania
 
-2. **Logowanie**
-   - Poprawne dane
-   - Niepoprawne dane
-   - Sprawdzenie tokenu w localStorage
-
-3. **Chronione trasy**
-   - Próba dostępu bez logowania
-   - Przekierowanie do login
-   - Dostęp po zalogowaniu
-
-4. **Odświeżanie tokenu**
-   - Symulacja wygasłego tokenu
-   - Automatyczne odświeżenie
-   - Retry oryginalnego żądania
-
-5. **Wylogowanie**
-   - Czyszczenie tokenów
-   - Przekierowanie do login
-
-### Uruchamianie testów
-
-```bash
-# Uruchom backend i frontend ręcznie
-cd backend && python main.py  # Port 8000
-cd frontend && pnpm dev        # Port 5173
-
-# W innym terminalu
-pnpm exec playwright test
-```
+1. **Rejestracja użytkownika** - Formularz, walidacja, sukces
+2. **Logowanie** - Poprawne/niepoprawne dane, token w localStorage
+3. **Chronione trasy** - Przekierowania, guardy
+4. **Odświeżanie tokenu** - Automatyczny refresh przy 401
+5. **Wylogowanie** - Czyszczenie danych, przekierowanie
+6. **Feature flag** - Przełączanie między trybem offline/online
 
 ## 🔄 Migracja Danych (Opcjonalnie)
 
@@ -267,7 +237,7 @@ Gdy użytkownik przełączy się z trybu offline na online, można zaimplementow
 - [ ] Feature flag działa poprawnie
 - [ ] Tryb offline (bez backendu) działa jak wcześniej
 - [ ] Tryb online (z backendem) działa poprawnie
-- [ ] Testy Playwright przechodzą
+- [ ] Funkcjonalność przetestowana w przeglądarce (Playwright/browser MCP)
 - [ ] Dokumentacja zaktualizowana
 - [ ] `.env.example` zawiera wszystkie potrzebne zmienne
 - [ ] Brak console errors w trybie offline

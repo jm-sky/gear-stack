@@ -13,7 +13,7 @@ const props = defineProps<{
 <template>
   <div :class="cn('max-w-md w-full space-y-8', props.class)">
     <div class="space-y-4 bg-card/80 py-8 px-6 shadow-lg rounded-lg">
-      <slot v-if="withHeader" name="header">
+      <slot v-if="withHeader || $slots['header-description']" name="header">
         <h2 v-if="title" class="text-center text-2xl font-bold text-card-foreground">
           {{ title }}
         </h2>

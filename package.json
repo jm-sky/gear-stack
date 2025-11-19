@@ -25,6 +25,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "floating-vue": "^5.2.2",
+    "jwt-decode": "^4.0.0",
     "lucide-vue-next": "^0.554.0",
     "pinia": "^3.0.3",
     "reka-ui": "^2.6.0",

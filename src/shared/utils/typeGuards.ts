@@ -1,10 +1,14 @@
 // shared/utils/typeGuards.ts
-// This file is kept for potential future use but axios dependencies have been removed
-// as the app is now fully client-side with localStorage
+import { type AxiosError, type AxiosResponse, HttpStatusCode, isAxiosError } from 'axios'
 
 export interface ValidationErrorResponse {
   errors: Record<string, string[]>
 }
 
-// Note: ValidationError type removed as it was dependent on AxiosError
-// If needed in the future, create a custom error type for client-side validation
+export type ValidationError = AxiosError<ValidationErrorResponse> & {
+  response: AxiosResponse<ValidationErrorResponse>
+}
+
+export function isValidationError(err: unknown): err is ValidationError {
+  return isAxiosError(err) && err.response?.status === HttpStatusCode.UnprocessableEntity && !!err.response.data?.errors
+}

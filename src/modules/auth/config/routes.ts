@@ -1,0 +1,77 @@
+// modules/auth/config/routes.ts
+// Configurable route paths for auth module
+// This allows the auth module to be used in different apps with different route structures
+
+import type { RouteRecordRaw } from 'vue-router'
+
+export const AuthRoutePaths = {
+  login: import.meta.env.VITE_AUTH_LOGIN_PATH ?? '/auth/login',
+  register: import.meta.env.VITE_AUTH_REGISTER_PATH ?? '/auth/register',
+  forgotPassword: import.meta.env.VITE_AUTH_FORGOT_PASSWORD_PATH ?? '/auth/forgot-password',
+  resetPassword: import.meta.env.VITE_AUTH_RESET_PASSWORD_PATH ?? '/auth/reset-password',
+  changePassword: import.meta.env.VITE_AUTH_CHANGE_PASSWORD_PATH ?? '/auth/change-password',
+  twoFactorSetup: import.meta.env.VITE_AUTH_TWO_FACTOR_SETUP_PATH ?? '/auth/2fa/setup',
+  twoFactorVerify: import.meta.env.VITE_AUTH_TWO_FACTOR_VERIFY_PATH ?? '/auth/2fa/verify',
+  verifyEmail: import.meta.env.VITE_AUTH_VERIFY_EMAIL_PATH ?? '/auth/verify-email',
+  dashboard: import.meta.env.VITE_AUTH_DASHBOARD_PATH ?? '/dashboard',
+} as const
+
+// Named route versions (when using Vue Router named routes)
+export const AuthRouteNames = {
+  login: 'Login',
+  register: 'Register',
+  forgotPassword: 'ForgotPassword',
+  resetPassword: 'ResetPassword',
+  changePassword: 'ChangePassword',
+  twoFactorSetup: 'TwoFactorSetup',
+  twoFactorVerify: 'TwoFactorVerify',
+  verifyEmail: 'VerifyEmail',
+  dashboard: 'Dashboard',
+} as const
+
+export const authRoutes: RouteRecordRaw[] = [
+  {
+    path: AuthRoutePaths.login,
+    name: AuthRouteNames.login,
+    component: () => import('@/modules/auth/pages/LoginPage.vue'),
+  },
+  {
+    path: AuthRoutePaths.register,
+    name: AuthRouteNames.register,
+    component: () => import('@/modules/auth/pages/RegisterPage.vue'),
+  },
+  {
+    path: AuthRoutePaths.forgotPassword,
+    name: AuthRouteNames.forgotPassword,
+    component: () => import('@/modules/auth/pages/ForgotPasswordPage.vue'),
+  },
+  {
+    path: AuthRoutePaths.resetPassword,
+    name: AuthRouteNames.resetPassword,
+    component: () => import('@/modules/auth/pages/ResetPasswordPage.vue'),
+  },
+  {
+    path: AuthRoutePaths.changePassword,
+    name: AuthRouteNames.changePassword,
+    component: () => import('@/modules/auth/pages/ChangePasswordPage.vue'),
+  },
+  {
+    path: AuthRoutePaths.twoFactorSetup,
+    name: AuthRouteNames.twoFactorSetup,
+    meta: { requiresAuth: true },
+    component: () => import('@/modules/auth/pages/TwoFactorSetupPage.vue'),
+  },
+  {
+    path: AuthRoutePaths.twoFactorVerify,
+    name: AuthRouteNames.twoFactorVerify,
+    // Note: This route does NOT require auth (requiresAuth: false)
+    // because users in 2FA flow have twoFactorToken but no accessToken
+    meta: { requiresAuth: false },
+    component: () => import('@/modules/auth/pages/TwoFactorVerifyPage.vue'),
+  },
+  {
+    path: AuthRoutePaths.verifyEmail,
+    name: AuthRouteNames.verifyEmail,
+    component: () => import('@/modules/auth/pages/VerifyEmailPage.vue'),
+  },
+]

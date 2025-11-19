@@ -1,0 +1,80 @@
+// modules/auth/types/user.type.ts
+import type { TDateTime, TULID } from '@/shared/types/base.type'
+
+export interface User {
+  id: TULID
+  name: string
+  email: string
+  avatar?: string
+  isActive: boolean
+  isAdmin: boolean
+  isEmailVerified: boolean
+  emailVerifiedAt?: TDateTime | null
+  createdAt: TDateTime
+  preferredTwoFactorMethod?: 'totp' | 'webauthn' | null
+}
+
+export interface LoginCredentials {
+  email: string
+  password: string
+}
+
+export interface RegisterCredentials {
+  name: string
+  email: string
+  password: string
+  passwordConfirmation: string
+}
+
+export interface ForgotPasswordData {
+  email: string
+}
+
+export interface ResetPasswordData {
+  email: string
+  token: string
+  password: string
+  passwordConfirmation: string
+}
+
+export interface ChangePasswordData {
+  currentPassword: string
+  password: string
+  passwordConfirmation: string
+}
+
+export interface AuthResponse {
+  user: User
+  accessToken: string
+  refreshToken: string
+  tokenType: string
+  expiresIn: number
+  requiresEmailVerification: boolean
+}
+
+export interface TwoFactorRequiredResponse {
+  requiresTwoFactor: true
+  twoFactorToken: string
+  methods: string[] // ["totp", "webauthn"]
+  preferredMethod: string | null
+  allowBackupCodes: boolean
+  expiresAt: string // ISO datetime string
+}
+
+export type LoginResponse = AuthResponse | TwoFactorRequiredResponse
+
+export interface RefreshTokenResponse {
+  accessToken: string
+  refreshToken: string
+  tokenType: string
+  expiresIn: number
+}
+
+export interface MessageResponse {
+  message: string
+}
+
+export interface RegisterResponse extends MessageResponse {
+  email?: string
+}
+

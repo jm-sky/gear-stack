@@ -1,3 +1,4 @@
+import { authRoutes } from '@/modules/auth/config/routes'
 import { gearRoutes } from '@/modules/gear/routes'
 import { settingsRoutes } from '@/modules/settings/routes'
 import { userRoutes } from '@/modules/user/routes'
@@ -28,6 +29,7 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/ContactPage.vue'),
     meta: { layout: 'authenticated' },
   },
+  ...authRoutes,
   ...gearRoutes,
   ...settingsRoutes,
   ...userRoutes,
