@@ -39,6 +39,10 @@ export const gearEn = {
       selectContainer: 'Container',
       selectContainerPlaceholder: 'Select a container',
       noContainersAvailable: 'No containers available to nest.',
+      // Extended fields
+      extendedFields: 'Additional Information',
+      brand: 'Brand',
+      price: 'Price',
       colors: {
         default: 'Default',
         blue: 'Blue',
@@ -133,6 +137,19 @@ export const gearEn = {
         expiringSoon: 'Expiring Soon',
         daysLeft: '{days} days left',
       },
+      // Extended fields
+      extendedFields: 'Additional Information',
+      price: 'Price',
+      url: 'URL / Link',
+      brand: 'Brand',
+      color: 'Color',
+      quality: 'Quality / Price Tier',
+      actions: 'Actions',
+      qualities: {
+        low: 'Low',
+        medium: 'Medium',
+        high: 'High',
+      },
     },
     actions: {
       show: 'Show',
@@ -165,6 +182,9 @@ export const gearEn = {
       nameRequired: 'Name is required',
       quantityMin: 'Quantity must be greater than 0',
       weightMin: 'Weight cannot be negative',
+    },
+    comboBox: {
+      add: 'Add',
     },
   },
 }
@@ -210,6 +230,10 @@ export const gearPl = {
       selectContainer: 'Kontener',
       selectContainerPlaceholder: 'Wybierz kontener',
       noContainersAvailable: 'Brak dostępnych kontenerów do zagnieżdżenia.',
+      // Extended fields
+      extendedFields: 'Dodatkowe Informacje',
+      brand: 'Marka',
+      price: 'Cena',
       colors: {
         default: 'Domyślny',
         blue: 'Niebieski',
@@ -304,6 +328,19 @@ export const gearPl = {
         expiringSoon: 'Wkrótce Wygasa',
         daysLeft: 'Pozostało {days} dni',
       },
+      // Extended fields
+      extendedFields: 'Dodatkowe Informacje',
+      price: 'Cena',
+      url: 'URL / Link',
+      brand: 'Marka',
+      color: 'Kolor',
+      quality: 'Jakość / Półka cenowa',
+      actions: 'Akcje',
+      qualities: {
+        low: 'Niska',
+        medium: 'Średnia',
+        high: 'Wysoka',
+      },
     },
     actions: {
       show: 'Pokaż',
@@ -336,6 +373,9 @@ export const gearPl = {
       nameRequired: 'Nazwa jest wymagana',
       quantityMin: 'Ilość musi być większa od 0',
       weightMin: 'Waga nie może być ujemna',
+    },
+    comboBox: {
+      add: 'Dodaj',
     },
   },
 }

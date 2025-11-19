@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Box, ChevronRight, Package } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import DataTable from '@/components/data-table/DataTable.vue'
@@ -8,6 +8,7 @@ import Badge from '@/components/ui/badge/Badge.vue'
 import { Button } from '@/components/ui/button'
 import TableEmpty from '@/components/ui/table/TableEmpty.vue'
 import { useSettings } from '@/modules/settings/composables/useSettings'
+import { ITEMS_TABLE_COLUMN_VISIBILITY_KEY } from '@/shared/config/config'
 import type { IGearItem } from '../types/gear.types'
 import { useGear } from '../composables/useGear'
 import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
@@ -15,6 +16,7 @@ import { EXPIRATION_WARNING_DAYS } from '../utils/constants'
 import { COLOR_TEXT_CLASSES } from '../utils/containerColors'
 import { formatWeight } from '../utils/formatWeight'
 import { createItemsColumns } from '../utils/itemsColumns'
+import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 import CategoryIcon from './CategoryIcon.vue'
 import ItemsTableNestedContainerRow from './ItemsTableNestedContainerRow.vue'
 import ItemsTableRowActions from './ItemsTableRowActions.vue'
@@ -42,6 +44,43 @@ const { getContainerById } = useGear()
 
 // Expanded rows state (which containers are expanded)
 const expandedRows = ref<Set<string>>(new Set())
+
+// Load column visibility from localStorage
+function loadColumnVisibility(): Record<string, boolean> {
+  try {
+    const stored = localStorage.getItem(ITEMS_TABLE_COLUMN_VISIBILITY_KEY)
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      // Validate that it's an object with boolean values
+      if (typeof parsed === 'object' && parsed !== null) {
+        return parsed
+      }
+    }
+  } catch (error) {
+    console.error('Error loading column visibility from storage:', error)
+  }
+  // Default: hide brand and color by default
+  return {
+    brand: false,
+    color: false,
+  }
+}
+
+// Column visibility state - load from localStorage or use defaults
+const columnVisibility = ref<Record<string, boolean>>(loadColumnVisibility())
+
+// Save column visibility to localStorage when it changes
+watch(
+  columnVisibility,
+  (newValue) => {
+    try {
+      localStorage.setItem(ITEMS_TABLE_COLUMN_VISIBILITY_KEY, JSON.stringify(newValue))
+    } catch (error) {
+      console.error('Error saving column visibility to storage:', error)
+    }
+  },
+  { deep: true },
+)
 
 // Helper to get category label for filtering
 const getCategoryLabel = (categoryKey: string): string => {
@@ -126,6 +165,7 @@ function getNestedContainer(item: IGearItem) {
 
 <template>
   <DataTable
+    v-model:column-visibility="columnVisibility"
     :columns="columns"
     :data="props.items"
     :search-placeholder="t('gear.filters.search')"
@@ -133,6 +173,7 @@ function getNestedContainer(item: IGearItem) {
     :enable-sorting="true"
     :enable-filtering="true"
     :enable-pagination="true"
+    :enable-column-visibility="true"
     :initial-page-size="10"
   >
     <template #name="{ row }">
@@ -203,6 +244,23 @@ function getNestedContainer(item: IGearItem) {
       <Badge :variant="getStatusVariant(row.original.status)">
         {{ t(`gear.item.statuses.${row.original.status}`) }}
       </Badge>
+    </template>
+
+    <template #brand="{ row }">
+      {{ row.original.brand ?? '-' }}
+    </template>
+
+    <template #color="{ row }">
+      <div v-if="row.original.color" class="flex items-center gap-2">
+        <div
+          class="size-3 rounded-full shrink-0 border border-border"
+          :style="{
+            backgroundColor: getColorHex(row.original.color) ?? DEFAULT_COLOR,
+          }"
+        />
+        <span>{{ row.original.color }}</span>
+      </div>
+      <span v-else>-</span>
     </template>
 
     <template #actions="{ row }">

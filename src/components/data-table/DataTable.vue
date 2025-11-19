@@ -8,7 +8,7 @@ import {
   useVueTable,
 } from '@tanstack/vue-table'
 import { ArrowUpDown } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -67,6 +67,7 @@ const props = withDefaults(defineProps<DataTableProps<TData, TValue>>(), {
 const page = defineModel<number>('page', { default: 1 })
 const pageSize = defineModel<number>('pageSize', { default: 10 })
 const rowSelection = defineModel<RowSelectionState>('rowSelection', { default: {} })
+const columnVisibilityModel = defineModel<VisibilityState>('columnVisibility', { default: () => ({}) })
 
 // Emits for non-v-model events
 const emit = defineEmits<{
@@ -81,7 +82,28 @@ const emit = defineEmits<{
 // State
 const sorting = ref<SortingState>([])
 const globalFilter = ref('')
-const columnVisibility = ref<VisibilityState>({})
+// Use model value if provided, otherwise use internal ref
+const columnVisibility = ref<VisibilityState>({ ...(columnVisibilityModel.value || {}) })
+
+// Sync model with internal ref only on initial mount or when model changes externally
+// Don't sync when table updates (that's handled by onColumnVisibilityChange)
+let isInternalUpdate = false
+watch(columnVisibilityModel, (newValue) => {
+  if (isInternalUpdate) {
+    isInternalUpdate = false
+    return
+  }
+  
+  // Only sync if the new value is different and not empty
+  if (newValue && Object.keys(newValue).length > 0) {
+    // Compare actual values
+    const currentStr = JSON.stringify(columnVisibility.value)
+    const newStr = JSON.stringify(newValue)
+    if (currentStr !== newStr) {
+      columnVisibility.value = { ...newValue }
+    }
+  }
+}, { immediate: true, deep: true })
 
 // Pagination state (client-side or server-side)
 const isServerSide = computed(() => props.total !== undefined)
@@ -138,6 +160,9 @@ const table = useVueTable({
   onColumnVisibilityChange: props.enableColumnVisibility
     ? (updaterOrValue) => {
         valueUpdater(updaterOrValue, columnVisibility)
+        // Update model after state is updated - mark as internal to prevent watch loop
+        isInternalUpdate = true
+        columnVisibilityModel.value = { ...columnVisibility.value }
         emit('update:columnVisibility', columnVisibility.value)
       }
     : undefined,
@@ -168,12 +193,17 @@ const table = useVueTable({
       } : undefined
     },
   },
-  initialState: props.enablePagination ? {
-    pagination: {
-      pageIndex: 0,
-      pageSize: currentPageSize.value,
-    },
-  } : undefined,
+  initialState: {
+    ...(props.enablePagination ? {
+      pagination: {
+        pageIndex: 0,
+        pageSize: currentPageSize.value,
+      },
+    } : {}),
+    ...(props.enableColumnVisibility && Object.keys(columnVisibility.value).length > 0 ? {
+      columnVisibility: columnVisibility.value,
+    } : {}),
+  },
 })
 
 // Computed values

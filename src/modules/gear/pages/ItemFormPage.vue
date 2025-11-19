@@ -43,6 +43,11 @@ const getInitialValues = (): ItemFormData => {
       expirationDate: item.value.expirationDate ?? '',
       priority: item.value.priority,
       status: item.value.status,
+      price: item.value.price,
+      url: item.value.url ?? '',
+      brand: item.value.brand ?? '',
+      color: item.value.color ?? '',
+      quality: item.value.quality,
     }
   }
   return {

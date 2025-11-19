@@ -201,17 +201,17 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 
 ## 📊 Wizualizacje i analityka
 
-### Wykres kołowy kategorii w kontenerze
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+### ✅ Wykres kołowy kategorii w kontenerze
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium
 
-- Wykres kołowy pokazujący rozkład kategorii przedmiotów w kontenerze
-- Przełącznik między dwoma trybami wyświetlania:
-  - **Pod względem wagi** - Jak dużo ważą narzędzia względem całości? (procentowy udział wagi każdej kategorii)
-  - **Pod względem ilości** - Jak dużo mam sztuk narzędzi względem wszystkich przedmiotów? (procentowy udział ilości przedmiotów w każdej kategorii)
-- Wykres wyświetlany na stronie szczegółów kontenera
-- Kolorowe segmenty odpowiadające kolorom kategorii (lub dedykowanym kolorom)
-- Legenda z nazwami kategorii i wartościami procentowymi
-- Uwzględnienie zagnieżdżonych kontenerów w obliczeniach (opcjonalnie)
+- ✅ Wykres kołowy (donut chart) pokazujący rozkład kategorii przedmiotów w kontenerze
+- ✅ Przełącznik między dwoma trybami wyświetlania:
+  - ✅ **Pod względem wagi** - Jak dużo ważą narzędzia względem całości? (procentowy udział wagi każdej kategorii)
+  - ✅ **Pod względem ilości** - Jak dużo mam sztuk narzędzi względem wszystkich przedmiotów? (procentowy udział ilości przedmiotów w każdej kategorii)
+- ✅ Wykres wyświetlany na stronie szczegółów kontenera
+- ✅ Kolorowe segmenty odpowiadające kolorom kategorii (lub dedykowanym kolorom)
+- ✅ Legenda z nazwami kategorii i wartościami procentowymi
+- ✅ Uwzględnienie zagnieżdżonych kontenerów w obliczeniach (opcjonalnie)
 
 ---
 
@@ -259,7 +259,6 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 1. **Preferowana jednostka wagi** - Medium priority, Small complexity
 2. **Rozszerzone pola** - Medium priority, Medium complexity
 3. **Eksport do prompt (AI)** - Medium priority, Medium complexity
-4. **Wykres kołowy kategorii** - Medium priority, Medium complexity
 
 ### Low Priority (Polish/Enhancement)
 1. **Wybór primary color** - Low priority, Small complexity (warianty już przygotowane)

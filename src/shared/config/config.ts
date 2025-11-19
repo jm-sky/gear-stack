@@ -23,3 +23,4 @@ export const DARK_MODE_STORAGE_KEY = `${config.app.id}:dark-mode`
 export const JWT_STORE_KEY = `${config.app.id}:token`
 export const LOCALE_STORAGE_KEY = `${config.app.id}:locale`
 export const USER_STORAGE_KEY = `${config.app.id}:user`
+export const ITEMS_TABLE_COLUMN_VISIBILITY_KEY = `${config.app.id}:items-table-column-visibility`

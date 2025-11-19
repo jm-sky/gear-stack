@@ -24,11 +24,11 @@ class GearService {
     if (data.parentContainerId) {
       const allContainers = this.store.getAllContainers
       const newContainerId = crypto.randomUUID() // Generate ID before validation
-      
+
       if (wouldCreateCircularReference(newContainerId, data.parentContainerId, allContainers)) {
         throw new Error('Cannot create container: would create circular reference')
       }
-      
+
       // Verify parent exists
       const parent = this.store.getContainerById(data.parentContainerId)
       if (!parent) {
@@ -62,12 +62,12 @@ class GearService {
     // Validate parent relationship change if provided
     if (data.parentContainerId !== undefined) {
       const allContainers = this.store.getAllContainers
-      
+
       if (data.parentContainerId) {
         if (wouldCreateCircularReference(id, data.parentContainerId, allContainers)) {
           throw new Error('Cannot update container: would create circular reference')
         }
-        
+
         // Verify parent exists
         const parent = this.store.getContainerById(data.parentContainerId)
         if (!parent) {
@@ -168,6 +168,11 @@ class GearService {
       expirationDate: data.expirationDate ?? existingItem.expirationDate,
       priority: data.priority ?? existingItem.priority,
       status: data.status ?? existingItem.status,
+      price: data.price ?? existingItem.price,
+      url: data.url ?? existingItem.url,
+      brand: data.brand ?? existingItem.brand,
+      color: data.color ?? existingItem.color,
+      quality: data.quality ?? existingItem.quality,
       containerId: data.containerId !== undefined && data.containerId !== null && data.containerId.trim() !== '' ? data.containerId : (data.containerId === '' ? undefined : existingItem.containerId),
       createdAt: existingItem.createdAt,
       updatedAt: new Date().toISOString(),
@@ -226,7 +231,7 @@ class GearService {
         const nestedContainerWeight = this.calculateTotalWeight(item.containerId)
         return total + nestedContainerWeight * item.quantity
       }
-      
+
       // Regular item weight
       const weightInGrams = convertToGrams(item.weight, item.weightUnit ?? 'g')
       return total + weightInGrams * item.quantity

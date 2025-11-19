@@ -1,0 +1,282 @@
+"""Two-Factor Authentication service facade.
+
+This service aggregates TOTP and WebAuthn services using composition pattern.
+It provides a unified interface for all 2FA operations while delegating to
+specialized services.
+
+Uses composition over inheritance - no base classes.
+"""
+
+from __future__ import annotations
+
+import logging
+from typing import Any
+
+from .totp_service import TotpService
+from .webauthn_service import WebAuthnService
+from .types.repository import TwoFactorRepositoryInterface
+
+logger = logging.getLogger(__name__)
+
+
+class TwoFactorService:
+    """Facade service aggregating TOTP and WebAuthn services.
+
+    This service uses composition to delegate operations to specialized
+    services while providing a unified API for 2FA operations.
+    """
+
+    def __init__(self, repository: TwoFactorRepositoryInterface):
+        """Initialize with repository and create service dependencies.
+
+        Args:
+            repository: Two-factor repository interface
+        """
+        self.repository = repository
+        # Composition: create specialized services
+        self.totp = TotpService(repository)
+        self.webauthn = WebAuthnService(repository)
+
+    # ==================================================================
+    # TOTP Methods - delegate to TotpService
+    # ==================================================================
+
+    async def initiate_totp_setup(
+        self, user_id: str, email: str
+    ) -> dict[str, Any]:
+        """Start TOTP setup. Delegates to TotpService."""
+        return await self.totp.initiate_setup(user_id, email)
+
+    async def verify_totp_setup(
+        self, setup_token: str, code: str
+    ) -> dict[str, Any]:
+        """Verify TOTP setup. Delegates to TotpService."""
+        return await self.totp.verify_setup(setup_token, code)
+
+    async def get_totp_status(self, user_id: str) -> dict[str, Any]:
+        """Get TOTP status. Delegates to TotpService."""
+        return await self.totp.get_status(user_id)
+
+    async def regenerate_backup_codes(
+        self,
+        user_id: str,
+        password: str | None = None,
+        totp_code: str | None = None,
+        user_repository: Any = None,
+    ) -> dict[str, Any]:
+        """Regenerate backup codes. Delegates to TotpService."""
+        return await self.totp.regenerate_backup_codes(
+            user_id, password, totp_code, user_repository
+        )
+
+    async def disable_totp(
+        self,
+        user_id: str,
+        password: str | None = None,
+        backup_code: str | None = None,
+        user_repository: Any = None,
+    ) -> dict[str, Any]:
+        """Disable TOTP. Delegates to TotpService."""
+        return await self.totp.disable(
+            user_id, password, backup_code, user_repository
+        )
+
+    async def verify_totp_login(
+        self, two_factor_token: str, code: str
+    ) -> dict[str, Any]:
+        """Verify TOTP code during login and return JWT tokens.
+
+        This method combines TOTP verification with token generation.
+        """
+        from .auth_utils import verify_two_factor_token
+        from app.modules.auth.auth_utils import (
+            create_access_token,
+            create_refresh_token,
+        )
+
+        # Verify 2FA token
+        payload = verify_two_factor_token(two_factor_token)
+        user_id: str = payload["sub"]
+
+        # Verify TOTP/backup code
+        is_valid, is_backup = await self.totp.verify_code(
+            user_id, code, mark_used=True
+        )
+
+        if not is_valid:
+            from .exceptions import InvalidTwoFactorCodeError
+
+            raise InvalidTwoFactorCodeError("Invalid verification code")
+
+        # Create access and refresh tokens
+        access_token = create_access_token(data={"sub": user_id})
+        refresh_token = create_refresh_token(data={"sub": user_id})
+
+        return {
+            "accessToken": access_token,
+            "refreshToken": refresh_token,
+            "tokenType": "bearer",
+        }
+
+    # ==================================================================
+    # WebAuthn Methods - delegate to WebAuthnService
+    # ==================================================================
+
+    async def initiate_passkey_registration(
+        self,
+        user_id: str,
+        user_email: str,
+        user_name: str,
+        name: str | None = None,
+    ) -> dict[str, Any]:
+        """Initiate passkey registration. Delegates to WebAuthnService."""
+        return await self.webauthn.initiate_registration(
+            user_id, user_email, user_name, name
+        )
+
+    async def complete_passkey_registration(
+        self,
+        registration_token: str,
+        credential_json: dict[str, Any],
+        name: str | None = None,
+        user_agent: str | None = None,
+        origin: str | None = None,
+    ) -> dict[str, Any]:
+        """Complete passkey registration. Delegates to WebAuthnService."""
+        return await self.webauthn.complete_registration(
+            registration_token, credential_json, name, user_agent, origin
+        )
+
+    async def get_webauthn_status(self, user_id: str) -> dict[str, Any]:
+        """Get WebAuthn status. Delegates to WebAuthnService."""
+        return await self.webauthn.get_status(user_id)
+
+    async def delete_passkey(self, passkey_id: str, user_id: str) -> None:
+        """Delete passkey. Delegates to WebAuthnService."""
+        await self.webauthn.delete_passkey(passkey_id, user_id)
+
+    async def initiate_passkey_authentication(
+        self, user_id: str
+    ) -> dict[str, Any]:
+        """Initiate passkey authentication. Delegates to WebAuthnService."""
+        return await self.webauthn.initiate_authentication(user_id)
+
+    async def complete_passkey_authentication(
+        self,
+        challenge_token: str,
+        credential_json: dict,
+        challenge_data: dict | None = None,
+    ) -> dict[str, Any]:
+        """Complete passkey authentication. Delegates to WebAuthnService."""
+        return await self.webauthn.complete_authentication(
+            challenge_token, credential_json, challenge_data
+        )
+
+    # ==================================================================
+    # Combined 2FA Methods - use both services
+    # ==================================================================
+
+    async def has_two_factor_enabled(self, user_id: str) -> bool:
+        """Check if user has any 2FA method enabled.
+
+        Combines TOTP and WebAuthn status checks.
+        """
+        totp_status = await self.totp.get_status(user_id)
+        has_totp = totp_status.get("isEnabled", False)
+
+        webauthn_status = await self.webauthn.get_status(user_id)
+        has_passkeys = webauthn_status.get("enabled", False)
+
+        logger.info(
+            f"2FA check for user {user_id}: "
+            f"TOTP enabled={has_totp}, "
+            f"Passkeys enabled={has_passkeys}, "
+            f"Has 2FA={has_totp or has_passkeys}"
+        )
+
+        return has_totp or has_passkeys
+
+    async def get_available_methods(self, user_id: str) -> list[str]:
+        """Get list of available 2FA methods for user.
+
+        Combines TOTP and WebAuthn availability.
+        """
+        methods = []
+
+        totp_status = await self.totp.get_status(user_id)
+        if totp_status.get("isEnabled"):
+            methods.append("totp")
+
+        webauthn_status = await self.webauthn.get_status(user_id)
+        if webauthn_status.get("enabled"):
+            methods.append("webauthn")
+
+        return methods
+
+    async def get_preferred_method(self, user_id: str) -> str | None:
+        """Get preferred 2FA method.
+
+        Returns first available method (TOTP priority).
+        TODO: Store and retrieve actual preference from user settings.
+        """
+        methods = await self.get_available_methods(user_id)
+        if methods:
+            # For now, return first method (TOTP priority)
+            # In future, check user_settings table for preference
+            return methods[0]
+        return None
+
+    async def get_two_factor_status(self, user_id: str) -> dict[str, Any]:
+        """Get combined 2FA status (TOTP + WebAuthn).
+
+        Aggregates status from both services.
+        """
+        totp_status = await self.totp.get_status(user_id)
+        webauthn_status = await self.webauthn.get_status(user_id)
+
+        return {
+            "totp": {
+                "enabled": totp_status.get("isEnabled", False),
+                "createdAt": totp_status.get("createdAt"),
+                "lastUsedAt": totp_status.get("lastVerifiedAt"),
+            },
+            "webauthn": webauthn_status,
+            "required": False,  # Global setting - can be added later
+        }
+
+    async def update_preferred_method(
+        self, user_id: str, method: str
+    ) -> None:
+        """Update user's preferred 2FA method.
+
+        Args:
+            user_id: User ID
+            method: Preferred method ('totp' or 'webauthn')
+
+        Raises:
+            ValueError: If method is invalid or not enabled
+        """
+        valid_methods = ["totp", "webauthn"]
+        if method not in valid_methods:
+            raise ValueError(
+                f"Invalid method. Must be one of: {valid_methods}"
+            )
+
+        # Verify the method is enabled for the user
+        if method == "totp":
+            status = await self.totp.get_status(user_id)
+            if not status.get("isEnabled"):
+                raise ValueError("TOTP is not enabled for this user")
+        elif method == "webauthn":
+            status = await self.webauthn.get_status(user_id)
+            if not status.get("enabled"):
+                raise ValueError("WebAuthn is not enabled for this user")
+
+        # TODO: Store preferred method in user_settings table
+        # For now, just validate and log
+        logger.info(
+            f"Updated preferred 2FA method for user {user_id} to {method}"
+        )
+
+        # Placeholder for actual storage:
+        # await self.repository.update_user_preferred_2fa_method(user_id, method)

@@ -30,6 +30,8 @@ const getInitialValues = (): ContainerFormData => {
       description: container.value.description ?? '',
       type: container.value.type,
       color: container.value.color ?? 'default',
+      brand: container.value.brand ?? '',
+      price: container.value.price,
     }
   }
   return {
@@ -37,6 +39,8 @@ const getInitialValues = (): ContainerFormData => {
     description: '',
     type: 'other' as const,
     color: 'default' as const,
+    brand: '',
+    price: undefined,
   }
 }
 

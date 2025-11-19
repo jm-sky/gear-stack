@@ -3,6 +3,7 @@ import { useFocus } from '@vueuse/core'
 import { nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
+import ComboBox from '@/components/ui/combo-box/ComboBox.vue'
 import { FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import {
@@ -14,7 +15,9 @@ import {
 } from '@/components/ui/select'
 import { useSettings } from '@/modules/settings/composables/useSettings'
 import type { IGearItem } from '../types/gear.types'
+import { getBrandOptions } from '../utils/suggestedValues'
 import CategoryIcon from './CategoryIcon.vue'
+import ColorAutocomplete from './ColorAutocomplete.vue'
 
 defineProps<{
   item?: IGearItem
@@ -304,6 +307,97 @@ const handleCancel = () => {
         <FormMessage />
       </FormItem>
     </FormField>
+
+    <!-- Extended Fields Section -->
+    <div class="border-t pt-6 space-y-6">
+      <h3 class="text-lg font-semibold text-muted-foreground">
+        {{ $t('gear.item.extendedFields') }}
+      </h3>
+
+      <!-- Price and Brand -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <FormField v-slot="{ componentField }" name="price">
+          <FormItem>
+            <FormLabel :label="$t('gear.item.price')" />
+            <Input
+              v-bind="componentField"
+              type="number"
+              :placeholder="$t('gear.item.price')"
+              min="0"
+              step="0.01"
+            />
+            <FormMessage />
+          </FormItem>
+        </FormField>
+
+        <FormField v-slot="{ value, handleChange }" name="brand">
+          <FormItem>
+            <FormLabel :label="$t('gear.item.brand')" />
+            <ComboBox
+              :value="value"
+              :options="getBrandOptions()"
+              :placeholder="''"
+              :creatable="true"
+              :create-label="$t('gear.comboBox.add')"
+              class="w-full"
+              @update:value="handleChange"
+            />
+            <FormMessage />
+          </FormItem>
+        </FormField>
+      </div>
+
+      <!-- URL -->
+      <FormField v-slot="{ componentField }" name="url">
+        <FormItem>
+          <FormLabel :label="$t('gear.item.url')" />
+          <Input
+            v-bind="componentField"
+            type="url"
+            :placeholder="$t('gear.item.url')"
+          />
+          <FormMessage />
+        </FormItem>
+      </FormField>
+
+      <!-- Color and Quality -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <FormField v-slot="{ value, handleChange }" name="color">
+          <FormItem>
+            <FormLabel :label="$t('gear.item.color')" />
+            <ColorAutocomplete
+              :value="value"
+              class="w-full"
+              @update:value="handleChange"
+            />
+            <FormMessage />
+          </FormItem>
+        </FormField>
+
+        <FormField v-slot="{ value, handleChange }" name="quality">
+          <FormItem>
+            <FormLabel :label="$t('gear.item.quality')" />
+            <Select :model-value="value" @update:model-value="handleChange">
+              <SelectTrigger class="w-full min-w-36">
+                <SelectValue :placeholder="$t('gear.item.quality')" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="low">
+                  {{ $t('gear.item.qualities.low') }}
+                </SelectItem>
+                <SelectItem value="medium">
+                  {{ $t('gear.item.qualities.medium') }}
+                </SelectItem>
+                <SelectItem value="high">
+                  {{ $t('gear.item.qualities.high') }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+      </div>
+    </div>
 
     <!-- Actions -->
     <div class="flex flex-col sm:flex-row justify-end gap-3">

@@ -25,7 +25,6 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const globalFilter = defineModel<string>('globalFilter', { default: '' })
-const columnVisibility = defineModel<Record<string, boolean>>('columnVisibility', { default: {} })
 
 const handleGlobalFilterChange = (value: string) => {
   globalFilter.value = value
@@ -34,15 +33,15 @@ const handleGlobalFilterChange = (value: string) => {
 const { t } = useI18n()
 
 const handleColumnVisibilityChange = (columnId: string, visible: boolean) => {
-  // Toggle column visibility in table
-  const column = props.table.getColumn(columnId)
-  if (column) {
-    column.toggleVisibility(visible)
+  // Update column visibility through table state - this will trigger onColumnVisibilityChange
+  const currentState = props.table.getState().columnVisibility || {}
+  const newState = {
+    ...currentState,
+    [columnId]: visible,
   }
 
-  // Update parent state
-  const newVisibility = { ...columnVisibility.value, [columnId]: visible }
-  columnVisibility.value = newVisibility
+  // Use table.setColumnVisibility to update state - this properly triggers onColumnVisibilityChange
+  props.table.setColumnVisibility(newState)
 }
 
 // Helper to get column header text
@@ -62,12 +61,31 @@ const getColumnHeaderText = (column: ReturnType<Table<TData>['getColumn']>): str
           if (typeof result === 'string') {
             return result
           }
-          // If it's a VNode, we can't easily extract text, so fall back to id
+          // If it's a VNode, try to extract text or fall back
         } catch {
-          // If header function fails, fall back to id
+          // If header function fails with context, try without context
+          try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const result = headerDef({} as any)
+            if (typeof result === 'string') {
+              return result
+            }
+          } catch {
+            // If that also fails, fall back to id
+          }
         }
         break
       }
+    }
+    // If no header found in groups, try calling function directly
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const result = headerDef({} as any)
+      if (typeof result === 'string') {
+        return result
+      }
+    } catch {
+      // Fall through to fallback
     }
   } else if (typeof headerDef === 'string') {
     return headerDef
@@ -102,7 +120,7 @@ const getColumnHeaderText = (column: ReturnType<Table<TData>['getColumn']>): str
           v-for="column in table.getAllColumns().filter((column) => column.getCanHide())"
           :key="column.id"
           class="capitalize"
-          :checked="column.getIsVisible()"
+          :model-value="column.getIsVisible()"
           @update:model-value="(value: boolean) => handleColumnVisibilityChange(column.id, value)"
         >
           {{ getColumnHeaderText(column) }}

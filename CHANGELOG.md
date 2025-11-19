@@ -21,6 +21,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.8.0] - 2025-01-19
+
+### Added
+- Extended fields for gear items and containers (brand, color, price, URL, quality)
+- ComboBox component with creatable options for brand and color fields
+- Suggested values for colors (Olive, Coyote, Black, Tan, etc.) and brands (Helicon, Maxpedition, Mil-Tec, etc.)
+- Column visibility management in items table with localStorage persistence
+- Color visualization in items table - colored circle with color name
+- Command and Popover UI components (shadcn-vue based)
+- `getColorHex()` utility function for mapping color names to hex values
+- `ITEMS_TABLE_COLUMN_VISIBILITY_KEY` for storing column visibility preferences
+
+### Changed
+- Brand and Color fields now use ComboBox component instead of plain Input
+- Items table columns (brand, color) are hidden by default
+- All table columns can now be shown/hidden via column visibility dropdown
+- Color column displays colored circle next to color name
+- Improved DataTable column visibility synchronization with v-model
+- Enhanced DataTableToolbar to properly handle column visibility toggling
+
+### Fixed
+- Column visibility state now properly syncs between table and parent component
+- Fixed issue where columns could be shown but not hidden
+- Improved ComboBox filtering and creatable option display
+
+---
+
 ## [0.7.0] - 2025-11-19
 
 ### Added

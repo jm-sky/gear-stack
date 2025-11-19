@@ -3,6 +3,7 @@ import { useFocus } from '@vueuse/core'
 import { nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
+import ComboBox from '@/components/ui/combo-box/ComboBox.vue'
 import { FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import {
@@ -15,6 +16,7 @@ import {
 import { useSettings } from '@/modules/settings/composables/useSettings'
 import type { IGearContainer } from '../types/gear.types'
 import { COLOR_DOT_CLASSES, CONTAINER_COLORS } from '../utils/containerColors'
+import { getBrandOptions } from '../utils/suggestedValues'
 
 defineProps<{
   container?: IGearContainer
@@ -42,7 +44,7 @@ const getContainerTypeLabel = (typeKey: string): string => {
   if (customType) {
     return customType.label
   }
-  
+
   // Default types
   return t(`gear.container.types.${typeKey}`)
 }
@@ -126,7 +128,7 @@ const handleCancel = () => {
             <SelectItem value="other">
               {{ $t('gear.container.types.other') }}
             </SelectItem>
-            
+
             <!-- Custom Container Types -->
             <template v-if="customContainerTypes.length > 0">
               <div class="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
@@ -168,6 +170,46 @@ const handleCancel = () => {
         <FormMessage />
       </FormItem>
     </FormField>
+
+    <!-- Extended Fields Section -->
+    <div class="border-t pt-6 space-y-6">
+      <h3 class="text-lg font-semibold text-muted-foreground">
+        {{ $t('gear.container.extendedFields') }}
+      </h3>
+
+      <!-- Brand and Price -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <FormField v-slot="{ value, handleChange }" name="brand">
+          <FormItem>
+            <FormLabel :label="$t('gear.container.brand')" />
+            <ComboBox
+              :value="value"
+              :options="getBrandOptions()"
+              :placeholder="$t('gear.container.brand')"
+              :creatable="true"
+              :create-label="$t('gear.comboBox.add')"
+              class="w-full"
+              @update:value="handleChange"
+            />
+            <FormMessage />
+          </FormItem>
+        </FormField>
+
+        <FormField v-slot="{ componentField }" name="price">
+          <FormItem>
+            <FormLabel :label="$t('gear.container.price')" />
+            <Input
+              v-bind="componentField"
+              type="number"
+              :placeholder="$t('gear.container.price')"
+              min="0"
+              step="0.01"
+            />
+            <FormMessage />
+          </FormItem>
+        </FormField>
+      </div>
+    </div>
 
     <!-- Actions -->
     <div class="flex flex-col sm:flex-row justify-end gap-3">
