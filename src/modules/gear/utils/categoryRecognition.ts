@@ -37,9 +37,9 @@ export const CATEGORY_KEYWORDS: Record<TGearItemCategory, string[]> = {
   ],
   tools: [
     // English
-    'tool', 'knife', 'multitool', 'axe', 'saw', 'hammer', 'screwdriver', 'wrench', 'pliers',
+    'tool', 'knife', 'multitool', 'axe', 'hatchet', 'saw', 'hammer', 'screwdriver', 'wrench', 'pliers', 'shovel', 'trowel', 'entrenching',
     // Polish
-    'narzędzie', 'nóż', 'siekiera', 'piła', 'młotek', 'śrubokręt', 'klucz', 'obcęgi', 'niezbędnik',
+    'narzędzie', 'nóż', 'siekiera', 'toporek', 'piła', 'młotek', 'śrubokręt', 'klucz', 'obcęgi', 'niezbędnik', 'saperka', 'łopatka',
   ],
   navigation: [
     // English
