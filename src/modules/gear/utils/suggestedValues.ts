@@ -49,6 +49,16 @@ export const SUGGESTED_BRANDS = [
   'Merrell',
   'Columbia',
   'Mystery Ranch',
+  'Victorinox',
+  'Olight',
+  'Black Diamond',
+  'Badger',
+  'Fiskars',
+  'MFH',
+  'Esbit',
+  'SolarForce',
+  'Leatherman',
+  'Bahco',
 ] as const
 
 
