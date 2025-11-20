@@ -62,6 +62,20 @@ export function createItemsColumns(
       enableHiding: true,
     },
     {
+      id: 'wearable',
+      accessorKey: 'wearable',
+      header: () => t('gear.item.wearable'),
+      enableSorting: true,
+      enableHiding: true,
+    },
+    {
+      id: 'consumable',
+      accessorKey: 'consumable',
+      header: () => t('gear.item.consumable'),
+      enableSorting: true,
+      enableHiding: true,
+    },
+    {
       id: 'actions',
       header: () => t('gear.item.actions'),
       enableSorting: false,

@@ -3,6 +3,7 @@ import { useFocus } from '@vueuse/core'
 import { nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import ComboBox from '@/components/ui/combo-box/ComboBox.vue'
 import { FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -400,6 +401,35 @@ const handleCancel = () => {
                 </SelectItem>
               </SelectContent>
             </Select>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+      </div>
+
+      <!-- Wearable and Consumable -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <FormField v-slot="{ componentField }" name="wearable">
+          <FormItem class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+            <div class="flex-1 space-y-1">
+              <FormLabel :label="$t('gear.item.wearable')" class="cursor-pointer" />
+              <p class="text-sm text-muted-foreground">
+                {{ $t('gear.item.wearableDescription') }}
+              </p>
+            </div>
+            <Checkbox v-model="componentField.modelValue" />
+            <FormMessage />
+          </FormItem>
+        </FormField>
+
+        <FormField v-slot="{ componentField }" name="consumable">
+          <FormItem class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+            <div class="flex-1 space-y-1">
+              <FormLabel :label="$t('gear.item.consumable')" class="cursor-pointer" />
+              <p class="text-sm text-muted-foreground">
+                {{ $t('gear.item.consumableDescription') }}
+              </p>
+            </div>
+            <Checkbox v-model="componentField.modelValue" />
             <FormMessage />
           </FormItem>
         </FormField>

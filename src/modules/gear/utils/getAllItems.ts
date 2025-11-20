@@ -24,6 +24,8 @@ export function getAllItems(containers: IGearContainer[]): IItemWithContainer[] 
         brand: item.brand,
         color: item.color,
         expirationDate: item.expirationDate,
+        wearable: item.wearable,
+        consumable: item.consumable,
       })
     })
   })

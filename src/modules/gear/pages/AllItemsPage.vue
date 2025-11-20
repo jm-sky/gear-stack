@@ -48,6 +48,8 @@ function loadColumnVisibility(): Record<string, boolean> {
   return {
     brand: false,
     color: false,
+    wearable: false,
+    consumable: false,
   }
 }
 
@@ -186,6 +188,20 @@ function navigateToContainer(containerId: string) {
             />
             <span>{{ row.original.color }}</span>
           </div>
+          <span v-else>-</span>
+        </template>
+
+        <template #wearable="{ row }">
+          <Badge v-if="row.original.wearable" variant="outline" class="text-xs">
+            {{ t('gear.item.wearable') }}
+          </Badge>
+          <span v-else>-</span>
+        </template>
+
+        <template #consumable="{ row }">
+          <Badge v-if="row.original.consumable" variant="outline" class="text-xs">
+            {{ t('gear.item.consumable') }}
+          </Badge>
           <span v-else>-</span>
         </template>
 

@@ -63,10 +63,12 @@ function loadColumnVisibility(): Record<string, boolean> {
   } catch (error) {
     console.error('Error loading column visibility from storage:', error)
   }
-  // Default: hide brand and color by default
+  // Default: hide brand, color, wearable, and consumable by default
   return {
     brand: false,
     color: false,
+    wearable: false,
+    consumable: false,
   }
 }
 
@@ -271,6 +273,20 @@ function getNestedContainer(item: IGearItem) {
         />
         <span>{{ row.original.color }}</span>
       </div>
+      <span v-else>-</span>
+    </template>
+
+    <template #wearable="{ row }">
+      <Badge v-if="row.original.wearable" variant="outline" class="text-xs">
+        {{ t('gear.item.wearable') }}
+      </Badge>
+      <span v-else>-</span>
+    </template>
+
+    <template #consumable="{ row }">
+      <Badge v-if="row.original.consumable" variant="outline" class="text-xs">
+        {{ t('gear.item.consumable') }}
+      </Badge>
       <span v-else>-</span>
     </template>
 

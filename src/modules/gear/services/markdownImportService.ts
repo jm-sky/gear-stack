@@ -30,7 +30,9 @@ When generating or updating gear lists, use this format:
 ### Status (Optional)
 - Second parentheses: \`Missing\`, \`To Buy\` (omit if Owned)
 - Expiration: \`Expiration: DD.MM.YYYY\`
-- Can combine: \`(Missing, Expiration: 31.12.2025)\`
+- Wearable: \`Wearable\` - item is worn/carried on person (e.g., clothing, watch)
+- Consumable: \`Consumable\` - item is consumed/used up (e.g., food, medicine, fuel)
+- Can combine: \`(Missing, Expiration: 31.12.2025, Wearable)\`
 
 ### Container ID (Required for containers)
 - Format: \`[#slug-id]\` in header and nested item reference
@@ -42,9 +44,11 @@ When generating or updating gear lists, use this format:
 - Recognized by \`http://\`, \`https://\`, or \`www.\`
 
 ### Weight (Optional)
-- Format: \`- [number]g\` or \`- [number]kg\`
+- **For containers:** Format: \`- [number]g\` or \`- [number]kg\` or \`- [number]oz\` or \`- [number]lb\` in container header
+- **For items:** Format: \`- [number]g\` or \`- [number]kg\` or \`- [number]oz\` or \`- [number]lb\` at the end after a dash
 - Always at the end after a dash
-- If omitted, default weight will be assigned (100g)
+- If omitted for items, default weight will be assigned (100g)
+- Container weight is optional but recommended for accurate total weight calculations
 
 ## Example
 \`\`\`markdown
@@ -52,11 +56,13 @@ When generating or updating gear lists, use this format:
 - **Water Bottle** x2 (Nalgene) - 300g
 - **Tactical Knife** (Victorinox, Black) - 200g
 - **Headlamp** (Petzl, Red) (Missing) - 90g
+- **Hiking Boots** (Salomon) (Wearable) - 1200g
+- **Energy Bar** (Consumable) - 50g
 - **First Aid Pouch** (Pouch) [#first-aid-pouch] - 350g
 
 ## First Aid Pouch [#first-aid-pouch] (Pouch) - 500g
 - **Bandages** x5 - 100g
-- **Pain Pills** (Expiration: 31.12.2025) - 50g
+- **Pain Pills** (Expiration: 31.12.2025, Consumable) - 50g
 \`\`\`
 
 ## Nested Containers
@@ -264,6 +270,8 @@ class MarkdownImportService {
     let url: string | undefined
     let nestedContainerId: string | undefined
     let uuid: string | undefined
+    let wearable: boolean | undefined
+    let consumable: boolean | undefined
 
     // 1. Extract bold text as item name (new format: **Item Name**)
     const boldMatch = workingLine.match(/\*\*([^*]+)\*\*/)
@@ -358,6 +366,16 @@ class MarkdownImportService {
           continue
         }
 
+        // Check for wearable/consumable flags
+        if (statusLower.includes('wearable') || statusLower.includes('noszony')) {
+          wearable = true
+          continue
+        }
+        if (statusLower.includes('consumable') || statusLower.includes('zużywalny')) {
+          consumable = true
+          continue
+        }
+
         // Check if it's a brand
         const matchedBrand = this.matchBrand(part)
         if (matchedBrand && !brand) {
@@ -402,6 +420,16 @@ class MarkdownImportService {
           status = 'toBuy'
           continue
         }
+
+        // Check for wearable/consumable flags
+        if (statusLower.includes('wearable') || statusLower.includes('noszony')) {
+          wearable = true
+          continue
+        }
+        if (statusLower.includes('consumable') || statusLower.includes('zużywalny')) {
+          consumable = true
+          continue
+        }
       }
     }
 
@@ -432,6 +460,8 @@ class MarkdownImportService {
       color,
       expirationDate,
       url,
+      wearable,
+      consumable,
       nestedContainerId, // Temporary slug reference to container
       uuid, // UUID for update workflow
     }

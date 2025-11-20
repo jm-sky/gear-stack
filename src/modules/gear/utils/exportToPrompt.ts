@@ -90,6 +90,13 @@ function formatItem(
       statusParts.push(statusLabel)
     }
   }
+  // Add wearable/consumable flags
+  if (item.wearable) {
+    statusParts.push('Wearable')
+  }
+  if (item.consumable) {
+    statusParts.push('Consumable')
+  }
   if (statusParts.length > 0) {
     parts.push(`(${statusParts.join(', ')})`)
   }
