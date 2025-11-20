@@ -13,8 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useSettings } from '@/modules/settings/composables/useSettings'
 import type { IGearItem } from '../types/gear.types'
+import { useGearSettings } from '../composables/useGearSettings'
 import { getBrandOptions } from '../utils/suggestedValues'
 import CategoryIcon from './CategoryIcon.vue'
 import ColorAutocomplete from './ColorAutocomplete.vue'
@@ -30,7 +30,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const { customCategories } = useSettings()
+const { customCategories } = useGearSettings()
 
 // Auto-focus na pierwszym polu
 const nameInputRef = ref<HTMLInputElement | undefined>(undefined)

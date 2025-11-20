@@ -21,6 +21,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.18.0] - 2025-01-21
+
+### Added
+- **Modular Settings Architecture**:
+  - Separated core settings (locale, dark mode, preferred weight unit) from gear-specific settings (custom categories, container types)
+  - Created dedicated services: `CoreSettingsService` and `GearSettingsService`
+  - Created separate Pinia stores: `useCoreSettingsStore` and `useGearSettingsStore`
+  - Created separate composables: `useCoreSettings()` and `useGearSettings()`
+  - Modular SettingsPage component with slot-based architecture for extensibility
+  - Settings page now supports adding module-specific settings via slots
+
+### Changed
+- **Settings Architecture Refactoring**:
+  - Split monolithic settings into core and gear modules
+  - Core settings stored in `core-settings` localStorage key
+  - Gear settings stored in `gear-settings` localStorage key
+  - Automatic migration from old unified settings storage
+  - Settings page structure: core settings in module, gear settings added via slot in `/src/pages/settings/`
+  - All components updated to use appropriate settings composables
+
+### Fixed
+- Improved code organization and maintainability through modular architecture
+- Better separation of concerns between core application settings and module-specific settings
+
+---
+
 ## [0.17.0] - 2025-01-21
 
 ### Added

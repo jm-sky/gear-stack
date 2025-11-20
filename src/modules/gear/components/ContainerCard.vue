@@ -13,9 +13,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { useSettings } from '@/modules/settings/composables/useSettings'
+import { useCoreSettings } from '@/modules/settings/composables/useCoreSettings'
 import type { IGearContainer } from '../types/gear.types'
 import { useGear } from '../composables/useGear'
+import { useGearSettings } from '../composables/useGearSettings'
 import {
   READINESS_EXCELLENT_THRESHOLD,
   READINESS_GOOD_THRESHOLD,
@@ -35,7 +36,9 @@ const emit = defineEmits<{
 const router = useRouter()
 const { t } = useI18n()
 const { calculateTotalWeight, calculateReadinessPercentage, getContainerById, containers } = useGear()
-const { customContainerTypes, settings } = useSettings()
+const { customContainerTypes } = useGearSettings()
+const { settings: coreSettings } = useCoreSettings()
+const settings = computed(() => ({ preferredWeightUnit: coreSettings.value.preferredWeightUnit }))
 
 // Computed properties
 const totalWeight = computed<number>(() => calculateTotalWeight(props.container.id))

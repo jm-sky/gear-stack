@@ -7,7 +7,6 @@ import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import { useSettings } from '@/modules/settings/composables/useSettings'
 import type { IGearContainer } from '../types/gear.types'
 import ContainerCard from '../components/ContainerCard.vue'
 import ContainersFilters from '../components/ContainersFilters.vue'
@@ -15,12 +14,13 @@ import ContainersListPageDropdown from '../components/ContainersListPageDropdown
 import ExportToPromptDialog from '../components/ExportToPromptDialog.vue'
 import ImportMarkdownDialog from '../components/ImportMarkdownDialog.vue'
 import { useGear } from '../composables/useGear'
+import { useGearSettings } from '../composables/useGearSettings'
 import type { TUUID } from '@/shared/types/base.type'
 
 const router = useRouter()
 const { t } = useI18n()
 const { containers, deleteContainer, getRootContainers } = useGear()
-const { customContainerTypes } = useSettings()
+const { customContainerTypes } = useGearSettings()
 
 // Filters - using refs that will be bound to ContainersFilters via v-model
 const searchQueryRaw = ref('')

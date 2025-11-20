@@ -5,11 +5,11 @@ import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import type { IUserCategory } from '../types/settings.types'
-import { useSettings } from '../composables/useSettings'
+import { useGearSettings } from '@/modules/gear/composables/useGearSettings'
+import type { IUserCategory } from '@/modules/gear/types/gearSettings.types'
 
 const { t } = useI18n()
-const { customCategories, addCategory, updateCategory, removeCategory } = useSettings()
+const { customCategories, addCategory, updateCategory, removeCategory } = useGearSettings()
 
 const editingId = ref<string | null>(null)
 const newCategoryKey = ref('')

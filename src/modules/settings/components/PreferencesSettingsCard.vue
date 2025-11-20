@@ -17,13 +17,13 @@ import {
 } from '@/components/ui/select'
 import { useDarkMode } from '@/shared/composables/useDarkMode'
 import { type SupportedLocale, useLocale } from '@/shared/i18n'
-import { useSettings } from '../composables/useSettings'
+import { useCoreSettings } from '../composables/useCoreSettings'
 import type { TGearWeightUnit } from '@/modules/gear/types/gear.types'
 
 const { t } = useI18n()
 const { currentLocale } = useLocale()
 const { isDark, toggle: toggleDarkMode } = useDarkMode()
-const { settings, updateSettings } = useSettings()
+const { settings, updateSettings } = useCoreSettings()
 
 const settingsSchema = z.object({
   darkMode: z.enum(['light', 'dark']),
@@ -46,8 +46,8 @@ const { handleSubmit, setValues } = useForm({
 
 watch(() => settings.value, (val) => {
   if (val) {
-    setValues({ 
-      darkMode: getThemeValue(val.darkMode), 
+    setValues({
+      darkMode: getThemeValue(val.darkMode),
       locale: val.locale,
       preferredWeightUnit: val.preferredWeightUnit ?? 'g',
     })
@@ -68,7 +68,7 @@ const onSubmit = handleSubmit(async (values) => {
     locale: values.locale,
     preferredWeightUnit: values.preferredWeightUnit as TGearWeightUnit,
   })
-  
+
   // Sync with composables
   if (isDark.value !== (values.darkMode === 'dark')) {
     toggleDarkMode()
@@ -90,7 +90,7 @@ const onSubmit = handleSubmit(async (values) => {
       </CardDescription>
     </CardHeader>
     <CardContent>
-      <form class="space-y-6" @submit="onSubmit">
+      <form class="space-y-2" @submit="onSubmit">
         <div class="grid gap-6 md:grid-cols-2">
           <!-- Theme -->
           <div class="space-y-3">

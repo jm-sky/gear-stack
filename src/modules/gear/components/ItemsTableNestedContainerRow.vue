@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Badge } from '@/components/ui/badge'
 import { TableCell, TableRow } from '@/components/ui/table'
-import { useSettings } from '@/modules/settings/composables/useSettings'
+import { useCoreSettings } from '@/modules/settings/composables/useCoreSettings'
 import type { IGearContainer, IGearItem, TContainerColor } from '../types/gear.types'
 import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 import { COLOR_BORDER_CLASSES } from '../utils/containerColors'
@@ -11,7 +11,8 @@ import { formatWeightWithPreferredUnit } from '../utils/formatWeight'
 import CategoryIcon from './CategoryIcon.vue'
 
 const { t } = useI18n()
-const { settings } = useSettings()
+const { settings: coreSettings } = useCoreSettings()
+const settings = computed(() => ({ preferredWeightUnit: coreSettings.value.preferredWeightUnit }))
 
 const props = defineProps<{
   nestedItems: IGearItem[]

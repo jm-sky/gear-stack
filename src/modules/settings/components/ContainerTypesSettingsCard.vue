@@ -5,11 +5,11 @@ import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import type { IUserContainerType } from '../types/settings.types'
-import { useSettings } from '../composables/useSettings'
+import { useGearSettings } from '@/modules/gear/composables/useGearSettings'
+import type { IUserContainerType } from '@/modules/gear/types/gearSettings.types'
 
 const { t } = useI18n()
-const { customContainerTypes, addContainerType, updateContainerType, removeContainerType } = useSettings()
+const { customContainerTypes, addContainerType, updateContainerType, removeContainerType } = useGearSettings()
 
 const editingId = ref<string | null>(null)
 const newTypeKey = ref('')

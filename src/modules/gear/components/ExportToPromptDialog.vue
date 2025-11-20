@@ -14,9 +14,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { useSettings } from '@/modules/settings/composables/useSettings'
 import type { IGearContainer } from '../types/gear.types'
 import { useGear } from '../composables/useGear'
+import { useGearSettings } from '../composables/useGearSettings'
 import { exportContainersToPrompt, exportContainerToPrompt } from '../utils/exportToPrompt'
 import GuidelinesDialog from './GuidelinesDialog.vue'
 
@@ -32,7 +32,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const { getContainerById, calculateTotalWeight } = useGear()
-const { customContainerTypes } = useSettings()
+const { customContainerTypes } = useGearSettings()
 const copied = ref(false)
 const isGuidelinesDialogOpen = ref(false)
 const showUuid = ref(true)
