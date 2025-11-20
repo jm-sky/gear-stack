@@ -59,6 +59,9 @@ export const SUGGESTED_BRANDS = [
   'SolarForce',
   'Leatherman',
   'Bahco',
+  'NEO Tools',
+  'EDCX',
+  'YOUKUKE',
 ] as const
 
 
