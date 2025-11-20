@@ -1,8 +1,10 @@
-# Roadmap - Gear Stack
+# Roadmap - Gear Stack (Front-end Only)
 
-Lista planowanych funkcjonalności i ulepszeń aplikacji.
+Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (działające z localStorage, bez potrzeby backendu, bazy danych lub autoryzacji).
 
-> 📋 **Zobacz też:** [Features Implementation Plans](./features/README.md) - szczegółowe plany implementacji
+> 📋 **Zobacz też:** 
+> - [ROADMAP_V2.md](./ROADMAP_V2.md) - funkcjonalności wymagające backendu/DB/auth
+> - [Features Implementation Plans](./features/README.md) - szczegółowe plany implementacji
 
 ---
 
@@ -105,6 +107,8 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 - ✅ Walidacja cyklicznych referencji - zapobieganie nieskończonym pętlom
 - ✅ Osobne akcje "Dodaj Przedmiot" i "Dodaj Kontener" w interfejsie
 
+> **Uwaga:** Ta funkcjonalność jest już zaimplementowana i działa z localStorage. W przyszłości może być rozszerzona o synchronizację z backendem (zobacz [ROADMAP_V2.md](./ROADMAP_V2.md)).
+
 ---
 
 ## 📝 Rozszerzone pola
@@ -127,6 +131,8 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 - ✅ Wspólne pola (firma, cena) zaimplementowane w modelu danych
 - ✅ Wizualizacja kolorów w tabelach (kolorowa kropka)
 - ✅ Zarządzanie widocznością kolumn (marka, kolor) w tabelach
+
+> **Uwaga:** Ta funkcjonalność jest już zaimplementowana i działa z localStorage. W przyszłości może być rozszerzona o synchronizację z backendem (zobacz [ROADMAP_V2.md](./ROADMAP_V2.md)).
 
 ---
 
@@ -189,18 +195,13 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 - ✅ Dokumentacja zagnieżdżonych kontenerów
 - ✅ Przycisk kopiowania szablonu do schowka
 
-**Planowane ulepszenia:**
-- 🔄 **UUID support dla update workflow:**
-  - 🔄 Dodanie pola `uuid` do kontenerów i przedmiotów
-  - 🔄 Export zawiera UUID w nagłówku: `## Container [#slug] [uuid:abc-123] (Type)`
-  - 🔄 Import rozpoznaje UUID i może zaktualizować istniejące kontenery/przedmioty zamiast tylko tworzyć nowe
-  - 🔄 Umożliwia cykl export → edycja w AI → import z zachowaniem relacji
-  - 🔄 Stabilne referencje nawet po zmianie nazw kontenerów
-  - 🔄 Opcja w import dialog: "Aktualizuj istniejące" vs "Twórz nowe"
+**Planowane ulepszenia (front-end only):**
 - 🔄 Opcje konfiguracji eksportu:
   - 🔄 Pokazywanie cen przedmiotów w eksporcie (opcjonalnie)
   - 🔄 Dodatkowe podsumowanie "Do kupienia" na końcu eksportu
   - 🔄 Inne opcje konfiguracji formatu (poziom szczegółowości, metadane, itp.)
+
+> **Uwaga:** UUID support dla update workflow wymaga backendu/DB - zobacz [ROADMAP_V2.md](./ROADMAP_V2.md)
 
 ---
 
@@ -231,7 +232,8 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 - ✅ Słownik słów kluczowych dla każdej kategorii i typu kontenera
 - ✅ Rozpoznawanie uruchamiane na zdarzeniu blur (po opuszczeniu pola nazwy)
 - ✅ Priorytetyzacja dłuższych słów kluczowych (np. "bagażnik" zamiast "bag")
-- ⏳ Możliwość uczenia się na podstawie wcześniejszych wyborów użytkownika (zaplanowane, ale nie zaimplementowane)
+
+> **Uwaga:** Uczenie się na podstawie wcześniejszych wyborów użytkownika wymaga backendu/DB - zobacz [ROADMAP_V2.md](./ROADMAP_V2.md)
 
 ---
 
@@ -253,7 +255,7 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 - Dwa sposoby zmiany kolejności:
   - **Drag & drop** - przeciąganie wierszy w tabeli do zmiany kolejności (preferowane)
   - **Akcje "Do góry" / "Do dołu"** - przyciski w menu akcji przedmiotu (alternatywa, jeśli drag & drop jest zbyt skomplikowane)
-- Kolejność zapisywana w bazie danych i wyświetlana domyślnie w tabeli przedmiotów
+- Kolejność zapisywana w localStorage i wyświetlana domyślnie w tabeli przedmiotów
 - Opcja sortowania według innych kryteriów (nazwa, waga, kategoria) z możliwością powrotu do kolejności ręcznej
 - Wizualne wskaźniki podczas przeciągania (highlight, placeholder)
 
@@ -295,16 +297,17 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 
 ---
 
-## 🔮 Przyszłe rozważenia
+## 🤖 Funkcje AI (front-end only)
 
-**Status:** 🔄 Planned | **Priority:** Low
+### Funkcje AI z API calls (bez auth)
+**Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Medium
 
-- Synchronizacja między urządzeniami (cloud storage)
-- Wersjonowanie danych (historia zmian)
-- Statystyki i raporty
-- Szablony kontenerów (predefiniowane zestawy)
-- Współdzielenie kontenerów między użytkownikami
-- Aplikacja mobilna (PWA)
+- Sugestie sprzętu (na podstawie pogody, aktywności itp.) - przez API calls
+- Analiza listy (co dodać, co usunąć, alternatywy) - przez API calls
+- Generowanie gotowych presetów (UL, bushcraft, EDC) - przez API calls
+- Konwersja: opis → gotowy kontener - przez API calls
+
+> **Uwaga:** Podstawowe funkcje AI mogą działać przez API calls bez autoryzacji. Zaawansowane funkcje wymagające personalizacji i uczenia się na podstawie historii użytkownika wymagają backendu/DB - zobacz [ROADMAP_V2.md](./ROADMAP_V2.md)
 
 ---
 
@@ -322,12 +325,29 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 ### Low Priority (Polish/Enhancement)
 1. **Wybór primary color** - Low priority, Small complexity (warianty już przygotowane)
 2. **Footer i strony prawne** - Low priority, Small complexity
+3. **Funkcje AI (podstawowe)** - Low priority, Medium complexity
+
+---
+
+## 📝 Uwagi dotyczące funkcjonalności wymagających backendu
+
+Wszystkie funkcjonalności wymagające backendu, bazy danych lub autoryzacji zostały przeniesione do [ROADMAP_V2.md](./ROADMAP_V2.md), w tym:
+- Synchronizacja między urządzeniami
+- Wersjonowanie danych
+- Udostępnianie i współpraca
+- Globalny katalog itemów (multi-user)
+- Linkowanie przedmiotów (multi-user)
+- Zaawansowane funkcje AI z personalizacją
+- Szablony kontenerów (z udostępnianiem)
+- Statystyki i raporty (multi-user)
 
 ---
 
 ## 📝 Notatki
 
+- Wszystkie funkcjonalności w tym pliku działają z localStorage (front-end only)
 - Wszystkie zaimplementowane features mają dokumentację w `docs/features/`
 - Statusy są aktualizowane na bieżąco
 - Priorytety mogą się zmieniać w zależności od potrzeb użytkowników
 - Complexity: Small (1-2 dni), Medium (3-5 dni), Large (1+ tygodnie)
+- Funkcjonalności wymagające backendu/DB/auth znajdują się w [ROADMAP_V2.md](./ROADMAP_V2.md)
