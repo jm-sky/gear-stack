@@ -1,18 +1,23 @@
 <script setup lang="ts">
+import { Box } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { Badge } from '@/components/ui/badge'
 import { TableCell, TableRow } from '@/components/ui/table'
 import { useCoreSettings } from '@/modules/settings/composables/useCoreSettings'
 import type { IGearContainer, IGearItem, TContainerColor } from '../types/gear.types'
+import { useGear } from '../composables/useGear'
 import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
-import { COLOR_BORDER_CLASSES } from '../utils/containerColors'
+import { COLOR_BORDER_CLASSES, COLOR_TEXT_CLASSES } from '../utils/containerColors'
 import { formatWeightWithPreferredUnit } from '../utils/formatWeight'
 import CategoryIcon from './CategoryIcon.vue'
 
 const { t } = useI18n()
+const router = useRouter()
 const { settings: coreSettings } = useCoreSettings()
 const settings = computed(() => ({ preferredWeightUnit: coreSettings.value.preferredWeightUnit }))
+const { getContainerById } = useGear()
 
 const props = defineProps<{
   nestedItems: IGearItem[]
@@ -29,6 +34,24 @@ const containerColor = computed<TContainerColor>(() => {
 const borderColorClass = computed(() => {
   return COLOR_BORDER_CLASSES[containerColor.value]
 })
+
+// Check if nested item is a container
+function isNestedContainer(item: IGearItem): boolean {
+  return !!item.containerId
+}
+
+// Get nested container for an item
+function getNestedContainerForItem(item: IGearItem): IGearContainer | undefined {
+  if (!item.containerId) return undefined
+  return getContainerById(item.containerId)
+}
+
+// Navigate to nested container
+function navigateToNestedContainer(item: IGearItem) {
+  if (item.containerId) {
+    router.push(`/gear/${item.containerId}`)
+  }
+}
 </script>
 
 <template>
@@ -49,8 +72,19 @@ const borderColorClass = computed(() => {
             class="pl-8 pr-4 py-3 flex items-center gap-4 text-sm border-b rounded hover:bg-muted/50"
           >
             <div class="flex items-center gap-2 min-w-0 md:min-w-92">
-              <CategoryIcon :category="nestedItem.category" :size="14" class="text-muted-foreground" />
-              <span>{{ nestedItem.name }}</span>
+              <template v-if="isNestedContainer(nestedItem)">
+                <Box :size="14" class="text-muted-foreground shrink-0" :class="COLOR_TEXT_CLASSES[getNestedContainerForItem(nestedItem)?.color ?? 'default']" />
+                <span
+                  class="font-semibold cursor-pointer text-foreground/80 hover:text-primary transition-colors"
+                  @click="navigateToNestedContainer(nestedItem)"
+                >
+                  {{ nestedItem.name }}
+                </span>
+              </template>
+              <template v-else>
+                <CategoryIcon :category="nestedItem.category" :size="14" class="text-muted-foreground" />
+                <span>{{ nestedItem.name }}</span>
+              </template>
             </div>
             <div class="text-muted-foreground min-w-0 md:min-w-18">
               {{ nestedItem.quantity }}

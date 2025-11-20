@@ -26,6 +26,7 @@ const emit = defineEmits<{
   import: []
   addContainer: []
   exportToPrompt: []
+  recognizeParametersAll: []
 }>()
 
 const router = useRouter()
@@ -186,6 +187,11 @@ const handleBack = () => {
               <DropdownMenuItem @click="handleExportToPrompt">
                 <MessageSquare class="size-4" />
                 {{ t('gear.actions.exportToPrompt') }}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem @click="$emit('recognizeParametersAll')">
+                <SparklesIcon class="size-4" />
+                {{ t('gear.actions.recognizeParametersAll') }}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

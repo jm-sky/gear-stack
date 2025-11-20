@@ -146,6 +146,20 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 
 > **Uwaga:** Ta funkcjonalność jest już zaimplementowana i działa z localStorage. W przyszłości może być rozszerzona o synchronizację z backendem (zobacz [ROADMAP_V2.md](./ROADMAP_V2.md)).
 
+### Obsługa Markdown w notatkach
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+
+- Możliwość formatowania notatek (pole `notes`) za pomocą Markdown
+- W formularzach: edytor Markdown (z podglądem na żywo lub split view)
+- W wyświetlaniu: renderowanie Markdown do HTML (linki, **pogrubienie**, *kursywa*, listy, itp.)
+- Podstawowe wsparcie dla:
+  - **Bold** i *italic*
+  - Linki `[text](url)`
+  - Listy (ul/ol)
+  - `code` i bloki kodu
+- Opcjonalnie: edytor WYSIWYG dla Markdown lub składnia Markdown z podglądem
+- Obsługa dla przedmiotów (`IGearItem.notes`) i kontenerów (`IGearContainer.description`)
+
 ---
 
 ## 🚀 Import/Export i Markdown
@@ -329,6 +343,19 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 
 > **Uwaga:** Podstawowe funkcje AI mogą działać przez API calls bez autoryzacji. Zaawansowane funkcje wymagające personalizacji i uczenia się na podstawie historii użytkownika wymagają backendu/DB - zobacz [ROADMAP_V2.md](./ROADMAP_V2.md)
 
+### ✅ Rozpoznawanie parametrów przedmiotów na żądanie
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium
+
+- ✅ Rozpoznawanie koloru, firmy (brand) i innych parametrów na podstawie nazwy przedmiotu
+- ✅ Akcje dostępne w różnych miejscach:
+  - ✅ **Formularz przedmiotu** - przycisk "Rozpoznaj parametry"
+  - ✅ **Strona kontenera z listą przedmiotów** - akcja "Rozpoznaj parametry wszystkich przedmiotów" (bulk action)
+  - ✅ **Akcje wiersza przedmiotu w tabeli** - akcja "Rozpoznaj parametry" dla pojedynczego przedmiotu
+- ✅ Automatyczne uzupełnianie pól: kolor, firma/brand (oraz innych jeżeli są dostępne)
+- ✅ Integracja z istniejącymi słownikami sugerowanych wartości (SUGGESTED_BRANDS, SUGGESTED_COLORS)
+- ✅ Fuzzy matching dla rozpoznawania brandów i kolorów
+- ✅ Uzupełnianie tylko pustych pól (nie nadpisuje istniejących wartości)
+
 ---
 
 ## 📈 Priorytetyzacja
@@ -341,6 +368,7 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 ### Medium Priority
 1. **Preferowana jednostka wagi** - Medium priority, Small complexity
 2. ✅ **Rozszerzone pola** - Medium priority, Medium complexity (Completed in v0.8.0)
+3. ✅ **Rozpoznawanie parametrów przedmiotów na żądanie** - Medium priority, Medium complexity (Completed in v0.19.0)
 
 ### Low Priority (Polish/Enhancement)
 1. ⏸️ **Wybór primary color** - Low priority, Small complexity (On Hold - obecny kolor zadowalający)

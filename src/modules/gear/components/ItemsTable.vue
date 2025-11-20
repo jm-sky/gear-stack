@@ -36,6 +36,7 @@ const emit = defineEmits<{
   edit: [item: IGearItem]
   delete: [item: IGearItem]
   statusChange: [item: IGearItem, status: IGearItem['status']]
+  recognizeParameters: [item: IGearItem]
 }>()
 
 const { t } = useI18n()
@@ -280,6 +281,7 @@ function getNestedContainer(item: IGearItem) {
         @delete="emit('delete', row.original)"
         @status-change="(status) => emit('statusChange', row.original, status)"
         @view-container="navigateToNestedContainer"
+        @recognize-parameters="emit('recognizeParameters', row.original)"
       />
     </template>
 

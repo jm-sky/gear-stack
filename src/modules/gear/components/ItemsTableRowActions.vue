@@ -18,6 +18,7 @@ const emit = defineEmits<{
   delete: [item: IGearItem]
   statusChange: [status: TGearItemStatus]
   viewContainer: [item: IGearItem]
+  recognizeParameters: [item: IGearItem]
 }>()
 
 // Check if item is a nested container
@@ -51,6 +52,9 @@ const isNestedContainer = computed(() => {
       <template v-else>
         <DropdownMenuItem @click="emit('edit', row)">
           {{ t('gear.actions.edit') }}
+        </DropdownMenuItem>
+        <DropdownMenuItem @click="emit('recognizeParameters', row)">
+          {{ t('gear.actions.recognizeParameters') }}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem

@@ -13,6 +13,7 @@ import ExportToPromptDialog from '../components/ExportToPromptDialog.vue'
 import ItemsTable from '../components/ItemsTable.vue'
 import { useContainer } from '../composables/useContainer'
 import { useGear } from '../composables/useGear'
+import { recognizeParameters, recognizeParametersForItems } from '../utils/parameterRecognition'
 
 const route = useRoute()
 const router = useRouter()
@@ -136,6 +137,75 @@ const handleExportToPrompt = () => {
   isExportToPromptDialogOpen.value = true
 }
 
+const handleRecognizeParameters = async (item: IGearItem) => {
+  try {
+    const params = recognizeParameters(item.name)
+    
+    if (!params.brand && !params.color) {
+      toast.info(t('gear.actions.noParametersFound'))
+      return
+    }
+    
+    const updateData: Partial<IGearItem> = {}
+    if (params.brand && !item.brand) {
+      updateData.brand = params.brand
+    }
+    if (params.color && !item.color) {
+      updateData.color = params.color
+    }
+    
+    if (Object.keys(updateData).length > 0) {
+      updateItem(containerId, item.id, updateData)
+      toast.success(t('gear.actions.parametersRecognized'))
+    } else {
+      toast.info(t('gear.actions.noParametersFound'))
+    }
+  } catch (error) {
+    toast.error(t('common.error'))
+    console.error('Error recognizing parameters:', error)
+  }
+}
+
+const handleRecognizeParametersAll = async () => {
+  if (!container.value || !items.value || items.value.length === 0) return
+  
+  try {
+    toast.loading(t('gear.actions.recognizing'))
+    
+    const paramsMap = recognizeParametersForItems(items.value)
+    let updatedCount = 0
+    
+    for (const item of items.value) {
+      const params = paramsMap.get(item.id)
+      if (!params) continue
+      
+      const updateData: Partial<IGearItem> = {}
+      if (params.brand && !item.brand) {
+        updateData.brand = params.brand
+      }
+      if (params.color && !item.color) {
+        updateData.color = params.color
+      }
+      
+      if (Object.keys(updateData).length > 0) {
+        updateItem(containerId, item.id, updateData)
+        updatedCount++
+      }
+    }
+    
+    toast.dismiss()
+    if (updatedCount > 0) {
+      toast.success(t('gear.actions.parametersRecognized', { count: updatedCount }))
+    } else {
+      toast.info(t('gear.actions.noParametersFound'))
+    }
+  } catch (error) {
+    toast.dismiss()
+    toast.error(t('common.error'))
+    console.error('Error recognizing parameters:', error)
+  }
+}
+
 // Redirect if container not found
 if (!container.value) {
   router.push('/gear')
@@ -151,6 +221,7 @@ if (!container.value) {
         @import="handleImport"
         @add-container="handleAddContainer"
         @export-to-prompt="handleExportToPrompt"
+        @recognize-parameters-all="handleRecognizeParametersAll"
       />
 
       <!-- Items Table -->
@@ -159,6 +230,7 @@ if (!container.value) {
         @edit="handleEditItem"
         @delete="handleDeleteItem"
         @status-change="handleStatusChange"
+        @recognize-parameters="handleRecognizeParameters"
       />
 
       <!-- Category Pie Chart -->

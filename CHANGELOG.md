@@ -21,6 +21,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.19.0] - 2025-01-22
+
+### Added
+- **Parameter Recognition Feature**:
+  - Added automatic recognition of brand and color from item names
+  - New utility: `parameterRecognition.ts` with fuzzy matching against `SUGGESTED_BRANDS` and `SUGGESTED_COLORS`
+  - "Recognize Parameters" action in item row actions menu
+  - "Recognize Parameters" button in item form (fills brand/color fields)
+  - Bulk action "Recognize Parameters for All Items" in container header dropdown menu
+  - Recognition only fills empty fields (doesn't overwrite existing values)
+  - Integration with existing suggested values dictionaries
+
+### Changed
+- **UI Improvements**:
+  - Added visual separator in item form between fields and actions
+  - Improved parameter recognition UX with proper toast notifications
+  - Badge component now properly imported from registry in `PageListHeader.vue`
+
+### Fixed
+- Fixed TypeScript error in parameter recognition (handling undefined first word)
+- Improved nested container display - nested containers now have bold font and clickable links to container detail page
+
+---
+
 ## [0.18.0] - 2025-01-21
 
 ### Added
