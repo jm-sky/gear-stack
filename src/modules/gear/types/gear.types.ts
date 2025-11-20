@@ -89,6 +89,7 @@ export interface IGearContainer {
   type: TGearContainerType
   color?: TContainerColor  // Optional, defaults to 'default'
   parentContainerId?: TUUID // Parent container ID (if this container is nested)
+  hideWhenNested?: boolean // Hide from main list when nested in another container
   // Extended fields
   brand?: string // Manufacturer/brand
   price?: number // Price in currency (optional)
@@ -109,6 +110,7 @@ export interface ICreateContainerDto {
   type: TGearContainerType
   color?: TContainerColor
   parentContainerId?: TUUID
+  hideWhenNested?: boolean
   brand?: string
   price?: number
   weight?: number
@@ -125,6 +127,7 @@ export interface IUpdateContainerDto {
   type?: TGearContainerType
   color?: TContainerColor
   parentContainerId?: TUUID
+  hideWhenNested?: boolean
   brand?: string
   price?: number
   weight?: number
