@@ -156,8 +156,8 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 - ✅ **Półka cenowa / jakość** - niska półka, średnia półka, wyższa półka
 - ✅ **Firma** - producent/marka przedmiotu (z ComboBox i sugerowanymi wartościami)
 - ✅ **Kolor** - kolor przedmiotu (z ComboBox i sugerowanymi wartościami)
-- 🔄 **Wearable** - opcja oznaczania przedmiotu jako noszonego na sobie (np. odzież, zegarek, buty)
-- 🔄 **Consumable** - opcja oznaczania przedmiotu jako zużywalnego (np. jedzenie, lekarstwa, paliwo)
+- ✅ **Wearable** - opcja oznaczania przedmiotu jako noszonego na sobie (np. odzież, zegarek, buty)
+- ✅ **Consumable** - opcja oznaczania przedmiotu jako zużywalnego (np. jedzenie, lekarstwa, paliwo)
 
 **Dla kontenerów:**
 - ✅ **Firma** - producent/marka kontenera
