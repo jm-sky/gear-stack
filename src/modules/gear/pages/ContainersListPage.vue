@@ -179,7 +179,7 @@ const handleGenerateSampleSet = () => {
         <p class="text-muted-foreground mb-6 max-w-md">
           {{ t('gear.container.emptyDescription') }}
         </p>
-        <div class="flex gap-2">
+        <div class="flex flex-col md:flex-row flex-wrap gap-2">
           <Button @click="handleCreate">
             <Plus class="size-4" />
             {{ t('gear.container.create.title') }}
