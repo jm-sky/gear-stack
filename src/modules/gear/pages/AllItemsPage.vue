@@ -189,6 +189,20 @@ function navigateToContainer(containerId: string) {
           <span v-else>-</span>
         </template>
 
+        <template #wearable="{ row }">
+          <Badge v-if="row.original.wearable" variant="outline" class="text-xs">
+            {{ t('gear.item.wearable') }}
+          </Badge>
+          <span v-else>-</span>
+        </template>
+
+        <template #consumable="{ row }">
+          <Badge v-if="row.original.consumable" variant="outline" class="text-xs">
+            {{ t('gear.item.consumable') }}
+          </Badge>
+          <span v-else>-</span>
+        </template>
+
         <template #empty>
           <TableEmpty>
             <Package class="size-12 text-muted-foreground mb-4" />

@@ -153,6 +153,10 @@ export const gearEn = {
       brand: 'Brand',
       color: 'Color',
       quality: 'Quality / Price Tier',
+      wearable: 'Wearable',
+      wearableDescription: 'Item is worn/carried on person (e.g., clothing, watch, shoes)',
+      consumable: 'Consumable',
+      consumableDescription: 'Item is consumed/used up (e.g., food, medicine, fuel)',
       actions: 'Actions',
       qualities: {
         low: 'Low',
@@ -439,6 +443,10 @@ export const gearPl = {
       brand: 'Marka',
       color: 'Kolor',
       quality: 'Jakość / Półka cenowa',
+      wearable: 'Noszone',
+      wearableDescription: 'Przedmiot noszony na sobie (np. odzież, zegarek, buty)',
+      consumable: 'Zużywalne',
+      consumableDescription: 'Przedmiot zużywany/zużywalny (np. jedzenie, lekarstwa, paliwo)',
       actions: 'Akcje',
       qualities: {
         low: 'Niska',

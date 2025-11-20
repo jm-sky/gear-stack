@@ -274,6 +274,20 @@ function getNestedContainer(item: IGearItem) {
       <span v-else>-</span>
     </template>
 
+    <template #wearable="{ row }">
+      <Badge v-if="row.original.wearable" variant="outline" class="text-xs">
+        {{ t('gear.item.wearable') }}
+      </Badge>
+      <span v-else>-</span>
+    </template>
+
+    <template #consumable="{ row }">
+      <Badge v-if="row.original.consumable" variant="outline" class="text-xs">
+        {{ t('gear.item.consumable') }}
+      </Badge>
+      <span v-else>-</span>
+    </template>
+
     <template #actions="{ row }">
       <ItemsTableRowActions
         :row="row.original"
