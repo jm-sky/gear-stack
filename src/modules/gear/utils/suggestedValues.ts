@@ -110,7 +110,7 @@ export function getColorHex(colorName: string | null | undefined): string | null
  */
 export function getColorOptions(): Array<{ value: string; label: string; data: string }> {
   return SUGGESTED_COLORS.map(color => ({
-    value: color.toLowerCase(),
+    value: color,
     label: color,
     data: getColorHex(color) ?? color,
   }))
@@ -121,7 +121,7 @@ export function getColorOptions(): Array<{ value: string; label: string; data: s
  */
 export function getBrandOptions(): Array<{ value: string; label: string }> {
   return SUGGESTED_BRANDS.map(brand => ({
-    value: brand.toLowerCase(),
+    value: brand,
     label: brand,
   }))
 }
