@@ -121,25 +121,34 @@ const handleGenerateSampleSet = () => {
             {{ t('gear.page.title') }}
           </p>
         </div>
-        <div class="flex gap-2">
+        <div class="flex flex-col sm:flex-row gap-2">
+          <div class="flex gap-2">
+            <Button
+              v-tooltip.bottom="t('gear.export.allToPrompt')"
+              variant="outline"
+              class="shrink-0"
+              @click="handleExportAllToPrompt"
+            >
+              <Sparkles class="size-4" />
+            </Button>
+            <Button
+              v-tooltip.bottom="t('gear.container.create.title')"
+              variant="default"
+              class="shrink-0 flex-1 sm:flex-none"
+              @click="handleCreate"
+            >
+              <PlusIcon class="size-4" />
+              {{ t('gear.container.create.title') }}
+            </Button>
+            <ContainersListPageDropdown @export-all-to-prompt="handleExportAllToPrompt" @import="handleImport" />
+          </div>
           <Button
-            v-tooltip.bottom="t('gear.export.allToPrompt')"
             variant="outline"
-            class="shrink-0"
-            @click="handleExportAllToPrompt"
+            class="w-full sm:w-auto shrink-0"
+            @click="handleGenerateSampleSet"
           >
-            <Sparkles class="size-4" />
+            {{ t('gear.sampleSet.generateButton') }}
           </Button>
-          <Button
-            v-tooltip.bottom="t('gear.container.create.title')"
-            variant="default"
-            class="shrink-0 flex-1"
-            @click="handleCreate"
-          >
-            <PlusIcon class="size-4" />
-            {{ t('gear.container.create.title') }}
-          </Button>
-          <ContainersListPageDropdown @export-all-to-prompt="handleExportAllToPrompt" @import="handleImport" />
         </div>
       </div>
 
