@@ -17,9 +17,12 @@ DEPLOY_DIR="/var/www/gear-stack"
 
 echo -e "${GREEN}🔨 Starting Gear Stack build and deploy...${NC}"
 
+echo -e "${YELLOW}Pulling latest changes${NC}"
+cd "$PROJECT_DIR"
+git pull 
+
 # Step 1: Install frontend dependencies
 echo -e "${YELLOW}📦 Step 1: Installing frontend dependencies...${NC}"
-cd "$PROJECT_DIR"
 pnpm install --frozen-lockfile
 
 # Step 2: Build frontend
