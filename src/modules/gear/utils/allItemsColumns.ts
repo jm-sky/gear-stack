@@ -1,4 +1,4 @@
-import type { TContainerColor } from '../types/gear.types'
+import type { TContainerColor, TGearWeightUnit } from '../types/gear.types'
 import type { ColumnDef } from '@tanstack/vue-table'
 
 export interface IItemWithContainer {
@@ -10,7 +10,7 @@ export interface IItemWithContainer {
   containerColor: TContainerColor
   quantity: number
   weight: number
-  weightUnit: 'g' | 'kg'
+  weightUnit: TGearWeightUnit
   status: 'owned' | 'missing' | 'toBuy'
   priority: 'low' | 'medium' | 'high' | 'critical'
   brand?: string

@@ -21,6 +21,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.17.0] - 2025-01-21
+
+### Added
+- **Imperial Weight Units Support**:
+  - Added support for ounces (oz) and pounds (lb) as weight units
+  - Users can now select oz and lb in item and container forms
+  - Preferred weight unit setting now includes oz and lb options
+  - All weight conversion functions updated to support imperial units
+  - Conversion rates: 1 oz = 28.3495 g, 1 lb = 453.592 g
+
+### Changed
+- **Weight Unit Type**: Extended `TGearWeightUnit` type from `'g' | 'kg'` to `'g' | 'kg' | 'oz' | 'lb'`
+- **Weight Conversion Functions**: Updated all conversion functions in `formatWeight.ts` to handle oz and lb
+- **Form Validation**: Updated zod schemas to accept oz and lb as valid weight units
+- **Markdown Import/Export**: Parser now recognizes and handles oz and lb in markdown format
+- **Translations**: Added translations for oz and lb in both English and Polish
+
+### Technical Details
+- Added constants: `GRAMS_PER_OUNCE = 28.3495` and `GRAMS_PER_POUND = 453.592`
+- Updated all weight-related interfaces and types to support imperial units
+- All weight displays automatically convert to preferred unit (including oz/lb)
+
+---
+
 ## [0.16.0] - 2025-01-21
 
 ### Added

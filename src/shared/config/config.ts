@@ -3,7 +3,7 @@
 // Supported locales type (defined here to avoid cyclic dependencies)
 export type SupportedLocale = 'en' | 'pl'
 
-export type TGearWeightUnit = 'g' | 'kg'
+export type TGearWeightUnit = 'g' | 'kg' | 'oz' | 'lb'
 
 export const config = {
   app: {

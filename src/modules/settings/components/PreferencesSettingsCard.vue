@@ -28,7 +28,7 @@ const { settings, updateSettings } = useSettings()
 const settingsSchema = z.object({
   darkMode: z.enum(['light', 'dark']),
   locale: z.enum(['en', 'pl']),
-  preferredWeightUnit: z.enum(['g', 'kg']),
+  preferredWeightUnit: z.enum(['g', 'kg', 'oz', 'lb']),
 })
 
 const getThemeValue = (darkMode: boolean | undefined) => {
@@ -173,6 +173,12 @@ const onSubmit = handleSubmit(async (values) => {
                       </SelectItem>
                       <SelectItem value="kg">
                         {{ t('settings.preferences.preferredWeightUnit.options.kg') }}
+                      </SelectItem>
+                      <SelectItem value="oz">
+                        {{ t('settings.preferences.preferredWeightUnit.options.oz') }}
+                      </SelectItem>
+                      <SelectItem value="lb">
+                        {{ t('settings.preferences.preferredWeightUnit.options.lb') }}
                       </SelectItem>
                     </SelectContent>
                   </Select>

@@ -37,6 +37,22 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 - ✅ Formularze nadal mogą używać różnych jednostek, ale wyświetlanie będzie spójne
 - ✅ Ustawienie zapisywane w localStorage i synchronizowane w całej aplikacji
 
+### ✅ Dodatkowe jednostki wagi (oz, lb)
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium
+
+- ✅ Dodanie jednostek imperialnych: uncje (oz) i funty (lb)
+- ✅ Rozszerzenie typu `TGearWeightUnit` o `'oz'` i `'lb'`
+- ✅ Aktualizacja funkcji konwersji w `formatWeight.ts`:
+  - ✅ Konwersja oz → g (1 oz = 28.3495 g)
+  - ✅ Konwersja lb → g (1 lb = 453.592 g)
+  - ✅ Konwersja g → oz i g → lb
+- ✅ Aktualizacja formularzy (ItemFormFields, ContainerFormFields) - dodanie opcji oz i lb
+- ✅ Aktualizacja preferowanej jednostki wagi w ustawieniach - dodanie oz i lb jako opcji
+- ✅ Aktualizacja tłumaczeń (PL/EN) dla nowych jednostek
+- ✅ Aktualizacja parsera markdown import - rozpoznawanie oz i lb w eksporcie/impocie
+- ✅ Aktualizacja walidacji (zod schemas) - dodanie oz i lb do enum
+- ✅ Wszystkie wyświetlane wagi będą konwertowane do preferowanej jednostki (w tym oz/lb)
+
 ---
 
 ## 🎨 UI/UX Ulepszenia

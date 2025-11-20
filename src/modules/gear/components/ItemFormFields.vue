@@ -221,6 +221,12 @@ const handleCancel = () => {
                 <SelectItem value="kg">
                   {{ $t('gear.item.weightUnits.kg') }}
                 </SelectItem>
+                <SelectItem value="oz">
+                  {{ $t('gear.item.weightUnits.oz') }}
+                </SelectItem>
+                <SelectItem value="lb">
+                  {{ $t('gear.item.weightUnits.lb') }}
+                </SelectItem>
               </SelectContent>
             </Select>
             <FormMessage />

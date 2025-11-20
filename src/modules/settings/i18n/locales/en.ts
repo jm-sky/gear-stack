@@ -33,6 +33,8 @@ export const settingsEn = {
         options: {
           g: 'Grams (g)',
           kg: 'Kilograms (kg)',
+          oz: 'Ounces (oz)',
+          lb: 'Pounds (lb)',
         },
       },
     },

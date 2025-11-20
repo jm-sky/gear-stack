@@ -11,7 +11,7 @@ export const containerSchema = z.object({
   brand: z.string().optional(),
   price: z.number().min(0, 'Cena nie może być ujemna').optional(),
   weight: z.number().min(0, 'Waga nie może być ujemna').optional(),
-  weightUnit: z.enum(['g', 'kg']).optional(),
+  weightUnit: z.enum(['g', 'kg', 'oz', 'lb']).optional(),
   url: z.string().url('Nieprawidłowy URL').optional().or(z.literal('')),
 })
 
@@ -22,7 +22,7 @@ export const itemSchema = z.object({
   category: z.string().min(1, 'Kategoria jest wymagana'), // Allow any string for custom categories
   quantity: z.number().int().min(1, 'Ilość musi być większa od 0'),
   weight: z.number().min(0, 'Waga nie może być ujemna'),
-  weightUnit: z.enum(['g', 'kg']),
+  weightUnit: z.enum(['g', 'kg', 'oz', 'lb']),
   notes: z.string().optional(),
   expirationDate: z.string().optional(),
   priority: z.enum(['critical', 'high', 'medium', 'low']),

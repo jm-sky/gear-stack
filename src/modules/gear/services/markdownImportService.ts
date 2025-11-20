@@ -83,7 +83,7 @@ export interface IMarkdownImportResult {
     id?: string // Container ID from [#id] in header
     uuid?: string // Container UUID from [uuid:xxx] in header
     weight?: number // Container weight
-    weightUnit?: 'g' | 'kg' // Container weight unit
+    weightUnit?: 'g' | 'kg' | 'oz' | 'lb' // Container weight unit
     url?: string // Container URL
     items: Array<ICreateItemDto & { nestedContainerId?: string; uuid?: string }> // nestedContainerId is temporary slug reference, uuid for updates
   }>
@@ -99,7 +99,7 @@ interface IItemParams {
   category?: string
   quantity?: number
   weight?: number
-  weightUnit?: 'g' | 'kg'
+  weightUnit?: 'g' | 'kg' | 'oz' | 'lb'
 }
 
 /**
@@ -147,7 +147,7 @@ class MarkdownImportService {
     }
 
     const lines = markdown.split('\n')
-    let currentContainer: { name: string; id?: string; uuid?: string; weight?: number; weightUnit?: 'g' | 'kg'; url?: string; items: ICreateItemDto[] } | null = null
+    let currentContainer: { name: string; id?: string; uuid?: string; weight?: number; weightUnit?: 'g' | 'kg' | 'oz' | 'lb'; url?: string; items: ICreateItemDto[] } | null = null
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]?.trim()
@@ -164,7 +164,7 @@ class MarkdownImportService {
         let containerUuid: string | undefined
         let containerUrl: string | undefined
         let containerWeight: number | undefined
-        let containerWeightUnit: 'g' | 'kg' | undefined
+        let containerWeightUnit: 'g' | 'kg' | 'oz' | 'lb' | undefined
 
         // Extract ID from [#id]
         const idMatch = headerText.match(/\[#([^\]]+)\]/)
@@ -197,11 +197,12 @@ class MarkdownImportService {
           }
         }
 
-        // Extract weight from - weightg or - weightkg (at the end)
-        const weightMatch = headerText.match(/-?\s*([\d.]+)\s*(g|kg)\s*$/i)
+        // Extract weight from - weightg, - weightkg, - weightoz, - weightlb (at the end)
+        const weightMatch = headerText.match(/-?\s*([\d.]+)\s*(g|kg|oz|lb)\s*$/i)
         if (weightMatch) {
           containerWeight = parseFloat(weightMatch[1] ?? '0')
-          containerWeightUnit = (weightMatch[2]?.toLowerCase() ?? 'g') as 'g' | 'kg'
+          const unit = weightMatch[2]?.toLowerCase() ?? 'g'
+          containerWeightUnit = (unit === 'kg' ? 'kg' : unit === 'oz' ? 'oz' : unit === 'lb' ? 'lb' : 'g') as 'g' | 'kg' | 'oz' | 'lb'
           headerText = headerText.replace(weightMatch[0] ?? '', '').trim()
         }
 
@@ -258,7 +259,7 @@ class MarkdownImportService {
     let status: 'owned' | 'missing' | 'toBuy' = 'owned'
     let quantity = 1
     let weight = 100 // Default weight
-    let weightUnit: 'g' | 'kg' = 'g'
+    let weightUnit: 'g' | 'kg' | 'oz' | 'lb' = 'g'
     let expirationDate: string | undefined
     let url: string | undefined
     let nestedContainerId: string | undefined
@@ -278,11 +279,12 @@ class MarkdownImportService {
       workingLine = workingLine.replace(uuidMatch[0] ?? '', '').trim()
     }
 
-    // 3. Extract weight at the end (- 500g or - 2.5kg)
-    const weightMatch = workingLine.match(/[-–—]\s*(\d+(?:[.,]\d+)?)\s*(g|kg)\s*$/i)
+    // 3. Extract weight at the end (- 500g, - 2.5kg, - 16oz, - 2.5lb)
+    const weightMatch = workingLine.match(/[-–—]\s*(\d+(?:[.,]\d+)?)\s*(g|kg|oz|lb)\s*$/i)
     if (weightMatch) {
       weight = Number.parseFloat((weightMatch[1] ?? '100').replace(',', '.'))
-      weightUnit = (weightMatch[2]?.toLowerCase() === 'kg' ? 'kg' : 'g') as 'g' | 'kg'
+      const unit = weightMatch[2]?.toLowerCase() ?? 'g'
+      weightUnit = (unit === 'kg' ? 'kg' : unit === 'oz' ? 'oz' : unit === 'lb' ? 'lb' : 'g') as 'g' | 'kg' | 'oz' | 'lb'
       workingLine = workingLine.substring(0, weightMatch.index).trim()
     }
 
@@ -481,11 +483,12 @@ class MarkdownImportService {
         continue
       }
 
-      // Try to match weight (Ng, Nkg)
-      const weightMatch = part.match(/^(\d+(?:[.,]\d+)?)\s*(g|kg)$/i)
+      // Try to match weight (Ng, Nkg, Noz, Nlb)
+      const weightMatch = part.match(/^(\d+(?:[.,]\d+)?)\s*(g|kg|oz|lb)$/i)
       if (weightMatch) {
         params.weight = Number.parseFloat((weightMatch[1] ?? '0').replace(',', '.'))
-        params.weightUnit = (weightMatch[2]?.toLowerCase() === 'kg' ? 'kg' : 'g') as 'g' | 'kg'
+        const unit = weightMatch[2]?.toLowerCase() ?? 'g'
+        params.weightUnit = (unit === 'kg' ? 'kg' : unit === 'oz' ? 'oz' : unit === 'lb' ? 'lb' : 'g') as 'g' | 'kg' | 'oz' | 'lb'
         continue
       }
     }

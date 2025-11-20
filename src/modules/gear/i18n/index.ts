@@ -91,6 +91,8 @@ export const gearEn = {
       weightUnits: {
         g: 'g',
         kg: 'kg',
+        oz: 'oz',
+        lb: 'lb',
       },
       units: {
         piece: 'pcs',
@@ -355,6 +357,8 @@ export const gearPl = {
       weightUnits: {
         g: 'g',
         kg: 'kg',
+        oz: 'oz',
+        lb: 'lb',
       },
       units: {
         piece: 'szt.',

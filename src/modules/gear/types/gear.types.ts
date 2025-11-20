@@ -25,7 +25,7 @@ export type TGearItemPriority = 'critical' | 'high' | 'medium' | 'low'
 export type TGearItemQuality = 'low' | 'medium' | 'high'
 
 // Jednostka wagi
-export type TGearWeightUnit = 'g' | 'kg'
+export type TGearWeightUnit = 'g' | 'kg' | 'oz' | 'lb'
 
 // Container color options
 export type TContainerColor =
