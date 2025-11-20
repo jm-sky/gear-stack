@@ -448,10 +448,10 @@ const handleCancel = () => {
         {{ $t('gear.actions.recognizeParameters') }}
       </Button>
       <div class="flex gap-3">
-        <Button type="button" variant="outline" @click="handleCancel">
+        <Button type="button" variant="outline" class="flex-1" @click="handleCancel">
           {{ $t('gear.actions.cancel') }}
         </Button>
-        <Button type="submit" :loading>
+        <Button type="submit" class="flex-1" :loading>
           {{ $t('gear.actions.save') }}
         </Button>
       </div>

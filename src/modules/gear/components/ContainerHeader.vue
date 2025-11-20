@@ -164,7 +164,7 @@ const handleBack = () => {
             <BoxIcon class="size-4" />
             <span class="hidden sm:inline">{{ t('gear.container.addNested') }}</span>
           </Button>
-          <Button size="sm" class="shrink-0" @click="handleAddItem">
+          <Button size="sm" class="shrink-0 flex-1 sm:flex-none" @click="handleAddItem">
             <Plus class="size-4" />
             {{ t('gear.item.create') }}
           </Button>
