@@ -97,14 +97,10 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 - ✅ Kolor wyświetlany w kartach kontenerów i rozwiniętych wierszach zagnieżdżonych kontenerów
 
 ### Wybór primary color (brand color)
-**Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Small
+**Status:** ⏸️ On Hold | **Priority:** Low | **Complexity:** Small
 
-- Porównanie obecnego "dark orange" z alternatywnymi opcjami
-- Rozważenie kolorów: coyote, olive, oraz inne opcje pasujące do tematyki survival/outdoor
-- Testowanie różnych wariantów kolorystycznych
-- Wybór finalnego brand color, który najlepiej oddaje charakter aplikacji
-- Aktualizacja palety kolorów w całej aplikacji po wyborze
-- **Uwaga:** Warianty kolorów są już przygotowane w `src/css/style.css` jako zakomentowany kod
+- Obecny kolor "dark orange" jest zadowalający, zadanie wstrzymane
+- **Uwaga:** Warianty kolorów są już przygotowane w `src/css/style.css` jako zakomentowany kod (na wypadek potrzeby zmiany w przyszłości)
 
 ---
 
@@ -212,7 +208,7 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 - ✅ Przycisk kopiowania szablonu do schowka
 
 **Planowane ulepszenia (front-end only):**
-- ✅ **Opcje konfiguracji eksportu** (częściowo zaimplementowane):
+- 🚧 **Opcje konfiguracji eksportu** (częściowo zaimplementowane):
   - ✅ Pokazywanie UUID w eksporcie (opcjonalnie)
   - ✅ Pokazywanie wagi w eksporcie (opcjonalnie)
   - ✅ Pokazywanie koloru w eksporcie (opcjonalnie)
@@ -301,21 +297,23 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 
 ## 📄 Informacje prawne i footer
 
-### Strona "Informacja o ciasteczkach" i Footer
-**Status:** 🔄 Planned | **Priority:** Low | **Feature:** FEATURE-010 | **Complexity:** Small
+### ✅ Strona "Informacja o ciasteczkach" i Footer
+**Status:** ✅ Completed | **Priority:** Low | **Feature:** FEATURE-010 | **Complexity:** Small
 
 **Strona "Informacja o ciasteczkach":**
-- Strona/informacja typu "Informacja o ciasteczkach"
-- Informacje o wykorzystaniu localStorage
-- Zgodność z RODO (jeśli aplikacja będzie wykorzystywać cookies w przyszłości)
+- ✅ Strona `/cookies` z informacją o wykorzystaniu localStorage
+- ✅ Sekcje: LocalStorage, Co przechowujemy, Prywatność, Przyszłość, RODO
+- ✅ Zgodność z RODO - informacje o lokalnym przechowywaniu danych
+- ✅ Tłumaczenia PL/EN
 
 **Footer:**
-- Footer z informacją typu `2025 (R) DEV Made IT`
-- Linki do:
-  - Informacji o ciasteczkach
-  - Polityki prywatności (jeśli będzie potrzebna)
-  - Kontaktu
-  - GitHub/repozytorium (opcjonalnie)
+- ✅ Footer z informacją `© [rok] DEV Made IT`
+- ✅ Linki do:
+  - ✅ Informacji o ciasteczkach (`/cookies`)
+  - ✅ Polityki prywatności (`/privacy`)
+  - ✅ Kontaktu (`/contact`)
+  - ✅ GitHub/repozytorium
+- ✅ Footer wyświetlany w `AuthenticatedLayout`
 
 ---
 
@@ -345,8 +343,8 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 2. ✅ **Rozszerzone pola** - Medium priority, Medium complexity (Completed in v0.8.0)
 
 ### Low Priority (Polish/Enhancement)
-1. **Wybór primary color** - Low priority, Small complexity (warianty już przygotowane)
-2. **Footer i strony prawne** - Low priority, Small complexity
+1. ⏸️ **Wybór primary color** - Low priority, Small complexity (On Hold - obecny kolor zadowalający)
+2. ✅ **Footer i strony prawne** - Low priority, Small complexity (Completed)
 3. **Funkcje AI (podstawowe)** - Low priority, Medium complexity
 
 ---
