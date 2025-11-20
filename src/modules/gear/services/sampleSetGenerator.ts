@@ -1,4 +1,4 @@
-import type { ICreateContainerDto, ICreateItemDto } from '../types/gear.types'
+import type { ICreateItemDto } from '../types/gear.types'
 import { gearService } from './gearService'
 import type { TUUID } from '@/shared/types/base.type'
 
@@ -10,13 +10,6 @@ interface ISampleSetItem {
   quantity?: number
   priority?: ICreateItemDto['priority']
   status?: ICreateItemDto['status']
-}
-
-interface ISampleSetContainer {
-  nameKey: string
-  type: ICreateContainerDto['type']
-  items: ISampleSetItem[]
-  nestedContainers?: ISampleSetContainer[]
 }
 
 /**
