@@ -121,6 +121,28 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 
 > **Uwaga:** Ta funkcjonalność jest już zaimplementowana i działa z localStorage. W przyszłości może być rozszerzona o synchronizację z backendem (zobacz [ROADMAP_V2.md](./ROADMAP_V2.md)).
 
+### Oznaczanie kontenerów jako fragmentów rodzica (integral part)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+
+- Kontener może być oznaczony jako "fragment rodzica" (integral part of parent)
+- Przykład: Bagażnik samochodu jest częścią samochodu i nie powinien być liczony osobno
+- Przykład: Pokrywa plecaka jest częścią plecaka
+- Oznaczenie kontenera jako fragmentu:
+  - Kontener nie jest liczony jako osobny kontener w statystykach
+  - Waga kontenera-fragmentu jest zawsze wliczana do rodzica
+  - Fragment nie może być przeniesiony do innego kontenera bez rodzica
+  - Wizualne oznaczenie w interfejsie (ikona, badge, tooltip)
+- Użycie przypadków:
+  - Części samochodu (bagażnik, schowek, konsola)
+  - Części plecaka (kieszenie, pokrywy, pasy)
+  - Części namiotu (stelaż, podłoga)
+  - Inne kontenery, które są nierozerwalnie związane z rodzicem
+- Opcja w formularzu kontenera: checkbox "Fragment rodzica" (dostępne tylko gdy kontener ma rodzica)
+- Wpływ na obliczenia:
+  - Waga fragmentu zawsze wliczana do rodzica
+  - Fragment nie jest liczony jako osobny kontener w statystykach
+  - Fragment nie może być wyświetlony jako główny kontener (jeśli opcja "Pokaż tylko główne" jest włączona)
+
 ---
 
 ## 📝 Rozszerzone pola
@@ -134,6 +156,8 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 - ✅ **Półka cenowa / jakość** - niska półka, średnia półka, wyższa półka
 - ✅ **Firma** - producent/marka przedmiotu (z ComboBox i sugerowanymi wartościami)
 - ✅ **Kolor** - kolor przedmiotu (z ComboBox i sugerowanymi wartościami)
+- 🔄 **Wearable** - opcja oznaczania przedmiotu jako noszonego na sobie (np. odzież, zegarek, buty)
+- 🔄 **Consumable** - opcja oznaczania przedmiotu jako zużywalnego (np. jedzenie, lekarstwa, paliwo)
 
 **Dla kontenerów:**
 - ✅ **Firma** - producent/marka kontenera

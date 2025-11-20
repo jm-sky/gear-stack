@@ -75,6 +75,8 @@ export interface IGearItem {
   brand?: string // Manufacturer/brand
   color?: string // Item color
   quality?: TGearItemQuality // Price tier / quality
+  wearable?: boolean // Item is worn/carried on person (e.g., clothing, watch)
+  consumable?: boolean // Item is consumed/used up (e.g., food, medicine, fuel)
   createdAt: TDateTime
   updatedAt: TDateTime
 }
@@ -143,6 +145,8 @@ export interface ICreateItemDto {
   brand?: string
   color?: string
   quality?: TGearItemQuality
+  wearable?: boolean
+  consumable?: boolean
 }
 
 // DTO dla aktualizacji przedmiotu
@@ -162,5 +166,7 @@ export interface IUpdateItemDto {
   brand?: string
   color?: string
   quality?: TGearItemQuality
+  wearable?: boolean
+  consumable?: boolean
 }
 

@@ -42,9 +42,11 @@ When generating or updating gear lists, use this format:
 - Recognized by \`http://\`, \`https://\`, or \`www.\`
 
 ### Weight (Optional)
-- Format: \`- [number]g\` or \`- [number]kg\`
+- **For containers:** Format: \`- [number]g\` or \`- [number]kg\` or \`- [number]oz\` or \`- [number]lb\` in container header
+- **For items:** Format: \`- [number]g\` or \`- [number]kg\` or \`- [number]oz\` or \`- [number]lb\` at the end after a dash
 - Always at the end after a dash
-- If omitted, default weight will be assigned (100g)
+- If omitted for items, default weight will be assigned (100g)
+- Container weight is optional but recommended for accurate total weight calculations
 
 ## Example
 \`\`\`markdown
