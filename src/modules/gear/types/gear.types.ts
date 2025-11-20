@@ -90,6 +90,9 @@ export interface IGearContainer {
   // Extended fields
   brand?: string // Manufacturer/brand
   price?: number // Price in currency (optional)
+  weight?: number // Container weight value
+  weightUnit?: TGearWeightUnit // Container weight unit (g or kg)
+  url?: string // Link to product, review, etc.
   items: IGearItem[]
   createdAt: TDateTime
   updatedAt: TDateTime
@@ -104,6 +107,9 @@ export interface ICreateContainerDto {
   parentContainerId?: TUUID
   brand?: string
   price?: number
+  weight?: number
+  weightUnit?: TGearWeightUnit
+  url?: string
 }
 
 // DTO dla aktualizacji kontenera
@@ -115,6 +121,9 @@ export interface IUpdateContainerDto {
   parentContainerId?: TUUID
   brand?: string
   price?: number
+  weight?: number
+  weightUnit?: TGearWeightUnit
+  url?: string
 }
 
 // DTO dla tworzenia przedmiotu

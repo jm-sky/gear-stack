@@ -1,6 +1,156 @@
 import type { ICreateItemDto } from '../types/gear.types'
 import { SUGGESTED_BRANDS, SUGGESTED_COLORS } from '../utils/suggestedValues'
 
+// Markdown template for AI guidelines
+export const guidelinesTemplate = `# Gear List Formatting Guidelines
+
+When generating or updating gear lists, use this format:
+
+## Standard Format
+\`\`\`markdown
+## [Container Name] [#container-id] ([Container Type]) <URL> - [weight]g
+- **[Item Name]** x[qty] ([Brand], [Color]) [#nested-id] ([Status]) <URL> - [weight]g
+\`\`\`
+
+## Format Rules
+
+### Item Name (Required)
+- **Bold formatting** using \`**Item Name**\`
+- Always at the start of the line after \`- \`
+
+### Quantity (Optional)
+- Format: \`x[number]\` (e.g., x2, x10, x100)
+- Can appear anywhere before weight, but typically after item name
+- If omitted, quantity = 1
+
+### Brand and Color (Optional)
+- First parentheses: \`([Brand], [Color])\`
+- Brand comes first, color second
+- Both are optional, can have just brand or just color
+- Examples: \`(Victorinox)\`, \`(Red)\`, \`(Petzl, Black)\`
+
+### Status (Optional)
+- Second parentheses for status or expiration
+- Status values: \`Missing\`, \`To Buy\` (omit if Owned)
+- Expiration: \`Expiration: DD.MM.YYYY\`
+- Can combine: \`(Missing, Expiration: 31.12.2025)\`
+
+### Container ID (Required for containers)
+- Format: \`[#slug-id]\` in header and nested item reference
+- ID is generated from container name as slug
+- Examples: \`Bug-Out Bag\` → \`[#bug-out-bag]\`, \`EDC Pouch\` → \`[#edc-pouch]\`
+- If item references container \`[#id]\`, it creates nested relationship
+
+### URL (Optional)
+- Format: \`<URL>\` in angle brackets or plain URL
+- Recognized by \`http://\`, \`https://\`, or \`www.\`
+- Examples: \`<https://example.com>\`, \`https://example.com\`, \`www.example.com\`
+- Automatically adds \`https://\` to \`www.\` links
+
+### Weight (Optional)
+- Format: \`- [number]g\` or \`- [number]kg\`
+- Always at the end after a dash
+- Examples: \`- 150g\`, \`- 2.5kg\`, \`- 1200g\`
+- If omitted, default weight will be assigned (100g)
+
+## Examples
+
+### Minimal Format
+\`\`\`markdown
+- **Flashlight** - 150g
+- **Rope** - 500g
+\`\`\`
+
+### With Quantity
+\`\`\`markdown
+- **AA Battery** x4 - 96g
+- **Energy Bar** x10 - 400g
+\`\`\`
+
+### With Brand and Color
+\`\`\`markdown
+- **Tactical Knife** (Victorinox, Black) - 200g
+- **Headlamp** (Petzl, Red) - 90g
+- **Water Bottle** (Nalgene) - 150g
+\`\`\`
+
+### With Status
+\`\`\`markdown
+- **First Aid Kit** (Missing) - 500g
+- **Water Filter** (To Buy) - 200g
+- **Compass** (Suunto) (Missing) - 45g
+\`\`\`
+
+### With Expiration
+\`\`\`markdown
+- **Emergency Food** (Expiration: 31.12.2025) - 400g
+- **Water Purification Tablets** (Katadyn) (Expiration: 15.06.2026) - 50g
+\`\`\`
+
+### With URL
+\`\`\`markdown
+- **Tactical Knife** (Victorinox) <https://example.com/knife> - 200g
+- **Headlamp** (Petzl) www.petzl.com/headlamp - 90g
+- **Water Filter** <https://store.com/filter> (To Buy) - 200g
+\`\`\`
+
+### Complete Examples
+\`\`\`markdown
+- **Headlamp** x2 (Petzl, Red) <https://petzl.com> - 180g
+- **Multi-tool** (Leatherman, Silver) (Missing) - 250g
+- **Emergency Blanket** x3 (Mylar) <www.example.com> - 180g
+\`\`\`
+
+## Container Example
+\`\`\`markdown
+## Bug-Out Bag [#bug-out-bag] (Backpack) <https://example.com/backpack> - 2000g
+- **Water Bottle** x2 (Nalgene) - 300g
+- **Emergency Food** x5 (Expiration: 31.12.2025) - 1000g
+- **Tactical Knife** (Victorinox, Black) - 200g
+- **Headlamp** (Petzl, Red) - 90g
+- **First Aid Pouch** (Pouch) [#first-aid-pouch] - 350g
+- **Fire Starter** x2 - 50g
+
+## First Aid Pouch [#first-aid-pouch] (Pouch) <https://example.com/pouch> - 500g
+- **Bandages** x5 - 100g
+- **Pain Pills** (Expiration: 31.12.2025) - 50g
+- **Antiseptic** - 100g
+\`\`\`
+
+## Nested Containers
+When a container is inside another container:
+1. Add item with container name and \`[#id]\` reference
+2. Define the nested container separately with same \`[#id]\`
+3. Parser will create the relationship automatically
+
+Example:
+\`\`\`markdown
+## Main Backpack [#main] (Backpack)
+- **EDC Pouch** (Pouch) [#edc] - 500g
+- **Water Bottle** - 150g
+
+## EDC Pouch [#edc] (Pouch)
+- **Multi-tool** - 250g
+- **Flashlight** - 90g
+\`\`\`
+
+## Container Types
+Backpack, Bag, Pouch, Box, Cabinet, Vehicle, Shelf, Drawer, Case, Trunk, Other
+
+## Important Notes
+1. **Only item name is required** (bold \`**text**\`)
+2. Container headers must have \`[#id]\` for proper identification
+3. Nested containers: item with \`[#id]\` + separate container definition
+4. Weight should end with \`g\` or \`kg\` (if omitted, 100g default)
+5. Quantity can be anywhere but typically after name
+6. Parentheses order: (Brand, Color) then (Status/Expiration)
+7. URL can be in angle brackets \`<url>\` or plain (http://, https://, www.)
+8. All fields except item name are optional
+9. Use metric units (grams/kilograms)
+10. Parser is flexible and will guess missing fields
+`
+
+
 /**
  * Result of parsing markdown content
  */
@@ -9,6 +159,9 @@ export interface IMarkdownImportResult {
     name: string
     id?: string // Container ID from [#id] in header
     uuid?: string // Container UUID from [uuid:xxx] in header
+    weight?: number // Container weight
+    weightUnit?: 'g' | 'kg' // Container weight unit
+    url?: string // Container URL
     items: Array<ICreateItemDto & { nestedContainerId?: string; uuid?: string }> // nestedContainerId is temporary slug reference, uuid for updates
   }>
   errors: string[]
@@ -71,13 +224,13 @@ class MarkdownImportService {
     }
 
     const lines = markdown.split('\n')
-    let currentContainer: { name: string; id?: string; uuid?: string; items: ICreateItemDto[] } | null = null
+    let currentContainer: { name: string; id?: string; uuid?: string; weight?: number; weightUnit?: 'g' | 'kg'; url?: string; items: ICreateItemDto[] } | null = null
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]?.trim()
       if (!line) continue
 
-      // Container header (## Header [#id] [uuid:xxx] (Type))
+      // Container header (## Header [#id] [uuid:xxx] (Type) <URL> - weight)
       if (line.startsWith('## ')) {
         if (currentContainer && currentContainer.items.length > 0) {
           result.containers.push(currentContainer)
@@ -86,6 +239,9 @@ class MarkdownImportService {
         let headerText = line.substring(3).trim()
         let containerId: string | undefined
         let containerUuid: string | undefined
+        let containerUrl: string | undefined
+        let containerWeight: number | undefined
+        let containerWeightUnit: 'g' | 'kg' | undefined
 
         // Extract ID from [#id]
         const idMatch = headerText.match(/\[#([^\]]+)\]/)
@@ -101,6 +257,31 @@ class MarkdownImportService {
           headerText = headerText.replace(uuidMatch[0] ?? '', '').trim()
         }
 
+        // Extract URL from <URL> or plain URL
+        const urlAngleMatch = headerText.match(/<([^>]+)>/)
+        if (urlAngleMatch) {
+          containerUrl = urlAngleMatch[1]?.trim()
+          headerText = headerText.replace(urlAngleMatch[0] ?? '', '').trim()
+        } else {
+          // Try plain URL (http://, https://, www.)
+          const urlPlainMatch = headerText.match(/(https?:\/\/[^\s]+|www\.[^\s]+)/i)
+          if (urlPlainMatch && urlPlainMatch[1]) {
+            containerUrl = urlPlainMatch[1].trim()
+            if (containerUrl.startsWith('www.')) {
+              containerUrl = `https://${containerUrl}`
+            }
+            headerText = headerText.replace(urlPlainMatch[0] ?? '', '').trim()
+          }
+        }
+
+        // Extract weight from - weightg or - weightkg (at the end)
+        const weightMatch = headerText.match(/-?\s*([\d.]+)\s*(g|kg)\s*$/i)
+        if (weightMatch) {
+          containerWeight = parseFloat(weightMatch[1] ?? '0')
+          containerWeightUnit = (weightMatch[2]?.toLowerCase() ?? 'g') as 'g' | 'kg'
+          headerText = headerText.replace(weightMatch[0] ?? '', '').trim()
+        }
+
         // Extract container name (remove type in parentheses if present)
         const nameMatch = headerText.match(/^([^(]+)/)
         const containerName = (nameMatch ? nameMatch[1]?.trim() : headerText) || headerText
@@ -109,6 +290,9 @@ class MarkdownImportService {
           name: containerName,
           id: containerId,
           uuid: containerUuid,
+          weight: containerWeight,
+          weightUnit: containerWeightUnit,
+          url: containerUrl,
           items: [],
         }
         continue

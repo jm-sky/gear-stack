@@ -10,6 +10,9 @@ export const containerSchema = z.object({
   parentContainerId: z.string().uuid().optional().nullable(),
   brand: z.string().optional(),
   price: z.number().min(0, 'Cena nie może być ujemna').optional(),
+  weight: z.number().min(0, 'Waga nie może być ujemna').optional(),
+  weightUnit: z.enum(['g', 'kg']).optional(),
+  url: z.string().url('Nieprawidłowy URL').optional().or(z.literal('')),
 })
 
 // Schema dla przedmiotu

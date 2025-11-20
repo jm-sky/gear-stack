@@ -47,6 +47,9 @@ export const gearEn = {
       extendedFields: 'Additional Information',
       brand: 'Brand',
       price: 'Price',
+      weight: 'Weight',
+      weightUnit: 'Weight Unit',
+      url: 'URL',
       colors: {
         default: 'Default',
         blue: 'Blue',
@@ -300,6 +303,9 @@ export const gearPl = {
       extendedFields: 'Dodatkowe Informacje',
       brand: 'Marka',
       price: 'Cena',
+      weight: 'Waga',
+      weightUnit: 'Jednostka wagi',
+      url: 'URL',
       colors: {
         default: 'Domyślny',
         blue: 'Niebieski',

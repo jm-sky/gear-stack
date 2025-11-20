@@ -14,7 +14,7 @@ import {
   READINESS_EXCELLENT_THRESHOLD,
   READINESS_GOOD_THRESHOLD,
 } from '../utils/constants'
-import { formatWeightFromGrams } from '../utils/formatWeight'
+import { formatWeight, formatWeightFromGrams } from '../utils/formatWeight'
 
 const props = defineProps<{
   container: IGearContainer
@@ -118,10 +118,26 @@ const handleBack = () => {
           <p v-if="container.description" class="text-muted-foreground mb-3">
             {{ container.description }}
           </p>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
             <Badge variant="outline">
               {{ typeLabel }}
             </Badge>
+            <Badge v-if="container.brand" variant="secondary">
+              {{ container.brand }}
+            </Badge>
+            <Badge v-if="container.weight !== undefined && container.weightUnit" variant="secondary">
+              {{ formatWeight(container.weight, container.weightUnit) }}
+            </Badge>
+            <a
+              v-if="container.url"
+              :href="container.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-primary hover:underline text-sm"
+              @click.stop
+            >
+              {{ t('gear.container.url') }}
+            </a>
           </div>
         </div>
 

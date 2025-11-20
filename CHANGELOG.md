@@ -21,6 +21,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.14.0] - 2025-01-20
+
+### Added
+- **Container Weight and URL Fields**:
+  - Containers can now have weight and weight unit (g/kg) fields
+  - Containers can now have URL field for linking to product pages or resources
+  - Weight and URL fields added to container form
+  - Container header displays weight and URL (if provided)
+  - Weight displayed as badge in container header
+  - URL displayed as clickable link in container header
+
+- **Enhanced Export/Import**:
+  - Export now includes container weight in format: `## Container Name [#id] (Type) <URL> - [weight]g`
+  - Import parser now extracts container weight and URL from markdown headers
+  - Guidelines template updated to document container weight and URL format
+
+### Changed
+- **Guidelines Template**: Moved from `ExportToPromptDialog.vue` to `markdownImportService.ts` for better code organization and reusability
+- **Container Form**: Added weight, weightUnit, and URL input fields with proper validation
+
+### Fixed
+- Fixed TypeScript errors in markdown import service (containerUrl undefined check, container type definition)
+
+---
+
 ## [0.13.1] - 2025-01-19
 
 ### Fixed

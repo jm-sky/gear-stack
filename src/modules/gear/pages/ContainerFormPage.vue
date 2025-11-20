@@ -32,6 +32,9 @@ const getInitialValues = (): ContainerFormData => {
       color: container.value.color ?? 'default',
       brand: container.value.brand ?? '',
       price: container.value.price,
+      weight: container.value.weight,
+      weightUnit: container.value.weightUnit ?? 'kg',
+      url: container.value.url ?? '',
     }
   }
   return {
@@ -41,6 +44,9 @@ const getInitialValues = (): ContainerFormData => {
     color: 'default' as const,
     brand: '',
     price: undefined,
+    weight: undefined,
+    weightUnit: 'kg' as const,
+    url: '',
   }
 }
 

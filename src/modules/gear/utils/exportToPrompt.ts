@@ -178,7 +178,28 @@ export function exportContainerToPrompt(
     ? getContainerTypeLabel(container.type)
     : container.type
   const containerId = generateContainerId(container.name)
-  lines.push(`## ${container.name} [${containerId}] [uuid:${container.id}] (${typeLabel})`)
+  
+  // Build container header parts
+  const containerHeaderParts: string[] = []
+  containerHeaderParts.push(`## ${container.name}`)
+  containerHeaderParts.push(`[${containerId}]`)
+  containerHeaderParts.push(`[uuid:${container.id}]`)
+  containerHeaderParts.push(`(${typeLabel})`)
+  
+  // Add URL if provided
+  if (container.url) {
+    containerHeaderParts.push(`<${container.url}>`)
+  }
+  
+  // Add weight if provided
+  if (container.weight !== undefined && container.weightUnit) {
+    const weightText = formatWeight(container.weight, container.weightUnit)
+    // Extract just the number and unit (e.g., "1.50 kg" -> "1.50kg" or "500 g" -> "500g")
+    const weightValue = weightText.replace(/\s/g, '')
+    containerHeaderParts.push(`- ${weightValue}`)
+  }
+  
+  lines.push(containerHeaderParts.join(' '))
 
   // Collect nested containers to show separately
   const nestedContainers: Array<{ item: IGearItem; container: IGearContainer }> = []

@@ -209,6 +209,56 @@ const handleCancel = () => {
           </FormItem>
         </FormField>
       </div>
+
+      <!-- Weight and Weight Unit -->
+      <div class="grid grid-cols-[1fr_80px] sm:grid-cols-[1fr_auto] gap-2">
+        <FormField v-slot="{ componentField }" name="weight">
+          <FormItem>
+            <FormLabel :label="$t('gear.container.weight')" />
+            <Input
+              v-bind="componentField"
+              type="number"
+              :placeholder="$t('gear.container.weight')"
+              min="0"
+              step="0.01"
+            />
+            <FormMessage />
+          </FormItem>
+        </FormField>
+
+        <FormField v-slot="{ value, handleChange }" name="weightUnit">
+          <FormItem>
+            <FormLabel :label="$t('gear.container.weightUnit')" />
+            <Select :model-value="value" @update:model-value="handleChange">
+              <SelectTrigger class="w-[80px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="g">
+                  {{ $t('gear.item.weightUnits.g') }}
+                </SelectItem>
+                <SelectItem value="kg">
+                  {{ $t('gear.item.weightUnits.kg') }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+      </div>
+
+      <!-- URL -->
+      <FormField v-slot="{ componentField }" name="url">
+        <FormItem>
+          <FormLabel :label="$t('gear.container.url')" />
+          <Input
+            v-bind="componentField"
+            type="url"
+            :placeholder="$t('gear.container.url')"
+          />
+          <FormMessage />
+        </FormItem>
+      </FormField>
     </div>
 
     <!-- Actions -->

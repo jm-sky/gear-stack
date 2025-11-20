@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AlertCircle, FileText } from 'lucide-vue-next'
+import { AlertCircle, Check, FileText, Info } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
@@ -17,7 +17,7 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import type { IGearContainer } from '../types/gear.types'
 import { useGear } from '../composables/useGear'
-import { markdownImportService } from '../services/markdownImportService'
+import { guidelinesTemplate, markdownImportService } from '../services/markdownImportService'
 
 const props = defineProps<{
   open: boolean
@@ -35,6 +35,8 @@ const markdownContent = ref('')
 const importing = ref(false)
 const importMode = ref<'create' | 'update'>('update') // Default to update mode
 const previewResult = ref<ReturnType<typeof markdownImportService.parseMarkdown> | null>(null)
+const copiedGuidelines = ref(false)
+
 
 // Check if any containers/items have UUIDs
 const hasUuids = computed(() => {
@@ -61,6 +63,20 @@ const handlePreview = () => {
     toast.warning(t('gear.import.noContainersFound'))
   } else {
     toast.success(t('gear.import.previewSuccess', { count: result.containers.length }))
+  }
+}
+
+const handleCopyGuidelines = async () => {
+  try {
+    await navigator.clipboard.writeText(guidelinesTemplate)
+    copiedGuidelines.value = true
+    toast.success(t('gear.export.guidelinesCopied', 'Guidelines copied to clipboard'))
+    setTimeout(() => {
+      copiedGuidelines.value = false
+    }, 2000)
+  } catch (error) {
+    toast.error(t('common.error'))
+    console.error('Error copying guidelines:', error)
   }
 }
 
@@ -94,6 +110,9 @@ const handleImport = async () => {
           // Update existing container
           container = updateContainer(existing.id, {
             name: containerData.name,
+            weight: containerData.weight,
+            weightUnit: containerData.weightUnit,
+            url: containerData.url,
             // Keep existing type and other fields
           })
           updatedCount++
@@ -103,6 +122,9 @@ const handleImport = async () => {
             name: containerData.name,
             type: 'other',
             description: t('gear.import.importedDescription'),
+            weight: containerData.weight,
+            weightUnit: containerData.weightUnit,
+            url: containerData.url,
           })
           // Note: We can't override the auto-generated UUID in createContainer
           // This is a limitation - we'd need to modify the service to accept UUID
@@ -114,6 +136,9 @@ const handleImport = async () => {
           name: containerData.name,
           type: 'other',
           description: t('gear.import.importedDescription'),
+          weight: containerData.weight,
+          weightUnit: containerData.weightUnit,
+          url: containerData.url,
         })
         importedCount++
       }
@@ -291,18 +316,25 @@ const handleImport = async () => {
         </div>
       </div>
 
-      <DialogFooter>
-        <Button type="button" variant="outline" @click="handleClose">
-          {{ t('gear.actions.cancel') }}
+      <DialogFooter class="flex-col sm:flex-row gap-2">
+        <Button variant="secondary" class="sm:mr-auto" @click="handleCopyGuidelines">
+          <Info v-if="!copiedGuidelines" class="size-4" />
+          <Check v-else class="size-4" />
+          {{ copiedGuidelines ? t('common.copyToClipboard.copied') : t('gear.export.guidelines', 'Guidelines') }}
         </Button>
-        <Button
-          type="button"
-          :disabled="!previewResult || previewResult.containers.length === 0 || importing"
-          :loading="importing"
-          @click="handleImport"
-        >
-          {{ t('gear.import.import') }}
-        </Button>
+        <div class="flex gap-2">
+          <Button type="button" variant="outline" @click="handleClose">
+            {{ t('gear.actions.cancel') }}
+          </Button>
+          <Button
+            type="button"
+            :disabled="!previewResult || previewResult.containers.length === 0 || importing"
+            :loading="importing"
+            @click="handleImport"
+          >
+            {{ t('gear.import.import') }}
+          </Button>
+        </div>
       </DialogFooter>
     </DialogContent>
   </Dialog>
