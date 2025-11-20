@@ -144,7 +144,7 @@ const handleBack = () => {
             <Badge variant="outline">
               {{ typeLabel }}
             </Badge>
-            <Badge v-if="container.brand" variant="secondary">
+            <Badge v-if="container.brand" variant="secondary" class="normal-case">
               {{ container.brand }}
             </Badge>
             <Badge v-if="container.weight !== undefined && container.weightUnit" variant="secondary">

@@ -27,6 +27,7 @@ defineProps<{
 const emit = defineEmits<{
   cancel: []
   nameBlur: []
+  recognizeParameters: []
 }>()
 
 const { t } = useI18n()
@@ -326,6 +327,13 @@ const handleCancel = () => {
     </div>
 
     <!-- Actions -->
+    <Button
+      type="button"
+      variant="outline"
+      @click="$emit('recognizeParameters')"
+    >
+      {{ $t('gear.actions.recognizeParameters') }}
+    </Button>
     <div class="flex flex-col sm:flex-row justify-end gap-3">
       <Button type="button" variant="outline" @click="handleCancel">
         {{ $t('gear.actions.cancel') }}

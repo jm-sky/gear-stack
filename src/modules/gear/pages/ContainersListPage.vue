@@ -47,6 +47,14 @@ const filteredContainers = computed<IGearContainer[]>(() => {
   let baseContainers = containers.value
   if (showOnlyRootContainers.value) {
     baseContainers = getRootContainers()
+  } else {
+    // Hide containers with hideWhenNested=true AND parentContainerId set
+    baseContainers = baseContainers.filter(container => {
+      if (container.hideWhenNested && container.parentContainerId) {
+        return false // Hide this container
+      }
+      return true
+    })
   }
 
   // Then filter by search query

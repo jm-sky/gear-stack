@@ -10,6 +10,7 @@ import ContainerFormFields from '../components/ContainerFormFields.vue'
 import { useContainer } from '../composables/useContainer'
 import { useGear } from '../composables/useGear'
 import { recognizeContainerType } from '../utils/containerTypeRecognition'
+import { recognizeParameters } from '../utils/parameterRecognition'
 import { type ContainerFormData, containerSchema } from '../utils/validation'
 
 const router = useRouter()
@@ -97,6 +98,32 @@ const handleCancel = () => {
     router.push('/gear')
   }
 }
+
+// Recognize parameters handler
+const handleRecognizeParameters = () => {
+  if (!values.name) {
+    toast.error(t('gear.container.name'))
+    return
+  }
+
+  try {
+    const params = recognizeParameters(values.name)
+
+    if (!params.brand && !params.color) {
+      toast.info(t('gear.actions.noParametersFound'))
+      return
+    }
+
+    if (params.brand && !values.brand) {
+      setFieldValue('brand', params.brand)
+    }
+
+    toast.success(t('gear.actions.parametersRecognized'))
+  } catch (error) {
+    toast.error(t('common.error'))
+    console.error('Error recognizing parameters:', error)
+  }
+}
 </script>
 
 <template>
@@ -119,6 +146,7 @@ const handleCancel = () => {
             @submit="handleSubmit"
             @cancel="handleCancel"
             @name-blur="handleNameBlur"
+            @recognize-parameters="handleRecognizeParameters"
           />
         </form>
       </div>
