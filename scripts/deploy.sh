@@ -52,8 +52,15 @@ echo -e "${GREEN}✅ Frontend build completed${NC}"
 
 # Step 4: Copy frontend to destination
 echo -e "${YELLOW}📋 Step 4: Copying frontend to $FRONTEND_DEST...${NC}"
-sudo mkdir -p "$FRONTEND_DEST"
-sudo rsync -av --delete dist/ "$FRONTEND_DEST/"
+
+# Try without sudo first (if user is in caddy group), fallback to sudo
+if mkdir -p "$FRONTEND_DEST" 2>/dev/null && [ -w "$FRONTEND_DEST" ] 2>/dev/null; then
+  mkdir -p "$FRONTEND_DEST"
+  rsync -av --delete dist/ "$FRONTEND_DEST/"
+else
+  sudo mkdir -p "$FRONTEND_DEST"
+  sudo rsync -av --delete dist/ "$FRONTEND_DEST/"
+fi
 echo -e "${GREEN}✅ Frontend copied to $FRONTEND_DEST${NC}"
 
 # Step 5: Build and restart backend (Docker Compose)
