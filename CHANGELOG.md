@@ -21,6 +21,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.16.0] - 2025-01-21
+
+### Added
+- **Guidelines Dialog Component**:
+  - Created dedicated `GuidelinesDialog` component for displaying formatting guidelines
+  - Reusable component used in both Export and Import dialogs
+  - Guidelines are now shown in a modal dialog instead of being copied directly
+  - Users can view guidelines and copy them manually when needed
+
+### Changed
+- **Guidelines Display**:
+  - Guidelines button now opens a dialog instead of copying to clipboard immediately
+  - Guidelines template has been shortened while keeping essential information
+  - Reduced number of examples to make guidelines more concise
+  - Dialog is smaller than parent dialogs for better UX
+
+- **Code Refactoring**:
+  - Extracted Guidelines functionality into reusable component
+  - Removed code duplication between Export and Import dialogs
+  - Improved maintainability and consistency
+
+---
+
 ## [0.15.0] - 2025-01-21
 
 ### Added

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AlertCircle, Check, FileText, Info } from 'lucide-vue-next'
+import { AlertCircle, FileText, Info } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
@@ -17,7 +17,8 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import type { IGearContainer } from '../types/gear.types'
 import { useGear } from '../composables/useGear'
-import { guidelinesTemplate, markdownImportService } from '../services/markdownImportService'
+import { markdownImportService } from '../services/markdownImportService'
+import GuidelinesDialog from './GuidelinesDialog.vue'
 
 const props = defineProps<{
   open: boolean
@@ -35,7 +36,7 @@ const markdownContent = ref('')
 const importing = ref(false)
 const importMode = ref<'create' | 'update'>('update') // Default to update mode
 const previewResult = ref<ReturnType<typeof markdownImportService.parseMarkdown> | null>(null)
-const copiedGuidelines = ref(false)
+const isGuidelinesDialogOpen = ref(false)
 
 
 // Check if any containers/items have UUIDs
@@ -66,18 +67,8 @@ const handlePreview = () => {
   }
 }
 
-const handleCopyGuidelines = async () => {
-  try {
-    await navigator.clipboard.writeText(guidelinesTemplate)
-    copiedGuidelines.value = true
-    toast.success(t('gear.export.guidelinesCopied', 'Guidelines copied to clipboard'))
-    setTimeout(() => {
-      copiedGuidelines.value = false
-    }, 2000)
-  } catch (error) {
-    toast.error(t('common.error'))
-    console.error('Error copying guidelines:', error)
-  }
+const handleOpenGuidelines = () => {
+  isGuidelinesDialogOpen.value = true
 }
 
 const handleImport = async () => {
@@ -309,10 +300,9 @@ const handleImport = async () => {
       </div>
 
       <DialogFooter class="flex-col sm:flex-row gap-2">
-        <Button variant="secondary" class="sm:mr-auto" @click="handleCopyGuidelines">
-          <Info v-if="!copiedGuidelines" class="size-4" />
-          <Check v-else class="size-4" />
-          {{ copiedGuidelines ? t('common.copyToClipboard.copied') : t('gear.export.guidelines', 'Guidelines') }}
+        <Button variant="secondary" class="sm:mr-auto" @click="handleOpenGuidelines">
+          <Info class="size-4" />
+          {{ t('gear.export.guidelines', 'Guidelines') }}
         </Button>
         <div class="flex gap-2">
           <Button type="button" variant="outline" @click="handleClose">
@@ -334,4 +324,7 @@ const handleImport = async () => {
       </DialogFooter>
     </DialogContent>
   </Dialog>
+
+  <!-- Guidelines Dialog -->
+  <GuidelinesDialog v-model:open="isGuidelinesDialogOpen" />
 </template>

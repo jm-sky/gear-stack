@@ -17,8 +17,8 @@ import { Label } from '@/components/ui/label'
 import { useSettings } from '@/modules/settings/composables/useSettings'
 import type { IGearContainer } from '../types/gear.types'
 import { useGear } from '../composables/useGear'
-import { guidelinesTemplate } from '../services/markdownImportService'
 import { exportContainersToPrompt, exportContainerToPrompt } from '../utils/exportToPrompt'
+import GuidelinesDialog from './GuidelinesDialog.vue'
 
 const props = defineProps<{
   open: boolean
@@ -34,7 +34,7 @@ const { t } = useI18n()
 const { getContainerById, calculateTotalWeight } = useGear()
 const { customContainerTypes } = useSettings()
 const copied = ref(false)
-const copiedGuidelines = ref(false)
+const isGuidelinesDialogOpen = ref(false)
 const showUuid = ref(true)
 const showWeight = ref(true)
 const showColor = ref(true)
@@ -88,18 +88,8 @@ const handleCopy = async () => {
   }
 }
 
-const handleCopyGuidelines = async () => {
-  try {
-    await navigator.clipboard.writeText(guidelinesTemplate)
-    copiedGuidelines.value = true
-    toast.success(t('gear.export.guidelinesCopied', 'Guidelines copied to clipboard'))
-    setTimeout(() => {
-      copiedGuidelines.value = false
-    }, 2000)
-  } catch (error) {
-    toast.error(t('common.error'))
-    console.error('Error copying guidelines:', error)
-  }
+const handleOpenGuidelines = () => {
+  isGuidelinesDialogOpen.value = true
 }
 
 const handleOpenChange = (value: boolean) => {
@@ -169,10 +159,9 @@ const handleOpenChange = (value: boolean) => {
       </div>
 
       <DialogFooter class="flex-col sm:flex-row gap-2">
-        <Button variant="secondary" class="sm:mr-auto" @click="handleCopyGuidelines">
-          <Info v-if="!copiedGuidelines" class="size-4" />
-          <Check v-else class="size-4" />
-          {{ copiedGuidelines ? t('common.copyToClipboard.copied') : t('gear.export.guidelines', 'Guidelines') }}
+        <Button variant="secondary" class="sm:mr-auto" @click="handleOpenGuidelines">
+          <Info class="size-4" />
+          {{ t('gear.export.guidelines', 'Guidelines') }}
         </Button>
         <div class="flex gap-2">
           <Button class="flex-1" variant="outline" @click="handleOpenChange(false)">
@@ -187,5 +176,8 @@ const handleOpenChange = (value: boolean) => {
       </DialogFooter>
     </DialogContent>
   </Dialog>
+
+  <!-- Guidelines Dialog -->
+  <GuidelinesDialog v-model:open="isGuidelinesDialogOpen" />
 </template>
 

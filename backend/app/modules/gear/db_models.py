@@ -4,6 +4,8 @@ This module provides SQLAlchemy ORM models for gear containers and items.
 Designed to work with async SQLAlchemy sessions.
 """
 
+from __future__ import annotations
+
 from datetime import UTC, datetime
 
 from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text
@@ -46,9 +48,6 @@ class GearContainerDB(Base):
     price: Mapped[float | None] = mapped_column(Float, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC), nullable=False)
-
-    # Relationships
-    items: Mapped[list["GearItemDB"]] = relationship("GearItemDB", back_populates="container", cascade="all, delete-orphan")
 
     def __repr__(self) -> str:
         return f"<GearContainerDB(id={self.id}, name={self.name}, type={self.type})>"
@@ -108,3 +107,14 @@ class GearItemDB(Base):
 
     def __repr__(self) -> str:
         return f"<GearItemDB(id={self.id}, name={self.name}, category={self.category})>"
+
+
+# Define relationship after both classes are defined
+# This resolves the AmbiguousForeignKeysError by explicitly specifying
+# which foreign key to use (container_id vs nested_container_id)
+GearContainerDB.items = relationship(
+    "GearItemDB",
+    back_populates="container",
+    foreign_keys=[GearItemDB.container_id],
+    cascade="all, delete-orphan",
+)
