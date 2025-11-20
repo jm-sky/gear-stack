@@ -150,13 +150,6 @@ const handleGenerateSampleSet = () => {
             </Button>
             <ContainersListPageDropdown @export-all-to-prompt="handleExportAllToPrompt" @import="handleImport" />
           </div>
-          <Button
-            variant="outline"
-            class="w-full sm:w-auto shrink-0"
-            @click="handleGenerateSampleSet"
-          >
-            {{ t('gear.sampleSet.generateButton') }}
-          </Button>
         </div>
       </div>
 

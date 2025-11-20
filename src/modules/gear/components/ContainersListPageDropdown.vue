@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FileInput, MoreHorizontal, Plus, Sparkles, Trash2 } from 'lucide-vue-next'
+import { FileInput, MoreVertical, Plus, Sparkles, Trash2 } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -50,7 +50,7 @@ const handleExportAllToPrompt = () => {
   <DropdownMenu>
     <DropdownMenuTrigger as-child>
       <Button variant="outline" class="sm:shrink-0">
-        <MoreHorizontal class="size-4" />
+        <MoreVertical class="size-4" />
       </Button>
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end">
