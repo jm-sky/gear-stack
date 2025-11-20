@@ -5,7 +5,6 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import { useSettings } from '@/modules/settings/composables/useSettings'
 import type { IGearItem } from '../types/gear.types'
 import AddNestedContainerDialog from '../components/AddNestedContainerDialog.vue'
 import CategoryPieChart from '../components/CategoryPieChart.vue'
@@ -14,21 +13,18 @@ import ExportToPromptDialog from '../components/ExportToPromptDialog.vue'
 import ItemsTable from '../components/ItemsTable.vue'
 import { useContainer } from '../composables/useContainer'
 import { useGear } from '../composables/useGear'
-import { exportContainerToPrompt } from '../utils/exportToPrompt'
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 const { container } = useContainer()
 const { deleteItem, updateItem, exportData, importData, createItem, getContainerById } = useGear()
-const { customContainerTypes } = useSettings()
 
 const containerId = route.params.id as string
 
 // Dialog state
 const isAddContainerDialogOpen = ref(false)
 const isExportToPromptDialogOpen = ref(false)
-const exportMarkdown = ref('')
 
 // File operations handled in handleImport
 
@@ -135,33 +131,9 @@ const handleAddNestedContainer = (nestedContainerId: string) => {
   }
 }
 
-// Helper to get container type label
-const getContainerTypeLabel = (typeKey: string): string => {
-  const customType = customContainerTypes.value.find(t => t.key === typeKey)
-  if (customType) {
-    return customType.label
-  }
-  return t(`gear.container.types.${typeKey}`)
-}
-
 const handleExportToPrompt = () => {
   if (!container.value) return
-
-  try {
-    const { calculateTotalWeight } = useGear()
-    const markdown = exportContainerToPrompt(container.value, {
-      t,
-      getContainerTypeLabel,
-      getContainerById,
-      calculateTotalWeight,
-    })
-
-    exportMarkdown.value = markdown
-    isExportToPromptDialogOpen.value = true
-  } catch (error) {
-    toast.error(t('common.error'))
-    console.error('Error exporting to prompt:', error)
-  }
+  isExportToPromptDialogOpen.value = true
 }
 
 // Redirect if container not found
@@ -202,7 +174,7 @@ if (!container.value) {
       <!-- Export to Prompt Dialog -->
       <ExportToPromptDialog
         v-model:open="isExportToPromptDialogOpen"
-        :markdown="exportMarkdown"
+        :container="container"
       />
     </div>
   </AuthenticatedLayout>

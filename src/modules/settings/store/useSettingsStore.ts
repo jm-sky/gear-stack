@@ -1,12 +1,11 @@
 import { defineStore } from 'pinia'
 import { computed, reactive } from 'vue'
-import { LOCALE_STORAGE_KEY, type SupportedLocale } from '@/shared/config/config'
+import { config, LOCALE_STORAGE_KEY, SETTINGS_STORAGE_KEY, type SupportedLocale } from '@/shared/config/config'
 import type { ISettings, IUserCategory, IUserContainerType } from '../types/settings.types'
 
-const STORAGE_KEY = 'gear-stack:settings'
 
 function loadFromStorage(): ISettings {
-  const stored = localStorage.getItem(STORAGE_KEY)
+  const stored = localStorage.getItem(SETTINGS_STORAGE_KEY)
   let settings: Partial<ISettings> = {}
 
   if (stored) {
@@ -29,6 +28,9 @@ function loadFromStorage(): ISettings {
     darkMode: settings.darkMode ?? false,
     customCategories: settings.customCategories ?? [],
     customContainerTypes: settings.customContainerTypes ?? [],
+    preferredWeightUnit: (settings.preferredWeightUnit === 'g' || settings.preferredWeightUnit === 'kg')
+      ? settings.preferredWeightUnit
+      : config.defaults.preferredWeightUnit, // Default to grams
   }
 }
 
@@ -46,6 +48,9 @@ export const useSettingsStore = defineStore('settings', () => {
       localStorage.setItem(LOCALE_STORAGE_KEY, settings.locale)
     }
     state.darkMode = settings.darkMode ?? state.darkMode
+    if (settings.preferredWeightUnit !== undefined) {
+      state.preferredWeightUnit = settings.preferredWeightUnit
+    }
     if (settings.customCategories) {
       state.customCategories = settings.customCategories
     }
@@ -95,6 +100,7 @@ export const useSettingsStore = defineStore('settings', () => {
     const loaded = loadFromStorage()
     state.locale = loaded.locale
     state.darkMode = loaded.darkMode
+    state.preferredWeightUnit = loaded.preferredWeightUnit
     state.customCategories = loaded.customCategories
     state.customContainerTypes = loaded.customContainerTypes ?? []
     // Sync locale to useLocale's localStorage key
@@ -103,9 +109,10 @@ export const useSettingsStore = defineStore('settings', () => {
 
   function saveToStorage(): void {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify({
         locale: state.locale,
         darkMode: state.darkMode,
+        preferredWeightUnit: state.preferredWeightUnit,
         customCategories: state.customCategories,
         customContainerTypes: state.customContainerTypes,
       }))
@@ -118,6 +125,7 @@ export const useSettingsStore = defineStore('settings', () => {
     // State - Pinia automatycznie udostępnia reactive properties
     locale: computed(() => state.locale),
     darkMode: computed(() => state.darkMode),
+    preferredWeightUnit: computed(() => state.preferredWeightUnit),
     customCategories: computed(() => state.customCategories),
     customContainerTypes: computed(() => state.customContainerTypes),
 

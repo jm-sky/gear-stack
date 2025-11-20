@@ -14,7 +14,7 @@ import {
   READINESS_EXCELLENT_THRESHOLD,
   READINESS_GOOD_THRESHOLD,
 } from '../utils/constants'
-import { formatWeight, formatWeightFromGrams } from '../utils/formatWeight'
+import { formatWeight, formatWeightToPreferredUnit } from '../utils/formatWeight'
 
 const props = defineProps<{
   container: IGearContainer
@@ -30,7 +30,7 @@ const emit = defineEmits<{
 const router = useRouter()
 const { t } = useI18n()
 const { calculateTotalWeight, calculateReadinessPercentage } = useGear()
-const { customContainerTypes } = useSettings()
+const { customContainerTypes, settings } = useSettings()
 
 // Computed properties
 const totalWeight = computed<number>(() => calculateTotalWeight(props.container.id))
@@ -38,7 +38,7 @@ const readinessPercentage = computed<number>(() => calculateReadinessPercentage(
 const itemsCount = computed<number>(() => props.container.items.length)
 
 // Format weight (totalWeight is in grams)
-const formattedWeight = computed<string>(() => formatWeightFromGrams(totalWeight.value))
+const formattedWeight = computed<string>(() => formatWeightToPreferredUnit(totalWeight.value, settings.value.preferredWeightUnit))
 
 // Readiness color
 const readinessColor = computed<string>(() => {

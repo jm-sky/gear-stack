@@ -18,6 +18,7 @@ import {
 import { useDarkMode } from '@/shared/composables/useDarkMode'
 import { type SupportedLocale, useLocale } from '@/shared/i18n'
 import { useSettings } from '../composables/useSettings'
+import type { TGearWeightUnit } from '@/modules/gear/types/gear.types'
 
 const { t } = useI18n()
 const { currentLocale } = useLocale()
@@ -27,6 +28,7 @@ const { settings, updateSettings } = useSettings()
 const settingsSchema = z.object({
   darkMode: z.enum(['light', 'dark']),
   locale: z.enum(['en', 'pl']),
+  preferredWeightUnit: z.enum(['g', 'kg']),
 })
 
 const getThemeValue = (darkMode: boolean | undefined) => {
@@ -38,12 +40,17 @@ const { handleSubmit, setValues } = useForm({
   initialValues: {
     darkMode: getThemeValue(settings.value.darkMode),
     locale: settings.value.locale ?? currentLocale.value,
+    preferredWeightUnit: settings.value.preferredWeightUnit ?? 'g',
   },
 })
 
 watch(() => settings.value, (val) => {
   if (val) {
-    setValues({ darkMode: getThemeValue(val.darkMode), locale: val.locale })
+    setValues({ 
+      darkMode: getThemeValue(val.darkMode), 
+      locale: val.locale,
+      preferredWeightUnit: val.preferredWeightUnit ?? 'g',
+    })
   }
 }, { immediate: true })
 
@@ -59,6 +66,7 @@ const onSubmit = handleSubmit(async (values) => {
   updateSettings({
     darkMode: values.darkMode === 'dark',
     locale: values.locale,
+    preferredWeightUnit: values.preferredWeightUnit as TGearWeightUnit,
   })
   
   // Sync with composables
@@ -135,6 +143,36 @@ const onSubmit = handleSubmit(async (values) => {
                       </SelectItem>
                       <SelectItem value="pl">
                         {{ t('settings.preferences.locale.options.pl') }}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+          </div>
+
+          <!-- Preferred Weight Unit -->
+          <div class="space-y-3">
+            <FormField v-slot="{ componentField }" name="preferredWeightUnit">
+              <FormItem>
+                <FormLabel required>
+                  {{ t('settings.preferences.preferredWeightUnit.label') }}
+                </FormLabel>
+                <p class="text-sm text-muted-foreground">
+                  {{ t('settings.preferences.preferredWeightUnit.subtitle') }}
+                </p>
+                <FormControl>
+                  <Select v-bind="componentField">
+                    <SelectTrigger>
+                      <SelectValue :placeholder="t('settings.preferences.preferredWeightUnit.placeholder')" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="g">
+                        {{ t('settings.preferences.preferredWeightUnit.options.g') }}
+                      </SelectItem>
+                      <SelectItem value="kg">
+                        {{ t('settings.preferences.preferredWeightUnit.options.kg') }}
                       </SelectItem>
                     </SelectContent>
                   </Select>

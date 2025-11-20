@@ -15,14 +15,14 @@ import { useGear } from '../composables/useGear'
 import { createAllItemsColumns } from '../utils/allItemsColumns'
 import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 import { COLOR_DOT_CLASSES, COLOR_TEXT_CLASSES } from '../utils/containerColors'
-import { formatWeight } from '../utils/formatWeight'
+import { formatWeightWithPreferredUnit } from '../utils/formatWeight'
 import { getAllItems } from '../utils/getAllItems'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 
 const router = useRouter()
 const { t } = useI18n()
 const { containers } = useGear()
-const { customCategories } = useSettings()
+const { customCategories, settings } = useSettings()
 
 // Get all items from all containers
 const allItems = computed<IItemWithContainer[]>(() => {
@@ -154,7 +154,7 @@ function navigateToContainer(containerId: string) {
         </template>
 
         <template #weight="{ row }">
-          {{ formatWeight(row.original.weight * row.original.quantity, row.original.weightUnit) }}
+          {{ formatWeightWithPreferredUnit(row.original.weight * row.original.quantity, row.original.weightUnit, settings.preferredWeightUnit) }}
         </template>
 
         <template #status="{ row }">

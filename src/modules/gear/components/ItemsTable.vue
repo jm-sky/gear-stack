@@ -14,7 +14,7 @@ import { useGear } from '../composables/useGear'
 import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 import { EXPIRATION_WARNING_DAYS } from '../utils/constants'
 import { COLOR_TEXT_CLASSES } from '../utils/containerColors'
-import { formatWeight, formatWeightFromGrams } from '../utils/formatWeight'
+import { formatWeightToPreferredUnit, formatWeightWithPreferredUnit } from '../utils/formatWeight'
 import { createItemsColumns } from '../utils/itemsColumns'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 import CategoryIcon from './CategoryIcon.vue'
@@ -39,7 +39,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const router = useRouter()
-const { customCategories } = useSettings()
+const { customCategories, settings } = useSettings()
 const { getContainerById, calculateTotalWeight } = useGear()
 
 // Expanded rows state (which containers are expanded)
@@ -233,10 +233,10 @@ function getNestedContainer(item: IGearItem) {
     <template #weight="{ row }">
       <div class="text-end px-4">
         <template v-if="isNestedContainer(row.original)">
-          {{ formatWeightFromGrams(calculateTotalWeight(row.original.containerId!) * row.original.quantity) }}
+          {{ formatWeightToPreferredUnit(calculateTotalWeight(row.original.containerId!) * row.original.quantity, settings.preferredWeightUnit) }}
         </template>
         <template v-else>
-          {{ formatWeight(row.original.weight * row.original.quantity, row.original.weightUnit ?? 'g') }}
+          {{ formatWeightWithPreferredUnit(row.original.weight * row.original.quantity, row.original.weightUnit ?? 'g', settings.preferredWeightUnit) }}
         </template>
       </div>
     </template>

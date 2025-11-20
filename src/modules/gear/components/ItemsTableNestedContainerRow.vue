@@ -3,13 +3,15 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Badge } from '@/components/ui/badge'
 import { TableCell, TableRow } from '@/components/ui/table'
+import { useSettings } from '@/modules/settings/composables/useSettings'
 import type { IGearContainer, IGearItem, TContainerColor } from '../types/gear.types'
 import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 import { COLOR_BORDER_CLASSES } from '../utils/containerColors'
-import { formatWeight } from '../utils/formatWeight'
+import { formatWeightWithPreferredUnit } from '../utils/formatWeight'
 import CategoryIcon from './CategoryIcon.vue'
 
 const { t } = useI18n()
+const { settings } = useSettings()
 
 const props = defineProps<{
   nestedItems: IGearItem[]
@@ -53,7 +55,7 @@ const borderColorClass = computed(() => {
               {{ nestedItem.quantity }}
             </div>
             <div class="text-muted-foreground text-end px-4 min-w-0 md:min-w-[80px]">
-              {{ formatWeight(nestedItem.weight * nestedItem.quantity, nestedItem.weightUnit ?? 'g') }}
+              {{ formatWeightWithPreferredUnit(nestedItem.weight * nestedItem.quantity, nestedItem.weightUnit ?? 'g', settings.preferredWeightUnit) }}
             </div>
             <div class="min-w-0 md:min-w-26">
               <Badge :variant="getPriorityVariant(nestedItem.priority)">

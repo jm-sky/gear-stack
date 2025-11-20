@@ -26,6 +26,15 @@ export const settingsPl = {
           pl: 'Polski',
         },
       },
+      preferredWeightUnit: {
+        label: 'Preferowana Jednostka Wagi',
+        subtitle: 'Domyślna jednostka wyświetlania wag w całej aplikacji',
+        placeholder: 'Wybierz jednostkę wagi',
+        options: {
+          g: 'Gramy (g)',
+          kg: 'Kilogramy (kg)',
+        },
+      },
     },
     categories: {
       title: 'Własne Kategorie',

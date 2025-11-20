@@ -10,6 +10,12 @@ interface ExportOptions {
   getContainerTypeLabel?: (type: string) => string
   getContainerById?: (id: string) => IGearContainer | undefined
   calculateTotalWeight?: (containerId: string) => number
+  showUuid?: boolean // Whether to show UUID in export (default: true)
+  showWeight?: boolean // Whether to show weight in export (default: true)
+  showColor?: boolean // Whether to show color in export (default: true)
+  showBrand?: boolean // Whether to show brand in export (default: true)
+  showNestedContainer?: boolean // Whether to show nested container reference [#id] (default: true)
+  showLegend?: boolean // Whether to show legend at the end (default: true)
 }
 
 /**
@@ -48,8 +54,10 @@ function formatItem(
   // Item name
   parts.push(`**${item.name}**`)
 
-  // UUID (for stable references)
-  parts.push(`[uuid:${item.id}]`)
+  // UUID (for stable references) - only if showUuid is true (default: true)
+  if (options.showUuid !== false) {
+    parts.push(`[uuid:${item.id}]`)
+  }
 
   // Quantity after name (x4 format)
   if (item.quantity > 1) {
@@ -58,10 +66,10 @@ function formatItem(
 
   // Brand and color in first parentheses
   const brandColorParts: string[] = []
-  if (item.brand) {
+  if (options.showBrand !== false && item.brand) {
     brandColorParts.push(item.brand)
   }
-  if (item.color) {
+  if (options.showColor !== false && item.color) {
     brandColorParts.push(item.color)
   }
   if (brandColorParts.length > 0) {
@@ -86,8 +94,8 @@ function formatItem(
     parts.push(`(${statusParts.join(', ')})`)
   }
 
-  // Container ID if this item is a nested container
-  if (item.containerId && options.getContainerById) {
+  // Container ID if this item is a nested container (only if showNestedContainer is true, default: true)
+  if (options.showNestedContainer !== false && item.containerId && options.getContainerById) {
     const nestedContainer = options.getContainerById(item.containerId)
     if (nestedContainer) {
       const containerId = generateContainerId(nestedContainer.name)
@@ -100,22 +108,24 @@ function formatItem(
     parts.push(`<${item.url}>`)
   }
 
-  // Weight at the end
-  let totalWeight: number
-  let weightText: string
+  // Weight at the end (only if showWeight is true, default: true)
+  if (options.showWeight !== false) {
+    let totalWeight: number
+    let weightText: string
 
-  // If item is a nested container, use calculated total weight
-  if (item.containerId && options.calculateTotalWeight) {
-    const containerWeightInGrams = options.calculateTotalWeight(item.containerId)
-    totalWeight = containerWeightInGrams * item.quantity
-    weightText = formatWeightFromGrams(totalWeight)
-  } else {
-    // Regular item weight
-    totalWeight = item.weight * item.quantity
-    weightText = formatWeight(totalWeight, item.weightUnit ?? 'g')
+    // If item is a nested container, use calculated total weight
+    if (item.containerId && options.calculateTotalWeight) {
+      const containerWeightInGrams = options.calculateTotalWeight(item.containerId)
+      totalWeight = containerWeightInGrams * item.quantity
+      weightText = formatWeightFromGrams(totalWeight)
+    } else {
+      // Regular item weight
+      totalWeight = item.weight * item.quantity
+      weightText = formatWeight(totalWeight, item.weightUnit ?? 'g')
+    }
+
+    parts.push(`- ${weightText}`)
   }
-
-  parts.push(`- ${weightText}`)
 
   return `${indentStr}- ${parts.join(' ')}`
 }
@@ -136,7 +146,9 @@ function formatNestedContainer(
     ? options.getContainerTypeLabel(container.type)
     : container.type
   const containerId = generateContainerId(container.name)
-  lines.push(`${indentStr}## ${container.name} [${containerId}] [uuid:${container.id}] (${typeLabel})`)
+  const containerIdPart = options.showNestedContainer !== false ? ` [${containerId}]` : ''
+  const uuidPart = options.showUuid !== false ? ` [uuid:${container.id}]` : ''
+  lines.push(`${indentStr}## ${container.name}${containerIdPart}${uuidPart} (${typeLabel})`)
 
   // Container items
   if (container.items.length === 0) {
@@ -182,8 +194,14 @@ export function exportContainerToPrompt(
   // Build container header parts
   const containerHeaderParts: string[] = []
   containerHeaderParts.push(`## ${container.name}`)
-  containerHeaderParts.push(`[${containerId}]`)
-  containerHeaderParts.push(`[uuid:${container.id}]`)
+  // Container ID only if showNestedContainer is true (default: true)
+  if (options.showNestedContainer !== false) {
+    containerHeaderParts.push(`[${containerId}]`)
+  }
+  // UUID only if showUuid is true (default: true)
+  if (options.showUuid !== false) {
+    containerHeaderParts.push(`[uuid:${container.id}]`)
+  }
   containerHeaderParts.push(`(${typeLabel})`)
   
   // Add URL if provided
@@ -238,43 +256,45 @@ export function exportContainerToPrompt(
     })
   }
 
-  // Legend for AI
-  lines.push('')
-  lines.push('---')
-  lines.push('')
-  const legendTitle = t ? t('gear.export.legendTitle', '## Legenda dla AI') : '## Legenda dla AI'
-  const legendIntro = t ? t('gear.export.legendIntro', 'To jest system zarządzania sprzętem/ekwipunkiem. Oto co oznaczają dane:') : 'To jest system zarządzania sprzętem/ekwipunkiem. Oto co oznaczają dane:'
-  const legendContainer = t ? t('gear.export.legendContainer', '- **Kontener**: Plecak, torba, saszetka lub inna jednostka przechowywania przedmiotów') : '- **Kontener**: Plecak, torba, saszetka lub inna jednostka przechowywania przedmiotów'
-  const legendItems = t ? t('gear.export.legendItems', '- **Przedmioty**: Pojedyncze elementy wyposażenia przechowywane w kontenerze') : '- **Przedmioty**: Pojedyncze elementy wyposażenia przechowywane w kontenerze'
-  const legendWeight = t ? t('gear.export.legendWeight', '- **Waga**: Całkowita waga uwzględniająca ilość') : '- **Waga**: Całkowita waga uwzględniająca ilość'
-  const legendBrand = t ? t('gear.export.legendBrand', '- **Marka**: Producent/marka przedmiotu') : '- **Marka**: Producent/marka przedmiotu'
-  const legendColor = t ? t('gear.export.legendColor', '- **Kolor**: Kolor przedmiotu') : '- **Kolor**: Kolor przedmiotu'
-  const legendNested = t ? t('gear.export.legendNested', '- **Zagnieżdżone kontenery**: Kontener może zawierać inny kontener jako przedmiot. Zagnieżdżone kontenery są wyświetlane jako pozycja w liście oraz osobno z pełną zawartością poniżej.') : '- **Zagnieżdżone kontenery**: Kontener może zawierać inny kontener jako przedmiot. Zagnieżdżone kontenery są wyświetlane jako pozycja w liście oraz osobno z pełną zawartością poniżej.'
+  // Legend for AI (only if showLegend is true, default: true)
+  if (options.showLegend !== false) {
+    lines.push('')
+    lines.push('---')
+    lines.push('')
+    const legendTitle = t ? t('gear.export.legendTitle', '## Legenda dla AI') : '## Legenda dla AI'
+    const legendIntro = t ? t('gear.export.legendIntro', 'To jest system zarządzania sprzętem/ekwipunkiem. Oto co oznaczają dane:') : 'To jest system zarządzania sprzętem/ekwipunkiem. Oto co oznaczają dane:'
+    const legendContainer = t ? t('gear.export.legendContainer', '- **Kontener**: Plecak, torba, saszetka lub inna jednostka przechowywania przedmiotów') : '- **Kontener**: Plecak, torba, saszetka lub inna jednostka przechowywania przedmiotów'
+    const legendItems = t ? t('gear.export.legendItems', '- **Przedmioty**: Pojedyncze elementy wyposażenia przechowywane w kontenerze') : '- **Przedmioty**: Pojedyncze elementy wyposażenia przechowywane w kontenerze'
+    const legendWeight = t ? t('gear.export.legendWeight', '- **Waga**: Całkowita waga uwzględniająca ilość') : '- **Waga**: Całkowita waga uwzględniająca ilość'
+    const legendBrand = t ? t('gear.export.legendBrand', '- **Marka**: Producent/marka przedmiotu') : '- **Marka**: Producent/marka przedmiotu'
+    const legendColor = t ? t('gear.export.legendColor', '- **Kolor**: Kolor przedmiotu') : '- **Kolor**: Kolor przedmiotu'
+    const legendNested = t ? t('gear.export.legendNested', '- **Zagnieżdżone kontenery**: Kontener może zawierać inny kontener jako przedmiot. Zagnieżdżone kontenery są wyświetlane jako pozycja w liście oraz osobno z pełną zawartością poniżej.') : '- **Zagnieżdżone kontenery**: Kontener może zawierać inny kontener jako przedmiot. Zagnieżdżone kontenery są wyświetlane jako pozycja w liście oraz osobno z pełną zawartością poniżej.'
 
-  lines.push(legendTitle)
-  lines.push('')
-  lines.push(legendIntro)
-  lines.push('')
-  lines.push(legendContainer)
-  lines.push(legendItems)
-  lines.push('- **Status**:')
-  if (t) {
-    const ownedDesc = t('gear.export.legendStatusOwned', 'Przedmiot jest posiadany i dostępny')
-    const missingDesc = t('gear.export.legendStatusMissing', 'Przedmiot jest brakujący lub niedostępny')
-    const toBuyDesc = t('gear.export.legendStatusToBuy', 'Przedmiot należy zakupić')
-    lines.push(`  - ${t('gear.item.statuses.owned')}: ${ownedDesc}`)
-    lines.push(`  - ${t('gear.item.statuses.missing')}: ${missingDesc}`)
-    lines.push(`  - ${t('gear.item.statuses.toBuy')}: ${toBuyDesc}`)
-  } else {
-    lines.push('  - owned: Przedmiot jest posiadany i dostępny')
-    lines.push('  - missing: Przedmiot jest brakujący lub niedostępny')
-    lines.push('  - toBuy: Przedmiot należy zakupić')
+    lines.push(legendTitle)
+    lines.push('')
+    lines.push(legendIntro)
+    lines.push('')
+    lines.push(legendContainer)
+    lines.push(legendItems)
+    lines.push('- **Status**:')
+    if (t) {
+      const ownedDesc = t('gear.export.legendStatusOwned', 'Przedmiot jest posiadany i dostępny')
+      const missingDesc = t('gear.export.legendStatusMissing', 'Przedmiot jest brakujący lub niedostępny')
+      const toBuyDesc = t('gear.export.legendStatusToBuy', 'Przedmiot należy zakupić')
+      lines.push(`  - ${t('gear.item.statuses.owned')}: ${ownedDesc}`)
+      lines.push(`  - ${t('gear.item.statuses.missing')}: ${missingDesc}`)
+      lines.push(`  - ${t('gear.item.statuses.toBuy')}: ${toBuyDesc}`)
+    } else {
+      lines.push('  - owned: Przedmiot jest posiadany i dostępny')
+      lines.push('  - missing: Przedmiot jest brakujący lub niedostępny')
+      lines.push('  - toBuy: Przedmiot należy zakupić')
+    }
+    lines.push(legendWeight)
+    lines.push(legendBrand)
+    lines.push(legendColor)
+    lines.push(legendNested)
+    lines.push('')
   }
-  lines.push(legendWeight)
-  lines.push(legendBrand)
-  lines.push(legendColor)
-  lines.push(legendNested)
-  lines.push('')
 
   return lines.join('\n')
 }
@@ -293,11 +313,14 @@ export function exportContainersToPrompt(
   lines.push(`# ${titleText}`)
   lines.push('')
 
+  // Export each container without legend (legend will be added once at the end)
+  const exportOptionsWithoutLegend = { ...options, showLegend: false }
+  
   containers.forEach((container, index) => {
     if (index > 0) {
       lines.push('')
     }
-    const containerMarkdown = exportContainerToPrompt(container, options)
+    const containerMarkdown = exportContainerToPrompt(container, exportOptionsWithoutLegend)
     // Remove the header and description from nested containers
     const containerLines = containerMarkdown.split('\n')
     const titleLine = `# ${titleText}`
@@ -310,6 +333,46 @@ export function exportContainersToPrompt(
     }
     lines.push(...containerLines)
   })
+
+  // Add legend only once at the end (if showLegend is true, default: true)
+  if (options.showLegend !== false) {
+    lines.push('')
+    lines.push('---')
+    lines.push('')
+    const legendTitle = t ? t('gear.export.legendTitle', '## Legenda dla AI') : '## Legenda dla AI'
+    const legendIntro = t ? t('gear.export.legendIntro', 'To jest system zarządzania sprzętem/ekwipunkiem. Oto co oznaczają dane:') : 'To jest system zarządzania sprzętem/ekwipunkiem. Oto co oznaczają dane:'
+    const legendContainer = t ? t('gear.export.legendContainer', '- **Kontener**: Plecak, torba, saszetka lub inna jednostka przechowywania przedmiotów') : '- **Kontener**: Plecak, torba, saszetka lub inna jednostka przechowywania przedmiotów'
+    const legendItems = t ? t('gear.export.legendItems', '- **Przedmioty**: Pojedyncze elementy wyposażenia przechowywane w kontenerze') : '- **Przedmioty**: Pojedyncze elementy wyposażenia przechowywane w kontenerze'
+    const legendWeight = t ? t('gear.export.legendWeight', '- **Waga**: Całkowita waga uwzględniająca ilość') : '- **Waga**: Całkowita waga uwzględniająca ilość'
+    const legendBrand = t ? t('gear.export.legendBrand', '- **Marka**: Producent/marka przedmiotu') : '- **Marka**: Producent/marka przedmiotu'
+    const legendColor = t ? t('gear.export.legendColor', '- **Kolor**: Kolor przedmiotu') : '- **Kolor**: Kolor przedmiotu'
+    const legendNested = t ? t('gear.export.legendNested', '- **Zagnieżdżone kontenery**: Kontener może zawierać inny kontener jako przedmiot. Zagnieżdżone kontenery są wyświetlane jako pozycja w liście oraz osobno z pełną zawartością poniżej.') : '- **Zagnieżdżone kontenery**: Kontener może zawierać inny kontener jako przedmiot. Zagnieżdżone kontenery są wyświetlane jako pozycja w liście oraz osobno z pełną zawartością poniżej.'
+
+    lines.push(legendTitle)
+    lines.push('')
+    lines.push(legendIntro)
+    lines.push('')
+    lines.push(legendContainer)
+    lines.push(legendItems)
+    lines.push('- **Status**:')
+    if (t) {
+      const ownedDesc = t('gear.export.legendStatusOwned', 'Przedmiot jest posiadany i dostępny')
+      const missingDesc = t('gear.export.legendStatusMissing', 'Przedmiot jest brakujący lub niedostępny')
+      const toBuyDesc = t('gear.export.legendStatusToBuy', 'Przedmiot należy zakupić')
+      lines.push(`  - ${t('gear.item.statuses.owned')}: ${ownedDesc}`)
+      lines.push(`  - ${t('gear.item.statuses.missing')}: ${missingDesc}`)
+      lines.push(`  - ${t('gear.item.statuses.toBuy')}: ${toBuyDesc}`)
+    } else {
+      lines.push('  - owned: Przedmiot jest posiadany i dostępny')
+      lines.push('  - missing: Przedmiot jest brakujący lub niedostępny')
+      lines.push('  - toBuy: Przedmiot należy zakupić')
+    }
+    lines.push(legendWeight)
+    lines.push(legendBrand)
+    lines.push(legendColor)
+    lines.push(legendNested)
+    lines.push('')
+  }
 
   return lines.join('\n')
 }

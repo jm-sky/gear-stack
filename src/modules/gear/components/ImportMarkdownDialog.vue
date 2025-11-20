@@ -219,7 +219,7 @@ const handleImport = async () => {
 
 <template>
   <Dialog :open="props.open" @update:open="handleClose">
-    <DialogContent class="w-[95vw] max-w-4xl max-h-[90vh] flex flex-col">
+    <DialogContent class="min-w-full md:min-w-2xl max-w-screen md:max-w-6xl min-h-[70vh] max-h-[90vh] flex flex-col">
       <DialogHeader>
         <DialogTitle>{{ t('gear.import.title') }}</DialogTitle>
         <DialogDescription>
@@ -227,9 +227,9 @@ const handleImport = async () => {
         </DialogDescription>
       </DialogHeader>
 
-      <div class="flex-1 overflow-y-auto space-y-4">
+      <div class="flex flex-col flex-1 overflow-y-auto space-y-4">
         <!-- Markdown Input -->
-        <div>
+        <div class="flex flex-col flex-1">
           <label class="text-sm font-medium mb-2 block">
             {{ t('gear.import.markdownContent') }}
           </label>
@@ -237,16 +237,8 @@ const handleImport = async () => {
             v-model="markdownContent"
             :placeholder="t('gear.import.placeholder')"
             rows="12"
-            class="flex min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-mono"
+            class="flex flex-1 min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-mono"
           />
-        </div>
-
-        <!-- Preview Button -->
-        <div class="flex justify-start">
-          <Button type="button" variant="outline" @click="handlePreview">
-            <FileText class="size-4" />
-            {{ t('gear.import.preview') }}
-          </Button>
         </div>
 
         <!-- Import Mode Selection (shown only when UUIDs detected) -->
@@ -325,6 +317,10 @@ const handleImport = async () => {
         <div class="flex gap-2">
           <Button type="button" variant="outline" @click="handleClose">
             {{ t('gear.actions.cancel') }}
+          </Button>
+          <Button type="button" variant="outline" @click="handlePreview">
+            <FileText class="size-4" />
+            {{ t('gear.import.preview') }}
           </Button>
           <Button
             type="button"

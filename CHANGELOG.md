@@ -21,6 +21,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.15.0] - 2025-01-21
+
+### Added
+- **Preferred Weight Unit Setting**:
+  - Users can now set their preferred weight unit (g or kg) in settings
+  - All displayed weights across the application (tables, cards, headers) are automatically converted to the preferred unit
+  - Forms can still use different units, but display is consistent
+  - Setting is saved in localStorage and synchronized throughout the application
+  - UI option added to Preferences settings page
+
+- **Export Configuration Options**:
+  - Added export options dialog with checkboxes to control markdown export content:
+    - Show UUID in export
+    - Show weight
+    - Show color
+    - Show brand
+    - Show nested container reference (e.g., `[#bagaznik]`)
+    - Show legend
+  - All options are reactive - markdown updates in real-time when toggling options
+  - Options are saved per export session
+
+### Changed
+- **Export Dialog**: Refactored to accept container/containers directly instead of pre-generated markdown, allowing real-time updates based on options
+- **Weight Display**: All weight displays now use preferred unit from settings instead of automatic unit selection
+- **Export Format**: Container ID references (`[#id]`) in headers and items are now controlled by export options
+
+### Fixed
+- Fixed legend duplication when exporting multiple containers - legend now appears only once at the end
+- Fixed Checkbox component usage - now uses standard `v-model` instead of deprecated `v-model:checked` for regular refs
+
+### Documentation
+- Added `.cursorrules` file with Reka-ui Checkbox usage guidelines
+- Updated `CLAUDE.md` with UI component notes about Checkbox usage
+- Split ROADMAP into front-end only (`ROADMAP.md`) and backend-required (`ROADMAP_V2.md`) features
+
+---
+
 ## [0.14.0] - 2025-01-20
 
 ### Added

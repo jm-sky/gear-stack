@@ -29,13 +29,13 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 - ✅ HTML lang attribute automatycznie ustawiany na podstawie wykrytego języka
 - ✅ Wykryty język zapisywany w localStorage
 
-### Preferowana jednostka wagi
-**Status:** 🔄 Planned | **Priority:** Medium
+### ✅ Preferowana jednostka wagi
+**Status:** ✅ Completed | **Priority:** Medium
 
-- Użytkownik może ustawić preferowaną jednostkę wagi w ustawieniach (g lub kg)
-- Wszystkie wyświetlane wagi na dashboard, w tabelach i kartach będą konwertowane do preferowanej jednostki
-- Formularze nadal mogą używać różnych jednostek, ale wyświetlanie będzie spójne
-- Ustawienie zapisywane w localStorage i synchronizowane w całej aplikacji
+- ✅ Użytkownik może ustawić preferowaną jednostkę wagi w ustawieniach (g lub kg)
+- ✅ Wszystkie wyświetlane wagi na dashboard, w tabelach i kartach będą konwertowane do preferowanej jednostki
+- ✅ Formularze nadal mogą używać różnych jednostek, ale wyświetlanie będzie spójne
+- ✅ Ustawienie zapisywane w localStorage i synchronizowane w całej aplikacji
 
 ---
 
@@ -196,10 +196,16 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 - ✅ Przycisk kopiowania szablonu do schowka
 
 **Planowane ulepszenia (front-end only):**
-- 🔄 Opcje konfiguracji eksportu:
-  - 🔄 Pokazywanie cen przedmiotów w eksporcie (opcjonalnie)
-  - 🔄 Dodatkowe podsumowanie "Do kupienia" na końcu eksportu
-  - 🔄 Inne opcje konfiguracji formatu (poziom szczegółowości, metadane, itp.)
+- ✅ **Opcje konfiguracji eksportu** (częściowo zaimplementowane):
+  - ✅ Pokazywanie UUID w eksporcie (opcjonalnie)
+  - ✅ Pokazywanie wagi w eksporcie (opcjonalnie)
+  - ✅ Pokazywanie koloru w eksporcie (opcjonalnie)
+  - ✅ Pokazywanie marki w eksporcie (opcjonalnie)
+  - ✅ Pokazywanie powiązania z kontenerem (opcjonalnie)
+  - ✅ Pokazywanie legendy (opcjonalnie)
+  - 🔄 Pokazywanie cen przedmiotów w eksporcie (opcjonalnie) - planowane
+  - 🔄 Dodatkowe podsumowanie "Do kupienia" na końcu eksportu - planowane
+  - 🔄 Inne opcje konfiguracji formatu (poziom szczegółowości, metadane, itp.) - planowane
 
 > **Uwaga:** UUID support dla update workflow wymaga backendu/DB - zobacz [ROADMAP_V2.md](./ROADMAP_V2.md)
 
