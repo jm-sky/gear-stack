@@ -15,6 +15,7 @@ import ExportToPromptDialog from '../components/ExportToPromptDialog.vue'
 import ImportMarkdownDialog from '../components/ImportMarkdownDialog.vue'
 import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
+import { generateSampleSet } from '../services/sampleSetGenerator'
 import type { TUUID } from '@/shared/types/base.type'
 
 const router = useRouter()
@@ -95,6 +96,16 @@ const handleExportAllToPrompt = () => {
 
   isExportToPromptDialogOpen.value = true
 }
+
+const handleGenerateSampleSet = () => {
+  try {
+    generateSampleSet(t)
+    toast.success(t('gear.sampleSet.success'))
+  } catch (error) {
+    console.error('Error generating sample set:', error)
+    toast.error(t('common.error'))
+  }
+}
 </script>
 
 <template>
@@ -159,10 +170,15 @@ const handleExportAllToPrompt = () => {
         <p class="text-muted-foreground mb-6 max-w-md">
           {{ t('gear.container.emptyDescription') }}
         </p>
-        <Button @click="handleCreate">
-          <Plus class="size-4" />
-          {{ t('gear.container.create.title') }}
-        </Button>
+        <div class="flex gap-2">
+          <Button @click="handleCreate">
+            <Plus class="size-4" />
+            {{ t('gear.container.create.title') }}
+          </Button>
+          <Button variant="outline" @click="handleGenerateSampleSet">
+            {{ t('gear.sampleSet.generateButton') }}
+          </Button>
+        </div>
       </div>
     </div>
 
