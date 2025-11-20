@@ -12,6 +12,8 @@ export const containerSchema = z.object({
   price: z.number().min(0, 'Cena nie może być ujemna').optional(),
   weight: z.number().min(0, 'Waga nie może być ujemna').optional(),
   weightUnit: z.enum(['g', 'kg', 'oz', 'lb']).optional(),
+  maxWeight: z.number().min(0, 'Maksymalna waga nie może być ujemna').optional(),
+  maxWeightUnit: z.enum(['g', 'kg', 'oz', 'lb']).optional(),
   url: z.string().url('Nieprawidłowy URL').optional().or(z.literal('')),
 })
 

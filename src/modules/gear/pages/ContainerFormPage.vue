@@ -34,6 +34,8 @@ const getInitialValues = (): ContainerFormData => {
       price: container.value.price,
       weight: container.value.weight,
       weightUnit: container.value.weightUnit ?? 'kg',
+      maxWeight: container.value.maxWeight,
+      maxWeightUnit: container.value.maxWeightUnit ?? 'kg',
       url: container.value.url ?? '',
     }
   }
@@ -46,6 +48,8 @@ const getInitialValues = (): ContainerFormData => {
     price: undefined,
     weight: undefined,
     weightUnit: 'kg' as const,
+    maxWeight: undefined,
+    maxWeightUnit: 'kg' as const,
     url: '',
   }
 }

@@ -253,6 +253,49 @@ const handleCancel = () => {
         </FormField>
       </div>
 
+      <!-- Max Weight and Max Weight Unit -->
+      <div class="grid grid-cols-[1fr_80px] sm:grid-cols-[1fr_auto] gap-2">
+        <FormField v-slot="{ componentField }" name="maxWeight">
+          <FormItem>
+            <FormLabel :label="$t('gear.container.maxWeight')" />
+            <Input
+              v-bind="componentField"
+              type="number"
+              :placeholder="$t('gear.container.maxWeight')"
+              min="0"
+              step="0.01"
+            />
+            <FormMessage />
+          </FormItem>
+        </FormField>
+
+        <FormField v-slot="{ value, handleChange }" name="maxWeightUnit">
+          <FormItem>
+            <FormLabel :label="$t('gear.container.maxWeightUnit')" />
+            <Select :model-value="value" @update:model-value="handleChange">
+              <SelectTrigger class="w-[80px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="g">
+                  {{ $t('gear.item.weightUnits.g') }}
+                </SelectItem>
+                <SelectItem value="kg">
+                  {{ $t('gear.item.weightUnits.kg') }}
+                </SelectItem>
+                <SelectItem value="oz">
+                  {{ $t('gear.item.weightUnits.oz') }}
+                </SelectItem>
+                <SelectItem value="lb">
+                  {{ $t('gear.item.weightUnits.lb') }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+      </div>
+
       <!-- URL -->
       <FormField v-slot="{ componentField }" name="url">
         <FormItem>

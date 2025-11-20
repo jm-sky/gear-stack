@@ -233,8 +233,14 @@ class GearService {
       return 0
     }
 
-    // Calculate weight of direct items
-    const totalWeight = container.items.reduce((total, item) => {
+    // Start with container's own weight (if defined)
+    let totalWeight = 0
+    if (container.weight !== undefined && container.weightUnit) {
+      totalWeight = convertToGrams(container.weight, container.weightUnit)
+    }
+
+    // Add weight of direct items
+    totalWeight += container.items.reduce((total, item) => {
       // If item is a nested container, calculate its total weight recursively
       if (item.containerId) {
         const nestedContainerWeight = this.calculateTotalWeight(item.containerId)
@@ -257,6 +263,27 @@ class GearService {
 
     const ownedItems = container.items.filter(item => item.status === 'owned').length
     return Math.round((ownedItems / container.items.length) * 100)
+  }
+
+  calculateWeightLimitPercentage(containerId: TUUID): number | null {
+    const container = this.store.getContainerById(containerId)
+    if (!container || !container.maxWeight) {
+      return null
+    }
+
+    const totalWeight = this.calculateTotalWeight(containerId)
+    const maxWeightInGrams = convertToGrams(container.maxWeight, container.maxWeightUnit ?? 'g')
+
+    if (maxWeightInGrams === 0) {
+      return 0
+    }
+
+    return Math.round((totalWeight / maxWeightInGrams) * 100)
+  }
+
+  isWeightLimitExceeded(containerId: TUUID): boolean {
+    const percentage = this.calculateWeightLimitPercentage(containerId)
+    return percentage !== null && percentage > 100
   }
 
   getItemsByStatus(containerId: TUUID, status: TGearItemStatus): IGearItem[] {

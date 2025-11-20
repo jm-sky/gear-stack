@@ -293,6 +293,65 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 
 ---
 
+## 🔄 Zarządzanie kontenerami i przedmiotami
+
+### Kopiowanie/klonowanie kontenerów
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+
+- Możliwość sklonowania całego kontenera wraz z jego zawartością
+- Akcja "Duplikuj kontener" w menu akcji kontenera (dropdown na liście kontenerów)
+- Klonowanie tworzy nowy kontener z:
+  - Nazwą: "[Kopia] Nazwa oryginału" (edytowalna)
+  - Wszystkimi przedmiotami z oryginału (głębokie kopiowanie)
+  - Zagnieżdżonymi kontenerami (opcjonalnie - checkbox "Klonuj z zagnieżdżonymi kontenerami")
+  - Wszystkimi metadanymi (typ, kolor, brand, opis, itp.)
+- Dialog potwierdzający klonowanie z opcjami:
+  - Nowa nazwa kontenera (domyślnie: "[Kopia] Original Name")
+  - Checkbox: "Uwzględnij zagnieżdżone kontenery"
+  - Checkbox: "Uwzględnij ceny" (dla przedmiotów)
+- Klonowanie zapisuje w localStorage
+- Toast potwierdzający sukces z linkiem do nowego kontenera
+
+**Use cases:**
+- Tworzenie wariantu plecaka (np. "Plecak letni" → "Plecak zimowy")
+- Backup przed modyfikacją
+- Tworzenie podobnych zestawów (EDC #1, EDC #2)
+
+### Dodawanie istniejących przedmiotów do kontenera
+**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium
+
+- Możliwość dodania istniejącego przedmiotu z innego kontenera bez ręcznego przepisywania
+- W ItemFormPage dodanie opcji wyboru:
+  - **Nowy przedmiot** (obecny formularz) - domyślnie
+  - **Istniejący przedmiot** (autocomplete) - nowy tryb
+- Przycisk/toggle do przełączania między trybami lub dwa osobne buttony na stronie kontenera:
+  - "Dodaj przedmiot" (obecny)
+  - "Dodaj z katalogu" (nowy)
+- **Tryb "Dodaj istniejący":**
+  - Autocomplete/ComboBox z listą wszystkich przedmiotów ze wszystkich kontenerów
+  - Wyświetlanie: nazwa + kontener źródłowy + ikona kategorii
+  - Filtrowanie po nazwie (fuzzy search)
+  - Po wybraniu przedmiotu:
+    - Domyślnie: **kopia przedmiotu** (wszystkie pola + nowe UUID)
+    - Opcjonalnie: edycja przed dodaniem (ilość, waga, status)
+- Lista przedmiotów sortowana alfabetycznie
+- Grupowanie według kontenera źródłowego (opcjonalnie)
+- Podgląd szczegółów przedmiotu w dropdown (waga, marka, kolor)
+
+**Globalny katalog przedmiotów (localStorage):**
+- Funkcja w gearService: `getAllItems(): IGearItem[]` - zwraca wszystkie przedmioty ze wszystkich kontenerów
+- Funkcja: `getItemsForAutocomplete()` - zwraca przedmioty w formacie dla ComboBox
+- Cache w composable dla wydajności
+
+**Use cases:**
+- Dodawanie tego samego przedmiotu do wielu kontenerów (np. "Latarka" w różnych zestawach)
+- Szybkie budowanie nowego kontenera na bazie istniejących przedmiotów
+- Unikanie przepisywania tych samych danych
+
+> **Uwaga:** Linkowanie przedmiotów (zmiana w jednym → zmiana w wielu) wymaga backendu/DB - zobacz [ROADMAP_V2.md](./ROADMAP_V2.md)
+
+---
+
 ## ✏️ Szybka edycja
 
 ### Edycja bezpośrednio na liście
@@ -417,13 +476,17 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 
 ### High Priority (Następne do zrobienia)
 1. ✅ **Strona z listą wszystkich przedmiotów** - High priority, Medium complexity (Completed in v0.10.0)
-2. **Edycja bezpośrednio na liście** - High priority, Large complexity
-3. **Kolejność przedmiotów w kontenerze** - Medium priority, Medium complexity
+2. **Dodawanie istniejących przedmiotów do kontenera** - High priority, Medium complexity
+3. **Edycja bezpośrednio na liście** - High priority, Large complexity
 
 ### Medium Priority
-1. **Preferowana jednostka wagi** - Medium priority, Small complexity
-2. ✅ **Rozszerzone pola** - Medium priority, Medium complexity (Completed in v0.8.0)
-3. ✅ **Rozpoznawanie parametrów przedmiotów na żądanie** - Medium priority, Medium complexity (Completed in v0.19.0)
+1. **Kopiowanie/klonowanie kontenerów** - Medium priority, Small complexity
+2. **Maksymalna waga kontenera (maxWeight)** - Medium priority, Medium complexity
+3. **Kolejność przedmiotów w kontenerze** - Medium priority, Medium complexity
+4. **Oznaczanie kontenerów jako fragmentów rodzica** - Medium priority, Medium complexity
+5. **Obsługa Markdown w notatkach** - Medium priority, Medium complexity
+6. ✅ **Rozszerzone pola** - Medium priority, Medium complexity (Completed in v0.8.0)
+7. ✅ **Rozpoznawanie parametrów przedmiotów na żądanie** - Medium priority, Medium complexity (Completed in v0.19.0)
 
 ### Low Priority (Polish/Enhancement)
 1. ⏸️ **Wybór primary color** - Low priority, Small complexity (On Hold - obecny kolor zadowalający)

@@ -132,7 +132,12 @@ const handleRecognizeParameters = () => {
           {{ isEditMode ? t('gear.item.edit') : t('gear.item.create') }}
         </h1>
         <p class="text-muted-foreground mt-1">
-          {{ container.name }}
+          <RouterLink
+            :to="`/gear/${container.id}`"
+            class="hover:text-primary hover:underline transition-colors"
+          >
+            {{ container.name }}
+          </RouterLink>
         </p>
       </div>
 

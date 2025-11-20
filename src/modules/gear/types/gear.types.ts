@@ -94,6 +94,8 @@ export interface IGearContainer {
   price?: number // Price in currency (optional)
   weight?: number // Container weight value
   weightUnit?: TGearWeightUnit // Container weight unit (g or kg)
+  maxWeight?: number // Maximum weight limit value
+  maxWeightUnit?: TGearWeightUnit // Maximum weight unit (g or kg)
   url?: string // Link to product, review, etc.
   items: IGearItem[]
   createdAt: TDateTime
@@ -111,6 +113,8 @@ export interface ICreateContainerDto {
   price?: number
   weight?: number
   weightUnit?: TGearWeightUnit
+  maxWeight?: number
+  maxWeightUnit?: TGearWeightUnit
   url?: string
 }
 
@@ -125,6 +129,8 @@ export interface IUpdateContainerDto {
   price?: number
   weight?: number
   weightUnit?: TGearWeightUnit
+  maxWeight?: number
+  maxWeightUnit?: TGearWeightUnit
   url?: string
 }
 

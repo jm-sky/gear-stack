@@ -49,6 +49,11 @@ export const gearEn = {
       price: 'Price',
       weight: 'Weight',
       weightUnit: 'Weight Unit',
+      maxWeight: 'Max Weight',
+      maxWeightUnit: 'Max Weight Unit',
+      weightLimit: 'Weight Limit',
+      weightLimitExceeded: 'Weight limit exceeded',
+      weightLimitWarning: 'Close to weight limit',
       url: 'URL',
       colors: {
         default: 'Default',
@@ -339,6 +344,11 @@ export const gearPl = {
       price: 'Cena',
       weight: 'Waga',
       weightUnit: 'Jednostka wagi',
+      maxWeight: 'Maks. waga',
+      maxWeightUnit: 'Jednostka maks. wagi',
+      weightLimit: 'Limit wagi',
+      weightLimitExceeded: 'Przekroczono limit wagi',
+      weightLimitWarning: 'Blisko limitu wagi',
       url: 'URL',
       colors: {
         default: 'Domyślny',

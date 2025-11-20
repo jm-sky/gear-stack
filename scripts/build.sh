@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Gear Stack Build Script
-# This script installs dependencies and builds the application
+# Gear Stack Build and Deploy Script
+# This script installs dependencies, builds the application, and deploys to /var/www/gear-stack
 
 set -e  # Exit on any error
 
@@ -13,8 +13,9 @@ NC='\033[0m' # No Color
 
 # Configuration
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+DEPLOY_DIR="/var/www/gear-stack"
 
-echo -e "${GREEN}🔨 Starting Gear Stack build...${NC}"
+echo -e "${GREEN}🔨 Starting Gear Stack build and deploy...${NC}"
 
 # Step 1: Install frontend dependencies
 echo -e "${YELLOW}📦 Step 1: Installing frontend dependencies...${NC}"
@@ -26,4 +27,15 @@ echo -e "${YELLOW}🔨 Step 2: Building frontend...${NC}"
 pnpm build
 echo -e "${GREEN}✅ Frontend build completed${NC}"
 
-echo -e "${GREEN}✅ Build completed successfully!${NC}"
+# Step 3: Deploy to /var/www/gear-stack
+echo -e "${YELLOW}📋 Step 3: Deploying to ${DEPLOY_DIR}...${NC}"
+
+# Remove old files
+sudo rm -rf "${DEPLOY_DIR:?}"/*
+
+# Copy new build
+sudo cp -r dist/* "$DEPLOY_DIR/"
+
+echo -e "${GREEN}✅ Deployed to ${DEPLOY_DIR}${NC}"
+
+echo -e "${GREEN}✅ Build and deploy completed successfully!${NC}"

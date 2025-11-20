@@ -15,7 +15,7 @@ import {
   READINESS_EXCELLENT_THRESHOLD,
   READINESS_GOOD_THRESHOLD,
 } from '../utils/constants'
-import { formatWeight, formatWeightToPreferredUnit } from '../utils/formatWeight'
+import { convertToGrams, formatWeight, formatWeightToPreferredUnit } from '../utils/formatWeight'
 
 const props = defineProps<{
   container: IGearContainer
@@ -31,7 +31,7 @@ const emit = defineEmits<{
 
 const router = useRouter()
 const { t } = useI18n()
-const { calculateTotalWeight, calculateReadinessPercentage } = useGear()
+const { calculateTotalWeight, calculateReadinessPercentage, calculateWeightLimitPercentage } = useGear()
 const { customContainerTypes } = useGearSettings()
 const { settings: coreSettings } = useCoreSettings()
 const settings = computed(() => ({ preferredWeightUnit: coreSettings.value.preferredWeightUnit }))
@@ -63,6 +63,24 @@ const getContainerTypeLabel = (typeKey: string): string => {
 // Container type label
 const typeLabel = computed<string>(() => {
   return getContainerTypeLabel(props.container.type)
+})
+
+// Weight limit
+const weightLimitPercentage = computed<number | null>(() => calculateWeightLimitPercentage(props.container.id))
+const hasWeightLimit = computed<boolean>(() => weightLimitPercentage.value !== null)
+const weightLimitColor = computed<string>(() => {
+  if (!weightLimitPercentage.value) return ''
+  if (weightLimitPercentage.value >= 100) return 'text-red-600'
+  if (weightLimitPercentage.value >= 90) return 'text-orange-600'
+  if (weightLimitPercentage.value >= 70) return 'text-yellow-600'
+  return 'text-green-600'
+})
+const formattedMaxWeight = computed<string>(() => {
+  if (!props.container.maxWeight || !props.container.maxWeightUnit) return ''
+  return formatWeightToPreferredUnit(
+    convertToGrams(props.container.maxWeight, props.container.maxWeightUnit),
+    settings.value.preferredWeightUnit
+  )
 })
 
 // Actions
@@ -131,6 +149,13 @@ const handleBack = () => {
             </Badge>
             <Badge v-if="container.weight !== undefined && container.weightUnit" variant="secondary">
               {{ formatWeight(container.weight, container.weightUnit) }}
+            </Badge>
+            <Badge
+              v-if="hasWeightLimit && weightLimitPercentage !== null && weightLimitPercentage >= 90"
+              :class="weightLimitPercentage >= 100 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'"
+            >
+              {{ weightLimitPercentage >= 100 ? t('gear.container.weightLimitExceeded') : t('gear.container.weightLimitWarning') }}
+              ({{ weightLimitPercentage }}%)
             </Badge>
             <a
               v-if="container.url"
@@ -213,8 +238,20 @@ const handleBack = () => {
         <div class="text-sm text-muted-foreground mb-1">
           {{ t('gear.container.totalWeight') }}
         </div>
-        <div class="text-2xl font-bold">
+        <div :class="['text-2xl font-bold', hasWeightLimit ? weightLimitColor : '']">
           {{ formattedWeight }}
+          <span v-if="hasWeightLimit" class="text-sm text-muted-foreground">
+            / {{ formattedMaxWeight }}
+          </span>
+        </div>
+        <div v-if="hasWeightLimit && weightLimitPercentage !== null" class="w-full bg-muted rounded-full h-2 mt-2">
+          <div
+            :class="[
+              'h-2 rounded-full transition-all',
+              weightLimitPercentage >= 100 ? 'bg-red-600' : weightLimitPercentage >= 90 ? 'bg-orange-600' : weightLimitPercentage >= 70 ? 'bg-yellow-600' : 'bg-green-600',
+            ]"
+            :style="{ width: `${Math.min(weightLimitPercentage, 100)}%` }"
+          />
         </div>
       </div>
       <div class="bg-card rounded-lg border p-4">
