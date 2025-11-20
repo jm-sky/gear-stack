@@ -36,6 +36,8 @@ export const itemSchema = z.object({
   brand: z.string().optional(),
   color: z.string().optional(),
   quality: z.enum(['low', 'medium', 'high']).optional(),
+  wearable: z.boolean().optional(),
+  consumable: z.boolean().optional(),
 })
 
 // Type inference dla TypeScript

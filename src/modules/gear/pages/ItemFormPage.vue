@@ -49,6 +49,8 @@ const getInitialValues = (): ItemFormData => {
       brand: item.value.brand ?? '',
       color: item.value.color ?? '',
       quality: item.value.quality,
+      wearable: item.value.wearable ?? false,
+      consumable: item.value.consumable ?? false,
     }
   }
   return {

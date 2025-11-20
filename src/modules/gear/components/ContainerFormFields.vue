@@ -160,7 +160,7 @@ const handleCancel = () => {
             :key="color"
             type="button"
             :class="[
-              'w-10 h-10 rounded-full border-2 transition-all',
+              'size-10 rounded-full border-2 transition-all',
               COLOR_DOT_CLASSES[color],
               value === color || (!value && color === 'default') ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : 'opacity-50 hover:opacity-75',
             ]"
@@ -174,9 +174,13 @@ const handleCancel = () => {
     </FormField>
 
     <!-- Hide When Nested -->
-    <FormField v-slot="{ componentField }" name="hideWhenNested">
-      <FormItem class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-        <Checkbox v-bind="componentField" />
+    <FormField v-slot="{ componentField, handleChange }" name="hideWhenNested">
+      <FormItem v-slot="{ id }" class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+        <Checkbox
+          :id="id"
+          :model-value="componentField.modelValue"
+          @update:model-value="handleChange"
+        />
         <div class="flex-1 space-y-1">
           <FormLabel :label="$t('gear.container.hideWhenNested')" class="cursor-pointer" />
           <p class="text-sm text-muted-foreground">
@@ -246,7 +250,7 @@ const handleCancel = () => {
           <FormItem>
             <FormLabel :label="$t('gear.container.weightUnit')" />
             <Select :model-value="value" @update:model-value="handleChange">
-              <SelectTrigger class="w-[80px]">
+              <SelectTrigger class="w-36">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -289,7 +293,7 @@ const handleCancel = () => {
           <FormItem>
             <FormLabel :label="$t('gear.container.maxWeightUnit')" />
             <Select :model-value="value" @update:model-value="handleChange">
-              <SelectTrigger class="w-[80px]">
+              <SelectTrigger class="w-36">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

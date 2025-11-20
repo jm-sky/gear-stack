@@ -149,7 +149,7 @@ Add color selector:
         :key="color"
         type="button"
         :class="[
-          'w-10 h-10 rounded-full border-2 transition-all',
+          'size-10 rounded-full border-2 transition-all',
           COLOR_DOT_CLASSES[color],
           value === color ? 'ring-2 ring-offset-2 ring-gray-400' : 'opacity-50 hover:opacity-75'
         ]"

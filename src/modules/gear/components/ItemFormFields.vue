@@ -408,28 +408,36 @@ const handleCancel = () => {
 
       <!-- Wearable and Consumable -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <FormField v-slot="{ componentField }" name="wearable">
-          <FormItem class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+        <FormField v-slot="{ componentField, handleChange }" name="wearable">
+          <FormItem v-slot="{ id }" class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
             <div class="flex-1 space-y-1">
               <FormLabel :label="$t('gear.item.wearable')" class="cursor-pointer" />
               <p class="text-sm text-muted-foreground">
                 {{ $t('gear.item.wearableDescription') }}
               </p>
             </div>
-            <Checkbox v-model="componentField.modelValue" />
+            <Checkbox
+              :id="id"
+              :model-value="componentField.modelValue"
+              @update:model-value="handleChange"
+            />
             <FormMessage />
           </FormItem>
         </FormField>
 
-        <FormField v-slot="{ componentField }" name="consumable">
-          <FormItem class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+        <FormField v-slot="{ componentField, handleChange }" name="consumable">
+          <FormItem v-slot="{ id }" class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
             <div class="flex-1 space-y-1">
               <FormLabel :label="$t('gear.item.consumable')" class="cursor-pointer" />
               <p class="text-sm text-muted-foreground">
                 {{ $t('gear.item.consumableDescription') }}
               </p>
             </div>
-            <Checkbox v-model="componentField.modelValue" />
+            <Checkbox
+              :id
+              :model-value="componentField.modelValue"
+              @update:model-value="handleChange"
+            />
             <FormMessage />
           </FormItem>
         </FormField>
