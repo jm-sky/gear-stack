@@ -63,10 +63,12 @@ function loadColumnVisibility(): Record<string, boolean> {
   } catch (error) {
     console.error('Error loading column visibility from storage:', error)
   }
-  // Default: hide brand and color by default
+  // Default: hide brand, color, wearable, and consumable by default
   return {
     brand: false,
     color: false,
+    wearable: false,
+    consumable: false,
   }
 }
 

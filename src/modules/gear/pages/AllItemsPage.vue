@@ -48,6 +48,8 @@ function loadColumnVisibility(): Record<string, boolean> {
   return {
     brand: false,
     color: false,
+    wearable: false,
+    consumable: false,
   }
 }
 
