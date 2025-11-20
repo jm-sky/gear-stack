@@ -21,6 +21,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.20.0] - 2025-01-20
+
+### Added
+- **maxWeight Feature** (Container Weight Limits):
+  - Added `maxWeight` and `maxWeightUnit` fields to containers
+  - Weight limit input in container form (Extended Fields section)
+  - Automatic weight calculation including container's own weight
+  - Visual indicators in ContainerHeader:
+    - Warning badge when weight exceeds 90% of limit (orange)
+    - Exceeded badge when weight exceeds 100% (red)
+    - Color-coded weight display (green/yellow/orange/red)
+    - Progress bar showing weight usage percentage
+  - Stats card displays "currentWeight / maxWeight" with visual progress bar
+  - Weight limit calculations: `calculateWeightLimitPercentage()` and `isWeightLimitExceeded()`
+  - Translations for maxWeight feature (PL/EN)
+
+- **hideWhenNested Feature** (Smart Container Filtering):
+  - Added `hideWhenNested` boolean field to containers
+  - Checkbox in container form: "Hide on list when nested"
+  - Automatic filtering in ContainersListPage - containers with `hideWhenNested=true` and `parentContainerId` are hidden from main list
+  - Filter respects "Show only root containers" toggle
+  - Helps organize nested containers without cluttering main list
+
+- **Parameter Recognition in ContainerForm**:
+  - Added "Recognize Parameters" button to container form
+  - Recognizes brand from container name using fuzzy matching
+  - Same functionality as ItemForm parameter recognition
+  - Toast notifications for recognition results
+
+- **UI/UX Improvements**:
+  - Container name is now a clickable link in ItemFormPage (navigates to container details)
+  - Added `flex-1` to form buttons for better mobile layout:
+    - ItemFormFields: Cancel and Save buttons have equal width
+    - ContainerHeader: Add Item button expands on mobile (`flex-1 sm:flex-none`)
+  - Build script now includes deployment to `/var/www/gear-stack`
+
+### Fixed
+- Fixed brand and color displaying as lowercase in UI
+  - Changed `getBrandOptions()` to use original case instead of `toLowerCase()`
+  - Changed `getColorOptions()` to use original case instead of `toLowerCase()`
+  - Brand badge now displays with normal-case (e.g., "Maxpedition" instead of "maxpedition")
+- Fixed missing Checkbox import in ContainerFormFields
+- Fixed weight calculation to include container's own weight in total
+
+### Changed
+- Updated ROADMAP with new features:
+  - Added maxWeight feature documentation with use cases
+  - Added container/item management features (cloning, existing items catalog)
+
+---
+
 ## [0.19.0] - 2025-01-22
 
 ### Added

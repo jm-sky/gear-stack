@@ -176,7 +176,7 @@ const handleCancel = () => {
     <!-- Hide When Nested -->
     <FormField v-slot="{ componentField }" name="hideWhenNested">
       <FormItem class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-        <Checkbox v-model="componentField.modelValue" />
+        <Checkbox v-bind="componentField" />
         <div class="flex-1 space-y-1">
           <FormLabel :label="$t('gear.container.hideWhenNested')" class="cursor-pointer" />
           <p class="text-sm text-muted-foreground">

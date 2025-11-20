@@ -394,26 +394,30 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 
 ## ⚖️ Kontrola wagi
 
-### Maksymalna waga kontenera (maxWeight)
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+### ✅ Maksymalna waga kontenera (maxWeight)
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium | **Version:** v0.20.0
 
-- Dodanie opcjonalnego pola `maxWeight` do kontenerów
-- Możliwość ustawienia maksymalnej wagi dla kontenera (użytkownik może określić limit wagi, który jest w stanie nosić/transportować)
-- Wizualne ostrzeżenia gdy waga kontenera przekracza lub zbliża się do limitu:
-  - **Badge "Przekroczona waga"** - gdy totalna waga > maxWeight
-  - **Wskaźnik procentowy** - np. "85% z 15kg" - pokazuje jak blisko jesteśmy limitu
-  - **Kolorowanie** - zielony (0-70%), żółty (70-90%), czerwony (90%+)
-- Wyświetlanie w różnych miejscach:
-  - W nagłówku kontenera (ContainerHeader) - badge i wskaźnik
-  - W karcie kontenera na liście - badge jeśli przekroczona
-  - W statystykach kontenera - wizualny wskaźnik z paskiem postępu
-- Ustawienie maxWeight w formularzu kontenera:
-  - Pole opcjonalne z inputem numerycznym
-  - Wybór jednostki wagi (g, kg, oz, lb) - zgodnie z preferowaną jednostką użytkownika
-  - Automatyczna konwersja do gramów w modelu danych
-- Uwzględnienie zagnieżdżonych kontenerów w obliczeniach wagi
+- ✅ Dodanie opcjonalnego pola `maxWeight` do kontenerów
+- ✅ Możliwość ustawienia maksymalnej wagi dla kontenera (użytkownik może określić limit wagi, który jest w stanie nosić/transportować)
+- ✅ Wizualne ostrzeżenia gdy waga kontenera przekracza lub zbliża się do limitu:
+  - ✅ **Badge "Przekroczona waga"** - gdy totalna waga > maxWeight (czerwony, 100%+)
+  - ✅ **Badge "Blisko limitu"** - ostrzeżenie (pomarańczowy, 90%+)
+  - ✅ **Wskaźnik procentowy** - pokazuje procent wykorzystania limitu
+  - ✅ **Kolorowanie** - zielony (0-70%), żółty (70-90%), pomarańczowy (90-100%), czerwony (100%+)
+- ✅ Wyświetlanie w różnych miejscach:
+  - ✅ W nagłówku kontenera (ContainerHeader) - badge i wskaźnik
+  - ✅ W statystykach kontenera - wizualny wskaźnik z paskiem postępu ("15kg / 20kg")
+- ✅ Ustawienie maxWeight w formularzu kontenera:
+  - ✅ Pole opcjonalne z inputem numerycznym
+  - ✅ Wybór jednostki wagi (g, kg, oz, lb) - zgodnie z preferowaną jednostką użytkownika
+  - ✅ Automatyczna konwersja do gramów w modelu danych
+- ✅ Uwzględnienie zagnieżdżonych kontenerów w obliczeniach wagi
+- ✅ Uwzględnienie wagi samego kontenera w obliczeniach
+
+**Nie zaimplementowane (future):**
 - Toast/notification gdy podczas dodawania przedmiotu przekroczymy limit
 - Opcjonalna blokada dodawania przedmiotów gdy limit jest przekroczony (checkbox w ustawieniach)
+- Badge na karcie kontenera na liście
 
 **Use cases:**
 - Backpacking: "Nie chcę nosić więcej niż 12kg"
@@ -481,7 +485,7 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 
 ### Medium Priority
 1. **Kopiowanie/klonowanie kontenerów** - Medium priority, Small complexity
-2. **Maksymalna waga kontenera (maxWeight)** - Medium priority, Medium complexity
+2. ✅ **Maksymalna waga kontenera (maxWeight)** - Medium priority, Medium complexity (Completed in v0.20.0)
 3. **Kolejność przedmiotów w kontenerze** - Medium priority, Medium complexity
 4. **Oznaczanie kontenerów jako fragmentów rodzica** - Medium priority, Medium complexity
 5. **Obsługa Markdown w notatkach** - Medium priority, Medium complexity
