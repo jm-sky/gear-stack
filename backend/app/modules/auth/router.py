@@ -151,6 +151,18 @@ async def refresh_token(token_data: TokenRefresh, auth_service: AuthServiceDep, 
         )
 
 
+@router.post("/logout", response_model=MessageResponse, summary="Logout user", description="Logout current user", tags=["Authentication"])
+async def logout(current_user: CurrentUser) -> MessageResponse:
+    """
+    Logout current user.
+
+    Security features:
+    - ✅ Authentication required (JWT token via CurrentUser)
+    - TODO: Invalidate token
+    """
+    return MessageResponse(message="Logged out successfully")
+
+
 @router.post("/forgot-password", response_model=MessageResponse, summary="Request password reset", description="Request a password reset email (development: token is printed to console)", tags=["Authentication"])
 @rate_limit("3/minute")  # CRITICAL: Prevent email enumeration and spam
 @recaptcha_protected("forgot_password")  # Disabled by default, enable via RECAPTCHA_ENABLED=true
@@ -267,5 +279,3 @@ async def delete_account(request_data: DeleteAccountRequest, current_user: Curre
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except UserNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-
-

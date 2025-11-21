@@ -18,6 +18,10 @@ export const config = {
   contact: {
     email: import.meta.env.VITE_CONTACT_EMAIL ?? 'contact@dev-made.it',
   },
+  backend: {
+    enabled: import.meta.env.VITE_ENABLE_BACKEND === 'true',
+    baseUrl: import.meta.env.VITE_API_BASE_URL ?? '/api',
+  },
   defaults: {
     preferredWeightUnit: 'g' as TGearWeightUnit,
   },

@@ -183,18 +183,10 @@ class TotpService:
             }
 
         try:
-            backup_codes = (
-                json.loads(config.backup_codes) if config.backup_codes else []
-            )
-            used_codes = (
-                json.loads(config.backup_codes_used)
-                if config.backup_codes_used
-                else []
-            )
+            backup_codes = json.loads(config.backup_codes) if config.backup_codes else []
+            used_codes = json.loads(config.backup_codes_used) if config.backup_codes_used else []
         except json.JSONDecodeError as e:
-            logger.warning(
-                f"Failed to decode backup codes JSON for user {user_id}: {e}"
-            )
+            logger.warning(f"Failed to decode backup codes JSON for user {user_id}: {e}")
             backup_codes = []
             used_codes = []
 
@@ -238,9 +230,7 @@ class TotpService:
         # Verify password or TOTP code
         if password:
             if not user_repository:
-                raise ValueError(
-                    "User repository required for password verification"
-                )
+                raise ValueError("User repository required for password verification")
             user = await user_repository.get_user_by_id(user_id)
             if not user or not verify_password(password, user.hashedPassword):
                 raise InvalidTwoFactorCodeError("Invalid password")
@@ -253,9 +243,7 @@ class TotpService:
 
         # Generate new backup codes
         plain_codes, hashed_codes = generate_backup_codes()
-        await self.repository.update_backup_codes(
-            user_id, json.dumps(hashed_codes)
-        )
+        await self.repository.update_backup_codes(user_id, json.dumps(hashed_codes))
 
         return {
             "codes": plain_codes,
@@ -294,21 +282,13 @@ class TotpService:
         # Verify password or backup code
         if password:
             if not user_repository:
-                raise ValueError(
-                    "User repository required for password verification"
-                )
+                raise ValueError("User repository required for password verification")
             user = await user_repository.get_user_by_id(user_id)
             if not user or not verify_password(password, user.hashedPassword):
                 raise InvalidTwoFactorCodeError("Invalid password")
         elif backup_code:
-            backup_codes = (
-                json.loads(config.backup_codes) if config.backup_codes else []
-            )
-            used_codes = (
-                json.loads(config.backup_codes_used)
-                if config.backup_codes_used
-                else []
-            )
+            backup_codes = json.loads(config.backup_codes) if config.backup_codes else []
+            used_codes = json.loads(config.backup_codes_used) if config.backup_codes_used else []
             if not verify_backup_code(backup_code, backup_codes, used_codes):
                 raise InvalidTwoFactorCodeError("Invalid backup code")
         else:
@@ -319,9 +299,7 @@ class TotpService:
 
         return {"success": True, "message": "TOTP disabled"}
 
-    async def verify_code(
-        self, user_id: str, code: str, mark_used: bool = False
-    ) -> tuple[bool, bool]:
+    async def verify_code(self, user_id: str, code: str, mark_used: bool = False) -> tuple[bool, bool]:
         """Verify TOTP code or backup code.
 
         Args:
@@ -337,9 +315,7 @@ class TotpService:
         """
         config = await self.repository.get_totp_config(user_id)
         if not config or not config.is_enabled:
-            raise InvalidTwoFactorCodeError(
-                "TOTP is not enabled for this user"
-            )
+            raise InvalidTwoFactorCodeError("TOTP is not enabled for this user")
 
         # Try TOTP code first
         secret = decrypt_secret(config.secret)
@@ -348,21 +324,13 @@ class TotpService:
             return (True, False)
 
         # Try backup codes
-        backup_codes = (
-            json.loads(config.backup_codes) if config.backup_codes else []
-        )
-        used_codes = (
-            json.loads(config.backup_codes_used)
-            if config.backup_codes_used
-            else []
-        )
+        backup_codes = json.loads(config.backup_codes) if config.backup_codes else []
+        used_codes = json.loads(config.backup_codes_used) if config.backup_codes_used else []
 
         if verify_backup_code(code, backup_codes, used_codes):
             if mark_used:
                 used_codes = mark_backup_code_used(code, used_codes)
-                await self.repository.mark_backup_code_used(
-                    user_id, json.dumps(used_codes)
-                )
+                await self.repository.mark_backup_code_used(user_id, json.dumps(used_codes))
             return (True, True)
 
         return (False, False)

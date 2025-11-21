@@ -116,14 +116,10 @@ class WebAuthnService:
             Dict with options, registrationToken, expiresAt
         """
         # Generate registration options and challenge
-        options_json, challenge = create_registration_options(
-            user_id, user_email, user_name
-        )
+        options_json, challenge = create_registration_options(user_id, user_email, user_name)
 
         # Create registration token
-        registration_token = _create_passkey_registration_token(
-            user_id, challenge
-        )
+        registration_token = _create_passkey_registration_token(user_id, challenge)
 
         # Get expiration (10 minutes)
         expires_at = datetime.now(UTC) + timedelta(minutes=10)
@@ -186,11 +182,7 @@ class WebAuthnService:
             name = self._generate_passkey_name(user_agent)
 
         # Save transports as JSON
-        transports_json = (
-            json.dumps(verified_data.get("transports", []))
-            if verified_data.get("transports")
-            else None
-        )
+        transports_json = json.dumps(verified_data.get("transports", [])) if verified_data.get("transports") else None
 
         # Create passkey in database
         passkey_id = await self.repository.create_passkey(
@@ -208,9 +200,7 @@ class WebAuthnService:
 
         # Get created passkey
         passkeys = await self.repository.get_passkeys(user_id)
-        created_passkey = next(
-            (pk for pk in passkeys if pk.id == passkey_id), None
-        )
+        created_passkey = next((pk for pk in passkeys if pk.id == passkey_id), None)
 
         if not created_passkey:
             raise ValueError("Failed to retrieve created passkey")
@@ -322,9 +312,7 @@ class WebAuthnService:
         credential_id_b64 = base64.b64encode(credential_id).decode()
 
         # Find passkey by credential ID
-        passkey = await self.repository.get_passkey_by_credential_id(
-            credential_id_b64
-        )
+        passkey = await self.repository.get_passkey_by_credential_id(credential_id_b64)
 
         if not passkey:
             raise ValueError("Passkey not found")
@@ -428,9 +416,7 @@ class WebAuthnService:
         Returns:
             Dict with passkey details
         """
-        transports = (
-            json.loads(passkey.transports) if passkey.transports else None
-        )
+        transports = json.loads(passkey.transports) if passkey.transports else None
 
         return {
             "id": passkey.id,

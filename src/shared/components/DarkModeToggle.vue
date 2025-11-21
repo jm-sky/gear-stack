@@ -1,15 +1,22 @@
 <script setup lang="ts">
 import { Moon, Sun } from 'lucide-vue-next'
 import Button from '@/components/ui/button/Button.vue'
+import { useUpdateSettings } from '@/modules/settings/composables/useSettings'
 import { useDarkMode } from '../composables/useDarkMode'
 
-const { isDark, toggle } = useDarkMode()
+const { isDark } = useDarkMode()
+const updateMutation = useUpdateSettings()
+
+const toggle = async () => {
+  await updateMutation.mutateAsync({ darkMode: !isDark.value })
+}
 </script>
 
 <template>
   <Button
     variant="ghost"
     :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+    :disabled="updateMutation.isPending.value"
     class="min-w-10"
     @click="toggle"
   >

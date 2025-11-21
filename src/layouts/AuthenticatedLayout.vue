@@ -2,17 +2,26 @@
 import { BackpackIcon, Package } from 'lucide-vue-next'
 import { type Component, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
 import AppFooter from '@/components/layout/AppFooter.vue'
 import UserNav from '@/components/layout/UserNav.vue'
 import HoverLink from '@/components/ui/hover-link/HoverLink.vue'
 import LogoText from '@/components/ui/LogoText.vue'
+import { useAuth } from '@/modules/auth/composables/useAuth'
+import { AuthRouteNames, AuthRoutePaths } from '@/modules/auth/config/routes'
 import { GearRoutePath } from '@/modules/gear/routes'
 import { useUser } from '@/modules/user/composables/useUser'
 import DarkModeToggle from '@/shared/components/DarkModeToggle.vue'
 import LocaleToggle from '@/shared/i18n/components/LocaleToggle.vue'
 
 const { t } = useI18n()
+const router = useRouter()
 const { profile } = useUser()
+const { logout, user: authUser } = useAuth()
+
+// Use auth user if backend is enabled, otherwise use profile from localStorage
+const user = computed(() => authUser.value || profile.value)
 
 interface Link {
   to: string
@@ -34,8 +43,15 @@ const navLinks = computed<Link[]>(() => [
   },
 ])
 
-const handleLogout = () => {
-  // Handle logout if needed (for future use)
+const handleLogout = async () => {
+  try {
+    await logout()
+    toast.success(t('auth.logout_success', 'Logged out successfully'))
+    await router.push({ name: AuthRouteNames.login })
+  } catch (error) {
+    console.error('Logout error:', error)
+    toast.error(t('auth.logout_error', 'Failed to logout'))
+  }
 }
 </script>
 
@@ -45,7 +61,7 @@ const handleLogout = () => {
     <header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div class="mx-auto flex h-14 max-w-screen-2xl items-center px-4">
         <div class="mr-4 flex items-center gap-2 md:mr-6">
-          <RouterLink to="/" class="flex items-center gap-2 hover:brightness-80 transition-all duration-300">
+          <RouterLink :to="AuthRoutePaths.dashboard" class="flex items-center gap-2 hover:brightness-80 transition-all duration-300">
             <LogoText />
           </RouterLink>
           <nav v-if="navLinks.length > 0" class="hidden md:flex items-center gap-6 text-sm ml-6">
@@ -62,8 +78,8 @@ const handleLogout = () => {
             <LocaleToggle />
             <DarkModeToggle />
             <UserNav
-              :user-name="profile?.name ?? t('user.guest')"
-              :user-email="profile?.email"
+              :user-name="user?.name ?? t('user.guest')"
+              :user-email="user?.email"
               :nav-links="navLinks"
               @logout="handleLogout"
             >

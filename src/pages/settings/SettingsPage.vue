@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import GearPreferencesCard from '@/modules/gear/components/GearPreferencesCard.vue'
 import BrandsSettingsCard from '@/modules/settings/components/BrandsSettingsCard.vue'
 import CategoriesSettingsCard from '@/modules/settings/components/CategoriesSettingsCard.vue'
 import ContainerTypesSettingsCard from '@/modules/settings/components/ContainerTypesSettingsCard.vue'
@@ -12,6 +13,7 @@ import SettingsPageCore from '@/modules/settings/pages/SettingsPage.vue'
       <ContainerTypesSettingsCard />
       <CategoriesSettingsCard />
       <BrandsSettingsCard />
+      <GearPreferencesCard />
     </template>
   </SettingsPageCore>
 </template>

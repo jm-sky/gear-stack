@@ -4,32 +4,30 @@ import { Settings } from 'lucide-vue-next'
 import { useForm } from 'vee-validate'
 import { watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import Select from '@/components/ui/select/Select.vue'
+import SelectContent from '@/components/ui/select/SelectContent.vue'
+import SelectGroup from '@/components/ui/select/SelectGroup.vue'
+import SelectItem from '@/components/ui/select/SelectItem.vue'
+import SelectLabel from '@/components/ui/select/SelectLabel.vue'
+import SelectTrigger from '@/components/ui/select/SelectTrigger.vue'
+import SelectValue from '@/components/ui/select/SelectValue.vue'
+import { useSettings } from '@/modules/settings/composables/useSettings'
+import { settingsSchema } from '@/modules/settings/validation/settings.schema'
 import { useDarkMode } from '@/shared/composables/useDarkMode'
 import { type SupportedLocale, useLocale } from '@/shared/i18n'
-import { useCoreSettings } from '../composables/useCoreSettings'
-import type { TGearWeightUnit } from '@/modules/gear/types/gear.types'
+import type { ISettingsService, Settings as SettingsType } from '@/modules/settings/types/settings.type'
+
+const props = defineProps<{
+  service?: ISettingsService
+}>()
 
 const { t } = useI18n()
 const { currentLocale } = useLocale()
-const { isDark, toggle: toggleDarkMode } = useDarkMode()
-const { settings, updateSettings } = useCoreSettings()
-
-const settingsSchema = z.object({
-  darkMode: z.enum(['light', 'dark']),
-  locale: z.enum(['en', 'pl']),
-  preferredWeightUnit: z.enum(['g', 'kg', 'oz', 'lb']),
-})
+const { isDark } = useDarkMode()
+const { settingsQuery, settings, updateSettings, isLoading, isUpdating, isError } = useSettings(props.service)
 
 const getThemeValue = (darkMode: boolean | undefined) => {
   return darkMode ? 'dark' : 'light'
@@ -38,43 +36,34 @@ const getThemeValue = (darkMode: boolean | undefined) => {
 const { handleSubmit, setValues } = useForm({
   validationSchema: toTypedSchema(settingsSchema),
   initialValues: {
-    darkMode: getThemeValue(settings.value.darkMode),
-    locale: settings.value.locale ?? currentLocale.value,
-    preferredWeightUnit: settings.value.preferredWeightUnit ?? 'g',
-  },
+    darkMode: getThemeValue(settings.value?.darkMode),
+    locale: settings.value?.locale ?? currentLocale.value,
+  }
 })
 
-watch(() => settings.value, (val) => {
+watch(() => settingsQuery.data.value, (val: SettingsType | undefined) => {
   if (val) {
-    setValues({
-      darkMode: getThemeValue(val.darkMode),
-      locale: val.locale,
-      preferredWeightUnit: val.preferredWeightUnit ?? 'g',
-    })
+    setValues({ darkMode: getThemeValue(val.darkMode), locale: val.locale })
   }
-}, { immediate: true })
+})
 
 watch(() => currentLocale.value, (val: SupportedLocale) => {
   setValues({ locale: val })
-}, { immediate: true })
+}, {
+  immediate: true,
+})
 
 watch(() => isDark.value, (val: boolean) => {
   setValues({ darkMode: getThemeValue(val) })
-}, { immediate: true })
+}, {
+  immediate: true,
+})
 
 const onSubmit = handleSubmit(async (values) => {
-  updateSettings({
+  await updateSettings({
     darkMode: values.darkMode === 'dark',
     locale: values.locale,
-    preferredWeightUnit: values.preferredWeightUnit as TGearWeightUnit,
   })
-
-  // Sync with composables
-  if (isDark.value !== (values.darkMode === 'dark')) {
-    toggleDarkMode()
-  }
-  const { setLocale } = useLocale()
-  setLocale(values.locale)
 })
 </script>
 
@@ -83,37 +72,47 @@ const onSubmit = handleSubmit(async (values) => {
     <CardHeader>
       <div class="flex items-center gap-2">
         <Settings :size="20" />
-        <CardTitle>{{ t('settings.preferences.title') }}</CardTitle>
+        <CardTitle>{{ t('settings.page.sections.preferences.title') }}</CardTitle>
       </div>
-      <CardDescription>
-        {{ t('settings.preferences.description') }}
-      </CardDescription>
+      <CardDescription>{{ t('settings.page.sections.preferences.description') }}</CardDescription>
     </CardHeader>
     <CardContent>
-      <form class="space-y-2" @submit="onSubmit">
+      <div v-if="isLoading" class="space-y-4">
+        <div class="h-16 bg-muted rounded animate-pulse" />
+        <div class="h-16 bg-muted rounded animate-pulse" />
+      </div>
+
+      <div v-else-if="isError" class="bg-destructive/10 border border-destructive/20 text-destructive rounded-lg p-4">
+        {{ t('settings.page.error_prefix') }}
+      </div>
+
+      <form v-else class="space-y-6" @submit="onSubmit">
         <div class="grid gap-6 md:grid-cols-2">
           <!-- Theme -->
           <div class="space-y-3">
             <FormField v-slot="{ componentField }" name="darkMode">
               <FormItem>
                 <FormLabel required>
-                  {{ t('settings.preferences.theme.label') }}
+                  {{ t('settings.page.sections.theme.label') }}
                 </FormLabel>
                 <p class="text-sm text-muted-foreground">
-                  {{ t('settings.preferences.theme.subtitle') }}
+                  {{ t('settings.page.sections.theme.subtitle') }}
                 </p>
                 <FormControl>
                   <Select v-bind="componentField">
                     <SelectTrigger>
-                      <SelectValue :placeholder="t('settings.preferences.theme.placeholder')" />
+                      <SelectValue :placeholder="t('settings.page.sections.theme.placeholder')" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="light">
-                        {{ t('settings.preferences.theme.options.light') }}
-                      </SelectItem>
-                      <SelectItem value="dark">
-                        {{ t('settings.preferences.theme.options.dark') }}
-                      </SelectItem>
+                      <SelectGroup>
+                        <SelectLabel>{{ t('settings.page.sections.theme.group_label') }}</SelectLabel>
+                        <SelectItem value="light">
+                          {{ t('settings.page.sections.theme.options.light') }}
+                        </SelectItem>
+                        <SelectItem value="dark">
+                          {{ t('settings.page.sections.theme.options.dark') }}
+                        </SelectItem>
+                      </SelectGroup>
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -127,59 +126,26 @@ const onSubmit = handleSubmit(async (values) => {
             <FormField v-slot="{ componentField }" name="locale">
               <FormItem>
                 <FormLabel required>
-                  {{ t('settings.preferences.locale.label') }}
+                  {{ t('settings.page.sections.locale.label') }}
                 </FormLabel>
                 <p class="text-sm text-muted-foreground">
-                  {{ t('settings.preferences.locale.subtitle') }}
+                  {{ t('settings.page.sections.locale.subtitle') }}
                 </p>
                 <FormControl>
                   <Select v-bind="componentField">
                     <SelectTrigger>
-                      <SelectValue :placeholder="t('settings.preferences.locale.placeholder')" />
+                      <SelectValue :placeholder="t('settings.page.sections.locale.placeholder')" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="en">
-                        {{ t('settings.preferences.locale.options.en') }}
-                      </SelectItem>
-                      <SelectItem value="pl">
-                        {{ t('settings.preferences.locale.options.pl') }}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            </FormField>
-          </div>
-
-          <!-- Preferred Weight Unit -->
-          <div class="space-y-3">
-            <FormField v-slot="{ componentField }" name="preferredWeightUnit">
-              <FormItem>
-                <FormLabel required>
-                  {{ t('settings.preferences.preferredWeightUnit.label') }}
-                </FormLabel>
-                <p class="text-sm text-muted-foreground">
-                  {{ t('settings.preferences.preferredWeightUnit.subtitle') }}
-                </p>
-                <FormControl>
-                  <Select v-bind="componentField">
-                    <SelectTrigger>
-                      <SelectValue :placeholder="t('settings.preferences.preferredWeightUnit.placeholder')" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="g">
-                        {{ t('settings.preferences.preferredWeightUnit.options.g') }}
-                      </SelectItem>
-                      <SelectItem value="kg">
-                        {{ t('settings.preferences.preferredWeightUnit.options.kg') }}
-                      </SelectItem>
-                      <SelectItem value="oz">
-                        {{ t('settings.preferences.preferredWeightUnit.options.oz') }}
-                      </SelectItem>
-                      <SelectItem value="lb">
-                        {{ t('settings.preferences.preferredWeightUnit.options.lb') }}
-                      </SelectItem>
+                      <SelectGroup>
+                        <SelectLabel>{{ t('settings.page.sections.locale.group_label') }}</SelectLabel>
+                        <SelectItem value="en">
+                          {{ t('settings.page.sections.locale.options.en') }}
+                        </SelectItem>
+                        <SelectItem value="pl">
+                          {{ t('settings.page.sections.locale.options.pl') }}
+                        </SelectItem>
+                      </SelectGroup>
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -190,8 +156,8 @@ const onSubmit = handleSubmit(async (values) => {
         </div>
 
         <div class="flex justify-end">
-          <Button type="submit">
-            {{ t('settings.preferences.save') }}
+          <Button type="submit" :loading="isUpdating">
+            {{ t('settings.page.save') }}
           </Button>
         </div>
       </form>

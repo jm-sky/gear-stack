@@ -59,25 +59,25 @@ export type TGearItemCategory =
 // Pojedynczy przedmiot
 export interface IGearItem {
   id: TUUID
-  linkedItemId?: TUUID // Reference to original item when linked (future-ready for backend)
+  linkedItemId?: TUUID | null // Reference to original item when linked (future-ready for backend)
   name: string
   category: TGearItemCategory
   quantity: number
   weight: number // wartość wagi
   weightUnit: TGearWeightUnit // jednostka wagi (g lub kg)
-  notes?: string
-  expirationDate?: TDateTime // ISO date string
+  notes?: string | null
+  expirationDate?: TDateTime | null // ISO date string
   priority: TGearItemPriority
   status: TGearItemStatus
-  containerId?: TUUID // Reference to a nested container (if this item is a container)
+  containerId?: TUUID | null // Reference to a nested container (if this item is a container)
   // Extended fields
-  price?: number // Price in currency (optional)
-  url?: string // Link to product, review, etc.
-  brand?: string // Manufacturer/brand
-  color?: string // Item color
-  quality?: TGearItemQuality // Price tier / quality
-  wearable?: boolean // Item is worn/carried on person (e.g., clothing, watch)
-  consumable?: boolean // Item is consumed/used up (e.g., food, medicine, fuel)
+  price?: number | null // Price in currency (optional)
+  url?: string | null // Link to product, review, etc.
+  brand?: string | null // Manufacturer/brand
+  color?: string | null // Item color
+  quality?: TGearItemQuality | null // Price tier / quality
+  wearable?: boolean | null // Item is worn/carried on person (e.g., clothing, watch)
+  consumable?: boolean | null // Item is consumed/used up (e.g., food, medicine, fuel)
   createdAt: TDateTime
   updatedAt: TDateTime
 }
@@ -86,19 +86,19 @@ export interface IGearItem {
 export interface IGearContainer {
   id: TUUID
   name: string
-  description?: string
+  description?: string | null
   type: TGearContainerType
-  color?: TContainerColor  // Optional, defaults to 'default'
-  parentContainerId?: TUUID // Parent container ID (if this container is nested)
-  hideWhenNested?: boolean // Hide from main list when nested in another container
+  color?: TContainerColor | null  // Optional, defaults to 'default'
+  parentContainerId?: TUUID | null // Parent container ID (if this container is nested)
+  hideWhenNested?: boolean | null // Hide from main list when nested in another container
   // Extended fields
-  brand?: string // Manufacturer/brand
-  price?: number // Price in currency (optional)
-  weight?: number // Container weight value
-  weightUnit?: TGearWeightUnit // Container weight unit (g or kg)
-  maxWeight?: number // Maximum weight limit value
-  maxWeightUnit?: TGearWeightUnit // Maximum weight unit (g or kg)
-  url?: string // Link to product, review, etc.
+  brand?: string | null // Manufacturer/brand
+  price?: number | null // Price in currency (optional)
+  weight?: number | null // Container weight value
+  weightUnit?: TGearWeightUnit | null // Container weight unit (g or kg)
+  maxWeight?: number | null // Maximum weight limit value
+  maxWeightUnit?: TGearWeightUnit | null // Maximum weight unit (g or kg)
+  url?: string | null // Link to product, review, etc.
   items: IGearItem[]
   createdAt: TDateTime
   updatedAt: TDateTime
@@ -107,77 +107,140 @@ export interface IGearContainer {
 // DTO dla tworzenia kontenera
 export interface ICreateContainerDto {
   name: string
-  description?: string
+  description?: string | null
   type: TGearContainerType
-  color?: TContainerColor
-  parentContainerId?: TUUID
-  hideWhenNested?: boolean
-  brand?: string
-  price?: number
-  weight?: number
-  weightUnit?: TGearWeightUnit
-  maxWeight?: number
-  maxWeightUnit?: TGearWeightUnit
-  url?: string
+  color?: TContainerColor | null
+  parentContainerId?: TUUID | null
+  hideWhenNested?: boolean | null
+  brand?: string | null
+  price?: number | null
+  weight?: number | null
+  weightUnit?: TGearWeightUnit | null
+  maxWeight?: number | null
+  maxWeightUnit?: TGearWeightUnit | null
+  url?: string | null
 }
 
 // DTO dla aktualizacji kontenera
 export interface IUpdateContainerDto {
-  name?: string
-  description?: string
-  type?: TGearContainerType
-  color?: TContainerColor
-  parentContainerId?: TUUID
-  hideWhenNested?: boolean
-  brand?: string
-  price?: number
-  weight?: number
-  weightUnit?: TGearWeightUnit
-  maxWeight?: number
-  maxWeightUnit?: TGearWeightUnit
-  url?: string
+  name?: string | null
+  description?: string | null
+  type?: TGearContainerType | null
+  color?: TContainerColor | null
+  parentContainerId?: TUUID | null
+  hideWhenNested?: boolean | null
+  brand?: string | null
+  price?: number | null
+  weight?: number | null
+  weightUnit?: TGearWeightUnit | null
+  maxWeight?: number | null
+  maxWeightUnit?: TGearWeightUnit | null
+  url?: string | null
 }
 
 // DTO dla tworzenia przedmiotu
 export interface ICreateItemDto {
-  linkedItemId?: TUUID // Reference to original item when linking
+  linkedItemId?: TUUID | null // Reference to original item when linking
   name: string
   category: TGearItemCategory
   quantity: number
   weight: number
   weightUnit: TGearWeightUnit
-  notes?: string
-  expirationDate?: TDateTime
+  notes?: string | null
+  expirationDate?: TDateTime | null
   priority: TGearItemPriority
   status: TGearItemStatus
-  containerId?: TUUID // Reference to a nested container (if this item is a container)
-  price?: number
-  url?: string
-  brand?: string
-  color?: string
-  quality?: TGearItemQuality
-  wearable?: boolean
-  consumable?: boolean
+  containerId?: TUUID | null // Reference to a nested container (if this item is a container)
+  price?: number | null
+  url?: string | null
+  brand?: string | null
+  color?: string | null
+  quality?: TGearItemQuality | null
+  wearable?: boolean | null
+  consumable?: boolean | null
 }
 
 // DTO dla aktualizacji przedmiotu
 export interface IUpdateItemDto {
-  name?: string
-  category?: TGearItemCategory
-  quantity?: number
-  weight?: number
-  weightUnit?: TGearWeightUnit
-  notes?: string
-  expirationDate?: TDateTime
-  priority?: TGearItemPriority
-  status?: TGearItemStatus
-  containerId?: TUUID // Reference to a nested container (if this item is a container)
-  price?: number
-  url?: string
-  brand?: string
-  color?: string
-  quality?: TGearItemQuality
-  wearable?: boolean
-  consumable?: boolean
+  name?: string | null
+  category?: TGearItemCategory | null
+  quantity?: number | null
+  weight?: number | null
+  weightUnit?: TGearWeightUnit | null
+  notes?: string | null
+  expirationDate?: TDateTime | null
+  priority?: TGearItemPriority | null
+  status?: TGearItemStatus | null
+  containerId?: TUUID | null // Reference to a nested container (if this item is a container)
+  price?: number | null
+  url?: string | null
+  brand?: string | null
+  color?: string | null
+  quality?: TGearItemQuality | null
+  wearable?: boolean | null
+  consumable?: boolean | null
+}
+
+// Service interface for gear operations
+// This interface defines the common contract for both localStorage and API implementations
+export interface IGearService {
+  // Container operations (CRUD)
+  createContainer(data: ICreateContainerDto): Promise<IGearContainer>
+  getContainers(skip?: number, limit?: number): Promise<IGearContainer[]>
+  getContainer(id: TUUID): Promise<IGearContainer>
+  updateContainer(id: TUUID, data: IUpdateContainerDto): Promise<IGearContainer>
+  deleteContainer(id: TUUID): Promise<void>
+
+  // Item operations (CRUD)
+  createItem(containerId: TUUID, data: ICreateItemDto): Promise<IGearItem>
+  getItems(containerId: TUUID, skip?: number, limit?: number): Promise<IGearItem[]>
+  getItem(itemId: TUUID): Promise<IGearItem>
+  updateItem(itemId: TUUID, data: IUpdateItemDto): Promise<IGearItem>
+  deleteItem(itemId: TUUID): Promise<void>
+
+  // Statistics operations (from API or calculated locally)
+  getContainerWeight(containerId: TUUID): Promise<{ grams: number; kilograms: number }>
+  getContainerReadiness(containerId: TUUID): Promise<{
+    totalItems: number
+    ownedItems: number
+    missingItems: number
+    toBuyItems: number
+    readinessPercentage: number
+  }>
+}
+
+// Extended interface for localStorage-specific operations
+// These methods are only available in localStorage implementation
+// API implementation may throw "Not implemented" or provide fallback behavior
+export interface IGearServiceExtended extends IGearService {
+  // Additional container operations (localStorage-specific)
+  getAllContainers(): Promise<IGearContainer[]>
+  getRootContainers(): Promise<IGearContainer[]>
+  getNestedContainers(containerId: TUUID): Promise<IGearContainer[]>
+  deleteAllContainers(): Promise<void>
+
+  // Additional item operations (localStorage-specific)
+  getItemById(containerId: TUUID, itemId: TUUID): Promise<IGearItem | undefined>
+
+  // Business logic operations (calculated locally)
+  calculateTotalWeight(containerId: TUUID): Promise<number>
+  calculateReadinessPercentage(containerId: TUUID): Promise<number>
+  calculateWeightLimitPercentage(containerId: TUUID): Promise<number | null>
+  isWeightLimitExceeded(containerId: TUUID): Promise<boolean>
+  getItemsByStatus(containerId: TUUID, status: TGearItemStatus): Promise<IGearItem[]>
+  getExpiredItems(containerId: TUUID): Promise<IGearItem[]>
+  getExpiringSoonItems(containerId: TUUID, days?: number): Promise<IGearItem[]>
+  moveItem(containerId: TUUID, itemId: TUUID, newContainerId: TUUID): Promise<void>
+  cloneContainer(
+    containerId: TUUID,
+    options: {
+      newName: string
+      includeNestedContainers?: boolean
+      includePrices?: boolean
+    },
+  ): Promise<IGearContainer>
+  // Import/Export operations (localStorage-specific)
+  exportData(): Promise<string>
+  importData(json: string): Promise<void>
 }
 

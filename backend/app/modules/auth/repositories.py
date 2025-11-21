@@ -177,9 +177,7 @@ class UserRepository(SearchMixin, UserRepositoryInterface):
         # Convert to Pydantic User models
         return [self._map_user(user_db) for user_db in users_db]
 
-    async def count_users(
-        self, include_inactive: bool = False, search: str | None = None
-    ) -> int:
+    async def count_users(self, include_inactive: bool = False, search: str | None = None) -> int:
         """Count total users in database with optional search.
 
         Args:
@@ -266,9 +264,7 @@ class UserRepository(SearchMixin, UserRepositoryInterface):
 
         return False
 
-    async def change_password(
-        self, user_id: str, current_password: str, new_password: str
-    ) -> bool:
+    async def change_password(self, user_id: str, current_password: str, new_password: str) -> bool:
         """Change user password after verifying current password."""
         user = await self.get_user_by_id(user_id)
         if not user or not user.isActive:
@@ -283,9 +279,7 @@ class UserRepository(SearchMixin, UserRepositoryInterface):
         await self.update_user(user)
         return True
 
-    async def store_email_verification_token(
-        self, user_id: str, token: str, sent_at: datetime
-    ) -> User | None:
+    async def store_email_verification_token(self, user_id: str, token: str, sent_at: datetime) -> User | None:
         """Persist email verification token for a user."""
         user = await self.get_user_by_id(user_id)
         if not user:

@@ -7,13 +7,13 @@ import DataTable from '@/components/data-table/DataTable.vue'
 import Badge from '@/components/ui/badge/Badge.vue'
 import { Button } from '@/components/ui/button'
 import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
-import { useCoreSettings } from '@/modules/settings/composables/useCoreSettings'
 import { ITEMS_TABLE_COLUMN_VISIBILITY_KEY } from '@/shared/config/config'
 import type { IGearItem } from '../types/gear.types'
-import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
+import { useGearStore } from '../store/useGearStore'
 import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 import { EXPIRATION_WARNING_DAYS } from '../utils/constants'
+import { calculateTotalWeightSync } from '../utils/containerCalculations'
 import { COLOR_TEXT_CLASSES } from '../utils/containerColors'
 import { formatWeightToPreferredUnit, formatWeightWithPreferredUnit } from '../utils/formatWeight'
 import { createItemsColumns } from '../utils/itemsColumns'
@@ -41,10 +41,10 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const router = useRouter()
-const { settings: coreSettings } = useCoreSettings()
+const store = useGearStore()
+const { settings: gearSettings } = useGearSettings()
 const { customCategories } = useGearSettings()
-const settings = computed(() => ({ preferredWeightUnit: coreSettings.value.preferredWeightUnit }))
-const { getContainerById, calculateTotalWeight } = useGear()
+const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
 
 // Expanded rows state (which containers are expanded)
 const expandedRows = ref<Set<string>>(new Set())
@@ -158,14 +158,21 @@ function isRowExpanded(itemId: string): boolean {
 // Get nested container items
 function getNestedContainerItems(item: IGearItem): IGearItem[] {
   if (!item.containerId) return []
-  const container = getContainerById(item.containerId)
+  const container = store.getContainerById(item.containerId)
   return container?.items ?? []
 }
 
 // Get nested container
 function getNestedContainer(item: IGearItem) {
   if (!item.containerId) return undefined
-  return getContainerById(item.containerId)
+  return store.getContainerById(item.containerId)
+}
+
+// Calculate total weight for nested container (sync helper)
+function calculateTotalWeight(containerId: string): number {
+  const container = store.getContainerById(containerId)
+  if (!container) return 0
+  return calculateTotalWeightSync(container, store.getAllContainers)
 }
 </script>
 

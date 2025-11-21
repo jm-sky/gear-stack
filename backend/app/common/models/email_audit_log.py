@@ -45,14 +45,10 @@ class EmailAuditLog(Base):
     __tablename__ = "email_audit_log"
 
     # Primary key
-    id: Mapped[str] = mapped_column(
-        String(26), primary_key=True, default=generate_id
-    )
+    id: Mapped[str] = mapped_column(String(26), primary_key=True, default=generate_id)
 
     # Recipients
-    recipient_email: Mapped[str] = mapped_column(
-        String(255), nullable=False, index=True
-    )
+    recipient_email: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     sender_email: Mapped[str | None] = mapped_column(String(255))
 
     # Content
@@ -61,16 +57,12 @@ class EmailAuditLog(Base):
     text_body: Mapped[str | None] = mapped_column(Text)
 
     # Template info
-    template_name: Mapped[str | None] = mapped_column(
-        String(100), index=True
-    )
+    template_name: Mapped[str | None] = mapped_column(String(100), index=True)
     template_context: Mapped[dict | None] = mapped_column(JSON)
 
     # Status & Tracking
     # Status: pending, sent, failed, bounced
-    status: Mapped[str] = mapped_column(
-        String(20), nullable=False, index=True, default="pending"
-    )
+    status: Mapped[str] = mapped_column(String(20), nullable=False, index=True, default="pending")
     adapter: Mapped[str] = mapped_column(String(50), nullable=False)
 
     # Timestamps
@@ -80,18 +72,10 @@ class EmailAuditLog(Base):
         default=lambda: datetime.now(UTC),
         index=True,
     )
-    sent_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True)
-    )
-    failed_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True)
-    )
-    opened_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True)
-    )
-    clicked_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True)
-    )
+    sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    failed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    opened_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    clicked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     # Error handling
     error_message: Mapped[str | None] = mapped_column(Text)

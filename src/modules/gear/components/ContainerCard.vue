@@ -7,14 +7,17 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import CardContent from '@/components/ui/card/CardContent.vue'
-import { useCoreSettings } from '@/modules/settings/composables/useCoreSettings'
 import type { IGearContainer } from '../types/gear.types'
-import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
+import { useGearStore } from '../store/useGearStore'
 import {
   READINESS_EXCELLENT_THRESHOLD,
   READINESS_GOOD_THRESHOLD,
 } from '../utils/constants'
+import {
+  calculateReadinessPercentageSync,
+  calculateTotalWeightSync,
+} from '../utils/containerCalculations'
 import { COLOR_BORDER_CLASSES, COLOR_TEXT_CLASSES } from '../utils/containerColors'
 import { formatWeightToPreferredUnit } from '../utils/formatWeight'
 import ColorDot from './ColorDot.vue'
@@ -30,14 +33,18 @@ const emit = defineEmits<{
 
 const router = useRouter()
 const { t } = useI18n()
-const { calculateTotalWeight, calculateReadinessPercentage, getContainerById, containers } = useGear()
+const store = useGearStore()
 const { customContainerTypes } = useGearSettings()
-const { settings: coreSettings } = useCoreSettings()
-const settings = computed(() => ({ preferredWeightUnit: coreSettings.value.preferredWeightUnit }))
+const { settings: gearSettings } = useGearSettings()
+const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
 
-// Computed properties
-const totalWeight = computed<number>(() => calculateTotalWeight(props.container.id))
-const readinessPercentage = computed<number>(() => calculateReadinessPercentage(props.container.id))
+// Computed properties - use sync helpers for computed
+const totalWeight = computed<number>(() => {
+  return calculateTotalWeightSync(props.container, store.getAllContainers)
+})
+const readinessPercentage = computed<number>(() => {
+  return calculateReadinessPercentageSync(props.container)
+})
 const itemsCount = computed<number>(() => props.container.items.length)
 
 // Format weight (totalWeight is in grams)
@@ -76,14 +83,14 @@ const parentContainers = computed<IGearContainer[]>(() => {
 
   // Add direct parent if exists
   if (props.container.parentContainerId) {
-    const directParent = getContainerById(props.container.parentContainerId)
+    const directParent = store.getContainerById(props.container.parentContainerId)
     if (directParent) {
       parents.push(directParent)
     }
   }
 
   // Find all containers that have this container as an item
-  for (const container of containers.value) {
+  for (const container of store.getAllContainers) {
     if (container.id === containerId) continue // Skip self
     if (container.items.some(item => item.containerId === containerId)) {
       // Avoid duplicates
@@ -131,7 +138,7 @@ const handleShow = () => {
   >
     <CardHeader class="text-card-foreground flex items-start justify-between">
       <div class="flex items-center gap-2">
-        <ColorDot :color="container.color" />
+        <ColorDot :color="container.color ?? undefined" />
         <Package class="size-5" />
         <CardTitle>{{ container.name }}</CardTitle>
         <Badge v-if="isNested" variant="outline" class="ml-auto text-xs">

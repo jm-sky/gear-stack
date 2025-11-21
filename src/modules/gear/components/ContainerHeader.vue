@@ -7,15 +7,20 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import DropdownMenuSeparator from '@/components/ui/dropdown-menu/DropdownMenuSeparator.vue'
-import { useCoreSettings } from '@/modules/settings/composables/useCoreSettings'
 import type { IGearContainer } from '../types/gear.types'
-import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
+import { useGearStore } from '../store/useGearStore'
 import {
   READINESS_EXCELLENT_THRESHOLD,
   READINESS_GOOD_THRESHOLD,
 } from '../utils/constants'
+import {
+  calculateReadinessPercentageSync,
+  calculateTotalWeightSync,
+  calculateWeightLimitPercentageSync,
+} from '../utils/containerCalculations'
 import { convertToGrams, formatWeight, formatWeightToPreferredUnit } from '../utils/formatWeight'
+import { isSet } from '../utils/helpers'
 
 const props = defineProps<{
   container: IGearContainer
@@ -31,14 +36,18 @@ const emit = defineEmits<{
 
 const router = useRouter()
 const { t } = useI18n()
-const { calculateTotalWeight, calculateReadinessPercentage, calculateWeightLimitPercentage } = useGear()
+const store = useGearStore()
 const { customContainerTypes } = useGearSettings()
-const { settings: coreSettings } = useCoreSettings()
-const settings = computed(() => ({ preferredWeightUnit: coreSettings.value.preferredWeightUnit }))
+const { settings: gearSettings } = useGearSettings()
+const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
 
-// Computed properties
-const totalWeight = computed<number>(() => calculateTotalWeight(props.container.id))
-const readinessPercentage = computed<number>(() => calculateReadinessPercentage(props.container.id))
+// Computed properties - use sync helpers for computed
+const totalWeight = computed<number>(() => {
+  return calculateTotalWeightSync(props.container, store.getAllContainers)
+})
+const readinessPercentage = computed<number>(() => {
+  return calculateReadinessPercentageSync(props.container)
+})
 const itemsCount = computed<number>(() => props.container.items.length)
 
 // Format weight (totalWeight is in grams)
@@ -66,7 +75,9 @@ const typeLabel = computed<string>(() => {
 })
 
 // Weight limit
-const weightLimitPercentage = computed<number | null>(() => calculateWeightLimitPercentage(props.container.id))
+const weightLimitPercentage = computed<number | null>(() => {
+  return calculateWeightLimitPercentageSync(props.container, store.getAllContainers)
+})
 const hasWeightLimit = computed<boolean>(() => weightLimitPercentage.value !== null)
 const weightLimitColor = computed<string>(() => {
   if (!weightLimitPercentage.value) return ''
@@ -148,7 +159,7 @@ const handleBack = () => {
             <Badge v-if="container.brand" variant="secondary" class="normal-case">
               {{ container.brand }}
             </Badge>
-            <Badge v-if="container.weight !== undefined && container.weightUnit" variant="secondary">
+            <Badge v-if="isSet(container.weight) && isSet(container.weightUnit)" variant="secondary">
               {{ formatWeight(container.weight, container.weightUnit) }}
             </Badge>
             <Badge

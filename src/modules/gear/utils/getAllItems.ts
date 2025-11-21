@@ -29,11 +29,11 @@ export function getAllItems(containers: IGearContainer[], excludeContainerId?: T
         weightUnit: item.weightUnit ?? 'g',
         status: item.status,
         priority: item.priority,
-        brand: item.brand,
-        color: item.color,
-        expirationDate: item.expirationDate,
-        wearable: item.wearable,
-        consumable: item.consumable,
+        brand: item.brand ?? undefined,
+        color: item.color ?? undefined,
+        expirationDate: item.expirationDate ?? undefined,
+        wearable: item.wearable ?? undefined,
+        consumable: item.consumable ?? undefined,
       })
     })
   })

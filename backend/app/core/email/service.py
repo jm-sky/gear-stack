@@ -107,9 +107,7 @@ class EmailService:
         text = re.sub(r"\s+", " ", text)
         return text.strip()
 
-    async def send_welcome_email(
-        self, to: str, name: str, user_id: str | None = None
-    ) -> bool:
+    async def send_welcome_email(self, to: str, name: str, user_id: str | None = None) -> bool:
         """Send welcome email to new user.
 
         Args:
@@ -130,9 +128,7 @@ class EmailService:
             related_entity_id=user_id,
         )
 
-    async def send_email_verification_email(
-        self, to: str, name: str, verification_token: str, user_id: str | None = None
-    ) -> bool:
+    async def send_email_verification_email(self, to: str, name: str, verification_token: str, user_id: str | None = None) -> bool:
         """Send email verification message.
 
         Args:
@@ -162,9 +158,7 @@ class EmailService:
             related_entity_id=user_id,
         )
 
-    async def send_password_reset_email(
-        self, to: str, name: str, reset_token: str, user_id: str | None = None
-    ) -> bool:
+    async def send_password_reset_email(self, to: str, name: str, reset_token: str, user_id: str | None = None) -> bool:
         """Send password reset email.
 
         Args:
@@ -227,9 +221,7 @@ class EmailService:
             related_entity_id=user_id,
         )
 
-    async def send_account_deleted_email(
-        self, to: str, name: str, user_id: str | None = None
-    ) -> bool:
+    async def send_account_deleted_email(self, to: str, name: str, user_id: str | None = None) -> bool:
         """Send account deletion confirmation email.
 
         Args:
@@ -291,10 +283,7 @@ def get_email_service() -> EmailService:
                 use_tls=email_settings.smtp_use_tls,
                 max_retries=email_settings.max_retries,
             )
-            logger.info(
-                f"Using RetrySMTPAdapter with {email_settings.max_retries} "
-                f"max retries"
-            )
+            logger.info(f"Using RetrySMTPAdapter with {email_settings.max_retries} " f"max retries")
         else:
             adapter = SMTPEmailAdapter(
                 host=email_settings.smtp_host,

@@ -1,9 +1,10 @@
 import { computed } from 'vue'
+import { config } from '@/shared/config/config'
 import type { IUpdateGearSettingsDto, IUserBrand, IUserCategory, IUserContainerType } from '../types/gearSettings.types'
 import { useGearSettingsStore } from '../store/useGearSettingsStore'
 
 /**
- * Composable for gear settings (custom categories, container types, and brands)
+ * Composable for gear settings (custom categories, container types, brands, and preferred weight unit)
  */
 export function useGearSettings() {
   const store = useGearSettingsStore()
@@ -12,6 +13,7 @@ export function useGearSettings() {
     customCategories: store.customCategories,
     customContainerTypes: store.customContainerTypes,
     customBrands: store.customBrands,
+    preferredWeightUnit: store.preferredWeightUnit ?? config.defaults.preferredWeightUnit,
   }))
 
   const customCategories = computed<IUserCategory[]>(() => store.getAllCategories)

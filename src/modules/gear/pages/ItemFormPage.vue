@@ -55,11 +55,11 @@ const getInitialValues = (): ItemFormData => {
       expirationDate: item.value.expirationDate ?? '',
       priority: item.value.priority,
       status: item.value.status,
-      price: item.value.price,
+      price: item.value.price ?? undefined,
       url: item.value.url ?? '',
       brand: item.value.brand ?? '',
       color: item.value.color ?? '',
-      quality: item.value.quality,
+      quality: item.value.quality ?? undefined,
       wearable: item.value.wearable ?? false,
       consumable: item.value.consumable ?? false,
     }
@@ -115,7 +115,7 @@ const handleCatalogItemSelect = (selectedItem: IItemWithContainer) => {
 const onSubmit = handleSubmit(async (data: ICreateItemDto | IUpdateItemDto) => {
   try {
     if (isEditMode && itemId) {
-      updateItem(containerId, itemId, data as IUpdateItemDto)
+      await updateItem(itemId, data as IUpdateItemDto)
       toast.success(t('common.success'))
       router.push(`/gear/${containerId}`)
     } else {
@@ -124,7 +124,7 @@ const onSubmit = handleSubmit(async (data: ICreateItemDto | IUpdateItemDto) => {
         ...data as ICreateItemDto,
         linkedItemId: tabMode.value === 'catalog' && selectedCatalogItemId.value ? selectedCatalogItemId.value : undefined,
       }
-      createItem(containerId, createData)
+      await createItem(containerId, createData)
       toast.success(t('common.success'))
       router.push(`/gear/${containerId}`)
     }

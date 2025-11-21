@@ -11,9 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 T = TypeVar("T")
 
 
-async def get_by_id(
-    session: AsyncSession, model: Type[T], id: str
-) -> T | None:
+async def get_by_id(session: AsyncSession, model: Type[T], id: str) -> T | None:
     """Get entity by ID.
 
     Args:
@@ -42,9 +40,7 @@ async def count_all(session: AsyncSession, model: Type[T]) -> int:
     return result.scalar_one()
 
 
-async def exists_by_field(
-    session: AsyncSession, model: Type[T], field_name: str, value: any
-) -> bool:
+async def exists_by_field(session: AsyncSession, model: Type[T], field_name: str, value: any) -> bool:
     """Check if entity exists with given field value.
 
     Args:
@@ -60,9 +56,7 @@ async def exists_by_field(
         exists = await exists_by_field(session, UserDB, "email", "test@example.com")
     """
     field = getattr(model, field_name)
-    result = await session.execute(
-        select(func.count()).select_from(model).where(field == value)
-    )
+    result = await session.execute(select(func.count()).select_from(model).where(field == value))
     count = result.scalar_one()
     return count > 0
 

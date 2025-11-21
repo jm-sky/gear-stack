@@ -1,19 +1,27 @@
 import { GEAR_SETTINGS_STORAGE_KEY, SETTINGS_STORAGE_KEY } from '@/shared/config/config'
-import type { IGearSettings, IUpdateGearSettingsDto, IUserBrand, IUserCategory, IUserContainerType } from '../types/gearSettings.types'
+import type {
+  IGearSettings,
+  IGearSettingsService,
+  IUpdateGearSettingsDto,
+  IUserBrand,
+  IUserCategory,
+  IUserContainerType,
+} from '../types/gearSettings.types'
 
 /**
- * Gear Settings Service
+ * Gear Settings Service (LocalStorage implementation)
  * Handles gear-specific settings: custom categories and container types
+ * Implements IGearSettingsService interface for localStorage-based operations.
  */
-export class GearSettingsService {
+class GearSettingsService implements IGearSettingsService {
   private static readonly STORAGE_KEY = GEAR_SETTINGS_STORAGE_KEY
   private static readonly OLD_STORAGE_KEY = SETTINGS_STORAGE_KEY // For migration
 
   /**
    * Migrate from old storage format if needed
    */
-  private static migrateFromOldStorage(): Partial<IGearSettings> | null {
-    const oldStored = localStorage.getItem(this.OLD_STORAGE_KEY)
+  private migrateFromOldStorage(): Partial<IGearSettings> | null {
+    const oldStored = localStorage.getItem(GearSettingsService.OLD_STORAGE_KEY)
     if (!oldStored) return null
 
     try {
@@ -30,8 +38,8 @@ export class GearSettingsService {
   /**
    * Load gear settings from localStorage
    */
-  static loadFromStorage(): IGearSettings {
-    const stored = localStorage.getItem(this.STORAGE_KEY)
+  async loadFromStorage(): Promise<IGearSettings> {
+    const stored = localStorage.getItem(GearSettingsService.STORAGE_KEY)
     let settings: Partial<IGearSettings> = {}
 
     if (stored) {
@@ -46,7 +54,7 @@ export class GearSettingsService {
       if (migrated) {
         settings = migrated
         // Save to new location
-        this.saveToStorage({
+        await this.saveToStorage({
           customCategories: migrated.customCategories ?? [],
           customContainerTypes: migrated.customContainerTypes ?? [],
           customBrands: [],
@@ -54,147 +62,217 @@ export class GearSettingsService {
       }
     }
 
-    return {
+    return Promise.resolve({
       customCategories: settings.customCategories ?? [],
       customContainerTypes: settings.customContainerTypes ?? [],
       customBrands: settings.customBrands ?? [],
-    }
+      preferredWeightUnit: settings.preferredWeightUnit,
+    })
   }
 
   /**
    * Save gear settings to localStorage
    */
-  static saveToStorage(settings: IGearSettings): void {
+  async saveToStorage(settings: IGearSettings): Promise<void> {
     try {
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify({
+      localStorage.setItem(GearSettingsService.STORAGE_KEY, JSON.stringify({
         customCategories: settings.customCategories,
         customContainerTypes: settings.customContainerTypes,
         customBrands: settings.customBrands,
+        preferredWeightUnit: settings.preferredWeightUnit,
       }))
+      return Promise.resolve()
     } catch (error) {
       console.error('Error saving gear settings to storage:', error)
+      return Promise.reject(error)
     }
   }
 
   /**
    * Update gear settings
    */
-  static updateSettings(current: IGearSettings, updates: IUpdateGearSettingsDto): IGearSettings {
+  async updateSettings(current: IGearSettings, updates: IUpdateGearSettingsDto): Promise<IGearSettings> {
     const updated: IGearSettings = {
       customCategories: updates.customCategories ?? current.customCategories,
       customContainerTypes: updates.customContainerTypes ?? current.customContainerTypes,
       customBrands: updates.customBrands ?? current.customBrands,
+      preferredWeightUnit: updates.preferredWeightUnit ?? current.preferredWeightUnit,
     }
 
-    this.saveToStorage(updated)
-    return updated
+    await this.saveToStorage(updated)
+    return Promise.resolve(updated)
   }
 
   /**
    * Add a custom category
    */
-  static addCategory(settings: IGearSettings, category: IUserCategory): IGearSettings {
+  async addCategory(settings: IGearSettings, category: IUserCategory): Promise<IGearSettings> {
     const updated = {
       ...settings,
       customCategories: [...settings.customCategories, category],
     }
-    this.saveToStorage(updated)
-    return updated
+    await this.saveToStorage(updated)
+    return Promise.resolve(updated)
   }
 
   /**
    * Update a custom category
    */
-  static updateCategory(settings: IGearSettings, category: IUserCategory): IGearSettings {
+  async updateCategory(settings: IGearSettings, category: IUserCategory): Promise<IGearSettings> {
     const updated = {
       ...settings,
       customCategories: settings.customCategories.map(c => c.id === category.id ? category : c),
     }
-    this.saveToStorage(updated)
-    return updated
+    await this.saveToStorage(updated)
+    return Promise.resolve(updated)
   }
 
   /**
    * Remove a custom category
    */
-  static removeCategory(settings: IGearSettings, categoryId: string): IGearSettings {
+  async removeCategory(settings: IGearSettings, categoryId: string): Promise<IGearSettings> {
     const updated = {
       ...settings,
       customCategories: settings.customCategories.filter(c => c.id !== categoryId),
     }
-    this.saveToStorage(updated)
-    return updated
+    await this.saveToStorage(updated)
+    return Promise.resolve(updated)
   }
 
   /**
    * Add a custom container type
    */
-  static addContainerType(settings: IGearSettings, containerType: IUserContainerType): IGearSettings {
+  async addContainerType(settings: IGearSettings, containerType: IUserContainerType): Promise<IGearSettings> {
     const updated = {
       ...settings,
       customContainerTypes: [...settings.customContainerTypes, containerType],
     }
-    this.saveToStorage(updated)
-    return updated
+    await this.saveToStorage(updated)
+    return Promise.resolve(updated)
   }
 
   /**
    * Update a custom container type
    */
-  static updateContainerType(settings: IGearSettings, containerType: IUserContainerType): IGearSettings {
+  async updateContainerType(settings: IGearSettings, containerType: IUserContainerType): Promise<IGearSettings> {
     const updated = {
       ...settings,
       customContainerTypes: settings.customContainerTypes.map(t => t.id === containerType.id ? containerType : t),
     }
-    this.saveToStorage(updated)
-    return updated
+    await this.saveToStorage(updated)
+    return Promise.resolve(updated)
   }
 
   /**
    * Remove a custom container type
    */
-  static removeContainerType(settings: IGearSettings, containerTypeId: string): IGearSettings {
+  async removeContainerType(settings: IGearSettings, containerTypeId: string): Promise<IGearSettings> {
     const updated = {
       ...settings,
       customContainerTypes: settings.customContainerTypes.filter(t => t.id !== containerTypeId),
     }
-    this.saveToStorage(updated)
-    return updated
+    await this.saveToStorage(updated)
+    return Promise.resolve(updated)
   }
 
   /**
    * Add a custom brand
    */
-  static addBrand(settings: IGearSettings, brand: IUserBrand): IGearSettings {
+  async addBrand(settings: IGearSettings, brand: IUserBrand): Promise<IGearSettings> {
     const updated = {
       ...settings,
       customBrands: [...settings.customBrands, brand],
     }
-    this.saveToStorage(updated)
-    return updated
+    await this.saveToStorage(updated)
+    return Promise.resolve(updated)
   }
 
   /**
    * Update a custom brand
    */
-  static updateBrand(settings: IGearSettings, brand: IUserBrand): IGearSettings {
+  async updateBrand(settings: IGearSettings, brand: IUserBrand): Promise<IGearSettings> {
     const updated = {
       ...settings,
       customBrands: settings.customBrands.map(b => b.id === brand.id ? brand : b),
     }
-    this.saveToStorage(updated)
-    return updated
+    await this.saveToStorage(updated)
+    return Promise.resolve(updated)
   }
 
   /**
    * Remove a custom brand
    */
-  static removeBrand(settings: IGearSettings, brandId: string): IGearSettings {
+  async removeBrand(settings: IGearSettings, brandId: string): Promise<IGearSettings> {
     const updated = {
       ...settings,
       customBrands: settings.customBrands.filter(b => b.id !== brandId),
     }
-    this.saveToStorage(updated)
-    return updated
+    await this.saveToStorage(updated)
+    return Promise.resolve(updated)
+  }
+
+  // Static helper methods for backward compatibility
+  // These methods create an instance and call the instance methods
+  static async loadFromStorage(): Promise<IGearSettings> {
+    const instance = new GearSettingsService()
+    return instance.loadFromStorage()
+  }
+
+  static async saveToStorage(settings: IGearSettings): Promise<void> {
+    const instance = new GearSettingsService()
+    return instance.saveToStorage(settings)
+  }
+
+  static async updateSettings(current: IGearSettings, updates: IUpdateGearSettingsDto): Promise<IGearSettings> {
+    const instance = new GearSettingsService()
+    return instance.updateSettings(current, updates)
+  }
+
+  static async addCategory(settings: IGearSettings, category: IUserCategory): Promise<IGearSettings> {
+    const instance = new GearSettingsService()
+    return instance.addCategory(settings, category)
+  }
+
+  static async updateCategory(settings: IGearSettings, category: IUserCategory): Promise<IGearSettings> {
+    const instance = new GearSettingsService()
+    return instance.updateCategory(settings, category)
+  }
+
+  static async removeCategory(settings: IGearSettings, categoryId: string): Promise<IGearSettings> {
+    const instance = new GearSettingsService()
+    return instance.removeCategory(settings, categoryId)
+  }
+
+  static async addContainerType(settings: IGearSettings, containerType: IUserContainerType): Promise<IGearSettings> {
+    const instance = new GearSettingsService()
+    return instance.addContainerType(settings, containerType)
+  }
+
+  static async updateContainerType(settings: IGearSettings, containerType: IUserContainerType): Promise<IGearSettings> {
+    const instance = new GearSettingsService()
+    return instance.updateContainerType(settings, containerType)
+  }
+
+  static async removeContainerType(settings: IGearSettings, containerTypeId: string): Promise<IGearSettings> {
+    const instance = new GearSettingsService()
+    return instance.removeContainerType(settings, containerTypeId)
+  }
+
+  static async addBrand(settings: IGearSettings, brand: IUserBrand): Promise<IGearSettings> {
+    const instance = new GearSettingsService()
+    return instance.addBrand(settings, brand)
+  }
+
+  static async updateBrand(settings: IGearSettings, brand: IUserBrand): Promise<IGearSettings> {
+    const instance = new GearSettingsService()
+    return instance.updateBrand(settings, brand)
+  }
+
+  static async removeBrand(settings: IGearSettings, brandId: string): Promise<IGearSettings> {
+    const instance = new GearSettingsService()
+    return instance.removeBrand(settings, brandId)
   }
 }
+
+export { GearSettingsService }
+export const gearSettingsService = new GearSettingsService()

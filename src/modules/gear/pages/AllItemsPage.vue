@@ -7,7 +7,6 @@ import DataTable from '@/components/data-table/DataTable.vue'
 import Badge from '@/components/ui/badge/Badge.vue'
 import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import { useCoreSettings } from '@/modules/settings/composables/useCoreSettings'
 import { ALL_ITEMS_TABLE_COLUMN_VISIBILITY_KEY } from '@/shared/config/config'
 import type { IItemWithContainer } from '../utils/allItemsColumns'
 import CategoryIcon from '../components/CategoryIcon.vue'
@@ -24,8 +23,8 @@ const router = useRouter()
 const { t } = useI18n()
 const { containers } = useGear()
 const { customCategories } = useGearSettings()
-const { settings: coreSettings } = useCoreSettings()
-const settings = computed(() => ({ preferredWeightUnit: coreSettings.value.preferredWeightUnit }))
+const { settings: gearSettings } = useGearSettings()
+const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
 
 // Get all items from all containers
 const allItems = computed<IItemWithContainer[]>(() => {
@@ -159,7 +158,7 @@ function navigateToContainer(containerId: string) {
         </template>
 
         <template #weight="{ row }">
-          {{ formatWeightWithPreferredUnit(row.original.weight * row.original.quantity, row.original.weightUnit, settings.preferredWeightUnit) }}
+          {{ formatWeightWithPreferredUnit(row.original.weight * row.original.quantity, row.original.weightUnit, settings.preferredWeightUnit ?? 'g') }}
         </template>
 
         <template #status="{ row }">

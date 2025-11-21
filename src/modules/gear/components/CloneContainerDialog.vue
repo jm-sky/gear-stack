@@ -58,7 +58,7 @@ const handleClone = async () => {
 
   try {
     isCloning.value = true
-    const clonedContainer = cloneContainer(props.container.id, {
+    const clonedContainer = await cloneContainer(props.container.id, {
       newName: newName.value.trim(),
       includeNestedContainers: includeNestedContainers.value,
       includePrices: includePrices.value,

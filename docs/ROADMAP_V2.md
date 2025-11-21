@@ -88,6 +88,14 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - Możliwość dodawania przedmiotów z katalogu do własnych kontenerów
 - Wersjonowanie przedmiotów w katalogu
 
+### Wyświetlanie kontenerów na liście wszystkich przedmiotów
+**Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Small
+
+- Kontenery (plecaki, torby, itp.) powinny być widoczne na liście wszystkich przedmiotów
+- Plecak to też przedmiot - powinien być traktowany jako taki w katalogu
+- Wizualne rozróżnienie między kontenerami a zwykłymi przedmiotami na liście
+- Możliwość filtrowania: tylko kontenery / tylko przedmioty / wszystkie
+
 ### Linkowanie przedmiotów (zmiana w jednym → zmiana w wielu listach)
 **Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Large
 
