@@ -4,15 +4,17 @@
 
 import type { RouteRecordRaw } from 'vue-router'
 
+export const AUTH_BASE_PATH = import.meta.env.VITE_AUTH_BASE_PATH ?? '/auth'
+
 export const AuthRoutePaths = {
-  login: import.meta.env.VITE_AUTH_LOGIN_PATH ?? '/auth/login',
-  register: import.meta.env.VITE_AUTH_REGISTER_PATH ?? '/auth/register',
-  forgotPassword: import.meta.env.VITE_AUTH_FORGOT_PASSWORD_PATH ?? '/auth/forgot-password',
-  resetPassword: import.meta.env.VITE_AUTH_RESET_PASSWORD_PATH ?? '/auth/reset-password',
-  changePassword: import.meta.env.VITE_AUTH_CHANGE_PASSWORD_PATH ?? '/auth/change-password',
-  twoFactorSetup: import.meta.env.VITE_AUTH_TWO_FACTOR_SETUP_PATH ?? '/auth/2fa/setup',
-  twoFactorVerify: import.meta.env.VITE_AUTH_TWO_FACTOR_VERIFY_PATH ?? '/auth/2fa/verify',
-  verifyEmail: import.meta.env.VITE_AUTH_VERIFY_EMAIL_PATH ?? '/auth/verify-email',
+  login: import.meta.env.VITE_AUTH_LOGIN_PATH ?? `${AUTH_BASE_PATH}/login`,
+  register: import.meta.env.VITE_AUTH_REGISTER_PATH ?? `${AUTH_BASE_PATH}/register`,
+  forgotPassword: import.meta.env.VITE_AUTH_FORGOT_PASSWORD_PATH ?? `${AUTH_BASE_PATH}/forgot-password`,
+  resetPassword: import.meta.env.VITE_AUTH_RESET_PASSWORD_PATH ?? `${AUTH_BASE_PATH}/reset-password`,
+  changePassword: import.meta.env.VITE_AUTH_CHANGE_PASSWORD_PATH ?? `${AUTH_BASE_PATH}/change-password`,
+  twoFactorSetup: import.meta.env.VITE_AUTH_TWO_FACTOR_SETUP_PATH ?? `${AUTH_BASE_PATH}/2fa/setup`,
+  twoFactorVerify: import.meta.env.VITE_AUTH_TWO_FACTOR_VERIFY_PATH ?? `${AUTH_BASE_PATH}/2fa/verify`,
+  verifyEmail: import.meta.env.VITE_AUTH_VERIFY_EMAIL_PATH ?? `${AUTH_BASE_PATH}/verify-email`,
   dashboard: import.meta.env.VITE_AUTH_DASHBOARD_PATH ?? '/dashboard',
 } as const
 

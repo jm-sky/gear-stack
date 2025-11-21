@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
+import Alert from '@/components/ui/alert/Alert.vue'
+import AlertTitle from '@/components/ui/alert/AlertTitle.vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,6 +14,8 @@ import { AuthRouteNames, AuthRoutePaths } from '@/modules/auth/config/routes'
 import { useAuthStore } from '@/modules/auth/store/useAuthStore'
 
 type VerificationStatus = 'idle' | 'success' | 'error'
+
+const REDIRECT_TIMEOUT = 3000
 
 const { t } = useI18n()
 const route = useRoute()
@@ -23,6 +27,7 @@ const verificationStatus = ref<VerificationStatus>('idle')
 const verificationError = ref<string | null>(null)
 const message = ref<string | null>(null)
 const emailInput = ref<string>('')
+const redirectTimeout = ref<number | null>(null)
 
 const token = computed(() => typeof route.query.token === 'string' ? route.query.token : null)
 
@@ -47,10 +52,13 @@ async function handleVerify(currentToken: string) {
   verificationError.value = null
 
   try {
-    const response = await verifyEmail(currentToken)
+    await verifyEmail(currentToken)
     verificationStatus.value = 'success'
-    message.value = response.message
-    toast.success(response.message)
+    message.value = t('auth.verify_email.success')
+    toast.success(t('auth.verify_email.success'))
+    redirectTimeout.value = setTimeout(() => {
+      router.push(AuthRoutePaths.dashboard)
+    }, REDIRECT_TIMEOUT)
   } catch (error) {
     verificationStatus.value = 'error'
     verificationError.value = t('auth.verify_email.invalid_or_expired')
@@ -81,6 +89,12 @@ function goToLogin() {
 function goToDashboard() {
   router.push(AuthRoutePaths.dashboard)
 }
+
+onBeforeUnmount(() => {
+  if (redirectTimeout.value) {
+    clearTimeout(redirectTimeout.value)
+  }
+})
 </script>
 
 <template>
@@ -101,15 +115,21 @@ function goToDashboard() {
       </div>
 
       <div v-else class="space-y-4">
-        <p v-if="message" class="text-foreground">
-          {{ message }}
-        </p>
-        <p v-if="verificationError" class="text-destructive">
-          {{ verificationError }}
-        </p>
-        <p v-else-if="!token" class="text-muted-foreground">
-          {{ t('auth.verify_email.instructions') }}
-        </p>
+        <Alert v-if="message" variant="success">
+          <AlertTitle>
+            {{ message }}
+          </AlertTitle>
+        </Alert>
+        <Alert v-if="verificationError" variant="destructive">
+          <AlertTitle>
+            {{ verificationError }}
+          </AlertTitle>
+        </Alert>
+        <Alert v-else-if="!token" variant="info">
+          <AlertTitle>
+            {{ t('auth.verify_email.instructions') }}
+          </AlertTitle>
+        </Alert>
       </div>
 
       <div class="space-y-6">

@@ -1,4 +1,4 @@
-import { authRoutes } from '@/modules/auth/config/routes'
+import { AuthRouteNames, AuthRoutePaths, authRoutes } from '@/modules/auth/config/routes'
 import { gearRoutes } from '@/modules/gear/routes'
 import { settingsRoutes } from '@/modules/settings/routes'
 import { userRoutes } from '@/modules/user/routes'
@@ -12,8 +12,8 @@ export const routes: RouteRecordRaw[] = [
     meta: { requiresGuest: true },
   },
   {
-    path: '/home',
-    name: 'home',
+    path: AuthRoutePaths.dashboard,
+    name: AuthRouteNames.dashboard,
     component: () => import('@/pages/HomePage.vue'),
     meta: { layout: 'authenticated', requiresAuth: true },
   },

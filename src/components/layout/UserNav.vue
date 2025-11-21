@@ -11,6 +11,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import Avatar from '../ui/avatar/Avatar.vue'
+import AvatarFallback from '../ui/avatar/AvatarFallback.vue'
+import AvatarImage from '../ui/avatar/AvatarImage.vue'
 
 export interface Link {
   to: string
@@ -21,6 +24,7 @@ export interface Link {
 export interface UserNavProps {
   userName?: string
   userEmail?: string
+  userAvatar?: string
   navLinks?: Link[]
 }
 
@@ -61,13 +65,12 @@ const navigateTo = (path: string) => {
 <template>
   <DropdownMenu>
     <DropdownMenuTrigger as-child>
-      <button
-        type="button"
-        class="flex items-center justify-center size-9 rounded-full bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity"
-        aria-label="User menu"
-      >
-        {{ initials }}
-      </button>
+      <Avatar aria-label="User menu" class="cursor-pointer">
+        <AvatarImage :src="userAvatar ?? ''" />
+        <AvatarFallback class="bg-primary text-primary-foreground">
+          {{ initials }}
+        </AvatarFallback>
+      </Avatar>
     </DropdownMenuTrigger>
 
     <DropdownMenuContent class="w-64" align="end">

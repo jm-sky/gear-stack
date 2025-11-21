@@ -1,5 +1,5 @@
 import { useBackend } from '@/shared/composables/useBackend'
-import { CORE_SETTINGS_STORAGE_KEY, LOCALE_STORAGE_KEY, SETTINGS_STORAGE_KEY, type SupportedLocale } from '@/shared/config/config'
+import { CORE_SETTINGS_STORAGE_KEY, JWT_STORE_KEY, LOCALE_STORAGE_KEY, SETTINGS_STORAGE_KEY, type SupportedLocale } from '@/shared/config/config'
 import type { ISettingsService, Settings, UpdateSettingsData } from '../types/settings.type'
 import { settingsApiService } from './settingsApiService'
 
@@ -115,8 +115,14 @@ class SettingsService implements ISettingsService {
     return isBackendEnabled.value
   }
 
+  private get isAuthenticated(): boolean {
+    // Check if user has a token (simple check, no need to decode)
+    return !!localStorage.getItem(JWT_STORE_KEY)
+  }
+
   async getSettings(): Promise<Settings> {
-    if (this.isBackendEnabled) {
+    // Only use API if backend is enabled AND user is authenticated
+    if (this.isBackendEnabled && this.isAuthenticated) {
       try {
         // API call
         return await settingsApiService.getSettings()
@@ -127,12 +133,13 @@ class SettingsService implements ISettingsService {
       }
     }
 
-    // Offline mode
+    // Offline mode or not authenticated - use localStorage
     return this.localService.getSettings()
   }
 
   async updateSettings(data: UpdateSettingsData): Promise<Settings> {
-    if (this.isBackendEnabled) {
+    // Only use API if backend is enabled AND user is authenticated
+    if (this.isBackendEnabled && this.isAuthenticated) {
       try {
         // API call
         const settings = await settingsApiService.updateSettings(data)
@@ -146,7 +153,7 @@ class SettingsService implements ISettingsService {
       }
     }
 
-    // Offline mode
+    // Offline mode or not authenticated - use localStorage
     return this.localService.updateSettings(data)
   }
 }

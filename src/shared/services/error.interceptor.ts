@@ -12,6 +12,7 @@
  */
 
 import { HttpStatusCode } from 'axios'
+import { AUTH_BASE_PATH } from '@/modules/auth/config/routes'
 import { authService } from '@/modules/auth/services/authService'
 import { useAuthStore } from '@/modules/auth/store/useAuthStore'
 import { useLoginModal } from '@/shared/composables/useLoginModal'
@@ -34,6 +35,12 @@ export async function errorResponseInterceptor(error: AxiosError) {
     // Pass error through for local handling
     return Promise.reject(error)
   }
+
+  // Check if we're on an auth page or if the request is to an auth endpoint
+  // Don't show login modal if user is already on login page
+  const AUTH_PREFIX = `${AUTH_BASE_PATH}/`
+  const isOnAuthPage = typeof window !== 'undefined' && window.location.pathname.startsWith(AUTH_PREFIX)
+  const isAuthRequest = originalRequest?.url?.includes(AUTH_PREFIX) || false
 
   // Handle 401 Unauthorized errors
   if (
@@ -85,21 +92,23 @@ export async function errorResponseInterceptor(error: AxiosError) {
         authStore.clearRefreshToken()
         authStore.clearUser()
 
-        // Open login modal with retry callback
-        const loginModal = useLoginModal()
-        loginModal.open({
-          onSuccess: async () => {
-            try {
-              // After successful login, retry the original request
-              // Auth interceptor will add the new token automatically
-              originalRequest._retry = false // Reset retry flag for new attempt
-              return await apiClient(originalRequest)
-            } catch (retryError) {
-              console.error('Failed to retry request after re-authentication', retryError)
-              throw retryError
-            }
-          },
-        })
+        // Only open login modal if not on auth page and not an auth request
+        if (!isOnAuthPage && !isAuthRequest) {
+          const loginModal = useLoginModal()
+          loginModal.open({
+            onSuccess: async () => {
+              try {
+                // After successful login, retry the original request
+                // Auth interceptor will add the new token automatically
+                originalRequest._retry = false // Reset retry flag for new attempt
+                return await apiClient(originalRequest)
+              } catch (retryError) {
+                console.error('Failed to retry request after re-authentication', retryError)
+                throw retryError
+              }
+            },
+          })
+        }
 
         return Promise.reject(refreshError)
       } finally {
@@ -113,21 +122,23 @@ export async function errorResponseInterceptor(error: AxiosError) {
       // Clear the failed queue since we can't proceed without refresh token
       refreshStore.processQueue(new Error('No refresh token available'))
 
-      // Open login modal with retry callback
-      const loginModal = useLoginModal()
-      loginModal.open({
-        onSuccess: async () => {
-          try {
-            // After successful login, retry the original request
-            // Auth interceptor will add the new token automatically
-            originalRequest._retry = false // Reset retry flag
-            return await apiClient(originalRequest)
-          } catch (retryError) {
-            console.error('Failed to retry request after re-authentication', retryError)
-            throw retryError
-          }
-        },
-      })
+      // Only open login modal if not on auth page and not an auth request
+      if (!isOnAuthPage && !isAuthRequest) {
+        const loginModal = useLoginModal()
+        loginModal.open({
+          onSuccess: async () => {
+            try {
+              // After successful login, retry the original request
+              // Auth interceptor will add the new token automatically
+              originalRequest._retry = false // Reset retry flag
+              return await apiClient(originalRequest)
+            } catch (retryError) {
+              console.error('Failed to retry request after re-authentication', retryError)
+              throw retryError
+            }
+          },
+        })
+      }
 
       // Reject the original request
       return Promise.reject(new Error('Authentication required'))
