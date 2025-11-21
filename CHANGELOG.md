@@ -21,6 +21,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.0] - 2025-11-21
+
+### Release: Backend Integration & Authentication
+
+This is the second major release (2.0.0) of Gear Stack, introducing backend integration and full authentication system. The application now supports user accounts, authentication, and backend API integration while maintaining backward compatibility with local storage.
+
+**Key highlights:**
+- **Backend Integration**: Full API integration with backend services
+- **Authentication Module**: Complete user authentication system with email verification
+- **Two-Factor Authentication (2FA)**: Enhanced security with WebAuthn support
+- **User Management**: User accounts, profiles, and session management
+- **Logout Functionality**: Proper session cleanup and logout flow
+- **Enhanced Services**: Refactored gear services with container/item API services
+- **Improved Error Handling**: Enhanced Vite configuration and interceptor error handling
+- **Routing Updates**: Updated routing and layout for landing and home pages
+- **Container Data Handling**: Enhanced container data handling with missing fields support
+
+**Technical improvements:**
+- Service layer refactoring for better separation of concerns
+- Enhanced API interceptors with improved error handling
+- Updated application settings and user authentication flow
+- Workflow permissions fixes for code scanning alerts
+
+This release marks the transition from a pure local storage application to a full-stack application with backend support, while maintaining all existing features and data compatibility.
+
+---
+
 ## [1.0.0] - 2025-11-21
 
 ### Release: Full local storage
