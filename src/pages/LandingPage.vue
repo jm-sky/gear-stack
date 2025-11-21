@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { BackpackIcon, LogIn, UserPlus } from 'lucide-vue-next'
+import { BackpackIcon, LogIn, Plus, UserPlus } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import AppFooter from '@/components/layout/AppFooter.vue'
 import { Button } from '@/components/ui/button'
 import { AuthRouteNames } from '@/modules/auth/config/routes'
+import { GearRouteName } from '@/modules/gear/routes'
 import DarkModeToggle from '@/shared/components/DarkModeToggle.vue'
 import { config } from '@/shared/config/config'
 import LocaleToggle from '@/shared/i18n/components/LocaleToggle.vue'
@@ -18,6 +19,10 @@ const handleLogin = () => {
 
 const handleRegister = () => {
   router.push({ name: AuthRouteNames.register })
+}
+
+const handleCreateContainer = () => {
+  router.push({ name: GearRouteName.ContainerNew })
 }
 
 // If backend is disabled, redirect to home (offline mode)
@@ -84,7 +89,16 @@ if (!config.backend.enabled) {
 
         <!-- CTA Buttons -->
         <div class="flex flex-col sm:flex-row gap-4 justify-center items-center pt-8">
-          <Button size="lg" class="w-full sm:w-auto" @click="handleLogin">
+          <Button size="lg" class="w-full sm:w-auto" @click="handleCreateContainer">
+            <Plus class="size-5 mr-2" />
+            {{ t('gear.container.create.title', 'Add Container') }}
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            class="w-full sm:w-auto"
+            @click="handleLogin"
+          >
             <LogIn class="size-5 mr-2" />
             {{ t('landing.login', 'Log In') }}
           </Button>

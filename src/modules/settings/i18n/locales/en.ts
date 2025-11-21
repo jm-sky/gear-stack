@@ -3,29 +3,36 @@ export const settingsEn = {
     page: {
       title: 'Settings',
       subtitle: 'Manage your preferences and custom categories',
+      save: 'Save',
+      error_prefix: 'Error loading settings',
+      sections: {
+        preferences: {
+          title: 'Preferences',
+          description: 'Manage your general preferences and settings',
+        },
+        theme: {
+          label: 'Theme',
+          subtitle: 'Choose light or dark theme',
+          placeholder: 'Select a theme',
+          group_label: 'Theme',
+          options: {
+            light: 'Light',
+            dark: 'Dark',
+          },
+        },
+        locale: {
+          label: 'Language',
+          subtitle: 'Language used across the interface',
+          placeholder: 'Select a language',
+          group_label: 'Language',
+          options: {
+            en: 'English',
+            pl: 'Polski',
+          },
+        },
+      },
     },
     preferences: {
-      title: 'Preferences',
-      description: 'Manage your general preferences and settings',
-      save: 'Save',
-      theme: {
-        label: 'Theme',
-        subtitle: 'Choose light or dark theme',
-        placeholder: 'Select a theme',
-        options: {
-          light: 'Light',
-          dark: 'Dark',
-        },
-      },
-      locale: {
-        label: 'Language',
-        subtitle: 'Language used across the interface',
-        placeholder: 'Select a language',
-        options: {
-          en: 'English',
-          pl: 'Polski',
-        },
-      },
       preferredWeightUnit: {
         label: 'Preferred Weight Unit',
         subtitle: 'Default unit for displaying weights throughout the application',
@@ -79,6 +86,31 @@ export const settingsEn = {
       label: 'Label',
       labelPlaceholder: 'Brand name',
       empty: 'No custom brands yet. Add your first one above.',
+    },
+    delete_account: {
+      title: 'Delete Account',
+      description: 'Permanently delete your account and all associated data',
+      warning_title: 'Warning: This action cannot be undone',
+      warning_1: 'All your data will be permanently deleted',
+      warning_2: 'You will lose access to all your containers and items',
+      warning_3: 'This action cannot be reversed',
+      button: 'Delete Account',
+      modal: {
+        title: 'Delete Account',
+        description: 'Are you sure you want to delete your account? This action cannot be undone.',
+        warning_title: 'Final Warning',
+        warning_text: 'Once you delete your account, all your data will be permanently removed and cannot be recovered.',
+        confirmation_label: 'Type DELETE to confirm',
+        confirmation_hint: 'Please type DELETE in the field above to confirm account deletion',
+        confirm_checkbox: 'I understand that this action cannot be undone and all my data will be permanently deleted',
+        cancel: 'Cancel',
+        delete_button: 'Delete Account',
+        success: 'Account deleted successfully',
+        errors: {
+          invalid_confirmation: 'Invalid confirmation. Please type DELETE to confirm.',
+          generic: 'Failed to delete account. Please try again.',
+        },
+      },
     },
   },
 }

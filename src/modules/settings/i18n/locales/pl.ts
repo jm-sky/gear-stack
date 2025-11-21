@@ -3,29 +3,36 @@ export const settingsPl = {
     page: {
       title: 'Ustawienia',
       subtitle: 'Zarządzaj preferencjami i własnymi kategoriami',
+      save: 'Zapisz',
+      error_prefix: 'Błąd ładowania ustawień',
+      sections: {
+        preferences: {
+          title: 'Preferencje',
+          description: 'Zarządzaj ogólnymi preferencjami i ustawieniami',
+        },
+        theme: {
+          label: 'Motyw',
+          subtitle: 'Wybierz jasny lub ciemny motyw',
+          placeholder: 'Wybierz motyw',
+          group_label: 'Motyw',
+          options: {
+            light: 'Jasny',
+            dark: 'Ciemny',
+          },
+        },
+        locale: {
+          label: 'Język',
+          subtitle: 'Język używany w interfejsie',
+          placeholder: 'Wybierz język',
+          group_label: 'Język',
+          options: {
+            en: 'English',
+            pl: 'Polski',
+          },
+        },
+      },
     },
     preferences: {
-      title: 'Preferencje',
-      description: 'Zarządzaj ogólnymi preferencjami i ustawieniami',
-      save: 'Zapisz',
-      theme: {
-        label: 'Motyw',
-        subtitle: 'Wybierz jasny lub ciemny motyw',
-        placeholder: 'Wybierz motyw',
-        options: {
-          light: 'Jasny',
-          dark: 'Ciemny',
-        },
-      },
-      locale: {
-        label: 'Język',
-        subtitle: 'Język używany w interfejsie',
-        placeholder: 'Wybierz język',
-        options: {
-          en: 'English',
-          pl: 'Polski',
-        },
-      },
       preferredWeightUnit: {
         label: 'Preferowana Jednostka Wagi',
         subtitle: 'Domyślna jednostka wyświetlania wag w całej aplikacji',
@@ -79,6 +86,31 @@ export const settingsPl = {
       label: 'Etykieta',
       labelPlaceholder: 'Nazwa marki',
       empty: 'Brak własnych marek. Dodaj pierwszą powyżej.',
+    },
+    delete_account: {
+      title: 'Usuń Konto',
+      description: 'Trwale usuń swoje konto i wszystkie powiązane dane',
+      warning_title: 'Ostrzeżenie: Ta akcja nie może być cofnięta',
+      warning_1: 'Wszystkie Twoje dane zostaną trwale usunięte',
+      warning_2: 'Utracisz dostęp do wszystkich swoich kontenerów i przedmiotów',
+      warning_3: 'Ta akcja nie może być odwrócona',
+      button: 'Usuń Konto',
+      modal: {
+        title: 'Usuń Konto',
+        description: 'Czy na pewno chcesz usunąć swoje konto? Ta akcja nie może być cofnięta.',
+        warning_title: 'Ostatnie Ostrzeżenie',
+        warning_text: 'Po usunięciu konta wszystkie Twoje dane zostaną trwale usunięte i nie będą mogły zostać odzyskane.',
+        confirmation_label: 'Wpisz DELETE aby potwierdzić',
+        confirmation_hint: 'Proszę wpisać DELETE w polu powyżej, aby potwierdzić usunięcie konta',
+        confirm_checkbox: 'Rozumiem, że ta akcja nie może być cofnięta i wszystkie moje dane zostaną trwale usunięte',
+        cancel: 'Anuluj',
+        delete_button: 'Usuń Konto',
+        success: 'Konto zostało pomyślnie usunięte',
+        errors: {
+          invalid_confirmation: 'Nieprawidłowe potwierdzenie. Proszę wpisać DELETE aby potwierdzić.',
+          generic: 'Nie udało się usunąć konta. Proszę spróbować ponownie.',
+        },
+      },
     },
   },
 }

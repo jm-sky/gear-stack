@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import { useAuth } from '@/modules/auth/composables/useAuth'
+import DeleteAccountCard from '@/modules/settings/components/DeleteAccountCard.vue'
 import PreferencesSettingsCard from '../components/PreferencesSettingsCard.vue'
 
 const { t } = useI18n()
+const { isAuthenticated } = useAuth()
 </script>
 
 <template>
@@ -24,6 +27,8 @@ const { t } = useI18n()
 
         <!-- Additional Settings from other modules (via slot) -->
         <slot name="after" />
+
+        <DeleteAccountCard v-if="isAuthenticated" />
       </div>
     </div>
   </AuthenticatedLayout>

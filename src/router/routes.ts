@@ -9,13 +9,12 @@ export const routes: RouteRecordRaw[] = [
     path: '/',
     name: 'landing',
     component: () => import('@/pages/LandingPage.vue'),
-    meta: { requiresGuest: true },
   },
   {
     path: AuthRoutePaths.dashboard,
     name: AuthRouteNames.dashboard,
     component: () => import('@/pages/HomePage.vue'),
-    meta: { layout: 'authenticated', requiresAuth: true },
+    meta: { layout: 'authenticated' },
   },
   {
     path: '/cookies',
