@@ -8,10 +8,12 @@ import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import OAuthButton from '@/modules/auth/components/OAuthButton.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { AuthRouteNames, AuthRoutePaths } from '@/modules/auth/config/routes'
 import { loginSchema } from '@/modules/auth/validation/login.schema'
 import { useRecaptcha } from '@/shared/composables/useRecaptcha'
+import { config } from '@/shared/config/config'
 import { isValidationError } from '@/shared/utils/typeGuards'
 import type { IAuthService } from '@/modules/auth/types/auth.type'
 import type { LoginCredentials } from '@/modules/auth/types/user.type'
@@ -114,5 +116,20 @@ const onSubmit = handleSubmit(async (values: LoginCredentials) => {
     <Button type="submit" class="w-full" :loading="isLoggingIn">
       {{ t('auth.form.submit_login') }}
     </Button>
+
+    <template v-if="config.oauth.google.enabled">
+      <div class="relative my-6">
+        <div class="absolute inset-0 flex items-center">
+          <span class="w-full border-t" />
+        </div>
+        <div class="relative flex justify-center text-xs uppercase">
+          <span class="bg-background px-2 text-muted-foreground">
+            Or continue with
+          </span>
+        </div>
+      </div>
+
+      <OAuthButton />
+    </template>
   </form>
 </template>

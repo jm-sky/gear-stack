@@ -80,3 +80,14 @@ export interface MessageResponse {
 export interface RegisterResponse extends MessageResponse {
   email?: string
 }
+
+export interface OAuthAuthUrlResponse {
+  authUrl: string
+  state: string
+}
+
+export interface OAuthCallbackRequest {
+  code: string
+  state: string
+  recaptchaToken?: string | null
+}

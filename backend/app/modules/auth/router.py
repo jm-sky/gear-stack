@@ -44,6 +44,9 @@ from .schemas import (
     ForgotPasswordRequest,
     LoginResponse,
     MessageResponse,
+    OAuthAuthUrlRequest,
+    OAuthAuthUrlResponse,
+    OAuthCallbackRequest,
     ResendEmailVerificationRequest,
     ResetPasswordRequest,
     TokenRefresh,
@@ -279,3 +282,61 @@ async def delete_account(request_data: DeleteAccountRequest, current_user: Curre
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except UserNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+
+# OAuth Endpoints
+
+
+@router.post(
+    "/oauth/auth-url",
+    response_model=OAuthAuthUrlResponse,
+    summary="Get OAuth authorization URL",
+    description="Generate OAuth authorization URL for the specified provider",
+    tags=["Authentication", "OAuth"],
+)
+@rate_limit("10/minute")
+async def get_oauth_auth_url(request_data: OAuthAuthUrlRequest, request: Request) -> OAuthAuthUrlResponse:
+    """
+    Generate OAuth authorization URL.
+
+    Returns authorization URL and CSRF state parameter.
+    """
+    from app.core.oauth import oauth_service
+
+    state = oauth_service.generate_state()
+    auth_url = oauth_service.get_authorization_url(request_data.provider, state)
+
+    return OAuthAuthUrlResponse(authUrl=auth_url, state=state)
+
+
+@router.post(
+    "/oauth/callback/{provider}",
+    summary="OAuth callback handler",
+    description="Handle OAuth callback and login/register user",
+    tags=["Authentication", "OAuth"],
+)
+@rate_limit("10/minute")
+@recaptcha_protected("oauth_callback")  # Optional reCAPTCHA protection
+async def oauth_callback(provider: str, callback_data: OAuthCallbackRequest, auth_service: AuthServiceDep, request: Request) -> LoginResponseType:
+    """
+    Handle OAuth callback and authenticate user.
+
+    Security features:
+    - ✅ Rate limiting: 10 requests/minute
+    - ✅ CSRF protection via state parameter
+    - ⚪ reCAPTCHA: Optional (enable via RECAPTCHA_ENABLED=true)
+    """
+    from app.core.oauth import oauth_service
+
+    try:
+        # Exchange code for token
+        token_response = await oauth_service.exchange_code_for_token(provider, callback_data.code)
+
+        # Get user info from provider
+        user_info = await oauth_service.get_user_info(provider, token_response.accessToken)
+
+        # Login or register user via OAuth
+        return await auth_service.login_with_oauth(provider, user_info)
+
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"OAuth authentication failed: {str(e)}")

@@ -7,6 +7,8 @@ import type {
   LoginCredentials,
   LoginResponse,
   MessageResponse,
+  OAuthAuthUrlResponse,
+  OAuthCallbackRequest,
   RefreshTokenResponse,
   RegisterCredentials,
   RegisterResponse,
@@ -69,6 +71,16 @@ class AuthService implements IAuthService {
 
   async resendVerification(email: string): Promise<MessageResponse> {
     const response = await apiClient.post<MessageResponse>('/auth/email/resend', { email })
+    return response.data
+  }
+
+  async getOAuthAuthUrl(provider: string): Promise<OAuthAuthUrlResponse> {
+    const response = await apiClient.post<OAuthAuthUrlResponse>('/auth/oauth/auth-url', { provider })
+    return response.data
+  }
+
+  async oauthCallback(provider: string, data: OAuthCallbackRequest): Promise<LoginResponse> {
+    const response = await apiClient.post<LoginResponse>(`/auth/oauth/callback/${provider}`, data)
     return response.data
   }
 }

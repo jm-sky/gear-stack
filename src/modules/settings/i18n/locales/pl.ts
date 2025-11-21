@@ -32,6 +32,37 @@ export const settingsPl = {
         },
       },
     },
+    security: {
+      title: 'Bezpieczeństwo',
+      description: 'Zarządzaj bezpieczeństwem konta i uwierzytelnianiem dwuskładnikowym',
+      setup: 'Włącz 2FA',
+      manage: 'Zarządzaj 2FA',
+      not_configured: 'Uwierzytelnianie dwuskładnikowe nie jest włączone. Włącz je dla lepszego bezpieczeństwa.',
+      totp: {
+        title: 'Aplikacja uwierzytelniająca',
+        enabled: 'Włączona',
+        disabled: 'Nie skonfigurowana',
+      },
+      passkeys: {
+        title: 'Klucze dostępu',
+        enabled: 'Włączone',
+        disabled: 'Nie skonfigurowane',
+        count: 'Nie zarejestrowano kluczy dostępu | Zarejestrowano {count} klucz dostępu | Zarejestrowano {count} klucze dostępu',
+      },
+      preferred_method: {
+        title: 'Preferowana metoda 2FA',
+        description: 'Ustaw preferowaną metodę uwierzytelniania dwuskładnikowego',
+        label: 'Preferowana metoda',
+        placeholder: 'Wybierz preferowaną metodę',
+        options: {
+          none: 'Automatycznie',
+          totp: 'Aplikacja uwierzytelniająca',
+          webauthn: 'Klucze dostępu',
+        },
+        saved: 'Zaktualizowano preferowaną metodę',
+        error: 'Nie udało się zaktualizować preferowanej metody',
+      },
+    },
     preferences: {
       preferredWeightUnit: {
         label: 'Preferowana Jednostka Wagi',

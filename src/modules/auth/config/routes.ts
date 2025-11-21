@@ -15,6 +15,7 @@ export const AuthRoutePaths = {
   twoFactorSetup: import.meta.env.VITE_AUTH_TWO_FACTOR_SETUP_PATH ?? `${AUTH_BASE_PATH}/2fa/setup`,
   twoFactorVerify: import.meta.env.VITE_AUTH_TWO_FACTOR_VERIFY_PATH ?? `${AUTH_BASE_PATH}/2fa/verify`,
   verifyEmail: import.meta.env.VITE_AUTH_VERIFY_EMAIL_PATH ?? `${AUTH_BASE_PATH}/verify-email`,
+  oauthCallback: import.meta.env.VITE_AUTH_OAUTH_CALLBACK_PATH ?? `${AUTH_BASE_PATH}/callback/:provider`,
   dashboard: import.meta.env.VITE_AUTH_DASHBOARD_PATH ?? '/dashboard',
 } as const
 
@@ -28,6 +29,7 @@ export const AuthRouteNames = {
   twoFactorSetup: 'TwoFactorSetup',
   twoFactorVerify: 'TwoFactorVerify',
   verifyEmail: 'VerifyEmail',
+  oauthCallback: 'OAuthCallback',
   dashboard: 'Dashboard',
 } as const
 
@@ -75,5 +77,10 @@ export const authRoutes: RouteRecordRaw[] = [
     path: AuthRoutePaths.verifyEmail,
     name: AuthRouteNames.verifyEmail,
     component: () => import('@/modules/auth/pages/VerifyEmailPage.vue'),
+  },
+  {
+    path: AuthRoutePaths.oauthCallback,
+    name: AuthRouteNames.oauthCallback,
+    component: () => import('@/modules/auth/pages/OAuthCallbackPage.vue'),
   },
 ]

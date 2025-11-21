@@ -148,6 +148,14 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - Dodawanie firm / marek (brand) - zapisywane w DB
 - Uczenie się na podstawie wcześniejszych wyborów użytkownika (dla kategorii)
 
+### Profil użytkownika - link do Gravatara
+**Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Small
+
+- Umożliwienie zapisania URL do obrazu awatara użytkownika
+- Integracja z Gravatar (automatyczne pobieranie awatara na podstawie email)
+- Pole `avatar_url` w profilu użytkownika (już istnieje w DB)
+- Możliwość podania własnego URL do awatara
+
 ---
 
 ## 🚀 Import/Export - rozszerzenia wymagające DB
@@ -229,6 +237,51 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - Konwersja tekstowego opisu na gotowy kontener z przedmiotami
 - Integracja z AI (np. OpenAI API)
 - Zapisywanie wygenerowanych kontenerów w DB
+
+---
+
+## 📷 Media i zasoby graficzne
+
+### Upload avatarów użytkownika (wymaga S3)
+**Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Medium | **Prerequisite:** S3 Storage
+
+- Możliwość wgrywania własnych avatarów użytkownika
+- Alternatywa do Gravatar - użytkownik może wgrać własny obraz
+- Automatyczne skalowanie i optymalizacja obrazów
+- Limity rozmiaru pliku (np. 2MB max)
+- Obsługa formatów: JPG, PNG, WebP
+- **Wymaga:** Wdrożenie S3 lub innego cloud storage
+
+### Zdjęcia przedmiotów (wymaga S3)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium | **Prerequisite:** S3 Storage
+
+- Możliwość dodawania zdjęć do przedmiotów w kontenerach
+- Wielokrotne zdjęcia per przedmiot (galeria)
+- Limity przestrzeni per użytkownik
+- Limity liczby plików
+- Automatyczne skalowanie i kompresja
+- Obsługa formatów: JPG, PNG, WebP
+- **Wymaga:** Wdrożenie S3 lub innego cloud storage
+
+### Automatyczne wyszukiwanie obrazków dla przedmiotów
+**Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Medium
+
+- Usługa automatycznego wyszukiwania grafik dla przedmiotów
+- Wyszukiwanie na podstawie nazwy firmy/marki i nazwy przedmiotu
+- Integracja z API wyszukiwarek obrazów (np. Google Images API, Unsplash API)
+- Możliwość wyboru obrazu z wyników wyszukiwania
+- Cache wyszukanych obrazów
+- Fallback do domyślnych ikon gdy brak wyników
+
+### Generowanie SVG z obrazków
+**Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Large
+
+- Konwersja obrazów rastowych → SVG
+- Tworzenie kompozycji wielu przedmiotów (wizualizacja zawartości plecaka)
+- Generowanie layout'u z przedmiotów
+- Export do SVG/PNG
+- Możliwość edycji kompozycji
+- Integracja z biblioteką do wektoryzacji obrazów
 
 ---
 

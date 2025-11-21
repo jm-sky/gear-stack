@@ -364,3 +364,62 @@ class AuthService:
         # TODO: Delete related data (2FA, passkeys, etc.)
 
         return True
+
+    async def login_with_oauth(self, provider: str, user_info: dict) -> LoginResponse:
+        """
+        Login or register user via OAuth.
+
+        Args:
+            provider: OAuth provider name (google, github, etc.)
+            user_info: User information from OAuth provider
+
+        Returns:
+            LoginResponse with tokens and user info
+
+        Raises:
+            ValueError: If provider or user_info is invalid
+        """
+        if not provider or not user_info:
+            raise ValueError("Provider and user_info are required")
+
+        email = user_info.get("email")
+        if not email:
+            raise ValueError("Email is required from OAuth provider")
+
+        # Check if user already exists
+        existing_user = await self.user_repository.get_user_by_email(email)
+
+        if existing_user:
+            # User exists - check if OAuth is already linked
+            if existing_user.oauthProvider and existing_user.oauthProviderId:
+                # OAuth already linked - verify it matches
+                if existing_user.oauthProvider != provider:
+                    raise ValueError(f"Email already registered with {existing_user.oauthProvider}")
+            else:
+                # Regular user exists - link OAuth to existing account
+                # This allows users to add OAuth to existing password-based accounts
+                pass
+
+            user = existing_user
+        else:
+            # Create new OAuth user
+            user = await self.user_repository.create_oauth_user(
+                email=email,
+                name=user_info.get("name", email.split("@")[0]),
+                provider=provider,
+                provider_id=user_info.get("id", user_info.get("sub", "")),
+                avatar_url=user_info.get("picture"),
+            )
+
+        # Generate tokens
+        access_token = create_access_token({"sub": user.id})
+        refresh_token = create_refresh_token({"sub": user.id})
+
+        return LoginResponse(
+            user=UserResponse(**user.to_response()),
+            accessToken=access_token,
+            refreshToken=refresh_token,
+            tokenType="bearer",
+            expiresIn=settings.jwt.access_token_expire_minutes * 60,
+            requiresEmailVerification=False,  # OAuth emails are pre-verified
+        )
