@@ -1,4 +1,5 @@
 import type { ICreateItemDto } from '../types/gear.types'
+import { recognizeParameters } from '../utils/parameterRecognition'
 import { SUGGESTED_BRANDS, SUGGESTED_COLORS } from '../utils/suggestedValues'
 
 // Markdown template for AI guidelines
@@ -145,8 +146,18 @@ class MarkdownImportService {
 
   /**
    * Parse markdown content into containers and items
+   * @param markdown - Markdown content to parse
+   * @param options - Parsing options
+   * @param options.recognizeFromName - Whether to recognize brand and color from item name (default: false)
+   * @param options.customBrands - Custom user brands to include in recognition
    */
-  parseMarkdown(markdown: string): IMarkdownImportResult {
+  parseMarkdown(
+    markdown: string,
+    options?: {
+      recognizeFromName?: boolean
+      customBrands?: Array<{ label: string }>
+    }
+  ): IMarkdownImportResult {
     const result: IMarkdownImportResult = {
       containers: [],
       errors: [],
@@ -231,7 +242,10 @@ class MarkdownImportService {
       // Item line (- Item)
       if (line.startsWith('- ') && currentContainer) {
         try {
-          const item = this.parseItemLine(line.substring(2).trim())
+          const item = this.parseItemLine(line.substring(2).trim(), {
+            recognizeFromName: options?.recognizeFromName ?? false,
+            customBrands: options?.customBrands,
+          })
           if (item) {
             currentContainer.items.push(item)
           }
@@ -254,8 +268,17 @@ class MarkdownImportService {
    * New format: - **Item Name** [uuid:xxx] x2 (Brand, Color) [#container-id] (Status) - 500g
    * Old format: - Item name **Brand** (params) x5
    * Flexible: Parser will try to guess all fields
+   * @param options - Parsing options
+   * @param options.recognizeFromName - Whether to recognize brand and color from item name
+   * @param options.customBrands - Custom user brands to include in recognition
    */
-  private parseItemLine(line: string): (ICreateItemDto & { nestedContainerId?: string; uuid?: string }) | null {
+  private parseItemLine(
+    line: string,
+    options?: {
+      recognizeFromName?: boolean
+      customBrands?: Array<{ label: string }>
+    }
+  ): (ICreateItemDto & { nestedContainerId?: string; uuid?: string }) | null {
     if (!line) return null
 
     let workingLine = line
@@ -445,7 +468,19 @@ class MarkdownImportService {
       name = workingLine.trim()
     }
 
-    // 8. Determine category from name
+    // 8. Recognize brand and color from name if option is enabled and not already set
+    if (options?.recognizeFromName && name) {
+      const recognizedParams = recognizeParameters(name, options.customBrands)
+      // Only use recognized values if brand/color weren't already found in parentheses
+      if (!brand && recognizedParams.brand) {
+        brand = recognizedParams.brand
+      }
+      if (!color && recognizedParams.color) {
+        color = recognizedParams.color
+      }
+    }
+
+    // 9. Determine category from name
     const category = this.matchCategory(name)
 
     const item: ICreateItemDto & { nestedContainerId?: string; uuid?: string } = {
