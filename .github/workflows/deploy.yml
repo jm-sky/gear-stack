@@ -1,4 +1,6 @@
 name: Deploy to VPS
+permissions:
+  contents: read
 
 # Required GitHub Secrets:
 # - VPS_HOST: IP address or hostname of your VPS
