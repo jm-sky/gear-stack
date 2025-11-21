@@ -1,4 +1,4 @@
-import { config } from '@/shared/config/config'
+import { useBackend } from '@/shared/composables/useBackend'
 import { useGearStore } from '../store/useGearStore'
 import { gearContainerApiService } from './gearContainerApiService'
 import { gearContainerLocalService } from './gearContainerLocalService'
@@ -6,44 +6,90 @@ import { gearContainerLocalService } from './gearContainerLocalService'
 /**
  * Gear Container Service Factory
  *
- * Returns appropriate service based on feature flag.
- * When backend is enabled, uses API service and synchronizes with store.
- * When backend is disabled, uses localStorage service.
+ * Returns appropriate service based on backend status and authentication.
+ * When backend is enabled AND user is authenticated, uses API service and synchronizes with store.
+ * Otherwise, uses localStorage service.
  */
 export const gearContainerService = () => {
-  if (config.backend.enabled) {
-    // Wrap API service to sync store
+  const { shouldUseAPI } = useBackend()
+  
+  if (shouldUseAPI.value) {
+    // Wrap API service to sync store and localStorage as backup
     return {
       ...gearContainerApiService,
       async createContainer(data: Parameters<typeof gearContainerApiService.createContainer>[0]) {
-        const container = await gearContainerApiService.createContainer(data)
-        useGearStore().addContainer(container)
-        return container
+        try {
+          const container = await gearContainerApiService.createContainer(data)
+          const store = useGearStore()
+          store.addContainer(container)
+          // Also save to localStorage as backup
+          gearContainerLocalService.createContainer(data).catch(err => {
+            console.warn('Failed to save container to localStorage backup:', err)
+          })
+          return container
+        } catch (error) {
+          // Fallback to localStorage on API error
+          console.warn('API failed, falling back to localStorage', error)
+          return gearContainerLocalService.createContainer(data)
+        }
       },
       async updateContainer(id: Parameters<typeof gearContainerApiService.updateContainer>[0], data: Parameters<typeof gearContainerApiService.updateContainer>[1]) {
-        const container = await gearContainerApiService.updateContainer(id, data)
-        useGearStore().updateContainer(container)
-        return container
+        try {
+          const container = await gearContainerApiService.updateContainer(id, data)
+          const store = useGearStore()
+          store.updateContainer(container)
+          // Also save to localStorage as backup
+          gearContainerLocalService.updateContainer(id, data).catch(err => {
+            console.warn('Failed to save container to localStorage backup:', err)
+          })
+          return container
+        } catch (error) {
+          // Fallback to localStorage on API error
+          console.warn('API failed, falling back to localStorage', error)
+          return gearContainerLocalService.updateContainer(id, data)
+        }
       },
       async deleteContainer(id: Parameters<typeof gearContainerApiService.deleteContainer>[0]) {
-        await gearContainerApiService.deleteContainer(id)
-        useGearStore().removeContainer(id)
+        try {
+          await gearContainerApiService.deleteContainer(id)
+          useGearStore().removeContainer(id)
+          // Also remove from localStorage
+          gearContainerLocalService.deleteContainer(id).catch(err => {
+            console.warn('Failed to remove container from localStorage backup:', err)
+          })
+        } catch (error) {
+          // Fallback to localStorage on API error
+          console.warn('API failed, falling back to localStorage', error)
+          await gearContainerLocalService.deleteContainer(id)
+        }
       },
       async getContainers(skip = 0, limit = 100) {
-        const containers = await gearContainerApiService.getContainers(skip, limit)
-        useGearStore().setContainers(containers)
-        return containers
+        try {
+          const containers = await gearContainerApiService.getContainers(skip, limit)
+          useGearStore().setContainers(containers)
+          return containers
+        } catch (error) {
+          // Fallback to localStorage on API error
+          console.warn('API failed, falling back to localStorage', error)
+          return gearContainerLocalService.getContainers(skip, limit)
+        }
       },
       async getContainer(id: Parameters<typeof gearContainerApiService.getContainer>[0]) {
-        const container = await gearContainerApiService.getContainer(id)
-        const store = useGearStore()
-        const existing = store.getContainerById(id)
-        if (existing) {
-          store.updateContainer(container)
-        } else {
-          store.addContainer(container)
+        try {
+          const container = await gearContainerApiService.getContainer(id)
+          const store = useGearStore()
+          const existing = store.getContainerById(id)
+          if (existing) {
+            store.updateContainer(container)
+          } else {
+            store.addContainer(container)
+          }
+          return container
+        } catch (error) {
+          // Fallback to localStorage on API error
+          console.warn('API failed, falling back to localStorage', error)
+          return gearContainerLocalService.getContainer(id)
         }
-        return container
       },
       // Delegate statistics methods
       getContainerWeight: gearContainerApiService.getContainerWeight.bind(gearContainerApiService),
