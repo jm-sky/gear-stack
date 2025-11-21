@@ -102,6 +102,22 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 - Obecny kolor "dark orange" jest zadowalający, zadanie wstrzymane
 - **Uwaga:** Warianty kolorów są już przygotowane w `src/css/style.css` jako zakomentowany kod (na wypadek potrzeby zmiany w przyszłości)
 
+### Zintegrowany input wagi z wyborem jednostki
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+
+- Utworzenie komponentu `<WeightInputWithUnitPicker>` łączącego input wagi z wyborem jednostki w jednym elemencie UI
+- Komponent powinien łączyć:
+  - Input numeryczny dla wagi
+  - Select/dropdown dla jednostki wagi (g, kg, oz, lb)
+- Użycie w formularzach:
+  - `ItemFormFields.vue` - pole wagi przedmiotu
+  - `ContainerFormFields.vue` - pola wagi kontenera (weight, maxWeight)
+- Korzyści:
+  - Lepszy UX - wszystko w jednym miejscu
+  - Spójny wygląd we wszystkich formularzach
+  - Łatwiejsze zarządzanie stanem (jedna kompozycja zamiast dwóch osobnych pól)
+- Obsługa wszystkich jednostek: g, kg, oz, lb
+
 ---
 
 ## 🔗 Relacje i Nesting
@@ -493,13 +509,14 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 3. **Edycja bezpośrednio na liście** - High priority, Large complexity
 
 ### Medium Priority
-1. **Kopiowanie/klonowanie kontenerów** - Medium priority, Small complexity
+1. ✅ **Kopiowanie/klonowanie kontenerów** - Medium priority, Small complexity (Completed in v0.21.0)
 2. ✅ **Maksymalna waga kontenera (maxWeight)** - Medium priority, Medium complexity (Completed in v0.20.0)
-3. **Kolejność przedmiotów w kontenerze** - Medium priority, Medium complexity
-4. **Oznaczanie kontenerów jako fragmentów rodzica** - Medium priority, Medium complexity
-5. **Obsługa Markdown w notatkach** - Medium priority, Medium complexity
-6. ✅ **Rozszerzone pola** - Medium priority, Medium complexity (Completed in v0.8.0)
-7. ✅ **Rozpoznawanie parametrów przedmiotów na żądanie** - Medium priority, Medium complexity (Completed in v0.19.0)
+3. **Zintegrowany input wagi z wyborem jednostki** - Medium priority, Small complexity
+4. **Kolejność przedmiotów w kontenerze** - Medium priority, Medium complexity
+5. **Oznaczanie kontenerów jako fragmentów rodzica** - Medium priority, Medium complexity
+6. **Obsługa Markdown w notatkach** - Medium priority, Medium complexity
+7. ✅ **Rozszerzone pola** - Medium priority, Medium complexity (Completed in v0.8.0)
+8. ✅ **Rozpoznawanie parametrów przedmiotów na żądanie** - Medium priority, Medium complexity (Completed in v0.19.0)
 
 ### Low Priority (Polish/Enhancement)
 1. ⏸️ **Wybór primary color** - Low priority, Small complexity (On Hold - obecny kolor zadowalający)
