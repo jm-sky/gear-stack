@@ -1,18 +1,32 @@
 <script setup lang="ts">
 import { BackpackIcon, FileInput, Plus } from 'lucide-vue-next'
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useGear } from '@/modules/gear/composables/useGear'
+import { gearContainerService } from '@/modules/gear/services/gearContainerService'
 import { generateSampleSet } from '@/modules/gear/services/sampleSetGenerator'
 import { READINESS_EXCELLENT_THRESHOLD } from '@/modules/gear/utils/constants'
+import { config } from '@/shared/config/config'
 
 const router = useRouter()
 const { t } = useI18n()
 const { containers } = useGear()
+
+// Load containers from API on mount (when backend is enabled)
+onMounted(async () => {
+  if (config.backend.enabled) {
+    try {
+      await gearContainerService().getContainers()
+    } catch (error) {
+      console.error('Failed to load containers from API:', error)
+      // Fallback to localStorage is handled by store initialization
+    }
+  }
+})
 
 const handleGoToGear = () => {
   router.push('/gear')

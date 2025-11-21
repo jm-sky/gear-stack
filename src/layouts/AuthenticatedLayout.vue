@@ -61,7 +61,7 @@ const handleLogout = async () => {
     <header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div class="mx-auto flex h-14 max-w-screen-2xl items-center px-4">
         <div class="mr-4 flex items-center gap-2 md:mr-6">
-          <RouterLink to="/" class="flex items-center gap-2 hover:brightness-80 transition-all duration-300">
+          <RouterLink to="/home" class="flex items-center gap-2 hover:brightness-80 transition-all duration-300">
             <LogoText />
           </RouterLink>
           <nav v-if="navLinks.length > 0" class="hidden md:flex items-center gap-6 text-sm ml-6">

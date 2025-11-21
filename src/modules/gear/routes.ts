@@ -25,7 +25,7 @@ export const gearRoutes: RouteRecordRaw[] = [
     path: GearRoutePath.Containers,
     name: GearRouteName.Containers,
     component: () => import('@/modules/gear/pages/ContainersListPage.vue'),
-    meta: { layout: 'authenticated' },
+    meta: { layout: 'authenticated', requiresAuth: true },
   },
   {
     path: GearRoutePath.AllItems,

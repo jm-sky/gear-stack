@@ -7,6 +7,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import { config } from '@/shared/config/config'
 import type { IGearContainer } from '../types/gear.types'
 import ContainerCard from '../components/ContainerCard.vue'
 import ContainersFilters from '../components/ContainersFilters.vue'
@@ -15,6 +16,7 @@ import ExportToPromptDialog from '../components/ExportToPromptDialog.vue'
 import ImportMarkdownDialog from '../components/ImportMarkdownDialog.vue'
 import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
+import { gearContainerService } from '../services/gearContainerService'
 import { generateSampleSet } from '../services/sampleSetGenerator'
 import { getRootContainers as getRootContainersUtil } from '../utils/containerNesting'
 import type { TUUID } from '@/shared/types/base.type'
@@ -34,12 +36,22 @@ const showOnlyRootContainers = ref(false)
 const importDialogOpen = ref(false)
 const isExportToPromptDialogOpen = ref(false)
 
-// Check for import query parameter and open dialog
-onMounted(() => {
+// Check for import query parameter and open dialog, and load containers from API
+onMounted(async () => {
   if (route.query.import === 'true') {
     importDialogOpen.value = true
     // Remove query parameter from URL
     router.replace({ query: { ...route.query, import: undefined } })
+  }
+
+  // Load containers from API on mount (when backend is enabled)
+  if (config.backend.enabled) {
+    try {
+      await gearContainerService().getContainers()
+    } catch (error) {
+      console.error('Failed to load containers from API:', error)
+      // Fallback to localStorage is handled by store initialization
+    }
   }
 })
 

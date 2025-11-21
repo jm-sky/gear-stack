@@ -87,7 +87,7 @@ export async function authGuard(
   }
 
   if (requiresGuest && isAuthenticated) {
-    next({ name: AuthRouteNames.dashboard }); return
+    next({ name: 'home' }); return
   }
 
   // Allow navigation

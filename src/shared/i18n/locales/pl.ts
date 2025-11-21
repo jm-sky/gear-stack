@@ -195,4 +195,23 @@ export default {
       description: 'Staramy się odpowiadać na wszystkie wiadomości w ciągu 7 dni. Jeśli zgłaszasz problem techniczny, prosimy o dołączenie szczegółowych informacji o problemie.',
     },
   },
+  landing: {
+    title: 'Gear Stack',
+    subtitle: 'Organizuj i zarządzaj swoim sprzętem survivalowym i wyposażeniem bug-out bag',
+    feature1: {
+      title: 'Organizuj',
+      description: 'Śledź cały swój sprzęt w uporządkowanych kontenerach',
+    },
+    feature2: {
+      title: 'Śledź',
+      description: 'Monitoruj wagę, gotowość i daty ważności',
+    },
+    feature3: {
+      title: 'Przygotuj się',
+      description: 'Bądź gotowy na każdą sytuację z dobrze przygotowanym zestawem sprzętu',
+    },
+    login: 'Zaloguj się',
+    register: 'Zarejestruj się',
+    footer: 'Zacznij organizować swój sprzęt już dziś',
+  },
 }

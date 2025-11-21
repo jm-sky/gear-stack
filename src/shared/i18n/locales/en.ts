@@ -195,4 +195,23 @@ export default {
       description: 'We try to respond to all messages within 7 days. If you are reporting a technical issue, please include detailed information about the problem.',
     },
   },
+  landing: {
+    title: 'Gear Stack',
+    subtitle: 'Organize and manage your survival gear and bug-out bag equipment',
+    feature1: {
+      title: 'Organize',
+      description: 'Keep track of all your gear in organized containers',
+    },
+    feature2: {
+      title: 'Track',
+      description: 'Monitor weight, readiness, and expiration dates',
+    },
+    feature3: {
+      title: 'Prepare',
+      description: 'Be ready for any situation with a well-prepared gear stack',
+    },
+    login: 'Log In',
+    register: 'Sign Up',
+    footer: 'Start organizing your gear today',
+  },
 }

@@ -7,9 +7,15 @@ import type { RouteRecordRaw } from 'vue-router'
 export const routes: RouteRecordRaw[] = [
   {
     path: '/',
+    name: 'landing',
+    component: () => import('@/pages/LandingPage.vue'),
+    meta: { requiresGuest: true },
+  },
+  {
+    path: '/home',
     name: 'home',
     component: () => import('@/pages/HomePage.vue'),
-    meta: { layout: 'authenticated' },
+    meta: { layout: 'authenticated', requiresAuth: true },
   },
   {
     path: '/cookies',
