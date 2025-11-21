@@ -213,5 +213,9 @@ export default {
     login: 'Log In',
     register: 'Sign Up',
     footer: 'Start organizing your gear today',
+    localData: {
+      title: 'You have containers in your browser',
+      description: 'Log in or register to synchronize your data',
+    },
   },
 }

@@ -213,5 +213,9 @@ export default {
     login: 'Zaloguj się',
     register: 'Zarejestruj się',
     footer: 'Zacznij organizować swój sprzęt już dziś',
+    localData: {
+      title: 'Masz kontenery w przeglądarce',
+      description: 'Zaloguj się lub zarejestruj, aby zsynchronizować swoje dane',
+    },
   },
 }

@@ -1,17 +1,59 @@
 <script setup lang="ts">
 import { BackpackIcon, LogIn, Plus, UserPlus } from 'lucide-vue-next'
+import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import AppFooter from '@/components/layout/AppFooter.vue'
 import { Button } from '@/components/ui/button'
 import { AuthRouteNames } from '@/modules/auth/config/routes'
+import { useAuthStore } from '@/modules/auth/store/useAuthStore'
 import { GearRouteName } from '@/modules/gear/routes'
+import { hasLocalData } from '@/modules/gear/services/dataMigrationService'
+import { useGearStore } from '@/modules/gear/store/useGearStore'
+import { READINESS_EXCELLENT_THRESHOLD } from '@/modules/gear/utils/constants'
 import DarkModeToggle from '@/shared/components/DarkModeToggle.vue'
 import { config } from '@/shared/config/config'
 import LocaleToggle from '@/shared/i18n/components/LocaleToggle.vue'
 
 const router = useRouter()
 const { t } = useI18n()
+const authStore = useAuthStore()
+const gearStore = useGearStore()
+
+// Check if user is not logged in but has containers in localStorage
+const hasLocalContainers = computed(() => {
+  if (authStore.isAuthenticated) return false
+  return hasLocalData()
+})
+
+// Load containers from localStorage if not authenticated
+onMounted(() => {
+  if (!authStore.isAuthenticated) {
+    gearStore.loadFromStorage()
+  }
+})
+
+// Get containers for stats
+const localContainers = computed(() => {
+  if (!hasLocalContainers.value) return []
+  return gearStore.getAllContainers
+})
+
+// Calculate stats similar to HomePage
+const containersCount = computed(() => localContainers.value.length)
+
+const itemsCount = computed(() => {
+  return localContainers.value.reduce((sum, c) => sum + c.items.length, 0)
+})
+
+const readyContainersCount = computed(() => {
+  return localContainers.value.filter(c => {
+    const ownedItems = c.items.filter(i => i.status === 'owned').length
+    const totalItems = c.items.length
+    if (totalItems === 0) return false
+    return (ownedItems / totalItems) * 100 >= READINESS_EXCELLENT_THRESHOLD
+  }).length
+})
 
 const handleLogin = () => {
   router.push({ name: AuthRouteNames.login })
@@ -59,8 +101,67 @@ if (!config.backend.enabled) {
           </p>
         </div>
 
+        <!-- Local Containers Summary (shown when not logged in but has containers) -->
+        <div v-if="hasLocalContainers" class="space-y-6 py-8">
+          <div class="bg-card/50 backdrop-blur-sm rounded-lg border p-6 space-y-4">
+            <div class="text-center space-y-2">
+              <h2 class="text-2xl font-semibold">
+                {{ t('landing.localData.title', 'Masz kontenery w przeglądarce') }}
+              </h2>
+              <p class="text-muted-foreground">
+                {{ t('landing.localData.description', 'Zaloguj się lub zarejestruj, aby zsynchronizować swoje dane') }}
+              </p>
+            </div>
+
+            <!-- Container Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="bg-background rounded-lg border p-4 text-center">
+                <div class="text-3xl font-bold text-primary mb-2">
+                  {{ containersCount }}
+                </div>
+                <div class="text-muted-foreground text-sm">
+                  {{ t('gear.page.containers', 'Containers') }}
+                </div>
+              </div>
+              <div class="bg-background rounded-lg border p-4 text-center">
+                <div class="text-3xl font-bold text-primary mb-2">
+                  {{ itemsCount }}
+                </div>
+                <div class="text-muted-foreground text-sm">
+                  {{ t('gear.page.items', 'Items') }}
+                </div>
+              </div>
+              <div class="bg-background rounded-lg border p-4 text-center">
+                <div class="text-3xl font-bold text-primary mb-2">
+                  {{ readyContainersCount }}
+                </div>
+                <div class="text-muted-foreground text-sm">
+                  {{ t('gear.page.readyContainers', 'Ready Containers') }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Login/Register CTA -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+              <Button size="lg" class="w-full sm:w-auto" @click="handleLogin">
+                <LogIn class="size-5 mr-2" />
+                {{ t('landing.login', 'Log In') }}
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                class="w-full sm:w-auto"
+                @click="handleRegister"
+              >
+                <UserPlus class="size-5 mr-2" />
+                {{ t('landing.register', 'Sign Up') }}
+              </Button>
+            </div>
+          </div>
+        </div>
+
         <!-- Features -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 py-8">
+        <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-6 py-8">
           <div class="space-y-2">
             <h3 class="font-semibold text-lg">
               {{ t('landing.feature1.title', 'Organize') }}
@@ -87,8 +188,8 @@ if (!config.backend.enabled) {
           </div>
         </div>
 
-        <!-- CTA Buttons -->
-        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center pt-8">
+        <!-- CTA Buttons (shown when no local containers) -->
+        <div v-if="!hasLocalContainers" class="flex flex-col sm:flex-row gap-4 justify-center items-center pt-8">
           <Button size="lg" class="w-full sm:w-auto" @click="handleCreateContainer">
             <Plus class="size-5 mr-2" />
             {{ t('gear.container.create.title', 'Add Container') }}

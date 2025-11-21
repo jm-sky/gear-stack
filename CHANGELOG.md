@@ -21,6 +21,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.1] - 2025-01-27
+
+### Added
+- **Landing Page Local Data Detection**: Landing page now detects when user is not logged in but has containers stored in localStorage
+  - Shows container summary statistics (containers count, items count, ready containers count)
+  - Displays login/register call-to-action buttons prominently
+  - Encourages users to log in or register to synchronize their local data
+  - Summary section only appears when local containers exist and user is not authenticated
+
+### Changed
+- Landing page now conditionally shows features section or local data summary based on authentication and localStorage state
+- Improved user experience for users with local data who haven't logged in yet
+
+---
+
 ## [2.1.0] - 2025-01-27
 
 ### Release: Hybrid Mode & Offline-First Architecture
