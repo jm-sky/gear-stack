@@ -16,15 +16,25 @@ export interface IUserContainerType {
   updatedAt: string
 }
 
+export interface IUserBrand {
+  id: string
+  key: string // unique identifier (e.g., 'custom_brand_1')
+  label: string
+  createdAt: string
+  updatedAt: string
+}
+
 export interface IGearSettings {
   customCategories: IUserCategory[]
   customContainerTypes: IUserContainerType[]
+  customBrands: IUserBrand[]
   preferredWeightUnit?: TGearWeightUnit
 }
 
 export interface IUpdateGearSettingsDto {
   customCategories?: IUserCategory[]
   customContainerTypes?: IUserContainerType[]
+  customBrands?: IUserBrand[]
   preferredWeightUnit?: TGearWeightUnit
 }
 
@@ -44,5 +54,10 @@ export interface IGearSettingsService {
   addContainerType(settings: IGearSettings, containerType: IUserContainerType): Promise<IGearSettings>
   updateContainerType(settings: IGearSettings, containerType: IUserContainerType): Promise<IGearSettings>
   removeContainerType(settings: IGearSettings, containerTypeId: string): Promise<IGearSettings>
+
+  // Brand operations
+  addBrand(settings: IGearSettings, brand: IUserBrand): Promise<IGearSettings>
+  updateBrand(settings: IGearSettings, brand: IUserBrand): Promise<IGearSettings>
+  removeBrand(settings: IGearSettings, brandId: string): Promise<IGearSettings>
 }
 

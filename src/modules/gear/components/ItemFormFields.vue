@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import WeightInputWithUnitPicker from '@/components/ui/weight-input/WeightInputWithUnitPicker.vue'
 import type { IGearItem } from '../types/gear.types'
 import { useGearSettings } from '../composables/useGearSettings'
 import { getBrandOptions } from '../utils/suggestedValues'
@@ -33,7 +34,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const { customCategories } = useGearSettings()
+const { customCategories, customBrands } = useGearSettings()
 
 // Auto-focus na pierwszym polu
 const nameInputRef = ref<HTMLInputElement | undefined>(undefined)
@@ -199,47 +200,22 @@ const handleCancel = () => {
         </FormItem>
       </FormField>
 
-      <div class="grid grid-cols-[1fr_80px] sm:grid-cols-[1fr_auto] gap-2">
-        <FormField v-slot="{ componentField }" name="weight">
+      <FormField v-slot="{ value: weightValue, handleChange: handleWeightChange }" name="weight">
+        <FormField v-slot="{ value: unitValue, handleChange: handleUnitChange }" name="weightUnit">
           <FormItem>
             <FormLabel :label="$t('gear.item.weight')" required />
-            <Input
-              v-bind="componentField"
-              type="number"
+            <WeightInputWithUnitPicker
+              :model-value="weightValue"
+              :unit="unitValue || 'g'"
               :placeholder="$t('gear.item.weight')"
-              min="0"
-              step="0.01"
+              :required="true"
+              @update:model-value="handleWeightChange"
+              @update:unit="handleUnitChange"
             />
             <FormMessage />
           </FormItem>
         </FormField>
-
-        <FormField v-slot="{ value, handleChange }" name="weightUnit">
-          <FormItem>
-            <FormLabel :label="$t('gear.item.weightUnit')" />
-            <Select :model-value="value" @update:model-value="handleChange">
-              <SelectTrigger class="w-[80px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="g">
-                  {{ $t('gear.item.weightUnits.g') }}
-                </SelectItem>
-                <SelectItem value="kg">
-                  {{ $t('gear.item.weightUnits.kg') }}
-                </SelectItem>
-                <SelectItem value="oz">
-                  {{ $t('gear.item.weightUnits.oz') }}
-                </SelectItem>
-                <SelectItem value="lb">
-                  {{ $t('gear.item.weightUnits.lb') }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-      </div>
+      </FormField>
     </div>
 
     <!-- Priority and Status -->
@@ -348,7 +324,7 @@ const handleCancel = () => {
             <FormLabel :label="$t('gear.item.brand')" />
             <ComboBox
               :value="value"
-              :options="getBrandOptions()"
+              :options="getBrandOptions(customBrands.map(b => ({ key: b.key, label: b.label })))"
               :placeholder="''"
               :creatable="true"
               :create-label="$t('gear.comboBox.add')"

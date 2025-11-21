@@ -10,12 +10,16 @@ export interface IRecognizedParameters {
 
 /**
  * Recognize parameters (brand, color) from item name
- * Uses fuzzy matching against SUGGESTED_BRANDS and SUGGESTED_COLORS
+ * Uses fuzzy matching against SUGGESTED_BRANDS (and custom brands) and SUGGESTED_COLORS
  *
  * @param name - Item name to analyze
+ * @param customBrands - Optional array of custom user brands to include in matching
  * @returns Recognized parameters (brand and/or color)
  */
-export function recognizeParameters(name: string): IRecognizedParameters {
+export function recognizeParameters(
+  name: string,
+  customBrands?: Array<{ label: string }>
+): IRecognizedParameters {
   if (!name || name.trim().length === 0) {
     return {}
   }
@@ -23,9 +27,15 @@ export function recognizeParameters(name: string): IRecognizedParameters {
   const normalizedName = name.toLowerCase().trim()
   const result: IRecognizedParameters = {}
 
+  // Combine default and custom brands
+  const allBrands = [
+    ...SUGGESTED_BRANDS,
+    ...(customBrands?.map(b => b.label) ?? []),
+  ]
+
   // Match brand - check for brand names in the item name
   // Sort brands by length (longest first) to match longer names first
-  const brandsByLength = [...SUGGESTED_BRANDS].sort((a, b) => b.length - a.length)
+  const brandsByLength = [...allBrands].sort((a, b) => b.length - a.length)
 
   for (const brand of brandsByLength) {
     const normalizedBrand = brand.toLowerCase().trim()

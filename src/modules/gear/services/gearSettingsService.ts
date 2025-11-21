@@ -3,6 +3,7 @@ import type {
   IGearSettings,
   IGearSettingsService,
   IUpdateGearSettingsDto,
+  IUserBrand,
   IUserCategory,
   IUserContainerType,
 } from '../types/gearSettings.types'
@@ -53,9 +54,10 @@ class GearSettingsService implements IGearSettingsService {
       if (migrated) {
         settings = migrated
         // Save to new location
-        this.saveToStorage({
+        await this.saveToStorage({
           customCategories: migrated.customCategories ?? [],
           customContainerTypes: migrated.customContainerTypes ?? [],
+          customBrands: [],
         })
       }
     }
@@ -63,6 +65,8 @@ class GearSettingsService implements IGearSettingsService {
     return Promise.resolve({
       customCategories: settings.customCategories ?? [],
       customContainerTypes: settings.customContainerTypes ?? [],
+      customBrands: settings.customBrands ?? [],
+      preferredWeightUnit: settings.preferredWeightUnit,
     })
   }
 
@@ -74,6 +78,8 @@ class GearSettingsService implements IGearSettingsService {
       localStorage.setItem(GearSettingsService.STORAGE_KEY, JSON.stringify({
         customCategories: settings.customCategories,
         customContainerTypes: settings.customContainerTypes,
+        customBrands: settings.customBrands,
+        preferredWeightUnit: settings.preferredWeightUnit,
       }))
       return Promise.resolve()
     } catch (error) {
@@ -89,6 +95,8 @@ class GearSettingsService implements IGearSettingsService {
     const updated: IGearSettings = {
       customCategories: updates.customCategories ?? current.customCategories,
       customContainerTypes: updates.customContainerTypes ?? current.customContainerTypes,
+      customBrands: updates.customBrands ?? current.customBrands,
+      preferredWeightUnit: updates.preferredWeightUnit ?? current.preferredWeightUnit,
     }
 
     await this.saveToStorage(updated)
@@ -167,6 +175,42 @@ class GearSettingsService implements IGearSettingsService {
     return Promise.resolve(updated)
   }
 
+  /**
+   * Add a custom brand
+   */
+  async addBrand(settings: IGearSettings, brand: IUserBrand): Promise<IGearSettings> {
+    const updated = {
+      ...settings,
+      customBrands: [...settings.customBrands, brand],
+    }
+    await this.saveToStorage(updated)
+    return Promise.resolve(updated)
+  }
+
+  /**
+   * Update a custom brand
+   */
+  async updateBrand(settings: IGearSettings, brand: IUserBrand): Promise<IGearSettings> {
+    const updated = {
+      ...settings,
+      customBrands: settings.customBrands.map(b => b.id === brand.id ? brand : b),
+    }
+    await this.saveToStorage(updated)
+    return Promise.resolve(updated)
+  }
+
+  /**
+   * Remove a custom brand
+   */
+  async removeBrand(settings: IGearSettings, brandId: string): Promise<IGearSettings> {
+    const updated = {
+      ...settings,
+      customBrands: settings.customBrands.filter(b => b.id !== brandId),
+    }
+    await this.saveToStorage(updated)
+    return Promise.resolve(updated)
+  }
+
   // Static helper methods for backward compatibility
   // These methods create an instance and call the instance methods
   static async loadFromStorage(): Promise<IGearSettings> {
@@ -212,6 +256,21 @@ class GearSettingsService implements IGearSettingsService {
   static async removeContainerType(settings: IGearSettings, containerTypeId: string): Promise<IGearSettings> {
     const instance = new GearSettingsService()
     return instance.removeContainerType(settings, containerTypeId)
+  }
+
+  static async addBrand(settings: IGearSettings, brand: IUserBrand): Promise<IGearSettings> {
+    const instance = new GearSettingsService()
+    return instance.addBrand(settings, brand)
+  }
+
+  static async updateBrand(settings: IGearSettings, brand: IUserBrand): Promise<IGearSettings> {
+    const instance = new GearSettingsService()
+    return instance.updateBrand(settings, brand)
+  }
+
+  static async removeBrand(settings: IGearSettings, brandId: string): Promise<IGearSettings> {
+    const instance = new GearSettingsService()
+    return instance.removeBrand(settings, brandId)
   }
 }
 

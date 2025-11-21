@@ -66,6 +66,20 @@ export const settingsPl = {
       labelPlaceholder: 'Etykieta typu kontenera',
       empty: 'Brak własnych typów kontenerów. Dodaj pierwszy powyżej.',
     },
+    brands: {
+      title: 'Własne Marki',
+      description: 'Dodawaj i zarządzaj własnymi markami przedmiotów',
+      add: 'Dodaj Markę',
+      edit: 'Edytuj Markę',
+      save: 'Zapisz',
+      cancel: 'Anuluj',
+      deleteConfirm: 'Czy na pewno chcesz usunąć tę markę?',
+      key: 'Klucz',
+      keyPlaceholder: 'Klucz marki (np. custom_brand_1)',
+      label: 'Etykieta',
+      labelPlaceholder: 'Nazwa marki',
+      empty: 'Brak własnych marek. Dodaj pierwszą powyżej.',
+    },
   },
 }
 
