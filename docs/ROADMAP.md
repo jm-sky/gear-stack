@@ -342,8 +342,8 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 - Backup przed modyfikacją
 - Tworzenie podobnych zestawów (EDC #1, EDC #2)
 
-### Dodawanie istniejących przedmiotów do kontenera
-**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium
+### ✅ Dodawanie istniejących przedmiotów do kontenera
+**Status:** ✅ Completed | **Priority:** High | **Complexity:** Medium | **Completed in:** v0.22.0
 
 - Możliwość dodania istniejącego przedmiotu z innego kontenera bez ręcznego przepisywania
 - W ItemFormPage dodanie opcji wyboru:
@@ -505,7 +505,7 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 
 ### High Priority (Następne do zrobienia)
 1. ✅ **Strona z listą wszystkich przedmiotów** - High priority, Medium complexity (Completed in v0.10.0)
-2. **Dodawanie istniejących przedmiotów do kontenera** - High priority, Medium complexity
+2. ✅ **Dodawanie istniejących przedmiotów do kontenera** - High priority, Medium complexity (Completed in v0.22.0)
 3. **Edycja bezpośrednio na liście** - High priority, Large complexity
 
 ### Medium Priority

@@ -1,6 +1,6 @@
 # FEATURE-012: Add Existing Items to Container
 
-**Status:** 🔄 Planned  
+**Status:** ✅ Completed (v0.22.0)  
 **Priority:** High  
 **Category:** ⚡ Item Addition Improvements  
 **Related:** ROADMAP.md - Dodawanie istniejących przedmiotów do kontenera, ROADMAP_V2.md - Linkowanie przedmiotów

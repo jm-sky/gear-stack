@@ -59,6 +59,7 @@ export type TGearItemCategory =
 // Pojedynczy przedmiot
 export interface IGearItem {
   id: TUUID
+  linkedItemId?: TUUID // Reference to original item when linked (future-ready for backend)
   name: string
   category: TGearItemCategory
   quantity: number
@@ -139,6 +140,7 @@ export interface IUpdateContainerDto {
 
 // DTO dla tworzenia przedmiotu
 export interface ICreateItemDto {
+  linkedItemId?: TUUID // Reference to original item when linking
   name: string
   category: TGearItemCategory
   quantity: number

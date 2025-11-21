@@ -7,6 +7,7 @@ import type {
   IUpdateContainerDto,
   IUpdateItemDto,
 } from '../types/gear.types'
+import type { IItemWithContainer } from '../utils/allItemsColumns'
 import { gearService } from '../services/gearService'
 import { useGearStore } from '../store/useGearStore'
 import type { TUUID } from '@/shared/types/base.type'
@@ -122,6 +123,16 @@ export function useGear() {
     return gearService.cloneContainer(containerId, options)
   }
 
+  // ========== Item Catalog Operations ==========
+
+  const getAllItemsForCatalog = (excludeContainerId?: TUUID): IItemWithContainer[] => {
+    return gearService.getAllItemsForCatalog(excludeContainerId)
+  }
+
+  const getItemWithContainer = (itemId: TUUID): IItemWithContainer | undefined => {
+    return gearService.getItemWithContainer(itemId)
+  }
+
   return {
     // State
     containers,
@@ -157,6 +168,10 @@ export function useGear() {
 
     // Clone/Duplicate
     cloneContainer,
+
+    // Item Catalog
+    getAllItemsForCatalog,
+    getItemWithContainer,
   }
 }
 

@@ -7,9 +7,11 @@ import type {
   IUpdateItemDto,
   TGearItemStatus,
 } from '../types/gear.types'
+import type { IItemWithContainer } from '../utils/allItemsColumns'
 import { useGearStore } from '../store/useGearStore'
 import { getAllNestedContainers, getRootContainers, wouldCreateCircularReference } from '../utils/containerNesting'
 import { convertToGrams } from '../utils/formatWeight'
+import { getAllItems } from '../utils/getAllItems'
 import type { TUUID } from '@/shared/types/base.type'
 
 class GearService {
@@ -126,6 +128,7 @@ class GearService {
     const now = new Date().toISOString()
     const item: IGearItem = {
       id: crypto.randomUUID(),
+      linkedItemId: data.linkedItemId, // Reference to original item when linking
       name: data.name,
       category: data.category,
       quantity: data.quantity,
@@ -135,6 +138,13 @@ class GearService {
       expirationDate: data.expirationDate,
       priority: data.priority,
       status: data.status,
+      price: data.price,
+      url: data.url,
+      brand: data.brand,
+      color: data.color,
+      quality: data.quality,
+      wearable: data.wearable,
+      consumable: data.consumable,
       containerId: data.containerId && data.containerId.trim() !== '' ? data.containerId : undefined, // Reference to nested container
       createdAt: now,
       updatedAt: now,
@@ -535,6 +545,33 @@ class GearService {
 
     this.store.addContainer(clonedContainer)
     return clonedContainer
+  }
+
+  // ========== Item Catalog Operations ==========
+
+  /**
+   * Get all items from all containers for catalog/autocomplete
+   * Excludes items from specified container
+   * @param excludeContainerId - Container ID to exclude from results
+   * @returns Array of items with container information, sorted alphabetically by name
+   */
+  getAllItemsForCatalog(excludeContainerId?: TUUID): IItemWithContainer[] {
+    const containers = this.store.getAllContainers
+    const allItems = getAllItems(containers, excludeContainerId)
+    
+    // Sort alphabetically by name
+    return allItems.sort((a, b) => a.name.localeCompare(b.name))
+  }
+
+  /**
+   * Get item by ID with container information
+   * @param itemId - Item ID to find
+   * @returns Item with container information, or undefined if not found
+   */
+  getItemWithContainer(itemId: TUUID): IItemWithContainer | undefined {
+    const containers = this.store.getAllContainers
+    const allItems = getAllItems(containers)
+    return allItems.find(item => item.id === itemId)
   }
 }
 

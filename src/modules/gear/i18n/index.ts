@@ -158,6 +158,13 @@ export const gearEn = {
         missing: 'Missing',
         toBuy: 'To Buy',
       },
+      catalog: {
+        tabNew: 'New Item',
+        tabExisting: 'From Catalog',
+        selectItem: 'Select an item...',
+        searchItems: 'Search items...',
+        noItemsFound: 'No items found.',
+      },
       expiration: {
         expired: 'Expired',
         expiringSoon: 'Expiring Soon',
@@ -470,6 +477,13 @@ export const gearPl = {
         owned: 'Posiadane',
         missing: 'Brakuje',
         toBuy: 'Do kupienia',
+      },
+      catalog: {
+        tabNew: 'Nowy Przedmiot',
+        tabExisting: 'Z Katalogu',
+        selectItem: 'Wybierz przedmiot...',
+        searchItems: 'Szukaj przedmiotów...',
+        noItemsFound: 'Nie znaleziono przedmiotów.',
       },
       expiration: {
         expired: 'Przeterminowane',
