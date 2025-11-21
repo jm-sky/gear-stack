@@ -1,54 +1,76 @@
 import { defineStore } from 'pinia'
 import { computed, reactive } from 'vue'
 import type { IGearSettings, IUpdateGearSettingsDto, IUserCategory, IUserContainerType } from '../types/gearSettings.types'
-import { GearSettingsService } from '../services/gearSettingsService'
+import { gearSettingsService } from '../services/gearSettingsService'
+
+// Helper to load settings synchronously for initial state
+// This is a workaround for store initialization - in the future this should be async
+function loadSettingsSync(): IGearSettings {
+  const stored = localStorage.getItem('gear-stack:gear-settings')
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored)
+      return {
+        customCategories: parsed.customCategories ?? [],
+        customContainerTypes: parsed.customContainerTypes ?? [],
+        preferredWeightUnit: parsed.preferredWeightUnit,
+      }
+    } catch {
+      // Fall through to default
+    }
+  }
+  return {
+    customCategories: [],
+    customContainerTypes: [],
+  }
+}
 
 export const useGearSettingsStore = defineStore('gearSettings', () => {
-  const state = reactive<IGearSettings>(GearSettingsService.loadFromStorage())
+  const state = reactive<IGearSettings>(loadSettingsSync())
 
   const getAllCategories = computed<IUserCategory[]>(() => state.customCategories)
   const getAllContainerTypes = computed<IUserContainerType[]>(() => state.customContainerTypes)
 
   // Actions
-  function updateSettings(updates: IUpdateGearSettingsDto): void {
-    const updated = GearSettingsService.updateSettings(state, updates)
+  async function updateSettings(updates: IUpdateGearSettingsDto): Promise<void> {
+    const updated = await gearSettingsService.updateSettings(state, updates)
     state.customCategories = updated.customCategories
     state.customContainerTypes = updated.customContainerTypes
     state.preferredWeightUnit = updated.preferredWeightUnit
   }
 
-  function addCategory(category: IUserCategory): void {
-    const updated = GearSettingsService.addCategory(state, category)
+  async function addCategory(category: IUserCategory): Promise<void> {
+    const updated = await gearSettingsService.addCategory(state, category)
     state.customCategories = updated.customCategories
   }
 
-  function updateCategory(category: IUserCategory): void {
-    const updated = GearSettingsService.updateCategory(state, category)
+  async function updateCategory(category: IUserCategory): Promise<void> {
+    const updated = await gearSettingsService.updateCategory(state, category)
     state.customCategories = updated.customCategories
   }
 
-  function removeCategory(categoryId: string): void {
-    const updated = GearSettingsService.removeCategory(state, categoryId)
+  async function removeCategory(categoryId: string): Promise<void> {
+    const updated = await gearSettingsService.removeCategory(state, categoryId)
     state.customCategories = updated.customCategories
   }
 
-  function addContainerType(containerType: IUserContainerType): void {
-    const updated = GearSettingsService.addContainerType(state, containerType)
+  async function addContainerType(containerType: IUserContainerType): Promise<void> {
+    const updated = await gearSettingsService.addContainerType(state, containerType)
     state.customContainerTypes = updated.customContainerTypes
   }
 
-  function updateContainerType(containerType: IUserContainerType): void {
-    const updated = GearSettingsService.updateContainerType(state, containerType)
+  async function updateContainerType(containerType: IUserContainerType): Promise<void> {
+    const updated = await gearSettingsService.updateContainerType(state, containerType)
     state.customContainerTypes = updated.customContainerTypes
   }
 
-  function removeContainerType(containerTypeId: string): void {
-    const updated = GearSettingsService.removeContainerType(state, containerTypeId)
+  async function removeContainerType(containerTypeId: string): Promise<void> {
+    const updated = await gearSettingsService.removeContainerType(state, containerTypeId)
     state.customContainerTypes = updated.customContainerTypes
   }
 
-  function loadFromStorageAction(): void {
-    const loaded = GearSettingsService.loadFromStorage()
+  async function loadFromStorageAction(): Promise<void> {
+    const loaded = await gearSettingsService.loadFromStorage()
     state.customCategories = loaded.customCategories
     state.customContainerTypes = loaded.customContainerTypes
     state.preferredWeightUnit = loaded.preferredWeightUnit

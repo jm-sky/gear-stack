@@ -229,7 +229,14 @@ export interface IGearServiceExtended extends IGearService {
   getExpiredItems(containerId: TUUID): Promise<IGearItem[]>
   getExpiringSoonItems(containerId: TUUID, days?: number): Promise<IGearItem[]>
   moveItem(containerId: TUUID, itemId: TUUID, newContainerId: TUUID): Promise<void>
-
+  cloneContainer(
+    containerId: TUUID,
+    options: {
+      newName: string
+      includeNestedContainers?: boolean
+      includePrices?: boolean
+    },
+  ): Promise<IGearContainer>
   // Import/Export operations (localStorage-specific)
   exportData(): Promise<string>
   importData(json: string): Promise<void>

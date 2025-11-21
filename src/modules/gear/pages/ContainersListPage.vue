@@ -16,11 +16,12 @@ import ImportMarkdownDialog from '../components/ImportMarkdownDialog.vue'
 import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
 import { generateSampleSet } from '../services/sampleSetGenerator'
+import { getRootContainers as getRootContainersUtil } from '../utils/containerNesting'
 import type { TUUID } from '@/shared/types/base.type'
 
 const router = useRouter()
 const { t } = useI18n()
-const { containers, deleteContainer, getRootContainers } = useGear()
+const { containers, deleteContainer } = useGear()
 const { customContainerTypes } = useGearSettings()
 
 // Filters - using refs that will be bound to ContainersFilters via v-model
@@ -46,7 +47,7 @@ const filteredContainers = computed<IGearContainer[]>(() => {
   // First filter by root containers if enabled
   let baseContainers = containers.value
   if (showOnlyRootContainers.value) {
-    baseContainers = getRootContainers()
+    baseContainers = getRootContainersUtil(containers.value)
   } else {
     // Hide containers with hideWhenNested=true AND parentContainerId set
     baseContainers = baseContainers.filter(container => {
@@ -85,10 +86,10 @@ const handleImportComplete = () => {
   // Refresh is automatic via store reactivity
 }
 
-const handleDelete = (id: TUUID) => {
+const handleDelete = async (id: TUUID) => {
   if (confirm(t('gear.container.deleteConfirm'))) {
     try {
-      deleteContainer(id)
+      await deleteContainer(id)
       toast.success(t('common.success'))
     } catch {
       toast.error(t('common.error'))
@@ -105,9 +106,9 @@ const handleExportAllToPrompt = () => {
   isExportToPromptDialogOpen.value = true
 }
 
-const handleGenerateSampleSet = () => {
+const handleGenerateSampleSet = async () => {
   try {
-    generateSampleSet(t)
+    await generateSampleSet(t)
     toast.success(t('gear.sampleSet.success'))
   } catch (error) {
     console.error('Error generating sample set:', error)

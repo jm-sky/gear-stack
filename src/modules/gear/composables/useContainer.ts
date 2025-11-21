@@ -1,30 +1,36 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import type { IGearContainer, IUpdateContainerDto } from '../types/gear.types'
+import { useGearStore } from '../store/useGearStore'
+import {
+  calculateReadinessPercentageSync,
+  calculateTotalWeightSync,
+} from '../utils/containerCalculations'
 import { useGear } from './useGear'
 import type { TUUID } from '@/shared/types/base.type'
 
 export function useContainer(containerId?: TUUID) {
   const route = useRoute()
-  const { getContainerById, updateContainer, deleteContainer, calculateTotalWeight, calculateReadinessPercentage } = useGear()
+  const store = useGearStore()
+  const { updateContainer, deleteContainer } = useGear()
 
   // Pobierz ID z route jeśli nie podano
   const id = computed<TUUID>(() => containerId || (route.params.id as string))
 
-  // Container data
+  // Container data - use store directly for synchronous access in computed
   const container = computed<IGearContainer | undefined>(() => {
-    return getContainerById(id.value)
+    return store.getContainerById(id.value)
   })
 
-  // Computed properties
+  // Computed properties - use sync helpers for computed
   const totalWeight = computed<number>(() => {
     if (!container.value) return 0
-    return calculateTotalWeight(container.value.id)
+    return calculateTotalWeightSync(container.value, store.getAllContainers)
   })
 
   const readinessPercentage = computed<number>(() => {
     if (!container.value) return 0
-    return calculateReadinessPercentage(container.value.id)
+    return calculateReadinessPercentageSync(container.value)
   })
 
   const itemsCount = computed<number>(() => {
@@ -32,14 +38,14 @@ export function useContainer(containerId?: TUUID) {
   })
 
   // Actions
-  const update = (data: IUpdateContainerDto): IGearContainer | undefined => {
+  const update = async (data: IUpdateContainerDto): Promise<IGearContainer | undefined> => {
     if (!container.value) return undefined
-    return updateContainer(container.value.id, data)
+    return await updateContainer(container.value.id, data)
   }
 
-  const remove = (): void => {
+  const remove = async (): Promise<void> => {
     if (!container.value) return
-    deleteContainer(container.value.id)
+    await deleteContainer(container.value.id)
   }
 
   return {

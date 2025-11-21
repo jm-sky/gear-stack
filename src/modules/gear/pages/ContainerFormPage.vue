@@ -79,7 +79,7 @@ const onSubmit = handleSubmit(async (data: ContainerFormData) => {
       toast.success(t('common.success'))
       router.push(`/gear/${containerId}`)
     } else {
-      const newContainer = createContainer(data as ICreateContainerDto)
+      const newContainer = await createContainer(data as ICreateContainerDto)
       toast.success(t('common.success'))
       router.push(`/gear/${newContainer.id}`)
     }

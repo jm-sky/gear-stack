@@ -77,11 +77,11 @@ const handleNameBlur = () => {
 const onSubmit = handleSubmit(async (data: ICreateItemDto | IUpdateItemDto) => {
   try {
     if (isEditMode && itemId) {
-      updateItem(containerId, itemId, data as IUpdateItemDto)
+      await updateItem(itemId, data as IUpdateItemDto)
       toast.success(t('common.success'))
       router.push(`/gear/${containerId}`)
     } else {
-      createItem(containerId, data as ICreateItemDto)
+      await createItem(containerId, data as ICreateItemDto)
       toast.success(t('common.success'))
       router.push(`/gear/${containerId}`)
     }

@@ -18,6 +18,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import type { IGearContainer } from '../types/gear.types'
 import { useGear } from '../composables/useGear'
 import { markdownImportService } from '../services/markdownImportService'
+import { useGearStore } from '../store/useGearStore'
 import GuidelinesDialog from './GuidelinesDialog.vue'
 
 const props = defineProps<{
@@ -30,7 +31,8 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const { createContainer, updateContainer, createItem, updateItem, getContainerById } = useGear()
+const { createContainer, updateContainer, createItem, updateItem } = useGear()
+const store = useGearStore()
 
 const markdownContent = ref('')
 const importing = ref(false)
@@ -96,10 +98,10 @@ const handleImport = async () => {
 
       // Check if we should update existing container (has UUID and mode is update)
       if (importMode.value === 'update' && containerData.uuid) {
-        const existing = getContainerById(containerData.uuid)
+        const existing = store.getContainerById(containerData.uuid)
         if (existing) {
           // Update existing container
-          container = updateContainer(existing.id, {
+          container = await updateContainer(existing.id, {
             name: containerData.name,
             weight: containerData.weight,
             weightUnit: containerData.weightUnit,
@@ -109,7 +111,7 @@ const handleImport = async () => {
           updatedCount++
         } else {
           // UUID provided but container not found - create new with same UUID
-          container = createContainer({
+          container = await createContainer({
             name: containerData.name,
             type: 'other',
             description: t('gear.import.importedDescription'),
@@ -123,7 +125,7 @@ const handleImport = async () => {
         }
       } else {
         // Create new container
-        container = createContainer({
+        container = await createContainer({
           name: containerData.name,
           type: 'other',
           description: t('gear.import.importedDescription'),
@@ -168,16 +170,16 @@ const handleImport = async () => {
           const existingItem = container.items.find(i => i.id === itemUuid)
           if (existingItem) {
             // Update existing item
-            updateItem(container.id, existingItem.id, itemDto)
+            await updateItem(existingItem.id, itemDto)
             itemUpdatedCount++
           } else {
             // UUID provided but item not found - create new
-            createItem(container.id, itemDto)
+            await createItem(container.id, itemDto)
             itemCount++
           }
         } else {
           // Create new item
-          createItem(container.id, itemDto)
+          await createItem(container.id, itemDto)
           itemCount++
         }
       }
