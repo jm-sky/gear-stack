@@ -5,7 +5,8 @@
 // IMPORTANT: This file uses createI18nInstance() from @/shared/i18n
 // instead of duplicating the i18n configuration logic.
 
-// Import gear module messages
+// Import module messages
+import { authEn, authPl } from '@/modules/auth/i18n'
 import { gearEn, gearPl } from '@/modules/gear/i18n'
 import { settingsEn, settingsPl } from '@/modules/settings/i18n'
 import { userEn, userPl } from '@/modules/user/i18n'
@@ -19,8 +20,8 @@ import registryPl from '@/shared/i18n/locales/pl'
 // import appPl from './locales/pl'
 
 // Merge all messages together
-const en = { ...registryEn, ...gearEn, ...settingsEn, ...userEn }
-const pl = { ...registryPl, ...gearPl, ...settingsPl, ...userPl }
+const en = { ...registryEn, ...authEn, ...gearEn, ...settingsEn, ...userEn }
+const pl = { ...registryPl, ...authPl, ...gearPl, ...settingsPl, ...userPl }
 
 // If you have app-specific messages, merge them here:
 // const en = { ...registryEn, ...appEn }
