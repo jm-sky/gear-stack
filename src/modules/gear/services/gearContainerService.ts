@@ -64,6 +64,9 @@ export const gearContainerService = () => {
       exportData: gearContainerLocalService.exportData.bind(gearContainerLocalService),
       importData: gearContainerLocalService.importData.bind(gearContainerLocalService),
       cloneContainer: gearContainerLocalService.cloneContainer.bind(gearContainerLocalService),
+      // Item Catalog Operations
+      getAllItemsForCatalog: gearContainerLocalService.getAllItemsForCatalog.bind(gearContainerLocalService),
+      getItemWithContainer: gearContainerLocalService.getItemWithContainer.bind(gearContainerLocalService),
     }
   }
 

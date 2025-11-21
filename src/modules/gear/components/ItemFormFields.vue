@@ -23,6 +23,7 @@ import ColorAutocomplete from './ColorAutocomplete.vue'
 defineProps<{
   item?: IGearItem
   loading?: boolean
+  hideName?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -61,7 +62,11 @@ const handleCancel = () => {
 <template>
   <div class="space-y-6">
     <!-- Name -->
-    <FormField v-slot="{ componentField }" name="name">
+    <FormField
+      v-if="!hideName"
+      v-slot="{ componentField }"
+      name="name"
+    >
       <FormItem>
         <FormLabel :label="$t('gear.item.name')" required />
         <Input

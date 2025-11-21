@@ -5,9 +5,11 @@ import type {
   IUpdateContainerDto,
   TGearItemStatus,
 } from '../types/gear.types'
+import type { IItemWithContainer } from '../utils/allItemsColumns'
 import { useGearStore } from '../store/useGearStore'
 import { getAllNestedContainers, getRootContainers, wouldCreateCircularReference } from '../utils/containerNesting'
 import { convertToGrams } from '../utils/formatWeight'
+import { getAllItems } from '../utils/getAllItems'
 import type { TUUID } from '@/shared/types/base.type'
 
 /**
@@ -450,6 +452,33 @@ class GearContainerLocalService {
 
     this.store.addContainer(clonedContainer)
     return Promise.resolve(clonedContainer)
+  }
+
+  // ========== Item Catalog Operations ==========
+
+  /**
+   * Get all items from all containers for catalog/autocomplete
+   * Excludes items from specified container
+   * @param excludeContainerId - Container ID to exclude from results
+   * @returns Array of items with container information, sorted alphabetically by name
+   */
+  getAllItemsForCatalog(excludeContainerId?: TUUID): IItemWithContainer[] {
+    const containers = this.store.getAllContainers
+    const allItems = getAllItems(containers, excludeContainerId)
+    
+    // Sort alphabetically by name
+    return allItems.sort((a, b) => a.name.localeCompare(b.name))
+  }
+
+  /**
+   * Get item by ID with container information
+   * @param itemId - Item ID to find
+   * @returns Item with container information, or undefined if not found
+   */
+  getItemWithContainer(itemId: TUUID): IItemWithContainer | undefined {
+    const containers = this.store.getAllContainers
+    const allItems = getAllItems(containers)
+    return allItems.find(item => item.id === itemId)
   }
 }
 

@@ -21,6 +21,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.22.0] - 2025-01-21
+
+### Added
+- **Feature: Add Existing Items to Container** - Users can now add existing items from other containers to the current container using a catalog selector
+  - New tabs in ItemFormPage: "New Item" and "From Catalog"
+  - ItemCatalogSelector component with fuzzy search, category icons, and container badges
+  - Item linking support with `linkedItemId` field (future-ready for backend integration)
+  - Items already in current container are automatically excluded from catalog
+  - Form resets when switching between tabs
+  - Alphabetical sorting of catalog items
+  - Translations for catalog mode (PL/EN)
+
+### Changed
+- Extended `IGearItem` interface with `linkedItemId?: TUUID` field for item linking
+- Added `getAllItemsForCatalog()` and `getItemWithContainer()` methods to gear service
+- Extended `getAllItems()` utility to support filtering by container ID
+
+### Fixed
+- Fixed TypeScript type errors in ItemCatalogSelector component
+
+---
+
 ## [0.21.0] - 2025-01-21
 
 ### Added

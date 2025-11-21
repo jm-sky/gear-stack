@@ -29,6 +29,7 @@ class GearItemLocalService {
     const now = new Date().toISOString()
     const item: IGearItem = {
       id: crypto.randomUUID(),
+      linkedItemId: data.linkedItemId, // Reference to original item when linking
       name: data.name,
       category: data.category,
       quantity: data.quantity,
@@ -38,6 +39,13 @@ class GearItemLocalService {
       expirationDate: data.expirationDate,
       priority: data.priority,
       status: data.status,
+      price: data.price,
+      url: data.url,
+      brand: data.brand,
+      color: data.color,
+      quality: data.quality,
+      wearable: data.wearable,
+      consumable: data.consumable,
       containerId: data.containerId && data.containerId.trim() !== '' ? data.containerId : undefined,
       createdAt: now,
       updatedAt: now,
