@@ -315,6 +315,22 @@ export const gearEn = {
       tinder: 'Tinder / Char Cloth',
       lighter: 'Lighter',
     },
+    migration: {
+      title: 'Migrate Local Data?',
+      description: 'We found data stored locally. Would you like to migrate it to your account?',
+      benefits: {
+        title: 'Benefits of migration:',
+        sync: 'Sync across all your devices',
+        backup: 'Automatic cloud backup',
+        access: 'Access from anywhere',
+      },
+      note: 'Your local data will remain available even after migration. You can continue using the app offline.',
+      skip: 'Skip',
+      migrate: 'Migrate',
+      migrating: 'Migrating...',
+      success: 'Data migrated successfully!',
+      error: 'Failed to migrate data. Please try again.',
+    },
   },
 }
 
@@ -634,6 +650,22 @@ export const gearPl = {
       ferroRod: 'Krzesiwo magnezowe / Ferro Rod',
       tinder: 'Rozpałka / Char Cloth',
       lighter: 'Zapalniczka',
+    },
+    migration: {
+      title: 'Migrować dane lokalne?',
+      description: 'Znaleźliśmy dane przechowywane lokalnie. Czy chcesz je przenieść do swojego konta?',
+      benefits: {
+        title: 'Korzyści z migracji:',
+        sync: 'Synchronizacja na wszystkich urządzeniach',
+        backup: 'Automatyczna kopia zapasowa w chmurze',
+        access: 'Dostęp z dowolnego miejsca',
+      },
+      note: 'Twoje dane lokalne pozostaną dostępne nawet po migracji. Możesz nadal korzystać z aplikacji offline.',
+      skip: 'Pomiń',
+      migrate: 'Migruj',
+      migrating: 'Migrowanie...',
+      success: 'Dane zostały pomyślnie zmigrowane!',
+      error: 'Nie udało się zmigrować danych. Spróbuj ponownie.',
     },
   },
 }
