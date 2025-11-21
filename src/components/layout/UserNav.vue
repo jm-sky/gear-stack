@@ -1,14 +1,31 @@
 <script setup lang="ts">
 import { LogOut, User } from 'lucide-vue-next'
-import { computed } from 'vue'
+import { type Component, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+
+export interface Link {
+  to: string
+  label: string
+  icon?: Component
+}
 
 export interface UserNavProps {
   userName?: string
   userEmail?: string
+  navLinks?: Link[]
 }
 
 const { t } = useI18n()
+const router = useRouter()
 
 const props = defineProps<UserNavProps>()
 
@@ -35,65 +52,74 @@ const initials = computed(() => {
 const handleLogout = () => {
   emit('logout')
 }
+
+const navigateTo = (path: string) => {
+  router.push(path)
+}
 </script>
 
 <template>
-  <div class="relative group">
-    <!-- Avatar trigger -->
-    <button
-      type="button"
-      class="flex items-center justify-center size-9 rounded-full bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity"
-      aria-label="User menu"
-    >
-      {{ initials }}
-    </button>
+  <DropdownMenu>
+    <DropdownMenuTrigger as-child>
+      <button
+        type="button"
+        class="flex items-center justify-center size-9 rounded-full bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity"
+        aria-label="User menu"
+      >
+        {{ initials }}
+      </button>
+    </DropdownMenuTrigger>
 
-    <!-- Dropdown menu -->
-    <div class="absolute right-0 mt-2 w-64 bg-card border border-border rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+    <DropdownMenuContent class="w-64" align="end">
       <!-- User info -->
-      <div class="px-4 py-3 border-b border-border">
-        <p class="text-sm font-medium text-card-foreground">
-          {{ userName ?? 'N/A' }}
-        </p>
-        <p class="text-xs text-muted-foreground truncate">
-          {{ userEmail ?? '-' }}
-        </p>
-      </div>
+      <DropdownMenuLabel>
+        <div class="flex flex-col space-y-1">
+          <p class="text-sm font-medium leading-none">
+            {{ userName ?? 'N/A' }}
+          </p>
+          <p class="text-xs leading-none text-muted-foreground">
+            {{ userEmail ?? '-' }}
+          </p>
+        </div>
+      </DropdownMenuLabel>
 
-      <!-- Menu items -->
-      <div class="py-2">
-        <!-- Profile/Settings slot -->
-        <slot name="menu-items">
-          <RouterLink
-            to="/profile"
-            class="flex items-center gap-3 px-4 py-2 text-sm text-card-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+      <DropdownMenuSeparator />
+
+      <!-- Navigation Links (mobile only) -->
+      <template v-if="navLinks && navLinks.length > 0">
+        <div class="md:hidden">
+          <DropdownMenuItem
+            v-for="link in navLinks"
+            :key="link.to"
+            @click="navigateTo(link.to)"
           >
-            <User class="size-4" />
-            {{ t('user.profile.title', 'Profile') }}
-          </RouterLink>
+            <component :is="link.icon" v-if="link.icon" class="size-4 mr-2" />
+            {{ link.label }}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+        </div>
+      </template>
 
-          <RouterLink
-            to="/settings"
-            class="flex items-center gap-3 px-4 py-2 text-sm text-card-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-          >
-            <User class="size-4" />
-            {{ t('settings.page.title', 'Settings') }}
-          </RouterLink>
-        </slot>
+      <!-- Profile/Settings slot -->
+      <slot name="menu-items">
+        <DropdownMenuItem @click="navigateTo('/profile')">
+          <User class="size-4 mr-2" />
+          {{ t('user.profile.title', 'Profile') }}
+        </DropdownMenuItem>
 
-        <!-- Separator -->
-        <div class="border-t border-border my-2" />
+        <DropdownMenuItem @click="navigateTo('/settings')">
+          <User class="size-4 mr-2" />
+          {{ t('settings.page.title', 'Settings') }}
+        </DropdownMenuItem>
+      </slot>
 
-        <!-- Logout -->
-        <button
-          type="button"
-          class="flex items-center gap-3 px-4 py-2 text-sm text-card-foreground hover:bg-accent hover:text-accent-foreground transition-colors w-full text-left"
-          @click="handleLogout"
-        >
-          <LogOut class="size-4" />
-          {{ t('auth.logout', 'Logout') }}
-        </button>
-      </div>
-    </div>
-  </div>
+      <DropdownMenuSeparator />
+
+      <!-- Logout -->
+      <DropdownMenuItem @click="handleLogout">
+        <LogOut class="size-4 mr-2" />
+        {{ t('auth.logout', 'Logout') }}
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
 </template>

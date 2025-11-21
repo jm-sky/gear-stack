@@ -3,6 +3,8 @@ import { useFocus } from '@vueuse/core'
 import { nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import ComboBox from '@/components/ui/combo-box/ComboBox.vue'
 import { FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import {
@@ -12,20 +14,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useSettings } from '@/modules/settings/composables/useSettings'
+import WeightInputWithUnitPicker from '@/components/ui/weight-input/WeightInputWithUnitPicker.vue'
 import type { IGearItem } from '../types/gear.types'
+import { useGearSettings } from '../composables/useGearSettings'
+import { getBrandOptions } from '../utils/suggestedValues'
+import CategoryIcon from './CategoryIcon.vue'
+import ColorAutocomplete from './ColorAutocomplete.vue'
 
 defineProps<{
   item?: IGearItem
   loading?: boolean
+  hideName?: boolean
 }>()
 
 const emit = defineEmits<{
   cancel: []
+  nameBlur: []
+  recognizeParameters: []
 }>()
 
 const { t } = useI18n()
-const { customCategories } = useSettings()
+const { customCategories, customBrands } = useGearSettings()
 
 // Auto-focus na pierwszym polu
 const nameInputRef = ref<HTMLInputElement | undefined>(undefined)
@@ -54,13 +63,18 @@ const handleCancel = () => {
 <template>
   <div class="space-y-6">
     <!-- Name -->
-    <FormField v-slot="{ componentField }" name="name">
+    <FormField
+      v-if="!hideName"
+      v-slot="{ componentField }"
+      name="name"
+    >
       <FormItem>
         <FormLabel :label="$t('gear.item.name')" required />
         <Input
           ref="nameInputRef"
           v-bind="componentField"
           :placeholder="$t('gear.item.name')"
+          @blur="emit('nameBlur')"
         />
         <FormMessage />
       </FormItem>
@@ -71,43 +85,82 @@ const handleCancel = () => {
       <FormItem>
         <FormLabel :label="$t('gear.item.category')" required />
         <Select :model-value="value" @update:model-value="handleChange">
-          <SelectTrigger>
+          <SelectTrigger class="min-w-36">
             <SelectValue :placeholder="$t('gear.item.category')" />
           </SelectTrigger>
           <SelectContent>
             <!-- Default Categories -->
             <SelectItem value="water">
-              {{ $t('gear.item.categories.water') }}
+              <div class="flex items-center gap-2">
+                <CategoryIcon category="water" :size="16" />
+                <span>{{ $t('gear.item.categories.water') }}</span>
+              </div>
             </SelectItem>
             <SelectItem value="food">
-              {{ $t('gear.item.categories.food') }}
+              <div class="flex items-center gap-2">
+                <CategoryIcon category="food" :size="16" />
+                <span>{{ $t('gear.item.categories.food') }}</span>
+              </div>
             </SelectItem>
             <SelectItem value="shelter">
-              {{ $t('gear.item.categories.shelter') }}
+              <div class="flex items-center gap-2">
+                <CategoryIcon category="shelter" :size="16" />
+                <span>{{ $t('gear.item.categories.shelter') }}</span>
+              </div>
             </SelectItem>
             <SelectItem value="fire">
-              {{ $t('gear.item.categories.fire') }}
+              <div class="flex items-center gap-2">
+                <CategoryIcon category="fire" :size="16" />
+                <span>{{ $t('gear.item.categories.fire') }}</span>
+              </div>
             </SelectItem>
             <SelectItem value="firstAid">
-              {{ $t('gear.item.categories.firstAid') }}
+              <div class="flex items-center gap-2">
+                <CategoryIcon category="firstAid" :size="16" />
+                <span>{{ $t('gear.item.categories.firstAid') }}</span>
+              </div>
             </SelectItem>
             <SelectItem value="tools">
-              {{ $t('gear.item.categories.tools') }}
+              <div class="flex items-center gap-2">
+                <CategoryIcon category="tools" :size="16" />
+                <span>{{ $t('gear.item.categories.tools') }}</span>
+              </div>
             </SelectItem>
             <SelectItem value="navigation">
-              {{ $t('gear.item.categories.navigation') }}
+              <div class="flex items-center gap-2">
+                <CategoryIcon category="navigation" :size="16" />
+                <span>{{ $t('gear.item.categories.navigation') }}</span>
+              </div>
             </SelectItem>
             <SelectItem value="communication">
-              {{ $t('gear.item.categories.communication') }}
+              <div class="flex items-center gap-2">
+                <CategoryIcon category="communication" :size="16" />
+                <span>{{ $t('gear.item.categories.communication') }}</span>
+              </div>
             </SelectItem>
             <SelectItem value="clothing">
-              {{ $t('gear.item.categories.clothing') }}
+              <div class="flex items-center gap-2">
+                <CategoryIcon category="clothing" :size="16" />
+                <span>{{ $t('gear.item.categories.clothing') }}</span>
+              </div>
             </SelectItem>
             <SelectItem value="hygiene">
-              {{ $t('gear.item.categories.hygiene') }}
+              <div class="flex items-center gap-2">
+                <CategoryIcon category="hygiene" :size="16" />
+                <span>{{ $t('gear.item.categories.hygiene') }}</span>
+              </div>
+            </SelectItem>
+            <SelectItem value="light">
+              <div class="flex items-center gap-2">
+                <CategoryIcon category="light" :size="16" />
+                <span>{{ $t('gear.item.categories.light') }}</span>
+              </div>
             </SelectItem>
             <SelectItem value="other">
-              {{ $t('gear.item.categories.other') }}
+              <div class="flex items-center gap-2">
+                <CategoryIcon category="other" :size="16" />
+                <span>{{ $t('gear.item.categories.other') }}</span>
+              </div>
             </SelectItem>
 
             <!-- Custom Categories -->
@@ -120,7 +173,10 @@ const handleCancel = () => {
                 :key="category.id"
                 :value="category.key"
               >
-                {{ getCategoryLabel(category.key) }}
+                <div class="flex items-center gap-2">
+                  <CategoryIcon :category="category.key" :size="16" />
+                  <span>{{ getCategoryLabel(category.key) }}</span>
+                </div>
               </SelectItem>
             </template>
           </SelectContent>
@@ -144,41 +200,22 @@ const handleCancel = () => {
         </FormItem>
       </FormField>
 
-      <div class="grid grid-cols-[1fr_80px] sm:grid-cols-[1fr_auto] gap-2">
-        <FormField v-slot="{ componentField }" name="weight">
+      <FormField v-slot="{ value: weightValue, handleChange: handleWeightChange }" name="weight">
+        <FormField v-slot="{ value: unitValue, handleChange: handleUnitChange }" name="weightUnit">
           <FormItem>
             <FormLabel :label="$t('gear.item.weight')" required />
-            <Input
-              v-bind="componentField"
-              type="number"
+            <WeightInputWithUnitPicker
+              :model-value="weightValue"
+              :unit="unitValue || 'g'"
               :placeholder="$t('gear.item.weight')"
-              min="0"
-              step="0.01"
+              :required="true"
+              @update:model-value="handleWeightChange"
+              @update:unit="handleUnitChange"
             />
             <FormMessage />
           </FormItem>
         </FormField>
-
-        <FormField v-slot="{ value, handleChange }" name="weightUnit">
-          <FormItem>
-            <FormLabel :label="$t('gear.item.weightUnit')" />
-            <Select :model-value="value" @update:model-value="handleChange">
-              <SelectTrigger class="w-[80px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="g">
-                  {{ $t('gear.item.weightUnits.g') }}
-                </SelectItem>
-                <SelectItem value="kg">
-                  {{ $t('gear.item.weightUnits.kg') }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-      </div>
+      </FormField>
     </div>
 
     <!-- Priority and Status -->
@@ -187,7 +224,7 @@ const handleCancel = () => {
         <FormItem>
           <FormLabel :label="$t('gear.item.priority')" required />
           <Select :model-value="value" @update:model-value="handleChange">
-            <SelectTrigger>
+            <SelectTrigger class="min-w-36">
               <SelectValue :placeholder="$t('gear.item.priority')" />
             </SelectTrigger>
             <SelectContent>
@@ -213,7 +250,7 @@ const handleCancel = () => {
         <FormItem>
           <FormLabel :label="$t('gear.item.status')" required />
           <Select :model-value="value" @update:model-value="handleChange">
-            <SelectTrigger>
+            <SelectTrigger class="min-w-36">
               <SelectValue :placeholder="$t('gear.item.status')" />
             </SelectTrigger>
             <SelectContent>
@@ -260,14 +297,158 @@ const handleCancel = () => {
       </FormItem>
     </FormField>
 
+    <!-- Extended Fields Section -->
+    <div class="border-t pt-6 space-y-6">
+      <h3 class="text-lg font-semibold text-muted-foreground">
+        {{ $t('gear.item.extendedFields') }}
+      </h3>
+
+      <!-- Price and Brand -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <FormField v-slot="{ componentField }" name="price">
+          <FormItem>
+            <FormLabel :label="$t('gear.item.price')" />
+            <Input
+              v-bind="componentField"
+              type="number"
+              :placeholder="$t('gear.item.price')"
+              min="0"
+              step="0.01"
+            />
+            <FormMessage />
+          </FormItem>
+        </FormField>
+
+        <FormField v-slot="{ value, handleChange }" name="brand">
+          <FormItem>
+            <FormLabel :label="$t('gear.item.brand')" />
+            <ComboBox
+              :value="value"
+              :options="getBrandOptions(customBrands.map(b => ({ key: b.key, label: b.label })))"
+              :placeholder="''"
+              :creatable="true"
+              :create-label="$t('gear.comboBox.add')"
+              class="w-full"
+              @update:value="handleChange"
+            />
+            <FormMessage />
+          </FormItem>
+        </FormField>
+      </div>
+
+      <!-- URL -->
+      <FormField v-slot="{ componentField }" name="url">
+        <FormItem>
+          <FormLabel :label="$t('gear.item.url')" />
+          <Input
+            v-bind="componentField"
+            type="url"
+            :placeholder="$t('gear.item.url')"
+          />
+          <FormMessage />
+        </FormItem>
+      </FormField>
+
+      <!-- Color and Quality -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <FormField v-slot="{ value, handleChange }" name="color">
+          <FormItem>
+            <FormLabel :label="$t('gear.item.color')" />
+            <ColorAutocomplete
+              :value="value"
+              class="w-full"
+              @update:value="handleChange"
+            />
+            <FormMessage />
+          </FormItem>
+        </FormField>
+
+        <FormField v-slot="{ value, handleChange }" name="quality">
+          <FormItem>
+            <FormLabel :label="$t('gear.item.quality')" />
+            <Select :model-value="value" @update:model-value="handleChange">
+              <SelectTrigger class="w-full min-w-36">
+                <SelectValue :placeholder="$t('gear.item.quality')" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="low">
+                  {{ $t('gear.item.qualities.low') }}
+                </SelectItem>
+                <SelectItem value="medium">
+                  {{ $t('gear.item.qualities.medium') }}
+                </SelectItem>
+                <SelectItem value="high">
+                  {{ $t('gear.item.qualities.high') }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+      </div>
+
+      <!-- Wearable and Consumable -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <FormField v-slot="{ componentField, handleChange }" name="wearable">
+          <FormItem v-slot="{ id }" class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+            <div class="flex-1 space-y-1">
+              <FormLabel :label="$t('gear.item.wearable')" class="cursor-pointer" />
+              <p class="text-sm text-muted-foreground">
+                {{ $t('gear.item.wearableDescription') }}
+              </p>
+            </div>
+            <Checkbox
+              :id="id"
+              :model-value="componentField.modelValue"
+              @update:model-value="handleChange"
+            />
+            <FormMessage />
+          </FormItem>
+        </FormField>
+
+        <FormField v-slot="{ componentField, handleChange }" name="consumable">
+          <FormItem v-slot="{ id }" class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+            <div class="flex-1 space-y-1">
+              <FormLabel :label="$t('gear.item.consumable')" class="cursor-pointer" />
+              <p class="text-sm text-muted-foreground">
+                {{ $t('gear.item.consumableDescription') }}
+              </p>
+            </div>
+            <Checkbox
+              :id
+              :model-value="componentField.modelValue"
+              @update:model-value="handleChange"
+            />
+            <FormMessage />
+          </FormItem>
+        </FormField>
+      </div>
+    </div>
+
+    <div class="border-t my-4" />
+
     <!-- Actions -->
-    <div class="flex flex-col sm:flex-row justify-end gap-3">
-      <Button type="button" variant="outline" @click="handleCancel">
-        {{ $t('gear.actions.cancel') }}
+    <div class="flex flex-col sm:flex-row justify-between gap-3">
+      <Button
+        type="button"
+        variant="outline"
+        @click="$emit('recognizeParameters')"
+      >
+        {{ $t('gear.actions.recognizeParameters') }}
       </Button>
-      <Button type="submit" :loading>
-        {{ $t('gear.actions.save') }}
-      </Button>
+      <div class="flex gap-3">
+        <Button
+          type="button"
+          variant="outline"
+          class="flex-1"
+          @click="handleCancel"
+        >
+          {{ $t('gear.actions.cancel') }}
+        </Button>
+        <Button type="submit" class="flex-1" :loading>
+          {{ $t('gear.actions.save') }}
+        </Button>
+      </div>
     </div>
   </div>
 </template>

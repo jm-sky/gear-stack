@@ -29,13 +29,14 @@ export default {
     back: 'Wstecz',
     done: 'Gotowe',
     never: 'Nigdy',
+    or: 'lub',
     copyToClipboard: {
       success: 'Skopiowano do schowka',
       copied: 'Skopiowano',
       copy: 'Skopiuj',
     },
     pagination: {
-      totalRows: 'Łącznie {total} wierszy.',
+      totalRows: 'Łącznie {total} wierszy',
       rowsPerPage: 'Wierszy na stronę',
       page: 'Strona',
       of: 'z',
@@ -78,6 +79,73 @@ export default {
   settings: {
     page: {
       title: 'Ustawienia',
+    },
+  },
+  footer: {
+    cookies: 'Informacja o ciasteczkach',
+    privacy: 'Polityka prywatności',
+    contact: 'Kontakt',
+    github: 'GitHub',
+  },
+  cookies: {
+    title: 'Informacja o ciasteczkach',
+    subtitle: 'Informacje o wykorzystaniu danych w aplikacji',
+    localStorage: {
+      title: 'LocalStorage',
+      description: 'Aplikacja Gear Stack wykorzystuje localStorage przeglądarki do przechowywania danych użytkownika. Wszystkie dane są przechowywane lokalnie na Twoim urządzeniu i nie są przesyłane na żadne zewnętrzne serwery.',
+    },
+    whatWeStore: {
+      title: 'Co przechowujemy',
+      items: 'Dane kontenerów i przedmiotów (nazwy, opisy, wagi, statusy)',
+      profile: 'Dane profilu użytkownika (nazwa, email)',
+      settings: 'Ustawienia aplikacji (język, preferencje)',
+    },
+    privacy: {
+      title: 'Prywatność',
+      description: 'Wszystkie dane są przechowywane wyłącznie w Twojej przeglądarce. Nie zbieramy, nie przetwarzamy ani nie udostępniamy Twoich danych osobom trzecim. Aplikacja działa w pełni po stronie klienta (client-side).',
+    },
+    future: {
+      title: 'Przyszłość',
+      description: 'W przyszłości aplikacja może wykorzystywać cookies do dodatkowych funkcji (np. synchronizacja między urządzeniami). W takim przypadku ta strona zostanie zaktualizowana o szczegółowe informacje.',
+    },
+    rodo: {
+      title: 'RODO',
+      description: 'Zgodnie z Rozporządzeniem Ogólnym o Ochronie Danych (RODO), informujemy, że aplikacja nie przetwarza danych osobowych w sposób wymagający zgody użytkownika, ponieważ wszystkie dane są przechowywane lokalnie na urządzeniu użytkownika.',
+    },
+  },
+  privacy: {
+    title: 'Polityka prywatności',
+    subtitle: 'Jak chronimy Twoje dane',
+    dataStorage: {
+      title: 'Przechowywanie danych',
+      description: 'Aplikacja Gear Stack przechowuje wszystkie dane lokalnie w przeglądarce użytkownika za pomocą localStorage. Dane nie są przesyłane na żadne zewnętrzne serwery ani do osób trzecich.',
+    },
+    dataAccess: {
+      title: 'Dostęp do danych',
+      description: 'Tylko Ty masz dostęp do swoich danych. Aplikacja nie wymaga rejestracji ani logowania, więc nie ma możliwości, aby ktokolwiek inny uzyskał dostęp do Twoich danych.',
+    },
+    dataDeletion: {
+      title: 'Usuwanie danych',
+      description: 'Możesz w każdej chwili usunąć wszystkie dane z aplikacji poprzez wyczyszczenie localStorage w ustawieniach przeglądarki lub użycie funkcji eksportu/usuwania danych w aplikacji.',
+    },
+    changes: {
+      title: 'Zmiany w polityce',
+      description: 'W przypadku wprowadzenia zmian w sposobie przetwarzania danych, ta strona zostanie zaktualizowana, a użytkownicy zostaną poinformowani o istotnych zmianach.',
+    },
+  },
+  contact: {
+    title: 'Kontakt',
+    subtitle: 'Skontaktuj się z nami',
+    info: {
+      title: 'Informacje kontaktowe',
+      description: 'Jeśli masz pytania, sugestie lub chcesz zgłosić problem, skontaktuj się z nami:',
+    },
+    email: {
+      label: 'Email',
+    },
+    support: {
+      title: 'Wsparcie',
+      description: 'Staramy się odpowiadać na wszystkie wiadomości w ciągu 7 dni. Jeśli zgłaszasz problem techniczny, prosimy o dołączenie szczegółowych informacji o problemie.',
     },
   },
 }

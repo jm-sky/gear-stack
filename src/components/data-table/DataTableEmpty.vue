@@ -1,7 +1,6 @@
 <script setup lang="ts" generic="TData, TValue">
-import { FileText, Plus } from 'lucide-vue-next'
-import { Button } from '@/components/ui/button'
-import { TableEmpty } from '@/components/ui/table'
+import { FileText } from 'lucide-vue-next'
+import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
 import type { Table } from '@tanstack/vue-table'
 
 interface Props {
@@ -26,21 +25,13 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <TableEmpty :colspan="columns.length">
-    <div class="flex flex-col items-center justify-center py-12">
-      <div class="w-16 h-16 mb-4 rounded-full bg-muted flex items-center justify-center">
-        <FileText class="w-8 h-8 text-muted-foreground" />
-      </div>
-      <h3 class="text-lg font-semibold mb-2">
-        {{ title }}
-      </h3>
-      <p class="text-muted-foreground text-center mb-4">
-        {{ description }}
-      </p>
-      <Button v-if="showAction" @click="emit('action')">
-        <Plus class="size-4" />
-        {{ actionText }}
-      </Button>
-    </div>
-  </TableEmpty>
+  <TableEmptyDecorated
+    :colspan="columns.length"
+    :icon="FileText"
+    :title="title"
+    :description="description"
+    :show-action="showAction"
+    :action-text="actionText"
+    @action="emit('action')"
+  />
 </template>

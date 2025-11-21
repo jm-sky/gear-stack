@@ -54,6 +54,28 @@
   --popover-foreground: oklch(0.145 0 0);
   --primary: oklch(0.646 0.222 41.116);
   --primary-foreground: oklch(0.985 0 0);
+
+  /* ============================================
+     PRIMARY COLOR VARIANTS - Odkomentuj wybrany wariant
+
+     INSTRUKCJA:
+     1. Zakomentuj obecny --primary (linia powyżej)
+     2. Odkomentuj wybrany wariant poniżej (--primary i --primary-foreground)
+     3. Odkomentuj ten sam wariant w sekcji .dark (poniżej)
+     4. Odkomentuj odpowiedni --chart-1 w obu sekcjach (:root i .dark)
+     5. Odkomentuj odpowiedni --sidebar-primary w obu sekcjach (:root i .dark)
+
+     Wszystkie warianty są oznaczone numerami (VARIANT 1, VARIANT 2, itd.)
+     ============================================ */
+
+  /* VARIANT 1: Coyote - Brązowo-szary, ziemisty, naturalny i profesjonalny */
+  /* --primary: oklch(0.55 0.08 65); */
+  /* --primary-foreground: oklch(0.985 0 0); */
+
+  /* VARIANT 2: Forest Green - Ciemny zielony lasu, naturalny i spokojny */
+  /* --primary: oklch(0.50 0.15 150); */
+  /* --primary-foreground: oklch(0.985 0 0); */
+
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -66,6 +88,9 @@
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.646 0.222 41.116);
+  /* Chart-1 variants (odkomentuj razem z primary): */
+  /* --chart-1: oklch(0.55 0.08 65); */ /* Coyote */
+  /* --chart-1: oklch(0.50 0.15 150); */ /* Forest Green */
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
@@ -73,6 +98,9 @@
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
+  /* Sidebar-primary variants (odkomentuj razem z primary): */
+  /* --sidebar-primary: oklch(0.55 0.08 65); */ /* Coyote */
+  /* --sidebar-primary: oklch(0.50 0.15 150); */ /* Forest Green */
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
@@ -89,6 +117,19 @@
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.646 0.222 41.116);
   --primary-foreground: oklch(0.205 0 0);
+
+  /* ============================================
+     PRIMARY COLOR VARIANTS (DARK MODE) - Odkomentuj ten sam wariant co w :root
+     ============================================ */
+
+  /* VARIANT 1: Coyote - Brązowo-szary, ziemisty, naturalny i profesjonalny */
+  /* --primary: oklch(0.60 0.08 65); */
+  /* --primary-foreground: oklch(0.205 0 0); */
+
+  /* VARIANT 2: Forest Green - Ciemny zielony lasu, naturalny i spokojny */
+  /* --primary: oklch(0.55 0.15 150); */
+  /* --primary-foreground: oklch(0.985 0 0); */
+
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
@@ -101,6 +142,8 @@
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
   --chart-1: oklch(0.488 0.243 264.376);
+  /* Chart-1 variants (dark mode, odkomentuj razem z primary): */
+  /* --chart-1: oklch(0.60 0.08 65); */ /* Coyote */
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
@@ -108,6 +151,9 @@
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
+  /* Sidebar-primary variants (dark mode, odkomentuj razem z primary): */
+  /* --sidebar-primary: oklch(0.60 0.08 65); */ /* Coyote */
+  /* --sidebar-primary: oklch(0.55 0.15 150); */ /* Forest Green */
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
@@ -119,7 +165,12 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html,
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground overflow-x-hidden;
+    max-width: 100vw;
+  }
+  #app {
+    @apply w-full max-w-full overflow-x-hidden;
   }
 }

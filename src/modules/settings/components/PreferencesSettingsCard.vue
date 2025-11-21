@@ -17,16 +17,18 @@ import {
 } from '@/components/ui/select'
 import { useDarkMode } from '@/shared/composables/useDarkMode'
 import { type SupportedLocale, useLocale } from '@/shared/i18n'
-import { useSettings } from '../composables/useSettings'
+import { useCoreSettings } from '../composables/useCoreSettings'
+import type { TGearWeightUnit } from '@/modules/gear/types/gear.types'
 
 const { t } = useI18n()
 const { currentLocale } = useLocale()
 const { isDark, toggle: toggleDarkMode } = useDarkMode()
-const { settings, updateSettings } = useSettings()
+const { settings, updateSettings } = useCoreSettings()
 
 const settingsSchema = z.object({
   darkMode: z.enum(['light', 'dark']),
   locale: z.enum(['en', 'pl']),
+  preferredWeightUnit: z.enum(['g', 'kg', 'oz', 'lb']),
 })
 
 const getThemeValue = (darkMode: boolean | undefined) => {
@@ -38,12 +40,17 @@ const { handleSubmit, setValues } = useForm({
   initialValues: {
     darkMode: getThemeValue(settings.value.darkMode),
     locale: settings.value.locale ?? currentLocale.value,
+    preferredWeightUnit: settings.value.preferredWeightUnit ?? 'g',
   },
 })
 
 watch(() => settings.value, (val) => {
   if (val) {
-    setValues({ darkMode: getThemeValue(val.darkMode), locale: val.locale })
+    setValues({
+      darkMode: getThemeValue(val.darkMode),
+      locale: val.locale,
+      preferredWeightUnit: val.preferredWeightUnit ?? 'g',
+    })
   }
 }, { immediate: true })
 
@@ -59,8 +66,9 @@ const onSubmit = handleSubmit(async (values) => {
   updateSettings({
     darkMode: values.darkMode === 'dark',
     locale: values.locale,
+    preferredWeightUnit: values.preferredWeightUnit as TGearWeightUnit,
   })
-  
+
   // Sync with composables
   if (isDark.value !== (values.darkMode === 'dark')) {
     toggleDarkMode()
@@ -82,7 +90,7 @@ const onSubmit = handleSubmit(async (values) => {
       </CardDescription>
     </CardHeader>
     <CardContent>
-      <form class="space-y-6" @submit="onSubmit">
+      <form class="space-y-2" @submit="onSubmit">
         <div class="grid gap-6 md:grid-cols-2">
           <!-- Theme -->
           <div class="space-y-3">
@@ -135,6 +143,42 @@ const onSubmit = handleSubmit(async (values) => {
                       </SelectItem>
                       <SelectItem value="pl">
                         {{ t('settings.preferences.locale.options.pl') }}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+          </div>
+
+          <!-- Preferred Weight Unit -->
+          <div class="space-y-3">
+            <FormField v-slot="{ componentField }" name="preferredWeightUnit">
+              <FormItem>
+                <FormLabel required>
+                  {{ t('settings.preferences.preferredWeightUnit.label') }}
+                </FormLabel>
+                <p class="text-sm text-muted-foreground">
+                  {{ t('settings.preferences.preferredWeightUnit.subtitle') }}
+                </p>
+                <FormControl>
+                  <Select v-bind="componentField">
+                    <SelectTrigger>
+                      <SelectValue :placeholder="t('settings.preferences.preferredWeightUnit.placeholder')" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="g">
+                        {{ t('settings.preferences.preferredWeightUnit.options.g') }}
+                      </SelectItem>
+                      <SelectItem value="kg">
+                        {{ t('settings.preferences.preferredWeightUnit.options.kg') }}
+                      </SelectItem>
+                      <SelectItem value="oz">
+                        {{ t('settings.preferences.preferredWeightUnit.options.oz') }}
+                      </SelectItem>
+                      <SelectItem value="lb">
+                        {{ t('settings.preferences.preferredWeightUnit.options.lb') }}
                       </SelectItem>
                     </SelectContent>
                   </Select>

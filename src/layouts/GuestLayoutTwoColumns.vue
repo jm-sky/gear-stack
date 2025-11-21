@@ -19,7 +19,7 @@ const layoutActionsComponent = route.meta.layoutActionsComponent
 <template>
   <div class="min-h-screen grid lg:grid-cols-2 bg-gray-50 dark:bg-gray-950">
     <!-- Left Column - Branding Panel (hidden on mobile) -->
-    <div class="hidden lg:flex relative bg-gradient-to-br from-primary/90 to-primary-foreground/90 dark:from-primary/80 dark:via-purple-900 dark:to-primary-foreground/80">
+    <div class="hidden lg:flex relative bg-linear-to-br from-primary/90 to-primary-foreground/90 dark:from-primary/80 dark:via-purple-900 dark:to-primary-foreground/80">
       <!-- Background image overlay -->
       <div
         v-if="backgroundImage"
@@ -37,17 +37,17 @@ const layoutActionsComponent = route.meta.layoutActionsComponent
 
           <!-- Title & Tagline -->
           <h1 class="text-3xl font-bold">
-            {{ brandingTitle || 'Welcome to Vue Blocks Registry' }}
+            {{ brandingTitle ?? 'Welcome to Vue Blocks Registry' }}
           </h1>
           <p class="text-lg opacity-90">
-            {{ brandingTagline || 'Build faster with reusable Vue components' }}
+            {{ brandingTagline ?? 'Build faster with reusable Vue components' }}
           </p>
 
           <!-- Marketing message -->
           <div class="flex flex-col items-center justify-center gap-3 pt-6">
             <Rocket class="size-8" />
             <p class="text-base">
-              {{ brandingMessage || 'Get started in minutes with our powerful component library' }}
+              {{ brandingMessage ?? 'Get started in minutes with our powerful component library' }}
             </p>
           </div>
         </div>

@@ -1,28 +1,36 @@
 <script setup lang="ts">
 // File operations handled via native input element
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import type { IGearItem } from '../types/gear.types'
+import AddNestedContainerDialog from '../components/AddNestedContainerDialog.vue'
+import CategoryPieChart from '../components/CategoryPieChart.vue'
 import ContainerHeader from '../components/ContainerHeader.vue'
+import ExportToPromptDialog from '../components/ExportToPromptDialog.vue'
 import ItemsTable from '../components/ItemsTable.vue'
 import { useContainer } from '../composables/useContainer'
 import { useGear } from '../composables/useGear'
+import { recognizeParameters, recognizeParametersForItems } from '../utils/parameterRecognition'
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 const { container } = useContainer()
-const { deleteItem, updateItem, exportData, importData } = useGear()
+const { deleteItem, updateItem, exportData, importData, createItem, getContainerById } = useGear()
 
 const containerId = route.params.id as string
+
+// Dialog state
+const isAddContainerDialogOpen = ref(false)
+const isExportToPromptDialogOpen = ref(false)
 
 // File operations handled in handleImport
 
 // Items
-const items = computed<IGearItem[]>(() => container.value?.items || [])
+const items = computed<IGearItem[]>(() => container.value?.items ?? [])
 
 // Actions
 const handleEditItem = (item: IGearItem) => {
@@ -30,13 +38,12 @@ const handleEditItem = (item: IGearItem) => {
 }
 
 const handleDeleteItem = (item: IGearItem) => {
-  if (confirm(t('gear.item.deleteConfirm'))) {
-    try {
-      deleteItem(containerId, item.id)
-      toast.success(t('common.success'))
-    } catch {
-      toast.error(t('common.error'))
-    }
+  if (!confirm(t('gear.item.deleteConfirm'))) return
+  try {
+    deleteItem(containerId, item.id)
+    toast.success(t('common.success'))
+  } catch {
+    toast.error(t('common.error'))
   }
 }
 
@@ -94,6 +101,111 @@ const handleImport = () => {
   input.click()
 }
 
+const handleAddContainer = () => {
+  isAddContainerDialogOpen.value = true
+}
+
+const handleAddNestedContainer = (nestedContainerId: string) => {
+  try {
+    const nestedContainer = getContainerById(nestedContainerId)
+    if (!nestedContainer) {
+      toast.error(t('common.error'))
+      return
+    }
+
+    // Create an item that references the nested container
+    // Use container name as item name
+    createItem(containerId, {
+      name: nestedContainer.name,
+      category: 'other',
+      quantity: 1,
+      weight: 0,
+      weightUnit: 'g',
+      priority: 'medium',
+      status: 'owned',
+      containerId: nestedContainerId,
+    })
+    toast.success(t('common.success'))
+  } catch (error) {
+    toast.error(t('common.error'))
+    console.error('Error adding nested container:', error)
+  }
+}
+
+const handleExportToPrompt = () => {
+  if (!container.value) return
+  isExportToPromptDialogOpen.value = true
+}
+
+const handleRecognizeParameters = async (item: IGearItem) => {
+  try {
+    const params = recognizeParameters(item.name)
+    
+    if (!params.brand && !params.color) {
+      toast.info(t('gear.actions.noParametersFound'))
+      return
+    }
+    
+    const updateData: Partial<IGearItem> = {}
+    if (params.brand && !item.brand) {
+      updateData.brand = params.brand
+    }
+    if (params.color && !item.color) {
+      updateData.color = params.color
+    }
+    
+    if (Object.keys(updateData).length > 0) {
+      updateItem(containerId, item.id, updateData)
+      toast.success(t('gear.actions.parametersRecognized'))
+    } else {
+      toast.info(t('gear.actions.noParametersFound'))
+    }
+  } catch (error) {
+    toast.error(t('common.error'))
+    console.error('Error recognizing parameters:', error)
+  }
+}
+
+const handleRecognizeParametersAll = async () => {
+  if (!container.value || !items.value || items.value.length === 0) return
+  
+  try {
+    toast.loading(t('gear.actions.recognizing'))
+    
+    const paramsMap = recognizeParametersForItems(items.value)
+    let updatedCount = 0
+    
+    for (const item of items.value) {
+      const params = paramsMap.get(item.id)
+      if (!params) continue
+      
+      const updateData: Partial<IGearItem> = {}
+      if (params.brand && !item.brand) {
+        updateData.brand = params.brand
+      }
+      if (params.color && !item.color) {
+        updateData.color = params.color
+      }
+      
+      if (Object.keys(updateData).length > 0) {
+        updateItem(containerId, item.id, updateData)
+        updatedCount++
+      }
+    }
+    
+    toast.dismiss()
+    if (updatedCount > 0) {
+      toast.success(t('gear.actions.parametersRecognized', { count: updatedCount }))
+    } else {
+      toast.info(t('gear.actions.noParametersFound'))
+    }
+  } catch (error) {
+    toast.dismiss()
+    toast.error(t('common.error'))
+    console.error('Error recognizing parameters:', error)
+  }
+}
+
 // Redirect if container not found
 if (!container.value) {
   router.push('/gear')
@@ -102,18 +214,40 @@ if (!container.value) {
 
 <template>
   <AuthenticatedLayout>
-    <div v-if="container" class="space-y-6">
-      <ContainerHeader :container="container" @export="handleExport" @import="handleImport" />
+    <div v-if="container" class="space-y-6 w-full max-w-full overflow-hidden">
+      <ContainerHeader
+        :container="container"
+        @export="handleExport"
+        @import="handleImport"
+        @add-container="handleAddContainer"
+        @export-to-prompt="handleExportToPrompt"
+        @recognize-parameters-all="handleRecognizeParametersAll"
+      />
 
       <!-- Items Table -->
-      <div class="bg-card rounded-lg border p-4 sm:p-6 overflow-x-auto">
-        <ItemsTable
-          :items="items"
-          @edit="handleEditItem"
-          @delete="handleDeleteItem"
-          @status-change="handleStatusChange"
-        />
-      </div>
+      <ItemsTable
+        :items="items"
+        @edit="handleEditItem"
+        @delete="handleDeleteItem"
+        @status-change="handleStatusChange"
+        @recognize-parameters="handleRecognizeParameters"
+      />
+
+      <!-- Category Pie Chart -->
+      <CategoryPieChart :container="container" />
+
+      <!-- Add Nested Container Dialog -->
+      <AddNestedContainerDialog
+        v-model:open="isAddContainerDialogOpen"
+        :current-container-id="containerId"
+        @confirm="handleAddNestedContainer"
+      />
+
+      <!-- Export to Prompt Dialog -->
+      <ExportToPromptDialog
+        v-model:open="isExportToPromptDialogOpen"
+        :container="container"
+      />
     </div>
   </AuthenticatedLayout>
 </template>

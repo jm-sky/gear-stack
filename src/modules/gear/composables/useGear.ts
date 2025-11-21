@@ -7,6 +7,7 @@ import type {
   IUpdateContainerDto,
   IUpdateItemDto,
 } from '../types/gear.types'
+import type { IItemWithContainer } from '../utils/allItemsColumns'
 import { gearService } from '../services/gearService'
 import { useGearStore } from '../store/useGearStore'
 import type { TUUID } from '@/shared/types/base.type'
@@ -31,8 +32,20 @@ export function useGear() {
     gearService.deleteContainer(id)
   }
 
+  const deleteAllContainers = (): void => {
+    gearService.deleteAllContainers()
+  }
+
   const getContainerById = (id: TUUID): IGearContainer | undefined => {
     return gearService.getContainerById(id)
+  }
+
+  const getRootContainers = (): IGearContainer[] => {
+    return gearService.getRootContainers()
+  }
+
+  const getNestedContainers = (containerId: TUUID): IGearContainer[] => {
+    return gearService.getNestedContainers(containerId)
   }
 
   // ========== Item Operations ==========
@@ -63,6 +76,14 @@ export function useGear() {
     return gearService.calculateReadinessPercentage(containerId)
   }
 
+  const calculateWeightLimitPercentage = (containerId: TUUID): number | null => {
+    return gearService.calculateWeightLimitPercentage(containerId)
+  }
+
+  const isWeightLimitExceeded = (containerId: TUUID): boolean => {
+    return gearService.isWeightLimitExceeded(containerId)
+  }
+
   const getItemsByStatus = (containerId: TUUID, status: 'owned' | 'missing' | 'toBuy') => {
     return gearService.getItemsByStatus(containerId, status)
   }
@@ -89,6 +110,29 @@ export function useGear() {
     gearService.importData(json)
   }
 
+  // ========== Clone/Duplicate ==========
+
+  const cloneContainer = (
+    containerId: TUUID,
+    options: {
+      newName: string
+      includeNestedContainers?: boolean
+      includePrices?: boolean
+    },
+  ): IGearContainer => {
+    return gearService.cloneContainer(containerId, options)
+  }
+
+  // ========== Item Catalog Operations ==========
+
+  const getAllItemsForCatalog = (excludeContainerId?: TUUID): IItemWithContainer[] => {
+    return gearService.getAllItemsForCatalog(excludeContainerId)
+  }
+
+  const getItemWithContainer = (itemId: TUUID): IItemWithContainer | undefined => {
+    return gearService.getItemWithContainer(itemId)
+  }
+
   return {
     // State
     containers,
@@ -97,7 +141,10 @@ export function useGear() {
     createContainer,
     updateContainer,
     deleteContainer,
+    deleteAllContainers,
     getContainerById,
+    getRootContainers,
+    getNestedContainers,
 
     // Item Actions
     createItem,
@@ -108,6 +155,8 @@ export function useGear() {
     // Business Logic
     calculateTotalWeight,
     calculateReadinessPercentage,
+    calculateWeightLimitPercentage,
+    isWeightLimitExceeded,
     getItemsByStatus,
     getExpiredItems,
     getExpiringSoonItems,
@@ -116,6 +165,13 @@ export function useGear() {
     // Import/Export
     exportData,
     importData,
+
+    // Clone/Duplicate
+    cloneContainer,
+
+    // Item Catalog
+    getAllItemsForCatalog,
+    getItemWithContainer,
   }
 }
 

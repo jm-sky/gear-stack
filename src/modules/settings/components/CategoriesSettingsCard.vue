@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { Edit, Plus, Trash2 } from 'lucide-vue-next'
+import { Edit, InfoIcon, Plus, Trash2 } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import type { IUserCategory } from '../types/settings.types'
-import { useSettings } from '../composables/useSettings'
+import { useGearSettings } from '@/modules/gear/composables/useGearSettings'
+import type { IUserCategory } from '@/modules/gear/types/gearSettings.types'
 
 const { t } = useI18n()
-const { customCategories, addCategory, updateCategory, removeCategory } = useSettings()
+const { customCategories, addCategory, updateCategory, removeCategory } = useGearSettings()
 
 const editingId = ref<string | null>(null)
 const newCategoryKey = ref('')
@@ -93,10 +93,12 @@ const handleDelete = (id: string) => {
             v-model="newCategoryKey"
             :placeholder="t('settings.categories.keyPlaceholder')"
             :disabled="!!editingId"
+            @keydown.enter="handleAdd"
           />
           <Input
             v-model="newCategoryLabel"
             :placeholder="t('settings.categories.labelPlaceholder')"
+            @keydown.enter="handleAdd"
           />
         </div>
         <div class="flex gap-2">
@@ -145,7 +147,7 @@ const handleDelete = (id: string) => {
               </div>
             </div>
           </div>
-          <div class="flex gap-2 sm:flex-shrink-0">
+          <div class="flex gap-2 sm:shrink-0">
             <Button
               size="sm"
               variant="outline"
@@ -163,7 +165,8 @@ const handleDelete = (id: string) => {
           </div>
         </div>
       </div>
-      <div v-else class="text-center py-8 text-muted-foreground">
+      <div v-else class="flex items-center justify-center gap-2 text-sm py-8 text-muted-foreground">
+        <InfoIcon class="size-4 inline" />
         {{ t('settings.categories.empty') }}
       </div>
     </CardContent>

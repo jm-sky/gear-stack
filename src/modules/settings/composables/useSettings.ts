@@ -8,6 +8,7 @@ export function useSettings() {
   const settings = computed(() => ({
     locale: store.locale,
     darkMode: store.darkMode,
+    preferredWeightUnit: store.preferredWeightUnit,
     customCategories: store.customCategories,
     customContainerTypes: store.customContainerTypes,
   }))

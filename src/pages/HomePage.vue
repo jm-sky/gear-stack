@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import { BackpackIcon, Plus } from 'lucide-vue-next'
+import { BackpackIcon, FileInput, Plus } from 'lucide-vue-next'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useGear } from '@/modules/gear/composables/useGear'
+import { generateSampleSet } from '@/modules/gear/services/sampleSetGenerator'
+import { READINESS_EXCELLENT_THRESHOLD } from '@/modules/gear/utils/constants'
 
 const router = useRouter()
 const { t } = useI18n()
@@ -17,6 +21,28 @@ const handleGoToGear = () => {
 const handleCreateContainer = () => {
   router.push('/gear/new')
 }
+
+const handleImport = () => {
+  router.push('/gear?import=true')
+}
+
+const handleGenerateSampleSet = () => {
+  try {
+    generateSampleSet(t)
+    toast.success(t('gear.sampleSet.success'))
+  } catch (error) {
+    console.error('Error generating sample set:', error)
+    toast.error(t('common.error'))
+  }
+}
+
+const readyContainersCount = computed(() => {
+  return containers.value.filter(c => {
+    const ownedItems = c.items.filter(i => i.status === 'owned').length
+    const totalItems = c.items.length
+    return ownedItems / totalItems * 100 >= READINESS_EXCELLENT_THRESHOLD
+  }).length
+})
 </script>
 
 <template>
@@ -26,7 +52,7 @@ const handleCreateContainer = () => {
       <div class="text-center space-y-4">
         <div class="flex justify-center">
           <div class="rounded-full bg-primary/10 p-6">
-            <BackpackIcon class="h-16 w-16 text-primary" />
+            <BackpackIcon class="size-16 text-primary" />
           </div>
         </div>
         <h1 class="text-4xl font-bold">
@@ -57,7 +83,7 @@ const handleCreateContainer = () => {
         </div>
         <div class="bg-card rounded-lg border p-6 text-center">
           <div class="text-3xl font-bold text-primary mb-2">
-            {{ containers.filter(c => c.items.some(i => i.status === 'owned')).length }}
+            {{ readyContainersCount }}
           </div>
           <div class="text-muted-foreground">
             {{ t('gear.page.readyContainers', 'Ready Containers') }}
@@ -67,14 +93,14 @@ const handleCreateContainer = () => {
 
       <!-- Actions -->
       <div class="flex flex-col items-center gap-4">
-        <div class="flex flex-col sm:flex-row gap-4">
+        <div v-if="containers.length > 0" class="flex flex-col sm:flex-row gap-4">
           <Button size="lg" @click="handleGoToGear">
             <BackpackIcon class="size-5" />
             {{ t('gear.page.viewContainers', 'View Containers') }}
           </Button>
           <Button size="lg" variant="outline" @click="handleCreateContainer">
             <Plus class="size-5" />
-            {{ t('gear.container.create', 'Create Container') }}
+            {{ t('gear.container.create.title', 'Create Container') }}
           </Button>
         </div>
 
@@ -83,10 +109,24 @@ const handleCreateContainer = () => {
           <p class="text-muted-foreground mb-6">
             {{ t('gear.page.emptyDescription', 'Get started by creating your first gear container.') }}
           </p>
-          <Button size="lg" @click="handleCreateContainer">
-            <Plus class="size-5" />
-            {{ t('gear.container.create', 'Create Container') }}
-          </Button>
+          <div class="flex flex-col gap-4 items-center justify-center">
+            <Button size="lg" @click="handleCreateContainer">
+              <Plus class="size-5" />
+              {{ t('gear.container.create.title', 'Create Container') }}
+            </Button>
+            <div class="flex items-center gap-2 text-muted-foreground">
+              <span>{{ t('common.or', 'or') }}</span>
+            </div>
+            <div class="flex flex-col md:flex-row gap-2 items-center justify-center">
+              <Button size="lg" variant="outline" @click="handleImport">
+                <FileInput class="size-5" />
+                {{ t('gear.import.fromMarkdown', 'Import from Markdown') }}
+              </Button>
+              <Button size="lg" variant="outline" @click="handleGenerateSampleSet">
+                {{ t('gear.sampleSet.generateButton', 'Generate Sample Set') }}
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// import { Badge } from '@/components/ui/badge' // TODO: Add badge component to registry
+import { Badge } from '@/components/ui/badge'
 
 defineProps<{
   title: string
@@ -15,12 +15,9 @@ defineProps<{
       <h1 class="text-2xl font-bold text-foreground">
         {{ title }}
       </h1>
-      <!-- <Badge v-if="count !== undefined" variant="secondary">
+      <Badge v-if="count !== undefined" variant="secondary">
         {{ count }}
-      </Badge> -->
-      <span v-if="count !== undefined" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground">
-        {{ count }}
-      </span>
+      </Badge>
     </div>
 
     <!-- Right section: Actions slot -->

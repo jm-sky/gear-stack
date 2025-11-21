@@ -4,6 +4,8 @@
 
 // Weight conversion
 export const GRAMS_PER_KILOGRAM = 1000
+export const GRAMS_PER_OUNCE = 28.3495
+export const GRAMS_PER_POUND = 453.592
 export const WEIGHT_DECIMAL_PLACES = 2
 
 // Readiness thresholds (percentages)

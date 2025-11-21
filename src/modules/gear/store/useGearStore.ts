@@ -71,7 +71,12 @@ export const useGearStore = defineStore('gear', {
       this.containers = this.containers.filter(c => c.id !== id)
       this.saveToStorage()
     },
-    
+
+    clearAllContainers(): void {
+      this.containers = []
+      this.saveToStorage()
+    },
+
     // Synchronizacja z localStorage
     loadFromStorage(): void {
       this.containers = loadFromStorage()

@@ -7,8 +7,11 @@ import type {
   IUpdateItemDto,
   TGearItemStatus,
 } from '../types/gear.types'
+import type { IItemWithContainer } from '../utils/allItemsColumns'
 import { useGearStore } from '../store/useGearStore'
+import { getAllNestedContainers, getRootContainers, wouldCreateCircularReference } from '../utils/containerNesting'
 import { convertToGrams } from '../utils/formatWeight'
+import { getAllItems } from '../utils/getAllItems'
 import type { TUUID } from '@/shared/types/base.type'
 
 class GearService {
@@ -19,12 +22,35 @@ class GearService {
   // ========== Containers CRUD ==========
 
   createContainer(data: ICreateContainerDto): IGearContainer {
+    // Validate parent relationship if provided
+    if (data.parentContainerId) {
+      const allContainers = this.store.getAllContainers
+      const newContainerId = crypto.randomUUID() // Generate ID before validation
+
+      if (wouldCreateCircularReference(newContainerId, data.parentContainerId, allContainers)) {
+        throw new Error('Cannot create container: would create circular reference')
+      }
+
+      // Verify parent exists
+      const parent = this.store.getContainerById(data.parentContainerId)
+      if (!parent) {
+        throw new Error(`Parent container with id ${data.parentContainerId} not found`)
+      }
+    }
+
     const now = new Date().toISOString()
     const container: IGearContainer = {
       id: crypto.randomUUID(),
       name: data.name,
       description: data.description,
       type: data.type,
+      color: data.color,
+      parentContainerId: data.parentContainerId,
+      brand: data.brand,
+      price: data.price,
+      weight: data.weight,
+      weightUnit: data.weightUnit,
+      url: data.url,
       items: [],
       createdAt: now,
       updatedAt: now,
@@ -38,6 +64,23 @@ class GearService {
     const container = this.store.getContainerById(id)
     if (!container) {
       throw new Error(`Container with id ${id} not found`)
+    }
+
+    // Validate parent relationship change if provided
+    if (data.parentContainerId !== undefined) {
+      const allContainers = this.store.getAllContainers
+
+      if (data.parentContainerId) {
+        if (wouldCreateCircularReference(id, data.parentContainerId, allContainers)) {
+          throw new Error('Cannot update container: would create circular reference')
+        }
+
+        // Verify parent exists
+        const parent = this.store.getContainerById(data.parentContainerId)
+        if (!parent) {
+          throw new Error(`Parent container with id ${data.parentContainerId} not found`)
+        }
+      }
     }
 
     const updated: IGearContainer = {
@@ -54,12 +97,24 @@ class GearService {
     this.store.removeContainer(id)
   }
 
+  deleteAllContainers(): void {
+    this.store.clearAllContainers()
+  }
+
   getContainerById(id: TUUID): IGearContainer | undefined {
     return this.store.getContainerById(id)
   }
 
   getAllContainers(): IGearContainer[] {
     return this.store.getAllContainers
+  }
+
+  getRootContainers(): IGearContainer[] {
+    return getRootContainers(this.store.getAllContainers)
+  }
+
+  getNestedContainers(containerId: TUUID): IGearContainer[] {
+    return getAllNestedContainers(containerId, this.store.getAllContainers)
   }
 
   // ========== Items CRUD ==========
@@ -73,6 +128,7 @@ class GearService {
     const now = new Date().toISOString()
     const item: IGearItem = {
       id: crypto.randomUUID(),
+      linkedItemId: data.linkedItemId, // Reference to original item when linking
       name: data.name,
       category: data.category,
       quantity: data.quantity,
@@ -82,6 +138,14 @@ class GearService {
       expirationDate: data.expirationDate,
       priority: data.priority,
       status: data.status,
+      price: data.price,
+      url: data.url,
+      brand: data.brand,
+      color: data.color,
+      quality: data.quality,
+      wearable: data.wearable,
+      consumable: data.consumable,
+      containerId: data.containerId && data.containerId.trim() !== '' ? data.containerId : undefined, // Reference to nested container
       createdAt: now,
       updatedAt: now,
     }
@@ -123,6 +187,12 @@ class GearService {
       expirationDate: data.expirationDate ?? existingItem.expirationDate,
       priority: data.priority ?? existingItem.priority,
       status: data.status ?? existingItem.status,
+      price: data.price ?? existingItem.price,
+      url: data.url ?? existingItem.url,
+      brand: data.brand ?? existingItem.brand,
+      color: data.color ?? existingItem.color,
+      quality: data.quality ?? existingItem.quality,
+      containerId: data.containerId !== undefined && data.containerId !== null && data.containerId.trim() !== '' ? data.containerId : (data.containerId === '' ? undefined : existingItem.containerId),
       createdAt: existingItem.createdAt,
       updatedAt: new Date().toISOString(),
     }
@@ -173,10 +243,26 @@ class GearService {
       return 0
     }
 
-    return container.items.reduce((total, item) => {
+    // Start with container's own weight (if defined)
+    let totalWeight = 0
+    if (container.weight !== undefined && container.weightUnit) {
+      totalWeight = convertToGrams(container.weight, container.weightUnit)
+    }
+
+    // Add weight of direct items
+    totalWeight += container.items.reduce((total, item) => {
+      // If item is a nested container, calculate its total weight recursively
+      if (item.containerId) {
+        const nestedContainerWeight = this.calculateTotalWeight(item.containerId)
+        return total + nestedContainerWeight * item.quantity
+      }
+
+      // Regular item weight
       const weightInGrams = convertToGrams(item.weight, item.weightUnit ?? 'g')
       return total + weightInGrams * item.quantity
     }, 0)
+
+    return totalWeight
   }
 
   calculateReadinessPercentage(containerId: TUUID): number {
@@ -187,6 +273,27 @@ class GearService {
 
     const ownedItems = container.items.filter(item => item.status === 'owned').length
     return Math.round((ownedItems / container.items.length) * 100)
+  }
+
+  calculateWeightLimitPercentage(containerId: TUUID): number | null {
+    const container = this.store.getContainerById(containerId)
+    if (!container || !container.maxWeight) {
+      return null
+    }
+
+    const totalWeight = this.calculateTotalWeight(containerId)
+    const maxWeightInGrams = convertToGrams(container.maxWeight, container.maxWeightUnit ?? 'g')
+
+    if (maxWeightInGrams === 0) {
+      return 0
+    }
+
+    return Math.round((totalWeight / maxWeightInGrams) * 100)
+  }
+
+  isWeightLimitExceeded(containerId: TUUID): boolean {
+    const percentage = this.calculateWeightLimitPercentage(containerId)
+    return percentage !== null && percentage > 100
   }
 
   getItemsByStatus(containerId: TUUID, status: TGearItemStatus): IGearItem[] {
@@ -285,6 +392,186 @@ class GearService {
     } catch (error) {
       throw new Error(`Failed to import data: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
+  }
+
+  // ========== Clone/Duplicate ==========
+
+  /**
+   * Clones a container with all its items and optionally nested containers
+   * @param containerId - ID of the container to clone
+   * @param options - Clone options
+   * @returns The newly created cloned container
+   */
+  cloneContainer(
+    containerId: TUUID,
+    options: {
+      newName: string
+      includeNestedContainers?: boolean
+      includePrices?: boolean
+    },
+  ): IGearContainer {
+    const sourceContainer = this.store.getContainerById(containerId)
+    if (!sourceContainer) {
+      throw new Error(`Container with id ${containerId} not found`)
+    }
+
+    const { newName, includeNestedContainers = false, includePrices = true } = options
+
+    // Map to store old container IDs to new container IDs for nested containers
+    const containerIdMap = new Map<TUUID, TUUID>()
+
+    // First, clone nested containers if needed
+    if (includeNestedContainers) {
+      const containerIdsToClone = new Set<TUUID>()
+
+      // Find all nested containers referenced in items
+      sourceContainer.items.forEach(item => {
+        if (item.containerId) {
+          containerIdsToClone.add(item.containerId)
+        }
+      })
+
+      // Recursively find all nested containers
+      const findAllNestedContainers = (parentId: TUUID): void => {
+        const nested = this.store.getContainerById(parentId)
+        if (nested) {
+          containerIdsToClone.add(parentId)
+          nested.items.forEach(item => {
+            if (item.containerId) {
+              findAllNestedContainers(item.containerId)
+            }
+          })
+        }
+      }
+
+      containerIdsToClone.forEach(id => {
+        findAllNestedContainers(id)
+      })
+
+      // Clone nested containers (need to clone in dependency order)
+      const clonedNestedContainers: IGearContainer[] = []
+      const clonedIds = new Set<TUUID>()
+
+      const cloneNestedContainer = (oldContainerId: TUUID): void => {
+        if (clonedIds.has(oldContainerId)) return
+
+        const oldContainer = this.store.getContainerById(oldContainerId)
+        if (!oldContainer) return
+
+        // First clone all nested containers that this container depends on
+        oldContainer.items.forEach(item => {
+          if (item.containerId && !clonedIds.has(item.containerId)) {
+            cloneNestedContainer(item.containerId)
+          }
+        })
+
+        // Now clone this container
+        const now = new Date().toISOString()
+        const newContainerId = crypto.randomUUID()
+        containerIdMap.set(oldContainerId, newContainerId)
+
+        const clonedItems: IGearItem[] = oldContainer.items.map(oldItem => {
+          const newItemId = crypto.randomUUID()
+          const newItem: IGearItem = {
+            ...oldItem,
+            id: newItemId,
+            price: includePrices ? oldItem.price : undefined,
+            // Update containerId reference if this item references a nested container
+            containerId: oldItem.containerId ? containerIdMap.get(oldItem.containerId) : undefined,
+            createdAt: now,
+            updatedAt: now,
+            // Copy all extended fields (they are already included in spread operator, but ensure they are preserved)
+          }
+          return newItem
+        })
+
+        const clonedContainer: IGearContainer = {
+          ...oldContainer,
+          id: newContainerId,
+          name: `[Kopia] ${oldContainer.name}`,
+          parentContainerId: undefined, // Cloned nested containers are not nested in original parent
+          items: clonedItems,
+          price: includePrices ? oldContainer.price : undefined,
+          createdAt: now,
+          updatedAt: now,
+        }
+
+        clonedNestedContainers.push(clonedContainer)
+        clonedIds.add(oldContainerId)
+      }
+
+      containerIdsToClone.forEach(id => {
+        cloneNestedContainer(id)
+      })
+
+      // Add all cloned nested containers to store
+      clonedNestedContainers.forEach(container => {
+        this.store.addContainer(container)
+      })
+    }
+
+    // Now clone the main container
+    const now = new Date().toISOString()
+    const newContainerId = crypto.randomUUID()
+
+    const clonedItems: IGearItem[] = sourceContainer.items.map(oldItem => {
+      const newItemId = crypto.randomUUID()
+      const newItem: IGearItem = {
+        ...oldItem,
+        id: newItemId,
+        price: includePrices ? oldItem.price : undefined,
+        // Update containerId reference if this item references a nested container and we cloned them
+        containerId:
+          includeNestedContainers && oldItem.containerId
+            ? containerIdMap.get(oldItem.containerId)
+            : undefined, // If not cloning nested containers, remove the reference
+        createdAt: now,
+        updatedAt: now,
+        // Copy all extended fields (they are already included in spread operator, but ensure they are preserved)
+      }
+      return newItem
+    })
+
+    const clonedContainer: IGearContainer = {
+      ...sourceContainer,
+      id: newContainerId,
+      name: newName,
+      parentContainerId: undefined, // Cloned container is not nested
+      items: clonedItems,
+      price: includePrices ? sourceContainer.price : undefined,
+      createdAt: now,
+      updatedAt: now,
+    }
+
+    this.store.addContainer(clonedContainer)
+    return clonedContainer
+  }
+
+  // ========== Item Catalog Operations ==========
+
+  /**
+   * Get all items from all containers for catalog/autocomplete
+   * Excludes items from specified container
+   * @param excludeContainerId - Container ID to exclude from results
+   * @returns Array of items with container information, sorted alphabetically by name
+   */
+  getAllItemsForCatalog(excludeContainerId?: TUUID): IItemWithContainer[] {
+    const containers = this.store.getAllContainers
+    const allItems = getAllItems(containers, excludeContainerId)
+    
+    // Sort alphabetically by name
+    return allItems.sort((a, b) => a.name.localeCompare(b.name))
+  }
+
+  /**
+   * Get item by ID with container information
+   * @param itemId - Item ID to find
+   * @returns Item with container information, or undefined if not found
+   */
+  getItemWithContainer(itemId: TUUID): IItemWithContainer | undefined {
+    const containers = this.store.getAllContainers
+    const allItems = getAllItems(containers)
+    return allItems.find(item => item.id === itemId)
   }
 }
 

@@ -26,6 +26,17 @@ export const settingsEn = {
           pl: 'Polski',
         },
       },
+      preferredWeightUnit: {
+        label: 'Preferred Weight Unit',
+        subtitle: 'Default unit for displaying weights throughout the application',
+        placeholder: 'Select a weight unit',
+        options: {
+          g: 'Grams (g)',
+          kg: 'Kilograms (kg)',
+          oz: 'Ounces (oz)',
+          lb: 'Pounds (lb)',
+        },
+      },
     },
     categories: {
       title: 'Custom Categories',
@@ -54,6 +65,20 @@ export const settingsEn = {
       label: 'Label',
       labelPlaceholder: 'Container type label',
       empty: 'No custom container types yet. Add your first one above.',
+    },
+    brands: {
+      title: 'Custom Brands',
+      description: 'Add and manage your own item brands',
+      add: 'Add Brand',
+      edit: 'Edit Brand',
+      save: 'Save',
+      cancel: 'Cancel',
+      deleteConfirm: 'Are you sure you want to delete this brand?',
+      key: 'Key',
+      keyPlaceholder: 'Brand key (e.g., custom_brand_1)',
+      label: 'Label',
+      labelPlaceholder: 'Brand name',
+      empty: 'No custom brands yet. Add your first one above.',
     },
   },
 }

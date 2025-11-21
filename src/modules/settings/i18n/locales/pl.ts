@@ -26,6 +26,17 @@ export const settingsPl = {
           pl: 'Polski',
         },
       },
+      preferredWeightUnit: {
+        label: 'Preferowana Jednostka Wagi',
+        subtitle: 'Domyślna jednostka wyświetlania wag w całej aplikacji',
+        placeholder: 'Wybierz jednostkę wagi',
+        options: {
+          g: 'Gramy (g)',
+          kg: 'Kilogramy (kg)',
+          oz: 'Uncje (oz)',
+          lb: 'Funty (lb)',
+        },
+      },
     },
     categories: {
       title: 'Własne Kategorie',
@@ -54,6 +65,20 @@ export const settingsPl = {
       label: 'Etykieta',
       labelPlaceholder: 'Etykieta typu kontenera',
       empty: 'Brak własnych typów kontenerów. Dodaj pierwszy powyżej.',
+    },
+    brands: {
+      title: 'Własne Marki',
+      description: 'Dodawaj i zarządzaj własnymi markami przedmiotów',
+      add: 'Dodaj Markę',
+      edit: 'Edytuj Markę',
+      save: 'Zapisz',
+      cancel: 'Anuluj',
+      deleteConfirm: 'Czy na pewno chcesz usunąć tę markę?',
+      key: 'Klucz',
+      keyPlaceholder: 'Klucz marki (np. custom_brand_1)',
+      label: 'Etykieta',
+      labelPlaceholder: 'Nazwa marki',
+      empty: 'Brak własnych marek. Dodaj pierwszą powyżej.',
     },
   },
 }

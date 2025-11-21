@@ -1,0 +1,39 @@
+name: Deploy to VPS
+permissions:
+  contents: read
+
+# Required GitHub Secrets:
+# - VPS_HOST: IP address or hostname of your VPS
+# - VPS_USER: SSH username for VPS
+# - VPS_SSH_KEY: Private SSH key for authentication
+# - VPS_PORT: (optional) SSH port, defaults to 22
+# - VPS_DEPLOY_PATH: (optional) Path to project on VPS, defaults to ~/apps/gear-stack
+#
+# The deploy user needs sudo permissions to write to /var/www/gear-stack
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          timeout: 30s
+          command_timeout: 10m
+          script: |
+            set -e
+            DEPLOY_PATH="${{ secrets.VPS_DEPLOY_PATH || '~/apps/gear-stack' }}"
+            cd ${DEPLOY_PATH/#\~/$HOME}
+            scripts/deploy.sh
+

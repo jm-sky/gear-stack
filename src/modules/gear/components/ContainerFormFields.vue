@@ -3,6 +3,8 @@ import { useFocus } from '@vueuse/core'
 import { nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import ComboBox from '@/components/ui/combo-box/ComboBox.vue'
 import { FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import {
@@ -12,8 +14,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useSettings } from '@/modules/settings/composables/useSettings'
+import WeightInputWithUnitPicker from '@/components/ui/weight-input/WeightInputWithUnitPicker.vue'
 import type { IGearContainer } from '../types/gear.types'
+import { useGearSettings } from '../composables/useGearSettings'
+import { COLOR_DOT_CLASSES, CONTAINER_COLORS } from '../utils/containerColors'
+import { getBrandOptions } from '../utils/suggestedValues'
 
 defineProps<{
   container?: IGearContainer
@@ -22,10 +27,12 @@ defineProps<{
 
 const emit = defineEmits<{
   cancel: []
+  nameBlur: []
+  recognizeParameters: []
 }>()
 
 const { t } = useI18n()
-const { customContainerTypes } = useSettings()
+const { customContainerTypes, customBrands } = useGearSettings()
 
 // Auto-focus na pierwszym polu
 const nameInputRef = ref<HTMLInputElement | undefined>(undefined)
@@ -40,7 +47,7 @@ const getContainerTypeLabel = (typeKey: string): string => {
   if (customType) {
     return customType.label
   }
-  
+
   // Default types
   return t(`gear.container.types.${typeKey}`)
 }
@@ -61,6 +68,7 @@ const handleCancel = () => {
           ref="nameInputRef"
           v-bind="componentField"
           :placeholder="$t('gear.container.name')"
+          @blur="emit('nameBlur')"
         />
         <FormMessage />
       </FormItem>
@@ -123,7 +131,7 @@ const handleCancel = () => {
             <SelectItem value="other">
               {{ $t('gear.container.types.other') }}
             </SelectItem>
-            
+
             <!-- Custom Container Types -->
             <template v-if="customContainerTypes.length > 0">
               <div class="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
@@ -143,7 +151,142 @@ const handleCancel = () => {
       </FormItem>
     </FormField>
 
+    <!-- Color -->
+    <FormField v-slot="{ value, handleChange }" name="color">
+      <FormItem>
+        <FormLabel :label="$t('gear.container.color')" />
+        <div class="grid grid-cols-5 sm:grid-cols-10 gap-2">
+          <button
+            v-for="color in CONTAINER_COLORS"
+            :key="color"
+            type="button"
+            :class="[
+              'size-10 rounded-full border-2 transition-all',
+              COLOR_DOT_CLASSES[color],
+              value === color || (!value && color === 'default') ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : 'opacity-50 hover:opacity-75',
+            ]"
+            :aria-label="$t(`gear.container.colors.${color}`)"
+            :title="$t(`gear.container.colors.${color}`)"
+            @click="handleChange(color)"
+          />
+        </div>
+        <FormMessage />
+      </FormItem>
+    </FormField>
+
+    <!-- Hide When Nested -->
+    <FormField v-slot="{ componentField, handleChange }" name="hideWhenNested">
+      <FormItem v-slot="{ id }" class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+        <Checkbox
+          :id="id"
+          :model-value="componentField.modelValue"
+          @update:model-value="handleChange"
+        />
+        <div class="flex-1 space-y-1">
+          <FormLabel :label="$t('gear.container.hideWhenNested')" class="cursor-pointer" />
+          <p class="text-sm text-muted-foreground">
+            {{ $t('gear.container.hideWhenNestedDescription') }}
+          </p>
+        </div>
+        <FormMessage />
+      </FormItem>
+    </FormField>
+
+    <!-- Extended Fields Section -->
+    <div class="border-t pt-6 space-y-6">
+      <h3 class="text-lg font-semibold text-muted-foreground">
+        {{ $t('gear.container.extendedFields') }}
+      </h3>
+
+      <!-- Brand and Price -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <FormField v-slot="{ value, handleChange }" name="brand">
+          <FormItem>
+            <FormLabel :label="$t('gear.container.brand')" />
+            <ComboBox
+              :value="value"
+              :options="getBrandOptions(customBrands.map(b => ({ key: b.key, label: b.label })))"
+              :placeholder="$t('gear.container.brand')"
+              :creatable="true"
+              :create-label="$t('gear.comboBox.add')"
+              class="w-full"
+              @update:value="handleChange"
+            />
+            <FormMessage />
+          </FormItem>
+        </FormField>
+
+        <FormField v-slot="{ componentField }" name="price">
+          <FormItem>
+            <FormLabel :label="$t('gear.container.price')" />
+            <Input
+              v-bind="componentField"
+              type="number"
+              :placeholder="$t('gear.container.price')"
+              min="0"
+              step="0.01"
+            />
+            <FormMessage />
+          </FormItem>
+        </FormField>
+      </div>
+
+      <!-- Weight and Weight Unit -->
+      <FormField v-slot="{ value: weightValue, handleChange: handleWeightChange }" name="weight">
+        <FormField v-slot="{ value: unitValue, handleChange: handleUnitChange }" name="weightUnit">
+          <FormItem>
+            <FormLabel :label="$t('gear.container.weight')" />
+            <WeightInputWithUnitPicker
+              :model-value="weightValue"
+              :unit="unitValue || 'g'"
+              :placeholder="$t('gear.container.weight')"
+              @update:model-value="handleWeightChange"
+              @update:unit="handleUnitChange"
+            />
+            <FormMessage />
+          </FormItem>
+        </FormField>
+      </FormField>
+
+      <!-- Max Weight and Max Weight Unit -->
+      <FormField v-slot="{ value: maxWeightValue, handleChange: handleMaxWeightChange }" name="maxWeight">
+        <FormField v-slot="{ value: maxUnitValue, handleChange: handleMaxUnitChange }" name="maxWeightUnit">
+          <FormItem>
+            <FormLabel :label="$t('gear.container.maxWeight')" />
+            <WeightInputWithUnitPicker
+              :model-value="maxWeightValue"
+              :unit="maxUnitValue || 'g'"
+              :placeholder="$t('gear.container.maxWeight')"
+              @update:model-value="handleMaxWeightChange"
+              @update:unit="handleMaxUnitChange"
+            />
+            <FormMessage />
+          </FormItem>
+        </FormField>
+      </FormField>
+
+      <!-- URL -->
+      <FormField v-slot="{ componentField }" name="url">
+        <FormItem>
+          <FormLabel :label="$t('gear.container.url')" />
+          <Input
+            v-bind="componentField"
+            type="url"
+            :placeholder="$t('gear.container.url')"
+          />
+          <FormMessage />
+        </FormItem>
+      </FormField>
+    </div>
+
     <!-- Actions -->
+    <Button
+      type="button"
+      variant="outline"
+      @click="$emit('recognizeParameters')"
+    >
+      {{ $t('gear.actions.recognizeParameters') }}
+    </Button>
     <div class="flex flex-col sm:flex-row justify-end gap-3">
       <Button type="button" variant="outline" @click="handleCancel">
         {{ $t('gear.actions.cancel') }}

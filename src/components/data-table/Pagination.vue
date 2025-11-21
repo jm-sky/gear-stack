@@ -50,11 +50,11 @@ const setPageSize = (size: number) => {
 </script>
 
 <template>
-  <div class="flex items-center justify-between px-2">
+  <div class="flex items-center justify-between flex-wrap gap-2 md:gap-0 px-2">
     <div class="flex-1 text-sm text-muted-foreground">
       {{ t('common.pagination.totalRows', { total }) }}
     </div>
-    <div class="flex items-center space-x-6 lg:space-x-8">
+    <div class="flex items-center flex-wrap gap-2 md:gap-0 space-x-6 lg:space-x-8">
       <div class="flex items-center space-x-2">
         <p class="text-sm font-medium">
           {{ t('common.pagination.rowsPerPage') }}

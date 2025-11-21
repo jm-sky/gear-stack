@@ -29,13 +29,14 @@ export default {
     back: 'Back',
     done: 'Done',
     never: 'Never',
+    or: 'or',
     copyToClipboard: {
       success: 'Copied to clipboard',
       copied: 'Copied',
       copy: 'Copy',
     },
     pagination: {
-      totalRows: '{total} row(s) total.',
+      totalRows: '{total} row(s) total',
       rowsPerPage: 'Rows per page',
       page: 'Page',
       of: 'of',
@@ -78,6 +79,73 @@ export default {
   settings: {
     page: {
       title: 'Settings',
+    },
+  },
+  footer: {
+    cookies: 'Cookie Information',
+    privacy: 'Privacy Policy',
+    contact: 'Contact',
+    github: 'GitHub',
+  },
+  cookies: {
+    title: 'Cookie Information',
+    subtitle: 'Information about data usage in the application',
+    localStorage: {
+      title: 'LocalStorage',
+      description: 'Gear Stack application uses browser localStorage to store user data. All data is stored locally on your device and is not sent to any external servers.',
+    },
+    whatWeStore: {
+      title: 'What we store',
+      items: 'Container and item data (names, descriptions, weights, statuses)',
+      profile: 'User profile data (name, email)',
+      settings: 'Application settings (language, preferences)',
+    },
+    privacy: {
+      title: 'Privacy',
+      description: 'All data is stored exclusively in your browser. We do not collect, process, or share your data with third parties. The application runs fully client-side.',
+    },
+    future: {
+      title: 'Future',
+      description: 'In the future, the application may use cookies for additional features (e.g., synchronization between devices). In such case, this page will be updated with detailed information.',
+    },
+    rodo: {
+      title: 'GDPR',
+      description: 'In accordance with the General Data Protection Regulation (GDPR), we inform that the application does not process personal data in a way that requires user consent, as all data is stored locally on the user\'s device.',
+    },
+  },
+  privacy: {
+    title: 'Privacy Policy',
+    subtitle: 'How we protect your data',
+    dataStorage: {
+      title: 'Data Storage',
+      description: 'Gear Stack application stores all data locally in the user\'s browser using localStorage. Data is not sent to any external servers or third parties.',
+    },
+    dataAccess: {
+      title: 'Data Access',
+      description: 'Only you have access to your data. The application does not require registration or login, so there is no way for anyone else to access your data.',
+    },
+    dataDeletion: {
+      title: 'Data Deletion',
+      description: 'You can delete all data from the application at any time by clearing localStorage in your browser settings or using the export/delete data function in the application.',
+    },
+    changes: {
+      title: 'Policy Changes',
+      description: 'In case of changes in the way data is processed, this page will be updated, and users will be informed about significant changes.',
+    },
+  },
+  contact: {
+    title: 'Contact',
+    subtitle: 'Get in touch with us',
+    info: {
+      title: 'Contact Information',
+      description: 'If you have questions, suggestions, or want to report a problem, please contact us:',
+    },
+    email: {
+      label: 'Email',
+    },
+    support: {
+      title: 'Support',
+      description: 'We try to respond to all messages within 7 days. If you are reporting a technical issue, please include detailed information about the problem.',
     },
   },
 }

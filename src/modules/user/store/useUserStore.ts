@@ -1,100 +1,92 @@
 import { defineStore } from 'pinia'
+import { computed, reactive } from 'vue'
+import { USER_STORAGE_KEY } from '@/shared/config/config'
 import type { IUpdateUserDto, IUser } from '../types/user.types'
+import { createDefaultUser } from '../utils/createDefaultUser'
+import { loadFromStorage } from './loadFromStorage'
 
-const STORAGE_KEY = 'gear-stack:user'
-
-function loadFromStorage(): IUser | null {
-  const stored = localStorage.getItem(STORAGE_KEY)
-  if (stored) {
-    try {
-      return JSON.parse(stored)
-    } catch (error) {
-      console.error('Error loading user from storage:', error)
-    }
+function initializeUser(): IUser | null {
+  const loaded = loadFromStorage()
+  if (loaded) {
+    return loaded
   }
-  return null
+
+  // Initialize default user if none exists
+  const defaultUser = createDefaultUser()
+  try {
+    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(defaultUser))
+  } catch (error) {
+    console.error('Error saving default user to storage:', error)
+  }
+  return defaultUser
 }
 
-export const useUserStore = defineStore('user', {
-  state: (): { user: IUser | null } => {
-    const loaded = loadFromStorage()
-    // Initialize default user if none exists
-    if (!loaded) {
-      const now = new Date().toISOString()
-      const defaultUser: IUser = {
-        id: crypto.randomUUID(),
-        name: 'User',
-        email: 'user@example.com',
-        createdAt: now,
-        updatedAt: now,
-      }
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultUser))
-      } catch (error) {
-        console.error('Error saving default user to storage:', error)
-      }
-      return { user: defaultUser }
+export const useUserStore = defineStore('user', () => {
+  const state = reactive<{ user: IUser | null }>({
+    user: initializeUser(),
+  })
+
+  // Getters
+  const getProfile = computed<IUser | null>(() => state.user)
+
+  // Actions
+  function setUser(user: IUser): void {
+    state.user = user
+    saveToStorage()
+  }
+
+  function initializeDefaultUser(): void {
+    if (state.user) return // User already exists
+
+    const defaultUser = createDefaultUser()
+    setUser(defaultUser)
+  }
+
+  function updateUser(data: IUpdateUserDto): void {
+    if (!state.user) {
+      // If no user exists, initialize with default and update
+      initializeDefaultUser()
     }
-    return { user: loaded }
-  },
 
-  getters: {
-    getProfile: (state): IUser | null => {
-      return state.user
-    },
-  },
+    if (!state.user) return
 
-  actions: {
-    setUser(user: IUser): void {
-      this.user = user
-      this.saveToStorage()
-    },
+    state.user = {
+      ...state.user,
+      ...data,
+      updatedAt: new Date().toISOString(),
+    }
+    saveToStorage()
+  }
 
-    initializeDefaultUser(): void {
-      if (this.user) return // User already exists
+  function loadFromStorageAction(): void {
+    state.user = loadFromStorage()
+  }
 
-      const now = new Date().toISOString()
-      const defaultUser: IUser = {
-        id: crypto.randomUUID(),
-        name: 'User',
-        email: 'user@example.com',
-        createdAt: now,
-        updatedAt: now,
+  function saveToStorage(): void {
+    try {
+      if (state.user) {
+        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(state.user))
+      } else {
+        localStorage.removeItem(USER_STORAGE_KEY)
       }
-      this.setUser(defaultUser)
-    },
+    } catch (error) {
+      console.error('Error saving user to storage:', error)
+    }
+  }
 
-    updateUser(data: IUpdateUserDto): void {
-      if (!this.user) {
-        // If no user exists, initialize with default and update
-        this.initializeDefaultUser()
-      }
+  return {
+    // State - Pinia automatically exposes reactive properties
+    user: computed(() => state.user),
 
-      if (!this.user) return
+    // Getters
+    getProfile,
 
-      this.user = {
-        ...this.user,
-        ...data,
-        updatedAt: new Date().toISOString(),
-      }
-      this.saveToStorage()
-    },
-
-    loadFromStorage(): void {
-      this.user = loadFromStorage()
-    },
-
-    saveToStorage(): void {
-      try {
-        if (this.user) {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(this.user))
-        } else {
-          localStorage.removeItem(STORAGE_KEY)
-        }
-      } catch (error) {
-        console.error('Error saving user to storage:', error)
-      }
-    },
-  },
+    // Actions
+    setUser,
+    initializeDefaultUser,
+    updateUser,
+    loadFromStorage: loadFromStorageAction,
+    saveToStorage,
+  }
 })
 
