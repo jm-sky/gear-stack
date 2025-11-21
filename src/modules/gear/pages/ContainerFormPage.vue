@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
+import { useDebounceFn } from '@vueuse/core'
 import { useForm } from 'vee-validate'
+import { watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import type { ICreateContainerDto, IUpdateContainerDto } from '../types/gear.types'
+import type { ICreateContainerDto, IUpdateContainerDto, TContainerColor } from '../types/gear.types'
 import ContainerFormFields from '../components/ContainerFormFields.vue'
 import { useContainer } from '../composables/useContainer'
 import { useGear } from '../composables/useGear'
+import { useGearSettings } from '../composables/useGearSettings'
+import { CONTAINER_COLORS } from '../utils/containerColors'
 import { recognizeContainerType } from '../utils/containerTypeRecognition'
 import { recognizeParameters } from '../utils/parameterRecognition'
 import { type ContainerFormData, containerSchema } from '../utils/validation'
@@ -17,6 +21,7 @@ const router = useRouter()
 const route = useRoute()
 const { t } = useI18n()
 const { createContainer, updateContainer } = useGear()
+const { customBrands } = useGearSettings()
 
 const containerId = route.params.id as string | undefined
 const isEditMode: boolean = !!containerId
@@ -32,10 +37,10 @@ const getInitialValues = (): ContainerFormData => {
       color: container.value.color ?? 'default',
       hideWhenNested: container.value.hideWhenNested ?? false,
       brand: container.value.brand ?? '',
-      price: container.value.price,
-      weight: container.value.weight,
+      price: container.value.price ?? undefined,
+      weight: container.value.weight ?? undefined,
       weightUnit: container.value.weightUnit ?? 'kg',
-      maxWeight: container.value.maxWeight,
+      maxWeight: container.value.maxWeight ?? undefined,
       maxWeightUnit: container.value.maxWeightUnit ?? 'kg',
       url: container.value.url ?? '',
     }
@@ -59,6 +64,82 @@ const getInitialValues = (): ContainerFormData => {
 const { handleSubmit, isSubmitting, setFieldValue, values } = useForm({
   validationSchema: toTypedSchema(containerSchema),
   initialValues: getInitialValues(),
+})
+
+// Map item colors to container colors
+const mapItemColorToContainerColor = (itemColor: string): TContainerColor | null => {
+  const normalized = itemColor.toLowerCase().trim()
+
+  // Direct matches
+  const colorMap: Record<string, TContainerColor> = {
+    'green': 'green',
+    'blue': 'blue',
+    'red': 'red',
+    'yellow': 'yellow',
+    'purple': 'purple',
+    'orange': 'orange',
+    'pink': 'pink',
+    'teal': 'teal',
+    'indigo': 'indigo',
+    // Additional mappings
+    'navy': 'blue',
+    'olive': 'green',
+    'gray': 'default',
+    'grey': 'default',
+    'black': 'default',
+    'tan': 'yellow',
+    'brown': 'orange',
+  }
+
+  // Check direct match
+  if (colorMap[normalized]) {
+    return colorMap[normalized]
+  }
+
+  // Check if container color exists
+  if (CONTAINER_COLORS.includes(normalized as TContainerColor)) {
+    return normalized as TContainerColor
+  }
+
+  return null
+}
+
+// Auto-recognize type, color, and brand from name during typing (only for new containers, not when editing)
+const autoRecognizeFromName = useDebounceFn(() => {
+  if (isEditMode || !values.name || values.name.trim().length === 0) {
+    return
+  }
+
+  // Recognize container type (only if type is 'other' or not set)
+  if (values.type === 'other' || !values.type) {
+    const detectedType = recognizeContainerType(values.name)
+    if (detectedType) {
+      setFieldValue('type', detectedType)
+    }
+  }
+
+  // Recognize brand and color
+  const params = recognizeParameters(
+    values.name,
+    customBrands.value.map(b => ({ label: b.label }))
+  )
+
+  if (params.brand && !values.brand) {
+    setFieldValue('brand', params.brand)
+  }
+
+  // Map item color to container color
+  if (params.color && (!values.color || values.color === 'default')) {
+    const containerColor = mapItemColorToContainerColor(params.color)
+    if (containerColor) {
+      setFieldValue('color', containerColor)
+    }
+  }
+}, 500)
+
+// Watch for name changes and auto-recognize
+watch(() => values.name, () => {
+  autoRecognizeFromName()
 })
 
 // Auto-detect container type from name on blur (only for new containers, not when editing)
@@ -106,7 +187,10 @@ const handleRecognizeParameters = () => {
   }
 
   try {
-    const params = recognizeParameters(values.name)
+    const params = recognizeParameters(
+      values.name,
+      customBrands.value.map(b => ({ label: b.label }))
+    )
 
     if (!params.brand && !params.color) {
       toast.info(t('gear.actions.noParametersFound'))
@@ -115,6 +199,14 @@ const handleRecognizeParameters = () => {
 
     if (params.brand && !values.brand) {
       setFieldValue('brand', params.brand)
+    }
+
+    // Map item color to container color
+    if (params.color && (!values.color || values.color === 'default')) {
+      const containerColor = mapItemColorToContainerColor(params.color)
+      if (containerColor) {
+        setFieldValue('color', containerColor)
+      }
     }
 
     toast.success(t('gear.actions.parametersRecognized'))

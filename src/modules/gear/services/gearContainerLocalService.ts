@@ -10,6 +10,7 @@ import { useGearStore } from '../store/useGearStore'
 import { getAllNestedContainers, getRootContainers, wouldCreateCircularReference } from '../utils/containerNesting'
 import { convertToGrams } from '../utils/formatWeight'
 import { getAllItems } from '../utils/getAllItems'
+import { isSet } from '../utils/helpers'
 import type { TUUID } from '@/shared/types/base.type'
 
 /**
@@ -84,9 +85,25 @@ class GearContainerLocalService {
       }
     }
 
+    // Filter out null values and only include set fields
+    const updateData: Partial<IGearContainer> = {}
+    if (isSet(data.name)) updateData.name = data.name
+    if (isSet(data.description)) updateData.description = data.description
+    if (isSet(data.type)) updateData.type = data.type
+    if (isSet(data.color)) updateData.color = data.color
+    if (isSet(data.parentContainerId)) updateData.parentContainerId = data.parentContainerId
+    if (isSet(data.hideWhenNested)) updateData.hideWhenNested = data.hideWhenNested
+    if (isSet(data.brand)) updateData.brand = data.brand
+    if (isSet(data.price)) updateData.price = data.price
+    if (isSet(data.weight)) updateData.weight = data.weight
+    if (isSet(data.weightUnit)) updateData.weightUnit = data.weightUnit
+    if (isSet(data.maxWeight)) updateData.maxWeight = data.maxWeight
+    if (isSet(data.maxWeightUnit)) updateData.maxWeightUnit = data.maxWeightUnit
+    if (isSet(data.url)) updateData.url = data.url
+
     const updated: IGearContainer = {
       ...container,
-      ...data,
+      ...updateData,
       updatedAt: new Date().toISOString(),
     }
 
@@ -175,7 +192,7 @@ class GearContainerLocalService {
     }
 
     let totalWeight = 0
-    if (container.weight !== undefined && container.weightUnit) {
+    if (isSet(container.weight) && isSet(container.weightUnit)) {
       totalWeight = convertToGrams(container.weight, container.weightUnit)
     }
 

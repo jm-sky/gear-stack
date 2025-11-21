@@ -12,6 +12,7 @@
 
 import { computed, watchEffect } from 'vue'
 import { useSettingsQuery } from '@/modules/settings/composables/useSettings'
+import { useDarkMode } from '@/shared/composables/useDarkMode'
 import { useLocale } from '@/shared/i18n'
 import type { Settings } from '@/modules/settings/types/settings.type'
 
@@ -45,12 +46,22 @@ export interface AppInitializationState {
  */
 export function useAppInitialization() {
   const { setLocale } = useLocale()
+  const { setDark } = useDarkMode()
   const settingsQuery = useSettingsQuery()
 
-  // Watch settings data and apply locale when available
+  // Watch settings data and apply locale/darkMode when available
+  // API has priority - when settings are loaded from API, sync locale and darkMode
+  // This ensures LOCALE_STORAGE_KEY is always the source of truth for locale
   watchEffect(() => {
-    if (settingsQuery.data.value?.locale) {
-      setLocale(settingsQuery.data.value.locale)
+    if (settingsQuery.data.value) {
+      // Sync locale via useLocale to ensure LOCALE_STORAGE_KEY is source of truth
+      if (settingsQuery.data.value.locale) {
+        setLocale(settingsQuery.data.value.locale)
+      }
+      // Sync darkMode via useDarkMode
+      if (settingsQuery.data.value.darkMode !== undefined) {
+        setDark(settingsQuery.data.value.darkMode)
+      }
     }
   })
 

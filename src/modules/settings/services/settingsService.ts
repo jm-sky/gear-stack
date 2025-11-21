@@ -32,6 +32,7 @@ class SettingsLocalService implements ISettingsService {
 
   /**
    * Load core settings from localStorage
+   * LOCALE_STORAGE_KEY is always the source of truth for locale
    */
   async getSettings(): Promise<Settings> {
     const stored = localStorage.getItem(SettingsLocalService.STORAGE_KEY)
@@ -56,7 +57,7 @@ class SettingsLocalService implements ISettingsService {
       }
     }
 
-    // Sync locale from useLocale's localStorage key (single source of truth)
+    // LOCALE_STORAGE_KEY is always the source of truth for locale
     const localeFromStorage = localStorage.getItem(LOCALE_STORAGE_KEY)
     const locale: SupportedLocale = (localeFromStorage && (localeFromStorage === 'en' || localeFromStorage === 'pl'))
       ? localeFromStorage as SupportedLocale
@@ -70,6 +71,8 @@ class SettingsLocalService implements ISettingsService {
 
   /**
    * Update core settings
+   * Note: This saves to localStorage only.
+   * For proper i18n sync, use useLocale().setLocale() in composables.
    */
   async updateSettings(data: UpdateSettingsData): Promise<Settings> {
     const current = await this.getSettings()
@@ -84,15 +87,19 @@ class SettingsLocalService implements ISettingsService {
 
   /**
    * Save core settings to localStorage (private helper)
+   * LOCALE_STORAGE_KEY is always the source of truth for locale
    */
   private async saveToStorage(settings: Settings): Promise<void> {
     try {
+      // Save locale to LOCALE_STORAGE_KEY (source of truth)
+      // Note: This should be synced via useLocale().setLocale() for proper i18n sync
+      // This is just for localStorage persistence
+      localStorage.setItem(LOCALE_STORAGE_KEY, settings.locale)
+      // Also save to CORE_SETTINGS_STORAGE_KEY for dark mode
       localStorage.setItem(SettingsLocalService.STORAGE_KEY, JSON.stringify({
         locale: settings.locale,
         darkMode: settings.darkMode,
       }))
-      // Sync locale to useLocale's localStorage key (single source of truth)
-      localStorage.setItem(LOCALE_STORAGE_KEY, settings.locale)
       return Promise.resolve()
     } catch (error) {
       console.error('Error saving core settings to storage:', error)
@@ -141,10 +148,15 @@ class SettingsService implements ISettingsService {
     // Only use API if backend is enabled AND user is authenticated
     if (this.isBackendEnabled && this.isAuthenticated) {
       try {
-        // API call
+        // API call - API has priority
         const settings = await settingsApiService.updateSettings(data)
-        // Also save to localStorage as backup
-        await this.localService.updateSettings(data)
+        // Save to localStorage as backup
+        // Note: locale is saved to LOCALE_STORAGE_KEY by localService
+        // and synced via useLocale().setLocale() in composable (useUpdateSettings)
+        await this.localService.updateSettings({
+          locale: settings.locale,
+          darkMode: settings.darkMode,
+        })
         return settings
       } catch (error) {
         // Fallback to localStorage
@@ -167,6 +179,7 @@ export class SettingsServiceStatic {
 
   /**
    * Load core settings from localStorage (static method for backward compatibility)
+   * LOCALE_STORAGE_KEY is always the source of truth for locale
    */
   static loadFromStorage(): Settings {
     // Synchronous version for backward compatibility
@@ -181,7 +194,7 @@ export class SettingsServiceStatic {
       }
     }
 
-    // Sync locale from useLocale's localStorage key (single source of truth)
+    // LOCALE_STORAGE_KEY is always the source of truth for locale
     const localeFromStorage = localStorage.getItem(LOCALE_STORAGE_KEY)
     const locale: SupportedLocale = (localeFromStorage && (localeFromStorage === 'en' || localeFromStorage === 'pl'))
       ? localeFromStorage as SupportedLocale
@@ -195,6 +208,7 @@ export class SettingsServiceStatic {
 
   /**
    * Update core settings (static method for backward compatibility)
+   * Note: For proper i18n sync, use useLocale().setLocale() instead
    */
   static updateSettings(current: Settings, updates: UpdateSettingsData): Settings {
     const updated: Settings = {
@@ -203,11 +217,13 @@ export class SettingsServiceStatic {
     }
 
     try {
+      // Save locale to LOCALE_STORAGE_KEY (source of truth)
+      localStorage.setItem(LOCALE_STORAGE_KEY, updated.locale)
+      // Also save to CORE_SETTINGS_STORAGE_KEY for dark mode
       localStorage.setItem(CORE_SETTINGS_STORAGE_KEY, JSON.stringify({
         locale: updated.locale,
         darkMode: updated.darkMode,
       }))
-      localStorage.setItem(LOCALE_STORAGE_KEY, updated.locale)
     } catch (error) {
       console.error('Error saving core settings to storage:', error)
     }

@@ -4,6 +4,7 @@
 
 import type { IGearContainer, IGearItem } from '../types/gear.types'
 import { formatWeight, formatWeightFromGrams } from './formatWeight'
+import { isSet } from './helpers'
 
 interface ExportOptions {
   t?: (key: string, ...args: unknown[]) => string
@@ -230,7 +231,7 @@ export function exportContainerToPrompt(
   }
 
   // Add weight if provided
-  if (container.weight !== undefined && container.weightUnit) {
+  if (isSet(container.weight) && isSet(container.weightUnit)) {
     const weightText = formatWeight(container.weight, container.weightUnit)
     // Extract just the number and unit (e.g., "1.50 kg" -> "1.50kg" or "500 g" -> "500g")
     const weightValue = weightText.replace(/\s/g, '')

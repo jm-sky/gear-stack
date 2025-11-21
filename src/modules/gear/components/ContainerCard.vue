@@ -138,7 +138,7 @@ const handleShow = () => {
   >
     <CardHeader class="text-card-foreground flex items-start justify-between">
       <div class="flex items-center gap-2">
-        <ColorDot :color="container.color" />
+        <ColorDot :color="container.color ?? undefined" />
         <Package class="size-5" />
         <CardTitle>{{ container.name }}</CardTitle>
         <Badge v-if="isNested" variant="outline" class="ml-auto text-xs">

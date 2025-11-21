@@ -1,5 +1,6 @@
 import type { IGearContainer } from '../types/gear.types'
 import { convertToGrams } from './formatWeight'
+import { isSet } from './helpers'
 
 /**
  * Calculate total weight of a container synchronously (for use in computed)
@@ -11,9 +12,9 @@ export function calculateTotalWeightSync(
   container: IGearContainer,
   allContainers: IGearContainer[],
 ): number {
-  // Start with container's own weight (if defined)
+  // Start with container's own weight (if set)
   let totalWeight = 0
-  if (container.weight !== undefined && container.weightUnit) {
+  if (isSet(container.weight) && isSet(container.weightUnit)) {
     totalWeight = convertToGrams(container.weight, container.weightUnit)
   }
 
@@ -60,7 +61,7 @@ export function calculateWeightLimitPercentageSync(
   container: IGearContainer,
   allContainers: IGearContainer[],
 ): number | null {
-  if (!container || !container.maxWeight) {
+  if (!container || !isSet(container.maxWeight)) {
     return null
   }
 

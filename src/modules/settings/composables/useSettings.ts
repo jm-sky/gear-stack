@@ -5,6 +5,7 @@ import {
   settingsQueryKeys,
   settingsRetryFunction
 } from '@/modules/settings/utils/queryUtils'
+import { useDarkMode } from '@/shared/composables/useDarkMode'
 import { useLocale } from '@/shared/i18n'
 import type { ISettingsService, Settings, UpdateSettingsData } from '@/modules/settings/types/settings.type'
 
@@ -20,12 +21,16 @@ export function useSettingsQuery(service?: ISettingsService) {
 export function useUpdateSettings(service?: ISettingsService) {
   const queryClient = useQueryClient()
   const { setLocale } = useLocale()
+  const { setDark } = useDarkMode()
 
   return useMutation({
     mutationFn: (data: UpdateSettingsData) => (service ?? settingsService).updateSettings(data),
     onSuccess: (updated: Settings) => {
       queryClient.setQueryData(settingsQueryKeys.me(), updated)
+      // Sync locale via useLocale to ensure LOCALE_STORAGE_KEY is source of truth
       setLocale(updated.locale)
+      // Sync darkMode via useDarkMode
+      setDark(updated.darkMode)
       void queryClient.invalidateQueries({ queryKey: settingsQueryKeys.me() })
     },
     retry: settingsMutationRetryFunction,

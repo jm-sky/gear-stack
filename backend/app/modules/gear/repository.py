@@ -70,6 +70,11 @@ class GearRepository(SearchMixin):
         self.db.add(container)
         await self.db.commit()
         await self.db.refresh(container)
+        # Reload container with items relationship to avoid lazy loading issues
+        # For a newly created container, items will be empty, but we need to load the relationship
+        stmt = select(GearContainerDB).where(GearContainerDB.id == container.id).options(selectinload(GearContainerDB.items))
+        result = await self.db.execute(stmt)
+        container = result.scalar_one()
         return container
 
     async def get_container(self, container_id: str, user_id: str) -> GearContainerDB | None:
@@ -133,6 +138,10 @@ class GearRepository(SearchMixin):
 
         await self.db.commit()
         await self.db.refresh(container)
+        # Reload container with items relationship to avoid lazy loading issues
+        stmt = select(GearContainerDB).where(GearContainerDB.id == container.id).options(selectinload(GearContainerDB.items))
+        result = await self.db.execute(stmt)
+        container = result.scalar_one()
         return container
 
     async def delete_container(self, container_id: str, user_id: str) -> bool:

@@ -20,6 +20,7 @@ import {
   calculateWeightLimitPercentageSync,
 } from '../utils/containerCalculations'
 import { convertToGrams, formatWeight, formatWeightToPreferredUnit } from '../utils/formatWeight'
+import { isSet } from '../utils/helpers'
 
 const props = defineProps<{
   container: IGearContainer
@@ -158,7 +159,7 @@ const handleBack = () => {
             <Badge v-if="container.brand" variant="secondary" class="normal-case">
               {{ container.brand }}
             </Badge>
-            <Badge v-if="container.weight !== undefined && container.weightUnit" variant="secondary">
+            <Badge v-if="isSet(container.weight) && isSet(container.weightUnit)" variant="secondary">
               {{ formatWeight(container.weight, container.weightUnit) }}
             </Badge>
             <Badge
