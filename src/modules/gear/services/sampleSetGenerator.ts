@@ -1,5 +1,6 @@
 import type { ICreateItemDto } from '../types/gear.types'
-import { gearService } from './gearService'
+import { gearContainerService } from './gearContainerService'
+import { gearItemService } from './gearItemService'
 import type { TUUID } from '@/shared/types/base.type'
 
 interface ISampleSetItem {
@@ -18,7 +19,7 @@ interface ISampleSetItem {
  * @returns Array of created container IDs
  */
 export async function generateSampleSet(t: (key: string) => string): Promise<TUUID[]> {
-  const backpack = await gearService.createContainer({
+  const backpack = await gearContainerService().createContainer({
     name: t('gear.sampleSet.backpack'),
     type: 'backpack',
     description: t('gear.sampleSet.generate'),
@@ -26,7 +27,7 @@ export async function generateSampleSet(t: (key: string) => string): Promise<TUU
   const backpackId = backpack.id
 
   // Create pouch container (will be added as nested container item)
-  const pouch = await gearService.createContainer({
+  const pouch = await gearContainerService().createContainer({
     name: t('gear.sampleSet.pouch'),
     type: 'pouch',
   })
@@ -107,7 +108,7 @@ export async function generateSampleSet(t: (key: string) => string): Promise<TUU
 
   // Create items in backpack
   for (const item of backpackItems) {
-    await gearService.createItem(backpackId, {
+    await gearItemService().createItem(backpackId, {
       name: t(`gear.sampleSet.${item.nameKey}`),
       category: item.category,
       weight: item.weight,
@@ -119,7 +120,7 @@ export async function generateSampleSet(t: (key: string) => string): Promise<TUU
   }
 
   // Create pouch as nested container item in backpack
-  await gearService.createItem(backpackId, {
+  await gearItemService().createItem(backpackId, {
     name: t('gear.sampleSet.pouch'),
     category: 'tools',
     weight: 50,
@@ -132,7 +133,7 @@ export async function generateSampleSet(t: (key: string) => string): Promise<TUU
 
   // Create items in pouch
   for (const item of pouchItems) {
-    await gearService.createItem(pouchId, {
+    await gearItemService().createItem(pouchId, {
       name: t(`gear.sampleSet.${item.nameKey}`),
       category: item.category,
       weight: item.weight,

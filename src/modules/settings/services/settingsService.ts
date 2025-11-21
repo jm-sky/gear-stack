@@ -1,5 +1,7 @@
+import { useBackend } from '@/shared/composables/useBackend'
 import { CORE_SETTINGS_STORAGE_KEY, LOCALE_STORAGE_KEY, SETTINGS_STORAGE_KEY, type SupportedLocale } from '@/shared/config/config'
 import type { ISettingsService, Settings, UpdateSettingsData } from '../types/settings.type'
+import { settingsApiService } from './settingsApiService'
 
 /**
  * Settings Service (LocalStorage implementation)
@@ -100,10 +102,60 @@ class SettingsLocalService implements ISettingsService {
 }
 
 /**
- * Settings Service wrapper
- * Provides static methods for backward compatibility and instance methods for interface implementation
+ * Settings Service (Hybrid implementation)
+ * When backend is enabled, uses API calls.
+ * When backend is disabled, uses localStorage.
+ * Implements ISettingsService interface.
  */
-export class SettingsService {
+class SettingsService implements ISettingsService {
+  private localService = new SettingsLocalService()
+
+  private get isBackendEnabled() {
+    const { isBackendEnabled } = useBackend()
+    return isBackendEnabled.value
+  }
+
+  async getSettings(): Promise<Settings> {
+    if (this.isBackendEnabled) {
+      try {
+        // API call
+        return await settingsApiService.getSettings()
+      } catch (error) {
+        // Fallback to localStorage
+        console.warn('API failed, falling back to localStorage', error)
+        return this.localService.getSettings()
+      }
+    }
+
+    // Offline mode
+    return this.localService.getSettings()
+  }
+
+  async updateSettings(data: UpdateSettingsData): Promise<Settings> {
+    if (this.isBackendEnabled) {
+      try {
+        // API call
+        const settings = await settingsApiService.updateSettings(data)
+        // Also save to localStorage as backup
+        await this.localService.updateSettings(data)
+        return settings
+      } catch (error) {
+        // Fallback to localStorage
+        console.warn('API failed, falling back to localStorage', error)
+        return this.localService.updateSettings(data)
+      }
+    }
+
+    // Offline mode
+    return this.localService.updateSettings(data)
+  }
+}
+
+/**
+ * Settings Service wrapper (for backward compatibility)
+ * Provides static methods for backward compatibility
+ */
+export class SettingsServiceStatic {
   private static localService = new SettingsLocalService()
 
   /**
@@ -164,5 +216,11 @@ export class SettingsService {
   }
 }
 
-// Export instance for direct use
+// Export instance for direct use (hybrid implementation)
+export const settingsService = new SettingsService()
+
+// Export local service instance for direct use
 export const settingsLocalService = new SettingsLocalService()
+
+// Export static class for backward compatibility (renamed to avoid conflict)
+export { SettingsServiceStatic as SettingsService }

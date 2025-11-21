@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { settingsService } from '@/modules/settings/services/settingsApiService'
+import { settingsService } from '@/modules/settings/services/settingsService'
 import {
   settingsMutationRetryFunction,
   settingsQueryKeys,

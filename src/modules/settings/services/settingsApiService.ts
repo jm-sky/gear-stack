@@ -1,8 +1,8 @@
-// modules/settings/services/settingsService.ts
+// modules/settings/services/settingsApiService.ts
 import { apiClient } from '@/shared/services/apiClient'
 import type { ISettingsService, Settings, UpdateSettingsData } from '@/modules/settings/types/settings.type'
 
-class SettingsService implements ISettingsService {
+class SettingsApiService implements ISettingsService {
   async getSettings(): Promise<Settings> {
     const response = await apiClient.get<Settings>('/me/settings')
     return response.data
@@ -14,6 +14,6 @@ class SettingsService implements ISettingsService {
   }
 }
 
-export const settingsService = new SettingsService()
+export const settingsApiService = new SettingsApiService()
 
 

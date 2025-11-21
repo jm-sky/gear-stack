@@ -7,7 +7,8 @@ import type {
   IUpdateContainerDto,
   IUpdateItemDto,
 } from '../types/gear.types'
-import { gearService } from '../services/gearService'
+import { gearContainerService } from '../services/gearContainerService'
+import { gearItemService } from '../services/gearItemService'
 import { useGearStore } from '../store/useGearStore'
 import type { TUUID } from '@/shared/types/base.type'
 
@@ -20,97 +21,97 @@ export function useGear() {
   // ========== Container Operations ==========
 
   const createContainer = async (data: ICreateContainerDto): Promise<IGearContainer> => {
-    return await gearService.createContainer(data)
+    return await gearContainerService().createContainer(data)
   }
 
   const updateContainer = async (id: TUUID, data: IUpdateContainerDto): Promise<IGearContainer> => {
-    return await gearService.updateContainer(id, data)
+    return await gearContainerService().updateContainer(id, data)
   }
 
   const deleteContainer = async (id: TUUID): Promise<void> => {
-    await gearService.deleteContainer(id)
+    await gearContainerService().deleteContainer(id)
   }
 
   const deleteAllContainers = async (): Promise<void> => {
-    await gearService.deleteAllContainers()
+    await gearContainerService().deleteAllContainers()
   }
 
   const getContainerById = async (id: TUUID): Promise<IGearContainer | undefined> => {
     try {
-      return await gearService.getContainer(id)
+      return await gearContainerService().getContainer(id)
     } catch {
       return undefined
     }
   }
 
   const getRootContainers = async (): Promise<IGearContainer[]> => {
-    return await gearService.getRootContainers()
+    return await gearContainerService().getRootContainers()
   }
 
   const getNestedContainers = async (containerId: TUUID): Promise<IGearContainer[]> => {
-    return await gearService.getNestedContainers(containerId)
+    return await gearContainerService().getNestedContainers(containerId)
   }
 
   // ========== Item Operations ==========
 
   const createItem = async (containerId: TUUID, data: ICreateItemDto): Promise<IGearItem> => {
-    return await gearService.createItem(containerId, data)
+    return await gearItemService().createItem(containerId, data)
   }
 
   const updateItem = async (itemId: TUUID, data: IUpdateItemDto): Promise<IGearItem> => {
-    return await gearService.updateItem(itemId, data)
+    return await gearItemService().updateItem(itemId, data)
   }
 
   const deleteItem = async (itemId: TUUID): Promise<void> => {
-    await gearService.deleteItem(itemId)
+    await gearItemService().deleteItem(itemId)
   }
 
   const getItemById = async (containerId: TUUID, itemId: TUUID): Promise<IGearItem | undefined> => {
-    return await gearService.getItemById(containerId, itemId)
+    return await gearItemService().getItemById(containerId, itemId)
   }
 
   // ========== Business Logic ==========
 
   const calculateTotalWeight = async (containerId: TUUID): Promise<number> => {
-    return await gearService.calculateTotalWeight(containerId)
+    return await gearContainerService().calculateTotalWeight(containerId)
   }
 
   const calculateReadinessPercentage = async (containerId: TUUID): Promise<number> => {
-    return await gearService.calculateReadinessPercentage(containerId)
+    return await gearContainerService().calculateReadinessPercentage(containerId)
   }
 
   const calculateWeightLimitPercentage = async (containerId: TUUID): Promise<number | null> => {
-    return await gearService.calculateWeightLimitPercentage(containerId)
+    return await gearContainerService().calculateWeightLimitPercentage(containerId)
   }
 
   const isWeightLimitExceeded = async (containerId: TUUID): Promise<boolean> => {
-    return await gearService.isWeightLimitExceeded(containerId)
+    return await gearContainerService().isWeightLimitExceeded(containerId)
   }
 
   const getItemsByStatus = async (containerId: TUUID, status: 'owned' | 'missing' | 'toBuy'): Promise<IGearItem[]> => {
-    return await gearService.getItemsByStatus(containerId, status)
+    return await gearContainerService().getItemsByStatus(containerId, status)
   }
 
   const getExpiredItems = async (containerId: TUUID): Promise<IGearItem[]> => {
-    return await gearService.getExpiredItems(containerId)
+    return await gearContainerService().getExpiredItems(containerId)
   }
 
   const getExpiringSoonItems = async (containerId: TUUID, days: number = 30): Promise<IGearItem[]> => {
-    return await gearService.getExpiringSoonItems(containerId, days)
+    return await gearContainerService().getExpiringSoonItems(containerId, days)
   }
 
   const moveItem = async (containerId: TUUID, itemId: TUUID, newContainerId: TUUID): Promise<void> => {
-    await gearService.moveItem(containerId, itemId, newContainerId)
+    await gearContainerService().moveItem(containerId, itemId, newContainerId)
   }
 
   // ========== Import/Export ==========
 
   const exportData = async (): Promise<string> => {
-    return await gearService.exportData()
+    return await gearContainerService().exportData()
   }
 
   const importData = async (json: string): Promise<void> => {
-    await gearService.importData(json)
+    await gearContainerService().importData(json)
   }
 
   // ========== Clone/Duplicate ==========
@@ -123,7 +124,7 @@ export function useGear() {
       includePrices?: boolean
     },
   ): Promise<IGearContainer> => {
-    return await gearService.cloneContainer(containerId, options)
+    return await gearContainerService().cloneContainer(containerId, options)
   }
 
   return {
