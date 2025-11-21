@@ -21,6 +21,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.0] - 2025-01-27
+
+### Release: Hybrid Mode & Offline-First Architecture
+
+This release introduces a hybrid mode that allows the application to work seamlessly both with and without user authentication. Users can now use the app immediately without creating an account, with all data stored locally. After logging in, the app automatically switches to API mode while maintaining localStorage as a backup.
+
+**Key highlights:**
+- **Hybrid Mode**: Automatic switching between localStorage (offline) and API (online) based on authentication status
+- **Zero-Friction Onboarding**: Users can start using the app immediately without registration
+- **Data Migration**: Optional migration dialog to transfer local data to API after first login
+- **Offline-First**: All pages and features accessible without login
+- **Smart Fallback**: Automatic fallback to localStorage on API errors
+- **Settings Translations**: Fixed missing translations for settings page and delete account feature
+
+**New Features:**
+- **Hybrid Services**: All services (Gear, Settings, User) now support both localStorage and API modes
+- **Data Migration Dialog**: User-friendly dialog to migrate local data to API after login
+- **Landing Page Enhancement**: Added "Add Container" button for immediate access
+- **Route Accessibility**: All gear pages accessible without authentication
+- **Conditional Features**: Delete Account only visible when authenticated
+
+**Technical improvements:**
+- Extended `useBackend` composable with `isAuthenticated` and `shouldUseAPI` helpers
+- Unified conditional logic across all services (Gear, Settings, User)
+- Enhanced error handling with automatic localStorage fallback
+- Improved service architecture with hybrid implementations
+- Fixed translation structure for settings page sections
+
+**Breaking Changes:**
+- None - fully backward compatible
+
+This release maintains full backward compatibility while adding powerful new capabilities for both offline and online usage.
+
+---
+
 ## [2.0.0] - 2025-11-21
 
 ### Release: Backend Integration & Authentication
