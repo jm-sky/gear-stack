@@ -14,6 +14,7 @@ export const useGearSettingsStore = defineStore('gearSettings', () => {
     const updated = GearSettingsService.updateSettings(state, updates)
     state.customCategories = updated.customCategories
     state.customContainerTypes = updated.customContainerTypes
+    state.preferredWeightUnit = updated.preferredWeightUnit
   }
 
   function addCategory(category: IUserCategory): void {
@@ -50,12 +51,14 @@ export const useGearSettingsStore = defineStore('gearSettings', () => {
     const loaded = GearSettingsService.loadFromStorage()
     state.customCategories = loaded.customCategories
     state.customContainerTypes = loaded.customContainerTypes
+    state.preferredWeightUnit = loaded.preferredWeightUnit
   }
 
   return {
     // State
     customCategories: computed(() => state.customCategories),
     customContainerTypes: computed(() => state.customContainerTypes),
+    preferredWeightUnit: computed(() => state.preferredWeightUnit),
 
     // Getters
     getAllCategories,

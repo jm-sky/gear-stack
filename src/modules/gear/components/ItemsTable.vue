@@ -7,7 +7,6 @@ import DataTable from '@/components/data-table/DataTable.vue'
 import Badge from '@/components/ui/badge/Badge.vue'
 import { Button } from '@/components/ui/button'
 import TableEmpty from '@/components/ui/table/TableEmpty.vue'
-import { useCoreSettings } from '@/modules/settings/composables/useCoreSettings'
 import { ITEMS_TABLE_COLUMN_VISIBILITY_KEY } from '@/shared/config/config'
 import type { IGearItem } from '../types/gear.types'
 import { useGear } from '../composables/useGear'
@@ -41,9 +40,9 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const router = useRouter()
-const { settings: coreSettings } = useCoreSettings()
+const { settings: gearSettings } = useGearSettings()
 const { customCategories } = useGearSettings()
-const settings = computed(() => ({ preferredWeightUnit: coreSettings.value.preferredWeightUnit }))
+const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
 const { getContainerById, calculateTotalWeight } = useGear()
 
 // Expanded rows state (which containers are expanded)

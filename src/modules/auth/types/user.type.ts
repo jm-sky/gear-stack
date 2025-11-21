@@ -77,4 +77,3 @@ export interface MessageResponse {
 export interface RegisterResponse extends MessageResponse {
   email?: string
 }
-

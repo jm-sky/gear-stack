@@ -1,8 +1,14 @@
 // modules/auth/composables/useAuth.ts
-import { computed, ref } from 'vue'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
+import { computed } from 'vue'
+import { getAuthConfig } from '@/modules/auth/config/auth.config'
 import { authService } from '@/modules/auth/services/authService'
 import { useAuthStore } from '@/modules/auth/store/useAuthStore'
-import { useBackend } from '@/shared/composables/useBackend'
+import {
+  authMutationRetryFunction,
+  authQueryKeys,
+  authRetryFunction
+} from '@/modules/auth/utils/queryUtils'
 import type { IAuthService } from '@/modules/auth/types/auth.type'
 import type {
   ChangePasswordData,
@@ -11,50 +17,43 @@ import type {
   LoginResponse,
   RegisterCredentials,
   ResetPasswordData,
-  User,
+  User
 } from '@/modules/auth/types/user.type'
 
 /**
- * Simplified auth composable without TanStack Query
- * Uses Pinia store and authService directly
+ * Hook for fetching current user data
+ * Automatically refetches when token changes
  */
-export function useAuth(service?: IAuthService) {
+export function useCurrentUser(service?: IAuthService) {
   const authStore = useAuthStore()
-  const { isBackendEnabled } = useBackend()
-  const auth = service ?? authService
+  const config = getAuthConfig()
 
-  // Loading states
-  const isLoggingIn = ref(false)
-  const isRegistering = ref(false)
-  const isLoggingOut = ref(false)
-  const isLoading = ref(false)
-  const isVerifyingEmail = ref(false)
-  const isResendingVerification = ref(false)
+  return useQuery({
+    queryKey: authQueryKeys.me(),
+    queryFn: () => (service ?? authService).getCurrentUser(),
+    enabled: !!authStore.token, // Only fetch if user is authenticated
+    staleTime: config.query.staleTime,
+    retry: authRetryFunction,
+  })
+}
 
-  // Computed values
-  const user = computed<User | null>(() => authStore.user)
-  const isAuthenticated = computed<boolean>(() => authStore.isAuthenticated)
-  const isEmailVerified = computed<boolean>(() => user.value?.isEmailVerified ?? false)
+/**
+ * Hook for user login with automatic user data fetching
+ */
+export function useLogin(service?: IAuthService) {
+  const authStore = useAuthStore()
+  const queryClient = useQueryClient()
 
-  /**
-   * Login user
-   */
-  async function login(credentials: LoginCredentials): Promise<LoginResponse> {
-    if (!isBackendEnabled.value) {
-      throw new Error('Backend is not enabled. Set VITE_ENABLE_BACKEND=true')
-    }
-
-    isLoggingIn.value = true
-    try {
-      const response = await auth.login(credentials)
-
+  return useMutation({
+    mutationFn: async (credentials: LoginCredentials) => {
+      const response = await (service ?? authService).login(credentials)
       // Check if 2FA is required
       if ('requiresTwoFactor' in response && response.requiresTwoFactor) {
         // Store 2FA token and methods instead of access token
         authStore.setTwoFactorToken(
           response.twoFactorToken,
           response.methods,
-          response.preferredMethod,
+          response.preferredMethod
         )
         // Don't set access token - user needs to complete 2FA first
       } else if ('accessToken' in response) {
@@ -66,135 +65,170 @@ export function useAuth(service?: IAuthService) {
           authStore.setUser(response.user)
         }
       }
-
       return response
-    } finally {
-      isLoggingIn.value = false
-    }
-  }
+    },
+    onSuccess: async (data: LoginResponse) => {
+      // If it's a normal auth response (not 2FA required), set user and invalidate queries
+      if ('accessToken' in data && 'user' in data) {
+        // Set user from login response
+        authStore.setUser(data.user)
 
-  /**
-   * Register user
-   */
-  async function register(credentials: RegisterCredentials) {
-    if (!isBackendEnabled.value) {
-      throw new Error('Backend is not enabled. Set VITE_ENABLE_BACKEND=true')
-    }
-
-    isRegistering.value = true
-    try {
-      return await auth.register(credentials)
-    } finally {
-      isRegistering.value = false
-    }
-  }
-
-  /**
-   * Logout user
-   */
-  async function logout() {
-    if (!isBackendEnabled.value) {
+        // Invalidate and refetch user data to ensure consistency
+        if (!data.requiresEmailVerification) {
+          await queryClient.invalidateQueries({ queryKey: authQueryKeys.me() })
+        }
+      }
+      // If 2FA is required, don't set user or invalidate queries yet
+      // The user will be set after 2FA verification completes
+    },
+    onError: () => {
+      // Clear auth state on error
       authStore.logout()
-      return
-    }
+    },
+    retry: authMutationRetryFunction,
+  })
+}
 
-    isLoggingOut.value = true
-    try {
-      await auth.logout()
-    } catch (error) {
-      console.error('Logout error:', error)
+/**
+ * Hook for user registration with automatic user data fetching
+ */
+export function useRegister(service?: IAuthService) {
+  return useMutation({
+    mutationFn: (credentials: RegisterCredentials) => (service ?? authService).register(credentials),
+    onError: () => {
+      const authStore = useAuthStore()
+      authStore.logout()
+    },
+    retry: authMutationRetryFunction,
+  })
+}
+
+/**
+ * Hook for user logout with cache cleanup
+ */
+export function useLogout(service?: IAuthService) {
+  const authStore = useAuthStore()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: () => (service ?? authService).logout(),
+    onSuccess: () => {
+      // Clear all auth-related cache
+      queryClient.removeQueries({ queryKey: authQueryKeys.all })
+
+      // Clear auth store
+      authStore.logout()
+    },
+    onError: () => {
       // Even if logout fails on server, clear local state
-    } finally {
+      queryClient.removeQueries({ queryKey: authQueryKeys.all })
       authStore.logout()
-      isLoggingOut.value = false
-    }
-  }
+    },
+    retry: authMutationRetryFunction,
+  })
+}
 
-  /**
-   * Fetch current user
-   */
-  async function fetchUser() {
-    if (!isBackendEnabled.value) {
-      return null
-    }
+/**
+ * Hook for forgot password
+ */
+export function useForgotPassword(service?: IAuthService) {
+  return useMutation({
+    mutationFn: (data: ForgotPasswordData) => (service ?? authService).forgotPassword(data),
+    retry: authMutationRetryFunction,
+  })
+}
 
-    if (!authStore.token) {
-      return null
-    }
+/**
+ * Hook for reset password
+ */
+export function useResetPassword(service?: IAuthService) {
+  return useMutation({
+    mutationFn: (data: ResetPasswordData) => (service ?? authService).resetPassword(data),
+    retry: authMutationRetryFunction,
+  })
+}
 
-    isLoading.value = true
-    try {
-      const user = await auth.getCurrentUser()
-      authStore.setUser(user)
-      return user
-    } catch (error) {
-      console.error('Failed to fetch user:', error)
-      // If fetch fails, clear auth state
+/**
+ * Hook for change password
+ */
+export function useChangePassword(service?: IAuthService) {
+  return useMutation({
+    mutationFn: (data: ChangePasswordData) => (service ?? authService).changePassword(data),
+    retry: authMutationRetryFunction,
+  })
+}
+
+/**
+ * Hook for delete account
+ */
+export function useDeleteAccount(service?: IAuthService) {
+  const authStore = useAuthStore()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ confirmation, password }: { confirmation: string; password?: string }) =>
+      (service ?? authService).deleteAccount(confirmation, password),
+    onSuccess: () => {
+      // Clear all auth-related cache
+      queryClient.removeQueries({ queryKey: authQueryKeys.all })
+
+      // Clear auth store
       authStore.logout()
-      return null
-    } finally {
-      isLoading.value = false
-    }
+    },
+    onError: () => {
+      // Even if deletion fails, we keep the user logged in
+      // (in case of temporary network issues)
+    },
+    retry: authMutationRetryFunction,
+  })
+}
+
+/**
+ * Main auth composable with TanStack Query integration
+ */
+export function useAuth(service?: IAuthService) {
+  const authStore = useAuthStore()
+  const queryClient = useQueryClient()
+
+  // Queries
+  const currentUserQuery = useCurrentUser(service)
+
+  // Mutations
+  const loginMutation = useLogin(service)
+  const registerMutation = useRegister(service)
+  const logoutMutation = useLogout(service)
+  const forgotPasswordMutation = useForgotPassword(service)
+  const resetPasswordMutation = useResetPassword(service)
+  const changePasswordMutation = useChangePassword(service)
+  const deleteAccountMutation = useDeleteAccount(service)
+  const verifyEmailMutation = useMutation({
+    mutationFn: (token: string) => (service ?? authService).verifyEmail(token),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: authQueryKeys.me() })
+    },
+    retry: authMutationRetryFunction,
+  })
+  const resendVerificationMutation = useMutation({
+    mutationFn: (email: string) => (service ?? authService).resendVerification(email),
+    retry: authMutationRetryFunction,
+  })
+
+  // Computed values (keep refs reactive)
+  const user = computed<User | null>(() => currentUserQuery.data.value ?? authStore.user)
+  const isAuthenticated = computed<boolean>(() => !!authStore.token && !!user.value)
+  const isEmailVerified = computed<boolean>(() => user.value?.isEmailVerified ?? false)
+  const isLoading = currentUserQuery.isLoading
+  const isError = currentUserQuery.isError
+
+  // Helper function to refresh user data
+  const fetchUser = () => {
+    return queryClient.invalidateQueries({ queryKey: authQueryKeys.me() })
   }
 
-  /**
-   * Forgot password
-   */
-  async function forgotPassword(data: ForgotPasswordData) {
-    if (!isBackendEnabled.value) {
-      throw new Error('Backend is not enabled. Set VITE_ENABLE_BACKEND=true')
-    }
-    return await auth.forgotPassword(data)
-  }
-
-  /**
-   * Reset password
-   */
-  async function resetPassword(data: ResetPasswordData) {
-    if (!isBackendEnabled.value) {
-      throw new Error('Backend is not enabled. Set VITE_ENABLE_BACKEND=true')
-    }
-    return await auth.resetPassword(data)
-  }
-
-  /**
-   * Change password
-   */
-  async function changePassword(data: ChangePasswordData) {
-    if (!isBackendEnabled.value) {
-      throw new Error('Backend is not enabled. Set VITE_ENABLE_BACKEND=true')
-    }
-    return await auth.changePassword(data)
-  }
-
-  /**
-   * Verify email
-   */
-  async function verifyEmail(token: string) {
-    if (!isBackendEnabled.value) {
-      throw new Error('Backend is not enabled. Set VITE_ENABLE_BACKEND=true')
-    }
-    isVerifyingEmail.value = true
-    try {
-      return await auth.verifyEmail(token)
-    } finally {
-      isVerifyingEmail.value = false
-    }
-  }
-
-  /**
-   * Resend verification email
-   */
-  async function resendVerification(email: string) {
-    if (!isBackendEnabled.value) {
-      throw new Error('Backend is not enabled. Set VITE_ENABLE_BACKEND=true')
-    }
-    isResendingVerification.value = true
-    try {
-      return await auth.resendVerification(email)
-    } finally {
-      isResendingVerification.value = false
-    }
+  // Helper function to update user data optimistically
+  const updateUser = (updater: (oldUser: User | null) => User | null) => {
+    queryClient.setQueryData(authQueryKeys.me(), updater)
+    authStore.setUser(updater(authStore.user))
   }
 
   return {
@@ -202,25 +236,36 @@ export function useAuth(service?: IAuthService) {
     user,
     isAuthenticated,
     isEmailVerified,
-    isLoading: computed(() => isLoading.value),
+    isLoading,
+    isError,
+
+    // Queries
+    currentUserQuery,
 
     // Actions
-    login,
-    register,
-    logout,
+    login: loginMutation.mutateAsync,
+    register: registerMutation.mutateAsync,
+    logout: logoutMutation.mutateAsync,
+    forgotPassword: forgotPasswordMutation.mutateAsync,
+    resetPassword: resetPasswordMutation.mutateAsync,
+    changePassword: changePasswordMutation.mutateAsync,
+    deleteAccount: deleteAccountMutation.mutateAsync,
     fetchUser,
-    forgotPassword,
-    resetPassword,
-    changePassword,
-    verifyEmail,
-    resendVerification,
 
-    // Loading states (computed for template usage)
-    isLoggingIn: computed(() => isLoggingIn.value),
-    isRegistering: computed(() => isRegistering.value),
-    isLoggingOut: computed(() => isLoggingOut.value),
-    isVerifyingEmail: computed(() => isVerifyingEmail.value),
-    isResendingVerification: computed(() => isResendingVerification.value),
+    // Mutation states
+    isLoggingIn: loginMutation.isPending,
+    isRegistering: registerMutation.isPending,
+    isLoggingOut: logoutMutation.isPending,
+    isForgotPasswordLoading: forgotPasswordMutation.isPending,
+    isResetPasswordLoading: resetPasswordMutation.isPending,
+    isChangePasswordLoading: changePasswordMutation.isPending,
+    isDeletingAccount: deleteAccountMutation.isPending,
+    verifyEmail: verifyEmailMutation.mutateAsync,
+    resendVerification: resendVerificationMutation.mutateAsync,
+    isVerifyingEmail: verifyEmailMutation.isPending,
+    isResendingVerification: resendVerificationMutation.isPending,
+
+    // Helpers
+    updateUser,
   }
 }
-

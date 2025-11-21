@@ -179,3 +179,59 @@ export interface IUpdateItemDto {
   consumable?: boolean
 }
 
+// Service interface for gear operations
+// This interface defines the common contract for both localStorage and API implementations
+export interface IGearService {
+  // Container operations (CRUD)
+  createContainer(data: ICreateContainerDto): Promise<IGearContainer>
+  getContainers(skip?: number, limit?: number): Promise<IGearContainer[]>
+  getContainer(id: TUUID): Promise<IGearContainer>
+  updateContainer(id: TUUID, data: IUpdateContainerDto): Promise<IGearContainer>
+  deleteContainer(id: TUUID): Promise<void>
+
+  // Item operations (CRUD)
+  createItem(containerId: TUUID, data: ICreateItemDto): Promise<IGearItem>
+  getItems(containerId: TUUID, skip?: number, limit?: number): Promise<IGearItem[]>
+  getItem(itemId: TUUID): Promise<IGearItem>
+  updateItem(itemId: TUUID, data: IUpdateItemDto): Promise<IGearItem>
+  deleteItem(itemId: TUUID): Promise<void>
+
+  // Statistics operations (from API or calculated locally)
+  getContainerWeight(containerId: TUUID): Promise<{ grams: number; kilograms: number }>
+  getContainerReadiness(containerId: TUUID): Promise<{
+    totalItems: number
+    ownedItems: number
+    missingItems: number
+    toBuyItems: number
+    readinessPercentage: number
+  }>
+}
+
+// Extended interface for localStorage-specific operations
+// These methods are only available in localStorage implementation
+// API implementation may throw "Not implemented" or provide fallback behavior
+export interface IGearServiceExtended extends IGearService {
+  // Additional container operations (localStorage-specific)
+  getAllContainers(): Promise<IGearContainer[]>
+  getRootContainers(): Promise<IGearContainer[]>
+  getNestedContainers(containerId: TUUID): Promise<IGearContainer[]>
+  deleteAllContainers(): Promise<void>
+
+  // Additional item operations (localStorage-specific)
+  getItemById(containerId: TUUID, itemId: TUUID): Promise<IGearItem | undefined>
+
+  // Business logic operations (calculated locally)
+  calculateTotalWeight(containerId: TUUID): Promise<number>
+  calculateReadinessPercentage(containerId: TUUID): Promise<number>
+  calculateWeightLimitPercentage(containerId: TUUID): Promise<number | null>
+  isWeightLimitExceeded(containerId: TUUID): Promise<boolean>
+  getItemsByStatus(containerId: TUUID, status: TGearItemStatus): Promise<IGearItem[]>
+  getExpiredItems(containerId: TUUID): Promise<IGearItem[]>
+  getExpiringSoonItems(containerId: TUUID, days?: number): Promise<IGearItem[]>
+  moveItem(containerId: TUUID, itemId: TUUID, newContainerId: TUUID): Promise<void>
+
+  // Import/Export operations (localStorage-specific)
+  exportData(): Promise<string>
+  importData(json: string): Promise<void>
+}
+

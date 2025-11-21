@@ -2,17 +2,19 @@
  * Axios error response interceptor
  *
  * Handles HTTP error responses globally:
- * - 401 Unauthorized: Try to refresh token automatically, if that fails redirect to login
+ * - 401 Unauthorized: Try to refresh token automatically, if that fails open login modal
  * - Other errors: Pass through to be handled locally
  *
- * This provides centralized error handling with automatic token refresh.
+ * This provides centralized error handling with automatic token refresh
+ * and allows users to re-authenticate without losing their current context.
+ *
  * FIXED: Moved mutable state to Pinia store to prevent race conditions
  */
 
 import { HttpStatusCode } from 'axios'
-import { AuthRoutePaths } from '@/modules/auth/config/routes'
 import { authService } from '@/modules/auth/services/authService'
 import { useAuthStore } from '@/modules/auth/store/useAuthStore'
+import { useLoginModal } from '@/shared/composables/useLoginModal'
 import { config } from '@/shared/config/config'
 import { useTokenRefreshStore } from '@/shared/store/useTokenRefreshStore'
 import { apiClient } from './apiClient'
@@ -77,33 +79,55 @@ export async function errorResponseInterceptor(error: AxiosError) {
         // Retry the original request with new token (auth interceptor will add it)
         return apiClient(originalRequest)
       } catch (refreshError) {
-        // Refresh failed - clear tokens, process queue with error, and redirect to login
+        // Refresh failed - clear tokens, process queue with error, and show login modal
         refreshStore.processQueue(refreshError as Error)
         authStore.clearToken()
         authStore.clearRefreshToken()
         authStore.clearUser()
 
-        // Redirect to login page
-        if (window.location.pathname !== AuthRoutePaths.login) {
-          window.location.href = AuthRoutePaths.login
-        }
+        // Open login modal with retry callback
+        const loginModal = useLoginModal()
+        loginModal.open({
+          onSuccess: async () => {
+            try {
+              // After successful login, retry the original request
+              // Auth interceptor will add the new token automatically
+              originalRequest._retry = false // Reset retry flag for new attempt
+              return await apiClient(originalRequest)
+            } catch (retryError) {
+              console.error('Failed to retry request after re-authentication', retryError)
+              throw retryError
+            }
+          },
+        })
 
         return Promise.reject(refreshError)
       } finally {
         refreshStore.setRefreshing(false)
       }
     } else {
-      // No refresh token - clear auth data, clear queue, and redirect to login
+      // No refresh token - clear auth data, clear queue, and show login modal
       authStore.clearToken()
       authStore.clearUser()
 
       // Clear the failed queue since we can't proceed without refresh token
       refreshStore.processQueue(new Error('No refresh token available'))
 
-      // Redirect to login page
-      if (window.location.pathname !== AuthRoutePaths.login) {
-        window.location.href = AuthRoutePaths.login
-      }
+      // Open login modal with retry callback
+      const loginModal = useLoginModal()
+      loginModal.open({
+        onSuccess: async () => {
+          try {
+            // After successful login, retry the original request
+            // Auth interceptor will add the new token automatically
+            originalRequest._retry = false // Reset retry flag
+            return await apiClient(originalRequest)
+          } catch (retryError) {
+            console.error('Failed to retry request after re-authentication', retryError)
+            throw retryError
+          }
+        },
+      })
 
       // Reject the original request
       return Promise.reject(new Error('Authentication required'))
@@ -113,3 +137,4 @@ export async function errorResponseInterceptor(error: AxiosError) {
   // Pass error through for local handling
   return Promise.reject(error)
 }
+

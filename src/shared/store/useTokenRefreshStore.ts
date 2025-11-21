@@ -60,4 +60,3 @@ export const useTokenRefreshStore = defineStore('tokenRefresh', () => {
     reset,
   }
 })
-

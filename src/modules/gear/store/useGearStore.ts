@@ -35,30 +35,30 @@ export const useGearStore = defineStore('gear', {
       containers: loadFromStorage(),
     }
   },
-  
+
   getters: {
     // Proste getters do dostępu do danych
     getContainerById: (state) => (id: TUUID): IGearContainer | undefined => {
       return state.containers.find(c => c.id === id)
     },
-    
+
     getAllContainers: (state): IGearContainer[] => {
       return state.containers
     },
   },
-  
+
   actions: {
     // Tylko operacje na state - bez logiki biznesowej
     setContainers(containers: IGearContainer[]): void {
       this.containers = containers
       this.saveToStorage()
     },
-    
+
     addContainer(container: IGearContainer): void {
       this.containers.push(container)
       this.saveToStorage()
     },
-    
+
     updateContainer(container: IGearContainer): void {
       const index = this.containers.findIndex(c => c.id === container.id)
       if (index !== -1) {
@@ -66,7 +66,7 @@ export const useGearStore = defineStore('gear', {
         this.saveToStorage()
       }
     },
-    
+
     removeContainer(id: TUUID): void {
       this.containers = this.containers.filter(c => c.id !== id)
       this.saveToStorage()
@@ -81,7 +81,7 @@ export const useGearStore = defineStore('gear', {
     loadFromStorage(): void {
       this.containers = loadFromStorage()
     },
-    
+
     saveToStorage(): void {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(this.containers))

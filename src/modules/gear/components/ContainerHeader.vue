@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import DropdownMenuSeparator from '@/components/ui/dropdown-menu/DropdownMenuSeparator.vue'
-import { useCoreSettings } from '@/modules/settings/composables/useCoreSettings'
 import type { IGearContainer } from '../types/gear.types'
 import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
@@ -33,8 +32,8 @@ const router = useRouter()
 const { t } = useI18n()
 const { calculateTotalWeight, calculateReadinessPercentage, calculateWeightLimitPercentage } = useGear()
 const { customContainerTypes } = useGearSettings()
-const { settings: coreSettings } = useCoreSettings()
-const settings = computed(() => ({ preferredWeightUnit: coreSettings.value.preferredWeightUnit }))
+const { settings: gearSettings } = useGearSettings()
+const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
 
 // Computed properties
 const totalWeight = computed<number>(() => calculateTotalWeight(props.container.id))

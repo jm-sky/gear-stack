@@ -225,6 +225,13 @@ Gdy użytkownik przełączy się z trybu offline na online, można zaimplementow
 4. **Type safety** - Wszystkie typy z backendu powinny być zsynchronizowane
 5. **Security** - Tokeny przechowywane bezpiecznie, refresh token rotation
 
+## 🔗 Następne Kroki
+
+Po ukończeniu podstawowej integracji (auth, feature flag), następnym krokiem jest integracja endpointów API:
+
+- **[API_INTEGRATION_PLAN.md](./API_INTEGRATION_PLAN.md)** - Szczegółowy plan integracji endpointów Gear i Settings API z frontendem
+- **[ROADMAP_V2.md](./ROADMAP_V2.md)** - Roadmap funkcjonalności wymagających backendu (synchronizacja, udostępnianie, katalog, itp.)
+
 ## 📚 Zasoby
 
 - Projekt referencyjny: `../test`

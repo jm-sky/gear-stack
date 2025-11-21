@@ -1,16 +1,4 @@
-// modules/auth/types/auth.type.ts
-import type {
-  ChangePasswordData,
-  ForgotPasswordData,
-  LoginCredentials,
-  LoginResponse,
-  MessageResponse,
-  RefreshTokenResponse,
-  RegisterCredentials,
-  RegisterResponse,
-  ResetPasswordData,
-  User,
-} from './user.type'
+import type { ChangePasswordData, ForgotPasswordData, LoginCredentials, LoginResponse, MessageResponse, RefreshTokenResponse, RegisterCredentials, RegisterResponse, ResetPasswordData, User } from './user.type'
 
 export interface IAuthService {
   login(credentials: LoginCredentials): Promise<LoginResponse>
@@ -25,4 +13,3 @@ export interface IAuthService {
   verifyEmail(token: string): Promise<MessageResponse>
   resendVerification(email: string): Promise<MessageResponse>
 }
-

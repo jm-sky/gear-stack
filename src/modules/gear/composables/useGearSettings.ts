@@ -1,4 +1,5 @@
 import { computed } from 'vue'
+import { config } from '@/shared/config/config'
 import type { IUpdateGearSettingsDto, IUserCategory, IUserContainerType } from '../types/gearSettings.types'
 import { useGearSettingsStore } from '../store/useGearSettingsStore'
 
@@ -11,6 +12,7 @@ export function useGearSettings() {
   const settings = computed(() => ({
     customCategories: store.customCategories,
     customContainerTypes: store.customContainerTypes,
+    preferredWeightUnit: store.preferredWeightUnit ?? config.defaults.preferredWeightUnit,
   }))
 
   const customCategories = computed<IUserCategory[]>(() => store.getAllCategories)

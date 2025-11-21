@@ -4,8 +4,8 @@ import { computed, ref } from 'vue'
 import { JWT_STORE_KEY } from '@/shared/config/config'
 import type { User } from '@/modules/auth/types/user.type'
 
-const TWO_FACTOR_TOKEN_KEY = `${JWT_STORE_KEY.replace(':token', '')}:2fa-token`
-const REFRESH_TOKEN_KEY = `${JWT_STORE_KEY.replace(':token', '')}:refresh-token`
+const TWO_FACTOR_TOKEN_KEY = 'vbr_2fa_token'
+const REFRESH_TOKEN_KEY = 'vbr_refresh_token'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
@@ -76,9 +76,7 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem(TWO_FACTOR_TOKEN_KEY)
   }
 
-  const clearUser = () => {
-    user.value = null
-  }
+  const clearUser = () => user.value = null
 
   const logout = () => {
     clearToken()
@@ -107,4 +105,3 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
   }
 })
-
