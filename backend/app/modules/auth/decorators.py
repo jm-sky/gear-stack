@@ -103,12 +103,28 @@ def recaptcha_protected(action: str) -> Callable[[Callable[..., Any]], Callable[
                         request_data = kwarg_value
                         break
 
-            # Verify reCAPTCHA token
-            if request_data and hasattr(request_data, "recaptchaToken"):
+            # Verify reCAPTCHA token (only if enabled and token is provided)
+            from app.core.config import settings
+            
+            if settings.recaptcha.enabled:
+                token = None
+                if request_data and hasattr(request_data, "recaptchaToken"):
+                    token = request_data.recaptchaToken
+                
+                # If reCAPTCHA is enabled, token is required
+                if not token:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="reCAPTCHA token is required"
+                    )
+                
                 try:
-                    await verify_recaptcha(request_data.recaptchaToken or "", action=action)
+                    await verify_recaptcha(token, action=action)
                 except RecaptchaError as e:
-                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"reCAPTCHA verification failed: {str(e)}")
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"reCAPTCHA verification failed: {str(e)}"
+                    )
 
             return await func(*args, **kwargs)
 
