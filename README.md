@@ -191,18 +191,18 @@ Gear Stack is a full-stack application designed for outdoor enthusiasts, prepper
 ### 🔄 Planned Features
 
 #### High Priority
-- **All Items List Page** - Dedicated page showing all items from all containers with filtering and sorting
+- **All Items List Page** - Dedicated page showing all items from all containers with filtering and sorting [✅ Done]
 - **Inline Editing** - Quick edit items directly in the list without opening forms
 - **Item Ordering** - Manual drag & drop reordering of items within containers
 
 #### Medium Priority
-- **Preferred Weight Unit** - User setting to display all weights in grams or kilograms consistently
-- **Extended Fields** - Additional fields for items (price, URL, quality tier, brand, color)
-- **Extended Container Fields** - Brand and price fields for containers
+- **Preferred Weight Unit** - User setting to display all weights in grams or kilograms consistently ✅
+- **Extended Fields** - Additional fields for items (price, URL, quality tier, brand, color) ✅
+- **Extended Container Fields** - Brand and price fields for containers ✅
 
 #### Low Priority
-- **Brand Color Selection** - Choose primary brand color (coyote, olive, or other survival/outdoor themes)
-- **Footer & Legal Pages** - Cookie information, RODO compliance, privacy policy
+- **Brand Color Selection** - Choose primary brand color (coyote, olive, or other survival/outdoor themes) ✅
+- **Footer & Legal Pages** - Cookie information, RODO compliance, privacy policy ✅
 
 ### 🔮 Future Roadmap
 
@@ -214,7 +214,7 @@ Gear Stack is a full-stack application designed for outdoor enthusiasts, prepper
 
 **Medium Priority:**
 - Progressive Web App (PWA) for mobile installation
-- Global item catalog with autocomplete
+- Global item catalog with autocomplete ✅ (or partially done) 
 - Custom category and brand management
 - Advanced statistics and reports
 
