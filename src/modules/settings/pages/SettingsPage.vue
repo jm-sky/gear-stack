@@ -4,6 +4,7 @@ import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import DeleteAccountCard from '@/modules/settings/components/DeleteAccountCard.vue'
 import PreferencesSettingsCard from '../components/PreferencesSettingsCard.vue'
+import SecuritySettingsCard from '../components/SecuritySettingsCard.vue'
 
 const { t } = useI18n()
 const { isAuthenticated } = useAuth()
@@ -24,6 +25,9 @@ const { isAuthenticated } = useAuth()
       <div class="space-y-6">
         <!-- Core Preferences Settings -->
         <PreferencesSettingsCard />
+
+        <!-- Security Settings (2FA) -->
+        <SecuritySettingsCard v-if="isAuthenticated" />
 
         <!-- Additional Settings from other modules (via slot) -->
         <slot name="after" />

@@ -44,6 +44,7 @@ services:
       - SECRET_KEY=${SECRET_KEY}
       - LOG_LEVEL=${LOG_LEVEL:-DEBUG}
       - CORS_ORIGINS=${CORS_ORIGINS:-["http://localhost:3000"]}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
     ports:
       - "${APP_PORT:-8000}:8000"
     volumes:

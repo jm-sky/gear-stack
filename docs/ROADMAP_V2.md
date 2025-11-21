@@ -20,15 +20,44 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 
 ## 🔐 Autoryzacja i konta użytkowników
 
-### Podstawowa autoryzacja
-**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Large
+### ✅ Podstawowa autoryzacja
+**Status:** ✅ Completed | **Priority:** High | **Complexity:** Large
 
-- Rejestracja użytkowników (email/password)
-- Logowanie/Wylogowanie
-- Zarządzanie sesją użytkownika
-- Reset hasła
-- Zmiana hasła
-- **Uwaga:** Backend auth module już istnieje w `backend/app/modules/auth/`
+- ✅ Rejestracja użytkowników (email/password)
+- ✅ Logowanie/Wylogowanie
+- ✅ Zarządzanie sesją użytkownika
+- ✅ Reset hasła
+- ✅ Zmiana hasła
+- ✅ Weryfikacja email
+- ✅ 2FA (TOTP + WebAuthn/Passkeys)
+- ✅ Backend auth module w `backend/app/modules/auth/`
+- ✅ Frontend auth module w `src/modules/auth/`
+
+### 🚧 reCAPTCHA Bot Protection
+**Status:** 🚧 In Progress (Frontend Complete, Backend Ready) | **Priority:** High | **Feature:** [FEATURE-015](./features/FEATURE-015-recaptcha-integration.md)
+
+- ✅ Backend reCAPTCHA service (score-based verification)
+- ✅ Frontend reCAPTCHA integration (invisible v3)
+- ✅ Protected endpoints: login, register, forgot-password
+- ✅ Auto-loads reCAPTCHA script on app startup
+- ✅ Score threshold configuration (0.5 default)
+- ✅ Action verification (prevents token reuse)
+- 📝 **Status**: Enabled with `RECAPTCHA_ENABLED=true`
+
+### 🚧 OAuth Social Login
+**Status:** 🚧 In Progress (Backend 90%, Frontend Pending) | **Priority:** Medium | **Feature:** [FEATURE-014](./features/FEATURE-014-oauth-authentication.md)
+
+- ✅ Backend OAuth service with Google provider
+- ✅ Database migration for OAuth fields
+- ✅ Repository methods for OAuth users
+- ✅ User model supports nullable passwords
+- ✅ OAuth schemas and types defined
+- ⏳ Auth service OAuth method (1 hour remaining)
+- ⏳ OAuth router endpoints (1 hour remaining)
+- ⏳ Frontend OAuth composable (2-3 hours remaining)
+- ⏳ OAuth button component (1 hour remaining)
+- ⏳ OAuth callback page (1-2 hours remaining)
+- 📝 **Estimated completion**: 6-8 hours
 
 ---
 

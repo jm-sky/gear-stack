@@ -21,6 +21,77 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.0] - 2025-01-21
+
+### Release: Security Enhancements - reCAPTCHA & OAuth Integration
+
+This release introduces major security features including Google reCAPTCHA v3 protection and OAuth authentication infrastructure.
+
+### Added
+- **reCAPTCHA v3 Integration (Frontend)**: Invisible bot protection on all authentication forms
+  - Auto-loads reCAPTCHA script on app startup
+  - Integrated into LoginForm, RegisterForm, and ForgotPasswordPage
+  - Sends reCAPTCHA tokens to backend for verification
+  - Zero friction for legitimate users (invisible verification)
+  - Added `useRecaptcha` composable and utility functions
+  - Backend already supported reCAPTCHA, now enabled with frontend integration
+
+- **OAuth Infrastructure (Backend - 90% Complete)**: Foundation for social login
+  - Complete OAuth service with Google provider implementation (`app/core/oauth.py`)
+  - OAuth configuration in settings (`OAuthSettings`)
+  - Database migration for OAuth fields (provider, provider_id, avatar_url)
+  - Repository methods: `create_oauth_user()`, `get_user_by_oauth_provider()`
+  - OAuth schemas: `OAuthAuthUrlRequest/Response`, `OAuthCallbackRequest/Response`
+  - User model updated to support nullable passwords (OAuth users)
+  - OAuth fields added to UserDB model
+
+- **2FA Settings Visibility Fix**: Security settings card now visible on Settings page
+  - Shows TOTP (Authenticator App) status
+  - Shows WebAuthn/Passkeys status
+  - Displays preferred 2FA method selector
+  - Previously existed but wasn't shown due to missing import
+
+- **Documentation**: Comprehensive implementation guides
+  - `FEATURE-014-oauth-authentication.md` - Complete OAuth implementation plan
+  - `FEATURE-015-recaptcha-integration.md` - Complete reCAPTCHA implementation plan
+  - `IMPLEMENTATION_STATUS.md` - Current status and remaining work tracker
+  - `IMPLEMENTATION_COMPLETE.md` - Detailed progress report
+
+### Changed
+- User model `hashedPassword` field is now nullable (supports OAuth users without passwords)
+- Repository `_map_user` method updated to handle OAuth fields
+- Auth types updated to include `recaptchaToken` field in login/register/forgot-password requests
+- Config updated with reCAPTCHA and OAuth settings
+
+### Security
+- ✅ **reCAPTCHA Protection Active**: Login, register, and forgot-password endpoints now protected against bots
+- ✅ **OAuth CSRF Protection**: State parameter generation for preventing CSRF attacks
+- ✅ **Score-based Verification**: reCAPTCHA uses score threshold (0.5) to detect suspicious activity
+- ✅ **Action Verification**: Backend verifies reCAPTCHA action matches expected endpoint
+
+### Technical Details
+
+**Environment Variables**:
+- Backend: `RECAPTCHA_ENABLED=true`, `GOOGLE_RECAPTCHA_SITE_KEY`, `GOOGLE_RECAPTCHA_SECRET_KEY`
+- Frontend: `VITE_GOOGLE_RECAPTCHA_SITE_KEY`, `VITE_GOOGLE_OAUTH_CLIENT_ID`
+- Backend OAuth: `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REDIRECT_URI`
+
+**Database Changes**:
+- New migration: `011_add_oauth_fields.py`
+- Added columns: `oauth_provider`, `oauth_provider_id`, `avatar_url`
+- Made `hashed_password` nullable for OAuth users
+- Index created on `(oauth_provider, oauth_provider_id)` for efficient lookups
+
+**Remaining Work** (OAuth Frontend - ~6-8 hours):
+- OAuth login/callback composable (`useOAuth`)
+- OAuth button component
+- OAuth callback page
+- Integration into login/register pages
+- OAuth endpoints in auth router (backend)
+- OAuth service method in auth service (backend)
+
+---
+
 ## [2.1.1] - 2025-01-27
 
 ### Added

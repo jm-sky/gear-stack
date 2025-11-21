@@ -155,3 +155,38 @@ class ResendEmailVerificationRequest(BaseModel):
     """Resend email verification request."""
 
     email: EmailStr
+
+
+# OAuth Schemas
+
+
+class OAuthAuthUrlRequest(BaseModel):
+    """Request schema for OAuth authorization URL."""
+
+    provider: str = Field(..., description="OAuth provider name (google, github, etc.)")
+
+
+class OAuthAuthUrlResponse(BaseModel):
+    """Response schema for OAuth authorization URL."""
+
+    authUrl: str = Field(..., description="Authorization URL to redirect user to")
+    state: str = Field(..., description="CSRF protection state parameter")
+
+
+class OAuthCallbackRequest(BaseModel):
+    """Request schema for OAuth callback."""
+
+    code: str = Field(..., description="Authorization code from provider")
+    state: str = Field(..., description="CSRF protection state parameter")
+    recaptchaToken: str | None = Field(default=None, description="reCAPTCHA token (optional)")
+
+
+class OAuthCallbackResponse(BaseModel):
+    """Response schema for OAuth callback (same as LoginResponse)."""
+
+    user: UserResponse
+    accessToken: str
+    refreshToken: str
+    tokenType: str = "bearer"
+    expiresIn: int
+    requiresEmailVerification: bool = False  # OAuth emails are pre-verified

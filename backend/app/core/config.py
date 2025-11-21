@@ -165,6 +165,17 @@ class RecaptchaSettings(BaseSettings):
         return v
 
 
+class OAuthSettings(BaseSettings):
+    """OAuth authentication configuration."""
+
+    model_config = _base_config
+
+    # Google OAuth
+    google_client_id: str = Field(default="", validation_alias="GOOGLE_OAUTH_CLIENT_ID", description="Google OAuth client ID")
+    google_client_secret: str = Field(default="", validation_alias="GOOGLE_OAUTH_CLIENT_SECRET", description="Google OAuth client secret")
+    google_redirect_uri: str = Field(default="", validation_alias="GOOGLE_OAUTH_REDIRECT_URI", description="Google OAuth redirect URI")
+
+
 class EmailSettings(BaseSettings):
     """Email service configuration."""
 
@@ -202,6 +213,7 @@ class Settings(BaseSettings):
     rate_limit: RateLimitSettings = Field(default_factory=RateLimitSettings)
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
     recaptcha: RecaptchaSettings = Field(default_factory=RecaptchaSettings)
+    oauth: OAuthSettings = Field(default_factory=OAuthSettings)
     email: EmailSettings = Field(default_factory=EmailSettings)
 
     # Legacy compatibility - still accessible at root level

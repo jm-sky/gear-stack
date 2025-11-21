@@ -11,11 +11,13 @@ import { Input } from '@/components/ui/input'
 import GuestLayoutCentered from '@/layouts/GuestLayoutCentered.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { forgotPasswordSchema } from '@/modules/auth/validation/forgotPassword.schema'
+import { useRecaptcha } from '@/shared/composables/useRecaptcha'
 import { isValidationError } from '@/shared/utils/typeGuards'
 import type { ForgotPasswordData } from '@/modules/auth/types/user.type'
 
 const { t } = useI18n()
 const { forgotPassword, isForgotPasswordLoading } = useAuth()
+const { getToken } = useRecaptcha()
 
 const { handleSubmit, setErrors } = useForm({
   validationSchema: toTypedSchema(forgotPasswordSchema),
@@ -28,7 +30,13 @@ const successMessage = ref('')
 
 const onSubmit = handleSubmit(async (values: ForgotPasswordData) => {
   try {
-    const response = await forgotPassword(values)
+    // Get reCAPTCHA token before request
+    const recaptchaToken = await getToken('forgot_password')
+
+    const response = await forgotPassword({
+      ...values,
+      recaptchaToken,
+    })
     successMessage.value = response.message
   } catch (err: unknown) {
     if (isValidationError(err)) {

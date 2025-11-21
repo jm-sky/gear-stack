@@ -63,7 +63,7 @@ class UserRepository(SearchMixin, UserRepositoryInterface):
             id=user_db.id,
             email=user_db.email,
             name=user_db.name,
-            hashedPassword=user_db.hashed_password,
+            hashedPassword=user_db.hashed_password or "",  # OAuth users may not have password
             isActive=user_db.is_active,
             isAdmin=user_db.is_admin,
             isEmailVerified=user_db.is_email_verified,
@@ -73,6 +73,9 @@ class UserRepository(SearchMixin, UserRepositoryInterface):
             emailVerificationToken=user_db.email_verification_token,
             emailVerificationSentAt=user_db.email_verification_sent_at,
             emailVerifiedAt=user_db.email_verified_at,
+            oauthProvider=user_db.oauth_provider,
+            oauthProviderId=user_db.oauth_provider_id,
+            avatarUrl=user_db.avatar_url,
         )
 
     async def create_user(
@@ -329,6 +332,67 @@ class UserRepository(SearchMixin, UserRepositoryInterface):
 
         await self.db.commit()
         return True
+
+    async def create_oauth_user(
+        self,
+        email: str,
+        name: str,
+        provider: str,
+        provider_id: str,
+        avatar_url: str | None = None,
+    ) -> User:
+        """Create a new user via OAuth (no password)."""
+        # Normalize email using helper function
+        normalized_email = normalize_email(email)
+
+        # Check if user already exists
+        stmt = select(UserDB).where(UserDB.email == normalized_email)
+        result = await self.db.execute(stmt)
+        existing_user = result.scalar_one_or_none()
+
+        if existing_user:
+            raise UserAlreadyExistsError()
+
+        # Generate new ID
+        user_id = generate_id()
+
+        # Create UserDB instance (no password for OAuth users)
+        user_db = UserDB(
+            id=user_id,
+            email=normalized_email,
+            name=name,
+            hashed_password=None,  # OAuth users don't have passwords
+            is_active=True,
+            is_admin=False,
+            created_at=datetime.now(UTC),
+            is_email_verified=True,  # OAuth emails are pre-verified
+            email_verified_at=datetime.now(UTC),
+            oauth_provider=provider,
+            oauth_provider_id=provider_id,
+            avatar_url=avatar_url,
+        )
+
+        self.db.add(user_db)
+        await self.db.commit()
+        await self.db.refresh(user_db)
+
+        return self._map_user(user_db)
+
+    async def get_user_by_oauth_provider(
+        self, provider: str, provider_id: str
+    ) -> User | None:
+        """Get user by OAuth provider and provider ID."""
+        stmt = select(UserDB).where(
+            UserDB.oauth_provider == provider,
+            UserDB.oauth_provider_id == provider_id,
+        )
+        result = await self.db.execute(stmt)
+        user_db = result.scalar_one_or_none()
+
+        if not user_db:
+            return None
+
+        return self._map_user(user_db)
 
 
 def get_user_repository(

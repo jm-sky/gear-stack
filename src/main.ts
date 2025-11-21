@@ -9,11 +9,17 @@ import { i18n } from '@/i18n'
 import App from './App.vue'
 import router from './router'
 import { config } from './shared/config/config'
+import { loadRecaptchaScript } from './shared/utils/recaptcha'
 import 'floating-vue/dist/style.css'
 
 // Set page title from app config
 if (typeof document !== 'undefined') {
   document.title = config.app.name
+}
+
+// Load reCAPTCHA script early (non-blocking)
+if (config.recaptcha.enabled) {
+  loadRecaptchaScript().catch(console.error)
 }
 
 const app = createApp(App)

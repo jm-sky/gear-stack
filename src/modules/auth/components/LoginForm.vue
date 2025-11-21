@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { AuthRouteNames, AuthRoutePaths } from '@/modules/auth/config/routes'
 import { loginSchema } from '@/modules/auth/validation/login.schema'
+import { useRecaptcha } from '@/shared/composables/useRecaptcha'
 import { isValidationError } from '@/shared/utils/typeGuards'
 import type { IAuthService } from '@/modules/auth/types/auth.type'
 import type { LoginCredentials } from '@/modules/auth/types/user.type'
@@ -28,6 +29,7 @@ const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
 const { login, isLoggingIn } = useAuth(authService)
+const { getToken } = useRecaptcha()
 
 const { handleSubmit, setErrors } = useForm({
   validationSchema: toTypedSchema(loginSchema),
@@ -39,7 +41,13 @@ const { handleSubmit, setErrors } = useForm({
 
 const onSubmit = handleSubmit(async (values: LoginCredentials) => {
   try {
-    const response = await login(values)
+    // Get reCAPTCHA token before login
+    const recaptchaToken = await getToken('login')
+
+    const response = await login({
+      ...values,
+      recaptchaToken,
+    })
 
     // Check if 2FA is required
     if ('requiresTwoFactor' in response && response.requiresTwoFactor) {

@@ -65,7 +65,7 @@ class User(BaseModel):
     id: str  # ULID or UUID as string
     email: EmailStr
     name: str
-    hashedPassword: str
+    hashedPassword: str | None = None  # Nullable for OAuth users
     isActive: bool = True
     isAdmin: bool = False
     isEmailVerified: bool = False
@@ -75,9 +75,14 @@ class User(BaseModel):
     emailVerificationToken: str | None = None
     emailVerificationSentAt: datetime | None = None
     emailVerifiedAt: datetime | None = None
+    oauthProvider: str | None = None  # 'google', 'github', etc.
+    oauthProviderId: str | None = None  # Provider's user ID
+    avatarUrl: str | None = None  # Profile picture URL
 
     def verify_password(self, password: str) -> bool:
         """Verify password against stored hash."""
+        if not self.hashedPassword:
+            return False  # OAuth users don't have passwords
         return verify_password(password, self.hashedPassword)
 
     def set_password(self, password: str) -> None:

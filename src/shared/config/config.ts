@@ -22,6 +22,16 @@ export const config = {
     enabled: import.meta.env.VITE_ENABLE_BACKEND === 'true',
     baseUrl: import.meta.env.VITE_API_BASE_URL ?? '/api',
   },
+  recaptcha: {
+    siteKey: import.meta.env.VITE_GOOGLE_RECAPTCHA_SITE_KEY ?? '',
+    enabled: !!import.meta.env.VITE_GOOGLE_RECAPTCHA_SITE_KEY,
+  },
+  oauth: {
+    google: {
+      clientId: import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID ?? '',
+      enabled: !!import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID,
+    },
+  },
   defaults: {
     preferredWeightUnit: 'g' as TGearWeightUnit,
   },

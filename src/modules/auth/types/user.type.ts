@@ -17,6 +17,7 @@ export interface User {
 export interface LoginCredentials {
   email: string
   password: string
+  recaptchaToken?: string | null
 }
 
 export interface RegisterCredentials {
@@ -24,10 +25,12 @@ export interface RegisterCredentials {
   email: string
   password: string
   passwordConfirmation: string
+  recaptchaToken?: string | null
 }
 
 export interface ForgotPasswordData {
   email: string
+  recaptchaToken?: string | null
 }
 
 export interface ResetPasswordData {

@@ -10,12 +10,14 @@ import { Input } from '@/components/ui/input'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { AuthRouteNames } from '@/modules/auth/config/routes'
 import { registerSchema } from '@/modules/auth/validation/register.schema'
+import { useRecaptcha } from '@/shared/composables/useRecaptcha'
 import { isValidationError } from '@/shared/utils/typeGuards'
 import type { RegisterCredentials } from '@/modules/auth/types/user.type'
 
 const { t } = useI18n()
 const router = useRouter()
 const { register, isRegistering } = useAuth()
+const { getToken } = useRecaptcha()
 
 const { handleSubmit, setErrors } = useForm({
   validationSchema: toTypedSchema(registerSchema),
@@ -29,7 +31,13 @@ const { handleSubmit, setErrors } = useForm({
 
 const onSubmit = handleSubmit(async (values: RegisterCredentials) => {
   try {
-    const response = await register(values)
+    // Get reCAPTCHA token before registration
+    const recaptchaToken = await getToken('register')
+
+    const response = await register({
+      ...values,
+      recaptchaToken,
+    })
     toast.success(response.message ?? t('auth.register_success'))
     await router.push({ name: AuthRouteNames.verifyEmail, query: { email: values.email } })
   } catch (err: unknown) {
