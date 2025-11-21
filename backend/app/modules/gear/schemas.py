@@ -31,6 +31,12 @@ class ContainerCreate(BaseModel):
     parentContainerId: str | None = Field(None, alias="parentContainerId")
     brand: str | None = Field(None, max_length=255)
     price: float | None = Field(None, ge=0)
+    hideWhenNested: bool | None = Field(default=None, alias="hideWhenNested")
+    weight: float | None = Field(None, ge=0)
+    weightUnit: GearWeightUnit | None = Field(None, alias="weightUnit")
+    maxWeight: float | None = Field(None, ge=0, alias="maxWeight")
+    maxWeightUnit: GearWeightUnit | None = Field(None, alias="maxWeightUnit")
+    url: str | None = None
 
     model_config = {"populate_by_name": True}
 
@@ -45,6 +51,12 @@ class ContainerUpdate(BaseModel):
     parentContainerId: str | None = Field(None, alias="parentContainerId")
     brand: str | None = Field(None, max_length=255)
     price: float | None = Field(None, ge=0)
+    hideWhenNested: bool | None = Field(None, alias="hideWhenNested")
+    weight: float | None = Field(None, ge=0)
+    weightUnit: GearWeightUnit | None = Field(None, alias="weightUnit")
+    maxWeight: float | None = Field(None, ge=0, alias="maxWeight")
+    maxWeightUnit: GearWeightUnit | None = Field(None, alias="maxWeightUnit")
+    url: str | None = None
 
     model_config = {"populate_by_name": True}
 
@@ -68,6 +80,9 @@ class ItemResponse(BaseModel):
     brand: str | None = None
     color: str | None = None
     quality: GearItemQuality | None = None
+    linkedItemId: str | None = Field(None, alias="linkedItemId")
+    wearable: bool | None = None
+    consumable: bool | None = None
     createdAt: datetime
     updatedAt: datetime
 
@@ -85,6 +100,12 @@ class ContainerResponse(BaseModel):
     parentContainerId: str | None = Field(None, alias="parentContainerId")
     brand: str | None = None
     price: float | None = None
+    hideWhenNested: bool | None = None
+    weight: float | None = None
+    weightUnit: GearWeightUnit | None = Field(None, alias="weightUnit")
+    maxWeight: float | None = None
+    maxWeightUnit: GearWeightUnit | None = Field(None, alias="maxWeightUnit")
+    url: str | None = None
     items: list[ItemResponse] = []
     createdAt: datetime
     updatedAt: datetime
@@ -111,6 +132,9 @@ class ItemCreate(BaseModel):
     brand: str | None = Field(None, max_length=255)
     color: str | None = Field(None, max_length=50)
     quality: GearItemQuality | None = None
+    linkedItemId: str | None = Field(None, alias="linkedItemId")
+    wearable: bool | None = Field(default=None)
+    consumable: bool | None = Field(default=None)
 
     model_config = {"populate_by_name": True}
 
@@ -133,5 +157,8 @@ class ItemUpdate(BaseModel):
     brand: str | None = Field(None, max_length=255)
     color: str | None = Field(None, max_length=50)
     quality: GearItemQuality | None = None
+    linkedItemId: str | None = Field(None, alias="linkedItemId")
+    wearable: bool | None = None
+    consumable: bool | None = None
 
     model_config = {"populate_by_name": True}

@@ -267,5 +267,3 @@ async def delete_account(request_data: DeleteAccountRequest, current_user: Curre
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except UserNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-
-

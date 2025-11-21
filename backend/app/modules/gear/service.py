@@ -63,6 +63,9 @@ class GearService:
             brand=item.brand,
             color=item.color,
             quality=item.quality,
+            linkedItemId=item.linked_item_id,
+            wearable=item.wearable,
+            consumable=item.consumable,
             createdAt=item.created_at,
             updatedAt=item.updated_at,
         )
@@ -86,6 +89,12 @@ class GearService:
             parentContainerId=container.parent_container_id,
             brand=container.brand,
             price=container.price,
+            hideWhenNested=container.hide_when_nested,
+            weight=container.weight,
+            weightUnit=container.weight_unit,
+            maxWeight=container.max_weight,
+            maxWeightUnit=container.max_weight_unit,
+            url=container.url,
             items=items,
             createdAt=container.created_at,
             updatedAt=container.updated_at,
@@ -119,9 +128,7 @@ class GearService:
             return None
         return self._map_container_to_response(container)
 
-    async def get_containers(
-        self, user_id: str, skip: int = 0, limit: int = 100
-    ) -> list[ContainerResponse]:
+    async def get_containers(self, user_id: str, skip: int = 0, limit: int = 100) -> list[ContainerResponse]:
         """Get all containers for a user.
 
         Args:
@@ -135,9 +142,7 @@ class GearService:
         containers = await self.repository.get_containers(user_id, skip, limit)
         return [self._map_container_to_response(container) for container in containers]
 
-    async def update_container(
-        self, container_id: str, user_id: str, data: ContainerUpdate
-    ) -> ContainerResponse | None:
+    async def update_container(self, container_id: str, user_id: str, data: ContainerUpdate) -> ContainerResponse | None:
         """Update a container.
 
         Args:
@@ -165,9 +170,7 @@ class GearService:
         """
         return await self.repository.delete_container(container_id, user_id)
 
-    async def create_item(
-        self, container_id: str, user_id: str, data: ItemCreate
-    ) -> ItemResponse | None:
+    async def create_item(self, container_id: str, user_id: str, data: ItemCreate) -> ItemResponse | None:
         """Create a new gear item in a container.
 
         Args:
@@ -198,9 +201,7 @@ class GearService:
             return None
         return self._map_item_to_response(item)
 
-    async def get_items(
-        self, container_id: str, user_id: str, skip: int = 0, limit: int = 100
-    ) -> list[ItemResponse]:
+    async def get_items(self, container_id: str, user_id: str, skip: int = 0, limit: int = 100) -> list[ItemResponse]:
         """Get all items in a container.
 
         Args:
@@ -215,9 +216,7 @@ class GearService:
         items = await self.repository.get_items(container_id, user_id, skip, limit)
         return [self._map_item_to_response(item) for item in items]
 
-    async def update_item(
-        self, item_id: str, user_id: str, data: ItemUpdate
-    ) -> ItemResponse | None:
+    async def update_item(self, item_id: str, user_id: str, data: ItemUpdate) -> ItemResponse | None:
         """Update a gear item.
 
         Args:

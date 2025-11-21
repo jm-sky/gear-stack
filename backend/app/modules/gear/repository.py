@@ -60,6 +60,12 @@ class GearRepository(SearchMixin):
             parent_container_id=data.parentContainerId,
             brand=data.brand,
             price=data.price,
+            hide_when_nested=data.hideWhenNested,
+            weight=data.weight,
+            weight_unit=data.weightUnit,
+            max_weight=data.maxWeight,
+            max_weight_unit=data.maxWeightUnit,
+            url=data.url,
         )
         self.db.add(container)
         await self.db.commit()
@@ -76,11 +82,7 @@ class GearRepository(SearchMixin):
         Returns:
             Container if found, None otherwise
         """
-        stmt = (
-            select(GearContainerDB)
-            .where(and_(GearContainerDB.id == container_id, GearContainerDB.user_id == user_id))
-            .options(selectinload(GearContainerDB.items))
-        )
+        stmt = select(GearContainerDB).where(and_(GearContainerDB.id == container_id, GearContainerDB.user_id == user_id)).options(selectinload(GearContainerDB.items))
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -95,20 +97,11 @@ class GearRepository(SearchMixin):
         Returns:
             List of containers
         """
-        stmt = (
-            select(GearContainerDB)
-            .where(GearContainerDB.user_id == user_id)
-            .options(selectinload(GearContainerDB.items))
-            .offset(skip)
-            .limit(limit)
-            .order_by(GearContainerDB.created_at.desc())
-        )
+        stmt = select(GearContainerDB).where(GearContainerDB.user_id == user_id).options(selectinload(GearContainerDB.items)).offset(skip).limit(limit).order_by(GearContainerDB.created_at.desc())
         result = await self.db.execute(stmt)
         return result.scalars().all()
 
-    async def update_container(
-        self, container_id: str, user_id: str, data: ContainerUpdate
-    ) -> GearContainerDB | None:
+    async def update_container(self, container_id: str, user_id: str, data: ContainerUpdate) -> GearContainerDB | None:
         """Update a container.
 
         Args:
@@ -127,6 +120,10 @@ class GearRepository(SearchMixin):
         # Map camelCase to snake_case
         field_mapping = {
             "parentContainerId": "parent_container_id",
+            "hideWhenNested": "hide_when_nested",
+            "weightUnit": "weight_unit",
+            "maxWeight": "max_weight",
+            "maxWeightUnit": "max_weight_unit",
         }
 
         for key, value in update_data.items():
@@ -191,6 +188,9 @@ class GearRepository(SearchMixin):
             brand=data.brand,
             color=data.color,
             quality=data.quality,
+            linked_item_id=data.linkedItemId,
+            wearable=data.wearable,
+            consumable=data.consumable,
         )
         self.db.add(item)
         await self.db.commit()
@@ -207,17 +207,11 @@ class GearRepository(SearchMixin):
         Returns:
             Item if found, None otherwise
         """
-        stmt = (
-            select(GearItemDB)
-            .join(GearContainerDB, GearItemDB.container_id == GearContainerDB.id)
-            .where(and_(GearItemDB.id == item_id, GearContainerDB.user_id == user_id))
-        )
+        stmt = select(GearItemDB).join(GearContainerDB, GearItemDB.container_id == GearContainerDB.id).where(and_(GearItemDB.id == item_id, GearContainerDB.user_id == user_id))
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def get_items(
-        self, container_id: str, user_id: str, skip: int = 0, limit: int = 100
-    ) -> Sequence[GearItemDB]:
+    async def get_items(self, container_id: str, user_id: str, skip: int = 0, limit: int = 100) -> Sequence[GearItemDB]:
         """Get all items in a container.
 
         Args:
@@ -234,13 +228,7 @@ class GearRepository(SearchMixin):
         if not container:
             return []
 
-        stmt = (
-            select(GearItemDB)
-            .where(GearItemDB.container_id == container_id)
-            .offset(skip)
-            .limit(limit)
-            .order_by(GearItemDB.created_at.desc())
-        )
+        stmt = select(GearItemDB).where(GearItemDB.container_id == container_id).offset(skip).limit(limit).order_by(GearItemDB.created_at.desc())
         result = await self.db.execute(stmt)
         return result.scalars().all()
 
@@ -265,6 +253,7 @@ class GearRepository(SearchMixin):
             "weightUnit": "weight_unit",
             "expirationDate": "expiration_date",
             "containerId": "nested_container_id",
+            "linkedItemId": "linked_item_id",
         }
 
         for key, value in update_data.items():

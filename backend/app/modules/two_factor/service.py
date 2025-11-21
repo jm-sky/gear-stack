@@ -41,15 +41,11 @@ class TwoFactorService:
     # TOTP Methods - delegate to TotpService
     # ==================================================================
 
-    async def initiate_totp_setup(
-        self, user_id: str, email: str
-    ) -> dict[str, Any]:
+    async def initiate_totp_setup(self, user_id: str, email: str) -> dict[str, Any]:
         """Start TOTP setup. Delegates to TotpService."""
         return await self.totp.initiate_setup(user_id, email)
 
-    async def verify_totp_setup(
-        self, setup_token: str, code: str
-    ) -> dict[str, Any]:
+    async def verify_totp_setup(self, setup_token: str, code: str) -> dict[str, Any]:
         """Verify TOTP setup. Delegates to TotpService."""
         return await self.totp.verify_setup(setup_token, code)
 
@@ -65,9 +61,7 @@ class TwoFactorService:
         user_repository: Any = None,
     ) -> dict[str, Any]:
         """Regenerate backup codes. Delegates to TotpService."""
-        return await self.totp.regenerate_backup_codes(
-            user_id, password, totp_code, user_repository
-        )
+        return await self.totp.regenerate_backup_codes(user_id, password, totp_code, user_repository)
 
     async def disable_totp(
         self,
@@ -77,13 +71,9 @@ class TwoFactorService:
         user_repository: Any = None,
     ) -> dict[str, Any]:
         """Disable TOTP. Delegates to TotpService."""
-        return await self.totp.disable(
-            user_id, password, backup_code, user_repository
-        )
+        return await self.totp.disable(user_id, password, backup_code, user_repository)
 
-    async def verify_totp_login(
-        self, two_factor_token: str, code: str
-    ) -> dict[str, Any]:
+    async def verify_totp_login(self, two_factor_token: str, code: str) -> dict[str, Any]:
         """Verify TOTP code during login and return JWT tokens.
 
         This method combines TOTP verification with token generation.
@@ -99,9 +89,7 @@ class TwoFactorService:
         user_id: str = payload["sub"]
 
         # Verify TOTP/backup code
-        is_valid, is_backup = await self.totp.verify_code(
-            user_id, code, mark_used=True
-        )
+        is_valid, is_backup = await self.totp.verify_code(user_id, code, mark_used=True)
 
         if not is_valid:
             from .exceptions import InvalidTwoFactorCodeError
@@ -130,9 +118,7 @@ class TwoFactorService:
         name: str | None = None,
     ) -> dict[str, Any]:
         """Initiate passkey registration. Delegates to WebAuthnService."""
-        return await self.webauthn.initiate_registration(
-            user_id, user_email, user_name, name
-        )
+        return await self.webauthn.initiate_registration(user_id, user_email, user_name, name)
 
     async def complete_passkey_registration(
         self,
@@ -143,9 +129,7 @@ class TwoFactorService:
         origin: str | None = None,
     ) -> dict[str, Any]:
         """Complete passkey registration. Delegates to WebAuthnService."""
-        return await self.webauthn.complete_registration(
-            registration_token, credential_json, name, user_agent, origin
-        )
+        return await self.webauthn.complete_registration(registration_token, credential_json, name, user_agent, origin)
 
     async def get_webauthn_status(self, user_id: str) -> dict[str, Any]:
         """Get WebAuthn status. Delegates to WebAuthnService."""
@@ -155,9 +139,7 @@ class TwoFactorService:
         """Delete passkey. Delegates to WebAuthnService."""
         await self.webauthn.delete_passkey(passkey_id, user_id)
 
-    async def initiate_passkey_authentication(
-        self, user_id: str
-    ) -> dict[str, Any]:
+    async def initiate_passkey_authentication(self, user_id: str) -> dict[str, Any]:
         """Initiate passkey authentication. Delegates to WebAuthnService."""
         return await self.webauthn.initiate_authentication(user_id)
 
@@ -168,9 +150,7 @@ class TwoFactorService:
         challenge_data: dict | None = None,
     ) -> dict[str, Any]:
         """Complete passkey authentication. Delegates to WebAuthnService."""
-        return await self.webauthn.complete_authentication(
-            challenge_token, credential_json, challenge_data
-        )
+        return await self.webauthn.complete_authentication(challenge_token, credential_json, challenge_data)
 
     # ==================================================================
     # Combined 2FA Methods - use both services
@@ -187,12 +167,7 @@ class TwoFactorService:
         webauthn_status = await self.webauthn.get_status(user_id)
         has_passkeys = webauthn_status.get("enabled", False)
 
-        logger.info(
-            f"2FA check for user {user_id}: "
-            f"TOTP enabled={has_totp}, "
-            f"Passkeys enabled={has_passkeys}, "
-            f"Has 2FA={has_totp or has_passkeys}"
-        )
+        logger.info(f"2FA check for user {user_id}: " f"TOTP enabled={has_totp}, " f"Passkeys enabled={has_passkeys}, " f"Has 2FA={has_totp or has_passkeys}")
 
         return has_totp or has_passkeys
 
@@ -244,9 +219,7 @@ class TwoFactorService:
             "required": False,  # Global setting - can be added later
         }
 
-    async def update_preferred_method(
-        self, user_id: str, method: str
-    ) -> None:
+    async def update_preferred_method(self, user_id: str, method: str) -> None:
         """Update user's preferred 2FA method.
 
         Args:
@@ -258,9 +231,7 @@ class TwoFactorService:
         """
         valid_methods = ["totp", "webauthn"]
         if method not in valid_methods:
-            raise ValueError(
-                f"Invalid method. Must be one of: {valid_methods}"
-            )
+            raise ValueError(f"Invalid method. Must be one of: {valid_methods}")
 
         # Verify the method is enabled for the user
         if method == "totp":
@@ -274,9 +245,7 @@ class TwoFactorService:
 
         # TODO: Store preferred method in user_settings table
         # For now, just validate and log
-        logger.info(
-            f"Updated preferred 2FA method for user {user_id} to {method}"
-        )
+        logger.info(f"Updated preferred 2FA method for user {user_id} to {method}")
 
         # Placeholder for actual storage:
         # await self.repository.update_user_preferred_2fa_method(user_id, method)

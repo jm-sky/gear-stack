@@ -2,14 +2,14 @@ services:
   # PostgreSQL Database
   db:
     image: postgres:17-alpine
-    container_name: backend-db
+    container_name: gear-stack-db
     restart: unless-stopped
     environment:
       - POSTGRES_DB=${POSTGRES_DB:-backend}
       - POSTGRES_USER=${POSTGRES_USER:-backend}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - gear_stack_postgres_data:/var/lib/postgresql/data
     ports:
       - "${DB_FORWARD_PORT:-5432}:5432"  # Exposed for development
     healthcheck:
@@ -29,7 +29,7 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     image: backend:dev
-    container_name: backend-dev
+    container_name: gear-stack-app
     restart: unless-stopped
     depends_on:
       db:
@@ -48,10 +48,15 @@ services:
       - "${APP_PORT:-8000}:8000"
     volumes:
       # Mount source code for hot reload
-      - ./app:/app/app
-      - ./scripts:/app/scripts
-      - ./tests:/app/tests
-      - ./main.py:/app/main.py
+      # Paths are relative to docker-compose.dev.yml location (backend/ directory)
+      # Using :delegated for better performance on WSL2/macOS
+      - ./app:/app/app:rw,delegated
+      - ./scripts:/app/scripts:rw,delegated
+      - ./tests:/app/tests:rw,delegated
+      - ./migrations:/app/migrations:rw,delegated
+      - ./main.py:/app/main.py:rw,delegated
+      - ./cli:/app/cli:ro,delegated
+      - ./cli.py:/app/cli.py:ro,delegated
     logging:
       driver: "json-file"
       options:
@@ -59,6 +64,6 @@ services:
         max-file: "3"
 
 volumes:
-  postgres_data:
+  gear_stack_postgres_data:
     driver: local
 

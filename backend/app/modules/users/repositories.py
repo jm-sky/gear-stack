@@ -73,10 +73,7 @@ class UserRepository:
             password handling which should only be done through auth endpoints.
             Admin users can create users through the auth module's endpoints.
         """
-        raise NotImplementedError(
-            "User creation with password must be done through auth module endpoints. "
-            "Use POST /auth/register for new user registration."
-        )
+        raise NotImplementedError("User creation with password must be done through auth module endpoints. " "Use POST /auth/register for new user registration.")
 
     async def get_user_by_email(self, email: str) -> User | None:
         """Get user by email from database."""
