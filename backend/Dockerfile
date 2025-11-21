@@ -64,6 +64,7 @@ COPY --chown=appuser:appuser main.py ./main.py
 COPY --chown=appuser:appuser cli ./cli
 COPY --chown=appuser:appuser cli.py ./cli.py
 COPY --chown=appuser:appuser manage.py ./manage.py
+COPY --chown=appuser:appuser migrations ./migrations
 
 # Copy shared code if exists (optional)
 # COPY --chown=appuser:appuser shared /app/shared
