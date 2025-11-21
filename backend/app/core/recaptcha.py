@@ -59,8 +59,18 @@ async def verify_recaptcha(token: str, action: str = "submit") -> dict[str, Any]
         logger.debug("reCAPTCHA verification skipped (disabled in settings)")
         return {"success": True, "score": 1.0, "action": action, "skipped": True}
 
+    # Validate configuration when reCAPTCHA is enabled
+    if not settings.recaptcha.secret_key:
+        logger.error("reCAPTCHA is enabled but RECAPTCHA_SECRET_KEY is not configured")
+        raise RecaptchaError("reCAPTCHA secret key is not configured")
+
     if not token:
         raise RecaptchaError("reCAPTCHA token is required")
+    
+    # Validate token format (basic check - should be a non-empty string)
+    if not isinstance(token, str) or len(token) < 100:
+        logger.warning(f"reCAPTCHA token appears invalid: length={len(token) if isinstance(token, str) else 'N/A'}")
+        raise RecaptchaError("reCAPTCHA token format is invalid")
 
     try:
         async with httpx.AsyncClient() as client:
@@ -86,11 +96,28 @@ async def verify_recaptcha(token: str, action: str = "submit") -> dict[str, Any]
         if not result.get("success"):
             error_codes = result.get("error-codes", [])
             error_message = ", ".join(error_codes) if error_codes else "unknown error"
-            logger.warning(
+            
+            # Log full response for debugging
+            logger.error(
                 f"reCAPTCHA verification failed: {error_message}. "
-                f"Token length: {len(token)}, Action: {action}"
+                f"Token length: {len(token)}, Action: {action}, "
+                f"Full response: {result}"
             )
-            raise RecaptchaError(f"reCAPTCHA verification failed: {error_message}")
+            
+            # Provide more helpful error messages for common issues
+            if "invalid-input-response" in error_codes:
+                raise RecaptchaError(
+                    "reCAPTCHA verification failed: invalid token. "
+                    "This usually means the token expired, was already used, "
+                    "or the secret key doesn't match the site key."
+                )
+            elif "invalid-input-secret" in error_codes:
+                raise RecaptchaError(
+                    "reCAPTCHA verification failed: invalid secret key. "
+                    "Please check your RECAPTCHA_SECRET_KEY configuration."
+                )
+            else:
+                raise RecaptchaError(f"reCAPTCHA verification failed: {error_message}")
 
         # Verify action matches (prevents token reuse across different forms)
         if result.get("action") != action:

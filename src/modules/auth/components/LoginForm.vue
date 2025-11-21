@@ -43,8 +43,16 @@ const { handleSubmit, setErrors } = useForm({
 
 const onSubmit = handleSubmit(async (values: LoginCredentials) => {
   try {
-    // Get reCAPTCHA token before login
-    const recaptchaToken = await getToken('login')
+    // Get reCAPTCHA token before login (generate fresh token right before API call)
+    let recaptchaToken: string | null = null
+    if (config.recaptcha.enabled) {
+      recaptchaToken = await getToken('login')
+      if (!recaptchaToken) {
+        toast.error(t('auth.recaptcha_error') || 'Failed to generate reCAPTCHA token. Please try again.')
+        console.error('[Login] reCAPTCHA token generation failed')
+        return
+      }
+    }
 
     const response = await login({
       ...values,
