@@ -50,11 +50,27 @@ When generating or updating gear lists, use this format:
 - If omitted for items, default weight will be assigned (100g)
 - Container weight is optional but recommended for accurate total weight calculations
 
+### Item Descriptions (Optional)
+- Descriptions can be included in two formats
+- Always in italics: \`*text*\`
+- **Inline format:** Description in parentheses immediately after item name
+  - Format: \`- **Item Name** *(description)* ...\`
+  - Example: \`- **Knife** *(small, folding)* - 100g\`
+- **New line format:** Description on separate indented line below item name
+  - Format: \`- **Item Name** ...\n  *description*\`
+  - Example:
+    \`\`\`markdown
+    - **Knife** - 100g
+      *small, folding*
+    \`\`\`
+- Descriptions can contain parentheses and other characters
+- Parser automatically recognizes both formats
+
 ## Example
 \`\`\`markdown
 ## Bug-Out Bag [#bug-out-bag] (Backpack) <https://example.com/backpack> - 2000g
 - **Water Bottle** x2 (Nalgene) - 300g
-- **Tactical Knife** (Victorinox, Black) - 200g
+- **Tactical Knife** *(small, folding)* (Victorinox, Black) - 200g
 - **Headlamp** (Petzl, Red) (Missing) - 90g
 - **Hiking Boots** (Salomon) (Wearable) - 1200g
 - **Energy Bar** (Consumable) - 50g
@@ -62,7 +78,8 @@ When generating or updating gear lists, use this format:
 
 ## First Aid Pouch [#first-aid-pouch] (Pouch) - 500g
 - **Bandages** x5 - 100g
-- **Pain Pills** (Expiration: 31.12.2025, Consumable) - 50g
+- **Pain Pills**
+  *Expiration: 31.12.2025, Consumable* - 50g
 \`\`\`
 
 ## Nested Containers
@@ -231,9 +248,22 @@ class MarkdownImportService {
       // Item line (- Item)
       if (line.startsWith('- ') && currentContainer) {
         try {
-          const item = this.parseItemLine(line.substring(2).trim())
+          // Check for newline description format (next line is indented italic text)
+          let nextLine: string | undefined
+          if (i + 1 < lines.length) {
+            // Check if next line is indented (2+ spaces) and starts with italic text
+            if (lines[i + 1]?.match(/^\s{2,}\*([^*]+)\*$/)) {
+              nextLine = lines[i + 1]
+            }
+          }
+
+          const item = this.parseItemLine(line.substring(2).trim(), nextLine)
           if (item) {
             currentContainer.items.push(item)
+            // Skip next line if it was a description line
+            if (nextLine) {
+              i++ // Skip the description line
+            }
           }
         } catch (error) {
           result.errors.push(`Line ${i + 1}: ${error instanceof Error ? error.message : 'Unknown error'}`)
@@ -253,9 +283,11 @@ class MarkdownImportService {
    * Parse a single item line
    * New format: - **Item Name** [uuid:xxx] x2 (Brand, Color) [#container-id] (Status) - 500g
    * Old format: - Item name **Brand** (params) x5
+   * Inline description: - **Item Name** *(description)* ...
+   * Newline description: - **Item Name** ...\n  *description*
    * Flexible: Parser will try to guess all fields
    */
-  private parseItemLine(line: string): (ICreateItemDto & { nestedContainerId?: string; uuid?: string }) | null {
+  private parseItemLine(line: string, nextLine?: string): (ICreateItemDto & { nestedContainerId?: string; uuid?: string }) | null {
     if (!line) return null
 
     let workingLine = line
@@ -272,12 +304,48 @@ class MarkdownImportService {
     let uuid: string | undefined
     let wearable: boolean | undefined
     let consumable: boolean | undefined
+    let notes: string | undefined
 
     // 1. Extract bold text as item name (new format: **Item Name**)
+    // Also check for inline description format: **Name** *(description)*
     const boldMatch = workingLine.match(/\*\*([^*]+)\*\*/)
     if (boldMatch) {
       name = boldMatch[1]?.trim() ?? ''
       workingLine = workingLine.replace(boldMatch[0] ?? '', '').trim()
+
+      // Check for inline description format: *(description)* immediately after name
+      // Handle nested parentheses by manually parsing balanced parentheses
+      if (workingLine.startsWith('*(')) {
+        let depth = 0
+        let i = 2 // Start after '*('
+        let found = false
+        while (i < workingLine.length - 1) {
+          if (workingLine[i] === '(') {
+            depth++
+          } else if (workingLine[i] === ')') {
+            if (depth === 0) {
+              // Found closing ')', check if followed by '*'
+              if (workingLine[i + 1] === '*') {
+                notes = workingLine.substring(2, i).trim() // Extract text between *(
+                workingLine = workingLine.substring(i + 2).trim() // Remove *(...)*
+                found = true
+                break
+              }
+            } else {
+              depth--
+            }
+          }
+          i++
+        }
+        // Fallback: try simple regex if balanced parentheses matching fails
+        if (!found) {
+          const simpleMatch = workingLine.match(/^\*\(([^)]+)\)\*/)
+          if (simpleMatch) {
+            notes = simpleMatch[1]?.trim()
+            workingLine = workingLine.replace(simpleMatch[0] ?? '', '').trim()
+          }
+        }
+      }
     }
 
     // 2. Extract UUID from [uuid:xxx]
@@ -445,7 +513,15 @@ class MarkdownImportService {
       name = workingLine.trim()
     }
 
-    // 8. Determine category from name
+    // 8. Check for newline description format (next line is indented italic text)
+    if (!notes && nextLine) {
+      const newlineDescMatch = nextLine.match(/^\s{2,}\*([^*]+)\*$/)
+      if (newlineDescMatch) {
+        notes = newlineDescMatch[1]?.trim()
+      }
+    }
+
+    // 9. Determine category from name
     const category = this.matchCategory(name)
 
     const item: ICreateItemDto & { nestedContainerId?: string; uuid?: string } = {
@@ -462,6 +538,7 @@ class MarkdownImportService {
       url,
       wearable,
       consumable,
+      notes, // Item description/notes
       nestedContainerId, // Temporary slug reference to container
       uuid, // UUID for update workflow
     }

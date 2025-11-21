@@ -6,7 +6,7 @@ import { useRouter } from 'vue-router'
 import DataTable from '@/components/data-table/DataTable.vue'
 import Badge from '@/components/ui/badge/Badge.vue'
 import { Button } from '@/components/ui/button'
-import TableEmpty from '@/components/ui/table/TableEmpty.vue'
+import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
 import { ITEMS_TABLE_COLUMN_VISIBILITY_KEY } from '@/shared/config/config'
 import type { IGearItem } from '../types/gear.types'
 import { useGearSettings } from '../composables/useGearSettings'
@@ -319,19 +319,12 @@ function calculateTotalWeight(containerId: string): number {
     </template>
 
     <template #empty>
-      <TableEmpty :colspan="columns.length">
-        <div class="flex flex-col items-center justify-center text-center">
-          <div class="rounded-full bg-muted p-6 mb-4">
-            <Package class="size-12 text-muted-foreground" />
-          </div>
-          <h3 class="text-lg font-semibold mb-2">
-            {{ t('gear.item.empty') }}
-          </h3>
-          <p class="text-muted-foreground">
-            {{ t('gear.item.emptyDescription') }}
-          </p>
-        </div>
-      </TableEmpty>
+      <TableEmptyDecorated
+        :colspan="columns.length"
+        :icon="Package"
+        :title="t('gear.item.empty')"
+        :description="t('gear.item.emptyDescription')"
+      />
     </template>
   </DataTable>
 </template>

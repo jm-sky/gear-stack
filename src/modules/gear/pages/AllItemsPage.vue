@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import DataTable from '@/components/data-table/DataTable.vue'
 import Badge from '@/components/ui/badge/Badge.vue'
-import TableEmpty from '@/components/ui/table/TableEmpty.vue'
+import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { ALL_ITEMS_TABLE_COLUMN_VISIBILITY_KEY } from '@/shared/config/config'
 import type { IItemWithContainer } from '../utils/allItemsColumns'
@@ -205,15 +205,11 @@ function navigateToContainer(containerId: string) {
         </template>
 
         <template #empty>
-          <TableEmpty>
-            <Package class="size-12 text-muted-foreground mb-4" />
-            <h3 class="text-lg font-semibold mb-2">
-              {{ t('gear.allItems.empty', 'No items found') }}
-            </h3>
-            <p class="text-muted-foreground">
-              {{ t('gear.allItems.emptyDescription', 'Create containers and add items to see them here.') }}
-            </p>
-          </TableEmpty>
+          <TableEmptyDecorated
+            :colspan="columns.length"
+            :title="t('gear.allItems.empty', 'No items found')"
+            :description="t('gear.allItems.emptyDescription', 'Create containers and add items to see them here.')"
+          />
         </template>
       </DataTable>
     </div>

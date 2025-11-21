@@ -16,6 +16,7 @@ interface ExportOptions {
   showBrand?: boolean // Whether to show brand in export (default: true)
   showNestedContainer?: boolean // Whether to show nested container reference [#id] (default: true)
   showLegend?: boolean // Whether to show legend at the end (default: true)
+  descriptionFormat?: 'off' | 'inline' | 'newline' // Description format (default: 'off')
 }
 
 /**
@@ -53,6 +54,11 @@ function formatItem(
 
   // Item name
   parts.push(`**${item.name}**`)
+
+  // Description in inline format (immediately after name, before other fields)
+  if (item.notes && options.descriptionFormat === 'inline') {
+    parts.push(`*(${item.notes})*`)
+  }
 
   // UUID (for stable references) - only if showUuid is true (default: true)
   if (options.showUuid !== false) {
@@ -134,6 +140,13 @@ function formatItem(
     parts.push(`- ${weightText}`)
   }
 
+  // For newline format, split the line: name on first line, description on second line, then rest
+  if (item.notes && options.descriptionFormat === 'newline') {
+    const namePart = `**${item.name}**`
+    const restParts = parts.slice(1) // Everything after name (UUID, quantity, brand, etc.)
+    return `${indentStr}- ${namePart}\n${indentStr}  *${item.notes}*${restParts.length > 0 ? ' ' + restParts.join(' ') : ''}`
+  }
+
   return `${indentStr}- ${parts.join(' ')}`
 }
 
@@ -197,7 +210,7 @@ export function exportContainerToPrompt(
     ? getContainerTypeLabel(container.type)
     : container.type
   const containerId = generateContainerId(container.name)
-  
+
   // Build container header parts
   const containerHeaderParts: string[] = []
   containerHeaderParts.push(`## ${container.name}`)
@@ -210,12 +223,12 @@ export function exportContainerToPrompt(
     containerHeaderParts.push(`[uuid:${container.id}]`)
   }
   containerHeaderParts.push(`(${typeLabel})`)
-  
+
   // Add URL if provided
   if (container.url) {
     containerHeaderParts.push(`<${container.url}>`)
   }
-  
+
   // Add weight if provided
   if (container.weight !== undefined && container.weightUnit) {
     const weightText = formatWeight(container.weight, container.weightUnit)
@@ -223,7 +236,7 @@ export function exportContainerToPrompt(
     const weightValue = weightText.replace(/\s/g, '')
     containerHeaderParts.push(`- ${weightValue}`)
   }
-  
+
   lines.push(containerHeaderParts.join(' '))
 
   // Collect nested containers to show separately
@@ -322,7 +335,7 @@ export function exportContainersToPrompt(
 
   // Export each container without legend (legend will be added once at the end)
   const exportOptionsWithoutLegend = { ...options, showLegend: false }
-  
+
   containers.forEach((container, index) => {
     if (index > 0) {
       lines.push('')

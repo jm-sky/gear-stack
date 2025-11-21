@@ -29,6 +29,7 @@ export default {
     back: 'Back',
     done: 'Done',
     never: 'Never',
+    or: 'or',
     copyToClipboard: {
       success: 'Copied to clipboard',
       copied: 'Copied',

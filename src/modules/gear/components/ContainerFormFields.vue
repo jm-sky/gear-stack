@@ -154,7 +154,7 @@ const handleCancel = () => {
     <FormField v-slot="{ value, handleChange }" name="color">
       <FormItem>
         <FormLabel :label="$t('gear.container.color')" />
-        <div class="flex gap-2 flex-wrap">
+        <div class="grid grid-cols-5 sm:grid-cols-10 gap-2">
           <button
             v-for="color in CONTAINER_COLORS"
             :key="color"
@@ -164,7 +164,7 @@ const handleCancel = () => {
               COLOR_DOT_CLASSES[color],
               value === color || (!value && color === 'default') ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : 'opacity-50 hover:opacity-75',
             ]"
-            :aria-label="color"
+            :aria-label="$t(`gear.container.colors.${color}`)"
             :title="$t(`gear.container.colors.${color}`)"
             @click="handleChange(color)"
           />

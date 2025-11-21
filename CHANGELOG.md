@@ -21,6 +21,73 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.21.0] - 2025-01-21
+
+### Added
+- **Container Cloning Feature**:
+  - Added "Duplicate Container" action in container dropdown menu
+  - CloneContainerDialog with options:
+    - Editable new container name (default: "[Copy] Original Name")
+    - Checkbox: "Include nested containers"
+    - Checkbox: "Include item prices"
+  - Deep cloning with new UUIDs for all entities
+  - Preserves all container metadata (type, color, brand, description, etc.)
+  - Toast notification with success message
+  - Translations for cloning feature (PL/EN)
+
+- **TableEmptyDecorated Component**:
+  - New reusable component for decorated empty states in tables
+  - Supports custom icon, title, description
+  - Optional action button support
+  - Consistent styling across all empty states
+
+- **HomePage Empty State Options**:
+  - Added "Import from Markdown" option in empty state
+  - Added "Generate Sample Set" option in empty state
+  - Options displayed after "or" separator below main action
+
+- **Query Parameter Support for Import**:
+  - ContainersListPage now opens import dialog automatically when URL contains `?import=true`
+  - Allows direct navigation to import from HomePage
+
+### Changed
+- **UI/UX Improvements**:
+  - Improved empty states with decorated component (TableEmptyDecorated)
+    - AllItemsPage, ItemsTable now use TableEmptyDecorated
+    - DataTableEmpty refactored to use TableEmptyDecorated internally
+    - Consistent styling with icon in circular background
+  - Footer mobile layout improved (flex-col sm:flex-row with better gap spacing)
+  - Color grid in ContainerFormPage now uses responsive grid (5 columns on mobile, 10 on desktop)
+  - Horizontal scroll indicator added to DataTable (gradient hint on mobile)
+  - Search placeholder in ContainersListPage changed from "Search items..." to "Search containers..."
+
+- **Button Visibility Logic**:
+  - Header buttons on ContainersListPage and HomePage now hidden when containers list is empty
+  - Prevents duplicate "Create Container" buttons
+  - Dropdown menu always visible on ContainersListPage (contains import option)
+
+- **Accessibility**:
+  - Added aria-labels to all icon-only buttons:
+    - ContainerCardActions dropdown trigger
+    - ContainerHeader actions (SparklesIcon, MoreVertical)
+    - ContainersListPage actions (Sparkles)
+    - ContainersListPageDropdown trigger
+  - Added translations for "more actions" (PL/EN)
+
+### Fixed
+- **Critical Mobile UX Issues**:
+  - Fixed color grid layout on mobile (ContainerFormPage) - now displays 5 columns instead of 10 in single row
+  - Fixed footer mobile layout - better spacing and responsive columns
+  - Fixed duplicate "Create Container" buttons on ContainersListPage and HomePage
+  - Fixed placeholder text inconsistency ("Search items..." → "Search containers...")
+
+- **Component Issues**:
+  - Fixed TableEmptyDecorated component - proper icon component handling with computed
+  - Fixed empty states across application - consistent styling and layout
+  - Fixed horizontal scroll indicator positioning in DataTable
+
+---
+
 ## [0.20.0] - 2025-01-20
 
 ### Added

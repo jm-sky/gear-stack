@@ -2,6 +2,17 @@
 
 # Gear Stack Deployment Script
 # This script builds the application and deploys it to production
+#
+# Usage:
+#   - For local use: cd ~deploy/apps/gear-stack && scripts/deploy.sh
+#   - For CI/CD (deploy user): automatically uses ~/apps/gear-stack via GitHub Actions
+#
+# Note: Project should be stored in deploy user's apps directory
+# Other users can be added to 'deploy' group for access
+#
+# Requirements:
+#   - User must have sudo permissions to write to /var/www/gear-stack
+#   - User must have docker permissions (or be in docker group)
 
 set -e  # Exit on any error
 
