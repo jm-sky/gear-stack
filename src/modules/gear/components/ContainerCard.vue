@@ -113,6 +113,11 @@ const navigateToParent = (e: Event) => {
     router.push(`/gear/${firstParentContainer.value.id}`)
   }
 }
+
+// Navigate to container detail
+const handleShow = () => {
+  router.push(`/gear/${props.container.id}`)
+}
 </script>
 
 <template>
