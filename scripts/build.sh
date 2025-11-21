@@ -2,6 +2,12 @@
 
 # Gear Stack Build and Deploy Script
 # This script installs dependencies, builds the application, and deploys to /var/www/gear-stack
+#
+# Usage: For local development
+#   cd ~deploy/apps/gear-stack && scripts/build.sh
+#
+# Note: This is a simpler script for local use. For full deployment with backend,
+#       use scripts/deploy.sh instead.
 
 set -e  # Exit on any error
 

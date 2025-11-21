@@ -2,10 +2,12 @@ name: Deploy to VPS
 
 # Required GitHub Secrets:
 # - VPS_HOST: IP address or hostname of your VPS
-# - VPS_USER: SSH username for VPS (e.g., madeyskij)
+# - VPS_USER: SSH username for VPS
 # - VPS_SSH_KEY: Private SSH key for authentication
 # - VPS_PORT: (optional) SSH port, defaults to 22
-# - VPS_DEPLOY_PATH: (optional) Path to project on VPS, defaults to ~/projects/gear-stack
+# - VPS_DEPLOY_PATH: (optional) Path to project on VPS, defaults to ~/apps/gear-stack
+#
+# The deploy user needs sudo permissions to write to /var/www/gear-stack
 
 on:
   push:
@@ -29,7 +31,7 @@ jobs:
           command_timeout: 10m
           script: |
             set -e
-            DEPLOY_PATH="${{ secrets.VPS_DEPLOY_PATH || '~/projects/gear-stack' }}"
+            DEPLOY_PATH="${{ secrets.VPS_DEPLOY_PATH || '~/apps/gear-stack' }}"
             cd ${DEPLOY_PATH/#\~/$HOME}
-            VPS_USER="${{ secrets.VPS_USER }}" scripts/deploy.sh
+            scripts/deploy.sh
 
