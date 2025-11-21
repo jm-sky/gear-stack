@@ -130,6 +130,50 @@ Key environment variables (see `.env` file):
 - `CORS_HEADERS`: Allowed HTTP headers (JSON array format: `["*"]` for all)
 - `ENVIRONMENT`: Environment (development/production)
 
+### Email Configuration
+
+The application supports two email adapters:
+
+**1. File Adapter (Development - Default)**
+- Emails are saved to files instead of being sent
+- Useful for development and testing
+- Default configuration:
+  ```bash
+  EMAIL_ENABLED=true
+  EMAIL_ADAPTER=file
+  EMAIL_FILE_PATH=./emails
+  ```
+- Emails are saved in `./emails/YYYY-MM-DD/` directory with HTML and JSON metadata
+
+**2. SMTP Adapter (Production)**
+- Sends emails via SMTP server
+- Configuration:
+  ```bash
+  EMAIL_ENABLED=true
+  EMAIL_ADAPTER=smtp
+  SMTP_HOST=smtp.example.com
+  SMTP_PORT=587
+  SMTP_USER=your-email@example.com
+  SMTP_PASSWORD=your-password
+  SMTP_FROM=noreply@example.com
+  SMTP_USE_TLS=true
+  EMAIL_ENABLE_RETRY=false  # Enable retry with exponential backoff
+  EMAIL_MAX_RETRIES=5       # Max retry attempts (if retry enabled)
+  ```
+
+**Email Audit Logging**
+- Email audit logging to database (enabled by default):
+  ```bash
+  EMAIL_ENABLE_AUDIT=true
+  ```
+- Stores email metadata, templates, and context in database for audit trail
+
+**Example SMTP Providers:**
+- **Gmail**: `smtp.gmail.com:587` (requires app password)
+- **SendGrid**: `smtp.sendgrid.net:587`
+- **Mailgun**: `smtp.mailgun.org:587`
+- **AWS SES**: `email-smtp.region.amazonaws.com:587`
+
 ## License
 
 [Your License Here]
