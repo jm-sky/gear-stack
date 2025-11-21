@@ -14,6 +14,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import type { IGearContainer } from '../types/gear.types'
 import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
@@ -41,6 +48,7 @@ const showColor = ref(true)
 const showBrand = ref(true)
 const showNestedContainer = ref(true)
 const showLegend = ref(true)
+const descriptionFormat = ref<'off' | 'inline' | 'newline'>('off')
 
 // Get container type label helper
 const getContainerTypeLabel = (typeKey: string): string => {
@@ -64,6 +72,7 @@ const markdown = computed<string>(() => {
     showBrand: showBrand.value,
     showNestedContainer: showNestedContainer.value,
     showLegend: showLegend.value,
+    descriptionFormat: descriptionFormat.value,
   }
 
   if (props.container) {
@@ -151,6 +160,27 @@ const handleOpenChange = (value: boolean) => {
               {{ t('gear.export.showLegend', 'Show legend') }}
             </Label>
           </div>
+        </div>
+        <div class="space-y-2">
+          <Label class="text-sm font-medium">
+            {{ t('gear.export.descriptionFormat', 'Item descriptions format') }}
+          </Label>
+          <Select :model-value="descriptionFormat" @update:model-value="(value) => descriptionFormat = value as 'off' | 'inline' | 'newline'">
+            <SelectTrigger class="w-full sm:w-[200px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="off">
+                {{ t('gear.export.descriptionFormatOff', 'OFF') }}
+              </SelectItem>
+              <SelectItem value="inline">
+                {{ t('gear.export.descriptionFormatInline', 'Inline') }}
+              </SelectItem>
+              <SelectItem value="newline">
+                {{ t('gear.export.descriptionFormatNewline', 'New Line') }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

@@ -256,6 +256,15 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
   - 🔄 Pokazywanie cen przedmiotów w eksporcie (opcjonalnie) - planowane
   - 🔄 Dodatkowe podsumowanie "Do kupienia" na końcu eksportu - planowane
   - 🔄 Inne opcje konfiguracji formatu (poziom szczegółowości, metadane, itp.) - planowane
+- 🔄 **Obsługa opisów przedmiotów w markdown** - planowane | **Feature:** [FEATURE-013](./features/FEATURE-013-item-descriptions.md)
+  - 🔄 Opisy przedmiotów (pole `notes`) w eksporcie/impocie markdown
+  - 🔄 Opis zawsze w formacie kursywy (`*tekst*`)
+  - 🔄 Radio buttons/Select w opcjach eksportu: **OFF** (domyślnie), **Inline**, **New Line**
+  - 🔄 Dwie opcje formatu eksportu:
+    - **Opcja A (Inline):** `- Nóż *(mały, składany)* - 100g` - opis w nawiasie kursywą zaraz po nazwie
+    - **Opcja B (New Line):** opis w osobnej linii z wcięciem 2 spacje, od razu pod nazwą (przed wagą/marką)
+  - 🔄 Parsowanie opisów w imporcie markdown (automatyczne rozpoznawanie obu formatów)
+  - 🔄 Obsługa zagnieżdżonych nawiasów w opisach
 
 > **Uwaga:** UUID support dla update workflow wymaga backendu/DB - zobacz [ROADMAP_V2.md](./ROADMAP_V2.md)
 
@@ -295,8 +304,8 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 
 ## 🔄 Zarządzanie kontenerami i przedmiotami
 
-### Kopiowanie/klonowanie kontenerów
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+### ✅ Kopiowanie/klonowanie kontenerów
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Small | **Feature:** [FEATURE-013](./features/FEATURE-013-container-cloning.md)
 
 - Możliwość sklonowania całego kontenera wraz z jego zawartością
 - Akcja "Duplikuj kontener" w menu akcji kontenera (dropdown na liście kontenerów)
