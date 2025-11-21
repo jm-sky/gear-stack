@@ -126,6 +126,7 @@ const handleBack = () => {
           v-tooltip.bottom="t('gear.actions.exportToPrompt')"
           variant="ghost"
           size="sm"
+          :aria-label="$t('gear.actions.exportToPrompt')"
           @click="handleExportToPrompt"
         >
           <SparklesIcon class="size-4" />
@@ -195,7 +196,12 @@ const handleBack = () => {
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
-              <Button variant="outline" size="sm" class="shrink-0">
+              <Button
+                variant="outline"
+                size="sm"
+                class="shrink-0"
+                :aria-label="$t('gear.actions.moreActions')"
+              >
                 <MoreVertical class="size-4" />
               </Button>
             </DropdownMenuTrigger>

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { refDebounced } from '@vueuse/core'
 import { Package, Plus, PlusIcon, Sparkles } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
@@ -19,6 +19,7 @@ import { generateSampleSet } from '../services/sampleSetGenerator'
 import type { TUUID } from '@/shared/types/base.type'
 
 const router = useRouter()
+const route = useRoute()
 const { t } = useI18n()
 const { containers, deleteContainer, getRootContainers } = useGear()
 const { customContainerTypes } = useGearSettings()
@@ -31,6 +32,24 @@ const showOnlyRootContainers = ref(false)
 // Dialogs
 const importDialogOpen = ref(false)
 const isExportToPromptDialogOpen = ref(false)
+
+// Check for import query parameter and open dialog
+onMounted(() => {
+  if (route.query.import === 'true') {
+    importDialogOpen.value = true
+    // Remove query parameter from URL
+    router.replace({ query: { ...route.query, import: undefined } })
+  }
+})
+
+// Watch for route changes (in case user navigates back/forward)
+watch(() => route.query.import, (shouldImport) => {
+  if (shouldImport === 'true') {
+    importDialogOpen.value = true
+    // Remove query parameter from URL
+    router.replace({ query: { ...route.query, import: undefined } })
+  }
+})
 
 // Helper to get container type label for filtering
 const getContainerTypeLabel = (typeKey: string): string => {
@@ -132,14 +151,17 @@ const handleGenerateSampleSet = () => {
         <div class="flex flex-col sm:flex-row gap-2">
           <div class="flex gap-2">
             <Button
+              v-if="containers.length > 0"
               v-tooltip.bottom="t('gear.export.allToPrompt')"
               variant="outline"
               class="shrink-0"
+              :aria-label="$t('gear.export.allToPrompt')"
               @click="handleExportAllToPrompt"
             >
               <Sparkles class="size-4" />
             </Button>
             <Button
+              v-if="containers.length > 0"
               v-tooltip.bottom="t('gear.container.create.title')"
               variant="default"
               class="shrink-0 flex-1 sm:flex-none"

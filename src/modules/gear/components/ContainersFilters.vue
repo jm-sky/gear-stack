@@ -18,7 +18,7 @@ const showOnlyRootContainers = defineModel<boolean>('showOnlyRootContainers', { 
       <Search class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
       <Input
         v-model="searchQuery"
-        :placeholder="t('gear.filters.search')"
+        :placeholder="$t('gear.filters.searchContainers')"
         class="pl-9"
       />
     </div>

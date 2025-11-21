@@ -49,7 +49,11 @@ const handleExportAllToPrompt = () => {
 <template>
   <DropdownMenu>
     <DropdownMenuTrigger as-child>
-      <Button variant="outline" class="sm:shrink-0">
+      <Button
+        variant="outline"
+        class="sm:shrink-0"
+        :aria-label="$t('gear.actions.moreActions')"
+      >
         <MoreVertical class="size-4" />
       </Button>
     </DropdownMenuTrigger>

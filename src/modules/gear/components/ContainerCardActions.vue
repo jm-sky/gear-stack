@@ -52,6 +52,7 @@ const handleDelete = () => {
           variant="ghost"
           size="sm"
           class="size-8 p-0"
+          :aria-label="$t('gear.actions.moreActions')"
           @click.stop
         >
           <MoreVertical class="size-4" />

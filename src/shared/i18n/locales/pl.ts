@@ -29,6 +29,7 @@ export default {
     back: 'Wstecz',
     done: 'Gotowe',
     never: 'Nigdy',
+    or: 'lub',
     copyToClipboard: {
       success: 'Skopiowano do schowka',
       copied: 'Skopiowano',

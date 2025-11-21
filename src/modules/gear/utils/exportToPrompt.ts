@@ -210,7 +210,7 @@ export function exportContainerToPrompt(
     ? getContainerTypeLabel(container.type)
     : container.type
   const containerId = generateContainerId(container.name)
-  
+
   // Build container header parts
   const containerHeaderParts: string[] = []
   containerHeaderParts.push(`## ${container.name}`)
@@ -223,12 +223,12 @@ export function exportContainerToPrompt(
     containerHeaderParts.push(`[uuid:${container.id}]`)
   }
   containerHeaderParts.push(`(${typeLabel})`)
-  
+
   // Add URL if provided
   if (container.url) {
     containerHeaderParts.push(`<${container.url}>`)
   }
-  
+
   // Add weight if provided
   if (container.weight !== undefined && container.weightUnit) {
     const weightText = formatWeight(container.weight, container.weightUnit)
@@ -236,7 +236,7 @@ export function exportContainerToPrompt(
     const weightValue = weightText.replace(/\s/g, '')
     containerHeaderParts.push(`- ${weightValue}`)
   }
-  
+
   lines.push(containerHeaderParts.join(' '))
 
   // Collect nested containers to show separately
@@ -335,7 +335,7 @@ export function exportContainersToPrompt(
 
   // Export each container without legend (legend will be added once at the end)
   const exportOptionsWithoutLegend = { ...options, showLegend: false }
-  
+
   containers.forEach((container, index) => {
     if (index > 0) {
       lines.push('')

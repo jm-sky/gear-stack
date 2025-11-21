@@ -27,50 +27,50 @@
 - **Karta survivalowa** [uuid:f35eb4eb-3fcf-4d33-8127-7fb9df45c135] - 100g
 
 ## Plecak Helikon EDC Cordura (coyote) [#plecak-helikon-edc] [uuid:fcd6542e-4203-4b36-9ebf-6c503d14fb7f] (Backpack)
-- **Nóż Ontario SP2 Air Force** [uuid:04d9332f-4e50-4a47-91ca-5fc1b86aebdf] (Ontario) - 100g
-- **Scyzoryk Victorinox Ranger/Huntsman Elinox** [uuid:0adff64e-c469-48fd-9099-04b0cba34464] (Victorinox) - 100g
-- **Paracord EDCX 550 Type III** [uuid:132fa0b3-6bd9-49eb-9dc5-4c77cd09c32e] (EDCX, Black) - 100g
-- **Sznurek murarski** [uuid:1930b53d-ca66-4175-b653-e4531f3c2f6a] - 100g
+- **Nóż Ontario SP2 Air Force** [uuid:04d9332f-4e50-4a47-91ca-5fc1b86aebdf] (Ontario) - 220g
+- **Scyzoryk Victorinox Ranger/Huntsman Elinox** [uuid:0adff64e-c469-48fd-9099-04b0cba34464] (Victorinox) - 120g
+- **Paracord EDCX 550 Type III** [uuid:132fa0b3-6bd9-49eb-9dc5-4c77cd09c32e] (EDCX, Black) - 50g
+- **Sznurek murarski** [uuid:1930b53d-ca66-4175-b653-e4531f3c2f6a] - 20g
 - **Składana kuchenka Esbit + paliwo** [uuid:1f37c16b-8fd0-461e-bd29-79e6df13a764] (Esbit) - 100g
-- **Kubek tytanowy YOUKUKE** [uuid:26abc1c7-b1f1-46e0-9bdb-11d219c6c5c1] (YOUKUKE) - 100g
-- **Chusteczki jednorazowe** [uuid:2c41cbb9-a171-42ed-9f89-73c7e41df7ce] - 100g
-- **Rękawice budowlane odporne na przecięcia** [uuid:32a73c66-9e57-49ef-bf0d-3dc385d5b83d] - 100g
-- **Kompas z lupą i linijką** [uuid:38d82201-0e64-4b3c-b89c-179b0f9f73ef] - 100g
-- **Niezbędnik NEO Tools** [uuid:3f91b573-4a0c-43d5-9331-e69edc296d33] (NEO Tools) - 100g
-- **Racje NRG-5** [uuid:444db52e-0a48-4bc4-bb6d-53d18653cf1b] - 100g
-- **Płaszcz/tarp/poncho (stary)** [uuid:4bdcd0c7-35b3-43b0-a590-12134687ea33] - 100g
-- **Maska 3M AURA 9322+** [uuid:51cc4644-9351-4f7a-b029-4d48b6915816] (3M) x2 - 100g
-- **Worek na śmieci 160 L i 60 L** [uuid:59b155f9-4514-4f75-a0ea-4257e0e7ae2b] - 100g
-- **Notatnik Rite in the Rain** [uuid:5ec4414a-f687-4a49-8aaf-21deed00b36a] (Rite in the Rain) - 100g
-- **Zip/trytytki** [uuid:64bb8f49-7f77-40a4-8b0e-866f4eb1e268] x15 - 100g
-- **Duct tape** [uuid:6b40d4c1-5e1c-4c86-b1d1-14288e4f2a87] - 100g
-- **Zestaw do szycia** [uuid:71f970f0-8bc3-48b2-8f59-57491ac2f23b] - 100g
-- **Zestaw wędkarski** [uuid:78d6fc91-9715-459c-a794-909decb3a090] - 100g
-- **Folia aluminiowa** [uuid:7f740ae5-b5bf-4c13-8901-e79c4c456271] - 100g
-- **Pouch Maxpedition Barnacle** [uuid:9c4fc7c8-95b2-46cd-bb09-ef3ca52a3f45] (Maxpedition Barnacle) [#pouch-maxpedition-barnacle] - 100g
-- **Apteczka Blackhawk** [uuid:bd404a57-4c08-46c4-9c93-162fd047dca1] (Blackhawk) [#apteczka-blackhawk] - 100g
-- **Menażka** [uuid:f81e28e8-0228-4f89-be41-7a0333db4e9f] [#menazka] - 100g
+- **Kubek tytanowy YOUKUKE** [uuid:26abc1c7-b1f1-46e0-9bdb-11d219c6c5c1] (YOUKUKE) - 70g
+- **Chusteczki jednorazowe** [uuid:2c41cbb9-a171-42ed-9f89-73c7e41df7ce] - 50g
+- **Rękawice budowlane odporne na przecięcia** [uuid:32a73c66-9e57-49ef-bf0d-3dc385d5b83d] - 150g
+- **Kompas z lupą i linijką** [uuid:38d82201-0e64-4b3c-b89c-179b0f9f73ef] - 80g
+- **Niezbędnik NEO Tools** [uuid:3f91b573-4a0c-43d5-9331-e69edc296d33] (NEO Tools) - 150g
+- **Racje NRG-5** [uuid:444db52e-0a48-4bc4-bb6d-53d18653cf1b] - 400g
+- **Płaszcz/tarp/poncho (stary)** [uuid:4bdcd0c7-35b3-43b0-a590-12134687ea33] - 180g
+- **Maska 3M AURA 9322+** [uuid:51cc4644-9351-4f7a-b029-4d48b6915816] (3M) x2 - 20g
+- **Worek na śmieci 160 L i 60 L** [uuid:59b155f9-4514-4f75-a0ea-4257e0e7ae2b] - 200g
+- **Notatnik Rite in the Rain** [uuid:5ec4414a-f687-4a49-8aaf-21deed00b36a] (Rite in the Rain) - 120g
+- **Zip/trytytki** [uuid:64bb8f49-7f77-40a4-8b0e-866f4eb1e268] x15 - 30g
+- **Duct tape** [uuid:6b40d4c1-5e1c-4c86-b1d1-14288e4f2a87] - 120g
+- **Zestaw do szycia** [uuid:71f970f0-8bc3-48b2-8f59-57491ac2f23b] - 40g
+- **Zestaw wędkarski** [uuid:78d6fc91-9715-459c-a794-909decb3a090] - 50g
+- **Folia aluminiowa** [uuid:7f740ae5-b5bf-4c13-8901-e79c4c456271] - 20g
+- **Pouch Maxpedition Barnacle** [uuid:9c4fc7c8-95b2-46cd-bb09-ef3ca52a3f45] (Maxpedition Barnacle) [#pouch-maxpedition-barnacle] - 180g
+- **Apteczka Blackhawk** [uuid:bd404a57-4c08-46c4-9c93-162fd047dca1] (Blackhawk) [#apteczka-blackhawk] - 300g
+- **Menażka** [uuid:f81e28e8-0228-4f89-be41-7a0333db4e9f] [#menazka] - 350g
 
 ## Pouch Maxpedition Barnacle [#pouch-maxpedition-barnacle] [uuid:9c4fc7c8-95b2-46cd-bb09-ef3ca52a3f45] (Pouch)
-- **Krzesiwo magnezowe** [uuid:a1ed9792-1f84-4e76-8e44-463baec2de3b] - 100g
-- **Świeczka** [uuid:a8bfce98-50bf-4a58-a80f-daf23779f7fe] x2 - 100g
-- **Waciki bawełniane** [uuid:b0a33c09-56ff-4a63-8e64-632ca4cf0a2e] - 100g
-- **Drut ogrodniczy** [uuid:b6cbb7d3-f0d4-4689-b6e1-59e571baa361] - 100g
+- **Krzesiwo magnezowe** [uuid:a1ed9792-1f84-4e76-8e44-463baec2de3b] - 30g
+- **Świeczka** [uuid:a8bfce98-50bf-4a58-a80f-daf23779f7fe] x2 - 50g
+- **Waciki bawełniane** [uuid:b0a33c09-56ff-4a63-8e64-632ca4cf0a2e] - 10g
+- **Drut ogrodniczy** [uuid:b6cbb7d3-f0d4-4689-b6e1-59e571baa361] - 20g
 
 ## Apteczka Blackhawk [#apteczka-blackhawk] [uuid:bd404a57-4c08-46c4-9c93-162fd047dca1] (Pouch)
-- **Scyzoryk** [uuid:c40f175f-6df1-4ac4-afcd-eef56676b4e4] - 100g
-- **Zapalniczka** [uuid:caf7b663-62ae-48a7-9efc-024c2ec99f81] - 100g
-- **Elektrolity** [uuid:d0e4e8a3-6800-4ca3-8b32-4bb0d3f4c8a7] - 100g
-- **Materiały opatrunkowe** [uuid:d7bf2b63-5c5a-40d6-bfdd-bde1397ef812] - 100g
-- **Folia NRC** [uuid:dd19127d-59d1-4ada-8725-6348c8a006fd] - 100g
-- **Maseczka do sztucznego oddychania** [uuid:e49bcdb6-f512-40fa-bf22-2f5a606b76e8] - 100g
-- **Rękawiczki nitrylowe** [uuid:eaa87b5b-f3ef-40a8-b3ff-f3114fbc25c5] - 100g
-- **Tabletki do uzdatniania wody** [uuid:f160cc58-db87-4b62-84ed-f729fbaf5404] - 100g
+- **Scyzoryk** [uuid:c40f175f-6df1-4ac4-afcd-eef56676b4e4] - 40g
+- **Zapalniczka** [uuid:caf7b663-62ae-48a7-9efc-024c2ec99f81] - 15g
+- **Elektrolity** [uuid:d0e4e8a3-6800-4ca3-8b32-4bb0d3f4c8a7] - 50g
+- **Materiały opatrunkowe** [uuid:d7bf2b63-5c5a-40d6-bfdd-bde1397ef812] - 200g
+- **Folia NRC** [uuid:dd19127d-59d1-4ada-8725-6348c8a006fd] - 45g
+- **Maseczka do sztucznego oddychania** [uuid:e49bcdb6-f512-40fa-bf22-2f5a606b76e8] - 30g
+- **Rękawiczki nitrylowe** [uuid:eaa87b5b-f3ef-40a8-b3ff-f3114fbc25c5] - 10g
+- **Tabletki do uzdatniania wody** [uuid:f160cc58-db87-4b62-84ed-f729fbaf5404] - 30g
 
 ## Menażka Primus Eta Power [#menazka] [uuid:f81e28e8-0228-4f89-be41-7a0333db4e9f] (Box)
-- **Palnik MSR** [uuid:fe137519-e0fe-434a-bb7c-d0e6e0a253b8] (MSR) - 100g
-- **Gaz Jetboil JetPower 100 g** [uuid:04e3a730-082e-4c76-b238-e075e0fd4b21] (Jetboil) - 100g
-- **Zapałki** [uuid:0a3d9a40-4f02-4353-9f1d-6e6026d0521e] - 100g
+- **Palnik MSR** [uuid:fe137519-e0fe-434a-bb7c-d0e6e0a253b8] (MSR) - 80g
+- **Gaz Jetboil JetPower 100 g** [uuid:04e3a730-082e-4c76-b238-e075e0fd4b21] (Jetboil) - 220g
+- **Zapałki** [uuid:0a3d9a40-4f02-4353-9f1d-6e6026d0521e] - 20g
 
 ## Wodoodporne pudełko MFH [#wodoodporne-pudelko-mfh] [uuid:0f14ddfd-154d-44cc-b8d5-14f099795d39] (Box)
 - **Ładowarka SolarForce** [uuid:15437267-d17f-4dd2-a2df-9e74f2a8dc28] (SolarForce) - 100g

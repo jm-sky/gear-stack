@@ -20,7 +20,7 @@ const currentYear = new Date().getFullYear()
           </HoverLinkExternal>
         </div>
 
-        <nav class="flex flex-wrap items-center justify-center gap-6 text-sm">
+        <nav class="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 sm:gap-6 text-sm">
           <HoverLink to="/cookies">
             {{ t('footer.cookies', 'Informacja o ciasteczkach') }}
           </HoverLink>

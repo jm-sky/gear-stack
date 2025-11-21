@@ -187,7 +187,7 @@ const valueFormatter = (value: number) => {
 <template>
   <Card>
     <CardHeader>
-      <div class="flex items-center justify-between">
+      <div class="flex flex-col md:flex-row gap-2 items-center justify-between">
         <div>
           <CardTitle>
             {{ t('gear.chart.title', 'Rozkład kategorii') }}
@@ -196,7 +196,7 @@ const valueFormatter = (value: number) => {
             {{ t('gear.chart.description', 'Wizualizacja kategorii przedmiotów w kontenerze') }}
           </CardDescription>
         </div>
-        <div class="flex gap-2">
+        <div class="flex w-full justify-end gap-2">
           <Button
             :variant="chartMode === 'weight' ? 'default' : 'outline'"
             size="sm"

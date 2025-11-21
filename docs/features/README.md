@@ -19,6 +19,7 @@ This directory contains detailed implementation plans for features from the [ROA
 | FEATURE-009 | Export to Prompt (AI) - Basic | ✅ Completed | Medium | 🚀 Export |
 | FEATURE-010 | Footer & Legal Pages | 🔄 Planned | Low | 📄 Legal |
 | [FEATURE-011](./FEATURE-011-markdown-import-export.md) | Markdown Import/Export (AI-Friendly) | ✅ Completed | High | 🚀 Import/Export |
+| [FEATURE-012](./FEATURE-012-add-existing-items.md) | Add Existing Items to Container | 🔄 Planned | High | ⚡ Item Addition |
 
 ---
 
