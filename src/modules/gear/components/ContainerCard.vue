@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Box, MoreVertical, Package } from 'lucide-vue-next'
+import { Box, Package } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -7,12 +7,6 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import CardContent from '@/components/ui/card/CardContent.vue'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { useCoreSettings } from '@/modules/settings/composables/useCoreSettings'
 import type { IGearContainer } from '../types/gear.types'
 import { useGear } from '../composables/useGear'
@@ -24,6 +18,7 @@ import {
 import { COLOR_BORDER_CLASSES, COLOR_TEXT_CLASSES } from '../utils/containerColors'
 import { formatWeightToPreferredUnit } from '../utils/formatWeight'
 import ColorDot from './ColorDot.vue'
+import ContainerCardActions from './ContainerCardActions.vue'
 import ContainerReadinessProgressBar from './ContainerReadinessProgressBar.vue'
 
 const props = defineProps<{
@@ -118,19 +113,6 @@ const navigateToParent = (e: Event) => {
     router.push(`/gear/${firstParentContainer.value.id}`)
   }
 }
-
-// Actions
-const handleShow = () => {
-  router.push(`/gear/${props.container.id}`)
-}
-
-const handleEdit = () => {
-  router.push(`/gear/${props.container.id}/edit`)
-}
-
-const handleDelete = () => {
-  emit('delete', props.container.id)
-}
 </script>
 
 <template>
@@ -152,29 +134,7 @@ const handleDelete = () => {
           {{ t('gear.container.nested') }}
         </Badge>
       </div>
-      <DropdownMenu>
-        <DropdownMenuTrigger as-child>
-          <Button
-            variant="ghost"
-            size="sm"
-            class="size-8 p-0"
-            @click.stop
-          >
-            <MoreVertical class="size-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem @click.stop="handleShow">
-            {{ t('gear.actions.show') }}
-          </DropdownMenuItem>
-          <DropdownMenuItem @click.stop="handleEdit">
-            {{ t('gear.actions.edit') }}
-          </DropdownMenuItem>
-          <DropdownMenuItem class="text-destructive hover:text-destructive! hover:bg-destructive/4!" @click.stop="handleDelete">
-            {{ t('gear.actions.delete') }}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <ContainerCardActions :container="container" @delete="emit('delete', $event)" />
     </CardHeader>
 
     <CardContent class="flex flex-col gap-3 px-6 pb-4 text-card-foreground">

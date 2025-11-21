@@ -109,6 +109,19 @@ export function useGear() {
     gearService.importData(json)
   }
 
+  // ========== Clone/Duplicate ==========
+
+  const cloneContainer = (
+    containerId: TUUID,
+    options: {
+      newName: string
+      includeNestedContainers?: boolean
+      includePrices?: boolean
+    },
+  ): IGearContainer => {
+    return gearService.cloneContainer(containerId, options)
+  }
+
   return {
     // State
     containers,
@@ -141,6 +154,9 @@ export function useGear() {
     // Import/Export
     exportData,
     importData,
+
+    // Clone/Duplicate
+    cloneContainer,
   }
 }
 

@@ -383,6 +383,159 @@ class GearService {
       throw new Error(`Failed to import data: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
+
+  // ========== Clone/Duplicate ==========
+
+  /**
+   * Clones a container with all its items and optionally nested containers
+   * @param containerId - ID of the container to clone
+   * @param options - Clone options
+   * @returns The newly created cloned container
+   */
+  cloneContainer(
+    containerId: TUUID,
+    options: {
+      newName: string
+      includeNestedContainers?: boolean
+      includePrices?: boolean
+    },
+  ): IGearContainer {
+    const sourceContainer = this.store.getContainerById(containerId)
+    if (!sourceContainer) {
+      throw new Error(`Container with id ${containerId} not found`)
+    }
+
+    const { newName, includeNestedContainers = false, includePrices = true } = options
+
+    // Map to store old container IDs to new container IDs for nested containers
+    const containerIdMap = new Map<TUUID, TUUID>()
+
+    // First, clone nested containers if needed
+    if (includeNestedContainers) {
+      const containerIdsToClone = new Set<TUUID>()
+
+      // Find all nested containers referenced in items
+      sourceContainer.items.forEach(item => {
+        if (item.containerId) {
+          containerIdsToClone.add(item.containerId)
+        }
+      })
+
+      // Recursively find all nested containers
+      const findAllNestedContainers = (parentId: TUUID): void => {
+        const nested = this.store.getContainerById(parentId)
+        if (nested) {
+          containerIdsToClone.add(parentId)
+          nested.items.forEach(item => {
+            if (item.containerId) {
+              findAllNestedContainers(item.containerId)
+            }
+          })
+        }
+      }
+
+      containerIdsToClone.forEach(id => {
+        findAllNestedContainers(id)
+      })
+
+      // Clone nested containers (need to clone in dependency order)
+      const clonedNestedContainers: IGearContainer[] = []
+      const clonedIds = new Set<TUUID>()
+
+      const cloneNestedContainer = (oldContainerId: TUUID): void => {
+        if (clonedIds.has(oldContainerId)) return
+
+        const oldContainer = this.store.getContainerById(oldContainerId)
+        if (!oldContainer) return
+
+        // First clone all nested containers that this container depends on
+        oldContainer.items.forEach(item => {
+          if (item.containerId && !clonedIds.has(item.containerId)) {
+            cloneNestedContainer(item.containerId)
+          }
+        })
+
+        // Now clone this container
+        const now = new Date().toISOString()
+        const newContainerId = crypto.randomUUID()
+        containerIdMap.set(oldContainerId, newContainerId)
+
+        const clonedItems: IGearItem[] = oldContainer.items.map(oldItem => {
+          const newItemId = crypto.randomUUID()
+          const newItem: IGearItem = {
+            ...oldItem,
+            id: newItemId,
+            price: includePrices ? oldItem.price : undefined,
+            // Update containerId reference if this item references a nested container
+            containerId: oldItem.containerId ? containerIdMap.get(oldItem.containerId) : undefined,
+            createdAt: now,
+            updatedAt: now,
+            // Copy all extended fields (they are already included in spread operator, but ensure they are preserved)
+          }
+          return newItem
+        })
+
+        const clonedContainer: IGearContainer = {
+          ...oldContainer,
+          id: newContainerId,
+          name: `[Kopia] ${oldContainer.name}`,
+          parentContainerId: undefined, // Cloned nested containers are not nested in original parent
+          items: clonedItems,
+          price: includePrices ? oldContainer.price : undefined,
+          createdAt: now,
+          updatedAt: now,
+        }
+
+        clonedNestedContainers.push(clonedContainer)
+        clonedIds.add(oldContainerId)
+      }
+
+      containerIdsToClone.forEach(id => {
+        cloneNestedContainer(id)
+      })
+
+      // Add all cloned nested containers to store
+      clonedNestedContainers.forEach(container => {
+        this.store.addContainer(container)
+      })
+    }
+
+    // Now clone the main container
+    const now = new Date().toISOString()
+    const newContainerId = crypto.randomUUID()
+
+    const clonedItems: IGearItem[] = sourceContainer.items.map(oldItem => {
+      const newItemId = crypto.randomUUID()
+      const newItem: IGearItem = {
+        ...oldItem,
+        id: newItemId,
+        price: includePrices ? oldItem.price : undefined,
+        // Update containerId reference if this item references a nested container and we cloned them
+        containerId:
+          includeNestedContainers && oldItem.containerId
+            ? containerIdMap.get(oldItem.containerId)
+            : undefined, // If not cloning nested containers, remove the reference
+        createdAt: now,
+        updatedAt: now,
+        // Copy all extended fields (they are already included in spread operator, but ensure they are preserved)
+      }
+      return newItem
+    })
+
+    const clonedContainer: IGearContainer = {
+      ...sourceContainer,
+      id: newContainerId,
+      name: newName,
+      parentContainerId: undefined, // Cloned container is not nested
+      items: clonedItems,
+      price: includePrices ? sourceContainer.price : undefined,
+      createdAt: now,
+      updatedAt: now,
+    }
+
+    this.store.addContainer(clonedContainer)
+    return clonedContainer
+  }
 }
 
 export const gearService = new GearService()
