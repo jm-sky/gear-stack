@@ -61,6 +61,9 @@ ENV PATH="/app/venv/bin:$PATH"
 # Copy application code
 COPY --chown=appuser:appuser app ./app
 COPY --chown=appuser:appuser main.py ./main.py
+COPY --chown=appuser:appuser cli ./cli
+COPY --chown=appuser:appuser cli.py ./cli.py
+COPY --chown=appuser:appuser manage.py ./manage.py
 
 # Copy shared code if exists (optional)
 # COPY --chown=appuser:appuser shared /app/shared
