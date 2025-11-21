@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# Gear Stack Build and Deploy Script
+# This script installs dependencies, builds the application, and deploys to /var/www/gear-stack
+
+set -e  # Exit on any error
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Configuration
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+DEPLOY_DIR="/var/www/gear-stack"
+
+echo -e "${GREEN}🔨 Starting Gear Stack build and deploy...${NC}"
+
+echo -e "${YELLOW}Pulling latest changes${NC}"
+cd "$PROJECT_DIR"
+git pull 
+
+# Step 1: Install frontend dependencies
+echo -e "${YELLOW}📦 Step 1: Installing frontend dependencies...${NC}"
+pnpm install --frozen-lockfile
+
+# Step 2: Build frontend
+echo -e "${YELLOW}🔨 Step 2: Building frontend...${NC}"
+pnpm build
+echo -e "${GREEN}✅ Frontend build completed${NC}"
+
+# Step 3: Deploy to /var/www/gear-stack
+echo -e "${YELLOW}📋 Step 3: Deploying to ${DEPLOY_DIR}...${NC}"
+
+# Remove old files
+sudo rm -rf "${DEPLOY_DIR:?}"/*
+
+# Copy new build
+sudo cp -r dist/* "$DEPLOY_DIR/"
+
+echo -e "${GREEN}✅ Deployed to ${DEPLOY_DIR}${NC}"
+
+echo -e "${GREEN}✅ Build and deploy completed successfully!${NC}"

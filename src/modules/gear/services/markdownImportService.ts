@@ -1,6 +1,85 @@
 import type { ICreateItemDto } from '../types/gear.types'
 import { SUGGESTED_BRANDS, SUGGESTED_COLORS } from '../utils/suggestedValues'
 
+// Markdown template for AI guidelines
+export const guidelinesTemplate = `# Gear List Formatting Guidelines
+
+When generating or updating gear lists, use this format:
+
+## Standard Format
+\`\`\`markdown
+## [Container Name] [#container-id] ([Container Type]) <URL> - [weight]g
+- **[Item Name]** x[qty] ([Brand], [Color]) [#nested-id] ([Status]) <URL> - [weight]g
+\`\`\`
+
+## Format Rules
+
+### Item Name (Required)
+- **Bold formatting** using \`**Item Name**\`
+- Always at the start of the line after \`- \`
+
+### Quantity (Optional)
+- Format: \`x[number]\` (e.g., x2, x10)
+- If omitted, quantity = 1
+
+### Brand and Color (Optional)
+- First parentheses: \`([Brand], [Color])\`
+- Brand comes first, color second
+- Examples: \`(Victorinox)\`, \`(Petzl, Black)\`
+
+### Status (Optional)
+- Second parentheses: \`Missing\`, \`To Buy\` (omit if Owned)
+- Expiration: \`Expiration: DD.MM.YYYY\`
+- Wearable: \`Wearable\` - item is worn/carried on person (e.g., clothing, watch)
+- Consumable: \`Consumable\` - item is consumed/used up (e.g., food, medicine, fuel)
+- Can combine: \`(Missing, Expiration: 31.12.2025, Wearable)\`
+
+### Container ID (Required for containers)
+- Format: \`[#slug-id]\` in header and nested item reference
+- ID is generated from container name as slug
+- Example: \`Bug-Out Bag\` → \`[#bug-out-bag]\`
+
+### URL (Optional)
+- Format: \`<URL>\` in angle brackets or plain URL
+- Recognized by \`http://\`, \`https://\`, or \`www.\`
+
+### Weight (Optional)
+- **For containers:** Format: \`- [number]g\` or \`- [number]kg\` or \`- [number]oz\` or \`- [number]lb\` in container header
+- **For items:** Format: \`- [number]g\` or \`- [number]kg\` or \`- [number]oz\` or \`- [number]lb\` at the end after a dash
+- Always at the end after a dash
+- If omitted for items, default weight will be assigned (100g)
+- Container weight is optional but recommended for accurate total weight calculations
+
+## Example
+\`\`\`markdown
+## Bug-Out Bag [#bug-out-bag] (Backpack) <https://example.com/backpack> - 2000g
+- **Water Bottle** x2 (Nalgene) - 300g
+- **Tactical Knife** (Victorinox, Black) - 200g
+- **Headlamp** (Petzl, Red) (Missing) - 90g
+- **Hiking Boots** (Salomon) (Wearable) - 1200g
+- **Energy Bar** (Consumable) - 50g
+- **First Aid Pouch** (Pouch) [#first-aid-pouch] - 350g
+
+## First Aid Pouch [#first-aid-pouch] (Pouch) - 500g
+- **Bandages** x5 - 100g
+- **Pain Pills** (Expiration: 31.12.2025, Consumable) - 50g
+\`\`\`
+
+## Nested Containers
+When a container is inside another container:
+1. Add item with container name and \`[#id]\` reference
+2. Define the nested container separately with same \`[#id]\`
+3. Parser will create the relationship automatically
+
+## Important Notes
+1. **Only item name is required** (bold \`**text**\`)
+2. Container headers must have \`[#id]\` for proper identification
+3. Parentheses order: (Brand, Color) then (Status/Expiration)
+4. All fields except item name are optional
+5. Use metric units (grams/kilograms)
+`
+
+
 /**
  * Result of parsing markdown content
  */
@@ -9,6 +88,9 @@ export interface IMarkdownImportResult {
     name: string
     id?: string // Container ID from [#id] in header
     uuid?: string // Container UUID from [uuid:xxx] in header
+    weight?: number // Container weight
+    weightUnit?: 'g' | 'kg' | 'oz' | 'lb' // Container weight unit
+    url?: string // Container URL
     items: Array<ICreateItemDto & { nestedContainerId?: string; uuid?: string }> // nestedContainerId is temporary slug reference, uuid for updates
   }>
   errors: string[]
@@ -23,7 +105,7 @@ interface IItemParams {
   category?: string
   quantity?: number
   weight?: number
-  weightUnit?: 'g' | 'kg'
+  weightUnit?: 'g' | 'kg' | 'oz' | 'lb'
 }
 
 /**
@@ -71,13 +153,13 @@ class MarkdownImportService {
     }
 
     const lines = markdown.split('\n')
-    let currentContainer: { name: string; id?: string; uuid?: string; items: ICreateItemDto[] } | null = null
+    let currentContainer: { name: string; id?: string; uuid?: string; weight?: number; weightUnit?: 'g' | 'kg' | 'oz' | 'lb'; url?: string; items: ICreateItemDto[] } | null = null
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]?.trim()
       if (!line) continue
 
-      // Container header (## Header [#id] [uuid:xxx] (Type))
+      // Container header (## Header [#id] [uuid:xxx] (Type) <URL> - weight)
       if (line.startsWith('## ')) {
         if (currentContainer && currentContainer.items.length > 0) {
           result.containers.push(currentContainer)
@@ -86,6 +168,9 @@ class MarkdownImportService {
         let headerText = line.substring(3).trim()
         let containerId: string | undefined
         let containerUuid: string | undefined
+        let containerUrl: string | undefined
+        let containerWeight: number | undefined
+        let containerWeightUnit: 'g' | 'kg' | 'oz' | 'lb' | undefined
 
         // Extract ID from [#id]
         const idMatch = headerText.match(/\[#([^\]]+)\]/)
@@ -101,6 +186,32 @@ class MarkdownImportService {
           headerText = headerText.replace(uuidMatch[0] ?? '', '').trim()
         }
 
+        // Extract URL from <URL> or plain URL
+        const urlAngleMatch = headerText.match(/<([^>]+)>/)
+        if (urlAngleMatch) {
+          containerUrl = urlAngleMatch[1]?.trim()
+          headerText = headerText.replace(urlAngleMatch[0] ?? '', '').trim()
+        } else {
+          // Try plain URL (http://, https://, www.)
+          const urlPlainMatch = headerText.match(/(https?:\/\/[^\s]+|www\.[^\s]+)/i)
+          if (urlPlainMatch && urlPlainMatch[1]) {
+            containerUrl = urlPlainMatch[1].trim()
+            if (containerUrl.startsWith('www.')) {
+              containerUrl = `https://${containerUrl}`
+            }
+            headerText = headerText.replace(urlPlainMatch[0] ?? '', '').trim()
+          }
+        }
+
+        // Extract weight from - weightg, - weightkg, - weightoz, - weightlb (at the end)
+        const weightMatch = headerText.match(/-?\s*([\d.]+)\s*(g|kg|oz|lb)\s*$/i)
+        if (weightMatch) {
+          containerWeight = parseFloat(weightMatch[1] ?? '0')
+          const unit = weightMatch[2]?.toLowerCase() ?? 'g'
+          containerWeightUnit = (unit === 'kg' ? 'kg' : unit === 'oz' ? 'oz' : unit === 'lb' ? 'lb' : 'g') as 'g' | 'kg' | 'oz' | 'lb'
+          headerText = headerText.replace(weightMatch[0] ?? '', '').trim()
+        }
+
         // Extract container name (remove type in parentheses if present)
         const nameMatch = headerText.match(/^([^(]+)/)
         const containerName = (nameMatch ? nameMatch[1]?.trim() : headerText) || headerText
@@ -109,6 +220,9 @@ class MarkdownImportService {
           name: containerName,
           id: containerId,
           uuid: containerUuid,
+          weight: containerWeight,
+          weightUnit: containerWeightUnit,
+          url: containerUrl,
           items: [],
         }
         continue
@@ -151,11 +265,13 @@ class MarkdownImportService {
     let status: 'owned' | 'missing' | 'toBuy' = 'owned'
     let quantity = 1
     let weight = 100 // Default weight
-    let weightUnit: 'g' | 'kg' = 'g'
+    let weightUnit: 'g' | 'kg' | 'oz' | 'lb' = 'g'
     let expirationDate: string | undefined
     let url: string | undefined
     let nestedContainerId: string | undefined
     let uuid: string | undefined
+    let wearable: boolean | undefined
+    let consumable: boolean | undefined
 
     // 1. Extract bold text as item name (new format: **Item Name**)
     const boldMatch = workingLine.match(/\*\*([^*]+)\*\*/)
@@ -171,11 +287,12 @@ class MarkdownImportService {
       workingLine = workingLine.replace(uuidMatch[0] ?? '', '').trim()
     }
 
-    // 3. Extract weight at the end (- 500g or - 2.5kg)
-    const weightMatch = workingLine.match(/[-–—]\s*(\d+(?:[.,]\d+)?)\s*(g|kg)\s*$/i)
+    // 3. Extract weight at the end (- 500g, - 2.5kg, - 16oz, - 2.5lb)
+    const weightMatch = workingLine.match(/[-–—]\s*(\d+(?:[.,]\d+)?)\s*(g|kg|oz|lb)\s*$/i)
     if (weightMatch) {
       weight = Number.parseFloat((weightMatch[1] ?? '100').replace(',', '.'))
-      weightUnit = (weightMatch[2]?.toLowerCase() === 'kg' ? 'kg' : 'g') as 'g' | 'kg'
+      const unit = weightMatch[2]?.toLowerCase() ?? 'g'
+      weightUnit = (unit === 'kg' ? 'kg' : unit === 'oz' ? 'oz' : unit === 'lb' ? 'lb' : 'g') as 'g' | 'kg' | 'oz' | 'lb'
       workingLine = workingLine.substring(0, weightMatch.index).trim()
     }
 
@@ -249,6 +366,16 @@ class MarkdownImportService {
           continue
         }
 
+        // Check for wearable/consumable flags
+        if (statusLower.includes('wearable') || statusLower.includes('noszony')) {
+          wearable = true
+          continue
+        }
+        if (statusLower.includes('consumable') || statusLower.includes('zużywalny')) {
+          consumable = true
+          continue
+        }
+
         // Check if it's a brand
         const matchedBrand = this.matchBrand(part)
         if (matchedBrand && !brand) {
@@ -293,6 +420,16 @@ class MarkdownImportService {
           status = 'toBuy'
           continue
         }
+
+        // Check for wearable/consumable flags
+        if (statusLower.includes('wearable') || statusLower.includes('noszony')) {
+          wearable = true
+          continue
+        }
+        if (statusLower.includes('consumable') || statusLower.includes('zużywalny')) {
+          consumable = true
+          continue
+        }
       }
     }
 
@@ -323,6 +460,8 @@ class MarkdownImportService {
       color,
       expirationDate,
       url,
+      wearable,
+      consumable,
       nestedContainerId, // Temporary slug reference to container
       uuid, // UUID for update workflow
     }
@@ -374,11 +513,12 @@ class MarkdownImportService {
         continue
       }
 
-      // Try to match weight (Ng, Nkg)
-      const weightMatch = part.match(/^(\d+(?:[.,]\d+)?)\s*(g|kg)$/i)
+      // Try to match weight (Ng, Nkg, Noz, Nlb)
+      const weightMatch = part.match(/^(\d+(?:[.,]\d+)?)\s*(g|kg|oz|lb)$/i)
       if (weightMatch) {
         params.weight = Number.parseFloat((weightMatch[1] ?? '0').replace(',', '.'))
-        params.weightUnit = (weightMatch[2]?.toLowerCase() === 'kg' ? 'kg' : 'g') as 'g' | 'kg'
+        const unit = weightMatch[2]?.toLowerCase() ?? 'g'
+        params.weightUnit = (unit === 'kg' ? 'kg' : unit === 'oz' ? 'oz' : unit === 'lb' ? 'lb' : 'g') as 'g' | 'kg' | 'oz' | 'lb'
         continue
       }
     }

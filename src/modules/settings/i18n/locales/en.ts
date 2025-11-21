@@ -26,6 +26,17 @@ export const settingsEn = {
           pl: 'Polski',
         },
       },
+      preferredWeightUnit: {
+        label: 'Preferred Weight Unit',
+        subtitle: 'Default unit for displaying weights throughout the application',
+        placeholder: 'Select a weight unit',
+        options: {
+          g: 'Grams (g)',
+          kg: 'Kilograms (kg)',
+          oz: 'Ounces (oz)',
+          lb: 'Pounds (lb)',
+        },
+      },
     },
     categories: {
       title: 'Custom Categories',

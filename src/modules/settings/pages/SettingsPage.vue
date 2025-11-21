@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import CategoriesSettingsCard from '../components/CategoriesSettingsCard.vue'
-import ContainerTypesSettingsCard from '../components/ContainerTypesSettingsCard.vue'
 import PreferencesSettingsCard from '../components/PreferencesSettingsCard.vue'
 
 const { t } = useI18n()
@@ -21,14 +19,11 @@ const { t } = useI18n()
       </div>
 
       <div class="space-y-6">
-        <!-- Preferences Settings -->
+        <!-- Core Preferences Settings -->
         <PreferencesSettingsCard />
 
-        <!-- Container Types Settings -->
-        <ContainerTypesSettingsCard />
-
-        <!-- Categories Settings -->
-        <CategoriesSettingsCard />
+        <!-- Additional Settings from other modules (via slot) -->
+        <slot name="after" />
       </div>
     </div>
   </AuthenticatedLayout>

@@ -29,6 +29,7 @@ export type TColor = typeof SUGGESTED_COLORS[number]
 // Suggested brands/manufacturers for gear items and containers
 export const SUGGESTED_BRANDS = [
   'Helicon',
+  'Helikon',
   'Maxpedition',
   'Mil-Tec',
   '5.11 Tactical',
@@ -48,6 +49,19 @@ export const SUGGESTED_BRANDS = [
   'Merrell',
   'Columbia',
   'Mystery Ranch',
+  'Victorinox',
+  'Olight',
+  'Black Diamond',
+  'Badger',
+  'Fiskars',
+  'MFH',
+  'Esbit',
+  'SolarForce',
+  'Leatherman',
+  'Bahco',
+  'NEO Tools',
+  'EDCX',
+  'YOUKUKE',
 ] as const
 
 
@@ -96,7 +110,7 @@ export function getColorHex(colorName: string | null | undefined): string | null
  */
 export function getColorOptions(): Array<{ value: string; label: string; data: string }> {
   return SUGGESTED_COLORS.map(color => ({
-    value: color.toLowerCase(),
+    value: color,
     label: color,
     data: getColorHex(color) ?? color,
   }))
@@ -107,7 +121,7 @@ export function getColorOptions(): Array<{ value: string; label: string; data: s
  */
 export function getBrandOptions(): Array<{ value: string; label: string }> {
   return SUGGESTED_BRANDS.map(brand => ({
-    value: brand.toLowerCase(),
+    value: brand,
     label: brand,
   }))
 }

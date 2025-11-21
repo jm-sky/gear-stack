@@ -75,6 +75,14 @@ export function useGear() {
     return gearService.calculateReadinessPercentage(containerId)
   }
 
+  const calculateWeightLimitPercentage = (containerId: TUUID): number | null => {
+    return gearService.calculateWeightLimitPercentage(containerId)
+  }
+
+  const isWeightLimitExceeded = (containerId: TUUID): boolean => {
+    return gearService.isWeightLimitExceeded(containerId)
+  }
+
   const getItemsByStatus = (containerId: TUUID, status: 'owned' | 'missing' | 'toBuy') => {
     return gearService.getItemsByStatus(containerId, status)
   }
@@ -123,6 +131,8 @@ export function useGear() {
     // Business Logic
     calculateTotalWeight,
     calculateReadinessPercentage,
+    calculateWeightLimitPercentage,
+    isWeightLimitExceeded,
     getItemsByStatus,
     getExpiredItems,
     getExpiringSoonItems,

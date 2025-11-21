@@ -8,8 +8,14 @@ export const containerSchema = z.object({
   type: z.string().min(1, 'Typ jest wymagany'), // Allow any string for custom container types
   color: z.enum(['default', 'blue', 'green', 'red', 'yellow', 'purple', 'orange', 'pink', 'teal', 'indigo']).optional(),
   parentContainerId: z.string().uuid().optional().nullable(),
+  hideWhenNested: z.boolean().optional(),
   brand: z.string().optional(),
   price: z.number().min(0, 'Cena nie może być ujemna').optional(),
+  weight: z.number().min(0, 'Waga nie może być ujemna').optional(),
+  weightUnit: z.enum(['g', 'kg', 'oz', 'lb']).optional(),
+  maxWeight: z.number().min(0, 'Maksymalna waga nie może być ujemna').optional(),
+  maxWeightUnit: z.enum(['g', 'kg', 'oz', 'lb']).optional(),
+  url: z.string().url('Nieprawidłowy URL').optional().or(z.literal('')),
 })
 
 // Schema dla przedmiotu
@@ -19,7 +25,7 @@ export const itemSchema = z.object({
   category: z.string().min(1, 'Kategoria jest wymagana'), // Allow any string for custom categories
   quantity: z.number().int().min(1, 'Ilość musi być większa od 0'),
   weight: z.number().min(0, 'Waga nie może być ujemna'),
-  weightUnit: z.enum(['g', 'kg']),
+  weightUnit: z.enum(['g', 'kg', 'oz', 'lb']),
   notes: z.string().optional(),
   expirationDate: z.string().optional(),
   priority: z.enum(['critical', 'high', 'medium', 'low']),
@@ -30,6 +36,8 @@ export const itemSchema = z.object({
   brand: z.string().optional(),
   color: z.string().optional(),
   quality: z.enum(['low', 'medium', 'high']).optional(),
+  wearable: z.boolean().optional(),
+  consumable: z.boolean().optional(),
 })
 
 // Type inference dla TypeScript

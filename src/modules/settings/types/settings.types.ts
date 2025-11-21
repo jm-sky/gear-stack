@@ -1,3 +1,4 @@
+import type { TGearWeightUnit } from '@/modules/gear/types/gear.types'
 import type { SupportedLocale } from '@/shared/i18n'
 
 export interface IUserCategory {
@@ -21,6 +22,7 @@ export interface ISettings {
   darkMode: boolean
   customCategories: IUserCategory[]
   customContainerTypes: IUserContainerType[]
+  preferredWeightUnit: TGearWeightUnit
 }
 
 export interface IUpdateSettingsDto {
@@ -28,5 +30,6 @@ export interface IUpdateSettingsDto {
   darkMode?: boolean
   customCategories?: IUserCategory[]
   customContainerTypes?: IUserContainerType[]
+  preferredWeightUnit?: TGearWeightUnit
 }
 

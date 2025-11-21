@@ -12,6 +12,7 @@ import { useGear } from '../composables/useGear'
 import { useItem } from '../composables/useItem'
 import { recognizeCategory } from '../utils/categoryRecognition'
 import { getDefaultItemValues } from '../utils/defaultValues'
+import { recognizeParameters } from '../utils/parameterRecognition'
 import { type ItemFormData, itemSchema } from '../utils/validation'
 
 const router = useRouter()
@@ -48,6 +49,8 @@ const getInitialValues = (): ItemFormData => {
       brand: item.value.brand ?? '',
       color: item.value.color ?? '',
       quality: item.value.quality,
+      wearable: item.value.wearable ?? false,
+      consumable: item.value.consumable ?? false,
     }
   }
   return {
@@ -92,6 +95,35 @@ const onSubmit = handleSubmit(async (data: ICreateItemDto | IUpdateItemDto) => {
 const handleCancel = () => {
   router.push(`/gear/${containerId}`)
 }
+
+// Recognize parameters handler
+const handleRecognizeParameters = () => {
+  if (!values.name) {
+    toast.error(t('gear.item.name'))
+    return
+  }
+
+  try {
+    const params = recognizeParameters(values.name)
+
+    if (!params.brand && !params.color) {
+      toast.info(t('gear.actions.noParametersFound'))
+      return
+    }
+
+    if (params.brand && !values.brand) {
+      setFieldValue('brand', params.brand)
+    }
+    if (params.color && !values.color) {
+      setFieldValue('color', params.color)
+    }
+
+    toast.success(t('gear.actions.parametersRecognized'))
+  } catch (error) {
+    toast.error(t('common.error'))
+    console.error('Error recognizing parameters:', error)
+  }
+}
 </script>
 
 <template>
@@ -102,7 +134,12 @@ const handleCancel = () => {
           {{ isEditMode ? t('gear.item.edit') : t('gear.item.create') }}
         </h1>
         <p class="text-muted-foreground mt-1">
-          {{ container.name }}
+          <RouterLink
+            :to="`/gear/${container.id}`"
+            class="hover:text-primary hover:underline transition-colors"
+          >
+            {{ container.name }}
+          </RouterLink>
         </p>
       </div>
 
@@ -113,6 +150,7 @@ const handleCancel = () => {
             :loading="isSubmitting"
             @cancel="handleCancel"
             @name-blur="handleNameBlur"
+            @recognize-parameters="handleRecognizeParameters"
           />
         </form>
       </div>

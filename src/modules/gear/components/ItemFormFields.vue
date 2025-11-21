@@ -3,6 +3,7 @@ import { useFocus } from '@vueuse/core'
 import { nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import ComboBox from '@/components/ui/combo-box/ComboBox.vue'
 import { FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -13,8 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useSettings } from '@/modules/settings/composables/useSettings'
 import type { IGearItem } from '../types/gear.types'
+import { useGearSettings } from '../composables/useGearSettings'
 import { getBrandOptions } from '../utils/suggestedValues'
 import CategoryIcon from './CategoryIcon.vue'
 import ColorAutocomplete from './ColorAutocomplete.vue'
@@ -27,10 +28,11 @@ defineProps<{
 const emit = defineEmits<{
   cancel: []
   nameBlur: []
+  recognizeParameters: []
 }>()
 
 const { t } = useI18n()
-const { customCategories } = useSettings()
+const { customCategories } = useGearSettings()
 
 // Auto-focus na pierwszym polu
 const nameInputRef = ref<HTMLInputElement | undefined>(undefined)
@@ -221,6 +223,12 @@ const handleCancel = () => {
                 <SelectItem value="kg">
                   {{ $t('gear.item.weightUnits.kg') }}
                 </SelectItem>
+                <SelectItem value="oz">
+                  {{ $t('gear.item.weightUnits.oz') }}
+                </SelectItem>
+                <SelectItem value="lb">
+                  {{ $t('gear.item.weightUnits.lb') }}
+                </SelectItem>
               </SelectContent>
             </Select>
             <FormMessage />
@@ -397,16 +405,69 @@ const handleCancel = () => {
           </FormItem>
         </FormField>
       </div>
+
+      <!-- Wearable and Consumable -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <FormField v-slot="{ componentField, handleChange }" name="wearable">
+          <FormItem v-slot="{ id }" class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+            <div class="flex-1 space-y-1">
+              <FormLabel :label="$t('gear.item.wearable')" class="cursor-pointer" />
+              <p class="text-sm text-muted-foreground">
+                {{ $t('gear.item.wearableDescription') }}
+              </p>
+            </div>
+            <Checkbox
+              :id="id"
+              :model-value="componentField.modelValue"
+              @update:model-value="handleChange"
+            />
+            <FormMessage />
+          </FormItem>
+        </FormField>
+
+        <FormField v-slot="{ componentField, handleChange }" name="consumable">
+          <FormItem v-slot="{ id }" class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+            <div class="flex-1 space-y-1">
+              <FormLabel :label="$t('gear.item.consumable')" class="cursor-pointer" />
+              <p class="text-sm text-muted-foreground">
+                {{ $t('gear.item.consumableDescription') }}
+              </p>
+            </div>
+            <Checkbox
+              :id
+              :model-value="componentField.modelValue"
+              @update:model-value="handleChange"
+            />
+            <FormMessage />
+          </FormItem>
+        </FormField>
+      </div>
     </div>
 
+    <div class="border-t my-4" />
+
     <!-- Actions -->
-    <div class="flex flex-col sm:flex-row justify-end gap-3">
-      <Button type="button" variant="outline" @click="handleCancel">
-        {{ $t('gear.actions.cancel') }}
+    <div class="flex flex-col sm:flex-row justify-between gap-3">
+      <Button
+        type="button"
+        variant="outline"
+        @click="$emit('recognizeParameters')"
+      >
+        {{ $t('gear.actions.recognizeParameters') }}
       </Button>
-      <Button type="submit" :loading>
-        {{ $t('gear.actions.save') }}
-      </Button>
+      <div class="flex gap-3">
+        <Button
+          type="button"
+          variant="outline"
+          class="flex-1"
+          @click="handleCancel"
+        >
+          {{ $t('gear.actions.cancel') }}
+        </Button>
+        <Button type="submit" class="flex-1" :loading>
+          {{ $t('gear.actions.save') }}
+        </Button>
+      </div>
     </div>
   </div>
 </template>

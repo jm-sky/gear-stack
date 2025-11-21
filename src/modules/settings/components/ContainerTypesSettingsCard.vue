@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { Edit, Plus, Trash2 } from 'lucide-vue-next'
+import { Edit, InfoIcon, Plus, Trash2 } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import type { IUserContainerType } from '../types/settings.types'
-import { useSettings } from '../composables/useSettings'
+import { useGearSettings } from '@/modules/gear/composables/useGearSettings'
+import type { IUserContainerType } from '@/modules/gear/types/gearSettings.types'
 
 const { t } = useI18n()
-const { customContainerTypes, addContainerType, updateContainerType, removeContainerType } = useSettings()
+const { customContainerTypes, addContainerType, updateContainerType, removeContainerType } = useGearSettings()
 
 const editingId = ref<string | null>(null)
 const newTypeKey = ref('')
@@ -93,10 +93,12 @@ const handleDelete = (id: string) => {
             v-model="newTypeKey"
             :placeholder="t('settings.containerTypes.keyPlaceholder')"
             :disabled="!!editingId"
+            @keydown.enter="handleAdd"
           />
           <Input
             v-model="newTypeLabel"
             :placeholder="t('settings.containerTypes.labelPlaceholder')"
+            @keydown.enter="handleAdd"
           />
         </div>
         <div class="flex gap-2">
@@ -163,7 +165,8 @@ const handleDelete = (id: string) => {
           </div>
         </div>
       </div>
-      <div v-else class="text-center py-8 text-muted-foreground">
+      <div v-else class="flex items-center justify-center gap-2 text-sm py-8 text-muted-foreground">
+        <InfoIcon class="size-4 inline" />
         {{ t('settings.containerTypes.empty') }}
       </div>
     </CardContent>

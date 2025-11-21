@@ -25,7 +25,7 @@ const showOnlyRootContainers = defineModel<boolean>('showOnlyRootContainers', { 
     <div class="flex items-center gap-2">
       <Checkbox
         id="root-containers-filter"
-        v-model:checked="showOnlyRootContainers"
+        v-model="showOnlyRootContainers"
       />
       <Label
         for="root-containers-filter"

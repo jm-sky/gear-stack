@@ -10,6 +10,7 @@ import ContainerFormFields from '../components/ContainerFormFields.vue'
 import { useContainer } from '../composables/useContainer'
 import { useGear } from '../composables/useGear'
 import { recognizeContainerType } from '../utils/containerTypeRecognition'
+import { recognizeParameters } from '../utils/parameterRecognition'
 import { type ContainerFormData, containerSchema } from '../utils/validation'
 
 const router = useRouter()
@@ -22,7 +23,6 @@ const isEditMode: boolean = !!containerId
 
 const { container } = useContainer(containerId)
 
-
 const getInitialValues = (): ContainerFormData => {
   if (container.value) {
     return {
@@ -30,8 +30,14 @@ const getInitialValues = (): ContainerFormData => {
       description: container.value.description ?? '',
       type: container.value.type,
       color: container.value.color ?? 'default',
+      hideWhenNested: container.value.hideWhenNested ?? false,
       brand: container.value.brand ?? '',
       price: container.value.price,
+      weight: container.value.weight,
+      weightUnit: container.value.weightUnit ?? 'kg',
+      maxWeight: container.value.maxWeight,
+      maxWeightUnit: container.value.maxWeightUnit ?? 'kg',
+      url: container.value.url ?? '',
     }
   }
   return {
@@ -39,8 +45,14 @@ const getInitialValues = (): ContainerFormData => {
     description: '',
     type: 'other' as const,
     color: 'default' as const,
+    hideWhenNested: false,
     brand: '',
     price: undefined,
+    weight: undefined,
+    weightUnit: 'kg' as const,
+    maxWeight: undefined,
+    maxWeightUnit: 'kg' as const,
+    url: '',
   }
 }
 
@@ -85,6 +97,32 @@ const handleCancel = () => {
     router.push('/gear')
   }
 }
+
+// Recognize parameters handler
+const handleRecognizeParameters = () => {
+  if (!values.name) {
+    toast.error(t('gear.container.name'))
+    return
+  }
+
+  try {
+    const params = recognizeParameters(values.name)
+
+    if (!params.brand && !params.color) {
+      toast.info(t('gear.actions.noParametersFound'))
+      return
+    }
+
+    if (params.brand && !values.brand) {
+      setFieldValue('brand', params.brand)
+    }
+
+    toast.success(t('gear.actions.parametersRecognized'))
+  } catch (error) {
+    toast.error(t('common.error'))
+    console.error('Error recognizing parameters:', error)
+  }
+}
 </script>
 
 <template>
@@ -107,6 +145,7 @@ const handleCancel = () => {
             @submit="handleSubmit"
             @cancel="handleCancel"
             @name-blur="handleNameBlur"
+            @recognize-parameters="handleRecognizeParameters"
           />
         </form>
       </div>

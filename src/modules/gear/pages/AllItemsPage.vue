@@ -7,22 +7,25 @@ import DataTable from '@/components/data-table/DataTable.vue'
 import Badge from '@/components/ui/badge/Badge.vue'
 import TableEmpty from '@/components/ui/table/TableEmpty.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import { useSettings } from '@/modules/settings/composables/useSettings'
+import { useCoreSettings } from '@/modules/settings/composables/useCoreSettings'
 import { ALL_ITEMS_TABLE_COLUMN_VISIBILITY_KEY } from '@/shared/config/config'
 import type { IItemWithContainer } from '../utils/allItemsColumns'
 import CategoryIcon from '../components/CategoryIcon.vue'
 import { useGear } from '../composables/useGear'
+import { useGearSettings } from '../composables/useGearSettings'
 import { createAllItemsColumns } from '../utils/allItemsColumns'
 import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 import { COLOR_DOT_CLASSES, COLOR_TEXT_CLASSES } from '../utils/containerColors'
-import { formatWeight } from '../utils/formatWeight'
+import { formatWeightWithPreferredUnit } from '../utils/formatWeight'
 import { getAllItems } from '../utils/getAllItems'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 
 const router = useRouter()
 const { t } = useI18n()
 const { containers } = useGear()
-const { customCategories } = useSettings()
+const { customCategories } = useGearSettings()
+const { settings: coreSettings } = useCoreSettings()
+const settings = computed(() => ({ preferredWeightUnit: coreSettings.value.preferredWeightUnit }))
 
 // Get all items from all containers
 const allItems = computed<IItemWithContainer[]>(() => {
@@ -45,6 +48,8 @@ function loadColumnVisibility(): Record<string, boolean> {
   return {
     brand: false,
     color: false,
+    wearable: false,
+    consumable: false,
   }
 }
 
@@ -154,7 +159,7 @@ function navigateToContainer(containerId: string) {
         </template>
 
         <template #weight="{ row }">
-          {{ formatWeight(row.original.weight * row.original.quantity, row.original.weightUnit) }}
+          {{ formatWeightWithPreferredUnit(row.original.weight * row.original.quantity, row.original.weightUnit, settings.preferredWeightUnit) }}
         </template>
 
         <template #status="{ row }">
@@ -183,6 +188,20 @@ function navigateToContainer(containerId: string) {
             />
             <span>{{ row.original.color }}</span>
           </div>
+          <span v-else>-</span>
+        </template>
+
+        <template #wearable="{ row }">
+          <Badge v-if="row.original.wearable" variant="outline" class="text-xs">
+            {{ t('gear.item.wearable') }}
+          </Badge>
+          <span v-else>-</span>
+        </template>
+
+        <template #consumable="{ row }">
+          <Badge v-if="row.original.consumable" variant="outline" class="text-xs">
+            {{ t('gear.item.consumable') }}
+          </Badge>
           <span v-else>-</span>
         </template>
 

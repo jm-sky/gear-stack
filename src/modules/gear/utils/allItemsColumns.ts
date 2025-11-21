@@ -1,4 +1,4 @@
-import type { TContainerColor } from '../types/gear.types'
+import type { TContainerColor, TGearWeightUnit } from '../types/gear.types'
 import type { ColumnDef } from '@tanstack/vue-table'
 
 export interface IItemWithContainer {
@@ -10,12 +10,14 @@ export interface IItemWithContainer {
   containerColor: TContainerColor
   quantity: number
   weight: number
-  weightUnit: 'g' | 'kg'
+  weightUnit: TGearWeightUnit
   status: 'owned' | 'missing' | 'toBuy'
   priority: 'low' | 'medium' | 'high' | 'critical'
   brand?: string
   color?: string
   expirationDate?: string
+  wearable?: boolean
+  consumable?: boolean
 }
 
 export function createAllItemsColumns(
@@ -82,6 +84,20 @@ export function createAllItemsColumns(
       id: 'color',
       accessorKey: 'color',
       header: () => t('gear.item.color'),
+      enableSorting: true,
+      enableHiding: true,
+    },
+    {
+      id: 'wearable',
+      accessorKey: 'wearable',
+      header: () => t('gear.item.wearable'),
+      enableSorting: true,
+      enableHiding: true,
+    },
+    {
+      id: 'consumable',
+      accessorKey: 'consumable',
+      header: () => t('gear.item.consumable'),
       enableSorting: true,
       enableHiding: true,
     },

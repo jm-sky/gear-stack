@@ -182,3 +182,32 @@ The Vite config proxies `/api` requests to the configured backend URL.
 - **Module independence** - Modules should be self-contained and reusable
 - **Service layer** - Business logic belongs in service classes, not in stores or components
 - **Type safety** - All data structures have TypeScript interfaces in `types/` directories
+
+## UI Component Notes
+
+### Reka-ui / shadcn-vue Checkbox
+
+**CRITICAL:** In Reka-ui (shadcn-vue), Checkbox uses standard `v-model`, **NOT** `v-model:checked`.
+
+✅ **Correct usage:**
+```vue
+<script setup>
+const checked = ref(true)
+</script>
+
+<template>
+  <Checkbox v-model="checked" />
+</template>
+```
+
+❌ **Incorrect usage:**
+```vue
+<!-- DOES NOT WORK -->
+<Checkbox v-model:checked="checked" />
+<Checkbox :checked="checked" @update:checked="..." />
+```
+
+**Notes:**
+- `v-model:checked` only works with `defineModel()` (as in `ContainersFilters.vue`)
+- For regular `ref`, use standard `v-model`
+- Checkbox in Reka-ui uses `modelValue` and `@update:model-value` under the hood

@@ -7,14 +7,15 @@ import DataTable from '@/components/data-table/DataTable.vue'
 import Badge from '@/components/ui/badge/Badge.vue'
 import { Button } from '@/components/ui/button'
 import TableEmpty from '@/components/ui/table/TableEmpty.vue'
-import { useSettings } from '@/modules/settings/composables/useSettings'
+import { useCoreSettings } from '@/modules/settings/composables/useCoreSettings'
 import { ITEMS_TABLE_COLUMN_VISIBILITY_KEY } from '@/shared/config/config'
 import type { IGearItem } from '../types/gear.types'
 import { useGear } from '../composables/useGear'
+import { useGearSettings } from '../composables/useGearSettings'
 import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 import { EXPIRATION_WARNING_DAYS } from '../utils/constants'
 import { COLOR_TEXT_CLASSES } from '../utils/containerColors'
-import { formatWeight, formatWeightFromGrams } from '../utils/formatWeight'
+import { formatWeightToPreferredUnit, formatWeightWithPreferredUnit } from '../utils/formatWeight'
 import { createItemsColumns } from '../utils/itemsColumns'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 import CategoryIcon from './CategoryIcon.vue'
@@ -35,11 +36,14 @@ const emit = defineEmits<{
   edit: [item: IGearItem]
   delete: [item: IGearItem]
   statusChange: [item: IGearItem, status: IGearItem['status']]
+  recognizeParameters: [item: IGearItem]
 }>()
 
 const { t } = useI18n()
 const router = useRouter()
-const { customCategories } = useSettings()
+const { settings: coreSettings } = useCoreSettings()
+const { customCategories } = useGearSettings()
+const settings = computed(() => ({ preferredWeightUnit: coreSettings.value.preferredWeightUnit }))
 const { getContainerById, calculateTotalWeight } = useGear()
 
 // Expanded rows state (which containers are expanded)
@@ -59,10 +63,12 @@ function loadColumnVisibility(): Record<string, boolean> {
   } catch (error) {
     console.error('Error loading column visibility from storage:', error)
   }
-  // Default: hide brand and color by default
+  // Default: hide brand, color, wearable, and consumable by default
   return {
     brand: false,
     color: false,
+    wearable: false,
+    consumable: false,
   }
 }
 
@@ -233,10 +239,10 @@ function getNestedContainer(item: IGearItem) {
     <template #weight="{ row }">
       <div class="text-end px-4">
         <template v-if="isNestedContainer(row.original)">
-          {{ formatWeightFromGrams(calculateTotalWeight(row.original.containerId!) * row.original.quantity) }}
+          {{ formatWeightToPreferredUnit(calculateTotalWeight(row.original.containerId!) * row.original.quantity, settings.preferredWeightUnit) }}
         </template>
         <template v-else>
-          {{ formatWeight(row.original.weight * row.original.quantity, row.original.weightUnit ?? 'g') }}
+          {{ formatWeightWithPreferredUnit(row.original.weight * row.original.quantity, row.original.weightUnit ?? 'g', settings.preferredWeightUnit) }}
         </template>
       </div>
     </template>
@@ -270,6 +276,20 @@ function getNestedContainer(item: IGearItem) {
       <span v-else>-</span>
     </template>
 
+    <template #wearable="{ row }">
+      <Badge v-if="row.original.wearable" variant="outline" class="text-xs">
+        {{ t('gear.item.wearable') }}
+      </Badge>
+      <span v-else>-</span>
+    </template>
+
+    <template #consumable="{ row }">
+      <Badge v-if="row.original.consumable" variant="outline" class="text-xs">
+        {{ t('gear.item.consumable') }}
+      </Badge>
+      <span v-else>-</span>
+    </template>
+
     <template #actions="{ row }">
       <ItemsTableRowActions
         :row="row.original"
@@ -277,6 +297,7 @@ function getNestedContainer(item: IGearItem) {
         @delete="emit('delete', row.original)"
         @status-change="(status) => emit('statusChange', row.original, status)"
         @view-container="navigateToNestedContainer"
+        @recognize-parameters="emit('recognizeParameters', row.original)"
       />
     </template>
 

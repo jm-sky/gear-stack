@@ -21,6 +21,216 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.20.0] - 2025-01-20
+
+### Added
+- **maxWeight Feature** (Container Weight Limits):
+  - Added `maxWeight` and `maxWeightUnit` fields to containers
+  - Weight limit input in container form (Extended Fields section)
+  - Automatic weight calculation including container's own weight
+  - Visual indicators in ContainerHeader:
+    - Warning badge when weight exceeds 90% of limit (orange)
+    - Exceeded badge when weight exceeds 100% (red)
+    - Color-coded weight display (green/yellow/orange/red)
+    - Progress bar showing weight usage percentage
+  - Stats card displays "currentWeight / maxWeight" with visual progress bar
+  - Weight limit calculations: `calculateWeightLimitPercentage()` and `isWeightLimitExceeded()`
+  - Translations for maxWeight feature (PL/EN)
+
+- **hideWhenNested Feature** (Smart Container Filtering):
+  - Added `hideWhenNested` boolean field to containers
+  - Checkbox in container form: "Hide on list when nested"
+  - Automatic filtering in ContainersListPage - containers with `hideWhenNested=true` and `parentContainerId` are hidden from main list
+  - Filter respects "Show only root containers" toggle
+  - Helps organize nested containers without cluttering main list
+
+- **Parameter Recognition in ContainerForm**:
+  - Added "Recognize Parameters" button to container form
+  - Recognizes brand from container name using fuzzy matching
+  - Same functionality as ItemForm parameter recognition
+  - Toast notifications for recognition results
+
+- **UI/UX Improvements**:
+  - Container name is now a clickable link in ItemFormPage (navigates to container details)
+  - Added `flex-1` to form buttons for better mobile layout:
+    - ItemFormFields: Cancel and Save buttons have equal width
+    - ContainerHeader: Add Item button expands on mobile (`flex-1 sm:flex-none`)
+  - Build script now includes deployment to `/var/www/gear-stack`
+
+### Fixed
+- Fixed brand and color displaying as lowercase in UI
+  - Changed `getBrandOptions()` to use original case instead of `toLowerCase()`
+  - Changed `getColorOptions()` to use original case instead of `toLowerCase()`
+  - Brand badge now displays with normal-case (e.g., "Maxpedition" instead of "maxpedition")
+- Fixed missing Checkbox import in ContainerFormFields
+- Fixed weight calculation to include container's own weight in total
+
+### Changed
+- Updated ROADMAP with new features:
+  - Added maxWeight feature documentation with use cases
+  - Added container/item management features (cloning, existing items catalog)
+
+---
+
+## [0.19.0] - 2025-01-22
+
+### Added
+- **Parameter Recognition Feature**:
+  - Added automatic recognition of brand and color from item names
+  - New utility: `parameterRecognition.ts` with fuzzy matching against `SUGGESTED_BRANDS` and `SUGGESTED_COLORS`
+  - "Recognize Parameters" action in item row actions menu
+  - "Recognize Parameters" button in item form (fills brand/color fields)
+  - Bulk action "Recognize Parameters for All Items" in container header dropdown menu
+  - Recognition only fills empty fields (doesn't overwrite existing values)
+  - Integration with existing suggested values dictionaries
+
+### Changed
+- **UI Improvements**:
+  - Added visual separator in item form between fields and actions
+  - Improved parameter recognition UX with proper toast notifications
+  - Badge component now properly imported from registry in `PageListHeader.vue`
+
+### Fixed
+- Fixed TypeScript error in parameter recognition (handling undefined first word)
+- Improved nested container display - nested containers now have bold font and clickable links to container detail page
+
+---
+
+## [0.18.0] - 2025-01-21
+
+### Added
+- **Modular Settings Architecture**:
+  - Separated core settings (locale, dark mode, preferred weight unit) from gear-specific settings (custom categories, container types)
+  - Created dedicated services: `CoreSettingsService` and `GearSettingsService`
+  - Created separate Pinia stores: `useCoreSettingsStore` and `useGearSettingsStore`
+  - Created separate composables: `useCoreSettings()` and `useGearSettings()`
+  - Modular SettingsPage component with slot-based architecture for extensibility
+  - Settings page now supports adding module-specific settings via slots
+
+### Changed
+- **Settings Architecture Refactoring**:
+  - Split monolithic settings into core and gear modules
+  - Core settings stored in `core-settings` localStorage key
+  - Gear settings stored in `gear-settings` localStorage key
+  - Automatic migration from old unified settings storage
+  - Settings page structure: core settings in module, gear settings added via slot in `/src/pages/settings/`
+  - All components updated to use appropriate settings composables
+
+### Fixed
+- Improved code organization and maintainability through modular architecture
+- Better separation of concerns between core application settings and module-specific settings
+
+---
+
+## [0.17.0] - 2025-01-21
+
+### Added
+- **Imperial Weight Units Support**:
+  - Added support for ounces (oz) and pounds (lb) as weight units
+  - Users can now select oz and lb in item and container forms
+  - Preferred weight unit setting now includes oz and lb options
+  - All weight conversion functions updated to support imperial units
+  - Conversion rates: 1 oz = 28.3495 g, 1 lb = 453.592 g
+
+### Changed
+- **Weight Unit Type**: Extended `TGearWeightUnit` type from `'g' | 'kg'` to `'g' | 'kg' | 'oz' | 'lb'`
+- **Weight Conversion Functions**: Updated all conversion functions in `formatWeight.ts` to handle oz and lb
+- **Form Validation**: Updated zod schemas to accept oz and lb as valid weight units
+- **Markdown Import/Export**: Parser now recognizes and handles oz and lb in markdown format
+- **Translations**: Added translations for oz and lb in both English and Polish
+
+### Technical Details
+- Added constants: `GRAMS_PER_OUNCE = 28.3495` and `GRAMS_PER_POUND = 453.592`
+- Updated all weight-related interfaces and types to support imperial units
+- All weight displays automatically convert to preferred unit (including oz/lb)
+
+---
+
+## [0.16.0] - 2025-01-21
+
+### Added
+- **Guidelines Dialog Component**:
+  - Created dedicated `GuidelinesDialog` component for displaying formatting guidelines
+  - Reusable component used in both Export and Import dialogs
+  - Guidelines are now shown in a modal dialog instead of being copied directly
+  - Users can view guidelines and copy them manually when needed
+
+### Changed
+- **Guidelines Display**:
+  - Guidelines button now opens a dialog instead of copying to clipboard immediately
+  - Guidelines template has been shortened while keeping essential information
+  - Reduced number of examples to make guidelines more concise
+  - Dialog is smaller than parent dialogs for better UX
+
+- **Code Refactoring**:
+  - Extracted Guidelines functionality into reusable component
+  - Removed code duplication between Export and Import dialogs
+  - Improved maintainability and consistency
+
+---
+
+## [0.15.0] - 2025-01-21
+
+### Added
+- **Preferred Weight Unit Setting**:
+  - Users can now set their preferred weight unit (g or kg) in settings
+  - All displayed weights across the application (tables, cards, headers) are automatically converted to the preferred unit
+  - Forms can still use different units, but display is consistent
+  - Setting is saved in localStorage and synchronized throughout the application
+  - UI option added to Preferences settings page
+
+- **Export Configuration Options**:
+  - Added export options dialog with checkboxes to control markdown export content:
+    - Show UUID in export
+    - Show weight
+    - Show color
+    - Show brand
+    - Show nested container reference (e.g., `[#bagaznik]`)
+    - Show legend
+  - All options are reactive - markdown updates in real-time when toggling options
+  - Options are saved per export session
+
+### Changed
+- **Export Dialog**: Refactored to accept container/containers directly instead of pre-generated markdown, allowing real-time updates based on options
+- **Weight Display**: All weight displays now use preferred unit from settings instead of automatic unit selection
+- **Export Format**: Container ID references (`[#id]`) in headers and items are now controlled by export options
+
+### Fixed
+- Fixed legend duplication when exporting multiple containers - legend now appears only once at the end
+- Fixed Checkbox component usage - now uses standard `v-model` instead of deprecated `v-model:checked` for regular refs
+
+### Documentation
+- Added `.cursorrules` file with Reka-ui Checkbox usage guidelines
+- Updated `CLAUDE.md` with UI component notes about Checkbox usage
+- Split ROADMAP into front-end only (`ROADMAP.md`) and backend-required (`ROADMAP_V2.md`) features
+
+---
+
+## [0.14.0] - 2025-01-20
+
+### Added
+- **Container Weight and URL Fields**:
+  - Containers can now have weight and weight unit (g/kg) fields
+  - Containers can now have URL field for linking to product pages or resources
+  - Weight and URL fields added to container form
+  - Container header displays weight and URL (if provided)
+  - Weight displayed as badge in container header
+  - URL displayed as clickable link in container header
+
+- **Enhanced Export/Import**:
+  - Export now includes container weight in format: `## Container Name [#id] (Type) <URL> - [weight]g`
+  - Import parser now extracts container weight and URL from markdown headers
+  - Guidelines template updated to document container weight and URL format
+
+### Changed
+- **Guidelines Template**: Moved from `ExportToPromptDialog.vue` to `markdownImportService.ts` for better code organization and reusability
+- **Container Form**: Added weight, weightUnit, and URL input fields with proper validation
+
+### Fixed
+- Fixed TypeScript errors in markdown import service (containerUrl undefined check, container type definition)
+
+---
+
 ## [0.13.1] - 2025-01-19
 
 ### Fixed

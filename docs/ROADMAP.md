@@ -1,8 +1,10 @@
-# Roadmap - Gear Stack
+# Roadmap - Gear Stack (Front-end Only)
 
-Lista planowanych funkcjonalności i ulepszeń aplikacji.
+Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (działające z localStorage, bez potrzeby backendu, bazy danych lub autoryzacji).
 
-> 📋 **Zobacz też:** [Features Implementation Plans](./features/README.md) - szczegółowe plany implementacji
+> 📋 **Zobacz też:** 
+> - [ROADMAP_V2.md](./ROADMAP_V2.md) - funkcjonalności wymagające backendu/DB/auth
+> - [Features Implementation Plans](./features/README.md) - szczegółowe plany implementacji
 
 ---
 
@@ -27,13 +29,29 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 - ✅ HTML lang attribute automatycznie ustawiany na podstawie wykrytego języka
 - ✅ Wykryty język zapisywany w localStorage
 
-### Preferowana jednostka wagi
-**Status:** 🔄 Planned | **Priority:** Medium
+### ✅ Preferowana jednostka wagi
+**Status:** ✅ Completed | **Priority:** Medium
 
-- Użytkownik może ustawić preferowaną jednostkę wagi w ustawieniach (g lub kg)
-- Wszystkie wyświetlane wagi na dashboard, w tabelach i kartach będą konwertowane do preferowanej jednostki
-- Formularze nadal mogą używać różnych jednostek, ale wyświetlanie będzie spójne
-- Ustawienie zapisywane w localStorage i synchronizowane w całej aplikacji
+- ✅ Użytkownik może ustawić preferowaną jednostkę wagi w ustawieniach (g lub kg)
+- ✅ Wszystkie wyświetlane wagi na dashboard, w tabelach i kartach będą konwertowane do preferowanej jednostki
+- ✅ Formularze nadal mogą używać różnych jednostek, ale wyświetlanie będzie spójne
+- ✅ Ustawienie zapisywane w localStorage i synchronizowane w całej aplikacji
+
+### ✅ Dodatkowe jednostki wagi (oz, lb)
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium
+
+- ✅ Dodanie jednostek imperialnych: uncje (oz) i funty (lb)
+- ✅ Rozszerzenie typu `TGearWeightUnit` o `'oz'` i `'lb'`
+- ✅ Aktualizacja funkcji konwersji w `formatWeight.ts`:
+  - ✅ Konwersja oz → g (1 oz = 28.3495 g)
+  - ✅ Konwersja lb → g (1 lb = 453.592 g)
+  - ✅ Konwersja g → oz i g → lb
+- ✅ Aktualizacja formularzy (ItemFormFields, ContainerFormFields) - dodanie opcji oz i lb
+- ✅ Aktualizacja preferowanej jednostki wagi w ustawieniach - dodanie oz i lb jako opcji
+- ✅ Aktualizacja tłumaczeń (PL/EN) dla nowych jednostek
+- ✅ Aktualizacja parsera markdown import - rozpoznawanie oz i lb w eksporcie/impocie
+- ✅ Aktualizacja walidacji (zod schemas) - dodanie oz i lb do enum
+- ✅ Wszystkie wyświetlane wagi będą konwertowane do preferowanej jednostki (w tym oz/lb)
 
 ---
 
@@ -79,14 +97,10 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 - ✅ Kolor wyświetlany w kartach kontenerów i rozwiniętych wierszach zagnieżdżonych kontenerów
 
 ### Wybór primary color (brand color)
-**Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Small
+**Status:** ⏸️ On Hold | **Priority:** Low | **Complexity:** Small
 
-- Porównanie obecnego "dark orange" z alternatywnymi opcjami
-- Rozważenie kolorów: coyote, olive, oraz inne opcje pasujące do tematyki survival/outdoor
-- Testowanie różnych wariantów kolorystycznych
-- Wybór finalnego brand color, który najlepiej oddaje charakter aplikacji
-- Aktualizacja palety kolorów w całej aplikacji po wyborze
-- **Uwaga:** Warianty kolorów są już przygotowane w `src/css/style.css` jako zakomentowany kod
+- Obecny kolor "dark orange" jest zadowalający, zadanie wstrzymane
+- **Uwaga:** Warianty kolorów są już przygotowane w `src/css/style.css` jako zakomentowany kod (na wypadek potrzeby zmiany w przyszłości)
 
 ---
 
@@ -105,6 +119,30 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 - ✅ Walidacja cyklicznych referencji - zapobieganie nieskończonym pętlom
 - ✅ Osobne akcje "Dodaj Przedmiot" i "Dodaj Kontener" w interfejsie
 
+> **Uwaga:** Ta funkcjonalność jest już zaimplementowana i działa z localStorage. W przyszłości może być rozszerzona o synchronizację z backendem (zobacz [ROADMAP_V2.md](./ROADMAP_V2.md)).
+
+### Oznaczanie kontenerów jako fragmentów rodzica (integral part)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+
+- Kontener może być oznaczony jako "fragment rodzica" (integral part of parent)
+- Przykład: Bagażnik samochodu jest częścią samochodu i nie powinien być liczony osobno
+- Przykład: Pokrywa plecaka jest częścią plecaka
+- Oznaczenie kontenera jako fragmentu:
+  - Kontener nie jest liczony jako osobny kontener w statystykach
+  - Waga kontenera-fragmentu jest zawsze wliczana do rodzica
+  - Fragment nie może być przeniesiony do innego kontenera bez rodzica
+  - Wizualne oznaczenie w interfejsie (ikona, badge, tooltip)
+- Użycie przypadków:
+  - Części samochodu (bagażnik, schowek, konsola)
+  - Części plecaka (kieszenie, pokrywy, pasy)
+  - Części namiotu (stelaż, podłoga)
+  - Inne kontenery, które są nierozerwalnie związane z rodzicem
+- Opcja w formularzu kontenera: checkbox "Fragment rodzica" (dostępne tylko gdy kontener ma rodzica)
+- Wpływ na obliczenia:
+  - Waga fragmentu zawsze wliczana do rodzica
+  - Fragment nie jest liczony jako osobny kontener w statystykach
+  - Fragment nie może być wyświetlony jako główny kontener (jeśli opcja "Pokaż tylko główne" jest włączona)
+
 ---
 
 ## 📝 Rozszerzone pola
@@ -118,6 +156,8 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 - ✅ **Półka cenowa / jakość** - niska półka, średnia półka, wyższa półka
 - ✅ **Firma** - producent/marka przedmiotu (z ComboBox i sugerowanymi wartościami)
 - ✅ **Kolor** - kolor przedmiotu (z ComboBox i sugerowanymi wartościami)
+- ✅ **Wearable** - opcja oznaczania przedmiotu jako noszonego na sobie (np. odzież, zegarek, buty)
+- ✅ **Consumable** - opcja oznaczania przedmiotu jako zużywalnego (np. jedzenie, lekarstwa, paliwo)
 
 **Dla kontenerów:**
 - ✅ **Firma** - producent/marka kontenera
@@ -127,6 +167,22 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 - ✅ Wspólne pola (firma, cena) zaimplementowane w modelu danych
 - ✅ Wizualizacja kolorów w tabelach (kolorowa kropka)
 - ✅ Zarządzanie widocznością kolumn (marka, kolor) w tabelach
+
+> **Uwaga:** Ta funkcjonalność jest już zaimplementowana i działa z localStorage. W przyszłości może być rozszerzona o synchronizację z backendem (zobacz [ROADMAP_V2.md](./ROADMAP_V2.md)).
+
+### Obsługa Markdown w notatkach
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+
+- Możliwość formatowania notatek (pole `notes`) za pomocą Markdown
+- W formularzach: edytor Markdown (z podglądem na żywo lub split view)
+- W wyświetlaniu: renderowanie Markdown do HTML (linki, **pogrubienie**, *kursywa*, listy, itp.)
+- Podstawowe wsparcie dla:
+  - **Bold** i *italic*
+  - Linki `[text](url)`
+  - Listy (ul/ol)
+  - `code` i bloki kodu
+- Opcjonalnie: edytor WYSIWYG dla Markdown lub składnia Markdown z podglądem
+- Obsługa dla przedmiotów (`IGearItem.notes`) i kontenerów (`IGearContainer.description`)
 
 ---
 
@@ -189,18 +245,19 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 - ✅ Dokumentacja zagnieżdżonych kontenerów
 - ✅ Przycisk kopiowania szablonu do schowka
 
-**Planowane ulepszenia:**
-- 🔄 **UUID support dla update workflow:**
-  - 🔄 Dodanie pola `uuid` do kontenerów i przedmiotów
-  - 🔄 Export zawiera UUID w nagłówku: `## Container [#slug] [uuid:abc-123] (Type)`
-  - 🔄 Import rozpoznaje UUID i może zaktualizować istniejące kontenery/przedmioty zamiast tylko tworzyć nowe
-  - 🔄 Umożliwia cykl export → edycja w AI → import z zachowaniem relacji
-  - 🔄 Stabilne referencje nawet po zmianie nazw kontenerów
-  - 🔄 Opcja w import dialog: "Aktualizuj istniejące" vs "Twórz nowe"
-- 🔄 Opcje konfiguracji eksportu:
-  - 🔄 Pokazywanie cen przedmiotów w eksporcie (opcjonalnie)
-  - 🔄 Dodatkowe podsumowanie "Do kupienia" na końcu eksportu
-  - 🔄 Inne opcje konfiguracji formatu (poziom szczegółowości, metadane, itp.)
+**Planowane ulepszenia (front-end only):**
+- 🚧 **Opcje konfiguracji eksportu** (częściowo zaimplementowane):
+  - ✅ Pokazywanie UUID w eksporcie (opcjonalnie)
+  - ✅ Pokazywanie wagi w eksporcie (opcjonalnie)
+  - ✅ Pokazywanie koloru w eksporcie (opcjonalnie)
+  - ✅ Pokazywanie marki w eksporcie (opcjonalnie)
+  - ✅ Pokazywanie powiązania z kontenerem (opcjonalnie)
+  - ✅ Pokazywanie legendy (opcjonalnie)
+  - 🔄 Pokazywanie cen przedmiotów w eksporcie (opcjonalnie) - planowane
+  - 🔄 Dodatkowe podsumowanie "Do kupienia" na końcu eksportu - planowane
+  - 🔄 Inne opcje konfiguracji formatu (poziom szczegółowości, metadane, itp.) - planowane
+
+> **Uwaga:** UUID support dla update workflow wymaga backendu/DB - zobacz [ROADMAP_V2.md](./ROADMAP_V2.md)
 
 ---
 
@@ -231,7 +288,67 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 - ✅ Słownik słów kluczowych dla każdej kategorii i typu kontenera
 - ✅ Rozpoznawanie uruchamiane na zdarzeniu blur (po opuszczeniu pola nazwy)
 - ✅ Priorytetyzacja dłuższych słów kluczowych (np. "bagażnik" zamiast "bag")
-- ⏳ Możliwość uczenia się na podstawie wcześniejszych wyborów użytkownika (zaplanowane, ale nie zaimplementowane)
+
+> **Uwaga:** Uczenie się na podstawie wcześniejszych wyborów użytkownika wymaga backendu/DB - zobacz [ROADMAP_V2.md](./ROADMAP_V2.md)
+
+---
+
+## 🔄 Zarządzanie kontenerami i przedmiotami
+
+### Kopiowanie/klonowanie kontenerów
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+
+- Możliwość sklonowania całego kontenera wraz z jego zawartością
+- Akcja "Duplikuj kontener" w menu akcji kontenera (dropdown na liście kontenerów)
+- Klonowanie tworzy nowy kontener z:
+  - Nazwą: "[Kopia] Nazwa oryginału" (edytowalna)
+  - Wszystkimi przedmiotami z oryginału (głębokie kopiowanie)
+  - Zagnieżdżonymi kontenerami (opcjonalnie - checkbox "Klonuj z zagnieżdżonymi kontenerami")
+  - Wszystkimi metadanymi (typ, kolor, brand, opis, itp.)
+- Dialog potwierdzający klonowanie z opcjami:
+  - Nowa nazwa kontenera (domyślnie: "[Kopia] Original Name")
+  - Checkbox: "Uwzględnij zagnieżdżone kontenery"
+  - Checkbox: "Uwzględnij ceny" (dla przedmiotów)
+- Klonowanie zapisuje w localStorage
+- Toast potwierdzający sukces z linkiem do nowego kontenera
+
+**Use cases:**
+- Tworzenie wariantu plecaka (np. "Plecak letni" → "Plecak zimowy")
+- Backup przed modyfikacją
+- Tworzenie podobnych zestawów (EDC #1, EDC #2)
+
+### Dodawanie istniejących przedmiotów do kontenera
+**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium
+
+- Możliwość dodania istniejącego przedmiotu z innego kontenera bez ręcznego przepisywania
+- W ItemFormPage dodanie opcji wyboru:
+  - **Nowy przedmiot** (obecny formularz) - domyślnie
+  - **Istniejący przedmiot** (autocomplete) - nowy tryb
+- Przycisk/toggle do przełączania między trybami lub dwa osobne buttony na stronie kontenera:
+  - "Dodaj przedmiot" (obecny)
+  - "Dodaj z katalogu" (nowy)
+- **Tryb "Dodaj istniejący":**
+  - Autocomplete/ComboBox z listą wszystkich przedmiotów ze wszystkich kontenerów
+  - Wyświetlanie: nazwa + kontener źródłowy + ikona kategorii
+  - Filtrowanie po nazwie (fuzzy search)
+  - Po wybraniu przedmiotu:
+    - Domyślnie: **kopia przedmiotu** (wszystkie pola + nowe UUID)
+    - Opcjonalnie: edycja przed dodaniem (ilość, waga, status)
+- Lista przedmiotów sortowana alfabetycznie
+- Grupowanie według kontenera źródłowego (opcjonalnie)
+- Podgląd szczegółów przedmiotu w dropdown (waga, marka, kolor)
+
+**Globalny katalog przedmiotów (localStorage):**
+- Funkcja w gearService: `getAllItems(): IGearItem[]` - zwraca wszystkie przedmioty ze wszystkich kontenerów
+- Funkcja: `getItemsForAutocomplete()` - zwraca przedmioty w formacie dla ComboBox
+- Cache w composable dla wydajności
+
+**Use cases:**
+- Dodawanie tego samego przedmiotu do wielu kontenerów (np. "Latarka" w różnych zestawach)
+- Szybkie budowanie nowego kontenera na bazie istniejących przedmiotów
+- Unikanie przepisywania tych samych danych
+
+> **Uwaga:** Linkowanie przedmiotów (zmiana w jednym → zmiana w wielu) wymaga backendu/DB - zobacz [ROADMAP_V2.md](./ROADMAP_V2.md)
 
 ---
 
@@ -253,7 +370,7 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 - Dwa sposoby zmiany kolejności:
   - **Drag & drop** - przeciąganie wierszy w tabeli do zmiany kolejności (preferowane)
   - **Akcje "Do góry" / "Do dołu"** - przyciski w menu akcji przedmiotu (alternatywa, jeśli drag & drop jest zbyt skomplikowane)
-- Kolejność zapisywana w bazie danych i wyświetlana domyślnie w tabeli przedmiotów
+- Kolejność zapisywana w localStorage i wyświetlana domyślnie w tabeli przedmiotów
 - Opcja sortowania według innych kryteriów (nazwa, waga, kategoria) z możliwością powrotu do kolejności ręcznej
 - Wizualne wskaźniki podczas przeciągania (highlight, placeholder)
 
@@ -275,36 +392,87 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 
 ---
 
-## 📄 Informacje prawne i footer
+## ⚖️ Kontrola wagi
 
-### Strona "Informacja o ciasteczkach" i Footer
-**Status:** 🔄 Planned | **Priority:** Low | **Feature:** FEATURE-010 | **Complexity:** Small
+### ✅ Maksymalna waga kontenera (maxWeight)
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium | **Version:** v0.20.0
 
-**Strona "Informacja o ciasteczkach":**
-- Strona/informacja typu "Informacja o ciasteczkach"
-- Informacje o wykorzystaniu localStorage
-- Zgodność z RODO (jeśli aplikacja będzie wykorzystywać cookies w przyszłości)
+- ✅ Dodanie opcjonalnego pola `maxWeight` do kontenerów
+- ✅ Możliwość ustawienia maksymalnej wagi dla kontenera (użytkownik może określić limit wagi, który jest w stanie nosić/transportować)
+- ✅ Wizualne ostrzeżenia gdy waga kontenera przekracza lub zbliża się do limitu:
+  - ✅ **Badge "Przekroczona waga"** - gdy totalna waga > maxWeight (czerwony, 100%+)
+  - ✅ **Badge "Blisko limitu"** - ostrzeżenie (pomarańczowy, 90%+)
+  - ✅ **Wskaźnik procentowy** - pokazuje procent wykorzystania limitu
+  - ✅ **Kolorowanie** - zielony (0-70%), żółty (70-90%), pomarańczowy (90-100%), czerwony (100%+)
+- ✅ Wyświetlanie w różnych miejscach:
+  - ✅ W nagłówku kontenera (ContainerHeader) - badge i wskaźnik
+  - ✅ W statystykach kontenera - wizualny wskaźnik z paskiem postępu ("15kg / 20kg")
+- ✅ Ustawienie maxWeight w formularzu kontenera:
+  - ✅ Pole opcjonalne z inputem numerycznym
+  - ✅ Wybór jednostki wagi (g, kg, oz, lb) - zgodnie z preferowaną jednostką użytkownika
+  - ✅ Automatyczna konwersja do gramów w modelu danych
+- ✅ Uwzględnienie zagnieżdżonych kontenerów w obliczeniach wagi
+- ✅ Uwzględnienie wagi samego kontenera w obliczeniach
 
-**Footer:**
-- Footer z informacją typu `2025 (R) DEV Made IT`
-- Linki do:
-  - Informacji o ciasteczkach
-  - Polityki prywatności (jeśli będzie potrzebna)
-  - Kontaktu
-  - GitHub/repozytorium (opcjonalnie)
+**Nie zaimplementowane (future):**
+- Toast/notification gdy podczas dodawania przedmiotu przekroczymy limit
+- Opcjonalna blokada dodawania przedmiotów gdy limit jest przekroczony (checkbox w ustawieniach)
+- Badge na karcie kontenera na liście
+
+**Use cases:**
+- Backpacking: "Nie chcę nosić więcej niż 12kg"
+- Travel: "Bagaż podręczny max 8kg (limit linii lotniczej)"
+- EDC: "Kieszeń max 500g"
+- Survival kit: "Zestaw przetrwania max 3kg"
 
 ---
 
-## 🔮 Przyszłe rozważenia
+## 📄 Informacje prawne i footer
 
-**Status:** 🔄 Planned | **Priority:** Low
+### ✅ Strona "Informacja o ciasteczkach" i Footer
+**Status:** ✅ Completed | **Priority:** Low | **Feature:** FEATURE-010 | **Complexity:** Small
 
-- Synchronizacja między urządzeniami (cloud storage)
-- Wersjonowanie danych (historia zmian)
-- Statystyki i raporty
-- Szablony kontenerów (predefiniowane zestawy)
-- Współdzielenie kontenerów między użytkownikami
-- Aplikacja mobilna (PWA)
+**Strona "Informacja o ciasteczkach":**
+- ✅ Strona `/cookies` z informacją o wykorzystaniu localStorage
+- ✅ Sekcje: LocalStorage, Co przechowujemy, Prywatność, Przyszłość, RODO
+- ✅ Zgodność z RODO - informacje o lokalnym przechowywaniu danych
+- ✅ Tłumaczenia PL/EN
+
+**Footer:**
+- ✅ Footer z informacją `© [rok] DEV Made IT`
+- ✅ Linki do:
+  - ✅ Informacji o ciasteczkach (`/cookies`)
+  - ✅ Polityki prywatności (`/privacy`)
+  - ✅ Kontaktu (`/contact`)
+  - ✅ GitHub/repozytorium
+- ✅ Footer wyświetlany w `AuthenticatedLayout`
+
+---
+
+## 🤖 Funkcje AI (front-end only)
+
+### Funkcje AI z API calls (bez auth)
+**Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Medium
+
+- Sugestie sprzętu (na podstawie pogody, aktywności itp.) - przez API calls
+- Analiza listy (co dodać, co usunąć, alternatywy) - przez API calls
+- Generowanie gotowych presetów (UL, bushcraft, EDC) - przez API calls
+- Konwersja: opis → gotowy kontener - przez API calls
+
+> **Uwaga:** Podstawowe funkcje AI mogą działać przez API calls bez autoryzacji. Zaawansowane funkcje wymagające personalizacji i uczenia się na podstawie historii użytkownika wymagają backendu/DB - zobacz [ROADMAP_V2.md](./ROADMAP_V2.md)
+
+### ✅ Rozpoznawanie parametrów przedmiotów na żądanie
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium
+
+- ✅ Rozpoznawanie koloru, firmy (brand) i innych parametrów na podstawie nazwy przedmiotu
+- ✅ Akcje dostępne w różnych miejscach:
+  - ✅ **Formularz przedmiotu** - przycisk "Rozpoznaj parametry"
+  - ✅ **Strona kontenera z listą przedmiotów** - akcja "Rozpoznaj parametry wszystkich przedmiotów" (bulk action)
+  - ✅ **Akcje wiersza przedmiotu w tabeli** - akcja "Rozpoznaj parametry" dla pojedynczego przedmiotu
+- ✅ Automatyczne uzupełnianie pól: kolor, firma/brand (oraz innych jeżeli są dostępne)
+- ✅ Integracja z istniejącymi słownikami sugerowanych wartości (SUGGESTED_BRANDS, SUGGESTED_COLORS)
+- ✅ Fuzzy matching dla rozpoznawania brandów i kolorów
+- ✅ Uzupełnianie tylko pustych pól (nie nadpisuje istniejących wartości)
 
 ---
 
@@ -312,22 +480,44 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji.
 
 ### High Priority (Następne do zrobienia)
 1. ✅ **Strona z listą wszystkich przedmiotów** - High priority, Medium complexity (Completed in v0.10.0)
-2. **Edycja bezpośrednio na liście** - High priority, Large complexity
-3. **Kolejność przedmiotów w kontenerze** - Medium priority, Medium complexity
+2. **Dodawanie istniejących przedmiotów do kontenera** - High priority, Medium complexity
+3. **Edycja bezpośrednio na liście** - High priority, Large complexity
 
 ### Medium Priority
-1. **Preferowana jednostka wagi** - Medium priority, Small complexity
-2. ✅ **Rozszerzone pola** - Medium priority, Medium complexity (Completed in v0.8.0)
+1. **Kopiowanie/klonowanie kontenerów** - Medium priority, Small complexity
+2. ✅ **Maksymalna waga kontenera (maxWeight)** - Medium priority, Medium complexity (Completed in v0.20.0)
+3. **Kolejność przedmiotów w kontenerze** - Medium priority, Medium complexity
+4. **Oznaczanie kontenerów jako fragmentów rodzica** - Medium priority, Medium complexity
+5. **Obsługa Markdown w notatkach** - Medium priority, Medium complexity
+6. ✅ **Rozszerzone pola** - Medium priority, Medium complexity (Completed in v0.8.0)
+7. ✅ **Rozpoznawanie parametrów przedmiotów na żądanie** - Medium priority, Medium complexity (Completed in v0.19.0)
 
 ### Low Priority (Polish/Enhancement)
-1. **Wybór primary color** - Low priority, Small complexity (warianty już przygotowane)
-2. **Footer i strony prawne** - Low priority, Small complexity
+1. ⏸️ **Wybór primary color** - Low priority, Small complexity (On Hold - obecny kolor zadowalający)
+2. ✅ **Footer i strony prawne** - Low priority, Small complexity (Completed)
+3. **Funkcje AI (podstawowe)** - Low priority, Medium complexity
+
+---
+
+## 📝 Uwagi dotyczące funkcjonalności wymagających backendu
+
+Wszystkie funkcjonalności wymagające backendu, bazy danych lub autoryzacji zostały przeniesione do [ROADMAP_V2.md](./ROADMAP_V2.md), w tym:
+- Synchronizacja między urządzeniami
+- Wersjonowanie danych
+- Udostępnianie i współpraca
+- Globalny katalog itemów (multi-user)
+- Linkowanie przedmiotów (multi-user)
+- Zaawansowane funkcje AI z personalizacją
+- Szablony kontenerów (z udostępnianiem)
+- Statystyki i raporty (multi-user)
 
 ---
 
 ## 📝 Notatki
 
+- Wszystkie funkcjonalności w tym pliku działają z localStorage (front-end only)
 - Wszystkie zaimplementowane features mają dokumentację w `docs/features/`
 - Statusy są aktualizowane na bieżąco
 - Priorytety mogą się zmieniać w zależności od potrzeb użytkowników
 - Complexity: Small (1-2 dni), Medium (3-5 dni), Large (1+ tygodnie)
+- Funkcjonalności wymagające backendu/DB/auth znajdują się w [ROADMAP_V2.md](./ROADMAP_V2.md)

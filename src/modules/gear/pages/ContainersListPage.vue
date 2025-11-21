@@ -1,33 +1,27 @@
 <script setup lang="ts">
 import { refDebounced } from '@vueuse/core'
-import { ChevronDown, FileInput, Package, Plus, Sparkles, Trash2 } from 'lucide-vue-next'
+import { Package, Plus, PlusIcon, Sparkles } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import { useSettings } from '@/modules/settings/composables/useSettings'
 import type { IGearContainer } from '../types/gear.types'
 import ContainerCard from '../components/ContainerCard.vue'
 import ContainersFilters from '../components/ContainersFilters.vue'
+import ContainersListPageDropdown from '../components/ContainersListPageDropdown.vue'
 import ExportToPromptDialog from '../components/ExportToPromptDialog.vue'
 import ImportMarkdownDialog from '../components/ImportMarkdownDialog.vue'
 import { useGear } from '../composables/useGear'
-import { exportContainersToPrompt } from '../utils/exportToPrompt'
+import { useGearSettings } from '../composables/useGearSettings'
+import { generateSampleSet } from '../services/sampleSetGenerator'
 import type { TUUID } from '@/shared/types/base.type'
 
 const router = useRouter()
 const { t } = useI18n()
-const { containers, deleteContainer, deleteAllContainers, getRootContainers, getContainerById, calculateTotalWeight } = useGear()
-const { customContainerTypes } = useSettings()
+const { containers, deleteContainer, getRootContainers } = useGear()
+const { customContainerTypes } = useGearSettings()
 
 // Filters - using refs that will be bound to ContainersFilters via v-model
 const searchQueryRaw = ref('')
@@ -37,7 +31,6 @@ const showOnlyRootContainers = ref(false)
 // Dialogs
 const importDialogOpen = ref(false)
 const isExportToPromptDialogOpen = ref(false)
-const exportMarkdown = ref('')
 
 // Helper to get container type label for filtering
 const getContainerTypeLabel = (typeKey: string): string => {
@@ -54,6 +47,14 @@ const filteredContainers = computed<IGearContainer[]>(() => {
   let baseContainers = containers.value
   if (showOnlyRootContainers.value) {
     baseContainers = getRootContainers()
+  } else {
+    // Hide containers with hideWhenNested=true AND parentContainerId set
+    baseContainers = baseContainers.filter(container => {
+      if (container.hideWhenNested && container.parentContainerId) {
+        return false // Hide this container
+      }
+      return true
+    })
   }
 
   // Then filter by search query
@@ -95,43 +96,29 @@ const handleDelete = (id: TUUID) => {
   }
 }
 
-const handleDeleteAll = () => {
-  if (confirm(t('gear.container.deleteAllConfirm'))) {
-    try {
-      deleteAllContainers()
-      toast.success(t('gear.container.deleteAllSuccess'))
-    } catch {
-      toast.error(t('common.error'))
-    }
-  }
-}
-
 const handleExportAllToPrompt = () => {
   if (containers.value.length === 0) {
     toast.error(t('gear.export.noContainers'))
     return
   }
 
-  try {
-    const markdown = exportContainersToPrompt(containers.value, {
-      t,
-      getContainerTypeLabel,
-      getContainerById,
-      calculateTotalWeight,
-    })
+  isExportToPromptDialogOpen.value = true
+}
 
-    exportMarkdown.value = markdown
-    isExportToPromptDialogOpen.value = true
+const handleGenerateSampleSet = () => {
+  try {
+    generateSampleSet(t)
+    toast.success(t('gear.sampleSet.success'))
   } catch (error) {
+    console.error('Error generating sample set:', error)
     toast.error(t('common.error'))
-    console.error('Error exporting to prompt:', error)
   }
 }
 </script>
 
 <template>
   <AuthenticatedLayout>
-    <div class="space-y-6 w-full max-w-full overflow-hidden">
+    <div class="space-y-6 w-full max-w-full">
       <!-- Header -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -142,43 +129,27 @@ const handleExportAllToPrompt = () => {
             {{ t('gear.page.title') }}
           </p>
         </div>
-        <div class="flex gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger as-child>
-              <Button variant="outline" class="sm:shrink-0">
-                <Plus class="size-4" />
-                {{ t('gear.container.create.title') }}
-                <ChevronDown class="size-4 ml-1" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem @click="handleCreate">
-                <Plus class="size-4 mr-2" />
-                {{ t('gear.container.create.new') }}
-              </DropdownMenuItem>
-              <DropdownMenuItem @click="handleImport">
-                <FileInput class="size-4 mr-2" />
-                {{ t('gear.import.fromMarkdown') }}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator v-if="containers.length > 0" />
-              <DropdownMenuItem
-                v-if="containers.length > 0"
-                @click="handleExportAllToPrompt"
-              >
-                <Sparkles class="size-4 mr-2" />
-                {{ t('gear.export.allToPrompt') }}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator v-if="containers.length > 0" />
-              <DropdownMenuItem
-                v-if="containers.length > 0"
-                class="text-destructive focus:text-destructive"
-                @click="handleDeleteAll"
-              >
-                <Trash2 class="size-4 mr-2" />
-                {{ t('gear.container.deleteAll') }}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <div class="flex flex-col sm:flex-row gap-2">
+          <div class="flex gap-2">
+            <Button
+              v-tooltip.bottom="t('gear.export.allToPrompt')"
+              variant="outline"
+              class="shrink-0"
+              @click="handleExportAllToPrompt"
+            >
+              <Sparkles class="size-4" />
+            </Button>
+            <Button
+              v-tooltip.bottom="t('gear.container.create.title')"
+              variant="default"
+              class="shrink-0 flex-1 sm:flex-none"
+              @click="handleCreate"
+            >
+              <PlusIcon class="size-4" />
+              {{ t('gear.container.create.title') }}
+            </Button>
+            <ContainersListPageDropdown @export-all-to-prompt="handleExportAllToPrompt" @import="handleImport" />
+          </div>
         </div>
       </div>
 
@@ -209,10 +180,15 @@ const handleExportAllToPrompt = () => {
         <p class="text-muted-foreground mb-6 max-w-md">
           {{ t('gear.container.emptyDescription') }}
         </p>
-        <Button @click="handleCreate">
-          <Plus class="size-4" />
-          {{ t('gear.container.create.title') }}
-        </Button>
+        <div class="flex flex-col md:flex-row flex-wrap gap-2">
+          <Button @click="handleCreate">
+            <Plus class="size-4" />
+            {{ t('gear.container.create.title') }}
+          </Button>
+          <Button variant="outline" @click="handleGenerateSampleSet">
+            {{ t('gear.sampleSet.generateButton') }}
+          </Button>
+        </div>
       </div>
     </div>
 
@@ -225,7 +201,7 @@ const handleExportAllToPrompt = () => {
     <!-- Export to Prompt Dialog -->
     <ExportToPromptDialog
       v-model:open="isExportToPromptDialogOpen"
-      :markdown="exportMarkdown"
+      :containers="containers"
     />
   </AuthenticatedLayout>
 </template>
