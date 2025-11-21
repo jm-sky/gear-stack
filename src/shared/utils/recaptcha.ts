@@ -42,6 +42,9 @@ export function loadRecaptchaScript(): Promise<void> {
 
 /**
  * Execute reCAPTCHA and get token
+ * 
+ * Note: reCAPTCHA tokens expire after ~2 minutes and are single-use.
+ * Generate tokens immediately before making API calls.
  */
 export async function executeRecaptcha(action: string): Promise<string | null> {
   if (!config.recaptcha.enabled) {
@@ -52,14 +55,32 @@ export async function executeRecaptcha(action: string): Promise<string | null> {
     await loadRecaptchaScript()
 
     if (!window.grecaptcha) {
-      console.warn('reCAPTCHA not loaded')
+      console.warn('[reCAPTCHA] Script not loaded - grecaptcha not available')
       return null
     }
 
-    return await window.grecaptcha.execute(config.recaptcha.siteKey, { action })
+    // Ensure grecaptcha is ready
+    await new Promise<void>((resolve) => {
+      if (window.grecaptcha.ready) {
+        window.grecaptcha.ready(() => resolve())
+      } else {
+        // Fallback if ready callback is not available
+        resolve()
+      }
+    })
+
+    const token = await window.grecaptcha.execute(config.recaptcha.siteKey, { action })
+    
+    if (!token) {
+      console.warn('[reCAPTCHA] Token generation returned empty token')
+      return null
+    }
+
+    console.debug(`[reCAPTCHA] Token generated for action: ${action}`)
+    return token
   }
   catch (error) {
-    console.error('reCAPTCHA execution failed:', error)
+    console.error('[reCAPTCHA] Execution failed:', error)
     return null
   }
 }
@@ -70,6 +91,7 @@ declare global {
     grecaptcha: {
       execute: (siteKey: string, options: { action: string }) => Promise<string>
       ready: (callback: () => void) => void
+      render?: (container: string | HTMLElement, parameters: Record<string, unknown>) => number
     }
   }
 }

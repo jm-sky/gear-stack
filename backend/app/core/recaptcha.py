@@ -76,13 +76,21 @@ async def verify_recaptcha(token: str, action: str = "submit") -> dict[str, Any]
             result = response.json()
 
         # Log the result for debugging
-        logger.info(f"reCAPTCHA verification: success={result.get('success')}, " f"score={result.get('score')}, action={result.get('action')}")
+        logger.info(
+            f"reCAPTCHA verification: success={result.get('success')}, "
+            f"score={result.get('score')}, action={result.get('action')}, "
+            f"hostname={result.get('hostname')}"
+        )
 
         # Check if verification was successful
         if not result.get("success"):
             error_codes = result.get("error-codes", [])
-            logger.warning(f"reCAPTCHA verification failed: {error_codes}")
-            raise RecaptchaError(f"reCAPTCHA verification failed: {error_codes}")
+            error_message = ", ".join(error_codes) if error_codes else "unknown error"
+            logger.warning(
+                f"reCAPTCHA verification failed: {error_message}. "
+                f"Token length: {len(token)}, Action: {action}"
+            )
+            raise RecaptchaError(f"reCAPTCHA verification failed: {error_message}")
 
         # Verify action matches (prevents token reuse across different forms)
         if result.get("action") != action:
