@@ -1,6 +1,6 @@
 import type { IGearContainer } from '../types/gear.types'
-import type { TUUID } from '@/shared/types/base.type'
 import type { IItemWithContainer } from './allItemsColumns'
+import type { TUUID } from '@/shared/types/base.type'
 
 /**
  * Get all items from all containers with container information

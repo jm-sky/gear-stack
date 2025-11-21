@@ -1,5 +1,5 @@
 import { GEAR_SETTINGS_STORAGE_KEY, SETTINGS_STORAGE_KEY } from '@/shared/config/config'
-import type { IGearSettings, IUpdateGearSettingsDto, IUserCategory, IUserContainerType } from '../types/gearSettings.types'
+import type { IGearSettings, IUpdateGearSettingsDto, IUserBrand, IUserCategory, IUserContainerType } from '../types/gearSettings.types'
 
 /**
  * Gear Settings Service
@@ -49,6 +49,7 @@ export class GearSettingsService {
         this.saveToStorage({
           customCategories: migrated.customCategories ?? [],
           customContainerTypes: migrated.customContainerTypes ?? [],
+          customBrands: [],
         })
       }
     }
@@ -56,6 +57,7 @@ export class GearSettingsService {
     return {
       customCategories: settings.customCategories ?? [],
       customContainerTypes: settings.customContainerTypes ?? [],
+      customBrands: settings.customBrands ?? [],
     }
   }
 
@@ -67,6 +69,7 @@ export class GearSettingsService {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify({
         customCategories: settings.customCategories,
         customContainerTypes: settings.customContainerTypes,
+        customBrands: settings.customBrands,
       }))
     } catch (error) {
       console.error('Error saving gear settings to storage:', error)
@@ -80,6 +83,7 @@ export class GearSettingsService {
     const updated: IGearSettings = {
       customCategories: updates.customCategories ?? current.customCategories,
       customContainerTypes: updates.customContainerTypes ?? current.customContainerTypes,
+      customBrands: updates.customBrands ?? current.customBrands,
     }
 
     this.saveToStorage(updated)
@@ -153,6 +157,42 @@ export class GearSettingsService {
     const updated = {
       ...settings,
       customContainerTypes: settings.customContainerTypes.filter(t => t.id !== containerTypeId),
+    }
+    this.saveToStorage(updated)
+    return updated
+  }
+
+  /**
+   * Add a custom brand
+   */
+  static addBrand(settings: IGearSettings, brand: IUserBrand): IGearSettings {
+    const updated = {
+      ...settings,
+      customBrands: [...settings.customBrands, brand],
+    }
+    this.saveToStorage(updated)
+    return updated
+  }
+
+  /**
+   * Update a custom brand
+   */
+  static updateBrand(settings: IGearSettings, brand: IUserBrand): IGearSettings {
+    const updated = {
+      ...settings,
+      customBrands: settings.customBrands.map(b => b.id === brand.id ? brand : b),
+    }
+    this.saveToStorage(updated)
+    return updated
+  }
+
+  /**
+   * Remove a custom brand
+   */
+  static removeBrand(settings: IGearSettings, brandId: string): IGearSettings {
+    const updated = {
+      ...settings,
+      customBrands: settings.customBrands.filter(b => b.id !== brandId),
     }
     this.saveToStorage(updated)
     return updated

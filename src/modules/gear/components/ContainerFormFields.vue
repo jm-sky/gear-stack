@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import WeightInputWithUnitPicker from '@/components/ui/weight-input/WeightInputWithUnitPicker.vue'
 import type { IGearContainer } from '../types/gear.types'
 import { useGearSettings } from '../composables/useGearSettings'
 import { COLOR_DOT_CLASSES, CONTAINER_COLORS } from '../utils/containerColors'
@@ -31,7 +32,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const { customContainerTypes } = useGearSettings()
+const { customContainerTypes, customBrands } = useGearSettings()
 
 // Auto-focus na pierwszym polu
 const nameInputRef = ref<HTMLInputElement | undefined>(undefined)
@@ -204,7 +205,7 @@ const handleCancel = () => {
             <FormLabel :label="$t('gear.container.brand')" />
             <ComboBox
               :value="value"
-              :options="getBrandOptions()"
+              :options="getBrandOptions(customBrands.map(b => ({ key: b.key, label: b.label })))"
               :placeholder="$t('gear.container.brand')"
               :creatable="true"
               :create-label="$t('gear.comboBox.add')"
@@ -231,90 +232,38 @@ const handleCancel = () => {
       </div>
 
       <!-- Weight and Weight Unit -->
-      <div class="grid grid-cols-[1fr_80px] sm:grid-cols-[1fr_auto] gap-2">
-        <FormField v-slot="{ componentField }" name="weight">
+      <FormField v-slot="{ value: weightValue, handleChange: handleWeightChange }" name="weight">
+        <FormField v-slot="{ value: unitValue, handleChange: handleUnitChange }" name="weightUnit">
           <FormItem>
             <FormLabel :label="$t('gear.container.weight')" />
-            <Input
-              v-bind="componentField"
-              type="number"
+            <WeightInputWithUnitPicker
+              :model-value="weightValue"
+              :unit="unitValue || 'g'"
               :placeholder="$t('gear.container.weight')"
-              min="0"
-              step="0.01"
+              @update:model-value="handleWeightChange"
+              @update:unit="handleUnitChange"
             />
             <FormMessage />
           </FormItem>
         </FormField>
-
-        <FormField v-slot="{ value, handleChange }" name="weightUnit">
-          <FormItem>
-            <FormLabel :label="$t('gear.container.weightUnit')" />
-            <Select :model-value="value" @update:model-value="handleChange">
-              <SelectTrigger class="w-36">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="g">
-                  {{ $t('gear.item.weightUnits.g') }}
-                </SelectItem>
-                <SelectItem value="kg">
-                  {{ $t('gear.item.weightUnits.kg') }}
-                </SelectItem>
-                <SelectItem value="oz">
-                  {{ $t('gear.item.weightUnits.oz') }}
-                </SelectItem>
-                <SelectItem value="lb">
-                  {{ $t('gear.item.weightUnits.lb') }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-      </div>
+      </FormField>
 
       <!-- Max Weight and Max Weight Unit -->
-      <div class="grid grid-cols-[1fr_80px] sm:grid-cols-[1fr_auto] gap-2">
-        <FormField v-slot="{ componentField }" name="maxWeight">
+      <FormField v-slot="{ value: maxWeightValue, handleChange: handleMaxWeightChange }" name="maxWeight">
+        <FormField v-slot="{ value: maxUnitValue, handleChange: handleMaxUnitChange }" name="maxWeightUnit">
           <FormItem>
             <FormLabel :label="$t('gear.container.maxWeight')" />
-            <Input
-              v-bind="componentField"
-              type="number"
+            <WeightInputWithUnitPicker
+              :model-value="maxWeightValue"
+              :unit="maxUnitValue || 'g'"
               :placeholder="$t('gear.container.maxWeight')"
-              min="0"
-              step="0.01"
+              @update:model-value="handleMaxWeightChange"
+              @update:unit="handleMaxUnitChange"
             />
             <FormMessage />
           </FormItem>
         </FormField>
-
-        <FormField v-slot="{ value, handleChange }" name="maxWeightUnit">
-          <FormItem>
-            <FormLabel :label="$t('gear.container.maxWeightUnit')" />
-            <Select :model-value="value" @update:model-value="handleChange">
-              <SelectTrigger class="w-36">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="g">
-                  {{ $t('gear.item.weightUnits.g') }}
-                </SelectItem>
-                <SelectItem value="kg">
-                  {{ $t('gear.item.weightUnits.kg') }}
-                </SelectItem>
-                <SelectItem value="oz">
-                  {{ $t('gear.item.weightUnits.oz') }}
-                </SelectItem>
-                <SelectItem value="lb">
-                  {{ $t('gear.item.weightUnits.lb') }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-      </div>
+      </FormField>
 
       <!-- URL -->
       <FormField v-slot="{ componentField }" name="url">

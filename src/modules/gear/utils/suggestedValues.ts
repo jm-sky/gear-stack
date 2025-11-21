@@ -118,11 +118,29 @@ export function getColorOptions(): Array<{ value: string; label: string; data: s
 
 /**
  * Convert suggested brands to ComboBox options
+ * Includes both default SUGGESTED_BRANDS and custom user brands
  */
-export function getBrandOptions(): Array<{ value: string; label: string }> {
-  return SUGGESTED_BRANDS.map(brand => ({
+export function getBrandOptions(customBrands?: Array<{ key: string; label: string }>): Array<{ value: string; label: string }> {
+  const defaultBrands = SUGGESTED_BRANDS.map(brand => ({
     value: brand,
     label: brand,
   }))
+
+  if (!customBrands || customBrands.length === 0) {
+    return defaultBrands
+  }
+
+  const customBrandOptions = customBrands.map(brand => ({
+    value: brand.label,
+    label: brand.label,
+  }))
+
+  // Combine default and custom brands, removing duplicates
+  const allBrands = [...defaultBrands, ...customBrandOptions]
+  const uniqueBrands = Array.from(
+    new Map(allBrands.map(brand => [brand.value, brand])).values()
+  )
+
+  return uniqueBrands
 }
 

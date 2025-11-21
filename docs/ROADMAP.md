@@ -186,6 +186,46 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 
 > **Uwaga:** Ta funkcjonalność jest już zaimplementowana i działa z localStorage. W przyszłości może być rozszerzona o synchronizację z backendem (zobacz [ROADMAP_V2.md](./ROADMAP_V2.md)).
 
+### Dodawanie własnych marek (brand)
+**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium
+
+- Możliwość dodawania własnych marek w ustawieniach (podobnie jak kategorie)
+- UI w ustawieniach do zarządzania markami: dodawanie, edycja, usuwanie
+- Marki mają strukturę `key` i `label` (wymagane przez komponenty)
+- Lista marek łączona: domyślne (SUGGESTED_BRANDS) + własne użytkownika
+- Własne marki dostępne w:
+  - Autocomplete przy wyborze marki w formularzach przedmiotów i kontenerów
+  - Rozpoznawaniu parametrów przedmiotów (fuzzy matching)
+- Marki zapisywane w localStorage
+- Integracja z istniejącym polem `brand` w modelu danych
+
+> **Uwaga:** Ta funkcjonalność działa z localStorage (front-end only). W przyszłości może być rozszerzona o synchronizację z backendem (zobacz [ROADMAP_V2.md](./ROADMAP_V2.md)).
+
+### Obsługa waluty (currency)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+
+- Dodanie pola `currency` do przedmiotów i kontenerów (opcjonalne)
+- Domyślna waluta użytkownika w ustawieniach (localStorage)
+- Automatyczne rozpoznawanie domyślnej waluty na podstawie języka:
+  - Polski (PL) → PLN
+  - Inne języki → EUR
+- Obsługiwane waluty: PLN, EUR, USD, GBP oraz inne popularne waluty
+- Wyświetlanie waluty:
+  - W formularzach: pole wyboru waluty obok pola ceny
+  - W tabelach: cena z walutą (np. "100,00 PLN")
+  - W statystykach kontenera: suma cen z odpowiednimi walutami
+- Formatowanie cen używając `Intl.NumberFormat`:
+  - Separatory tysięcy
+  - Miejsca dziesiętne zgodne z konwencją waluty
+  - Symbol waluty w odpowiednim miejscu
+- Logika wyboru waluty:
+  - Jeśli przedmiot/kontener ma ustawioną walutę → użyj jej
+  - Jeśli nie ma → użyj domyślnej waluty użytkownika
+  - Jeśli użytkownik nie ma domyślnej → rozpoznaj z języka
+- Waluta zapisywana w localStorage
+
+> **Uwaga:** Ta funkcjonalność działa z localStorage (front-end only). W przyszłości może być rozszerzona o synchronizację z backendem (zobacz [ROADMAP_V2.md](./ROADMAP_V2.md)).
+
 ### Obsługa Markdown w notatkach
 **Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
 
@@ -343,7 +383,7 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 - Tworzenie podobnych zestawów (EDC #1, EDC #2)
 
 ### ✅ Dodawanie istniejących przedmiotów do kontenera
-**Status:** ✅ Completed | **Priority:** High | **Complexity:** Medium | **Completed in:** v0.22.0
+**Status:** ✅ Completed | **Priority:** High | **Complexity:** Medium | **Feature:** [FEATURE-012](./features/FEATURE-012-add-existing-items.md) | **Completed in:** v0.22.0
 
 - Możliwość dodania istniejącego przedmiotu z innego kontenera bez ręcznego przepisywania
 - W ItemFormPage dodanie opcji wyboru:
@@ -455,7 +495,7 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 ## 📄 Informacje prawne i footer
 
 ### ✅ Strona "Informacja o ciasteczkach" i Footer
-**Status:** ✅ Completed | **Priority:** Low | **Feature:** FEATURE-010 | **Complexity:** Small
+**Status:** ✅ Completed | **Priority:** Low | **Feature:** FEATURE-010 | **Complexity:** Small | **Completed in:** v0.15.0
 
 **Strona "Informacja o ciasteczkach":**
 - ✅ Strona `/cookies` z informacją o wykorzystaniu localStorage
@@ -506,17 +546,19 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 ### High Priority (Następne do zrobienia)
 1. ✅ **Strona z listą wszystkich przedmiotów** - High priority, Medium complexity (Completed in v0.10.0)
 2. ✅ **Dodawanie istniejących przedmiotów do kontenera** - High priority, Medium complexity (Completed in v0.22.0)
-3. **Edycja bezpośrednio na liście** - High priority, Large complexity
+3. **Dodawanie własnych marek (brand)** - High priority, Medium complexity
+4. **Edycja bezpośrednio na liście** - High priority, Large complexity
 
 ### Medium Priority
 1. ✅ **Kopiowanie/klonowanie kontenerów** - Medium priority, Small complexity (Completed in v0.21.0)
 2. ✅ **Maksymalna waga kontenera (maxWeight)** - Medium priority, Medium complexity (Completed in v0.20.0)
-3. **Zintegrowany input wagi z wyborem jednostki** - Medium priority, Small complexity
-4. **Kolejność przedmiotów w kontenerze** - Medium priority, Medium complexity
-5. **Oznaczanie kontenerów jako fragmentów rodzica** - Medium priority, Medium complexity
-6. **Obsługa Markdown w notatkach** - Medium priority, Medium complexity
-7. ✅ **Rozszerzone pola** - Medium priority, Medium complexity (Completed in v0.8.0)
-8. ✅ **Rozpoznawanie parametrów przedmiotów na żądanie** - Medium priority, Medium complexity (Completed in v0.19.0)
+3. **Obsługa waluty (currency)** - Medium priority, Medium complexity
+4. **Zintegrowany input wagi z wyborem jednostki** - Medium priority, Small complexity
+5. **Kolejność przedmiotów w kontenerze** - Medium priority, Medium complexity
+6. **Oznaczanie kontenerów jako fragmentów rodzica** - Medium priority, Medium complexity
+7. **Obsługa Markdown w notatkach** - Medium priority, Medium complexity
+8. ✅ **Rozszerzone pola** - Medium priority, Medium complexity (Completed in v0.8.0)
+9. ✅ **Rozpoznawanie parametrów przedmiotów na żądanie** - Medium priority, Medium complexity (Completed in v0.19.0)
 
 ### Low Priority (Polish/Enhancement)
 1. ⏸️ **Wybór primary color** - Low priority, Small complexity (On Hold - obecny kolor zadowalający)

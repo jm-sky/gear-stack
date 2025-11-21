@@ -14,13 +14,23 @@ export interface IUserContainerType {
   updatedAt: string
 }
 
+export interface IUserBrand {
+  id: string
+  key: string // unique identifier (e.g., 'custom_brand_1')
+  label: string
+  createdAt: string
+  updatedAt: string
+}
+
 export interface IGearSettings {
   customCategories: IUserCategory[]
   customContainerTypes: IUserContainerType[]
+  customBrands: IUserBrand[]
 }
 
 export interface IUpdateGearSettingsDto {
   customCategories?: IUserCategory[]
   customContainerTypes?: IUserContainerType[]
+  customBrands?: IUserBrand[]
 }
 

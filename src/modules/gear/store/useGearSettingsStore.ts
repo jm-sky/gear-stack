@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, reactive } from 'vue'
-import type { IGearSettings, IUpdateGearSettingsDto, IUserCategory, IUserContainerType } from '../types/gearSettings.types'
+import type { IGearSettings, IUpdateGearSettingsDto, IUserBrand, IUserCategory, IUserContainerType } from '../types/gearSettings.types'
 import { GearSettingsService } from '../services/gearSettingsService'
 
 export const useGearSettingsStore = defineStore('gearSettings', () => {
@@ -8,12 +8,14 @@ export const useGearSettingsStore = defineStore('gearSettings', () => {
 
   const getAllCategories = computed<IUserCategory[]>(() => state.customCategories)
   const getAllContainerTypes = computed<IUserContainerType[]>(() => state.customContainerTypes)
+  const getAllBrands = computed<IUserBrand[]>(() => state.customBrands)
 
   // Actions
   function updateSettings(updates: IUpdateGearSettingsDto): void {
     const updated = GearSettingsService.updateSettings(state, updates)
     state.customCategories = updated.customCategories
     state.customContainerTypes = updated.customContainerTypes
+    state.customBrands = updated.customBrands
   }
 
   function addCategory(category: IUserCategory): void {
@@ -46,20 +48,38 @@ export const useGearSettingsStore = defineStore('gearSettings', () => {
     state.customContainerTypes = updated.customContainerTypes
   }
 
+  function addBrand(brand: IUserBrand): void {
+    const updated = GearSettingsService.addBrand(state, brand)
+    state.customBrands = updated.customBrands
+  }
+
+  function updateBrand(brand: IUserBrand): void {
+    const updated = GearSettingsService.updateBrand(state, brand)
+    state.customBrands = updated.customBrands
+  }
+
+  function removeBrand(brandId: string): void {
+    const updated = GearSettingsService.removeBrand(state, brandId)
+    state.customBrands = updated.customBrands
+  }
+
   function loadFromStorageAction(): void {
     const loaded = GearSettingsService.loadFromStorage()
     state.customCategories = loaded.customCategories
     state.customContainerTypes = loaded.customContainerTypes
+    state.customBrands = loaded.customBrands
   }
 
   return {
     // State
     customCategories: computed(() => state.customCategories),
     customContainerTypes: computed(() => state.customContainerTypes),
+    customBrands: computed(() => state.customBrands),
 
     // Getters
     getAllCategories,
     getAllContainerTypes,
+    getAllBrands,
 
     // Actions
     updateSettings,
@@ -69,6 +89,9 @@ export const useGearSettingsStore = defineStore('gearSettings', () => {
     addContainerType,
     updateContainerType,
     removeContainerType,
+    addBrand,
+    updateBrand,
+    removeBrand,
     loadFromStorage: loadFromStorageAction,
   }
 })
