@@ -21,6 +21,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.0] - 2025-11-21
+
+### Release: Full local storage
+
+This is the first major release (1.0.0) of Gear Stack, marking the completion of the full local storage implementation. All core features are now functional and working entirely with localStorage, without requiring a backend, database, or authentication.
+
+**Key highlights:**
+- Complete gear management system with containers and items
+- Full import/export functionality (JSON and Markdown formats)
+- Container nesting and relationships
+- Extended fields (brand, color, price, URL, quality)
+- Weight management with multiple unit support (g, kg, oz, lb)
+- Category recognition and parameter recognition
+- Container cloning and catalog-based item addition
+- Comprehensive settings system (core and gear-specific)
+- Full internationalization (PL/EN)
+- Responsive design with mobile support
+
+All features documented in the ROADMAP are now implemented and working with localStorage. Future versions may include backend integration for multi-device synchronization and collaboration features.
+
+---
+
 ## [0.22.0] - 2025-01-21
 
 ### Added

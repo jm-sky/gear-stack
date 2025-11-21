@@ -199,3 +199,4 @@ Lista funkcjonalności z ROADMAP.md gotowych do implementacji, uporządkowana we
 - Można implementować niezależnie (małe zależności między funkcjami)
 - Każda funkcjonalność może być wdrożona osobno
 
+
