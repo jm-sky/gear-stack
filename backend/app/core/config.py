@@ -27,6 +27,7 @@ class AppSettings(BaseSettings):
     model_config = _base_config
 
     name: str = Field(default="backend", validation_alias="APP_NAME", description="Application name")
+    display_name: str = Field(default="Gear Stack", validation_alias="APP_DISPLAY_NAME", description="Application display name for emails and UI")
     version: str = Field(default="0.1.2", validation_alias="APP_VERSION", description="Application version")
     debug: bool = Field(default=False, validation_alias="DEBUG", description="Debug mode")
     environment: Environment = Field(default=Environment.DEVELOPMENT, validation_alias="ENVIRONMENT", description="Environment (local, development, test, production)")
