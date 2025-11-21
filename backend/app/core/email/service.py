@@ -30,6 +30,8 @@ class EmailService:
         self.adapter = adapter
         self.templates_dir = Path(__file__).parent / "templates"
         self.jinja_env = Environment(loader=FileSystemLoader(str(self.templates_dir)), autoescape=select_autoescape(["html", "xml"]))
+        # Primary color from frontend: oklch(0.646 0.222 41.116) converted to hex for email compatibility
+        self.primary_color = "#D97757"
 
     async def send_email(
         self,
@@ -58,9 +60,17 @@ class EmailService:
             True if email sent successfully
         """
         try:
+            # Add common context variables (app_name, primary_color, frontend_url)
+            context_with_defaults = {
+                "app_name": settings.app.display_name,
+                "primary_color": self.primary_color,
+                "frontend_url": settings.frontend_url,
+                **context,  # User-provided context overrides defaults
+            }
+
             # Load and render template
             template = self.jinja_env.get_template(f"{template_name}.html")
-            html_body = template.render(**context)
+            html_body = template.render(**context_with_defaults)
 
             # Generate text version (simple strip of HTML tags)
             text_body = self._html_to_text(html_body)
@@ -120,9 +130,9 @@ class EmailService:
         """
         return await self.send_email(
             to=to,
-            subject="Welcome to our platform!",
+            subject=f"Welcome to {settings.app.display_name}!",
             template_name="welcome",
-            context={"name": name, "email": to, "frontend_url": settings.frontend_url},
+            context={"name": name, "email": to},
             user_id=user_id,
             related_entity_type="user" if user_id else None,
             related_entity_id=user_id,
@@ -143,14 +153,13 @@ class EmailService:
         verification_link = f"{settings.frontend_url}/auth/verify-email?token={verification_token}"
         return await self.send_email(
             to=to,
-            subject="Verify your email address",
+            subject=f"Verify your email address - {settings.app.display_name}",
             template_name="email_verification",
             context={
                 "name": name,
                 "email": to,
                 "verification_link": verification_link,
                 "token": verification_token,
-                "frontend_url": settings.frontend_url,
                 "expires_hours": settings.security.email_verification_token_expires_hours,
             },
             user_id=user_id,
@@ -173,7 +182,7 @@ class EmailService:
         reset_link = f"{settings.frontend_url}/reset-password?token={reset_token}"
         return await self.send_email(
             to=to,
-            subject="Password Reset Request",
+            subject=f"Password Reset Request - {settings.app.display_name}",
             template_name="password_reset",
             context={
                 "name": name,
@@ -181,7 +190,6 @@ class EmailService:
                 "reset_link": reset_link,
                 "token": reset_token,
                 "expires_hours": settings.security.password_reset_token_expires_hours,
-                "frontend_url": settings.frontend_url,
             },
             user_id=user_id,
             related_entity_type="user" if user_id else None,
@@ -208,13 +216,12 @@ class EmailService:
         """
         return await self.send_email(
             to=to,
-            subject="Password Changed",
+            subject=f"Password Changed - {settings.app.display_name}",
             template_name="password_changed",
             context={
                 "name": name,
                 "email": to,
                 "ip_address": ip_address or "Unknown",
-                "frontend_url": settings.frontend_url,
             },
             user_id=user_id,
             related_entity_type="user" if user_id else None,
@@ -234,9 +241,9 @@ class EmailService:
         """
         return await self.send_email(
             to=to,
-            subject="Account Deleted",
+            subject=f"Account Deleted - {settings.app.display_name}",
             template_name="account_deleted",
-            context={"name": name, "email": to, "frontend_url": settings.frontend_url},
+            context={"name": name, "email": to},
             user_id=user_id,
             related_entity_type="user" if user_id else None,
             related_entity_id=user_id,
