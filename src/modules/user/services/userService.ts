@@ -47,65 +47,55 @@ class UserLocalService {
 }
 
 /**
- * User Service (Hybrid implementation)
- * When backend is enabled AND user is authenticated, uses API calls.
- * Otherwise, uses localStorage.
+ * User Service Factory
+ *
+ * Returns appropriate service based on backend status and authentication.
+ * When backend is enabled AND user is authenticated, uses API service.
+ * Otherwise, uses localStorage service.
  */
-class UserService {
-  private localService = new UserLocalService()
+export const userService = () => {
+  const { shouldUseAPI } = useBackend()
+  const localService = new UserLocalService()
 
-  private shouldUseAPI(): boolean {
-    const { shouldUseAPI } = useBackend()
-    return shouldUseAPI.value
-  }
-
-  async getUser(): Promise<IUser> {
-    // Only use API if backend is enabled AND user is authenticated
-    if (this.shouldUseAPI()) {
-      try {
-        // API call
-        const user = await userApiService.getUser()
-        // Save to localStorage as backup
-        await this.localService.saveUser(user).catch(err => {
-          console.warn('Failed to save user to localStorage backup:', err)
-        })
-        return user
-      } catch (error) {
-        // Fallback to localStorage
-        console.warn('API failed, falling back to localStorage', error)
-        return this.localService.getUser()
-      }
+  if (shouldUseAPI.value) {
+    // Wrap API service to sync localStorage as backup
+    return {
+      async getUser(): Promise<IUser> {
+        try {
+          // API call
+          const user = await userApiService.getUser()
+          // Save to localStorage as backup
+          await localService.saveUser(user).catch(err => {
+            console.warn('Failed to save user to localStorage backup:', err)
+          })
+          return user
+        } catch (error) {
+          // Fallback to localStorage
+          console.warn('API failed, falling back to localStorage', error)
+          return localService.getUser()
+        }
+      },
+      async updateUser(data: IUpdateUserDto): Promise<IUser> {
+        try {
+          // API call - API has priority
+          const user = await userApiService.updateUser(data)
+          // Save to localStorage as backup
+          await localService.saveUser(user).catch(err => {
+            console.warn('Failed to save user to localStorage backup:', err)
+          })
+          return user
+        } catch (error) {
+          // Fallback to localStorage
+          console.warn('API failed, falling back to localStorage', error)
+          return localService.updateUser(data)
+        }
+      },
     }
-
-    // Offline mode or not authenticated - use localStorage
-    return this.localService.getUser()
   }
 
-  async updateUser(data: IUpdateUserDto): Promise<IUser> {
-    // Only use API if backend is enabled AND user is authenticated
-    if (this.shouldUseAPI()) {
-      try {
-        // API call - API has priority
-        const user = await userApiService.updateUser(data)
-        // Save to localStorage as backup
-        await this.localService.saveUser(user).catch(err => {
-          console.warn('Failed to save user to localStorage backup:', err)
-        })
-        return user
-      } catch (error) {
-        // Fallback to localStorage
-        console.warn('API failed, falling back to localStorage', error)
-        return this.localService.updateUser(data)
-      }
-    }
-
-    // Offline mode or not authenticated - use localStorage
-    return this.localService.updateUser(data)
-  }
+  // Offline mode or not authenticated - use localStorage
+  return localService
 }
-
-// Export instance for direct use (hybrid implementation)
-export const userService = new UserService()
 
 // Export local service instance for direct use
 export const userLocalService = new UserLocalService()

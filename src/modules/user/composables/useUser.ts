@@ -22,7 +22,8 @@ export function useUser() {
   const loadProfile = async (): Promise<void> => {
     isLoading.value = true
     try {
-      const user = await userService.getUser()
+      const service = userService()
+      const user = await service.getUser()
       store.setUser(user)
     } catch (error) {
       console.error('Failed to load user profile:', error)
@@ -39,7 +40,8 @@ export function useUser() {
   const updateProfile = async (data: IUpdateUserDto): Promise<IUser> => {
     isLoading.value = true
     try {
-      const updated = await userService.updateUser(data)
+      const service = userService()
+      const updated = await service.updateUser(data)
       store.setUser(updated)
       return updated
     } catch (error) {
