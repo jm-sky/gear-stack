@@ -7,8 +7,10 @@ from typing import TYPE_CHECKING
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from app.core.config import EmailSettings, settings
+from .i18n import SupportedLocale, DEFAULT_LOCALE, get_translations
 
 if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
     from .adapter import EmailAdapter
 
 logger = logging.getLogger(__name__)
@@ -33,6 +35,34 @@ class EmailService:
         # Primary color from frontend: oklch(0.646 0.222 41.116) converted to hex for email compatibility
         self.primary_color = "#D97757"
 
+    def _render_translation(self, translations: dict, key: str, context: dict) -> str:
+        """Render a translation string with context variables.
+
+        Args:
+            translations: Translations dictionary
+            key: Translation key (e.g., "welcome.subject")
+            context: Context variables for template rendering
+
+        Returns:
+            Rendered translation string
+        """
+        # Navigate through nested keys (e.g., "welcome.subject")
+        keys = key.split(".")
+        value = translations
+        for k in keys:
+            if isinstance(value, dict):
+                value = value.get(k)
+            else:
+                return key  # Key not found, return key itself
+
+        if not isinstance(value, str):
+            return key  # Value is not a string, return key
+
+        # Render with Jinja2 to support variables in translations
+        from jinja2 import Template
+        template = Template(value)
+        return template.render(**context)
+
     async def send_email(
         self,
         to: str,
@@ -43,23 +73,36 @@ class EmailService:
         user_id: str | None = None,
         related_entity_type: str | None = None,
         related_entity_id: str | None = None,
+        locale: SupportedLocale | None = None,
+        translations: dict | None = None,
     ) -> bool:
         """Send email using template.
 
         Args:
             to: Recipient email address
-            subject: Email subject
+            subject: Email subject (can be a translation key if translations provided)
             template_name: Name of template file (without .html)
             context: Template context variables
             from_email: Sender email address (optional)
             user_id: Related user ID for audit logging (optional)
             related_entity_type: Type of related entity (optional)
             related_entity_id: ID of related entity (optional)
+            locale: Locale for translations (optional)
+            translations: Translations dictionary (optional, loaded automatically if locale provided)
 
         Returns:
             True if email sent successfully
         """
         try:
+            # Load translations if locale provided
+            if translations is None and locale:
+                translations = get_translations(locale)
+
+            # Render subject if it's a translation key
+            if translations and subject.startswith("translation:"):
+                translation_key = subject.replace("translation:", "")
+                subject = self._render_translation(translations, translation_key, context)
+
             # Add common context variables (app_name, primary_color, frontend_url)
             context_with_defaults = {
                 "app_name": settings.app.display_name,
@@ -67,6 +110,19 @@ class EmailService:
                 "frontend_url": settings.frontend_url,
                 **context,  # User-provided context overrides defaults
             }
+
+            # Add translations to context if available
+            if translations:
+                context_with_defaults["t"] = translations
+                context_with_defaults["locale"] = locale or DEFAULT_LOCALE
+                # Add helper function for translations in templates
+                def translate(key: str, **kwargs: dict) -> str:
+                    """Helper function for translations in templates."""
+                    return self._render_translation(translations, key, {**context_with_defaults, **kwargs})
+
+                context_with_defaults["translate"] = translate
+            else:
+                context_with_defaults["locale"] = DEFAULT_LOCALE
 
             # Load and render template
             template = self.jinja_env.get_template(f"{template_name}.html")
@@ -117,28 +173,52 @@ class EmailService:
         text = re.sub(r"\s+", " ", text)
         return text.strip()
 
-    async def send_welcome_email(self, to: str, name: str, user_id: str | None = None) -> bool:
+    async def send_welcome_email(
+        self,
+        to: str,
+        name: str,
+        user_id: str | None = None,
+        locale: SupportedLocale | None = None,
+        translations: dict | None = None,
+    ) -> bool:
         """Send welcome email to new user.
 
         Args:
             to: Recipient email address
             name: User name
             user_id: User ID for audit logging (optional)
+            locale: Locale for translations (optional)
+            translations: Translations dictionary (optional, loaded automatically if locale provided)
 
         Returns:
             True if email sent successfully
         """
+        context = {"name": name, "email": to}
+        subject = f"Welcome to {settings.app.display_name}!"
+        if translations:
+            subject = "translation:welcome.subject"
+
         return await self.send_email(
             to=to,
-            subject=f"Welcome to {settings.app.display_name}!",
+            subject=subject,
             template_name="welcome",
-            context={"name": name, "email": to},
+            context=context,
             user_id=user_id,
             related_entity_type="user" if user_id else None,
             related_entity_id=user_id,
+            locale=locale,
+            translations=translations,
         )
 
-    async def send_email_verification_email(self, to: str, name: str, verification_token: str, user_id: str | None = None) -> bool:
+    async def send_email_verification_email(
+        self,
+        to: str,
+        name: str,
+        verification_token: str,
+        user_id: str | None = None,
+        locale: SupportedLocale | None = None,
+        translations: dict | None = None,
+    ) -> bool:
         """Send email verification message.
 
         Args:
@@ -146,28 +226,45 @@ class EmailService:
             name: User name
             verification_token: Email verification token
             user_id: User ID for audit logging (optional)
+            locale: Locale for translations (optional)
+            translations: Translations dictionary (optional, loaded automatically if locale provided)
 
         Returns:
             True if email sent successfully
         """
         verification_link = f"{settings.frontend_url}/auth/verify-email?token={verification_token}"
+        context = {
+            "name": name,
+            "email": to,
+            "verification_link": verification_link,
+            "token": verification_token,
+            "expires_hours": settings.security.email_verification_token_expires_hours,
+        }
+        subject = f"Verify your email address - {settings.app.display_name}"
+        if translations:
+            subject = "translation:email_verification.subject"
+
         return await self.send_email(
             to=to,
-            subject=f"Verify your email address - {settings.app.display_name}",
+            subject=subject,
             template_name="email_verification",
-            context={
-                "name": name,
-                "email": to,
-                "verification_link": verification_link,
-                "token": verification_token,
-                "expires_hours": settings.security.email_verification_token_expires_hours,
-            },
+            context=context,
             user_id=user_id,
             related_entity_type="user" if user_id else None,
             related_entity_id=user_id,
+            locale=locale,
+            translations=translations,
         )
 
-    async def send_password_reset_email(self, to: str, name: str, reset_token: str, user_id: str | None = None) -> bool:
+    async def send_password_reset_email(
+        self,
+        to: str,
+        name: str,
+        reset_token: str,
+        user_id: str | None = None,
+        locale: SupportedLocale | None = None,
+        translations: dict | None = None,
+    ) -> bool:
         """Send password reset email.
 
         Args:
@@ -175,25 +272,34 @@ class EmailService:
             name: User name
             reset_token: Password reset token
             user_id: User ID for audit logging (optional)
+            locale: Locale for translations (optional)
+            translations: Translations dictionary (optional, loaded automatically if locale provided)
 
         Returns:
             True if email sent successfully
         """
         reset_link = f"{settings.frontend_url}/reset-password?token={reset_token}"
+        context = {
+            "name": name,
+            "email": to,
+            "reset_link": reset_link,
+            "token": reset_token,
+            "expires_hours": settings.security.password_reset_token_expires_hours,
+        }
+        subject = f"Password Reset Request - {settings.app.display_name}"
+        if translations:
+            subject = "translation:password_reset.subject"
+
         return await self.send_email(
             to=to,
-            subject=f"Password Reset Request - {settings.app.display_name}",
+            subject=subject,
             template_name="password_reset",
-            context={
-                "name": name,
-                "email": to,
-                "reset_link": reset_link,
-                "token": reset_token,
-                "expires_hours": settings.security.password_reset_token_expires_hours,
-            },
+            context=context,
             user_id=user_id,
             related_entity_type="user" if user_id else None,
             related_entity_id=user_id,
+            locale=locale,
+            translations=translations,
         )
 
     async def send_password_changed_email(
@@ -202,6 +308,8 @@ class EmailService:
         name: str,
         ip_address: str | None = None,
         user_id: str | None = None,
+        locale: SupportedLocale | None = None,
+        translations: dict | None = None,
     ) -> bool:
         """Send password changed notification email.
 
@@ -210,43 +318,68 @@ class EmailService:
             name: User name
             ip_address: IP address where change occurred (optional)
             user_id: User ID for audit logging (optional)
+            locale: Locale for translations (optional)
+            translations: Translations dictionary (optional, loaded automatically if locale provided)
 
         Returns:
             True if email sent successfully
         """
+        context = {
+            "name": name,
+            "email": to,
+            "ip_address": ip_address or "Unknown",
+        }
+        subject = f"Password Changed - {settings.app.display_name}"
+        if translations:
+            subject = "translation:password_changed.subject"
+
         return await self.send_email(
             to=to,
-            subject=f"Password Changed - {settings.app.display_name}",
+            subject=subject,
             template_name="password_changed",
-            context={
-                "name": name,
-                "email": to,
-                "ip_address": ip_address or "Unknown",
-            },
+            context=context,
             user_id=user_id,
             related_entity_type="user" if user_id else None,
             related_entity_id=user_id,
+            locale=locale,
+            translations=translations,
         )
 
-    async def send_account_deleted_email(self, to: str, name: str, user_id: str | None = None) -> bool:
+    async def send_account_deleted_email(
+        self,
+        to: str,
+        name: str,
+        user_id: str | None = None,
+        locale: SupportedLocale | None = None,
+        translations: dict | None = None,
+    ) -> bool:
         """Send account deletion confirmation email.
 
         Args:
             to: Recipient email address
             name: User name
             user_id: User ID for audit logging (optional)
+            locale: Locale for translations (optional)
+            translations: Translations dictionary (optional, loaded automatically if locale provided)
 
         Returns:
             True if email sent successfully
         """
+        context = {"name": name, "email": to}
+        subject = f"Account Deleted - {settings.app.display_name}"
+        if translations:
+            subject = "translation:account_deleted.subject"
+
         return await self.send_email(
             to=to,
-            subject=f"Account Deleted - {settings.app.display_name}",
+            subject=subject,
             template_name="account_deleted",
-            context={"name": name, "email": to},
+            context=context,
             user_id=user_id,
             related_entity_type="user" if user_id else None,
             related_entity_id=user_id,
+            locale=locale,
+            translations=translations,
         )
 
 

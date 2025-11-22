@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 
 from ...core.config import settings
 from ...core.email import get_email_service
+from ...core.email.i18n import SupportedLocale, get_translations
 from .auth_utils import create_access_token, create_email_verification_token, create_refresh_token, verify_token
 from .exceptions import (
     InvalidCredentialsError,
@@ -28,7 +29,14 @@ class AuthService:
     def __init__(self, user_repository: UserRepositoryInterface):
         self.user_repository = user_repository
 
-    async def register_user(self, email: str, password: str, name: str) -> User:
+    async def register_user(
+        self,
+        email: str,
+        password: str,
+        name: str,
+        locale: SupportedLocale | None = None,
+        translations: dict | None = None,
+    ) -> User:
         """
         Register a new user.
 
@@ -54,7 +62,14 @@ class AuthService:
 
             try:
                 email_service = get_email_service()
-                await email_service.send_email_verification_email(to=email, name=name, verification_token=verification_token)
+                await email_service.send_email_verification_email(
+                    to=email,
+                    name=name,
+                    verification_token=verification_token,
+                    user_id=user.id,
+                    locale=locale,
+                    translations=translations,
+                )
             except Exception as e:
                 logger.warning(f"Failed to send email verification message: {e}")
 
@@ -185,7 +200,12 @@ class AuthService:
             logger.error(f"Unexpected error during token refresh: {e}", exc_info=True)
             raise InvalidTokenError("Invalid or expired refresh token")
 
-    async def request_password_reset(self, email: str) -> bool:
+    async def request_password_reset(
+        self,
+        email: str,
+        locale: SupportedLocale | None = None,
+        translations: dict | None = None,
+    ) -> bool:
         """
         Generate password reset token for user.
 
@@ -209,7 +229,14 @@ class AuthService:
             # Send email with reset link
             try:
                 email_service = get_email_service()
-                await email_service.send_password_reset_email(to=email, name=user.name, reset_token=token)
+                await email_service.send_password_reset_email(
+                    to=email,
+                    name=user.name,
+                    reset_token=token,
+                    user_id=user.id,
+                    locale=locale,
+                    translations=translations,
+                )
             except Exception as e:
                 logger.error(f"Failed to send password reset email: {e}")
 
@@ -242,7 +269,12 @@ class AuthService:
             raise InvalidTokenError("Invalid or expired reset token")
         return True
 
-    async def resend_email_verification(self, email: str) -> bool:
+    async def resend_email_verification(
+        self,
+        email: str,
+        locale: SupportedLocale | None = None,
+        translations: dict | None = None,
+    ) -> bool:
         """Resend email verification message."""
         user = await self.user_repository.get_user_by_email(email)
         if not user:
@@ -256,13 +288,25 @@ class AuthService:
 
         try:
             email_service = get_email_service()
-            await email_service.send_email_verification_email(to=user.email, name=user.name, verification_token=token)
+            await email_service.send_email_verification_email(
+                to=user.email,
+                name=user.name,
+                verification_token=token,
+                user_id=user.id,
+                locale=locale,
+                translations=translations,
+            )
         except Exception as e:
             logger.warning(f"Failed to send email verification email: {e}")
 
         return True
 
-    async def verify_email(self, token: str) -> User:
+    async def verify_email(
+        self,
+        token: str,
+        locale: SupportedLocale | None = None,
+        translations: dict | None = None,
+    ) -> User:
         """Verify email using provided token."""
         user = await self.user_repository.verify_email_by_token(token)
         if not user:
@@ -271,13 +315,27 @@ class AuthService:
         # Send welcome email after successful verification
         try:
             email_service = get_email_service()
-            await email_service.send_welcome_email(to=user.email, name=user.name)
+            await email_service.send_welcome_email(
+                to=user.email,
+                name=user.name,
+                user_id=user.id,
+                locale=locale,
+                translations=translations,
+            )
         except Exception as e:
             logger.warning(f"Failed to send welcome email post verification: {e}")
 
         return user
 
-    async def change_password(self, user_id: str, current_password: str, new_password: str, ip_address: str | None = None) -> bool:
+    async def change_password(
+        self,
+        user_id: str,
+        current_password: str,
+        new_password: str,
+        ip_address: str | None = None,
+        locale: SupportedLocale | None = None,
+        translations: dict | None = None,
+    ) -> bool:
         """
         Change user password.
 
@@ -305,14 +363,29 @@ class AuthService:
         try:
             email_service = get_email_service()
             if user:
-                await email_service.send_password_changed_email(to=user.email, name=user.name, ip_address=ip_address)
+                await email_service.send_password_changed_email(
+                    to=user.email,
+                    name=user.name,
+                    ip_address=ip_address,
+                    user_id=user_id,
+                    locale=locale,
+                    translations=translations,
+                )
         except Exception as e:
             # Log error but don't fail password change if email fails
             logger.warning(f"Failed to send password changed email: {e}")
 
         return True
 
-    async def delete_account(self, user_id: str, password: str | None = None, confirmation: str = "", soft_delete: bool = True) -> bool:
+    async def delete_account(
+        self,
+        user_id: str,
+        password: str | None = None,
+        confirmation: str = "",
+        soft_delete: bool = True,
+        locale: SupportedLocale | None = None,
+        translations: dict | None = None,
+    ) -> bool:
         """
         Delete user account.
 
@@ -355,7 +428,13 @@ class AuthService:
         # Send account deletion confirmation email (before account is deleted)
         try:
             email_service = get_email_service()
-            await email_service.send_account_deleted_email(to=user_email, name=user_name)
+            await email_service.send_account_deleted_email(
+                to=user_email,
+                name=user_name,
+                user_id=user_id,
+                locale=locale,
+                translations=translations,
+            )
         except Exception as e:
             # Log error but don't fail deletion if email fails
             logger.warning(f"Failed to send account deletion email: {e}")
