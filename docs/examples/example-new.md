@@ -21,8 +21,8 @@ Wygenerowano aplikacją do zarządzania [Gear-stack](https://github.com/jm-sky/g
 - **Kora brzozowa** [uuid:a3334554-d818-49e0-beb3-97d8291e1b74] - 10g
 - **Latarka SolarForce L2P** [uuid:b63e7b4f-f1d4-4b5a-8bc3-60f42dd39a91] (SolarForce) - 190g
 - **Zapasowy akumulator** *(do SolarForce)* [uuid:bb9198bb-4a41-4c64-9b83-c473b4f6c31b] - 45g
-- **Niezbędnik Mil-Tec**
-- **Zestaw do szycia**
+- **Niezbędnik Mil-Tec** - 100g
+- **Zestaw do szycia** - 30g
 
 ## Pouch Maxpedition [#pouch] [uuid:c5a8bd96-2aec-4e4d-af23-2e8b8fcf6329] (Pouch)
 - **Krzesiwo magnezowe** [uuid:cbb6f92a-89ae-46ef-9bb3-412ee39fb58b] - 40g
@@ -31,7 +31,7 @@ Wygenerowano aplikacją do zarządzania [Gear-stack](https://github.com/jm-sky/g
 - **Piła łańcuszkowa** [uuid:e37d22df-5b67-4221-a7d4-d1d071e5ee1e] - 50g
 - **Mini osełka/ostrzałka** [uuid:eb24a89b-0e6d-4cb8-bd2a-15bc401e33d7] (Lansky) - 25g
 - **Karta survivalowa** [uuid:f35eb4eb-3fcf-4d33-8127-7fb9df45c135] - 8g
-- **Rozpałka żelowa** (Greenheat)
+- **Rozpałka żelowa** (Greenheat) - 15g
 
 ## Plecak Helikon EDC Cordura [#plecak-helikon-edc] [uuid:fcd6542e-4203-4b36-9ebf-6c503d14fb7f] (Backpack) *(coyote)*
 - **Nóż Ontario SP2 Air Force** [uuid:04d9332f-4e50-4a47-91ca-5fc1b86aebdf] (Ontario) - 220g
@@ -103,5 +103,5 @@ Wygenerowano aplikacją do zarządzania [Gear-stack](https://github.com/jm-sky/g
 - **Zapasowe baterie AA/AAA** [uuid:8c9927bf-13cc-433a-af85-980df5bfde85] (To Buy) - 30g
 - **Chusta/bandana** [uuid:941ea38f-0257-4b47-903e-5f0e88b9db64] (To Buy) - 40g
 - **Tabletki Javel do uzdatniania wody** [uuid:9b322909-20f5-4f7c-9a29-f8c6f2d80ffc] (Javel) (To Buy) - 15g
-- **Nóż finka** *(harcerski)*
-- **Hamak** (green)
+- **Nóż finka** *(harcerski)* - 150g
+- **Hamak** (green) - 600g
