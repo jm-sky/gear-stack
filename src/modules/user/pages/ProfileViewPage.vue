@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { Edit, Mail, User as UserIcon } from 'lucide-vue-next'
+import { Edit, Mail } from 'lucide-vue-next'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import Avatar from '@/components/ui/avatar/Avatar.vue'
+import AvatarFallback from '@/components/ui/avatar/AvatarFallback.vue'
+import AvatarImage from '@/components/ui/avatar/AvatarImage.vue'
 import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useUser } from '../composables/useUser'
@@ -13,6 +17,22 @@ const { profile } = useUser()
 const handleEdit = () => {
   router.push('/profile/edit')
 }
+
+// Generate initials from name or email
+const initials = computed(() => {
+  if (profile.value?.name) {
+    return profile.value.name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2)
+  }
+  if (profile.value?.email) {
+    return profile.value.email.substring(0, 2).toUpperCase()
+  }
+  return 'U'
+})
 </script>
 
 <template>
@@ -35,18 +55,12 @@ const handleEdit = () => {
 
       <div v-if="profile" class="bg-card border rounded-lg p-6 space-y-6">
         <div class="flex items-center space-x-6">
-          <div
-            v-if="profile.avatar"
-            class="size-24 rounded-full bg-muted ring-1 ring-border flex items-center justify-center overflow-hidden"
-          >
-            <img :src="profile.avatar" :alt="profile.name" class="size-full object-cover" />
-          </div>
-          <div
-            v-else
-            class="size-24 rounded-full bg-muted ring-1 ring-border flex items-center justify-center"
-          >
-            <UserIcon class="size-12 text-muted-foreground" />
-          </div>
+          <Avatar class="size-24 ring-1 ring-border">
+            <AvatarImage :src="profile.avatar ?? ''" :alt="profile.name" />
+            <AvatarFallback class="bg-muted text-muted-foreground text-2xl font-semibold">
+              {{ initials }}
+            </AvatarFallback>
+          </Avatar>
           <div>
             <h2 class="text-2xl font-semibold">
               {{ profile.name }}
