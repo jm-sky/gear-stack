@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ShoppingCart, Trash2, Download, Plus } from 'lucide-vue-next'
+import { Download, Plus, ShoppingCart, Trash2 } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
@@ -16,13 +16,6 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import type { IGearItem } from '../types/gear.types'
 import type { TGearItemCategory, TGearItemPriority } from '../types/gear.types'
@@ -255,7 +248,9 @@ const handleCopyMarkdown = async () => {
 
       <!-- Filters -->
       <div class="space-y-4 p-4 border rounded-lg bg-muted/50">
-        <h3 class="font-semibold text-sm">{{ t('gear.shopping.filters', 'Filters') }}</h3>
+        <h3 class="font-semibold text-sm">
+          {{ t('gear.shopping.filters', 'Filters') }}
+        </h3>
         
         <!-- Categories filter -->
         <div class="space-y-2">
@@ -269,7 +264,7 @@ const handleCopyMarkdown = async () => {
               <Checkbox
                 :id="`category-${category}`"
                 :checked="selectedCategories.includes(category)"
-                @update:checked="(checked) => {
+                @update:checked="(checked: boolean) => {
                   if (checked) {
                     if (!selectedCategories.includes(category)) {
                       selectedCategories.push(category)
@@ -298,12 +293,15 @@ const handleCopyMarkdown = async () => {
           <Label class="text-sm">{{ t('gear.shopping.filterByBudget', 'Filter by Budget') }}</Label>
           <div class="flex items-center gap-2">
             <Input
-              v-model.number="budget"
+              :model-value="budget?.toString() ?? ''"
               type="number"
               :placeholder="t('gear.shopping.budgetPlaceholder', 'Enter budget amount')"
               class="max-w-xs"
               min="0"
               step="0.01"
+              @update:model-value="(value) => {
+                budget = value === '' ? null : Number(value)
+              }"
             />
             <span class="text-sm text-muted-foreground">{{ t('gear.shopping.currency', 'PLN') }}</span>
             <Button
@@ -339,9 +337,11 @@ const handleCopyMarkdown = async () => {
       >
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="font-semibold">{{ t('gear.shopping.shoppingList', 'Shopping List') }}</h3>
+            <h3 class="font-semibold">
+              {{ t('gear.shopping.shoppingList', 'Shopping List') }}
+            </h3>
             <p class="text-sm text-muted-foreground">
-              {{ t('gear.shopping.itemsCount', '{count} items', { count: shoppingList.length }) }}
+              {{ t('gear.shopping.itemsCount', '{count} items', { count: shoppingList.length } as Record<string, unknown>) }}
               <span v-if="totalPrice > 0">
                 - {{ totalPrice.toFixed(2) }} {{ t('gear.shopping.currency', 'PLN') }}
               </span>
@@ -363,8 +363,12 @@ const handleCopyMarkdown = async () => {
           v-if="filteredItems.length === 0"
           class="text-center py-12 text-muted-foreground"
         >
-          <p class="text-lg">{{ t('gear.shopping.noItems', 'No items found') }}</p>
-          <p class="text-sm mt-2">{{ t('gear.shopping.noItemsDescription', 'Try adjusting your filters') }}</p>
+          <p class="text-lg">
+            {{ t('gear.shopping.noItems', 'No items found') }}
+          </p>
+          <p class="text-sm mt-2">
+            {{ t('gear.shopping.noItemsDescription', 'Try adjusting your filters') }}
+          </p>
         </div>
         
         <div
