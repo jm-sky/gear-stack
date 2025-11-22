@@ -38,10 +38,13 @@ export function useUser() {
    * Uses hybrid service (API when authenticated, localStorage otherwise)
    */
   const updateProfile = async (data: IUpdateUserDto): Promise<IUser> => {
+    console.log('useUser.updateProfile called with data:', data)
     isLoading.value = true
     try {
       const service = userService()
+      console.log('Calling service.updateUser')
       const updated = await service.updateUser(data)
+      console.log('Service returned updated user:', updated)
       store.setUser(updated)
       return updated
     } catch (error) {

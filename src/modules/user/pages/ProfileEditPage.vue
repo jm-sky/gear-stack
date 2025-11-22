@@ -11,12 +11,14 @@ import { Button } from '@/components/ui/button'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import { useBackend } from '@/shared/composables/useBackend'
 import { useUser } from '../composables/useUser'
 import { validateAvatarUrl } from '../utils/validateAvatarUrl'
 
 const router = useRouter()
 const { t } = useI18n()
 const { profile, updateProfile } = useUser()
+const { shouldUseAPI } = useBackend()
 
 const profileSchema = z.object({
   name: z.string().min(1, t('user.edit.name_required')),
@@ -38,6 +40,7 @@ const { handleSubmit, setValues } = useForm({
     avatarUrl: '',
   },
 })
+
 
 // Populate form with current profile data
 onMounted(() => {
@@ -61,20 +64,32 @@ watch(() => profile.value, (newProfile) => {
   }
 })
 
-const onSubmit = handleSubmit(async (values) => {
-  try {
-    await updateProfile({
-      name: values.name,
-      email: values.email,
-      avatarUrl: values.avatarUrl || undefined,
-    })
-    toast.success(t('common.success'))
-    router.push('/profile')
-  } catch (error) {
-    toast.error(t('common.error'))
-    console.error(error)
+const onSubmit = handleSubmit(
+  async (values) => {
+    try {
+      console.log('Form submitted with values:', values)
+      console.log('shouldUseAPI:', shouldUseAPI.value)
+      
+      const updateData = {
+        name: values.name,
+        email: values.email,
+        avatarUrl: values.avatarUrl && values.avatarUrl.trim() ? values.avatarUrl.trim() : null,
+      }
+      
+      console.log('Updating profile with data:', updateData)
+      await updateProfile(updateData)
+      toast.success(t('common.success'))
+      router.push('/profile')
+    } catch (error) {
+      toast.error(t('common.error'))
+      console.error('Error updating profile:', error)
+    }
+  },
+  (errors) => {
+    console.log('Form validation failed:', errors)
+    toast.error(t('user.edit.validation_error') || 'Validation failed')
   }
-})
+)
 
 const handleCancel = () => {
   router.push('/profile')
@@ -104,7 +119,7 @@ const handleCancel = () => {
         </div>
       </div>
 
-      <form v-if="profile" class="max-w-2xl mx-auto bg-card border rounded-lg p-6 space-y-8" @submit="onSubmit">
+      <form v-if="profile" class="max-w-2xl mx-auto bg-card border rounded-lg p-6 space-y-8" @submit.prevent="onSubmit">
         <div class="flex flex-col gap-6">
           <FormField v-slot="{ componentField }" name="name">
             <FormItem>
