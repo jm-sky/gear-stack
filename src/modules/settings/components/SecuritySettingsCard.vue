@@ -31,7 +31,7 @@ const authStore = useAuthStore()
 const { isAuthenticated } = useAuth()
 
 const { data: twoFactorStatus, isLoading } = useTwoFactorStatus(props.service, {
-  enabled: isAuthenticated,
+  enabled: isAuthenticated.value,
 })
 const updatePreferredMethodMutation = useUpdatePreferredMethod(props.service)
 
