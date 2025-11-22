@@ -18,10 +18,10 @@ const {
   updateServiceWorker,
 } = useRegisterSW({
   immediate: true,
-  onRegistered(r) {
+  onRegistered(r: ServiceWorkerRegistration | undefined) {
     console.log('Service Worker registered:', r)
   },
-  onRegisterError(error) {
+  onRegisterError(error: unknown) {
     console.error('Service Worker registration error:', error)
   },
 })
