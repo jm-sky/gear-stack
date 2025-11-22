@@ -295,12 +295,21 @@ class MarkdownImportService {
     let uuid: string | undefined
     let wearable: boolean | undefined
     let consumable: boolean | undefined
+    let notes: string | undefined
 
     // 1. Extract bold text as item name (new format: **Item Name**)
     const boldMatch = workingLine.match(/\*\*([^*]+)\*\*/)
     if (boldMatch) {
       name = boldMatch[1]?.trim() ?? ''
       workingLine = workingLine.replace(boldMatch[0] ?? '', '').trim()
+    }
+
+    // 1.5. Extract description/notes in italic format *(text)* BEFORE parsing parentheses
+    // This prevents description from being mistaken for brand/color
+    const italicDescriptionMatch = workingLine.match(/\*\(([^)]+)\)\*/)
+    if (italicDescriptionMatch) {
+      notes = italicDescriptionMatch[1]?.trim()
+      workingLine = workingLine.replace(italicDescriptionMatch[0] ?? '', '').trim()
     }
 
     // 2. Extract UUID from [uuid:xxx]
@@ -497,6 +506,7 @@ class MarkdownImportService {
       url,
       wearable,
       consumable,
+      notes,
       nestedContainerId, // Temporary slug reference to container
       uuid, // UUID for update workflow
     }
