@@ -480,6 +480,40 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 - ✅ Legenda z nazwami kategorii i wartościami procentowymi
 - ✅ Uwzględnienie zagnieżdżonych kontenerów w obliczeniach (opcjonalnie)
 
+### Rozszerzenie wykresów na stronie szczegółów kontenera
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+
+- Dodanie wykresu kołowego według **ceny** (price) - rozkład kosztów według kategorii
+  - Suma cen przedmiotów w każdej kategorii
+  - Procentowy udział każdej kategorii w całkowitym koszcie kontenera
+  - Wyświetlanie tylko dla przedmiotów z ustawioną ceną
+- Dodanie wykresu kołowego według **priorytetu** (priority) - rozkład przedmiotów według priorytetu
+  - Liczba przedmiotów w każdej kategorii priorytetu (critical, high, medium, low)
+  - Procentowy udział każdego priorytetu w całkowitej liczbie przedmiotów
+  - Możliwość wyświetlania według wagi lub ilości dla każdego priorytetu
+- Rozszerzenie przełącznika trybów wykresu o nowe opcje:
+  - Waga (istniejące)
+  - Ilość (istniejące)
+  - Cena (nowe)
+  - Priorytet (nowe)
+- Wizualne oznaczenie brakujących danych (np. gdy przedmioty nie mają ustawionej ceny)
+- **Uwaga:** Wszystkie wykresy powinny używać spójnego systemu kolorów i stylu
+
+### Wielowymiarowe wykresy (category x price, category x priority)
+**Status:** 🔄 Planned | **Priority:** Low | **Complexity:** High
+
+- Rozważenie implementacji wielowymiarowych wykresów pokazujących relacje między różnymi wymiarami danych
+- Przykłady:
+  - **Kategoria × Cena** - wykres słupkowy lub heatmap pokazujący średnią/całkowitą cenę dla każdej kategorii
+  - **Kategoria × Priorytet** - wykres pokazujący rozkład priorytetów w każdej kategorii
+  - **Priorytet × Cena** - wykres pokazujący rozkład cen według priorytetu
+- Możliwe typy wykresów:
+  - Heatmap (mapa ciepła) - dla dwóch wymiarów kategorycznych
+  - Wykres słupkowy grupowany (grouped bar chart) - dla kombinacji kategorii i wartości numerycznych
+  - Wykres bąbelkowy (bubble chart) - dla trzech wymiarów (x, y, rozmiar bąbelka)
+- Interaktywne narzędzia do eksploracji danych (zoom, filtrowanie, tooltips)
+- **Uwaga:** Ta funkcjonalność wymaga dokładniejszej analizy potrzeb użytkowników i może być zaimplementowana w późniejszej wersji
+
 ---
 
 ## ⚖️ Kontrola wagi
