@@ -64,6 +64,9 @@ export const settingsEn = {
       },
     },
     preferences: {
+      title: 'Gear Preferences',
+      description: 'Manage your gear-specific preferences and settings',
+      save: 'Save',
       preferredWeightUnit: {
         label: 'Preferred Weight Unit',
         subtitle: 'Default unit for displaying weights throughout the application',

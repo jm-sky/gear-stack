@@ -64,6 +64,9 @@ export const settingsPl = {
       },
     },
     preferences: {
+      title: 'Preferencje Sprzętu',
+      description: 'Zarządzaj preferencjami i ustawieniami dotyczącymi sprzętu',
+      save: 'Zapisz',
       preferredWeightUnit: {
         label: 'Preferowana Jednostka Wagi',
         subtitle: 'Domyślna jednostka wyświetlania wag w całej aplikacji',
