@@ -162,5 +162,25 @@ export const authPl = {
       invalid_or_expired: 'Link weryfikacyjny jest nieprawidłowy lub wygasł. Poproś o nowy poniżej.',
       success: 'Adres email został pomyślnie zweryfikowany.',
     },
+    oauth: {
+      button: {
+        continue_with_google: 'Kontynuuj z Google',
+        redirecting: 'Przekierowywanie...',
+      },
+      or_continue_with: 'Lub kontynuuj z',
+      callback: {
+        signing_in: 'Logowanie...',
+        processing: 'Przetwarzanie uwierzytelniania {{provider}}. Proszę czekać...',
+        authentication_failed: 'Uwierzytelnianie nie powiodło się',
+        cancelled_or_denied: 'Uwierzytelnianie OAuth zostało anulowane lub odrzucone',
+        invalid_parameters: 'Nieprawidłowe parametry OAuth',
+        invalid_state: 'Nieprawidłowy parametr state - możliwy atak CSRF',
+        failed: 'Uwierzytelnianie OAuth nie powiodło się',
+        success: 'Pomyślnie zalogowano za pomocą {{provider}}',
+        two_factor_required: 'Wymagane uwierzytelnianie dwuskładnikowe',
+        not_configured: 'Google OAuth nie jest skonfigurowane',
+        failed_to_initiate: 'Nie udało się zainicjować logowania',
+      },
+    },
   },
 }

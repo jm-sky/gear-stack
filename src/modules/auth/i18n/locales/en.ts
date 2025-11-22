@@ -162,5 +162,25 @@ export const authEn = {
       invalid_or_expired: 'Verification link is invalid or has expired. Request a new one below.',
       success: 'Email address verified successfully.',
     },
+    oauth: {
+      button: {
+        continue_with_google: 'Continue with Google',
+        redirecting: 'Redirecting...',
+      },
+      or_continue_with: 'Or continue with',
+      callback: {
+        signing_in: 'Signing you in...',
+        processing: 'Processing your {{provider}} authentication. Please wait...',
+        authentication_failed: 'Authentication Failed',
+        cancelled_or_denied: 'OAuth authentication was cancelled or denied',
+        invalid_parameters: 'Invalid OAuth parameters',
+        invalid_state: 'Invalid state parameter - possible CSRF attack',
+        failed: 'OAuth authentication failed',
+        success: 'Successfully signed in with {{provider}}',
+        two_factor_required: 'Two-factor authentication required',
+        not_configured: 'Google OAuth not configured',
+        failed_to_initiate: 'Failed to initiate login',
+      },
+    },
   },
 }

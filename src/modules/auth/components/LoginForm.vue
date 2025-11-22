@@ -124,7 +124,7 @@ const onSubmit = handleSubmit(async (values: LoginCredentials) => {
         </div>
         <div class="relative flex justify-center text-xs uppercase">
           <span class="bg-background px-2 text-muted-foreground">
-            Or continue with
+            {{ t('auth.oauth.or_continue_with') }}
           </span>
         </div>
       </div>
