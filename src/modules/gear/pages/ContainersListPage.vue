@@ -174,7 +174,6 @@ const handleGenerateSampleSet = async () => {
               <Sparkles class="size-4" />
             </Button>
             <Button
-              v-if="containers.length > 0"
               v-tooltip.bottom="t('gear.container.create.title')"
               variant="default"
               class="shrink-0 flex-1 sm:flex-none"
