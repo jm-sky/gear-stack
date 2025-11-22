@@ -33,31 +33,36 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - ✅ Backend auth module w `backend/app/modules/auth/`
 - ✅ Frontend auth module w `src/modules/auth/`
 
-### 🚧 reCAPTCHA Bot Protection
-**Status:** 🚧 In Progress (Frontend Complete, Backend Ready) | **Priority:** High | **Feature:** [FEATURE-015](./features/FEATURE-015-recaptcha-integration.md)
+### ✅ reCAPTCHA Bot Protection
+**Status:** ✅ Completed | **Priority:** High | **Feature:** [FEATURE-015](./features/FEATURE-015-recaptcha-integration.md)
 
 - ✅ Backend reCAPTCHA service (score-based verification)
 - ✅ Frontend reCAPTCHA integration (invisible v3)
-- ✅ Protected endpoints: login, register, forgot-password
+- ✅ Protected endpoints: login, register, forgot-password, OAuth callback
 - ✅ Auto-loads reCAPTCHA script on app startup
 - ✅ Score threshold configuration (0.5 default)
 - ✅ Action verification (prevents token reuse)
-- 📝 **Status**: Enabled with `RECAPTCHA_ENABLED=true`
+- ✅ Environment variable configuration fixed (v2.2.1)
+- ✅ Comprehensive logging for debugging
+- 📝 **Status**: Fully operational with `RECAPTCHA_ENABLED=true`
 
-### 🚧 OAuth Social Login
-**Status:** 🚧 In Progress (Backend 90%, Frontend Pending) | **Priority:** Medium | **Feature:** [FEATURE-014](./features/FEATURE-014-oauth-authentication.md)
+### ✅ OAuth Social Login
+**Status:** ✅ Completed | **Priority:** Medium | **Feature:** [FEATURE-014](./features/FEATURE-014-oauth-authentication.md)
 
 - ✅ Backend OAuth service with Google provider
 - ✅ Database migration for OAuth fields
 - ✅ Repository methods for OAuth users
 - ✅ User model supports nullable passwords
 - ✅ OAuth schemas and types defined
-- ⏳ Auth service OAuth method (1 hour remaining)
-- ⏳ OAuth router endpoints (1 hour remaining)
-- ⏳ Frontend OAuth composable (2-3 hours remaining)
-- ⏳ OAuth button component (1 hour remaining)
-- ⏳ OAuth callback page (1-2 hours remaining)
-- 📝 **Estimated completion**: 6-8 hours
+- ✅ Auth service OAuth method (`login_with_oauth`)
+- ✅ OAuth router endpoints (auth-url, callback)
+- ✅ Frontend OAuth integration (OAuthCallbackPage)
+- ✅ OAuth button component (already existing)
+- ✅ OAuth callback page with state verification
+- ✅ Fixed camelCase/snake_case compatibility (v2.2.1)
+- ✅ Fixed settings path and logger imports (v2.2.1)
+- ✅ Enhanced error handling on frontend (v2.2.1)
+- 📝 **Status**: Fully functional end-to-end with Google OAuth
 
 ---
 

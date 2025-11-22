@@ -21,6 +21,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.1] - 2025-11-22
+
+### Fixed
+- **reCAPTCHA Configuration**: Fixed environment variable naming issues
+  - Changed `GOOGLE_RECAPTCHA_SITE_KEY` → `RECAPTCHA_SITE_KEY` in backend
+  - Changed `GOOGLE_RECAPTCHA_SECRET_KEY` → `RECAPTCHA_SECRET_KEY` in backend
+  - Enabled reCAPTCHA in both frontend and backend configurations
+  - Added reCAPTCHA variables to docker-compose.yml and docker-compose.dev.yml
+  - Created diagnostic script `backend/scripts/check_env.py` for environment verification
+
+- **reCAPTCHA Logging**: Enhanced debugging capabilities
+  - Added detailed logging in `backend/app/core/recaptcha.py`
+  - Added logging in `backend/app/modules/auth/decorators.py`
+  - Logs now show configuration, request/response details, and error codes
+
+- **OAuth Authentication**: Fixed critical bugs preventing OAuth login
+  - Fixed `login_with_oauth` to support both camelCase and snake_case field names
+  - Fixed missing `logger` import in `backend/app/modules/auth/router.py`
+  - Fixed incorrect settings path: `settings.jwt` → `settings.security`
+  - Added detailed OAuth callback logging for debugging
+
+- **Frontend OAuth Error Handling**: Improved user experience
+  - Replaced hardcoded paths with `AuthRoutePaths` variables in OAuthCallbackPage
+  - Enhanced error message extraction from API responses
+  - Increased error display timeout from 2s to 3s
+
+### Security
+- **reCAPTCHA v3**: Now fully operational with score-based bot detection (min score: 0.5)
+- **OAuth**: Google OAuth authentication now functional end-to-end
+
+---
+
 ## [2.2.0] - 2025-01-21
 
 ### Release: Security Enhancements - reCAPTCHA & OAuth Integration

@@ -14,9 +14,12 @@ To disable rate limiting (NOT recommended):
 - Set RATE_LIMIT_ENABLED=false in .env
 """
 
+import logging
 from typing import TYPE_CHECKING, Annotated, Any, TypeAlias, Union, cast
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from app.modules.two_factor.schemas import (
@@ -110,9 +113,6 @@ async def login(credentials: UserLogin, auth_service: AuthServiceDep, request: R
     """
     try:
         # Debug: Log what type of auth service we're using
-        import logging
-
-        logger = logging.getLogger(__name__)
         logger.info(f"Login attempt for {credentials.email}, auth_service type: {type(auth_service).__name__}")
 
         result = await auth_service.login_user(email=credentials.email, password=credentials.password)
@@ -330,13 +330,24 @@ async def oauth_callback(provider: str, callback_data: OAuthCallbackRequest, aut
 
     try:
         # Exchange code for token
+        logger.info(f"OAuth callback: Exchanging code for token (provider: {provider})")
         token_response = await oauth_service.exchange_code_for_token(provider, callback_data.code)
+        logger.info(f"OAuth callback: Token exchange successful")
 
         # Get user info from provider
+        logger.info(f"OAuth callback: Fetching user info from {provider}")
         user_info = await oauth_service.get_user_info(provider, token_response.accessToken)
+        logger.info(f"OAuth callback: User info received - email: {user_info.email}, provider_id: {user_info.providerId}")
 
         # Login or register user via OAuth
-        return await auth_service.login_with_oauth(provider, user_info)
+        logger.info(f"OAuth callback: Calling auth_service.login_with_oauth")
+        # Convert Pydantic model to dict for compatibility
+        user_info_dict = user_info.model_dump()
+        logger.debug(f"OAuth callback: user_info_dict = {user_info_dict}")
+        result = await auth_service.login_with_oauth(provider, user_info_dict)
+        logger.info(f"OAuth callback: login_with_oauth completed successfully")
+        return result
 
     except Exception as e:
+        logger.error(f"OAuth callback error: {str(e)}", exc_info=True)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"OAuth authentication failed: {str(e)}")

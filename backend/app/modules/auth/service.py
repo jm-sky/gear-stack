@@ -371,7 +371,7 @@ class AuthService:
 
         Args:
             provider: OAuth provider name (google, github, etc.)
-            user_info: User information from OAuth provider
+            user_info: User information from OAuth provider (camelCase format from OAuthUserInfo)
 
         Returns:
             LoginResponse with tokens and user info
@@ -385,6 +385,21 @@ class AuthService:
         email = user_info.get("email")
         if not email:
             raise ValueError("Email is required from OAuth provider")
+
+        # Extract provider_id - support both camelCase (providerId) and snake_case (provider_id, id, sub)
+        provider_id = (
+            user_info.get("providerId")
+            or user_info.get("provider_id")
+            or user_info.get("id")
+            or user_info.get("sub")
+            or ""
+        )
+
+        # Extract avatar URL - support both camelCase (avatarUrl) and snake_case (avatar_url, picture)
+        avatar_url = user_info.get("avatarUrl") or user_info.get("avatar_url") or user_info.get("picture")
+
+        # Extract name
+        name = user_info.get("name", email.split("@")[0])
 
         # Check if user already exists
         existing_user = await self.user_repository.get_user_by_email(email)
@@ -405,10 +420,10 @@ class AuthService:
             # Create new OAuth user
             user = await self.user_repository.create_oauth_user(
                 email=email,
-                name=user_info.get("name", email.split("@")[0]),
+                name=name,
                 provider=provider,
-                provider_id=user_info.get("id", user_info.get("sub", "")),
-                avatar_url=user_info.get("picture"),
+                provider_id=provider_id,
+                avatar_url=avatar_url,
             )
 
         # Generate tokens
@@ -420,6 +435,6 @@ class AuthService:
             accessToken=access_token,
             refreshToken=refresh_token,
             tokenType="bearer",
-            expiresIn=settings.jwt.access_token_expire_minutes * 60,
+            expiresIn=settings.security.access_token_expires_minutes * 60,
             requiresEmailVerification=False,  # OAuth emails are pre-verified
         )

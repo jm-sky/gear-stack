@@ -37,7 +37,7 @@ onMounted(async () => {
     if (errorParam) {
       error.value = 'OAuth authentication was cancelled or denied'
       setTimeout(() => {
-        router.push('/login')
+        router.push(AuthRoutePaths.login)
       }, 2000)
       return
     }
@@ -46,7 +46,7 @@ onMounted(async () => {
     if (!providerParam || !code || !state) {
       error.value = 'Invalid OAuth parameters'
       setTimeout(() => {
-        router.push('/login')
+        router.push(AuthRoutePaths.login)
       }, 2000)
       return
     }
@@ -56,7 +56,7 @@ onMounted(async () => {
     if (!storedState || storedState !== state) {
       error.value = 'Invalid state parameter - possible CSRF attack'
       setTimeout(() => {
-        router.push('/login')
+        router.push(AuthRoutePaths.login)
       }, 2000)
       return
     }
@@ -78,7 +78,7 @@ onMounted(async () => {
     if ('requiresTwoFactor' in response) {
       // 2FA required - redirect to 2FA page
       toast.info('Two-factor authentication required')
-      await router.push('/auth/two-factor/verify')
+      await router.push(AuthRoutePaths.twoFactorVerify)
       return
     }
 
@@ -91,11 +91,27 @@ onMounted(async () => {
   }
   catch (err: unknown) {
     console.error('OAuth callback error:', err)
-    error.value = err instanceof Error ? err.message : 'OAuth authentication failed'
-    toast.error('Authentication failed')
+
+    // Better error handling - extract message from API response
+    let errorMessage = 'OAuth authentication failed'
+
+    if (err && typeof err === 'object' && 'response' in err) {
+      const axiosError = err as { response?: { data?: { detail?: string } } }
+      if (axiosError.response?.data?.detail) {
+        errorMessage = axiosError.response.data.detail
+      }
+    }
+    else if (err instanceof Error) {
+      errorMessage = err.message
+    }
+
+    error.value = errorMessage
+    console.error('OAuth callback detailed error:', errorMessage)
+    toast.error(errorMessage)
+
     setTimeout(() => {
-      router.push('/login')
-    }, 2000)
+      router.push(AuthRoutePaths.login)
+    }, 3000)
   }
   finally {
     isProcessing.value = false
