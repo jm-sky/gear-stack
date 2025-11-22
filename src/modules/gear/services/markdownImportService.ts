@@ -306,10 +306,18 @@ class MarkdownImportService {
 
     // 1.5. Extract description/notes in italic format *(text)* BEFORE parsing parentheses
     // This prevents description from being mistaken for brand/color
-    const italicDescriptionMatch = workingLine.match(/\*\(([^)]+)\)\*/)
+    // Match pattern: *(text)* with optional spaces around asterisks
+    const italicDescriptionMatch = workingLine.match(/\*\s*\(([^)]+)\)\s*\*/)
     if (italicDescriptionMatch) {
       notes = italicDescriptionMatch[1]?.trim()
       workingLine = workingLine.replace(italicDescriptionMatch[0] ?? '', '').trim()
+    } else {
+      // Also try without spaces: *(text)*
+      const italicDescriptionMatch2 = workingLine.match(/\*\(([^)]+)\)\*/)
+      if (italicDescriptionMatch2) {
+        notes = italicDescriptionMatch2[1]?.trim()
+        workingLine = workingLine.replace(italicDescriptionMatch2[0] ?? '', '').trim()
+      }
     }
 
     // 2. Extract UUID from [uuid:xxx]
