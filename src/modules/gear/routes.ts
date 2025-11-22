@@ -3,6 +3,7 @@ import type { RouteRecordRaw } from 'vue-router'
 export const GearRouteName = {
   Containers: 'gear-containers',
   AllItems: 'gear-all-items',
+  ShoppingPlanning: 'gear-shopping-planning',
   ContainerNew: 'gear-container-new',
   ContainerDetail: 'gear-container-detail',
   ContainerEdit: 'gear-container-edit',
@@ -13,6 +14,7 @@ export const GearRouteName = {
 export const GearRoutePath = {
   Containers: '/gear',
   AllItems: '/gear/items',
+  ShoppingPlanning: '/gear/shopping',
   ContainerNew: '/gear/new',
   ContainerDetail: '/gear/:id',
   ContainerEdit: '/gear/:id/edit',
@@ -31,6 +33,12 @@ export const gearRoutes: RouteRecordRaw[] = [
     path: GearRoutePath.AllItems,
     name: GearRouteName.AllItems,
     component: () => import('@/modules/gear/pages/AllItemsPage.vue'),
+    meta: { layout: 'authenticated' },
+  },
+  {
+    path: GearRoutePath.ShoppingPlanning,
+    name: GearRouteName.ShoppingPlanning,
+    component: () => import('@/modules/gear/pages/ShoppingPlanningPage.vue'),
     meta: { layout: 'authenticated' },
   },
   {

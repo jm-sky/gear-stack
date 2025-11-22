@@ -80,6 +80,21 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 - ✅ Wyszukiwarka przedmiotów (globalne filtrowanie)
 - ✅ Zarządzanie widocznością kolumn z zapisem w localStorage
 
+### ✅ Strona planowania zakupów
+**Status:** ✅ Completed | **Priority:** High | **Complexity:** Medium
+
+- ✅ Nowa strona wyświetlająca listę przedmiotów do zakupu i z bliskim terminem ważności
+- ✅ Dostępna jako pozycja w topbar navigation (obok "Kontenery" i "Wszystkie przedmioty")
+- ✅ Wyświetlanie przedmiotów z statusem "To buy" oraz opcjonalnie z bliskim terminem ważności
+- ✅ Sortowanie według priorytetu (critical → high → medium → low)
+- ✅ Filtrowanie po kategoriach (wielokrotny wybór)
+- ✅ Filtrowanie po budżecie (ogranicza listę do przedmiotów mieszczących się w budżecie)
+- ✅ Możliwość dodawania/usuwania pozycji z listy zakupów
+- ✅ Podsumowanie listy zakupów z liczbą przedmiotów i całkowitą ceną
+- ✅ Eksport listy zakupów jako markdown (z podziałem na priorytety)
+- ✅ Wszystkie teksty przetłumaczone przez i18n (PL/EN)
+- 🔄 **Uwaga:** Lista zakupów nie jest obecnie zapisywana w pamięci, ale przygotowana struktura pozwala na łatwe dodanie tej funkcjonalności w przyszłości
+
 ### ✅ Dedykowane ikony dla kategorii
 **Status:** ✅ Completed | **Priority:** High | **Feature:** [FEATURE-002](./features/FEATURE-002-category-icons.md)
 

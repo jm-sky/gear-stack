@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BackpackIcon, Package } from 'lucide-vue-next'
+import { BackpackIcon, Package, ShoppingCart } from 'lucide-vue-next'
 import { type Component, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -40,6 +40,11 @@ const navLinks = computed<Link[]>(() => [
     to: GearRoutePath.AllItems,
     label: t('gear.allItems.navTitle', 'All Items'),
     icon: Package,
+  },
+  {
+    to: GearRoutePath.ShoppingPlanning,
+    label: t('gear.shopping.navTitle', 'Shopping'),
+    icon: ShoppingCart,
   },
 ])
 
