@@ -95,7 +95,29 @@ export const gearContainerService = () => {
       getContainerWeight: gearContainerApiService.getContainerWeight.bind(gearContainerApiService),
       getContainerReadiness: gearContainerApiService.getContainerReadiness.bind(gearContainerApiService),
       // Add methods from local service that are not in API service
-      deleteAllContainers: gearContainerLocalService.deleteAllContainers.bind(gearContainerLocalService),
+      async deleteAllContainers() {
+        const store = useGearStore()
+        const containers = store.getAllContainers
+        
+        try {
+          // Delete all containers via API one by one
+          await Promise.all(
+            containers.map(container => 
+              gearContainerApiService.deleteContainer(container.id).catch(err => {
+                console.warn(`Failed to delete container ${container.id} from API:`, err)
+                // Continue with other deletions even if one fails
+              })
+            )
+          )
+          
+          // Clear store and localStorage after successful API deletions
+          store.clearAllContainers()
+        } catch (error) {
+          // Fallback to localStorage on API error
+          console.warn('API failed, falling back to localStorage', error)
+          await gearContainerLocalService.deleteAllContainers()
+        }
+      },
       getAllContainers: gearContainerLocalService.getAllContainers.bind(gearContainerLocalService),
       getRootContainers: gearContainerLocalService.getRootContainers.bind(gearContainerLocalService),
       getNestedContainers: gearContainerLocalService.getNestedContainers.bind(gearContainerLocalService),
