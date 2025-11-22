@@ -37,6 +37,7 @@ export const settingsEn = {
       description: 'Manage your account security and two-factor authentication',
       setup: 'Enable 2FA',
       manage: 'Manage 2FA',
+      login_required: 'Please log in to manage your security settings and two-factor authentication.',
       not_configured: 'Two-factor authentication is not enabled. Enable it for enhanced security.',
       totp: {
         title: 'Authenticator App',

@@ -15,11 +15,12 @@ export const twoFactorQueryKeys = {
 /**
  * Hook for fetching 2FA status
  */
-export function useTwoFactorStatus(service?: ITwoFactorService) {
+export function useTwoFactorStatus(service?: ITwoFactorService, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: twoFactorQueryKeys.status(),
     queryFn: () => (service ?? twoFactorService).getTwoFactorStatus(),
     staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: options?.enabled ?? true,
   })
 }
 
