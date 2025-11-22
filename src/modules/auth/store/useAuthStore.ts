@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { JWT_STORE_KEY } from '@/shared/config/config'
 import type { User } from '@/modules/auth/types/user.type'
+import { useUserStore } from '@/modules/user/store/useUserStore'
 
 const TWO_FACTOR_TOKEN_KEY = 'vbr_2fa_token'
 const REFRESH_TOKEN_KEY = 'vbr_refresh_token'
@@ -50,6 +51,19 @@ export const useAuthStore = defineStore('auth', () => {
 
   const setUser = (newUser: User | null) => {
     user.value = newUser
+
+    // Sync with userStore for profile page
+    if (newUser) {
+      const userStore = useUserStore()
+      userStore.setUser({
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        avatar: newUser.avatar,
+        createdAt: newUser.createdAt,
+        updatedAt: new Date().toISOString(),
+      })
+    }
   }
 
   const setRefreshToken = (newRefreshToken: string | null) => {
@@ -76,7 +90,12 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem(TWO_FACTOR_TOKEN_KEY)
   }
 
-  const clearUser = () => user.value = null
+  const clearUser = () => {
+    user.value = null
+    // Reset userStore to default user on logout
+    const userStore = useUserStore()
+    userStore.initializeDefaultUser()
+  }
 
   const logout = () => {
     clearToken()
