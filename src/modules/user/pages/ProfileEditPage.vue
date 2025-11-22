@@ -71,26 +71,20 @@ watch(() => profile.value, (newProfile) => {
 const onSubmit = handleSubmit(
   async (values) => {
     try {
-      console.log('Form submitted with values:', values)
-      console.log('shouldUseAPI:', shouldUseAPI.value)
-      
       const updateData = {
         name: values.name,
         email: values.email,
         avatarUrl: values.avatarUrl && values.avatarUrl.trim() ? values.avatarUrl.trim() : undefined,
       }
       
-      console.log('Updating profile with data:', updateData)
       await updateProfile(updateData)
       toast.success(t('common.success'))
       router.push('/profile')
     } catch (error) {
       toast.error(t('common.error'))
-      console.error('Error updating profile:', error)
     }
   },
-  (errors) => {
-    console.log('Form validation failed:', errors)
+  () => {
     toast.error(t('user.edit.validation_error') || 'Validation failed')
   }
 )
@@ -112,7 +106,6 @@ const handleGenerateGravatar = () => {
     toast.success(t('user.edit.gravatar_generated') || 'Gravatar URL generated')
   } catch (error) {
     toast.error(t('user.edit.gravatar_generation_failed') || 'Failed to generate Gravatar URL')
-    console.error('Error generating Gravatar URL:', error)
   }
 }
 </script>
