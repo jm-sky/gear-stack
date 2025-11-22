@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Download, Plus, ShoppingCart, Trash2 } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
-import type { ComputedRef } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -37,6 +36,9 @@ const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.prefe
 const selectedCategories = ref<TGearItemCategory[]>([])
 const budget = ref<number | null>(null)
 const includeExpiringSoon = ref(true)
+
+// Category checkbox states - using reactive object for v-model compatibility
+const categoryChecked = ref<Record<string, boolean>>({})
 
 // Shopping list (items selected for shopping)
 const shoppingList = ref<IItemWithContainerId[]>([])
@@ -93,33 +95,44 @@ const getCategoryLabel = (categoryValue: string): string => {
   return t(`gear.item.categories.${categoryValue}`)
 }
 
-// Cache for category checkbox computed properties
-const categoryCheckedCache = new Map<TGearItemCategory, ComputedRef<boolean>>()
+// Sync categoryChecked with selectedCategories
+watch(
+  () => allCategories.value,
+  (categories) => {
+    categories.forEach(category => {
+      if (!(category in categoryChecked.value)) {
+        categoryChecked.value[category] = selectedCategories.value.includes(category)
+      }
+    })
+  },
+  { immediate: true },
+)
 
-// Helper to get or create a computed property for category checkbox
-const getCategoryChecked = (category: TGearItemCategory): ComputedRef<boolean> => {
-  if (!categoryCheckedCache.has(category)) {
-    categoryCheckedCache.set(
-      category,
-      computed({
-        get: () => selectedCategories.value.includes(category),
-        set: (checked: boolean) => {
-          if (checked) {
-            if (!selectedCategories.value.includes(category)) {
-              selectedCategories.value.push(category)
-            }
-          } else {
-            const index = selectedCategories.value.indexOf(category)
-            if (index > -1) {
-              selectedCategories.value.splice(index, 1)
-            }
-          }
-        },
-      }),
-    )
-  }
-  return categoryCheckedCache.get(category)!
-}
+// Watch categoryChecked changes and sync to selectedCategories
+watch(
+  categoryChecked,
+  (checked) => {
+    const newSelected: TGearItemCategory[] = []
+    Object.entries(checked).forEach(([category, isChecked]) => {
+      if (isChecked && allCategories.value.includes(category as TGearItemCategory)) {
+        newSelected.push(category as TGearItemCategory)
+      }
+    })
+    selectedCategories.value = newSelected
+  },
+  { deep: true },
+)
+
+// Watch selectedCategories changes and sync to categoryChecked
+watch(
+  selectedCategories,
+  (selected) => {
+    allCategories.value.forEach(category => {
+      categoryChecked.value[category] = selected.includes(category)
+    })
+  },
+  { immediate: true },
+)
 
 // Priority order for sorting
 const priorityOrder: Record<TGearItemPriority, number> = {
@@ -298,7 +311,7 @@ const handleCopyMarkdown = async () => {
             >
               <Checkbox
                 :id="`category-${category}`"
-                v-model="getCategoryChecked(category)"
+                v-model="categoryChecked[category]"
               />
               <Label
                 :for="`category-${category}`"
