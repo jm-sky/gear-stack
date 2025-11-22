@@ -48,7 +48,11 @@ export async function authGuard(
   if (hasToken && !hasUser && !isIn2FAFlow && requiresAuth) {
     try {
       const user = await authService.getCurrentUser()
-      authStore.setUser(user)
+      // Map avatarUrl from backend to avatar in frontend
+      authStore.setUser({
+        ...user,
+        avatar: (user as any).avatarUrl || user.avatar,
+      })
       isAuthenticated = true // User is now authenticated after successful fetch
     } catch (error) {
       if (isAxiosError(error)) {

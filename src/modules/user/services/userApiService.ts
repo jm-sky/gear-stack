@@ -12,6 +12,7 @@ interface UserResponse {
   role?: string
   isActive?: boolean
   isEmailVerified?: boolean
+  avatarUrl?: string
   createdAt: string
   updatedAt: string
 }
@@ -45,7 +46,7 @@ class UserApiService {
       id: response.id,
       name: response.name,
       email: response.email,
-      // avatar is not in backend response, keep undefined
+      avatar: response.avatarUrl,
       createdAt: response.createdAt,
       updatedAt: response.updatedAt,
     }

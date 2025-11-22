@@ -60,9 +60,12 @@ export function useLogin(service?: IAuthService) {
         // Normal login response - set access token and refresh token
         authStore.setToken(response.accessToken)
         authStore.setRefreshToken(response.refreshToken)
-        // Set user from login response
+        // Set user from login response (map avatarUrl to avatar)
         if (response.user) {
-          authStore.setUser(response.user)
+          authStore.setUser({
+            ...response.user,
+            avatar: (response.user as any).avatarUrl || response.user.avatar,
+          })
         }
       }
       return response
@@ -70,8 +73,11 @@ export function useLogin(service?: IAuthService) {
     onSuccess: async (data: LoginResponse) => {
       // If it's a normal auth response (not 2FA required), set user and invalidate queries
       if ('accessToken' in data && 'user' in data) {
-        // Set user from login response
-        authStore.setUser(data.user)
+        // Set user from login response (map avatarUrl to avatar)
+        authStore.setUser({
+          ...data.user,
+          avatar: (data.user as any).avatarUrl || data.user.avatar,
+        })
 
         // Invalidate and refetch user data to ensure consistency
         if (!data.requiresEmailVerification) {

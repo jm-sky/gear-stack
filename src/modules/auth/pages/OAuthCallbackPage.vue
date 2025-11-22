@@ -85,7 +85,11 @@ onMounted(async () => {
     // Success - set auth data and redirect
     authStore.setToken(response.accessToken)
     authStore.setRefreshToken(response.refreshToken)
-    authStore.setUser(response.user)
+    // Map avatarUrl from backend to avatar in frontend
+    authStore.setUser({
+      ...response.user,
+      avatar: (response.user as any).avatarUrl || response.user.avatar,
+    })
     toast.success('Successfully signed in with ' + providerParam)
     await router.push(AuthRoutePaths.dashboard)
   }

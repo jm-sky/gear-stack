@@ -224,6 +224,7 @@ class UserRepository(SearchMixin, UserRepositoryInterface):
         user_db.email_verification_token = user.emailVerificationToken
         user_db.email_verification_sent_at = user.emailVerificationSentAt
         user_db.email_verified_at = user.emailVerifiedAt
+        user_db.avatar_url = user.avatarUrl
 
         await self.db.commit()
         await self.db.refresh(user_db)

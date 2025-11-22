@@ -8,10 +8,11 @@ import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useUser } from '../composables/useUser'
+import { validateAvatarUrl } from '../utils/validateAvatarUrl'
 
 const router = useRouter()
 const { t } = useI18n()
@@ -20,6 +21,13 @@ const { profile, updateProfile } = useUser()
 const profileSchema = z.object({
   name: z.string().min(1, t('user.edit.name_required')),
   email: z.string().email(t('user.edit.email_invalid')),
+  avatarUrl: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || validateAvatarUrl(val),
+      { message: t('user.edit.avatar_invalid') }
+    ),
 })
 
 const { handleSubmit, setValues } = useForm({
@@ -27,6 +35,7 @@ const { handleSubmit, setValues } = useForm({
   initialValues: {
     name: '',
     email: '',
+    avatarUrl: '',
   },
 })
 
@@ -36,6 +45,7 @@ onMounted(() => {
     setValues({
       name: profile.value.name,
       email: profile.value.email,
+      avatarUrl: profile.value.avatar || '',
     })
   }
 })
@@ -46,13 +56,18 @@ watch(() => profile.value, (newProfile) => {
     setValues({
       name: newProfile.name,
       email: newProfile.email,
+      avatarUrl: newProfile.avatar || '',
     })
   }
 })
 
 const onSubmit = handleSubmit(async (values) => {
   try {
-    updateProfile(values)
+    await updateProfile({
+      name: values.name,
+      email: values.email,
+      avatarUrl: values.avatarUrl || undefined,
+    })
     toast.success(t('common.success'))
     router.push('/profile')
   } catch (error) {
@@ -119,6 +134,25 @@ const handleCancel = () => {
                   v-bind="componentField"
                 />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField }" name="avatarUrl">
+            <FormItem>
+              <FormLabel>
+                {{ t('user.edit.avatar_label') }}
+              </FormLabel>
+              <FormControl>
+                <Input
+                  type="url"
+                  :placeholder="t('user.edit.avatar_placeholder')"
+                  v-bind="componentField"
+                />
+              </FormControl>
+              <FormDescription>
+                {{ t('user.edit.avatar_help') }}
+              </FormDescription>
               <FormMessage />
             </FormItem>
           </FormField>
