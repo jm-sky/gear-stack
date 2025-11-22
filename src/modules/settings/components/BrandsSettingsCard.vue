@@ -12,21 +12,19 @@ const { t } = useI18n()
 const { customBrands, addBrand, updateBrand, removeBrand } = useGearSettings()
 
 const editingId = ref<string | null>(null)
-const newBrandKey = ref('')
-const newBrandLabel = ref('')
+const newBrandValue = ref('')
 
-const isAdding = computed(() => editingId.value === null && (newBrandKey.value || newBrandLabel.value))
+const isAdding = computed(() => editingId.value === null && !!newBrandValue.value.trim())
 
 const handleAdd = () => {
-  if (!newBrandKey.value.trim() || !newBrandLabel.value.trim()) {
+  if (!newBrandValue.value.trim()) {
     return
   }
 
   const now = new Date().toISOString()
   const brand: IUserBrand = {
     id: crypto.randomUUID(),
-    key: newBrandKey.value.trim().toLowerCase().replace(/\s+/g, '_'),
-    label: newBrandLabel.value.trim(),
+    value: newBrandValue.value.trim(),
     createdAt: now,
     updatedAt: now,
   }
@@ -34,14 +32,12 @@ const handleAdd = () => {
   addBrand(brand)
 
   // Reset form
-  newBrandKey.value = ''
-  newBrandLabel.value = ''
+  newBrandValue.value = ''
 }
 
 const handleEdit = (brand: IUserBrand) => {
   editingId.value = brand.id
-  newBrandKey.value = brand.key
-  newBrandLabel.value = brand.label
+  newBrandValue.value = brand.value
 }
 
 const handleSave = (id: string) => {
@@ -50,21 +46,18 @@ const handleSave = (id: string) => {
 
   const updated: IUserBrand = {
     ...brand,
-    key: newBrandKey.value.trim().toLowerCase().replace(/\s+/g, '_'),
-    label: newBrandLabel.value.trim(),
+    value: newBrandValue.value.trim(),
     updatedAt: new Date().toISOString(),
   }
 
   updateBrand(updated)
   editingId.value = null
-  newBrandKey.value = ''
-  newBrandLabel.value = ''
+  newBrandValue.value = ''
 }
 
 const handleCancel = () => {
   editingId.value = null
-  newBrandKey.value = ''
-  newBrandLabel.value = ''
+  newBrandValue.value = ''
 }
 
 const handleDelete = (id: string) => {
@@ -88,19 +81,11 @@ const handleDelete = (id: string) => {
         <h4 class="font-medium text-sm">
           {{ editingId ? t('settings.brands.edit') : t('settings.brands.add') }}
         </h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Input
-            v-model="newBrandKey"
-            :placeholder="t('settings.brands.keyPlaceholder')"
-            :disabled="!!editingId"
-            @keydown.enter="handleAdd"
-          />
-          <Input
-            v-model="newBrandLabel"
-            :placeholder="t('settings.brands.labelPlaceholder')"
-            @keydown.enter="handleAdd"
-          />
-        </div>
+        <Input
+          v-model="newBrandValue"
+          :placeholder="t('settings.brands.valuePlaceholder')"
+          @keydown.enter="handleAdd"
+        />
         <div class="flex gap-2">
           <Button
             v-if="isAdding"
@@ -129,22 +114,9 @@ const handleDelete = (id: string) => {
           :key="brand.id"
           class="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg gap-3"
         >
-          <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <div class="text-xs text-muted-foreground">
-                {{ t('settings.brands.key') }}
-              </div>
-              <div class="font-mono text-sm">
-                {{ brand.key }}
-              </div>
-            </div>
-            <div>
-              <div class="text-xs text-muted-foreground">
-                {{ t('settings.brands.label') }}
-              </div>
-              <div class="text-sm">
-                {{ brand.label }}
-              </div>
+          <div class="flex-1">
+            <div class="text-sm">
+              {{ brand.value }}
             </div>
           </div>
           <div class="flex gap-2 sm:shrink-0">

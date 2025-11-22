@@ -65,7 +65,7 @@ const handlePreview = () => {
 
   const result = markdownImportService.parseMarkdown(markdownContent.value, {
     recognizeFromName: recognizeFromName.value,
-    customBrands: customBrands.value.map((b) => ({ label: b.label })),
+    customBrands: customBrands.value,
   })
   previewResult.value = result
 

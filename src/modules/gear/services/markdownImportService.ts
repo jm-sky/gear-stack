@@ -199,7 +199,7 @@ class MarkdownImportService {
     markdown: string,
     options?: {
       recognizeFromName?: boolean
-      customBrands?: Array<{ label: string }>
+      customBrands?: Array<{ value: string }>
     }
   ): IMarkdownImportResult {
     const result: IMarkdownImportResult = {
@@ -379,7 +379,7 @@ class MarkdownImportService {
     line: string,
     options?: {
       recognizeFromName?: boolean
-      customBrands?: Array<{ label: string }>
+      customBrands?: Array<{ value: string }>
     }
   ): (ICreateItemDto & { nestedContainerId?: string; uuid?: string }) | null {
     if (!line) return null

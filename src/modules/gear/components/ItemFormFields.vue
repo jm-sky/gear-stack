@@ -43,15 +43,15 @@ nextTick(() => {
 })
 
 // Get category label helper
-const getCategoryLabel = (categoryKey: string): string => {
+const getCategoryLabel = (categoryValue: string): string => {
   // Check if it's a custom category
-  const customCategory = customCategories.value.find(c => c.key === categoryKey)
+  const customCategory = customCategories.value.find(c => c.value === categoryValue)
   if (customCategory) {
-    return customCategory.label
+    return customCategory.value
   }
 
   // Default categories
-  return t(`gear.item.categories.${categoryKey}`)
+  return t(`gear.item.categories.${categoryValue}`)
 }
 
 // Cancel handler
@@ -171,11 +171,11 @@ const handleCancel = () => {
               <SelectItem
                 v-for="category in customCategories"
                 :key="category.id"
-                :value="category.key"
+                :value="category.value"
               >
                 <div class="flex items-center gap-2">
-                  <CategoryIcon :category="category.key" :size="16" />
-                  <span>{{ getCategoryLabel(category.key) }}</span>
+                  <CategoryIcon :category="category.value" :size="16" />
+                  <span>{{ getCategoryLabel(category.value) }}</span>
                 </div>
               </SelectItem>
             </template>
@@ -324,7 +324,7 @@ const handleCancel = () => {
             <FormLabel :label="$t('gear.item.brand')" />
             <ComboBox
               :value="value"
-              :options="getBrandOptions(customBrands.map(b => ({ key: b.key, label: b.label })))"
+              :options="getBrandOptions(customBrands)"
               :placeholder="''"
               :creatable="true"
               :create-label="$t('gear.comboBox.add')"

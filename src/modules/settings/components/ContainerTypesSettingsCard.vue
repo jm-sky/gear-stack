@@ -12,21 +12,19 @@ const { t } = useI18n()
 const { customContainerTypes, addContainerType, updateContainerType, removeContainerType } = useGearSettings()
 
 const editingId = ref<string | null>(null)
-const newTypeKey = ref('')
-const newTypeLabel = ref('')
+const newTypeValue = ref('')
 
-const isAdding = computed(() => editingId.value === null && (newTypeKey.value || newTypeLabel.value))
+const isAdding = computed(() => editingId.value === null && !!newTypeValue.value.trim())
 
 const handleAdd = () => {
-  if (!newTypeKey.value.trim() || !newTypeLabel.value.trim()) {
+  if (!newTypeValue.value.trim()) {
     return
   }
 
   const now = new Date().toISOString()
   const containerType: IUserContainerType = {
     id: crypto.randomUUID(),
-    key: newTypeKey.value.trim().toLowerCase().replace(/\s+/g, '_'),
-    label: newTypeLabel.value.trim(),
+    value: newTypeValue.value.trim(),
     createdAt: now,
     updatedAt: now,
   }
@@ -34,14 +32,12 @@ const handleAdd = () => {
   addContainerType(containerType)
 
   // Reset form
-  newTypeKey.value = ''
-  newTypeLabel.value = ''
+  newTypeValue.value = ''
 }
 
 const handleEdit = (containerType: IUserContainerType) => {
   editingId.value = containerType.id
-  newTypeKey.value = containerType.key
-  newTypeLabel.value = containerType.label
+  newTypeValue.value = containerType.value
 }
 
 const handleSave = (id: string) => {
@@ -50,21 +46,18 @@ const handleSave = (id: string) => {
 
   const updated: IUserContainerType = {
     ...containerType,
-    key: newTypeKey.value.trim().toLowerCase().replace(/\s+/g, '_'),
-    label: newTypeLabel.value.trim(),
+    value: newTypeValue.value.trim(),
     updatedAt: new Date().toISOString(),
   }
 
   updateContainerType(updated)
   editingId.value = null
-  newTypeKey.value = ''
-  newTypeLabel.value = ''
+  newTypeValue.value = ''
 }
 
 const handleCancel = () => {
   editingId.value = null
-  newTypeKey.value = ''
-  newTypeLabel.value = ''
+  newTypeValue.value = ''
 }
 
 const handleDelete = (id: string) => {
@@ -88,19 +81,11 @@ const handleDelete = (id: string) => {
         <h4 class="font-medium text-sm">
           {{ editingId ? t('settings.containerTypes.edit') : t('settings.containerTypes.add') }}
         </h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Input
-            v-model="newTypeKey"
-            :placeholder="t('settings.containerTypes.keyPlaceholder')"
-            :disabled="!!editingId"
-            @keydown.enter="handleAdd"
-          />
-          <Input
-            v-model="newTypeLabel"
-            :placeholder="t('settings.containerTypes.labelPlaceholder')"
-            @keydown.enter="handleAdd"
-          />
-        </div>
+        <Input
+          v-model="newTypeValue"
+          :placeholder="t('settings.containerTypes.valuePlaceholder')"
+          @keydown.enter="handleAdd"
+        />
         <div class="flex gap-2">
           <Button
             v-if="isAdding"
@@ -129,22 +114,9 @@ const handleDelete = (id: string) => {
           :key="containerType.id"
           class="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg gap-3"
         >
-          <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <div class="text-xs text-muted-foreground">
-                {{ t('settings.containerTypes.key') }}
-              </div>
-              <div class="font-mono text-sm">
-                {{ containerType.key }}
-              </div>
-            </div>
-            <div>
-              <div class="text-xs text-muted-foreground">
-                {{ t('settings.containerTypes.label') }}
-              </div>
-              <div class="text-sm">
-                {{ containerType.label }}
-              </div>
+          <div class="flex-1">
+            <div class="text-sm">
+              {{ containerType.value }}
             </div>
           </div>
           <div class="flex gap-2 sm:shrink-0">
