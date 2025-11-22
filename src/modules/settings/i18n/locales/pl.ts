@@ -37,6 +37,7 @@ export const settingsPl = {
       description: 'Zarządzaj bezpieczeństwem konta i uwierzytelnianiem dwuskładnikowym',
       setup: 'Włącz 2FA',
       manage: 'Zarządzaj 2FA',
+      login_required: 'Zaloguj się, aby zarządzać ustawieniami bezpieczeństwa i uwierzytelnianiem dwuskładnikowym.',
       not_configured: 'Uwierzytelnianie dwuskładnikowe nie jest włączone. Włącz je dla lepszego bezpieczeństwa.',
       totp: {
         title: 'Aplikacja uwierzytelniająca',

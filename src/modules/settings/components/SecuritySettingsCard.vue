@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useTwoFactorStatus, useUpdatePreferredMethod } from '@/modules/auth/composables/useTwoFactor'
+import { useAuth } from '@/modules/auth/composables/useAuth'
 import { useAuthStore } from '@/modules/auth/store/useAuthStore'
 import type { ITwoFactorService } from '@/modules/auth/types/twoFactor.type'
 
@@ -27,8 +28,11 @@ const props = defineProps<{
 const { t } = useI18n()
 const router = useRouter()
 const authStore = useAuthStore()
+const { isAuthenticated } = useAuth()
 
-const { data: twoFactorStatus, isLoading } = useTwoFactorStatus(props.service)
+const { data: twoFactorStatus, isLoading } = useTwoFactorStatus(props.service, {
+  enabled: isAuthenticated,
+})
 const updatePreferredMethodMutation = useUpdatePreferredMethod(props.service)
 
 const has2FAEnabled = computed(() => {
@@ -82,14 +86,18 @@ const handleManage2FA = async () => {
           <Shield :size="20" />
           <CardTitle>{{ t('settings.security.title') }}</CardTitle>
         </div>
-        <Button variant="outline" size="sm" @click="handleManage2FA">
+        <Button variant="outline" size="sm" :disabled="!isAuthenticated" @click="handleManage2FA">
           {{ has2FAEnabled ? t('settings.security.manage') : t('settings.security.setup') }}
         </Button>
       </div>
       <CardDescription>{{ t('settings.security.description') }}</CardDescription>
     </CardHeader>
     <CardContent>
-      <div v-if="isLoading" class="space-y-2">
+      <div v-if="!isAuthenticated" class="text-sm text-muted-foreground py-4">
+        {{ t('settings.security.login_required') }}
+      </div>
+
+      <div v-else-if="isLoading" class="space-y-2">
         <div class="h-4 w-3/4 bg-muted rounded animate-pulse" />
         <div class="h-4 w-1/2 bg-muted rounded animate-pulse" />
       </div>
