@@ -12,6 +12,6 @@ export const settingsRoutes: RouteRecordRaw[] = [
   {
     path: SettingsRoutePaths.settings,
     name: SettingsRouteNames.settings,
-    component: () => import('@/modules/settings/pages/SettingsPage.vue'),
+    component: () => import('@/pages/settings/SettingsPage.vue'),
   },
 ]
