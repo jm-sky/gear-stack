@@ -3,9 +3,10 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from app.common.pagination import PaginatedResponse
+from .validators import validate_avatar_url
 
 
 class UserCreate(BaseModel):
@@ -30,6 +31,15 @@ class UserProfileUpdate(BaseModel):
 
     email: Optional[EmailStr] = None
     name: Optional[str] = Field(None, min_length=1, max_length=100)
+    avatarUrl: Optional[str] = Field(None, description="Avatar URL (only allowed providers like Gravatar)")
+
+    @field_validator('avatarUrl')
+    @classmethod
+    def validate_avatar_url(cls, v: str | None) -> str | None:
+        """Validate avatar URL against allowed providers."""
+        if v is not None and not validate_avatar_url(v):
+            raise ValueError("Avatar URL must be from an allowed provider (e.g., Gravatar)")
+        return v
 
 
 class UserResponse(BaseModel):
@@ -40,6 +50,7 @@ class UserResponse(BaseModel):
     name: str
     role: str
     isActive: bool
+    avatarUrl: Optional[str] = None
     createdAt: datetime
     updatedAt: datetime
 

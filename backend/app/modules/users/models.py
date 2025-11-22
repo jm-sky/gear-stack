@@ -49,6 +49,7 @@ class User(BaseModel):
     role: str = "user"  # user, admin, etc.
     isActive: bool = True
     isEmailVerified: bool = True
+    avatarUrl: str | None = None
     createdAt: datetime
     updatedAt: datetime
 
@@ -61,6 +62,7 @@ class User(BaseModel):
             "role": self.role,
             "isActive": self.isActive,
             "isEmailVerified": self.isEmailVerified,
+            "avatarUrl": getattr(self, 'avatarUrl', None),
             "createdAt": self.createdAt,
             "updatedAt": self.updatedAt,
         }

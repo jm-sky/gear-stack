@@ -192,4 +192,5 @@ class User(BaseModel):
             "createdAt": self.createdAt,
             "isEmailVerified": self.isEmailVerified,
             "emailVerifiedAt": self.emailVerifiedAt,
+            "avatarUrl": self.avatarUrl,
         }

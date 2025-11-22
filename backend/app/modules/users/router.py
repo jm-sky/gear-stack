@@ -94,6 +94,7 @@ async def update_current_user_profile(
         user_id=current_user.id,
         email=user_data.email,
         name=user_data.name,
+        avatar_url=user_data.avatarUrl,
     )
     if not updated_user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
