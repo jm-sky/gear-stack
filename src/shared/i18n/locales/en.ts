@@ -62,6 +62,13 @@ export default {
     unauthorized: 'You are not authorized to perform this action',
     not_found: 'Resource not found',
     server_error: 'Server error. Please try again later',
+    chunkLoadError: {
+      title: 'New Version Available',
+      message: 'A new version of the application is available. The page needs to be reloaded to continue.',
+      description: 'Please save your work before reloading.',
+      reload: 'Reload Page',
+      cancel: 'Cancel',
+    },
   },
   navigation: {
     dashboard: 'Dashboard',
@@ -217,5 +224,13 @@ export default {
       title: 'You have containers in your browser',
       description: 'Log in or register to synchronize your data',
     },
+  },
+  notFound: {
+    title: 'Page Not Found',
+    description: 'The page you are looking for does not exist.',
+    suggestions: 'Here are some helpful links:',
+    goToContainers: 'Go to Containers',
+    goToDashboard: 'Go to Dashboard',
+    goToSettings: 'Go to Settings',
   },
 }

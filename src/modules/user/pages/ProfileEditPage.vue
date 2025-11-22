@@ -8,7 +8,7 @@ import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
-import { FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form'
+import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useBackend } from '@/shared/composables/useBackend'
@@ -19,7 +19,7 @@ import { validateAvatarUrl } from '../utils/validateAvatarUrl'
 const router = useRouter()
 const { t } = useI18n()
 const { profile, updateProfile } = useUser()
-const { shouldUseAPI } = useBackend()
+const { shouldUseAPI: _shouldUseAPI } = useBackend()
 
 const profileSchema = z.object({
   name: z.string().min(1, t('user.edit.name_required')),
@@ -33,7 +33,7 @@ const profileSchema = z.object({
     ),
 })
 
-const { handleSubmit, setValues, values } = useForm({
+const { handleSubmit, setValues } = useForm({
   validationSchema: toTypedSchema(profileSchema),
   initialValues: {
     name: '',
@@ -81,6 +81,7 @@ const onSubmit = handleSubmit(
       toast.success(t('common.success'))
       router.push('/profile')
     } catch (error) {
+      console.error('Profile update failed:', error)
       toast.error(t('common.error'))
     }
   },
@@ -105,6 +106,7 @@ const handleGenerateGravatar = () => {
     avatarUrlValue.value = gravatarUrl
     toast.success(t('user.edit.gravatar_generated') || 'Gravatar URL generated')
   } catch (error) {
+    console.error('Gravatar generation failed:', error)
     toast.error(t('user.edit.gravatar_generation_failed') || 'Failed to generate Gravatar URL')
   }
 }

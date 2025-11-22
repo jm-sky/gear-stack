@@ -152,6 +152,7 @@ export interface ICreateItemDto {
   status: TGearItemStatus
   containerId?: TUUID | null // Reference to a nested container (if this item is a container)
   price?: number | null
+  currency?: string | null // Currency code (PLN, USD, EUR, GBP, etc.)
   url?: string | null
   brand?: string | null
   color?: string | null

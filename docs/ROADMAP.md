@@ -321,6 +321,16 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
     - **Opcja B (New Line):** opis w osobnej linii z wcięciem 2 spacje, od razu pod nazwą (przed wagą/marką)
   - 🔄 Parsowanie opisów w imporcie markdown (automatyczne rozpoznawanie obu formatów)
   - 🔄 Obsługa zagnieżdżonych nawiasów w opisach
+- 🔄 **Obsługa opisu kontenera w markdown import** - planowane
+  - 🔄 Parser markdown wykrywa opis kontenera (tekst między nagłówkiem a pierwszą listą przedmiotów)
+  - 🔄 Opis zapisywany w polu `description` kontenera
+  - 🔄 Unit tests dla parsowania opisów kontenerów
+- 🔄 **Obsługa ceny w markdown import** - planowane
+  - 🔄 Parser wykrywa ceny przedmiotów i kontenerów w różnych formatach
+  - 🔄 Obsługiwane formaty: `100PLN`, `10 PLN`, `10,00 PLN`, `1 000,00 PLN`, `10zł`, `$50`, `50$`
+  - 🔄 Automatyczne rozpoznawanie waluty (PLN, zł, $, EUR, €, GBP, £)
+  - 🔄 Cena zapisywana w polu `price` przedmiotu/kontenera
+  - 🔄 Unit tests dla parsowania cen
 
 > **Uwaga:** UUID support dla update workflow wymaga backendu/DB - zobacz [ROADMAP_V2.md](./ROADMAP_V2.md)
 
@@ -489,6 +499,44 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **front-end only** (d
 - Travel: "Bagaż podręczny max 8kg (limit linii lotniczej)"
 - EDC: "Kieszeń max 500g"
 - Survival kit: "Zestaw przetrwania max 3kg"
+
+---
+
+## 🛠️ Obsługa błędów i UX
+
+### Strona 404 (Not Found)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+
+- Dedykowana strona 404 dla niepasujących tras
+- Wildcard route `*` w Vue Router łapiący wszystkie nieistniejące ścieżki
+- Przyjazny dla użytkownika interfejs:
+  - Komunikat "Strona nie została znaleziona"
+  - Link do strony głównej
+  - Sugestie dalszych kroków (Kontenery, Dashboard, Ustawienia)
+- Tłumaczenia PL/EN
+- Layout: `public` (dostępna dla wszystkich)
+
+### Error handler dla chunk loading errors
+**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium
+
+- Obsługa błędu "ChunkLoadError" (błąd ładowania chunk po deploy nowej wersji)
+- Wykrywanie błędów ładowania chunk w runtime
+- Dialog z komunikatem:
+  - Tytuł: "Nowa wersja aplikacji"
+  - Treść: "Aplikacja została zaktualizowana. Zapisz swoją pracę i odśwież stronę."
+  - Przycisk "Odśwież stronę"
+  - Przycisk "Anuluj" (opcjonalnie, jeśli użytkownik chce dokończyć pracę)
+- Tłumaczenia PL/EN
+- Global error handler w `main.ts` lub dedykowany composable
+- Auto-refresh (opcjonalnie, po potwierdzeniu użytkownika)
+- Toast notification (opcjonalnie, zamiast dialogu)
+
+**Use cases:**
+- Użytkownik ma otwartą aplikację
+- Deploy nowej wersji następuje w tle
+- Użytkownik próbuje przejść do nowej trasy
+- Stara chunk jest usunięta → ChunkLoadError
+- Dialog informuje użytkownika o nowej wersji i oferuje odświeżenie strony
 
 ---
 

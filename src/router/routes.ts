@@ -38,4 +38,11 @@ export const routes: RouteRecordRaw[] = [
   ...gearRoutes,
   ...settingsRoutes,
   ...userRoutes,
+  // 404 catch-all route - must be last
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'not-found',
+    component: () => import('@/pages/NotFoundPage.vue'),
+    meta: { layout: 'public' },
+  },
 ]

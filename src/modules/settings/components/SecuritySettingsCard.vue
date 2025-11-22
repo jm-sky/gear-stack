@@ -16,8 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useTwoFactorStatus, useUpdatePreferredMethod } from '@/modules/auth/composables/useTwoFactor'
 import { useAuth } from '@/modules/auth/composables/useAuth'
+import { useTwoFactorStatus, useUpdatePreferredMethod } from '@/modules/auth/composables/useTwoFactor'
 import { useAuthStore } from '@/modules/auth/store/useAuthStore'
 import type { ITwoFactorService } from '@/modules/auth/types/twoFactor.type'
 
@@ -86,7 +86,12 @@ const handleManage2FA = async () => {
           <Shield :size="20" />
           <CardTitle>{{ t('settings.security.title') }}</CardTitle>
         </div>
-        <Button variant="outline" size="sm" :disabled="!isAuthenticated" @click="handleManage2FA">
+        <Button
+          variant="outline"
+          size="sm"
+          :disabled="!isAuthenticated"
+          @click="handleManage2FA"
+        >
           {{ has2FAEnabled ? t('settings.security.manage') : t('settings.security.setup') }}
         </Button>
       </div>

@@ -21,6 +21,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.0] - 2025-11-22
+
+### Added
+- **Testing Infrastructure**: Set up Vitest testing framework
+  - Installed Vitest, @vitest/ui, and happy-dom
+  - Created `vitest.config.ts` configuration
+  - Added test scripts: `test`, `test:ui`, `test:run`, `test:coverage`
+  - **57 unit tests** for markdown import service with 100% pass rate
+
+- **Markdown Import Enhancements**:
+  - **Container Descriptions**: Support for parsing container descriptions from markdown
+    - Extracts text between container header and first item
+    - Supports multi-line descriptions with empty lines
+  - **Price Parsing**: Comprehensive price and currency support
+    - PLN formats: `100PLN`, `10 PLN`, `10,00 PLN`, `1 000,00 PLN`, `10zł`
+    - USD formats: `$50`, `50$`, `50 USD`
+    - EUR formats: `€100`, `100€`, `100 EUR`
+    - GBP formats: `£75`, `75£`, `75 GBP`
+  - Added `price` and `currency` fields to `ICreateItemDto` type
+  - Added `description`, `price`, and `currency` fields to `IMarkdownImportResult`
+
+- **Error Handling**:
+  - Global chunk loading error handler for post-deployment errors
+  - User-friendly dialog with i18n support (PL/EN)
+  - Automatic detection of ChunkLoadError and related failures
+  - Graceful page reload option
+
+- **404 Page**:
+  - New NotFoundPage component with proper UI
+  - Wildcard route `/:pathMatch(.*)*` for catching all unmatched routes
+  - Helpful navigation links to Containers, Dashboard, and Settings
+  - Full i18n support (PL/EN)
+
+- **Translations**:
+  - Added `errors.chunkLoadError` translations (PL/EN)
+  - Added `notFound` page translations (PL/EN)
+
+### Fixed
+- **Profile Page Mobile**: Fixed email overflow on mobile devices
+  - Added `break-all` class to email display
+  - Added `flex-shrink-0` to Mail icon to prevent crushing
+
+- **Markdown Export**: Fixed description format in newline mode
+  - Descriptions now appear alone on second line
+  - Metadata (UUID, quantity, brand, weight) stays on first line
+  - No more mixing of description with other fields
+
+### Changed
+- Updated ROADMAP.md with completed features and new planned tasks
+- Enhanced markdown import parser with better field extraction
+- Improved type safety with currency field additions
+
+---
+
 ## [2.2.1] - 2025-11-22
 
 ### Fixed

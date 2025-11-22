@@ -1,9 +1,9 @@
 // modules/auth/store/useAuthStore.ts
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
+import { useUserStore } from '@/modules/user/store/useUserStore'
 import { JWT_STORE_KEY } from '@/shared/config/config'
 import type { User } from '@/modules/auth/types/user.type'
-import { useUserStore } from '@/modules/user/store/useUserStore'
 
 const TWO_FACTOR_TOKEN_KEY = 'vbr_2fa_token'
 const REFRESH_TOKEN_KEY = 'vbr_refresh_token'

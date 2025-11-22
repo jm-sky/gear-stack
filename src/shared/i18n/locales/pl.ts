@@ -62,6 +62,13 @@ export default {
     unauthorized: 'Nie masz uprawnień do wykonania tej akcji',
     not_found: 'Zasób nie został znaleziony',
     server_error: 'Błąd serwera. Spróbuj ponownie później',
+    chunkLoadError: {
+      title: 'Nowa wersja aplikacji',
+      message: 'Aplikacja została zaktualizowana. Aby kontynuować, należy odświeżyć stronę.',
+      description: 'Zapisz swoją pracę przed odświeżeniem.',
+      reload: 'Odśwież stronę',
+      cancel: 'Anuluj',
+    },
   },
   navigation: {
     dashboard: 'Panel',
@@ -217,5 +224,13 @@ export default {
       title: 'Masz kontenery w przeglądarce',
       description: 'Zaloguj się lub zarejestruj, aby zsynchronizować swoje dane',
     },
+  },
+  notFound: {
+    title: 'Strona nie została znaleziona',
+    description: 'Strona, której szukasz, nie istnieje.',
+    suggestions: 'Oto kilka pomocnych linków:',
+    goToContainers: 'Przejdź do Kontenerów',
+    goToDashboard: 'Przejdź do Dashboardu',
+    goToSettings: 'Przejdź do Ustawień',
   },
 }

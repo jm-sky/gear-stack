@@ -48,4 +48,38 @@ app.directive('tooltip', vTooltip)
 const initialLocale = typeof i18n.global.locale === 'string' ? i18n.global.locale : i18n.global.locale.value
 document.documentElement.setAttribute('lang', initialLocale)
 
+// Global error handler for chunk loading errors
+window.addEventListener('error', (event) => {
+  const error = event.error
+
+  // Check if it's a chunk load error
+  const isChunkLoadError =
+    error?.name === 'ChunkLoadError' ||
+    error?.message?.includes('Failed to fetch dynamically imported module') ||
+    error?.message?.includes('Importing a module script failed') ||
+    (error?.message?.includes('fetch') && error?.message?.includes('chunk'))
+
+  if (isChunkLoadError) {
+    // Prevent default error handling
+    event.preventDefault()
+
+    // Get current locale
+    const currentLocale = typeof i18n.global.locale === 'string' ? i18n.global.locale : i18n.global.locale.value
+    const isPolish = currentLocale === 'pl'
+
+    // Show user-friendly message with confirm dialog
+    const title = isPolish ? 'Nowa wersja aplikacji' : 'New Version Available'
+    const message = isPolish
+      ? 'Aplikacja została zaktualizowana. Aby kontynuować, należy odświeżyć stronę.'
+      : 'A new version of the application is available. The page needs to be reloaded to continue.'
+    const description = isPolish ? 'Zapisz swoją pracę przed odświeżeniem.' : 'Please save your work before reloading.'
+
+    const shouldRefresh = window.confirm(`${title}\n\n${message}\n\n${description}`)
+
+    if (shouldRefresh) {
+      window.location.reload()
+    }
+  }
+})
+
 app.mount('#app')

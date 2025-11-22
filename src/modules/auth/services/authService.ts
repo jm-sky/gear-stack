@@ -53,7 +53,7 @@ class AuthService implements IAuthService {
 
   async getCurrentUser(): Promise<User> {
     // Token is sent via apiClient interceptor (Authorization header)
-    const response = await apiClient.get<{ avatarUrl?: string } & User>('/auth/me')
+    const response = await apiClient.get<User & { avatarUrl?: string }>('/auth/me')
     // Map avatarUrl from backend to avatar in frontend
     return {
       ...response.data,

@@ -66,8 +66,8 @@ const initials = computed(() => {
               {{ profile.name }}
             </h2>
             <div class="flex items-center mt-2 text-muted-foreground">
-              <Mail class="size-4 mr-2" />
-              <span>{{ profile.email }}</span>
+              <Mail class="size-4 mr-2 flex-shrink-0" />
+              <span class="break-all">{{ profile.email }}</span>
             </div>
           </div>
         </div>
