@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { Download, Plus, ShoppingCart, Trash2 } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { RouterLink } from 'vue-router'
 import { toast } from 'vue-sonner'
 import Badge from '@/components/ui/badge/Badge.vue'
 import { Button } from '@/components/ui/button'
@@ -36,8 +37,11 @@ const selectedCategories = ref<TGearItemCategory[]>([])
 const budget = ref<number | null>(null)
 const includeExpiringSoon = ref(true)
 
+// Category checkbox states - using reactive object for v-model compatibility
+const categoryChecked = ref<Record<string, boolean>>({})
+
 // Shopping list (items selected for shopping)
-const shoppingList = ref<IGearItem[]>([])
+const shoppingList = ref<IItemWithContainerId[]>([])
 
 // Helper to check if item is expiring soon
 function isExpiringSoon(item: IGearItem, days: number = EXPIRATION_WARNING_DAYS): boolean {
@@ -48,19 +52,24 @@ function isExpiringSoon(item: IGearItem, days: number = EXPIRATION_WARNING_DAYS)
   return daysUntilExpiration > 0 && daysUntilExpiration <= days
 }
 
-// Get available items (toBuy + optionally expiring soon)
-const availableItems = computed<IGearItem[]>(() => {
-  const items: IGearItem[] = []
+// Item with container ID for navigation
+interface IItemWithContainerId extends IGearItem {
+  _containerId: string // Internal field to track container ID
+}
+
+// Get available items (toBuy + optionally expiring soon) with container IDs
+const availableItems = computed<IItemWithContainerId[]>(() => {
+  const items: IItemWithContainerId[] = []
   
   containers.value.forEach(container => {
     container.items.forEach(item => {
       // Include items with status "toBuy"
       if (item.status === 'toBuy') {
-        items.push(item)
+        items.push({ ...item, _containerId: container.id })
       }
       // Optionally include items expiring soon
       else if (includeExpiringSoon.value && isExpiringSoon(item)) {
-        items.push(item)
+        items.push({ ...item, _containerId: container.id })
       }
     })
   })
@@ -86,6 +95,45 @@ const getCategoryLabel = (categoryValue: string): string => {
   return t(`gear.item.categories.${categoryValue}`)
 }
 
+// Sync categoryChecked with selectedCategories
+watch(
+  () => allCategories.value,
+  (categories) => {
+    categories.forEach(category => {
+      if (!(category in categoryChecked.value)) {
+        categoryChecked.value[category] = selectedCategories.value.includes(category)
+      }
+    })
+  },
+  { immediate: true },
+)
+
+// Watch categoryChecked changes and sync to selectedCategories
+watch(
+  categoryChecked,
+  (checked) => {
+    const newSelected: TGearItemCategory[] = []
+    Object.entries(checked).forEach(([category, isChecked]) => {
+      if (isChecked && allCategories.value.includes(category as TGearItemCategory)) {
+        newSelected.push(category as TGearItemCategory)
+      }
+    })
+    selectedCategories.value = newSelected
+  },
+  { deep: true },
+)
+
+// Watch selectedCategories changes and sync to categoryChecked
+watch(
+  selectedCategories,
+  (selected) => {
+    allCategories.value.forEach(category => {
+      categoryChecked.value[category] = selected.includes(category)
+    })
+  },
+  { immediate: true },
+)
+
 // Priority order for sorting
 const priorityOrder: Record<TGearItemPriority, number> = {
   critical: 0,
@@ -95,7 +143,7 @@ const priorityOrder: Record<TGearItemPriority, number> = {
 }
 
 // Filtered and sorted items
-const filteredItems = computed<IGearItem[]>(() => {
+const filteredItems = computed<IItemWithContainerId[]>(() => {
   let items = [...availableItems.value]
   
   // Filter by categories
@@ -129,12 +177,12 @@ const totalPrice = computed(() => {
 })
 
 // Check if item is in shopping list
-const isInShoppingList = (item: IGearItem): boolean => {
+const isInShoppingList = (item: IItemWithContainerId): boolean => {
   return shoppingList.value.some(i => i.id === item.id)
 }
 
 // Add item to shopping list
-const addToShoppingList = (item: IGearItem) => {
+const addToShoppingList = (item: IItemWithContainerId) => {
   if (!isInShoppingList(item)) {
     shoppingList.value.push(item)
     toast.success(t('gear.shopping.addedToCart', 'Added to shopping list'))
@@ -142,7 +190,7 @@ const addToShoppingList = (item: IGearItem) => {
 }
 
 // Remove item from shopping list
-const removeFromShoppingList = (item: IGearItem) => {
+const removeFromShoppingList = (item: IItemWithContainerId) => {
   const index = shoppingList.value.findIndex(i => i.id === item.id)
   if (index !== -1) {
     shoppingList.value.splice(index, 1)
@@ -151,7 +199,7 @@ const removeFromShoppingList = (item: IGearItem) => {
 }
 
 // Toggle item in shopping list
-const toggleShoppingList = (item: IGearItem) => {
+const toggleShoppingList = (item: IItemWithContainerId) => {
   if (isInShoppingList(item)) {
     removeFromShoppingList(item)
   } else {
@@ -224,7 +272,7 @@ const handleCopyMarkdown = async () => {
   <AuthenticatedLayout>
     <div class="space-y-6 w-full max-w-full overflow-hidden">
       <!-- Header -->
-      <div class="flex items-center justify-between">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 class="text-3xl font-bold tracking-tight flex items-center gap-3">
             <ShoppingCart class="size-8 text-primary" />
@@ -263,19 +311,7 @@ const handleCopyMarkdown = async () => {
             >
               <Checkbox
                 :id="`category-${category}`"
-                :checked="selectedCategories.includes(category)"
-                @update:checked="(checked: boolean) => {
-                  if (checked) {
-                    if (!selectedCategories.includes(category)) {
-                      selectedCategories.push(category)
-                    }
-                  } else {
-                    const index = selectedCategories.indexOf(category)
-                    if (index > -1) {
-                      selectedCategories.splice(index, 1)
-                    }
-                  }
-                }"
+                v-model="categoryChecked[category]"
               />
               <Label
                 :for="`category-${category}`"
@@ -398,7 +434,12 @@ const handleCopyMarkdown = async () => {
           <!-- Item info -->
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 flex-wrap">
-              <span class="font-medium">{{ item.name }}</span>
+              <RouterLink
+                :to="`/gear/${item._containerId}/items/${item.id}/edit`"
+                class="font-medium hover:text-primary hover:underline transition-colors"
+              >
+                {{ item.name }}
+              </RouterLink>
               <Badge
                 :variant="getPriorityVariant(item.priority)"
                 class="text-xs"

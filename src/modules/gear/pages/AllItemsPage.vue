@@ -2,7 +2,7 @@
 import { Package } from 'lucide-vue-next'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import DataTable from '@/components/data-table/DataTable.vue'
 import Badge from '@/components/ui/badge/Badge.vue'
 import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
@@ -135,7 +135,12 @@ function navigateToContainer(containerId: string) {
         </template>
 
         <template #name="{ row }">
-          <span class="font-medium">{{ row.original.name }}</span>
+          <RouterLink
+            :to="`/gear/${row.original.containerId}/items/${row.original.id}/edit`"
+            class="font-medium hover:text-primary hover:underline transition-colors"
+          >
+            {{ row.original.name }}
+          </RouterLink>
         </template>
 
         <template #container="{ row }">
