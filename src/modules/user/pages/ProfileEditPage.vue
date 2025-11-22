@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
-import { ArrowLeft } from 'lucide-vue-next'
-import { useForm } from 'vee-validate'
+import { ArrowLeft, Sparkles } from 'lucide-vue-next'
+import { useField, useForm } from 'vee-validate'
 import { onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useBackend } from '@/shared/composables/useBackend'
 import { useUser } from '../composables/useUser'
+import { generateGravatarUrl } from '../utils/generateGravatarUrl'
 import { validateAvatarUrl } from '../utils/validateAvatarUrl'
 
 const router = useRouter()
@@ -32,7 +33,7 @@ const profileSchema = z.object({
     ),
 })
 
-const { handleSubmit, setValues } = useForm({
+const { handleSubmit, setValues, values } = useForm({
   validationSchema: toTypedSchema(profileSchema),
   initialValues: {
     name: '',
@@ -40,6 +41,9 @@ const { handleSubmit, setValues } = useForm({
     avatarUrl: '',
   },
 })
+
+const { value: emailValue } = useField('email')
+const { value: avatarUrlValue } = useField('avatarUrl')
 
 
 // Populate form with current profile data
@@ -67,32 +71,42 @@ watch(() => profile.value, (newProfile) => {
 const onSubmit = handleSubmit(
   async (values) => {
     try {
-      console.log('Form submitted with values:', values)
-      console.log('shouldUseAPI:', shouldUseAPI.value)
-      
       const updateData = {
         name: values.name,
         email: values.email,
-        avatarUrl: values.avatarUrl && values.avatarUrl.trim() ? values.avatarUrl.trim() : null,
+        avatarUrl: values.avatarUrl && values.avatarUrl.trim() ? values.avatarUrl.trim() : undefined,
       }
       
-      console.log('Updating profile with data:', updateData)
       await updateProfile(updateData)
       toast.success(t('common.success'))
       router.push('/profile')
     } catch (error) {
       toast.error(t('common.error'))
-      console.error('Error updating profile:', error)
     }
   },
-  (errors) => {
-    console.log('Form validation failed:', errors)
+  () => {
     toast.error(t('user.edit.validation_error') || 'Validation failed')
   }
 )
 
 const handleCancel = () => {
   router.push('/profile')
+}
+
+const handleGenerateGravatar = () => {
+  const email = emailValue.value as string | undefined
+  if (!email || typeof email !== 'string' || !email.trim()) {
+    toast.error(t('user.edit.email_required_for_gravatar') || 'Email is required to generate Gravatar URL')
+    return
+  }
+
+  try {
+    const gravatarUrl = generateGravatarUrl(email)
+    avatarUrlValue.value = gravatarUrl
+    toast.success(t('user.edit.gravatar_generated') || 'Gravatar URL generated')
+  } catch (error) {
+    toast.error(t('user.edit.gravatar_generation_failed') || 'Failed to generate Gravatar URL')
+  }
 }
 </script>
 
@@ -159,11 +173,23 @@ const handleCancel = () => {
                 {{ t('user.edit.avatar_label') }}
               </FormLabel>
               <FormControl>
-                <Input
-                  type="url"
-                  :placeholder="t('user.edit.avatar_placeholder')"
-                  v-bind="componentField"
-                />
+                <div class="flex gap-2">
+                  <Input
+                    type="url"
+                    :placeholder="t('user.edit.avatar_placeholder')"
+                    class="flex-1"
+                    v-bind="componentField"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    :title="t('user.edit.generate_gravatar') || 'Generate Gravatar URL from email'"
+                    @click="handleGenerateGravatar"
+                  >
+                    <Sparkles class="size-4" />
+                  </Button>
+                </div>
               </FormControl>
               <FormDescription>
                 {{ t('user.edit.avatar_help') }}
