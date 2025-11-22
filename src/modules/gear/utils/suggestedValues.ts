@@ -62,6 +62,7 @@ export const SUGGESTED_BRANDS = [
   'NEO Tools',
   'EDCX',
   'YOUKUKE',
+  'M-TAC',
 ] as const
 
 
