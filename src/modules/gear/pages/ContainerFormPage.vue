@@ -121,7 +121,7 @@ const autoRecognizeFromName = useDebounceFn(() => {
   // Recognize brand and color
   const params = recognizeParameters(
     values.name,
-    customBrands.value.map(b => ({ label: b.label }))
+    customBrands.value
   )
 
   if (params.brand && !values.brand) {
@@ -189,7 +189,7 @@ const handleRecognizeParameters = () => {
   try {
     const params = recognizeParameters(
       values.name,
-      customBrands.value.map(b => ({ label: b.label }))
+      customBrands.value
     )
 
     if (!params.brand && !params.color) {

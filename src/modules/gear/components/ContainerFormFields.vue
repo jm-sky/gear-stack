@@ -41,15 +41,15 @@ nextTick(() => {
 })
 
 // Get container type label helper
-const getContainerTypeLabel = (typeKey: string): string => {
+const getContainerTypeLabel = (typeValue: string): string => {
   // Check if it's a custom container type
-  const customType = customContainerTypes.value.find(t => t.key === typeKey)
+  const customType = customContainerTypes.value.find(t => t.value === typeValue)
   if (customType) {
-    return customType.label
+    return customType.value
   }
 
   // Default types
-  return t(`gear.container.types.${typeKey}`)
+  return t(`gear.container.types.${typeValue}`)
 }
 
 // Cancel handler
@@ -140,9 +140,9 @@ const handleCancel = () => {
               <SelectItem
                 v-for="containerType in customContainerTypes"
                 :key="containerType.id"
-                :value="containerType.key"
+                :value="containerType.value"
               >
-                {{ getContainerTypeLabel(containerType.key) }}
+                {{ getContainerTypeLabel(containerType.value) }}
               </SelectItem>
             </template>
           </SelectContent>
@@ -205,7 +205,7 @@ const handleCancel = () => {
             <FormLabel :label="$t('gear.container.brand')" />
             <ComboBox
               :value="value"
-              :options="getBrandOptions(customBrands.map(b => ({ key: b.key, label: b.label })))"
+              :options="getBrandOptions(customBrands)"
               :placeholder="$t('gear.container.brand')"
               :creatable="true"
               :create-label="$t('gear.comboBox.add')"

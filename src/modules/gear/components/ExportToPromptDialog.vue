@@ -52,12 +52,12 @@ const showLegend = ref(true)
 const descriptionFormat = ref<'off' | 'inline' | 'newline'>('off')
 
 // Get container type label helper
-const getContainerTypeLabel = (typeKey: string): string => {
-  const customType = customContainerTypes.value.find(t => t.key === typeKey)
+const getContainerTypeLabel = (typeValue: string): string => {
+  const customType = customContainerTypes.value.find(t => t.value === typeValue)
   if (customType) {
-    return customType.label
+    return customType.value
   }
-  return t(`gear.container.types.${typeKey}`)
+  return t(`gear.container.types.${typeValue}`)
 }
 
 // Sync helpers for computed

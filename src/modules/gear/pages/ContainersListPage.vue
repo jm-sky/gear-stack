@@ -65,12 +65,12 @@ watch(() => route.query.import, (shouldImport) => {
 })
 
 // Helper to get container type label for filtering
-const getContainerTypeLabel = (typeKey: string): string => {
-  const customType = customContainerTypes.value.find(t => t.key === typeKey)
+const getContainerTypeLabel = (typeValue: string): string => {
+  const customType = customContainerTypes.value.find(t => t.value === typeValue)
   if (customType) {
-    return customType.label
+    return customType.value
   }
-  return t(`gear.container.types.${typeKey}`)
+  return t(`gear.container.types.${typeValue}`)
 }
 
 // Filtered containers
@@ -174,7 +174,6 @@ const handleGenerateSampleSet = async () => {
               <Sparkles class="size-4" />
             </Button>
             <Button
-              v-if="containers.length > 0"
               v-tooltip.bottom="t('gear.container.create.title')"
               variant="default"
               class="shrink-0 flex-1 sm:flex-none"

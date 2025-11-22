@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -7,6 +8,8 @@ import { AuthRoutePaths } from '@/modules/auth/config/routes'
 import { authService } from '@/modules/auth/services/authService'
 import { useAuthStore } from '@/modules/auth/store/useAuthStore'
 import { useRecaptcha } from '@/shared/composables/useRecaptcha'
+
+const { t } = useI18n()
 
 const route = useRoute()
 const router = useRouter()
@@ -35,7 +38,7 @@ onMounted(async () => {
 
     // Handle OAuth error (user denied)
     if (errorParam) {
-      error.value = 'OAuth authentication was cancelled or denied'
+      error.value = t('auth.oauth.callback.cancelled_or_denied')
       setTimeout(() => {
         router.push(AuthRoutePaths.login)
       }, 2000)
@@ -44,7 +47,7 @@ onMounted(async () => {
 
     // Validate required parameters
     if (!providerParam || !code || !state) {
-      error.value = 'Invalid OAuth parameters'
+      error.value = t('auth.oauth.callback.invalid_parameters')
       setTimeout(() => {
         router.push(AuthRoutePaths.login)
       }, 2000)
@@ -54,7 +57,7 @@ onMounted(async () => {
     // Verify state parameter for CSRF protection
     const storedState = localStorage.getItem('oauth_state')
     if (!storedState || storedState !== state) {
-      error.value = 'Invalid state parameter - possible CSRF attack'
+      error.value = t('auth.oauth.callback.invalid_state')
       setTimeout(() => {
         router.push(AuthRoutePaths.login)
       }, 2000)
@@ -77,7 +80,7 @@ onMounted(async () => {
     // Handle response
     if ('requiresTwoFactor' in response) {
       // 2FA required - redirect to 2FA page
-      toast.info('Two-factor authentication required')
+      toast.info(t('auth.oauth.callback.two_factor_required'))
       await router.push(AuthRoutePaths.twoFactorVerify)
       return
     }
@@ -90,14 +93,14 @@ onMounted(async () => {
       ...response.user,
       avatar: (response.user as any).avatarUrl || response.user.avatar,
     })
-    toast.success('Successfully signed in with ' + providerParam)
+    toast.success(t('auth.oauth.callback.success', { provider: providerParam }))
     await router.push(AuthRoutePaths.dashboard)
   }
   catch (err: unknown) {
     console.error('OAuth callback error:', err)
 
     // Better error handling - extract message from API response
-    let errorMessage = 'OAuth authentication failed'
+    let errorMessage = t('auth.oauth.callback.failed')
 
     if (err && typeof err === 'object' && 'response' in err) {
       const axiosError = err as { response?: { data?: { detail?: string } } }
@@ -128,11 +131,11 @@ onMounted(async () => {
     <Card class="w-full max-w-md">
       <CardHeader>
         <CardTitle v-if="error" class="text-destructive">
-          Authentication Failed
+          {{ $t('auth.oauth.callback.authentication_failed') }}
         </CardTitle>
         <CardTitle v-else class="flex items-center">
           <div class="mr-2 size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-          Signing you in...
+          {{ $t('auth.oauth.callback.signing_in') }}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -140,7 +143,7 @@ onMounted(async () => {
           {{ error }}
         </CardDescription>
         <CardDescription v-else>
-          Processing your {{ provider }} authentication. Please wait...
+          {{ $t('auth.oauth.callback.processing', { provider }) }}
         </CardDescription>
       </CardContent>
     </Card>

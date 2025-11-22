@@ -18,7 +18,7 @@ export interface IRecognizedParameters {
  */
 export function recognizeParameters(
   name: string,
-  customBrands?: Array<{ label: string }>
+  customBrands?: Array<{ value: string }>
 ): IRecognizedParameters {
   if (!name || name.trim().length === 0) {
     return {}
@@ -30,7 +30,7 @@ export function recognizeParameters(
   // Combine default and custom brands
   const allBrands = [
     ...SUGGESTED_BRANDS,
-    ...(customBrands?.map(b => b.label) ?? []),
+    ...(customBrands?.map(b => b.value) ?? []),
   ]
 
   // Match brand - check for brand names in the item name

@@ -89,12 +89,12 @@ watch(
 )
 
 // Helper to get category label for filtering
-const getCategoryLabel = (categoryKey: string): string => {
-  const customCategory = customCategories.value.find(c => c.key === categoryKey)
+const getCategoryLabel = (categoryValue: string): string => {
+  const customCategory = customCategories.value.find(c => c.value === categoryValue)
   if (customCategory) {
-    return customCategory.label
+    return customCategory.value
   }
-  return t(`gear.item.categories.${categoryKey}`)
+  return t(`gear.item.categories.${categoryValue}`)
 }
 
 // Columns
