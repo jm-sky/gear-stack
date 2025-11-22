@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PwaUpdatePrompt from '@/components/PwaUpdatePrompt.vue'
 import { Toaster } from '@/components/ui/sonner'
 import 'vue-sonner/style.css'
 import DataMigrationDialog from '@/modules/gear/components/DataMigrationDialog.vue'
@@ -12,6 +13,7 @@ const { isInitialized } = useAppInitialization()
   <RouterView :is-initialized />
   <LoginModal />
   <DataMigrationDialog />
+  <PwaUpdatePrompt />
   <Toaster rich-colors />
 </template>
 

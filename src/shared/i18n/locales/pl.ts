@@ -233,4 +233,12 @@ export default {
     goToDashboard: 'Przejdź do Dashboardu',
     goToSettings: 'Przejdź do Ustawień',
   },
+  pwa: {
+    update: {
+      title: 'Nowa wersja dostępna',
+      description: 'Dostępna jest nowa wersja aplikacji. Czy chcesz zaktualizować teraz?',
+      reload: 'Zaktualizuj teraz',
+      later: 'Później',
+    },
+  },
 }
