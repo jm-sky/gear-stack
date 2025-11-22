@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -13,13 +14,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import type { IGearContainer } from '../types/gear.types'
 import { useGear } from '../composables/useGear'
+import { useGearSettings } from '../composables/useGearSettings'
 import { markdownImportService } from '../services/markdownImportService'
-import { useGearSettingsStore } from '../store/useGearSettingsStore'
 import { useGearStore } from '../store/useGearStore'
 import GuidelinesDialog from './GuidelinesDialog.vue'
 
@@ -35,7 +35,7 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const { createContainer, updateContainer, createItem, updateItem } = useGear()
 const store = useGearStore()
-const gearSettingsStore = useGearSettingsStore()
+const { customBrands } = useGearSettings()
 
 const markdownContent = ref('')
 const importing = ref(false)
@@ -65,7 +65,7 @@ const handlePreview = () => {
 
   const result = markdownImportService.parseMarkdown(markdownContent.value, {
     recognizeFromName: recognizeFromName.value,
-    customBrands: gearSettingsStore.customBrands.value.map(b => ({ label: b.label })),
+    customBrands: customBrands.value.map((b) => ({ label: b.label })),
   })
   previewResult.value = result
 
