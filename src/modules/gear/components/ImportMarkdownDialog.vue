@@ -157,6 +157,13 @@ const handleImport = async () => {
 
     // Phase 2: Create/update items with nested container resolution
     for (const { containerData, container } of createdContainers) {
+      // Fetch latest container from store to ensure we have up-to-date items
+      const latestContainer = store.getContainerById(container.id)
+      if (!latestContainer) {
+        console.warn(`Container ${container.id} not found in store`)
+        continue
+      }
+
       // Import/update items
       for (const itemData of containerData.items) {
         // Extract nestedContainerId before destructuring
@@ -173,20 +180,20 @@ const handleImport = async () => {
         }
 
         if (importMode.value === 'update' && itemUuid) {
-          // Try to find existing item by UUID
-          const existingItem = container.items.find(i => i.id === itemUuid)
+          // Try to find existing item by UUID in the latest container from store
+          const existingItem = latestContainer.items.find(i => i.id === itemUuid)
           if (existingItem) {
             // Update existing item
             await updateItem(existingItem.id, itemDto)
             itemUpdatedCount++
           } else {
             // UUID provided but item not found - create new
-            await createItem(container.id, itemDto)
+            await createItem(latestContainer.id, itemDto)
             itemCount++
           }
         } else {
           // Create new item
-          await createItem(container.id, itemDto)
+          await createItem(latestContainer.id, itemDto)
           itemCount++
         }
       }
