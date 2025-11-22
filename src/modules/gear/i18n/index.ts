@@ -299,6 +299,8 @@ export const gearEn = {
       modeUpdateDesc: 'Update existing containers/items if UUID matches, create new if not found',
       modeCreate: 'Create New',
       modeCreateDesc: 'Always create new containers/items, ignore UUIDs',
+      recognizeFromName: 'Recognize brand and color from name',
+      recognizeFromNameDesc: 'Automatically detect brand and color from item names (same as when creating items manually)',
     },
     sampleSet: {
       generate: 'Generate Sample Set',
@@ -635,6 +637,8 @@ export const gearPl = {
       modeUpdateDesc: 'Aktualizuj istniejące kontenery/przedmioty jeśli UUID pasuje, utwórz nowe jeśli nie znaleziono',
       modeCreate: 'Utwórz Nowe',
       modeCreateDesc: 'Zawsze twórz nowe kontenery/przedmioty, ignoruj UUID',
+      recognizeFromName: 'Rozpoznawaj markę i kolor z nazwy',
+      recognizeFromNameDesc: 'Automatycznie wykrywaj markę i kolor z nazw przedmiotów (tak jak przy zwykłym tworzeniu)',
     },
     sampleSet: {
       generate: 'Generuj przykładowy zestaw',

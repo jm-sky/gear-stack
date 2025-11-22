@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -17,6 +18,7 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import type { IGearContainer } from '../types/gear.types'
 import { useGear } from '../composables/useGear'
+import { useGearSettings } from '../composables/useGearSettings'
 import { markdownImportService } from '../services/markdownImportService'
 import { useGearStore } from '../store/useGearStore'
 import GuidelinesDialog from './GuidelinesDialog.vue'
@@ -33,10 +35,12 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const { createContainer, updateContainer, createItem, updateItem } = useGear()
 const store = useGearStore()
+const { customBrands } = useGearSettings()
 
 const markdownContent = ref('')
 const importing = ref(false)
 const importMode = ref<'create' | 'update'>('update') // Default to update mode
+const recognizeFromName = ref(false) // Option to recognize brand and color from item name
 const previewResult = ref<ReturnType<typeof markdownImportService.parseMarkdown> | null>(null)
 const isGuidelinesDialogOpen = ref(false)
 
@@ -59,7 +63,10 @@ const handlePreview = () => {
     return
   }
 
-  const result = markdownImportService.parseMarkdown(markdownContent.value)
+  const result = markdownImportService.parseMarkdown(markdownContent.value, {
+    recognizeFromName: recognizeFromName.value,
+    customBrands: customBrands.value.map((b) => ({ label: b.label })),
+  })
   previewResult.value = result
 
   if (result.containers.length === 0) {
@@ -232,6 +239,17 @@ const handleImport = async () => {
             rows="12"
             class="flex flex-1 min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-mono"
           />
+        </div>
+
+        <!-- Recognition Options -->
+        <div class="flex items-center space-x-2">
+          <Checkbox id="recognize-from-name" v-model="recognizeFromName" />
+          <Label for="recognize-from-name" class="text-sm font-normal cursor-pointer">
+            {{ t('gear.import.recognizeFromName') }}
+            <span class="text-xs text-muted-foreground block">
+              {{ t('gear.import.recognizeFromNameDesc') }}
+            </span>
+          </Label>
         </div>
 
         <!-- Import Mode Selection (shown only when UUIDs detected) -->
