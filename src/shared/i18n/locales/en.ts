@@ -233,4 +233,12 @@ export default {
     goToDashboard: 'Go to Dashboard',
     goToSettings: 'Go to Settings',
   },
+  pwa: {
+    update: {
+      title: 'New Version Available',
+      description: 'A new version of the application is available. Would you like to update now?',
+      reload: 'Update Now',
+      later: 'Later',
+    },
+  },
 }
