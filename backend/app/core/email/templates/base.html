@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{% if locale %}{{ locale }}{% else %}en{% endif %}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -124,9 +124,9 @@
         </div>
         <div class="footer">
             <p><strong>{{ app_name }}</strong></p>
-            <p>This is an automated email. Please do not reply to this message.</p>
+            <p>{% if t %}{{ translate('common.footer_automated') }}{% else %}This is an automated email. Please do not reply to this message.{% endif %}</p>
             {% if frontend_url %}
-            <p><a href="{{ frontend_url }}">Visit {{ app_name }}</a></p>
+            <p><a href="{{ frontend_url }}">{% if t %}{{ translate('common.footer_visit') }}{% else %}Visit {{ app_name }}{% endif %}</a></p>
             {% endif %}
         </div>
     </div>
