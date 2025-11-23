@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import { Package } from 'lucide-vue-next'
+import { Package, User } from 'lucide-vue-next'
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import { useAuth } from '@/modules/auth/composables/useAuth'
 import { apiClient } from '@/shared/services/apiClient'
 import type { IGearContainer } from '../types/gear.types'
 import ColorDot from '../components/ColorDot.vue'
 
 const router = useRouter()
 const { t } = useI18n()
+const { isAuthenticated } = useAuth()
 
 const containers = ref<IGearContainer[]>([])
 const isLoading = ref(true)
@@ -29,6 +31,13 @@ onMounted(async () => {
 
 const handleContainerClick = (containerId: string) => {
   router.push(`/gear/public/${containerId}`)
+}
+
+const handleAuthorClick = (e: MouseEvent, authorId?: string | null) => {
+  e.stopPropagation()
+  if (authorId && isAuthenticated.value) {
+    router.push(`/users/${authorId}/public`)
+  }
 }
 </script>
 
@@ -74,8 +83,16 @@ const handleContainerClick = (containerId: string) => {
               <Badge variant="outline">
                 {{ container.type }}
               </Badge>
-              <Badge v-if="container.authorName" variant="secondary">
-                {{ t('gear.publicContainers.by') }} {{ container.authorName }}
+              <Badge
+                v-if="container.authorName"
+                v-tooltip.bottom="t('gear.publicContainers.by')"
+                variant="secondary"
+                :class="{ 'cursor-pointer hover:bg-secondary/80': container.authorId && isAuthenticated }"
+                :aria-label="t('gear.publicContainers.by')"
+                @click="handleAuthorClick($event, container.authorId)"
+              >
+                <User class="size-3 mr-1" />
+                <span v-if="!container.authorId || !isAuthenticated">{{ container.authorName }}</span>
               </Badge>
             </div>
             <div class="text-sm text-muted-foreground">

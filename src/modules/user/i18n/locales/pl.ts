@@ -27,6 +27,16 @@ export const userPl = {
       gravatar_generation_failed: 'Nie udało się wygenerować URL Gravatar',
       cancel: 'Anuluj',
       save_changes: 'Zapisz Zmiany',
+      show_public_profile: 'Pokaż Profil Publiczny',
+    },
+    publicProfile: {
+      not_found: 'Profil użytkownika nie został znaleziony',
+      not_public: 'Ten profil użytkownika nie jest publiczny',
+      error: 'Nie udało się załadować profilu użytkownika',
+      error_title: 'Profil Niedostępny',
+      public_containers: 'Publiczne Kontenery',
+      no_containers: 'Brak publicznych kontenerów',
+      no_containers_description: 'Ten użytkownik nie udostępnił jeszcze żadnych publicznych kontenerów',
     },
   },
 }

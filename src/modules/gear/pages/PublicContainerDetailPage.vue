@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ArrowLeft } from 'lucide-vue-next'
+import { ArrowLeft, User } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import { useAuth } from '@/modules/auth/composables/useAuth'
 import { apiClient } from '@/shared/services/apiClient'
 import type { IGearContainer } from '../types/gear.types'
 import CategoryPieChart from '../components/CategoryPieChart.vue'
@@ -22,6 +23,7 @@ import { formatWeightToPreferredUnit } from '../utils/formatWeight'
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
+const { isAuthenticated } = useAuth()
 const store = useGearStore()
 const { settings: gearSettings } = useGearSettings()
 const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
@@ -70,6 +72,13 @@ const formattedWeight = computed<string>(() => formatWeightToPreferredUnit(total
 const handleBack = () => {
   router.push('/gear/public')
 }
+
+const handleAuthorClick = (e: MouseEvent, authorId?: string | null) => {
+  e.stopPropagation()
+  if (authorId && isAuthenticated.value) {
+    router.push(`/users/${authorId}/public`)
+  }
+}
 </script>
 
 <template>
@@ -98,8 +107,16 @@ const handleBack = () => {
             <Badge variant="outline">
               {{ container.type }}
             </Badge>
-            <Badge v-if="container.authorName" variant="secondary">
-              {{ t('gear.publicContainers.by') }} {{ container.authorName }}
+            <Badge
+              v-if="container.authorName"
+              v-tooltip.bottom="t('gear.publicContainers.by')"
+              variant="secondary"
+              :class="{ 'cursor-pointer hover:bg-secondary/80': container.authorId && isAuthenticated }"
+              :aria-label="t('gear.publicContainers.by')"
+              @click="handleAuthorClick($event, container.authorId)"
+            >
+              <User class="size-3 mr-1" />
+              <span v-if="!container.authorId || !isAuthenticated">{{ container.authorName }}</span>
             </Badge>
             <Badge variant="secondary" class="text-xs">
               {{ $d(new Date(container.createdAt), 'short') }}

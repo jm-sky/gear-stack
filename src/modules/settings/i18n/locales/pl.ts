@@ -34,6 +34,14 @@ export const settingsPl = {
           label: 'Nowe kontenery domyślnie publiczne',
           subtitle: 'Po włączeniu, nowo utworzone kontenery będą domyślnie publiczne',
         },
+        profilePublic: {
+          label: 'Udostępnij profil publicznie',
+          subtitle: 'Pozwól innym zalogowanym użytkownikom przeglądać Twój publiczny profil',
+        },
+        emailPublic: {
+          label: 'Pokaż email w profilu publicznym',
+          subtitle: 'Wyświetlaj swój adres email w profilu publicznym (tylko jeśli profil jest publiczny)',
+        },
       },
     },
     security: {

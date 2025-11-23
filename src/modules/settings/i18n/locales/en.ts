@@ -34,6 +34,14 @@ export const settingsEn = {
           label: 'New Containers Default to Public',
           subtitle: 'When enabled, newly created containers will be public by default',
         },
+        profilePublic: {
+          label: 'Make Profile Public',
+          subtitle: 'Allow other authenticated users to view your public profile',
+        },
+        emailPublic: {
+          label: 'Show Email on Public Profile',
+          subtitle: 'Display your email address on your public profile (only if profile is public)',
+        },
       },
     },
     security: {

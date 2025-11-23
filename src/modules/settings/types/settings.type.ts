@@ -6,12 +6,16 @@ export interface Settings {
   darkMode: boolean
   locale: SupportedLocale
   defaultContainersPublic: boolean
+  profilePublic: boolean
+  emailPublic: boolean
 }
 
 export interface UpdateSettingsData {
   darkMode?: boolean
   locale?: SupportedLocale
   defaultContainersPublic?: boolean
+  profilePublic?: boolean
+  emailPublic?: boolean
 }
 
 export interface ISettingsService {
