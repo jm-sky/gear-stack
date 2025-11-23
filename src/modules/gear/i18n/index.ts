@@ -383,6 +383,7 @@ export const gearEn = {
     },
     publicContainers: {
       title: 'Public Containers',
+      navTitle: 'Public Browser',
       description: 'Browse containers shared by other users',
       by: 'by',
       empty: 'No public containers',
@@ -776,6 +777,7 @@ export const gearPl = {
     },
     publicContainers: {
       title: 'Publiczne Kontenery',
+      navTitle: 'Przeglądarka Publiczna',
       description: 'Przeglądaj kontenery udostępnione przez innych użytkowników',
       by: 'autor',
       empty: 'Brak publicznych kontenerów',
