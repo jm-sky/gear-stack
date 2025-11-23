@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Edit, Mail } from 'lucide-vue-next'
+import { Edit, ExternalLink, Mail } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -8,15 +8,25 @@ import AvatarFallback from '@/components/ui/avatar/AvatarFallback.vue'
 import AvatarImage from '@/components/ui/avatar/AvatarImage.vue'
 import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import { useSettings } from '@/modules/settings/composables/useSettings'
 import { useUser } from '../composables/useUser'
 
 const router = useRouter()
 const { t } = useI18n()
 const { profile } = useUser()
+const { settings } = useSettings()
 
 const handleEdit = () => {
   router.push('/profile/edit')
 }
+
+const isProfilePublic = computed(() => settings.value?.profilePublic ?? false)
+const publicProfileUrl = computed(() => {
+  if (profile.value?.id && isProfilePublic.value) {
+    return `/users/${profile.value.id}/public`
+  }
+  return null
+})
 
 // Generate initials from name or email
 const initials = computed(() => {
@@ -47,10 +57,20 @@ const initials = computed(() => {
             {{ t('user.profile.subtitle') }}
           </p>
         </div>
-        <Button variant="outline" @click="handleEdit">
-          <Edit class="size-4 mr-2" />
-          {{ t('user.profile.edit_button') }}
-        </Button>
+        <div class="flex items-center gap-2">
+          <Button
+            v-if="publicProfileUrl"
+            variant="outline"
+            @click="router.push(publicProfileUrl)"
+          >
+            <ExternalLink class="size-4 mr-2" />
+            {{ t('user.edit.show_public_profile') }}
+          </Button>
+          <Button variant="outline" @click="handleEdit">
+            <Edit class="size-4 mr-2" />
+            {{ t('user.profile.edit_button') }}
+          </Button>
+        </div>
       </div>
 
       <div v-if="profile" class="bg-card border rounded-lg p-6 space-y-6">

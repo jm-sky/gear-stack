@@ -3,15 +3,15 @@ import { Package, User } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import { apiClient } from '@/shared/services/apiClient'
-import type { IGearContainer } from '@/modules/gear/types/gear.types'
-import type { IUser } from '../types/user.types'
 import Avatar from '@/components/ui/avatar/Avatar.vue'
 import AvatarFallback from '@/components/ui/avatar/AvatarFallback.vue'
 import AvatarImage from '@/components/ui/avatar/AvatarImage.vue'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import ColorDot from '@/modules/gear/components/ColorDot.vue'
+import { apiClient } from '@/shared/services/apiClient'
+import type { IUser } from '../types/user.types'
+import type { IGearContainer } from '@/modules/gear/types/gear.types'
 
 const route = useRoute()
 const router = useRouter()
@@ -48,11 +48,12 @@ onMounted(async () => {
     // Fetch public containers for this user
     const containersResponse = await apiClient.get<IGearContainer[]>(`/gear/public/containers?authorId=${userId}`)
     containers.value = containersResponse.data
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Failed to load public user profile:', err)
-    if (err.response?.status === 404) {
+    const errorResponse = err as { response?: { status?: number } }
+    if (errorResponse.response?.status === 404) {
       error.value = t('user.publicProfile.not_found')
-    } else if (err.response?.status === 403) {
+    } else if (errorResponse.response?.status === 403) {
       error.value = t('user.publicProfile.not_public')
     } else {
       error.value = t('user.publicProfile.error')

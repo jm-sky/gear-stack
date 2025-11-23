@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
-import { ArrowLeft, ExternalLink, Sparkles } from 'lucide-vue-next'
-import { computed, onMounted, watch } from 'vue'
+import { ArrowLeft, Sparkles } from 'lucide-vue-next'
 import { useField, useForm } from 'vee-validate'
+import { onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -12,7 +12,6 @@ import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessa
 import { Input } from '@/components/ui/input'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useBackend } from '@/shared/composables/useBackend'
-import { useSettings } from '@/modules/settings/composables/useSettings'
 import { useUser } from '../composables/useUser'
 import { generateGravatarUrl } from '../utils/generateGravatarUrl'
 import { validateAvatarUrl } from '../utils/validateAvatarUrl'
@@ -21,15 +20,6 @@ const router = useRouter()
 const { t } = useI18n()
 const { profile, updateProfile } = useUser()
 const { shouldUseAPI: _shouldUseAPI } = useBackend()
-const { settings } = useSettings()
-
-const isProfilePublic = computed(() => settings.value?.profilePublic ?? false)
-const publicProfileUrl = computed(() => {
-  if (profile.value?.id && isProfilePublic.value) {
-    return `/users/${profile.value.id}/public`
-  }
-  return null
-})
 
 const profileSchema = z.object({
   name: z.string().min(1, t('user.edit.name_required')),
@@ -143,14 +133,6 @@ const handleGenerateGravatar = () => {
             </p>
           </div>
         </div>
-        <Button
-          v-if="publicProfileUrl"
-          variant="outline"
-          @click="router.push(publicProfileUrl)"
-        >
-          <ExternalLink class="size-4 mr-2" />
-          {{ t('user.edit.show_public_profile') }}
-        </Button>
       </div>
 
       <form v-if="profile" class="max-w-2xl mx-auto bg-card border rounded-lg p-6 space-y-8" @submit.prevent="onSubmit">

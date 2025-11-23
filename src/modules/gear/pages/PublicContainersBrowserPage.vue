@@ -6,8 +6,8 @@ import { useRouter } from 'vue-router'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import { apiClient } from '@/shared/services/apiClient'
 import { useAuth } from '@/modules/auth/composables/useAuth'
+import { apiClient } from '@/shared/services/apiClient'
 import type { IGearContainer } from '../types/gear.types'
 import ColorDot from '../components/ColorDot.vue'
 
@@ -85,11 +85,11 @@ const handleAuthorClick = (e: MouseEvent, authorId?: string | null) => {
               </Badge>
               <Badge
                 v-if="container.authorName"
+                v-tooltip.bottom="t('gear.publicContainers.by')"
                 variant="secondary"
                 :class="{ 'cursor-pointer hover:bg-secondary/80': container.authorId && isAuthenticated }"
-                @click="handleAuthorClick($event, container.authorId)"
-                v-tooltip.bottom="t('gear.publicContainers.by')"
                 :aria-label="t('gear.publicContainers.by')"
+                @click="handleAuthorClick($event, container.authorId)"
               >
                 <User class="size-3 mr-1" />
                 <span v-if="!container.authorId || !isAuthenticated">{{ container.authorName }}</span>
