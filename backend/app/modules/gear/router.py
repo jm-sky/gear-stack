@@ -7,10 +7,12 @@ All endpoints require authentication.
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.modules.auth.dependencies import CurrentUser
+from app.modules.settings.db_models import UserSettingsDB
 
 from .repository import GearRepository
 from .schemas import (
@@ -67,6 +69,7 @@ async def create_container(
     data: ContainerCreate,
     current_user: CurrentUser,
     service: GearServiceDep,
+    db: AsyncSession = Depends(get_db),
 ) -> ContainerResponse:
     """Create a new gear container for the current user.
 
@@ -74,6 +77,7 @@ async def create_container(
         data: Container creation data
         current_user: Authenticated user
         service: Gear service instance
+        db: Database session
 
     Returns:
         Created container
@@ -81,7 +85,12 @@ async def create_container(
     Raises:
         HTTPException: If validation fails
     """
-    return await service.create_container(current_user.id, data)
+    # Get user settings for default public setting
+    result = await db.execute(select(UserSettingsDB).where(UserSettingsDB.user_id == current_user.id))
+    settings = result.scalars().first()
+    default_public = settings.default_containers_public if settings else False
+    
+    return await service.create_container(current_user.id, data, default_public=default_public)
 
 
 @router.get(
@@ -421,3 +430,57 @@ async def get_container_readiness(
             detail="Container not found",
         )
     return service.calculate_container_readiness(container)
+
+
+# Public container endpoints (no authentication required)
+@router.get(
+    "/public/containers",
+    response_model=list[ContainerResponse],
+    summary="Get all public containers",
+)
+async def get_public_containers(
+    service: GearServiceDep,
+    skip: int = Query(0, ge=0, description="Number of records to skip"),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
+) -> list[ContainerResponse]:
+    """Get all public containers from all users.
+
+    Args:
+        service: Gear service instance
+        skip: Number of records to skip
+        limit: Maximum number of records to return
+
+    Returns:
+        List of public containers with author names
+    """
+    return await service.get_public_containers(skip, limit)
+
+
+@router.get(
+    "/public/containers/{container_id}",
+    response_model=ContainerResponse,
+    summary="Get a public container by ID",
+)
+async def get_public_container(
+    container_id: str,
+    service: GearServiceDep,
+) -> ContainerResponse:
+    """Get a public container by ID.
+
+    Args:
+        container_id: Container ID
+        service: Gear service instance
+
+    Returns:
+        Public container with author name
+
+    Raises:
+        HTTPException: If container not found or not public
+    """
+    container = await service.get_public_container(container_id)
+    if not container:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Public container not found",
+        )
+    return container

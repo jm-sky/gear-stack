@@ -12,6 +12,7 @@ import ContainerFormFields from '../components/ContainerFormFields.vue'
 import { useContainer } from '../composables/useContainer'
 import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
+import { useSettings } from '@/modules/settings/composables/useSettings'
 import { CONTAINER_COLORS } from '../utils/containerColors'
 import { recognizeContainerType } from '../utils/containerTypeRecognition'
 import { recognizeParameters } from '../utils/parameterRecognition'
@@ -36,6 +37,7 @@ const getInitialValues = (): ContainerFormData => {
       type: container.value.type,
       color: container.value.color ?? 'default',
       hideWhenNested: container.value.hideWhenNested ?? false,
+      isPublic: container.value.isPublic ?? false,
       brand: container.value.brand ?? '',
       price: container.value.price ?? undefined,
       weight: container.value.weight ?? undefined,
@@ -45,12 +47,15 @@ const getInitialValues = (): ContainerFormData => {
       url: container.value.url ?? '',
     }
   }
+  // For new containers, use default from settings
+  const { settings } = useSettings()
   return {
     name: '',
     description: '',
     type: 'other' as const,
     color: 'default' as const,
     hideWhenNested: false,
+    isPublic: settings.value?.defaultContainersPublic ?? false,
     brand: '',
     price: undefined,
     weight: undefined,

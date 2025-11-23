@@ -38,7 +38,11 @@ async def get_my_settings(
 ) -> SettingsResponse:
     """Return preferences for the authenticated user."""
     settings = await _get_or_create_settings(db, current_user.id)
-    return SettingsResponse(darkMode=settings.dark_mode, locale=settings.locale)  # type: ignore[arg-type]
+    return SettingsResponse(
+        darkMode=settings.dark_mode,
+        locale=settings.locale,
+        defaultContainersPublic=settings.default_containers_public,
+    )  # type: ignore[arg-type]
 
 
 @router.patch("", response_model=SettingsResponse)
@@ -49,7 +53,7 @@ async def update_my_settings(
     db: AsyncSession = Depends(get_db),
 ) -> SettingsResponse:
     """Update preferences for the authenticated user."""
-    if payload.darkMode is None and payload.locale is None:
+    if payload.darkMode is None and payload.locale is None and payload.defaultContainersPublic is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="At least one field must be provided.",
@@ -61,8 +65,14 @@ async def update_my_settings(
         settings.dark_mode = payload.darkMode
     if payload.locale is not None:
         settings.locale = payload.locale
+    if payload.defaultContainersPublic is not None:
+        settings.default_containers_public = payload.defaultContainersPublic
 
     settings.updated_at = datetime.now(UTC)
     await db.commit()
     await db.refresh(settings)
-    return SettingsResponse(darkMode=settings.dark_mode, locale=settings.locale)  # type: ignore[arg-type]
+    return SettingsResponse(
+        darkMode=settings.dark_mode,
+        locale=settings.locale,
+        defaultContainersPublic=settings.default_containers_public,
+    )  # type: ignore[arg-type]

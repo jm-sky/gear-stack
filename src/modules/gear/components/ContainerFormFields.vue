@@ -192,6 +192,24 @@ const handleCancel = () => {
       </FormItem>
     </FormField>
 
+    <!-- Is Public -->
+    <FormField v-slot="{ componentField, handleChange }" name="isPublic">
+      <FormItem v-slot="{ id }" class="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800 p-4">
+        <Checkbox
+          :id="id"
+          :model-value="componentField.modelValue"
+          @update:model-value="handleChange"
+        />
+        <div class="flex-1 space-y-1">
+          <FormLabel :label="$t('gear.container.isPublic')" class="cursor-pointer" />
+          <p class="text-sm text-muted-foreground">
+            {{ $t('gear.container.isPublicDescription') }}
+          </p>
+        </div>
+        <FormMessage />
+      </FormItem>
+    </FormField>
+
     <!-- Extended Fields Section -->
     <div class="border-t pt-6 space-y-6">
       <h3 class="text-lg font-semibold text-muted-foreground">

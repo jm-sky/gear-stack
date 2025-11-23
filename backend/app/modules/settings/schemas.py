@@ -11,8 +11,10 @@ SupportedLocale = Literal["en", "pl"]
 class SettingsResponse(BaseModel):
     darkMode: bool = Field(default=False)
     locale: SupportedLocale = Field(default="en")
+    defaultContainersPublic: bool = Field(default=False)
 
 
 class UpdateSettingsRequest(BaseModel):
     darkMode: bool | None = Field(default=None)
     locale: SupportedLocale | None = Field(default=None)
+    defaultContainersPublic: bool | None = Field(default=None)

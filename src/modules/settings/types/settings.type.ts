@@ -5,11 +5,13 @@ export type Theme = 'light' | 'dark'
 export interface Settings {
   darkMode: boolean
   locale: SupportedLocale
+  defaultContainersPublic: boolean
 }
 
 export interface UpdateSettingsData {
   darkMode?: boolean
   locale?: SupportedLocale
+  defaultContainersPublic?: boolean
 }
 
 export interface ISettingsService {

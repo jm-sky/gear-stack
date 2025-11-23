@@ -9,6 +9,8 @@ export const GearRouteName = {
   ContainerEdit: 'gear-container-edit',
   ItemNew: 'gear-item-new',
   ItemEdit: 'gear-item-edit',
+  PublicContainers: 'gear-public-containers',
+  PublicContainerDetail: 'gear-public-container-detail',
 }
 
 export const GearRoutePath = {
@@ -20,6 +22,8 @@ export const GearRoutePath = {
   ContainerEdit: '/gear/:id/edit',
   ItemNew: '/gear/:containerId/items/new',
   ItemEdit: '/gear/:containerId/items/:itemId/edit',
+  PublicContainers: '/gear/public',
+  PublicContainerDetail: '/gear/public/:id',
 }
 
 export const gearRoutes: RouteRecordRaw[] = [
@@ -76,6 +80,18 @@ export const gearRoutes: RouteRecordRaw[] = [
     path: GearRoutePath.ItemEdit,
     name: GearRouteName.ItemEdit,
     component: () => import('@/modules/gear/pages/ItemFormPage.vue'),
+    meta: { layout: 'authenticated' },
+  },
+  {
+    path: GearRoutePath.PublicContainers,
+    name: GearRouteName.PublicContainers,
+    component: () => import('@/modules/gear/pages/PublicContainersBrowserPage.vue'),
+    meta: { layout: 'authenticated' },
+  },
+  {
+    path: GearRoutePath.PublicContainerDetail,
+    name: GearRouteName.PublicContainerDetail,
+    component: () => import('@/modules/gear/pages/PublicContainerDetailPage.vue'),
     meta: { layout: 'authenticated' },
   },
 ]

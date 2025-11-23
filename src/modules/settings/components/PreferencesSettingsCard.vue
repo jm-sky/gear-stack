@@ -6,6 +6,7 @@ import { watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import Select from '@/components/ui/select/Select.vue'
 import SelectContent from '@/components/ui/select/SelectContent.vue'
@@ -38,12 +39,17 @@ const { handleSubmit, setValues } = useForm({
   initialValues: {
     darkMode: getThemeValue(settings.value?.darkMode),
     locale: settings.value?.locale ?? currentLocale.value,
+    defaultContainersPublic: settings.value?.defaultContainersPublic ?? false,
   }
 })
 
 watch(() => settingsQuery.data.value, (val: SettingsType | undefined) => {
   if (val) {
-    setValues({ darkMode: getThemeValue(val.darkMode), locale: val.locale })
+    setValues({
+      darkMode: getThemeValue(val.darkMode),
+      locale: val.locale,
+      defaultContainersPublic: val.defaultContainersPublic ?? false,
+    })
   }
 })
 
@@ -63,6 +69,7 @@ const onSubmit = handleSubmit(async (values) => {
   await updateSettings({
     darkMode: values.darkMode === 'dark',
     locale: values.locale,
+    defaultContainersPublic: values.defaultContainersPublic,
   })
 })
 </script>
@@ -154,6 +161,24 @@ const onSubmit = handleSubmit(async (values) => {
             </FormField>
           </div>
         </div>
+
+        <!-- Default Containers Public -->
+        <FormField v-slot="{ componentField, handleChange }" name="defaultContainersPublic">
+          <FormItem v-slot="{ id }" class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+            <Checkbox
+              :id="id"
+              :model-value="componentField.modelValue"
+              @update:model-value="handleChange"
+            />
+            <div class="flex-1 space-y-1">
+              <FormLabel :label="$t('settings.page.sections.defaultContainersPublic.label')" class="cursor-pointer" />
+              <p class="text-sm text-muted-foreground">
+                {{ $t('settings.page.sections.defaultContainersPublic.subtitle') }}
+              </p>
+            </div>
+            <FormMessage />
+          </FormItem>
+        </FormField>
 
         <div class="flex justify-end">
           <Button type="submit" :loading="isUpdating">

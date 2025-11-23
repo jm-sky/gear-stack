@@ -155,9 +155,14 @@ const handleShow = () => {
       </CardDescription>
 
       <div class="flex items-center justify-between gap-2 flex-wrap">
-        <Badge class="h-5" variant="outline">
-          {{ typeLabel }}
-        </Badge>
+        <div class="flex items-center gap-2">
+          <Badge class="h-5" variant="outline">
+            {{ typeLabel }}
+          </Badge>
+          <Badge variant="secondary" class="h-5 text-xs">
+            {{ $d(new Date(container.createdAt), 'short') }}
+          </Badge>
+        </div>
         <div v-if="firstParentContainer" class="flex items-center gap-1">
           <Button
             variant="outline"

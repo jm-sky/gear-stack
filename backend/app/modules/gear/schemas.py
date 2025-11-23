@@ -37,6 +37,7 @@ class ContainerCreate(BaseModel):
     maxWeight: float | None = Field(None, ge=0, alias="maxWeight")
     maxWeightUnit: GearWeightUnit | None = Field(None, alias="maxWeightUnit")
     url: str | None = None
+    isPublic: bool | None = Field(default=None, alias="isPublic")
 
     model_config = {"populate_by_name": True}
 
@@ -57,6 +58,7 @@ class ContainerUpdate(BaseModel):
     maxWeight: float | None = Field(None, ge=0, alias="maxWeight")
     maxWeightUnit: GearWeightUnit | None = Field(None, alias="maxWeightUnit")
     url: str | None = None
+    isPublic: bool | None = Field(default=None, alias="isPublic")
 
     model_config = {"populate_by_name": True}
 
@@ -106,6 +108,8 @@ class ContainerResponse(BaseModel):
     maxWeight: float | None = None
     maxWeightUnit: GearWeightUnit | None = Field(None, alias="maxWeightUnit")
     url: str | None = None
+    isPublic: bool
+    authorName: str | None = None  # Only populated for public containers
     items: list[ItemResponse] = []
     createdAt: datetime
     updatedAt: datetime

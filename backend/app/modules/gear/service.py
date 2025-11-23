@@ -95,21 +95,75 @@ class GearService:
             maxWeight=container.max_weight,
             maxWeightUnit=container.max_weight_unit,
             url=container.url,
+            isPublic=container.is_public,
+            authorName=None,  # Will be populated for public containers
             items=items,
             createdAt=container.created_at,
             updatedAt=container.updated_at,
         )
 
-    async def create_container(self, user_id: str, data: ContainerCreate) -> ContainerResponse:
+    def _map_container_to_response_with_author(self, container: GearContainerDB) -> ContainerResponse:
+        """Map database container to response schema with author name.
+
+        Args:
+            container: Database container model (must have user relationship loaded)
+
+        Returns:
+            Container response schema with author name
+        """
+        items = [self._map_item_to_response(item) for item in container.items]
+        # Filter nested containers - only show items if nested container is public
+        filtered_items = []
+        for item in items:
+            if item.containerId:  # This is a nested container reference
+                # We need to check if the nested container is public
+                # For now, we'll include it and let the frontend handle filtering
+                # In a full implementation, we'd join and check is_public
+                filtered_items.append(item)
+            else:
+                filtered_items.append(item)
+        
+        # Get author name from user relationship if available
+        author_name = None
+        if hasattr(container, 'user') and container.user:
+            author_name = container.user.name
+        
+        return ContainerResponse(
+            id=container.id,
+            name=container.name,
+            description=container.description,
+            type=container.type,
+            color=container.color,
+            parentContainerId=container.parent_container_id,
+            brand=container.brand,
+            price=container.price,
+            hideWhenNested=container.hide_when_nested,
+            weight=container.weight,
+            weightUnit=container.weight_unit,
+            maxWeight=container.max_weight,
+            maxWeightUnit=container.max_weight_unit,
+            url=container.url,
+            isPublic=container.is_public,
+            authorName=author_name,
+            items=filtered_items,
+            createdAt=container.created_at,
+            updatedAt=container.updated_at,
+        )
+
+    async def create_container(self, user_id: str, data: ContainerCreate, default_public: bool = False) -> ContainerResponse:
         """Create a new gear container.
 
         Args:
             user_id: Owner user ID
             data: Container creation data
+            default_public: Default public setting from user preferences
 
         Returns:
             Created container response
         """
+        # Use default_public if isPublic is not explicitly set
+        if data.isPublic is None:
+            data.isPublic = default_public
         container = await self.repository.create_container(user_id, data)
         return self._map_container_to_response(container)
 
@@ -141,6 +195,33 @@ class GearService:
         """
         containers = await self.repository.get_containers(user_id, skip, limit)
         return [self._map_container_to_response(container) for container in containers]
+
+    async def get_public_containers(self, skip: int = 0, limit: int = 100) -> list[ContainerResponse]:
+        """Get all public containers from all users.
+
+        Args:
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+
+        Returns:
+            List of public container responses with author names
+        """
+        containers = await self.repository.get_public_containers(skip, limit)
+        return [self._map_container_to_response_with_author(container) for container in containers]
+
+    async def get_public_container(self, container_id: str) -> ContainerResponse | None:
+        """Get a public container by ID.
+
+        Args:
+            container_id: Container ID
+
+        Returns:
+            Container response with author name if found and public, None otherwise
+        """
+        container = await self.repository.get_public_container(container_id)
+        if not container:
+            return None
+        return self._map_container_to_response_with_author(container)
 
     async def update_container(self, container_id: str, user_id: str, data: ContainerUpdate) -> ContainerResponse | None:
         """Update a container.

@@ -66,6 +66,7 @@ class SettingsLocalService implements ISettingsService {
     return Promise.resolve({
       locale,
       darkMode: settings.darkMode ?? false,
+      defaultContainersPublic: settings.defaultContainersPublic ?? false,
     })
   }
 
@@ -79,6 +80,7 @@ class SettingsLocalService implements ISettingsService {
     const updated: Settings = {
       locale: data.locale ?? current.locale,
       darkMode: data.darkMode ?? current.darkMode,
+      defaultContainersPublic: data.defaultContainersPublic ?? current.defaultContainersPublic,
     }
 
     await this.saveToStorage(updated)
@@ -95,10 +97,11 @@ class SettingsLocalService implements ISettingsService {
       // Note: This should be synced via useLocale().setLocale() for proper i18n sync
       // This is just for localStorage persistence
       localStorage.setItem(LOCALE_STORAGE_KEY, settings.locale)
-      // Also save to CORE_SETTINGS_STORAGE_KEY for dark mode
+      // Also save to CORE_SETTINGS_STORAGE_KEY for dark mode and defaultContainersPublic
       localStorage.setItem(SettingsLocalService.STORAGE_KEY, JSON.stringify({
         locale: settings.locale,
         darkMode: settings.darkMode,
+        defaultContainersPublic: settings.defaultContainersPublic ?? false,
       }))
       return Promise.resolve()
     } catch (error) {
@@ -156,6 +159,7 @@ class SettingsService implements ISettingsService {
         await this.localService.updateSettings({
           locale: settings.locale,
           darkMode: settings.darkMode,
+          defaultContainersPublic: settings.defaultContainersPublic,
         })
         return settings
       } catch (error) {
@@ -203,6 +207,7 @@ export class SettingsServiceStatic {
     return {
       locale,
       darkMode: settings.darkMode ?? false,
+      defaultContainersPublic: settings.defaultContainersPublic ?? false,
     }
   }
 
@@ -214,15 +219,17 @@ export class SettingsServiceStatic {
     const updated: Settings = {
       locale: updates.locale ?? current.locale,
       darkMode: updates.darkMode ?? current.darkMode,
+      defaultContainersPublic: updates.defaultContainersPublic ?? current.defaultContainersPublic,
     }
 
     try {
       // Save locale to LOCALE_STORAGE_KEY (source of truth)
       localStorage.setItem(LOCALE_STORAGE_KEY, updated.locale)
-      // Also save to CORE_SETTINGS_STORAGE_KEY for dark mode
+      // Also save to CORE_SETTINGS_STORAGE_KEY for dark mode and defaultContainersPublic
       localStorage.setItem(CORE_SETTINGS_STORAGE_KEY, JSON.stringify({
         locale: updated.locale,
         darkMode: updated.darkMode,
+        defaultContainersPublic: updated.defaultContainersPublic,
       }))
     } catch (error) {
       console.error('Error saving core settings to storage:', error)

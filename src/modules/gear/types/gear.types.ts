@@ -91,6 +91,8 @@ export interface IGearContainer {
   color?: TContainerColor | null  // Optional, defaults to 'default'
   parentContainerId?: TUUID | null // Parent container ID (if this container is nested)
   hideWhenNested?: boolean | null // Hide from main list when nested in another container
+  isPublic: boolean // Whether container is publicly visible
+  authorName?: string | null // Author name (only for public containers)
   // Extended fields
   brand?: string | null // Manufacturer/brand
   price?: number | null // Price in currency (optional)
@@ -112,6 +114,7 @@ export interface ICreateContainerDto {
   color?: TContainerColor | null
   parentContainerId?: TUUID | null
   hideWhenNested?: boolean | null
+  isPublic?: boolean | null
   brand?: string | null
   price?: number | null
   weight?: number | null
@@ -129,6 +132,7 @@ export interface IUpdateContainerDto {
   color?: TContainerColor | null
   parentContainerId?: TUUID | null
   hideWhenNested?: boolean | null
+  isPublic?: boolean | null
   brand?: string | null
   price?: number | null
   weight?: number | null
