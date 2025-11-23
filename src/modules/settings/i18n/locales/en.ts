@@ -30,6 +30,10 @@ export const settingsEn = {
             pl: 'Polski',
           },
         },
+        defaultContainersPublic: {
+          label: 'New Containers Default to Public',
+          subtitle: 'When enabled, newly created containers will be public by default',
+        },
       },
     },
     security: {
