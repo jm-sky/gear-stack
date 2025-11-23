@@ -20,8 +20,10 @@ This directory contains detailed implementation plans for features from the [ROA
 | FEATURE-010 | Footer & Legal Pages | ✅ Completed | Low | 📄 Legal |
 | [FEATURE-011](./FEATURE-011-markdown-import-export.md) | Markdown Import/Export (AI-Friendly) | ✅ Completed | High | 🚀 Import/Export |
 | [FEATURE-012](./FEATURE-012-add-existing-items.md) | Add Existing Items to Container | ✅ Completed | High | ⚡ Item Addition |
-| FEATURE-014 | Custom Brands Management | 🔄 Planned | High | 📝 Data Model |
-| FEATURE-015 | Currency Support | 🔄 Planned | Medium | 📝 Data Model |
+| [FEATURE-013](./FEATURE-013-item-descriptions.md) | Item Descriptions in Markdown | 🔄 Planned | Medium | 🚀 Import/Export |
+| [FEATURE-014](./FEATURE-014-oauth-authentication.md) | OAuth Authentication | ✅ Completed | Medium | 🔐 Authentication |
+| [FEATURE-015](./FEATURE-015-recaptcha-integration.md) | reCAPTCHA Integration | ✅ Completed | Medium-High | 🔐 Security |
+| [FEATURE-016](./FEATURE-016-automatic-item-image-fetching.md) | Automatic Item Image Fetching | 🔄 Planned | Medium | 📷 Media & Resources |
 
 ---
 

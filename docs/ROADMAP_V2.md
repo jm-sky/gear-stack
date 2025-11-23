@@ -269,11 +269,20 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - **Wymaga:** Wdrożenie S3 lub innego cloud storage
 
 ### Automatyczne wyszukiwanie obrazków dla przedmiotów
-**Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Medium
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Large | **Feature:** [FEATURE-016](./features/FEATURE-016-automatic-item-image-fetching.md)
 
-- Usługa automatycznego wyszukiwania grafik dla przedmiotów
-- Wyszukiwanie na podstawie nazwy firmy/marki i nazwy przedmiotu
-- Integracja z API wyszukiwarek obrazów (np. Google Images API, Unsplash API)
+- Opcja przy tworzeniu przedmiotu "Wyszukaj obrazki w web"
+- Dodatkowa akcja na żądanie dla istniejących przedmiotów
+- Ustawienie w ustawieniach użytkownika: "Domyślnie wyszukaj obrazków dla nowych przedmiotów"
+- **Dostęp tylko dla adminów** (isAdmin) - funkcjonalność dostępna wyłącznie dla użytkowników z uprawnieniami administratora
+- Konfiguracja wielu wyszukiwarek obrazków:
+  - Konfiguracja zapisywana na serwerze jako relationship do item
+  - Każda wyszukiwarka ma konfigurację:
+    - URL sklepu (np. militaria.pl, allegro.pl)
+    - Template wyszukiwania (szablon URL z parametrami)
+    - Selectors HTML (gdzie w HTML znajdują się obrazki)
+    - Lub czyste API (jeśli sklep ma API)
+- Wyszukiwanie na podstawie nazwy przedmiotu, marki/firmy i innych parametrów
 - Możliwość wyboru obrazu z wyników wyszukiwania
 - Cache wyszukanych obrazów
 - Fallback do domyślnych ikon gdy brak wyników
