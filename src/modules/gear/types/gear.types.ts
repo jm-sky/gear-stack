@@ -93,6 +93,7 @@ export interface IGearContainer {
   hideWhenNested?: boolean | null // Hide from main list when nested in another container
   isPublic: boolean // Whether container is publicly visible
   authorName?: string | null // Author name (only for public containers)
+  authorId?: TUUID | null // Author user ID (only for public containers)
   // Extended fields
   brand?: string | null // Manufacturer/brand
   price?: number | null // Price in currency (optional)

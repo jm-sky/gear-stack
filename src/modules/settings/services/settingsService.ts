@@ -54,6 +54,8 @@ class SettingsLocalService implements ISettingsService {
           locale: migrated.locale ?? 'en',
           darkMode: migrated.darkMode ?? false,
           defaultContainersPublic: false,
+          profilePublic: false,
+          emailPublic: false,
         })
       }
     }
@@ -68,6 +70,8 @@ class SettingsLocalService implements ISettingsService {
       locale,
       darkMode: settings.darkMode ?? false,
       defaultContainersPublic: settings.defaultContainersPublic ?? false,
+      profilePublic: settings.profilePublic ?? false,
+      emailPublic: settings.emailPublic ?? false,
     })
   }
 
@@ -82,6 +86,8 @@ class SettingsLocalService implements ISettingsService {
       locale: data.locale ?? current.locale,
       darkMode: data.darkMode ?? current.darkMode,
       defaultContainersPublic: data.defaultContainersPublic ?? current.defaultContainersPublic,
+      profilePublic: data.profilePublic ?? current.profilePublic,
+      emailPublic: data.emailPublic ?? current.emailPublic,
     }
 
     await this.saveToStorage(updated)
@@ -98,12 +104,14 @@ class SettingsLocalService implements ISettingsService {
       // Note: This should be synced via useLocale().setLocale() for proper i18n sync
       // This is just for localStorage persistence
       localStorage.setItem(LOCALE_STORAGE_KEY, settings.locale)
-      // Also save to CORE_SETTINGS_STORAGE_KEY for dark mode and defaultContainersPublic
-      localStorage.setItem(SettingsLocalService.STORAGE_KEY, JSON.stringify({
-        locale: settings.locale,
-        darkMode: settings.darkMode,
-        defaultContainersPublic: settings.defaultContainersPublic ?? false,
-      }))
+        // Also save to CORE_SETTINGS_STORAGE_KEY for dark mode and defaultContainersPublic
+        localStorage.setItem(SettingsLocalService.STORAGE_KEY, JSON.stringify({
+          locale: settings.locale,
+          darkMode: settings.darkMode,
+          defaultContainersPublic: settings.defaultContainersPublic ?? false,
+          profilePublic: settings.profilePublic ?? false,
+          emailPublic: settings.emailPublic ?? false,
+        }))
       return Promise.resolve()
     } catch (error) {
       console.error('Error saving core settings to storage:', error)
@@ -161,6 +169,8 @@ class SettingsService implements ISettingsService {
           locale: settings.locale,
           darkMode: settings.darkMode,
           defaultContainersPublic: settings.defaultContainersPublic,
+          profilePublic: settings.profilePublic,
+          emailPublic: settings.emailPublic,
         })
         return settings
       } catch (error) {
@@ -209,6 +219,8 @@ export class SettingsServiceStatic {
       locale,
       darkMode: settings.darkMode ?? false,
       defaultContainersPublic: settings.defaultContainersPublic ?? false,
+      profilePublic: settings.profilePublic ?? false,
+      emailPublic: settings.emailPublic ?? false,
     }
   }
 
@@ -221,17 +233,21 @@ export class SettingsServiceStatic {
       locale: updates.locale ?? current.locale,
       darkMode: updates.darkMode ?? current.darkMode,
       defaultContainersPublic: updates.defaultContainersPublic ?? current.defaultContainersPublic,
+      profilePublic: updates.profilePublic ?? current.profilePublic,
+      emailPublic: updates.emailPublic ?? current.emailPublic,
     }
 
     try {
       // Save locale to LOCALE_STORAGE_KEY (source of truth)
       localStorage.setItem(LOCALE_STORAGE_KEY, updated.locale)
-      // Also save to CORE_SETTINGS_STORAGE_KEY for dark mode and defaultContainersPublic
-      localStorage.setItem(CORE_SETTINGS_STORAGE_KEY, JSON.stringify({
-        locale: updated.locale,
-        darkMode: updated.darkMode,
-        defaultContainersPublic: updated.defaultContainersPublic,
-      }))
+        // Also save to CORE_SETTINGS_STORAGE_KEY for dark mode and defaultContainersPublic
+        localStorage.setItem(CORE_SETTINGS_STORAGE_KEY, JSON.stringify({
+          locale: updated.locale,
+          darkMode: updated.darkMode,
+          defaultContainersPublic: updated.defaultContainersPublic,
+          profilePublic: updated.profilePublic,
+          emailPublic: updated.emailPublic,
+        }))
     } catch (error) {
       console.error('Error saving core settings to storage:', error)
     }

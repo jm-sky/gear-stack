@@ -13,5 +13,11 @@ export const userRoutes: RouteRecordRaw[] = [
     component: () => import('@/modules/user/pages/ProfileEditPage.vue'),
     meta: { layout: 'authenticated' },
   },
+  {
+    path: '/users/:userId/public',
+    name: 'publicUserProfile',
+    component: () => import('@/modules/user/pages/PublicUserProfilePage.vue'),
+    meta: { layout: 'authenticated' },
+  },
 ]
 

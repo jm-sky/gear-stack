@@ -40,6 +40,8 @@ const { handleSubmit, setValues } = useForm({
     darkMode: getThemeValue(settings.value?.darkMode),
     locale: settings.value?.locale ?? currentLocale.value,
     defaultContainersPublic: settings.value?.defaultContainersPublic ?? false,
+    profilePublic: settings.value?.profilePublic ?? false,
+    emailPublic: settings.value?.emailPublic ?? false,
   }
 })
 
@@ -49,6 +51,8 @@ watch(() => settingsQuery.data.value, (val: SettingsType | undefined) => {
       darkMode: getThemeValue(val.darkMode),
       locale: val.locale,
       defaultContainersPublic: val.defaultContainersPublic ?? false,
+      profilePublic: val.profilePublic ?? false,
+      emailPublic: val.emailPublic ?? false,
     })
   }
 })
@@ -70,6 +74,8 @@ const onSubmit = handleSubmit(async (values) => {
     darkMode: values.darkMode === 'dark',
     locale: values.locale,
     defaultContainersPublic: values.defaultContainersPublic,
+    profilePublic: values.profilePublic,
+    emailPublic: values.emailPublic,
   })
 })
 </script>
@@ -174,6 +180,42 @@ const onSubmit = handleSubmit(async (values) => {
               <FormLabel :label="$t('settings.page.sections.defaultContainersPublic.label')" class="cursor-pointer" />
               <p class="text-sm text-muted-foreground">
                 {{ $t('settings.page.sections.defaultContainersPublic.subtitle') }}
+              </p>
+            </div>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+
+        <!-- Profile Public -->
+        <FormField v-slot="{ componentField, handleChange }" name="profilePublic">
+          <FormItem v-slot="{ id }" class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+            <Checkbox
+              :id="id"
+              :model-value="componentField.modelValue"
+              @update:model-value="handleChange"
+            />
+            <div class="flex-1 space-y-1">
+              <FormLabel :label="$t('settings.page.sections.profilePublic.label')" class="cursor-pointer" />
+              <p class="text-sm text-muted-foreground">
+                {{ $t('settings.page.sections.profilePublic.subtitle') }}
+              </p>
+            </div>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+
+        <!-- Email Public -->
+        <FormField v-slot="{ componentField, handleChange }" name="emailPublic">
+          <FormItem v-slot="{ id }" class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+            <Checkbox
+              :id="id"
+              :model-value="componentField.modelValue"
+              @update:model-value="handleChange"
+            />
+            <div class="flex-1 space-y-1">
+              <FormLabel :label="$t('settings.page.sections.emailPublic.label')" class="cursor-pointer" />
+              <p class="text-sm text-muted-foreground">
+                {{ $t('settings.page.sections.emailPublic.subtitle') }}
               </p>
             </div>
             <FormMessage />

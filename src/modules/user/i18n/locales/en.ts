@@ -27,6 +27,16 @@ export const userEn = {
       gravatar_generation_failed: 'Failed to generate Gravatar URL',
       cancel: 'Cancel',
       save_changes: 'Save Changes',
+      show_public_profile: 'Show Public Profile',
+    },
+    publicProfile: {
+      not_found: 'User profile not found',
+      not_public: 'This user profile is not public',
+      error: 'Failed to load user profile',
+      error_title: 'Profile Not Available',
+      public_containers: 'Public Containers',
+      no_containers: 'No public containers',
+      no_containers_description: 'This user has not shared any public containers yet',
     },
   },
 }
