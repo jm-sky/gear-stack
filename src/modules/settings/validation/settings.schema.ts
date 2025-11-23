@@ -4,6 +4,7 @@ import { z } from 'zod'
 export const settingsSchema = z.object({
   darkMode: z.enum(['light', 'dark']),
   locale: z.enum(['en', 'pl']),
+  defaultContainersPublic: z.boolean().optional(),
 })
 
 export type SettingsFormData = z.infer<typeof settingsSchema>

@@ -7,6 +7,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import { useSettings } from '@/modules/settings/composables/useSettings'
 import type { ICreateContainerDto, IUpdateContainerDto, TContainerColor } from '../types/gear.types'
 import ContainerFormFields from '../components/ContainerFormFields.vue'
 import { useContainer } from '../composables/useContainer'
@@ -22,6 +23,7 @@ const route = useRoute()
 const { t } = useI18n()
 const { createContainer, updateContainer } = useGear()
 const { customBrands } = useGearSettings()
+const { settings } = useSettings()
 
 const containerId = route.params.id as string | undefined
 const isEditMode: boolean = !!containerId
@@ -36,6 +38,7 @@ const getInitialValues = (): ContainerFormData => {
       type: container.value.type,
       color: container.value.color ?? 'default',
       hideWhenNested: container.value.hideWhenNested ?? false,
+      isPublic: container.value.isPublic ?? false,
       brand: container.value.brand ?? '',
       price: container.value.price ?? undefined,
       weight: container.value.weight ?? undefined,
@@ -45,12 +48,14 @@ const getInitialValues = (): ContainerFormData => {
       url: container.value.url ?? '',
     }
   }
+  // For new containers, use default from settings (will be updated via watch)
   return {
     name: '',
     description: '',
     type: 'other' as const,
     color: 'default' as const,
     hideWhenNested: false,
+    isPublic: false, // Will be updated via watch when settings load
     brand: '',
     price: undefined,
     weight: undefined,
@@ -65,6 +70,21 @@ const { handleSubmit, isSubmitting, setFieldValue, values } = useForm({
   validationSchema: toTypedSchema(containerSchema),
   initialValues: getInitialValues(),
 })
+
+// Watch for settings changes and update isPublic field for new containers
+watch(() => settings.value?.defaultContainersPublic, (newValue) => {
+  if (!isEditMode && newValue !== undefined) {
+    // Update isPublic when settings load (only if still at initial false value)
+    // This allows user to change it manually without it being overwritten
+    const currentValue = values.isPublic
+    if (currentValue === false && newValue === true) {
+      setFieldValue('isPublic', newValue)
+    } else if (currentValue === false && newValue === false) {
+      // Keep it false if settings also say false
+      setFieldValue('isPublic', false)
+    }
+  }
+}, { immediate: true })
 
 // Map item colors to container colors
 const mapItemColorToContainerColor = (itemColor: string): TContainerColor | null => {

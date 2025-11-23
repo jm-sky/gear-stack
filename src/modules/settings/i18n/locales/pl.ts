@@ -30,6 +30,10 @@ export const settingsPl = {
             pl: 'Polski',
           },
         },
+        defaultContainersPublic: {
+          label: 'Nowe kontenery domyślnie publiczne',
+          subtitle: 'Po włączeniu, nowo utworzone kontenery będą domyślnie publiczne',
+        },
       },
     },
     security: {

@@ -9,10 +9,11 @@ from typing import Sequence
 
 from sqlalchemy import select, and_, or_
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload, joinedload
 
 from app.common.id_utils import generate_id
 from app.common.search import SearchMixin
+from app.modules.auth.db_models import UserDB
 
 from .db_models import GearContainerDB, GearItemDB
 from .schemas import ContainerCreate, ContainerUpdate, ItemCreate, ItemUpdate
@@ -66,6 +67,7 @@ class GearRepository(SearchMixin):
             max_weight=data.maxWeight,
             max_weight_unit=data.maxWeightUnit,
             url=data.url,
+            is_public=data.isPublic if data.isPublic is not None else False,
         )
         self.db.add(container)
         await self.db.commit()
@@ -106,6 +108,49 @@ class GearRepository(SearchMixin):
         result = await self.db.execute(stmt)
         return result.scalars().all()
 
+    async def get_public_containers(self, skip: int = 0, limit: int = 100) -> Sequence[GearContainerDB]:
+        """Get all public containers from all users.
+
+        Args:
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+
+        Returns:
+            List of public containers with user relationship loaded
+        """
+        stmt = (
+            select(GearContainerDB)
+            .where(GearContainerDB.is_public == True)  # noqa: E712
+            .options(selectinload(GearContainerDB.items), joinedload(GearContainerDB.user))
+            .offset(skip)
+            .limit(limit)
+            .order_by(GearContainerDB.created_at.desc())
+        )
+        result = await self.db.execute(stmt)
+        return result.unique().scalars().all()
+
+    async def get_public_container(self, container_id: str) -> GearContainerDB | None:
+        """Get a public container by ID.
+
+        Args:
+            container_id: Container ID
+
+        Returns:
+            Container if found and public, None otherwise (with user relationship loaded)
+        """
+        stmt = (
+            select(GearContainerDB)
+            .where(
+                and_(
+                    GearContainerDB.id == container_id,
+                    GearContainerDB.is_public == True,  # noqa: E712
+                )
+            )
+            .options(selectinload(GearContainerDB.items), joinedload(GearContainerDB.user))
+        )
+        result = await self.db.execute(stmt)
+        return result.unique().scalar_one_or_none()
+
     async def update_container(self, container_id: str, user_id: str, data: ContainerUpdate) -> GearContainerDB | None:
         """Update a container.
 
@@ -129,6 +174,7 @@ class GearRepository(SearchMixin):
             "weightUnit": "weight_unit",
             "maxWeight": "max_weight",
             "maxWeightUnit": "max_weight_unit",
+            "isPublic": "is_public",
         }
 
         for key, value in update_data.items():

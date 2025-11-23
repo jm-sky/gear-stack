@@ -156,6 +156,12 @@ const handleBack = () => {
             <Badge variant="outline">
               {{ typeLabel }}
             </Badge>
+            <Badge variant="secondary" class="text-xs">
+              {{ $d(new Date(container.createdAt), 'short') }}
+            </Badge>
+            <Badge v-if="container.updatedAt !== container.createdAt" variant="secondary" class="text-xs">
+              {{ $t('gear.container.updated') }}: {{ $d(new Date(container.updatedAt), 'short') }}
+            </Badge>
             <Badge v-if="container.brand" variant="secondary" class="normal-case">
               {{ container.brand }}
             </Badge>

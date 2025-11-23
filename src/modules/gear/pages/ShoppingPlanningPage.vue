@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { toTypedSchema } from '@vee-validate/zod'
 import { CheckCircle2, Download, Minus, Plus, RotateCcw, ShoppingCart, Trash2, X } from 'lucide-vue-next'
+import { useForm } from 'vee-validate'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
@@ -21,16 +23,14 @@ import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import type { ICreateItemDto, IGearItem } from '../types/gear.types'
 import type { TGearItemCategory, TGearItemPriority } from '../types/gear.types'
 import CategoryIcon from '../components/CategoryIcon.vue'
+import ItemFormFields from '../components/ItemFormFields.vue'
 import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
 import { getPriorityVariant } from '../utils/badgeVariants'
 import { EXPIRATION_WARNING_DAYS, MILLISECONDS_PER_DAY } from '../utils/constants'
-import { formatWeightWithPreferredUnit } from '../utils/formatWeight'
 import { getDefaultItemValues } from '../utils/defaultValues'
-import { itemSchema, type ItemFormData } from '../utils/validation'
-import { toTypedSchema } from '@vee-validate/zod'
-import { useForm } from 'vee-validate'
-import ItemFormFields from '../components/ItemFormFields.vue'
+import { formatWeightWithPreferredUnit } from '../utils/formatWeight'
+import { type ItemFormData, itemSchema } from '../utils/validation'
 
 const { t } = useI18n()
 const router = useRouter()

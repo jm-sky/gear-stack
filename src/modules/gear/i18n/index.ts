@@ -48,6 +48,9 @@ export const gearEn = {
       showOnlyRootContainers: 'Show only root containers',
       hideWhenNested: 'Hide on list when nested',
       hideWhenNestedDescription: 'Hide this container from the main list when it is nested inside another container',
+      isPublic: 'Public Container',
+      isPublicDescription: 'Make this container visible to other users. Public containers can be viewed by anyone.',
+      updated: 'Updated',
       nested: 'Nested',
       parentContainer: 'Parent',
       addNested: 'Add Container',
@@ -378,6 +381,13 @@ export const gearEn = {
       success: 'Data migrated successfully!',
       error: 'Failed to migrate data. Please try again.',
     },
+    publicContainers: {
+      title: 'Public Containers',
+      description: 'Browse containers shared by other users',
+      by: 'by',
+      empty: 'No public containers',
+      emptyDescription: 'There are no public containers available yet. Create a container and mark it as public to share it with others.',
+    },
   },
 }
 
@@ -431,6 +441,9 @@ export const gearPl = {
       showOnlyRootContainers: 'Pokaż tylko kontenery główne',
       hideWhenNested: 'Ukryj na liście gdy zagnieżdżony',
       hideWhenNestedDescription: 'Ukryj ten kontener z głównej listy, gdy jest zagnieżdżony w innym kontenerze',
+      isPublic: 'Kontener Publiczny',
+      isPublicDescription: 'Udostępnij ten kontener innym użytkownikom. Publiczne kontenery mogą być przeglądane przez każdego.',
+      updated: 'Zaktualizowano',
       nested: 'Zagnieżdżony',
       parentContainer: 'Rodzic',
       addNested: 'Dodaj Kontener',
@@ -760,6 +773,13 @@ export const gearPl = {
       migrating: 'Migrowanie...',
       success: 'Dane zostały pomyślnie zmigrowane!',
       error: 'Nie udało się zmigrować danych. Spróbuj ponownie.',
+    },
+    publicContainers: {
+      title: 'Publiczne Kontenery',
+      description: 'Przeglądaj kontenery udostępnione przez innych użytkowników',
+      by: 'autor',
+      empty: 'Brak publicznych kontenerów',
+      emptyDescription: 'Nie ma jeszcze dostępnych publicznych kontenerów. Utwórz kontener i oznacz go jako publiczny, aby udostępnić go innym.',
     },
   },
 }

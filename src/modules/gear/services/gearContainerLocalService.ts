@@ -50,6 +50,8 @@ class GearContainerLocalService {
       type: data.type,
       color: data.color,
       parentContainerId: data.parentContainerId,
+      isPublic: data.isPublic ?? false,
+      authorName: null,
       brand: data.brand,
       price: data.price,
       weight: data.weight,
