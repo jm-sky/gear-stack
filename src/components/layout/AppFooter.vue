@@ -7,6 +7,8 @@ import GithubIcon from '../ui/icons/GithubIcon.vue'
 const { t } = useI18n()
 
 const currentYear = new Date().getFullYear()
+const version = __APP_VERSION__
+const buildDate = new Date(__BUILD_DATE__).toLocaleDateString()
 </script>
 
 <template>
@@ -18,6 +20,9 @@ const currentYear = new Date().getFullYear()
           <HoverLinkExternal href="https://dev-made.it">
             DEV Made IT
           </HoverLinkExternal>
+          <span class="ml-2 text-xs opacity-70">
+            v{{ version }} – {{ buildDate }}
+          </span>
         </div>
 
         <nav class="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-3 sm:gap-6 text-sm">
