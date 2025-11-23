@@ -64,6 +64,9 @@ class GearContainerApiService {
     if (isSet(data.url)) {
       cleaned.url = data.url || null
     }
+    if (data.isPublic !== undefined && data.isPublic !== null) {
+      cleaned.isPublic = data.isPublic
+    }
 
     return cleaned
   }
@@ -135,6 +138,9 @@ class GearContainerApiService {
     }
     if (isSet(data.url)) {
       cleaned.url = data.url || null
+    }
+    if (data.isPublic !== undefined && data.isPublic !== null) {
+      cleaned.isPublic = data.isPublic
     }
 
     return cleaned
