@@ -1,20 +1,26 @@
 <script setup lang="ts">
-import { BackpackIcon, FileInput, Plus } from 'lucide-vue-next'
-import { computed, onMounted } from 'vue'
+import { BackpackIcon, FileInput, Globe, Plus } from 'lucide-vue-next'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useGear } from '@/modules/gear/composables/useGear'
+import { GearRoutePath } from '@/modules/gear/routes'
 import { gearContainerService } from '@/modules/gear/services/gearContainerService'
 import { generateSampleSet } from '@/modules/gear/services/sampleSetGenerator'
 import { READINESS_EXCELLENT_THRESHOLD } from '@/modules/gear/utils/constants'
 import { config } from '@/shared/config/config'
+import { apiClient } from '@/shared/services/apiClient'
+import type { IGearContainer } from '@/modules/gear/types/gear.types'
 
 const router = useRouter()
 const { t } = useI18n()
 const { containers } = useGear()
+
+const publicContainersCount = ref<number>(0)
+const isLoadingPublicContainers = ref(false)
 
 // Load containers from API on mount (when backend is enabled)
 onMounted(async () => {
@@ -24,6 +30,19 @@ onMounted(async () => {
     } catch (error) {
       console.error('Failed to load containers from API:', error)
       // Fallback to localStorage is handled by store initialization
+    }
+  }
+
+  // Load public containers count
+  if (config.backend.enabled) {
+    try {
+      isLoadingPublicContainers.value = true
+      const response = await apiClient.get<IGearContainer[]>('/gear/public/containers')
+      publicContainersCount.value = response.data.length
+    } catch (error) {
+      console.error('Failed to load public containers count:', error)
+    } finally {
+      isLoadingPublicContainers.value = false
     }
   }
 })
@@ -48,6 +67,10 @@ const handleGenerateSampleSet = () => {
     console.error('Error generating sample set:', error)
     toast.error(t('common.error'))
   }
+}
+
+const handleGoToPublicContainers = () => {
+  router.push(GearRoutePath.PublicContainers)
 }
 
 const readyContainersCount = computed(() => {
@@ -78,7 +101,7 @@ const readyContainersCount = computed(() => {
       </div>
 
       <!-- Quick Stats -->
-      <div v-if="containers.length > 0" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div v-if="containers.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <div class="bg-card rounded-lg border p-6 text-center">
           <div class="text-3xl font-bold text-primary mb-2">
             {{ containers.length }}
@@ -101,6 +124,19 @@ const readyContainersCount = computed(() => {
           </div>
           <div class="text-muted-foreground">
             {{ t('gear.page.readyContainers', 'Ready Containers') }}
+          </div>
+        </div>
+        <div
+          v-if="config.backend.enabled"
+          class="bg-card rounded-lg border p-6 text-center cursor-pointer hover:bg-accent/50 transition-colors"
+          @click="handleGoToPublicContainers"
+        >
+          <div class="text-3xl font-bold text-primary mb-2">
+            {{ isLoadingPublicContainers ? '...' : publicContainersCount }}
+          </div>
+          <div class="text-muted-foreground flex items-center justify-center gap-1">
+            <Globe class="size-4" />
+            {{ t('gear.publicContainers.navTitle', 'Public Browser') }}
           </div>
         </div>
       </div>

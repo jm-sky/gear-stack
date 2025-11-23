@@ -117,18 +117,18 @@ const handleContainerClick = (containerId: string) => {
       <!-- User Profile Header -->
       <Card>
         <CardContent class="pt-6">
-          <div class="flex items-center space-x-6">
-            <Avatar class="size-24 ring-1 ring-border">
+          <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
+            <Avatar class="size-20 sm:size-24 ring-1 ring-border shrink-0">
               <AvatarImage :src="user.avatar ?? ''" :alt="user.name" />
-              <AvatarFallback class="bg-muted text-muted-foreground text-2xl font-semibold">
+              <AvatarFallback class="bg-muted text-muted-foreground text-xl sm:text-2xl font-semibold">
                 {{ initials }}
               </AvatarFallback>
             </Avatar>
-            <div>
-              <h1 class="text-3xl font-bold mb-2">
+            <div class="text-center sm:text-left">
+              <h1 class="text-2xl sm:text-3xl font-bold mb-2">
                 {{ user.name }}
               </h1>
-              <p v-if="user.emailPublic && user.email" class="text-muted-foreground">
+              <p v-if="user.emailPublic && user.email" class="text-muted-foreground text-sm sm:text-base break-all">
                 {{ user.email }}
               </p>
             </div>
@@ -138,7 +138,7 @@ const handleContainerClick = (containerId: string) => {
 
       <!-- Public Containers -->
       <div>
-        <h2 class="text-2xl font-bold mb-4">
+        <h2 class="text-xl sm:text-2xl font-bold mb-4">
           {{ t('user.publicProfile.public_containers') }}
         </h2>
 
