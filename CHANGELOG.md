@@ -21,6 +21,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.0] - 2025-11-23
+
+### Added
+- **Shopping List Features**:
+  - Shopping list persistence functionality (#24)
+  - "Add All" functionality for shopping lists (#24)
+  - Shopping planning page functionality (#21)
+  - Enhanced shopping list functionality and item editing (#23)
+
+- **Progressive Web App (PWA)**:
+  - PWA support with Vue and Vite (#19)
+  - Installable web application support
+  - Offline capabilities
+
+- **Internationalization**:
+  - Email internationalization and translations (#15)
+
+- **Documentation**:
+  - AI plan documentation
+
+### Changed
+- **Data Structure**:
+  - Unified brand, category, and type fields (#20)
+  - Refactored to use 'value' instead of 'key' and 'label' for custom items
+  - Simplified settings card components for brands, categories, and container types
+
+- **OAuth Integration**:
+  - Implemented internationalization for OAuth login
+  - Improved OAuth callback page with better error handling
+
+### Fixed
+- Shopping list and item page issues (#22)
+- Removed unnecessary v-if from create container button
+- Improved OAuth error message display
+
+---
+
 ## [2.3.0] - 2025-11-22
 
 ### Added
