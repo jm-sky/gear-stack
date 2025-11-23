@@ -114,10 +114,18 @@ const handleCatalogItemSelect = (selectedItem: IItemWithContainer) => {
 // Submit handler
 const onSubmit = handleSubmit(async (data: ICreateItemDto | IUpdateItemDto) => {
   try {
+    const returnTo = route.query.returnTo as string | undefined
+    
     if (isEditMode && itemId) {
       await updateItem(itemId, data as IUpdateItemDto)
       toast.success(t('common.success'))
-      router.push(`/gear/${containerId}`)
+      
+      // Redirect based on returnTo query param
+      if (returnTo === 'shopping') {
+        router.push('/gear/shopping')
+      } else {
+        router.push(`/gear/${containerId}`)
+      }
     } else {
       // Add linkedItemId if selecting from catalog
       const createData: ICreateItemDto = {
@@ -126,7 +134,13 @@ const onSubmit = handleSubmit(async (data: ICreateItemDto | IUpdateItemDto) => {
       }
       await createItem(containerId, createData)
       toast.success(t('common.success'))
-      router.push(`/gear/${containerId}`)
+      
+      // Redirect based on returnTo query param
+      if (returnTo === 'shopping') {
+        router.push('/gear/shopping')
+      } else {
+        router.push(`/gear/${containerId}`)
+      }
     }
   } catch (error) {
     toast.error(t('common.error'))
@@ -136,7 +150,12 @@ const onSubmit = handleSubmit(async (data: ICreateItemDto | IUpdateItemDto) => {
 
 // Cancel handler
 const handleCancel = () => {
-  router.push(`/gear/${containerId}`)
+  const returnTo = route.query.returnTo as string | undefined
+  if (returnTo === 'shopping') {
+    router.push('/gear/shopping')
+  } else {
+    router.push(`/gear/${containerId}`)
+  }
 }
 
 // Recognize parameters handler
