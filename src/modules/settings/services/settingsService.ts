@@ -53,6 +53,7 @@ class SettingsLocalService implements ISettingsService {
         this.saveToStorage({
           locale: migrated.locale ?? 'en',
           darkMode: migrated.darkMode ?? false,
+          defaultContainersPublic: false,
         })
       }
     }

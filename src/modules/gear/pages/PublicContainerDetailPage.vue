@@ -11,13 +11,13 @@ import type { IGearContainer } from '../types/gear.types'
 import CategoryPieChart from '../components/CategoryPieChart.vue'
 import ContainerReadinessProgressBar from '../components/ContainerReadinessProgressBar.vue'
 import ItemsTable from '../components/ItemsTable.vue'
+import { useGearSettings } from '../composables/useGearSettings'
 import { useGearStore } from '../store/useGearStore'
 import {
   calculateReadinessPercentageSync,
   calculateTotalWeightSync,
 } from '../utils/containerCalculations'
 import { formatWeightToPreferredUnit } from '../utils/formatWeight'
-import { useGearSettings } from '../composables/useGearSettings'
 
 const route = useRoute()
 const router = useRouter()
