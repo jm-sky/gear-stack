@@ -2,7 +2,7 @@
 import { ArrowLeft, User } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
@@ -72,13 +72,6 @@ const formattedWeight = computed<string>(() => formatWeightToPreferredUnit(total
 const handleBack = () => {
   router.push('/gear/public')
 }
-
-const handleAuthorClick = (e: MouseEvent, authorId?: string | null) => {
-  e.stopPropagation()
-  if (authorId && isAuthenticated.value) {
-    router.push(`/users/${authorId}/public`)
-  }
-}
 </script>
 
 <template>
@@ -97,26 +90,38 @@ const handleAuthorClick = (e: MouseEvent, authorId?: string | null) => {
         </Button>
 
         <div>
-          <h1 class="text-3xl font-bold mb-2">
+          <h1 class="text-2xl sm:text-3xl font-bold mb-2 break-words">
             {{ container.name }}
           </h1>
-          <p v-if="container.description" class="text-muted-foreground mb-3">
+          <p v-if="container.description" class="text-muted-foreground mb-3 text-sm sm:text-base break-words">
             {{ container.description }}
           </p>
           <div class="flex items-center gap-2 flex-wrap">
             <Badge variant="outline">
               {{ container.type }}
             </Badge>
+            <RouterLink
+              v-if="container.authorName && container.authorId && isAuthenticated"
+              :to="`/users/${container.authorId}/public`"
+            >
+              <Badge
+                v-tooltip.bottom="t('gear.publicContainers.author')"
+                variant="secondary"
+                class="cursor-pointer hover:bg-secondary/80"
+                :aria-label="t('gear.publicContainers.author')"
+              >
+                <User class="size-3 mr-1" />
+                {{ container.authorName }}
+              </Badge>
+            </RouterLink>
             <Badge
-              v-if="container.authorName"
-              v-tooltip.bottom="t('gear.publicContainers.by')"
+              v-else-if="container.authorName"
+              v-tooltip.bottom="t('gear.publicContainers.author')"
               variant="secondary"
-              :class="{ 'cursor-pointer hover:bg-secondary/80': container.authorId && isAuthenticated }"
-              :aria-label="t('gear.publicContainers.by')"
-              @click="handleAuthorClick($event, container.authorId)"
+              :aria-label="t('gear.publicContainers.author')"
             >
               <User class="size-3 mr-1" />
-              <span v-if="!container.authorId || !isAuthenticated">{{ container.authorName }}</span>
+              {{ container.authorName }}
             </Badge>
             <Badge variant="secondary" class="text-xs">
               {{ $d(new Date(container.createdAt), 'short') }}
