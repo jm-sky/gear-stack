@@ -47,11 +47,69 @@ const includeExpiringSoon = ref(true)
 // Category checkbox states - using reactive object for v-model compatibility
 const categoryChecked = ref<Record<string, boolean>>({})
 
+// Storage key for shopping list
+const SHOPPING_LIST_STORAGE_KEY = 'gear-stack:shopping-list'
+const DELETED_ITEMS_STORAGE_KEY = 'gear-stack:shopping-deleted-items'
+
+// Helper to load shopping list from localStorage
+function loadShoppingListFromStorage(): IItemWithContainerId[] {
+  const stored = localStorage.getItem(SHOPPING_LIST_STORAGE_KEY)
+  if (stored) {
+    try {
+      return JSON.parse(stored) as IItemWithContainerId[]
+    } catch (error) {
+      console.error('Error loading shopping list from storage:', error)
+    }
+  }
+  return []
+}
+
+// Helper to save shopping list to localStorage
+function saveShoppingListToStorage(list: IItemWithContainerId[]): void {
+  try {
+    localStorage.setItem(SHOPPING_LIST_STORAGE_KEY, JSON.stringify(list))
+  } catch (error) {
+    console.error('Error saving shopping list to storage:', error)
+  }
+}
+
+// Helper to load deleted items from localStorage
+function loadDeletedItemsFromStorage(): IItemWithContainerId[] {
+  const stored = localStorage.getItem(DELETED_ITEMS_STORAGE_KEY)
+  if (stored) {
+    try {
+      return JSON.parse(stored) as IItemWithContainerId[]
+    } catch (error) {
+      console.error('Error loading deleted items from storage:', error)
+    }
+  }
+  return []
+}
+
+// Helper to save deleted items to localStorage
+function saveDeletedItemsToStorage(items: IItemWithContainerId[]): void {
+  try {
+    localStorage.setItem(DELETED_ITEMS_STORAGE_KEY, JSON.stringify(items))
+  } catch (error) {
+    console.error('Error saving deleted items to storage:', error)
+  }
+}
+
 // Shopping list (items selected for shopping)
-const shoppingList = ref<IItemWithContainerId[]>([])
+const shoppingList = ref<IItemWithContainerId[]>(loadShoppingListFromStorage())
 
 // Deleted items (local to this page)
-const deletedItems = ref<IItemWithContainerId[]>([])
+const deletedItems = ref<IItemWithContainerId[]>(loadDeletedItemsFromStorage())
+
+// Watch shopping list changes and save to localStorage
+watch(shoppingList, (newList) => {
+  saveShoppingListToStorage(newList)
+}, { deep: true })
+
+// Watch deleted items changes and save to localStorage
+watch(deletedItems, (newItems) => {
+  saveDeletedItemsToStorage(newItems)
+}, { deep: true })
 
 // Helper to check if item is expired
 function isExpired(item: IGearItem): boolean {
@@ -269,7 +327,25 @@ const restoreToShoppingList = (item: IItemWithContainerId) => {
 const resetShoppingList = () => {
   shoppingList.value = []
   deletedItems.value = []
+  saveShoppingListToStorage([])
+  saveDeletedItemsToStorage([])
   toast.success(t('gear.shopping.listReset', 'Shopping list reset'))
+}
+
+// Add all filtered items to shopping list
+const addAllToShoppingList = () => {
+  let addedCount = 0
+  filteredItems.value.forEach(item => {
+    if (!isInShoppingList(item)) {
+      shoppingList.value.push(item)
+      addedCount++
+    }
+  })
+  if (addedCount > 0) {
+    toast.success(t('gear.shopping.addedAllToCart', { count: addedCount }))
+  } else {
+    toast.info(t('gear.shopping.allItemsAlreadyInList'))
+  }
 }
 
 // Generate markdown export (only from shopping list, respecting filters)
@@ -392,6 +468,64 @@ const onAddItemSubmit = handleAddItemSubmit(async (data: ICreateItemDto) => {
   }
 })
 
+// Sync shopping list with current container data
+// This ensures items in shopping list are up-to-date with container data
+function syncShoppingListWithContainers() {
+  const updatedList: IItemWithContainerId[] = []
+  
+  shoppingList.value.forEach(shoppingItem => {
+    // Find the item in current containers
+    let found = false
+    containers.value.forEach(container => {
+      const currentItem = container.items.find(item => item.id === shoppingItem.id)
+      if (currentItem) {
+        // Update item with current data
+        updatedList.push({ ...currentItem, _containerId: container.id })
+        found = true
+      }
+    })
+    
+    // If item not found in containers, it might have been deleted
+    // We keep it in the list for now, but it will be filtered out
+    if (!found) {
+      updatedList.push(shoppingItem)
+    }
+  })
+  
+  shoppingList.value = updatedList
+}
+
+// Sync deleted items with current container data
+function syncDeletedItemsWithContainers() {
+  const updatedDeleted: IItemWithContainerId[] = []
+  
+  deletedItems.value.forEach(deletedItem => {
+    // Find the item in current containers
+    let found = false
+    containers.value.forEach(container => {
+      const currentItem = container.items.find(item => item.id === deletedItem.id)
+      if (currentItem) {
+        // Update item with current data
+        updatedDeleted.push({ ...currentItem, _containerId: container.id })
+        found = true
+      }
+    })
+    
+    // If item not found, keep it as is
+    if (!found) {
+      updatedDeleted.push(deletedItem)
+    }
+  })
+  
+  deletedItems.value = updatedDeleted
+}
+
+// Watch containers changes and sync shopping list
+watch(containers, () => {
+  syncShoppingListWithContainers()
+  syncDeletedItemsWithContainers()
+}, { deep: true })
+
 // Handle redirect from edit page
 onMounted(() => {
   const returnTo = route.query.returnTo as string | undefined
@@ -399,6 +533,10 @@ onMounted(() => {
     // Clear the query param
     router.replace({ query: {} })
   }
+  
+  // Sync shopping list with current container data on mount
+  syncShoppingListWithContainers()
+  syncDeletedItemsWithContainers()
 })
 </script>
 
@@ -421,7 +559,7 @@ onMounted(() => {
             variant="default"
             @click="addItemDialogOpen = true"
           >
-            <Plus class="size-4 mr-2" />
+            <Plus class="size-4" />
             {{ t('gear.shopping.addItem', 'Add') }}
           </Button>
           <Button
@@ -429,14 +567,14 @@ onMounted(() => {
             variant="outline"
             @click="exportDialogOpen = true"
           >
-            <Download class="size-4 mr-2" />
+            <Download class="size-4" />
             {{ t('gear.shopping.exportMarkdown', 'Export Markdown') }}
           </Button>
           <Button
             variant="outline"
             @click="resetShoppingList"
           >
-            <RotateCcw class="size-4 mr-2" />
+            <RotateCcw class="size-4" />
             {{ t('gear.shopping.reset', 'Reset') }}
           </Button>
         </div>
@@ -453,8 +591,8 @@ onMounted(() => {
               {{ t('gear.shopping.summary', 'Summary') }}
             </h3>
             <p class="text-sm text-muted-foreground">
-              {{ t('gear.shopping.itemsCount', '{count} items', { count: shoppingList.length } as Record<string, unknown>) }}
-              ({{ t('gear.shopping.totalQuantity', '{count} pieces', { count: totalItemsCount } as Record<string, unknown>) }})
+              {{ t('gear.shopping.itemsCount', { count: shoppingList.length }) }}
+              ({{ t('gear.shopping.totalQuantity', { count: totalItemsCount }) }})
               <span v-if="totalPrice > 0">
                 - {{ totalPrice.toFixed(2) }} {{ t('gear.shopping.currency', 'PLN') }}
               </span>
@@ -618,7 +756,7 @@ onMounted(() => {
                 size="sm"
                 @click="markAsPurchased(item)"
               >
-                <CheckCircle2 class="size-4 mr-2" />
+                <CheckCircle2 class="size-4" />
                 {{ t('gear.shopping.purchased', 'Purchased') }}
               </Button>
               <Button
@@ -635,9 +773,20 @@ onMounted(() => {
 
       <!-- Available items list -->
       <div class="space-y-4">
-        <h2 class="text-xl font-semibold">
-          {{ t('gear.shopping.availableItems', 'Available Items') }}
-        </h2>
+        <div class="flex items-center justify-between">
+          <h2 class="text-xl font-semibold">
+            {{ t('gear.shopping.availableItems', 'Available Items') }}
+          </h2>
+          <Button
+            v-if="filteredItems.length > 0"
+            variant="outline"
+            size="sm"
+            @click="addAllToShoppingList"
+          >
+            <Plus class="size-4" />
+            {{ t('gear.shopping.addAll', 'Add All') }}
+          </Button>
+        </div>
         
         <div class="space-y-2">
           <div
@@ -739,8 +888,8 @@ onMounted(() => {
               {{ t('gear.shopping.summary', 'Summary') }}
             </h3>
             <p class="text-sm text-muted-foreground">
-              {{ t('gear.shopping.itemsCount', '{count} items', { count: shoppingList.length } as Record<string, unknown>) }}
-              ({{ t('gear.shopping.totalQuantity', '{count} pieces', { count: totalItemsCount } as Record<string, unknown>) }})
+              {{ t('gear.shopping.itemsCount', { count: shoppingList.length }) }}
+              ({{ t('gear.shopping.totalQuantity', { count: totalItemsCount }) }})
               <span v-if="totalPrice > 0">
                 - {{ totalPrice.toFixed(2) }} {{ t('gear.shopping.currency', 'PLN') }}
               </span>
