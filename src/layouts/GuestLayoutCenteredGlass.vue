@@ -10,6 +10,9 @@ defineProps<{
 
 const route = useRoute()
 const layoutActionsComponent = route.meta.layoutActionsComponent
+
+const version = __APP_VERSION__
+const buildDate = new Date(__BUILD_DATE__).toLocaleDateString()
 </script>
 
 <template>
@@ -52,6 +55,9 @@ const layoutActionsComponent = route.meta.layoutActionsComponent
       <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <p class="text-center text-sm text-muted-foreground">
           &copy; 2025 Vue Blocks Registry. Demo application.
+          <span class="ml-2 text-xs opacity-70">
+            v{{ version }} – {{ buildDate }}
+          </span>
         </p>
       </div>
     </footer>
