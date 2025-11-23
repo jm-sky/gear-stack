@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CheckCircle2, Download, Plus, RotateCcw, ShoppingCart, Trash2, X } from 'lucide-vue-next'
+import { CheckCircle2, Download, Minus, Plus, RotateCcw, ShoppingCart, Trash2, X } from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
@@ -301,6 +301,27 @@ const markAsPurchased = async (item: IItemWithContainerId) => {
   }
 }
 
+// Update item quantity in shopping list
+const updateShoppingListItemQuantity = (item: IItemWithContainerId, newQuantity: number) => {
+  if (newQuantity < 1) return
+  const index = shoppingList.value.findIndex(i => i.id === item.id)
+  if (index !== -1) {
+    shoppingList.value[index] = { ...shoppingList.value[index], quantity: newQuantity }
+  }
+}
+
+// Increment quantity
+const incrementQuantity = (item: IItemWithContainerId) => {
+  updateShoppingListItemQuantity(item, item.quantity + 1)
+}
+
+// Decrement quantity
+const decrementQuantity = (item: IItemWithContainerId) => {
+  if (item.quantity > 1) {
+    updateShoppingListItemQuantity(item, item.quantity - 1)
+  }
+}
+
 // Delete item from shopping list (move to deleted section)
 const deleteFromShoppingList = (item: IItemWithContainerId) => {
   const index = shoppingList.value.findIndex(i => i.id === item.id)
@@ -554,7 +575,7 @@ onMounted(() => {
             {{ t('gear.shopping.subtitle', 'Plan your purchases for items to buy and expiring soon') }}
           </p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
           <Button
             variant="default"
             @click="addItemDialogOpen = true"
@@ -749,6 +770,28 @@ onMounted(() => {
               </div>
             </div>
 
+            <!-- Quantity controls -->
+            <div class="flex items-center gap-2 shrink-0">
+              <Button
+                variant="outline"
+                size="sm"
+                :disabled="item.quantity <= 1"
+                @click="decrementQuantity(item)"
+              >
+                <Minus class="size-4" />
+              </Button>
+              <span class="text-sm font-medium min-w-[2ch] text-center">
+                {{ item.quantity }}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                @click="incrementQuantity(item)"
+              >
+                <Plus class="size-4" />
+              </Button>
+            </div>
+
             <!-- Actions -->
             <div class="flex items-center gap-2 shrink-0">
               <Button
@@ -757,7 +800,7 @@ onMounted(() => {
                 @click="markAsPurchased(item)"
               >
                 <CheckCircle2 class="size-4" />
-                {{ t('gear.shopping.purchased', 'Purchased') }}
+                <span class="hidden sm:inline">{{ t('gear.shopping.purchased', 'Purchased') }}</span>
               </Button>
               <Button
                 variant="outline"
@@ -1000,9 +1043,6 @@ onMounted(() => {
                 }"
               >
                 {{ t('gear.actions.cancel', 'Cancel') }}
-              </Button>
-              <Button type="submit" :disabled="isAddingItem">
-                {{ t('gear.actions.add', 'Add') }}
               </Button>
             </DialogFooter>
           </form>
