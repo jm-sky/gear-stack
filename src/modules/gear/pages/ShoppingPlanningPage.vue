@@ -306,7 +306,8 @@ const updateShoppingListItemQuantity = (item: IItemWithContainerId, newQuantity:
   if (newQuantity < 1) return
   const index = shoppingList.value.findIndex(i => i.id === item.id)
   if (index !== -1) {
-    shoppingList.value[index] = { ...shoppingList.value[index], quantity: newQuantity }
+    const existingItem = shoppingList.value[index]
+    shoppingList.value[index] = { ...existingItem, quantity: newQuantity } as IItemWithContainerId
   }
 }
 
