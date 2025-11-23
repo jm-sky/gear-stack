@@ -11,8 +11,8 @@ import { GearRoutePath } from '@/modules/gear/routes'
 import { gearContainerService } from '@/modules/gear/services/gearContainerService'
 import { generateSampleSet } from '@/modules/gear/services/sampleSetGenerator'
 import { READINESS_EXCELLENT_THRESHOLD } from '@/modules/gear/utils/constants'
-import { apiClient } from '@/shared/services/apiClient'
 import { config } from '@/shared/config/config'
+import { apiClient } from '@/shared/services/apiClient'
 import type { IGearContainer } from '@/modules/gear/types/gear.types'
 
 const router = useRouter()
