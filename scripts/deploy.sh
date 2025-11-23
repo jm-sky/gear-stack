@@ -39,6 +39,8 @@ pnpm install --frozen-lockfile
 
 # Step 3: Build frontend
 echo -e "${YELLOW}🔨 Step 3: Building frontend...${NC}"
+# Clean up dist directory to avoid permission issues
+rm -rf dist
 pnpm build
 echo -e "${GREEN}✅ Frontend build completed${NC}"
 
