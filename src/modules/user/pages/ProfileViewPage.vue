@@ -48,7 +48,7 @@ const initials = computed(() => {
 <template>
   <AuthenticatedLayout>
     <div class="space-y-6">
-      <div class="flex items-center justify-between">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div class="space-y-1">
           <h1 class="text-3xl font-bold tracking-tight">
             {{ t('user.profile.title') }}
@@ -57,16 +57,17 @@ const initials = computed(() => {
             {{ t('user.profile.subtitle') }}
           </p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <Button
             v-if="publicProfileUrl"
             variant="outline"
+            class="flex-1 sm:flex-none"
             @click="router.push(publicProfileUrl)"
           >
             <ExternalLink class="size-4 mr-2" />
             {{ t('user.edit.show_public_profile') }}
           </Button>
-          <Button variant="outline" @click="handleEdit">
+          <Button variant="outline" class="flex-1 sm:flex-none" @click="handleEdit">
             <Edit class="size-4 mr-2" />
             {{ t('user.profile.edit_button') }}
           </Button>

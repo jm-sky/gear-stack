@@ -71,6 +71,23 @@ class UserListResponse(PaginatedResponse[UserResponse]):
     pass
 
 
+class PublicUserResponse(BaseModel):
+    """Public user profile response schema with camelCase.
+    
+    Only includes public information:
+    - id, name, avatarUrl (always public)
+    - email (only if user has emailPublic setting enabled)
+    """
+
+    id: str
+    name: str
+    avatarUrl: Optional[str] = None
+    email: Optional[EmailStr] = None  # Only included if emailPublic is True
+    emailPublic: bool = False  # Indicates if email is included
+
+    model_config = {"from_attributes": True, "populate_by_name": True}
+
+
 class MessageResponse(BaseModel):
     """Generic message response."""
 

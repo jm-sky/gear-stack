@@ -13,6 +13,17 @@ import { apiClient } from '@/shared/services/apiClient'
 import type { IUser } from '../types/user.types'
 import type { IGearContainer } from '@/modules/gear/types/gear.types'
 
+/**
+ * Backend API response type for public user profile
+ */
+interface PublicUserResponse {
+  id: string
+  name: string
+  avatarUrl?: string
+  email?: string
+  emailPublic: boolean
+}
+
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
@@ -22,6 +33,21 @@ const user = ref<IUser | null>(null)
 const containers = ref<IGearContainer[]>([])
 const isLoading = ref(true)
 const error = ref<string | null>(null)
+
+/**
+ * Map backend PublicUserResponse to frontend IUser
+ */
+function mapToIUser(response: PublicUserResponse): IUser {
+  return {
+    id: response.id,
+    name: response.name,
+    email: response.email || '',
+    avatar: response.avatarUrl,
+    emailPublic: response.emailPublic,
+    createdAt: '', // Not provided in public profile
+    updatedAt: '', // Not provided in public profile
+  }
+}
 
 // Generate initials from name or email
 const initials = computed(() => {
@@ -42,8 +68,8 @@ const initials = computed(() => {
 onMounted(async () => {
   try {
     // Fetch public user profile
-    const userResponse = await apiClient.get<IUser>(`/users/${userId}/public`)
-    user.value = userResponse.data
+    const userResponse = await apiClient.get<PublicUserResponse>(`/users/${userId}/public`)
+    user.value = mapToIUser(userResponse.data)
 
     // Fetch public containers for this user
     const containersResponse = await apiClient.get<IGearContainer[]>(`/gear/public/containers?authorId=${userId}`)
