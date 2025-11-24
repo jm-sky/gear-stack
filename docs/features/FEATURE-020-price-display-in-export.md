@@ -1,6 +1,6 @@
 # FEATURE-020: Price Display in Markdown Export (Pokazywanie cen w eksporcie markdown)
 
-**Status:** 🚧 In Progress
+**Status:** ✅ Completed
 **Priority:** Medium
 **Complexity:** Small
 **Category:** 🚀 Import/Export

@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select'
 import type { IGearContainer } from '../types/gear.types'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
+import { useGearSettings } from '../composables/useGearSettings'
 import { useGearStore } from '../store/useGearStore'
 import { calculateTotalWeightSync } from '../utils/containerCalculations'
 import { exportContainersToPrompt, exportContainerToPrompt } from '../utils/exportToPrompt'
@@ -40,6 +41,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const store = useGearStore()
+const { defaultCurrency } = useGearSettings()
 const copied = ref(false)
 const isGuidelinesDialogOpen = ref(false)
 const showUuid = ref(true)
@@ -48,6 +50,7 @@ const showColor = ref(true)
 const showBrand = ref(true)
 const showNestedContainer = ref(true)
 const showLegend = ref(true)
+const showPrices = ref(false)
 const descriptionFormat = ref<'off' | 'inline' | 'newline'>('off')
 
 // Get container type label helper
@@ -77,7 +80,9 @@ const markdown = computed<string>(() => {
     showBrand: showBrand.value,
     showNestedContainer: showNestedContainer.value,
     showLegend: showLegend.value,
+    showPrices: showPrices.value,
     descriptionFormat: descriptionFormat.value,
+    defaultCurrency: defaultCurrency.value,
   }
 
   if (props.container) {
@@ -163,6 +168,12 @@ const handleOpenChange = (value: boolean) => {
             <Checkbox id="showLegend" v-model="showLegend" />
             <Label for="showLegend" class="text-sm font-normal cursor-pointer">
               {{ t('gear.export.showLegend', 'Show legend') }}
+            </Label>
+          </div>
+          <div class="flex items-center space-x-2">
+            <Checkbox id="showPrices" v-model="showPrices" />
+            <Label for="showPrices" class="text-sm font-normal cursor-pointer">
+              {{ t('gear.export.showPrices', 'Show prices') }}
             </Label>
           </div>
         </div>

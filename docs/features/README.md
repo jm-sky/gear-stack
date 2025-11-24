@@ -24,10 +24,10 @@ This directory contains detailed implementation plans for features from the [ROA
 | [FEATURE-014](./FEATURE-014-oauth-authentication.md) | OAuth Authentication | ✅ Completed | Medium | 🔐 Authentication |
 | [FEATURE-015](./FEATURE-015-recaptcha-integration.md) | reCAPTCHA Integration | ✅ Completed | Medium-High | 🔐 Security |
 | [FEATURE-016](./FEATURE-016-automatic-item-image-fetching.md) | Automatic Item Image Fetching | 🔄 Planned | Medium | 📷 Media & Resources |
-| [FEATURE-017](./FEATURE-017-currency-support.md) | Currency Support | 🚧 In Progress | Medium | 📝 Data Model / 💰 Financial |
+| [FEATURE-017](./FEATURE-017-currency-support.md) | Currency Support | ✅ Completed | Medium | 📝 Data Model / 💰 Financial |
 | [FEATURE-018](./FEATURE-018-item-ordering.md) | Item Ordering | 🚧 In Progress | Medium | ✏️ Editing / 🎨 UI/UX |
 | [FEATURE-019](./FEATURE-019-extended-charts.md) | Extended Charts | 🚧 In Progress | Medium | 📊 Visualizations / Analytics |
-| [FEATURE-020](./FEATURE-020-price-display-in-export.md) | Price Display in Export | 🚧 In Progress | Medium | 🚀 Import/Export |
+| [FEATURE-020](./FEATURE-020-price-display-in-export.md) | Price Display in Export | ✅ Completed | Medium | 🚀 Import/Export |
 
 ---
 
