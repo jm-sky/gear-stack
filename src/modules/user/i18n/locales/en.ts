@@ -7,6 +7,10 @@ export const userEn = {
       subtitle: 'Your public information and account details.',
       user_id_label: 'User ID',
       no_profile: 'No profile data available',
+      auth_required_title: 'Authentication Required',
+      auth_required_message: 'Log in to use all app features',
+      login_button: 'Log In',
+      register_button: 'Sign Up',
     },
     edit: {
       title: 'Edit Profile',

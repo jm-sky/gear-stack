@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { LogOut, User } from 'lucide-vue-next'
+import { LogIn, LogOut, User, UserPlus } from 'lucide-vue-next'
 import { type Component, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -11,9 +11,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useAuth } from '@/modules/auth/composables/useAuth'
+import { AuthRoutePaths } from '@/modules/auth/config/routes'
+import { SettingsRoutePaths } from '@/modules/settings/routes'
+import { UserRoutePaths } from '@/modules/user/routes'
 import Avatar from '../ui/avatar/Avatar.vue'
 import AvatarFallback from '../ui/avatar/AvatarFallback.vue'
 import AvatarImage from '../ui/avatar/AvatarImage.vue'
+import DropdownMenuItemLink from '../ui/dropdown-menu/DropdownMenuItemLink.vue'
 
 export interface Link {
   to: string
@@ -30,6 +35,7 @@ export interface UserNavProps {
 
 const { t } = useI18n()
 const router = useRouter()
+const { isAuthenticated } = useAuth()
 
 const props = defineProps<UserNavProps>()
 
@@ -105,24 +111,34 @@ const navigateTo = (path: string) => {
 
       <!-- Profile/Settings slot -->
       <slot name="menu-items">
-        <DropdownMenuItem @click="navigateTo('/profile')">
+        <DropdownMenuItemLink :to="UserRoutePaths.profile">
           <User class="size-4 mr-2" />
           {{ t('user.profile.title', 'Profile') }}
-        </DropdownMenuItem>
+        </DropdownMenuItemLink>
 
-        <DropdownMenuItem @click="navigateTo('/settings')">
+        <DropdownMenuItemLink :to="SettingsRoutePaths.settings">
           <User class="size-4 mr-2" />
           {{ t('settings.page.title', 'Settings') }}
-        </DropdownMenuItem>
+        </DropdownMenuItemLink>
       </slot>
 
       <DropdownMenuSeparator />
 
       <!-- Logout -->
-      <DropdownMenuItem @click="handleLogout">
+      <DropdownMenuItem v-if="isAuthenticated" @click="handleLogout">
         <LogOut class="size-4 mr-2" />
         {{ t('auth.logout', 'Logout') }}
       </DropdownMenuItem>
+      <template v-else>
+        <DropdownMenuItemLink :to="AuthRoutePaths.login">
+          <LogIn class="size-4 mr-2" />
+          {{ t('auth.login', 'Login') }}
+        </DropdownMenuItemLink>
+        <DropdownMenuItemLink :to="AuthRoutePaths.register">
+          <UserPlus class="size-4 mr-2" />
+          {{ t('auth.register', 'Register') }}
+        </DropdownMenuItemLink>
+      </template>
     </DropdownMenuContent>
   </DropdownMenu>
 </template>

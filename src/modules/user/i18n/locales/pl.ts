@@ -7,6 +7,10 @@ export const userPl = {
       subtitle: 'Twoje publiczne informacje i szczegóły konta.',
       user_id_label: 'ID Użytkownika',
       no_profile: 'Brak danych profilu',
+      auth_required_title: 'Wymagane logowanie',
+      auth_required_message: 'Zaloguj się aby korzystać z wszystkich funkcji aplikacji',
+      login_button: 'Zaloguj się',
+      register_button: 'Zarejestruj się',
     },
     edit: {
       title: 'Edytuj Profil',

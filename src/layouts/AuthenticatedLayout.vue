@@ -90,7 +90,7 @@ const handleLogout = async () => {
             <UserNav
               :user-name="user?.name ?? t('user.guest')"
               :user-email="user?.email"
-              :user-avatar="user?.avatar"
+              :user-avatar="user?.avatarUrl"
               :nav-links="navLinks"
               @logout="handleLogout"
             >

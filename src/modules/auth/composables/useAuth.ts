@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // modules/auth/composables/useAuth.ts
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { computed } from 'vue'
@@ -64,7 +65,7 @@ export function useLogin(service?: IAuthService) {
         if (response.user) {
           authStore.setUser({
             ...response.user,
-            avatar: (response.user as any).avatarUrl || response.user.avatar,
+            avatarUrl: (response.user as any).avatarUrl || response.user.avatarUrl,
           })
         }
       }
@@ -76,13 +77,13 @@ export function useLogin(service?: IAuthService) {
         // Set user from login response (map avatarUrl to avatar)
         authStore.setUser({
           ...data.user,
-          avatar: (data.user as any).avatarUrl || data.user.avatar,
+          avatarUrl: (data.user as any).avatarUrl || data.user.avatarUrl,
         })
 
         // Invalidate and refetch user data to ensure consistency
         if (!data.requiresEmailVerification) {
           await queryClient.invalidateQueries({ queryKey: authQueryKeys.me() })
-          
+
           // Check if data migration should be prompted (localStorage -> API)
           // This is done asynchronously and doesn't block login
           try {

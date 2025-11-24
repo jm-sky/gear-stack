@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, expect, it } from 'vitest'
 import { GRAMS_PER_KILOGRAM, GRAMS_PER_OUNCE, GRAMS_PER_POUND } from './constants'
 import {

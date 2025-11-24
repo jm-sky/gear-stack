@@ -2,6 +2,7 @@
 import { useRoute } from 'vue-router'
 import LogoText from '@/components/ui/LogoText.vue'
 import DarkModeToggle from '@/shared/components/DarkModeToggle.vue'
+import { config } from '@/shared/config/config'
 import LocaleToggle from '@/shared/i18n/components/LocaleToggle.vue'
 
 // Auth layout for login, register, forgot password pages
@@ -35,7 +36,7 @@ const buildDate = new Date(__BUILD_DATE__).toLocaleDateString()
     <footer>
       <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <p class="text-center text-sm text-muted-foreground">
-          &copy; 2025 Vue Blocks Registry. Demo application.
+          &copy; 2025 {{ config.app.name }}.
           <span class="ml-2 text-xs opacity-70">
             v{{ version }} – {{ buildDate }}
           </span>

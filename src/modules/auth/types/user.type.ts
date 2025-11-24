@@ -5,7 +5,7 @@ export interface User {
   id: TULID
   name: string
   email: string
-  avatar?: string
+  avatarUrl?: string
   isActive: boolean
   isAdmin: boolean
   isEmailVerified: boolean

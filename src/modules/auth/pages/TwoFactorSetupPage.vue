@@ -12,6 +12,7 @@ import PasskeyList from '@/modules/auth/components/PasskeyList.vue'
 import TotpSetupForm from '@/modules/auth/components/TotpSetupForm.vue'
 import WebAuthnRegisterForm from '@/modules/auth/components/WebAuthnRegisterForm.vue'
 import { useTotpStatus, useTwoFactorStatus, useWebAuthnStatus } from '@/modules/auth/composables/useTwoFactor'
+import { SettingsRoutePaths } from '@/modules/settings/routes'
 import DisableTotpDialog from '../components/DisableTotpDialog.vue'
 import type { ITwoFactorService } from '@/modules/auth/types/twoFactor.type'
 
@@ -150,7 +151,7 @@ const handleDisableTotpSuccess = async () => {
 
           <!-- Back Button -->
           <div class="flex justify-start">
-            <Button variant="outline" @click="router.push('/settings')">
+            <Button variant="outline" @click="router.push(SettingsRoutePaths.settings)">
               {{ t('common.back') }}
             </Button>
           </div>

@@ -42,7 +42,7 @@ function mapToIUser(response: PublicUserResponse): IUser {
     id: response.id,
     name: response.name,
     email: response.email || '',
-    avatar: response.avatarUrl,
+    avatarUrl: response.avatarUrl,
     emailPublic: response.emailPublic,
     createdAt: '', // Not provided in public profile
     updatedAt: '', // Not provided in public profile
@@ -119,7 +119,7 @@ const handleContainerClick = (containerId: string) => {
         <CardContent class="pt-6">
           <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
             <Avatar class="size-20 sm:size-24 ring-1 ring-border shrink-0">
-              <AvatarImage :src="user.avatar ?? ''" :alt="user.name" />
+              <AvatarImage :src="user.avatarUrl ?? ''" :alt="user.name" />
               <AvatarFallback class="bg-muted text-muted-foreground text-xl sm:text-2xl font-semibold">
                 {{ initials }}
               </AvatarFallback>

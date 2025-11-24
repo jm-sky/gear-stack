@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { isAxiosError } from 'axios'
 import { AuthRouteNames } from '@/modules/auth/config/routes'
 import { authService } from '@/modules/auth/services/authService'
@@ -12,7 +13,7 @@ import type { NavigationGuardNext, RouteLocationNormalized, Router } from 'vue-r
  * - Guest-only routes (requiresGuest meta)
  * - Auto-refresh user data when JWT exists but user data is missing
  * - Auto-logout on 401 errors
- * 
+ *
  * Note: Only active when backend is enabled (VITE_ENABLE_BACKEND=true)
  */
 export async function authGuard(
@@ -51,7 +52,7 @@ export async function authGuard(
       // Map avatarUrl from backend to avatar in frontend
       authStore.setUser({
         ...user,
-        avatar: (user as any).avatarUrl || user.avatar,
+        avatarUrl: (user as any).avatarUrl || user.avatarUrl,
       })
       isAuthenticated = true // User is now authenticated after successful fetch
     } catch (error) {

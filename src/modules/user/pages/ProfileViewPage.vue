@@ -8,16 +8,20 @@ import AvatarFallback from '@/components/ui/avatar/AvatarFallback.vue'
 import AvatarImage from '@/components/ui/avatar/AvatarImage.vue'
 import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import { useAuth } from '@/modules/auth/composables/useAuth'
 import { useSettings } from '@/modules/settings/composables/useSettings'
+import AuthenticationRequiredAlert from '../components/AuthenticationRequiredAlert.vue'
 import { useUser } from '../composables/useUser'
+import { UserRoutePaths } from '../routes'
 
 const router = useRouter()
 const { t } = useI18n()
 const { profile } = useUser()
 const { settings } = useSettings()
+const { isAuthenticated } = useAuth()
 
 const handleEdit = () => {
-  router.push('/profile/edit')
+  router.push(UserRoutePaths.profileEdit)
 }
 
 const isProfilePublic = computed(() => settings.value?.profilePublic ?? false)
@@ -67,7 +71,12 @@ const initials = computed(() => {
             <ExternalLink class="size-4 mr-2" />
             {{ t('user.edit.show_public_profile') }}
           </Button>
-          <Button variant="outline" class="flex-1 sm:flex-none" @click="handleEdit">
+          <Button
+            v-if="isAuthenticated"
+            variant="outline"
+            class="flex-1 sm:flex-none"
+            @click="handleEdit"
+          >
             <Edit class="size-4 mr-2" />
             {{ t('user.profile.edit_button') }}
           </Button>
@@ -77,7 +86,7 @@ const initials = computed(() => {
       <div v-if="profile" class="bg-card border rounded-lg p-6 space-y-6">
         <div class="flex items-center space-x-6">
           <Avatar class="size-24 ring-1 ring-border">
-            <AvatarImage :src="profile.avatar ?? ''" :alt="profile.name" />
+            <AvatarImage :src="profile.avatarUrl ?? ''" :alt="profile.name" />
             <AvatarFallback class="bg-muted text-muted-foreground text-2xl font-semibold">
               {{ initials }}
             </AvatarFallback>
@@ -87,7 +96,7 @@ const initials = computed(() => {
               {{ profile.name }}
             </h2>
             <div class="flex items-center mt-2 text-muted-foreground">
-              <Mail class="size-4 mr-2 flex-shrink-0" />
+              <Mail class="size-4 mr-2 shrink-0" />
               <span class="break-all">{{ profile.email }}</span>
             </div>
           </div>
@@ -112,6 +121,8 @@ const initials = computed(() => {
           {{ t('user.profile.no_profile') }}
         </p>
       </div>
+
+      <AuthenticationRequiredAlert v-if="!isAuthenticated" />
     </div>
   </AuthenticatedLayout>
 </template>

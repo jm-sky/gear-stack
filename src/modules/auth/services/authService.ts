@@ -57,7 +57,7 @@ class AuthService implements IAuthService {
     // Map avatarUrl from backend to avatar in frontend
     return {
       ...response.data,
-      avatar: response.data.avatarUrl,
+      avatarUrl: response.data.avatarUrl,
     }
   }
 

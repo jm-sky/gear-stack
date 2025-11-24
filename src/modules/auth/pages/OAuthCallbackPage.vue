@@ -8,6 +8,7 @@ import { AuthRoutePaths } from '@/modules/auth/config/routes'
 import { authService } from '@/modules/auth/services/authService'
 import { useAuthStore } from '@/modules/auth/store/useAuthStore'
 import { useRecaptcha } from '@/shared/composables/useRecaptcha'
+import type { AuthResponse, LoginResponse } from '../types/user.type'
 
 const { t } = useI18n()
 
@@ -21,9 +22,7 @@ const error = ref<string | null>(null)
 const provider = ref('')
 
 onMounted(async () => {
-  if (isProcessing.value) {
-    return
-  }
+  if (isProcessing.value) return
 
   isProcessing.value = true
 
@@ -71,7 +70,7 @@ onMounted(async () => {
     const recaptchaToken = await getToken('oauth_callback')
 
     // Call OAuth callback endpoint
-    const response = await authService.oauthCallback(providerParam, {
+    const response: LoginResponse = await authService.oauthCallback(providerParam, {
       code,
       state,
       recaptchaToken,
@@ -85,18 +84,19 @@ onMounted(async () => {
       return
     }
 
+    const authResponse = response as AuthResponse
+
     // Success - set auth data and redirect
-    authStore.setToken(response.accessToken)
-    authStore.setRefreshToken(response.refreshToken)
+    authStore.setToken(authResponse.accessToken)
+    authStore.setRefreshToken(authResponse.refreshToken)
     // Map avatarUrl from backend to avatar in frontend
     authStore.setUser({
-      ...response.user,
-      avatar: (response.user as any).avatarUrl || response.user.avatar,
+      ...authResponse.user,
+      avatarUrl: authResponse.user.avatarUrl,
     })
     toast.success(t('auth.oauth.callback.success', { provider: providerParam }))
     await router.push(AuthRoutePaths.dashboard)
-  }
-  catch (err: unknown) {
+  } catch (err: unknown) {
     console.error('OAuth callback error:', err)
 
     // Better error handling - extract message from API response
@@ -107,8 +107,7 @@ onMounted(async () => {
       if (axiosError.response?.data?.detail) {
         errorMessage = axiosError.response.data.detail
       }
-    }
-    else if (err instanceof Error) {
+    } else if (err instanceof Error) {
       errorMessage = err.message
     }
 
@@ -119,8 +118,7 @@ onMounted(async () => {
     setTimeout(() => {
       router.push(AuthRoutePaths.login)
     }, 3000)
-  }
-  finally {
+  } finally {
     isProcessing.value = false
   }
 })

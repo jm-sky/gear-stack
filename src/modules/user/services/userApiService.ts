@@ -49,7 +49,7 @@ class UserApiService {
       id: response.id,
       name: response.name,
       email: response.email,
-      avatar: response.avatarUrl,
+      avatarUrl: response.avatarUrl,
       createdAt: response.createdAt,
       updatedAt: response.updatedAt,
     }

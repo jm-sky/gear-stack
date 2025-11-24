@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useBackend } from '@/shared/composables/useBackend'
 import { useUser } from '../composables/useUser'
+import { UserRoutePaths } from '../routes'
 import { generateGravatarUrl } from '../utils/generateGravatarUrl'
 import { validateAvatarUrl } from '../utils/validateAvatarUrl'
 
@@ -52,7 +53,7 @@ onMounted(() => {
     setValues({
       name: profile.value.name,
       email: profile.value.email,
-      avatarUrl: profile.value.avatar || '',
+      avatarUrl: profile.value.avatarUrl || '',
     })
   }
 })
@@ -63,7 +64,7 @@ watch(() => profile.value, (newProfile) => {
     setValues({
       name: newProfile.name,
       email: newProfile.email,
-      avatarUrl: newProfile.avatar || '',
+      avatarUrl: newProfile.avatarUrl ?? '',
     })
   }
 })
@@ -76,10 +77,10 @@ const onSubmit = handleSubmit(
         email: values.email,
         avatarUrl: values.avatarUrl && values.avatarUrl.trim() ? values.avatarUrl.trim() : undefined,
       }
-      
+
       await updateProfile(updateData)
       toast.success(t('common.success'))
-      router.push('/profile')
+      router.push(UserRoutePaths.profile)
     } catch (error) {
       console.error('Profile update failed:', error)
       toast.error(t('common.error'))
@@ -91,7 +92,7 @@ const onSubmit = handleSubmit(
 )
 
 const handleCancel = () => {
-  router.push('/profile')
+  router.push(UserRoutePaths.profile)
 }
 
 const handleGenerateGravatar = () => {
