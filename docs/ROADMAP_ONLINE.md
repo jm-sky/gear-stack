@@ -316,6 +316,29 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 
 ---
 
+## 🔍 Monitoring i diagnostyka
+
+### Integracja z Sentry
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+
+- Monitoring błędów w czasie rzeczywistym (backend + frontend)
+- Automatyczne raportowanie wyjątków i błędów
+- Performance monitoring (transakcje, zapytania DB)
+- Release tracking i deployment notifications
+- User feedback integration
+- Source maps dla lepszego debugowania (frontend)
+- Contextualne informacje (user ID, environment, breadcrumbs)
+- Alerting dla krytycznych błędów
+- Integracja z CI/CD pipeline
+
+**Korzyści:**
+- Szybsze wykrywanie i diagnozowanie błędów w produkcji
+- Proaktywne powiadomienia o problemach przed zgłoszeniem przez użytkowników
+- Lepsze zrozumienie zachowania aplikacji w środowisku produkcyjnym
+- Tracking wydajności i bottlenecków
+
+---
+
 ## 📱 Aplikacja mobilna
 
 ### ✅ PWA (Progressive Web App)
