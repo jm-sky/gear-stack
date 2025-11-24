@@ -226,6 +226,12 @@ export default {
       title: 'Masz kontenery w przeglądarce',
       description: 'Zaloguj się lub zarejestruj, aby zsynchronizować swoje dane',
     },
+    stats: {
+      totalUsers: 'Wszyscy użytkownicy',
+      totalContainers: 'Wszystkie kontenery',
+      totalItems: 'Wszystkie przedmioty',
+      newThisMonth: 'w tym miesiącu',
+    },
   },
   notFound: {
     title: 'Strona nie została znaleziona',
