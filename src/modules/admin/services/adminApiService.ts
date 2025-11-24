@@ -1,0 +1,67 @@
+import { apiClient } from '@/shared/services/apiClient'
+import type { TUUID } from '@/shared/types/base.type'
+import type { IAdminContainer, IAdminItem, IAdminUser } from '../types/admin.types'
+
+/**
+ * Admin API Service
+ * Handles API calls for admin operations (users, containers, items management)
+ */
+class AdminApiService {
+  // Users management
+  async getUsers(skip = 0, limit = 100): Promise<IAdminUser[]> {
+    const response = await apiClient.get<IAdminUser[]>('/admin/users', {
+      params: { skip, limit },
+    })
+    return response.data
+  }
+
+  async getUser(id: TUUID): Promise<IAdminUser> {
+    const response = await apiClient.get<IAdminUser>(`/admin/users/${id}`)
+    return response.data
+  }
+
+  async updateUser(id: TUUID, data: Partial<IAdminUser>): Promise<IAdminUser> {
+    const response = await apiClient.patch<IAdminUser>(`/admin/users/${id}`, data)
+    return response.data
+  }
+
+  async deleteUser(id: TUUID): Promise<void> {
+    await apiClient.delete(`/admin/users/${id}`)
+  }
+
+  // Containers management
+  async getContainers(skip = 0, limit = 100): Promise<IAdminContainer[]> {
+    const response = await apiClient.get<IAdminContainer[]>('/admin/containers', {
+      params: { skip, limit },
+    })
+    return response.data
+  }
+
+  async getContainer(id: TUUID): Promise<IAdminContainer> {
+    const response = await apiClient.get<IAdminContainer>(`/admin/containers/${id}`)
+    return response.data
+  }
+
+  async deleteContainer(id: TUUID): Promise<void> {
+    await apiClient.delete(`/admin/containers/${id}`)
+  }
+
+  // Items management
+  async getItems(skip = 0, limit = 100): Promise<IAdminItem[]> {
+    const response = await apiClient.get<IAdminItem[]>('/admin/items', {
+      params: { skip, limit },
+    })
+    return response.data
+  }
+
+  async getItem(id: TUUID): Promise<IAdminItem> {
+    const response = await apiClient.get<IAdminItem>(`/admin/items/${id}`)
+    return response.data
+  }
+
+  async deleteItem(id: TUUID): Promise<void> {
+    await apiClient.delete(`/admin/items/${id}`)
+  }
+}
+
+export const adminApiService = new AdminApiService()
