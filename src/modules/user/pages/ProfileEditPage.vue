@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
-import { ArrowLeft, Sparkles } from 'lucide-vue-next'
+import { ArrowLeft, Shield, Sparkles } from 'lucide-vue-next'
 import { useField, useForm } from 'vee-validate'
 import { onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { z } from 'zod'
+import Badge from '@/components/ui/badge/Badge.vue'
 import { Button } from '@/components/ui/button'
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -126,9 +127,15 @@ const handleGenerateGravatar = () => {
             <ArrowLeft class="size-4" />
           </Button>
           <div class="space-y-1">
-            <h1 class="text-3xl font-bold tracking-tight">
-              {{ t('user.edit.title') }}
-            </h1>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h1 class="text-3xl font-bold tracking-tight">
+                {{ t('user.edit.title') }}
+              </h1>
+              <Badge v-if="profile?.isAdmin" variant="default" class="gap-1">
+                <Shield class="size-3" />
+                {{ t('user.profile.admin_badge', 'Admin') }}
+              </Badge>
+            </div>
             <p class="text-sm text-muted-foreground">
               {{ t('user.edit.subtitle') }}
             </p>
