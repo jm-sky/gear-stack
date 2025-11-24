@@ -9,6 +9,7 @@ from typing import Sequence
 
 from .repository import GearRepository
 from .schemas import (
+    BatchOrderUpdateRequest,
     ContainerCreate,
     ContainerResponse,
     ContainerUpdate,
@@ -66,6 +67,7 @@ class GearService:
             linkedItemId=item.linked_item_id,
             wearable=item.wearable,
             consumable=item.consumable,
+            order=item.order,
             createdAt=item.created_at,
             updatedAt=item.updated_at,
         )
@@ -324,6 +326,22 @@ class GearService:
             True if deleted, False if not found
         """
         return await self.repository.delete_item(item_id, user_id)
+
+    async def batch_update_item_order(self, user_id: str, data: BatchOrderUpdateRequest) -> list[ItemResponse]:
+        """Batch update items' order values.
+
+        Args:
+            user_id: Owner user ID
+            data: Batch order update request with list of item IDs and their new order values
+
+        Returns:
+            List of updated item responses
+
+        Raises:
+            ValueError: If any item ID is not found or doesn't belong to the user
+        """
+        items = await self.repository.batch_update_item_order(user_id, data)
+        return [self._map_item_to_response(item) for item in items]
 
     def calculate_container_weight(self, container: ContainerResponse) -> dict[str, float]:
         """Calculate total weight of a container in grams and kilograms.

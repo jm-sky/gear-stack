@@ -185,6 +185,71 @@ class GearItemLocalService {
 
     return Promise.resolve(container.items.find(item => item.id === itemId))
   }
+
+  /**
+   * Batch update items order
+   * Updates multiple items' order field in a single operation
+   */
+  async batchUpdateOrder(items: IGearItem[]): Promise<IGearItem[]> {
+    if (items.length === 0) {
+      return Promise.resolve([])
+    }
+
+    // Group items by container
+    const itemsByContainer = new Map<TUUID, IGearItem[]>()
+    for (const item of items) {
+      // Find container for this item
+      const allContainers = this.store.getAllContainers
+      for (const container of allContainers) {
+        const existingItem = container.items.find(i => i.id === item.id)
+        if (existingItem) {
+          const containerId = container.id
+          if (!itemsByContainer.has(containerId)) {
+            itemsByContainer.set(containerId, [])
+          }
+          itemsByContainer.get(containerId)!.push(item)
+          break
+        }
+      }
+    }
+
+    const updatedItems: IGearItem[] = []
+    const now = new Date().toISOString()
+
+    // Update each container
+    for (const [containerId, containerItems] of itemsByContainer.entries()) {
+      const container = this.store.getContainerById(containerId)
+      if (!container) continue
+
+      // Create a map of item updates
+      const itemUpdates = new Map(containerItems.map(item => [item.id, item]))
+
+      // Update items in container
+      const updatedContainerItems = container.items.map(existingItem => {
+        const update = itemUpdates.get(existingItem.id)
+        if (update) {
+          const updated: IGearItem = {
+            ...existingItem,
+            order: update.order,
+            updatedAt: now,
+          }
+          updatedItems.push(updated)
+          return updated
+        }
+        return existingItem
+      })
+
+      const updatedContainer: IGearContainer = {
+        ...container,
+        items: updatedContainerItems,
+        updatedAt: now,
+      }
+
+      this.store.updateContainer(updatedContainer)
+    }
+
+    return Promise.resolve(updatedItems)
+  }
 }
 
 export const gearItemLocalService = new GearItemLocalService()
