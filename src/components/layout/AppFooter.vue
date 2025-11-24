@@ -21,7 +21,8 @@ const { version, buildDate } = useAppVersion()
           <HoverLinkExternal :href="config.contact.companyWebsite">
             {{ config.contact.companyName }}
           </HoverLinkExternal>
-          |
+        </div>
+        <div class="text-sm">
           <HoverLink to="/">
             {{ config.app.name }}
           </HoverLink>

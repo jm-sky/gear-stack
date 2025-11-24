@@ -77,7 +77,7 @@ const navigateTo = (path: string) => {
     <DropdownMenuTrigger as-child>
       <Avatar
         aria-label="User menu"
-        :class="cn('cursor-pointer hover:brightness-95 transition-all duration-300', !isAuthenticated && 'ring-2 ring-muted-foreground/30')"
+        :class="cn('cursor-pointer hover:brightness-95 transition-all duration-300', !isAuthenticated && 'ring-2 ring-muted-foreground/30', isAdmin && 'ring-2 ring-primary ring-offset-2 ring-offset-background')"
       >
         <AvatarImage :src="userAvatar ?? ''" />
         <AvatarFallback :class="isAuthenticated ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'">

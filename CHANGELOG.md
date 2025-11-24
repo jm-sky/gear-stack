@@ -21,6 +21,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.10.0] - 2025-01-24
+
+### Added
+- **Admin Badge Display**: Admin users now have a visual badge with Shield icon displayed on profile pages
+- **Admin Avatar Ring**: Admin users' avatars display a primary-colored ring with offset for easy identification
+- **isAdmin Field in Auth Responses**: Login and authentication responses now include isAdmin flag for frontend use
+
+### Changed
+- **Backend Refactoring - Admin Module**: Complete architectural refactoring following Repository→Service→Router pattern
+  - Created `AdminRepository` class for database queries (211 lines)
+  - Created `AdminService` class for business logic (331 lines)
+  - Created proper Pydantic response schemas (`AdminUserResponse`, `AdminContainerResponse`, `AdminItemResponse`)
+  - Refactored `admin/router.py` from 406 to 224 lines (45% reduction)
+  - Eliminated code duplication (consolidated user serialization)
+  - Improved type safety and maintainability
+- **Public Profile API**: Now includes `isAdmin` field in public user profile responses
+- **User Type Definitions**: Added optional `isAdmin` field to `IUser` interface
+
+### Technical Details
+- Frontend: Added Shield icon and Badge components to profile pages
+- Frontend: Added admin ring styling to UserNav avatar component
+- Backend: Admin module now follows same clean architecture as Gear module
+- Backend: All admin endpoints use proper dependency injection and type-safe responses
+- Translations: Added admin badge translations (EN: "Admin", PL: "Administrator")
+- All type checking and linting passes successfully
+
+---
+
 ## [2.9.0] - 2025-01-21
 
 ### Added

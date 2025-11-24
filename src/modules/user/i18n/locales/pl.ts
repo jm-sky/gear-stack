@@ -11,6 +11,7 @@ export const userPl = {
       auth_required_message: 'Zaloguj się aby korzystać z wszystkich funkcji aplikacji',
       login_button: 'Zaloguj się',
       register_button: 'Załóż konto',
+      admin_badge: 'Administrator',
     },
     edit: {
       title: 'Edytuj Profil',

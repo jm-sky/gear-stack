@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { isAxiosError } from 'axios'
+ 
 import { AuthRouteNames } from '@/modules/auth/config/routes'
 import { useAuthStore } from '@/modules/auth/store/useAuthStore'
 import { config } from '@/shared/config/config'

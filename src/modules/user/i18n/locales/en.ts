@@ -11,6 +11,7 @@ export const userEn = {
       auth_required_message: 'Log in to use all app features',
       login_button: 'Log In',
       register_button: 'Sign Up',
+      admin_badge: 'Admin',
     },
     edit: {
       title: 'Edit Profile',

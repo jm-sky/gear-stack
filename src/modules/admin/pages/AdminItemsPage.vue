@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Package2, Trash2 } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
-import type { ColumnDef } from '@tanstack/vue-table'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -11,8 +10,9 @@ import Button from '@/components/ui/button/Button.vue'
 import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { GearRoutePath } from '@/modules/gear/routes'
-import { adminApiService } from '../services/adminApiService'
 import type { IAdminItem } from '../types/admin.types'
+import { adminApiService } from '../services/adminApiService'
+import type { ColumnDef } from '@tanstack/vue-table'
 
 const { t } = useI18n()
 const items = ref<IAdminItem[]>([])

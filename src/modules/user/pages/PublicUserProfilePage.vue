@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { Package, User } from 'lucide-vue-next'
+import { Package, Shield, User } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import Avatar from '@/components/ui/avatar/Avatar.vue'
 import AvatarFallback from '@/components/ui/avatar/AvatarFallback.vue'
 import AvatarImage from '@/components/ui/avatar/AvatarImage.vue'
+import Badge from '@/components/ui/badge/Badge.vue'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import ColorDot from '@/modules/gear/components/ColorDot.vue'
@@ -20,6 +21,7 @@ interface PublicUserResponse {
   id: string
   name: string
   avatarUrl?: string
+  isAdmin: boolean
   email?: string
   emailPublic: boolean
 }
@@ -43,6 +45,7 @@ function mapToIUser(response: PublicUserResponse): IUser {
     name: response.name,
     email: response.email || '',
     avatarUrl: response.avatarUrl,
+    isAdmin: response.isAdmin,
     emailPublic: response.emailPublic,
     createdAt: '', // Not provided in public profile
     updatedAt: '', // Not provided in public profile
@@ -124,11 +127,17 @@ const handleContainerClick = (containerId: string) => {
                 {{ initials }}
               </AvatarFallback>
             </Avatar>
-            <div class="text-center sm:text-left">
-              <h1 class="text-2xl sm:text-3xl font-bold mb-2">
-                {{ user.name }}
-              </h1>
-              <p v-if="user.emailPublic && user.email" class="text-muted-foreground text-sm sm:text-base break-all">
+            <div class="text-center sm:text-left flex-1">
+              <div class="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
+                <h1 class="text-2xl sm:text-3xl font-bold">
+                  {{ user.name }}
+                </h1>
+                <Badge v-if="user.isAdmin" variant="default" class="gap-1">
+                  <Shield class="size-3" />
+                  {{ t('user.profile.admin_badge', 'Admin') }}
+                </Badge>
+              </div>
+              <p v-if="user.emailPublic && user.email" class="text-muted-foreground text-sm sm:text-base break-all mt-2">
                 {{ user.email }}
               </p>
             </div>

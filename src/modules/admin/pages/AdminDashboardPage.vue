@@ -5,8 +5,8 @@ import { RouterLink } from 'vue-router'
 import Button from '@/components/ui/button/Button.vue'
 import Card from '@/components/ui/card/Card.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import { AdminRoutePaths } from '../routes'
 import { useAdmin } from '../composables/useAdmin'
+import { AdminRoutePaths } from '../routes'
 
 const { t } = useI18n()
 const { isAdmin } = useAdmin()

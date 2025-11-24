@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Trash2, Users } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
-import type { ColumnDef } from '@tanstack/vue-table'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
 import DataTable from '@/components/data-table/DataTable.vue'
@@ -9,8 +8,9 @@ import Badge from '@/components/ui/badge/Badge.vue'
 import Button from '@/components/ui/button/Button.vue'
 import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import { adminApiService } from '../services/adminApiService'
 import type { IAdminUser } from '../types/admin.types'
+import { adminApiService } from '../services/adminApiService'
+import type { ColumnDef } from '@tanstack/vue-table'
 
 const { t } = useI18n()
 const users = ref<IAdminUser[]>([])

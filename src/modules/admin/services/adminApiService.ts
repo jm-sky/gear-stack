@@ -1,6 +1,6 @@
 import { apiClient } from '@/shared/services/apiClient'
-import type { TUUID } from '@/shared/types/base.type'
 import type { IAdminContainer, IAdminItem, IAdminUser } from '../types/admin.types'
+import type { TUUID } from '@/shared/types/base.type'
 
 /**
  * Admin API Service

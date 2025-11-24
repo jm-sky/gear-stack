@@ -605,3 +605,101 @@ async def _delete_user_from_db(user_id: str) -> None:
         # Delete user
         await db.delete(user_db)
         await db.commit()
+
+
+@users_app.command("toggle-admin")
+def users_toggle_admin(
+    identifier: str | None = typer.Argument(None, help="User email or ID"),
+    yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation prompt"),
+) -> None:
+    """Toggle admin flag for a user by email or ID.
+
+    Examples:
+        # Interactive mode (will prompt for email/ID)
+        python -m cli users toggle-admin
+
+        # Toggle admin by email
+        python -m cli users toggle-admin user@example.com
+
+        # Toggle admin by ID without confirmation
+        python -m cli users toggle-admin 01HQX... --yes
+    """
+    asyncio.run(_users_toggle_admin_async(identifier, yes))
+
+
+async def _users_toggle_admin_async(identifier: str | None, yes: bool) -> None:
+    """Async implementation of toggle admin."""
+    from rich.console import Console
+
+    console = Console()
+
+    try:
+        # Get identifier if not provided
+        if not identifier:
+            identifier = Prompt.ask("[cyan]Enter user email or ID[/cyan]")
+
+        # Find user
+        with console.status("[bold green]Finding user...", spinner="dots"):
+            user = await _find_user(identifier)
+
+        if not user:
+            console.print(f"\n[red]User not found:[/red] {identifier}\n")
+            return
+
+        # Determine new admin status
+        new_admin_status = not user["isAdmin"]
+        action = "promote to administrator" if new_admin_status else "demote to regular user"
+
+        # Show user info
+        console.print(f"\n[bold cyan]User to modify:[/bold cyan]\n")
+
+        user_info = f"""[bold]ID:[/bold] {user['id']}
+[bold]Email:[/bold] {user['email']}
+[bold]Name:[/bold] {user['name']}
+[bold]Current Role:[/bold] {'Administrator' if user['isAdmin'] else 'User'}
+[bold]New Role:[/bold] {'Administrator' if new_admin_status else 'User'}"""
+
+        panel = Panel(user_info, border_style="cyan")
+        console.print(panel)
+
+        # Confirm change
+        if not yes:
+            console.print()
+            if not Confirm.ask(f"Are you sure you want to {action}?", default=True):
+                console.print("[yellow]Cancelled[/yellow]")
+                return
+
+        # Toggle admin status
+        with console.status(f"[bold green]Updating user...", spinner="dots"):
+            await _toggle_admin_in_db(user["id"], new_admin_status)
+
+        console.print(
+            f"\n[bold green]✓[/bold green] User {'promoted to administrator' if new_admin_status else 'demoted to regular user'} successfully\n"
+        )
+
+    except Exception as e:
+        console.print(f"\n[red]Error toggling admin status:[/red] {e}\n")
+        raise typer.Exit(1)
+
+
+async def _toggle_admin_in_db(user_id: str, is_admin: bool) -> None:
+    """Toggle admin status in database.
+
+    Args:
+        user_id: User ID to update
+        is_admin: New admin status
+    """
+    from app.core.database import get_db
+    from app.modules.auth.repositories import UserRepository
+
+    async for db in get_db():
+        repo = UserRepository(db)
+
+        # Get user
+        user = await repo.get_user_by_id(user_id)
+        if not user:
+            raise ValueError(f"User with id {user_id} not found")
+
+        # Update admin status
+        user.isAdmin = is_admin
+        await repo.update_user(user)

@@ -1,5 +1,5 @@
-import { AuthRouteNames, AuthRoutePaths, authRoutes } from '@/modules/auth/config/routes'
 import { adminRoutes } from '@/modules/admin/routes'
+import { AuthRouteNames, AuthRoutePaths, authRoutes } from '@/modules/auth/config/routes'
 import { gearRoutes } from '@/modules/gear/routes'
 import { settingsRoutes } from '@/modules/settings/routes'
 import { userRoutes } from '@/modules/user/routes'

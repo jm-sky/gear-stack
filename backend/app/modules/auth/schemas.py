@@ -92,6 +92,7 @@ class UserResponse(BaseModel):
     email: EmailStr
     name: str
     isActive: bool
+    isAdmin: bool
     isEmailVerified: bool
     emailVerifiedAt: datetime | None = None
     avatarUrl: str | None = None

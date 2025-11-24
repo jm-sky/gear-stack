@@ -149,18 +149,14 @@ async def get_public_user_profile(
         )
 
     # Build public response
-    response_data = {
-        "id": user.id,
-        "name": user.name,
-        "avatarUrl": user.avatarUrl,
-        "emailPublic": settings.is_public_email,
-    }
-
-    # Only include email if user has emailPublic enabled
-    if settings.is_public_email:
-        response_data["email"] = user.email
-
-    return PublicUserResponse(**response_data)
+    return PublicUserResponse(
+        id=user.id,
+        name=user.name,
+        avatarUrl=user.avatarUrl,
+        isAdmin=user.role == "admin",
+        email=user.email if settings.is_public_email else None,
+        emailPublic=settings.is_public_email,
+    )
 
 
 @router.get(
