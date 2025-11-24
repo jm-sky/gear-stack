@@ -23,19 +23,49 @@ from sqlalchemy import text
 from app.core.database import engine
 
 
+async def column_exists(conn, table_name: str, column_name: str) -> bool:
+    """Check if a column exists in a table."""
+    result = await conn.execute(
+        text(
+            """
+            SELECT EXISTS (
+                SELECT FROM information_schema.columns 
+                WHERE table_schema = 'public' 
+                AND table_name = :table_name
+                AND column_name = :column_name
+            );
+        """
+        ),
+        {"table_name": table_name, "column_name": column_name},
+    )
+    return result.scalar() is True
+
+
 async def upgrade() -> None:
     """Add OAuth fields to users table."""
     print("Adding OAuth fields to users table...")
 
     async with engine.begin() as conn:
         # Add oauth_provider column
-        await conn.execute(text("ALTER TABLE users ADD COLUMN oauth_provider VARCHAR(50)"))
+        if not await column_exists(conn, "users", "oauth_provider"):
+            await conn.execute(text("ALTER TABLE users ADD COLUMN oauth_provider VARCHAR(50)"))
+            print("  ✓ Added oauth_provider column")
+        else:
+            print("  ⊙ oauth_provider column already exists, skipping")
 
         # Add oauth_provider_id column
-        await conn.execute(text("ALTER TABLE users ADD COLUMN oauth_provider_id VARCHAR(255)"))
+        if not await column_exists(conn, "users", "oauth_provider_id"):
+            await conn.execute(text("ALTER TABLE users ADD COLUMN oauth_provider_id VARCHAR(255)"))
+            print("  ✓ Added oauth_provider_id column")
+        else:
+            print("  ⊙ oauth_provider_id column already exists, skipping")
 
         # Add avatar_url column
-        await conn.execute(text("ALTER TABLE users ADD COLUMN avatar_url TEXT"))
+        if not await column_exists(conn, "users", "avatar_url"):
+            await conn.execute(text("ALTER TABLE users ADD COLUMN avatar_url TEXT"))
+            print("  ✓ Added avatar_url column")
+        else:
+            print("  ⊙ avatar_url column already exists, skipping")
 
         # Make hashed_password nullable (for OAuth users)
         # SQLite doesn't support ALTER COLUMN, so we need to check the dialect
