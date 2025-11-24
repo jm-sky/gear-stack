@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { Users, Package, PackageCheck } from 'lucide-vue-next'
+import { Package, PackageCheck, Users } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { apiClient } from '@/shared/services/apiClient'
-import { config } from '@/shared/config/config'
-import { useGearStore } from '@/modules/gear/store/useGearStore'
 import { useAuthStore } from '@/modules/auth/store/useAuthStore'
+import { useGearStore } from '@/modules/gear/store/useGearStore'
+import { config } from '@/shared/config/config'
+import { apiClient } from '@/shared/services/apiClient'
 
 const { t } = useI18n()
 const gearStore = useGearStore()

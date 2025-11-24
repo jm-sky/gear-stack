@@ -112,7 +112,6 @@ if (!config.backend.enabled) {
       </div>
 
       <div class="max-w-2xl w-full space-y-8 text-center">
-
         <!-- Local Containers Summary (shown when not logged in but has containers) -->
         <div v-if="hasLocalContainers" class="space-y-6 py-8">
           <div class="bg-card/50 backdrop-blur-sm rounded-lg border p-6 space-y-4">
