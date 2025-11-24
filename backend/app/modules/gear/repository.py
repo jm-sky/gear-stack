@@ -366,7 +366,7 @@ class GearRepository(SearchMixin):
         """
         # Get all item IDs from the request
         item_ids = [item_order.id for item_order in data.items]
-        
+
         # Fetch all items and verify they belong to the user
         stmt = (
             select(GearItemDB)
@@ -380,24 +380,24 @@ class GearRepository(SearchMixin):
         )
         result = await self.db.execute(stmt)
         items = result.scalars().all()
-        
+
         # Verify all items were found
         found_item_ids = {item.id for item in items}
         missing_item_ids = set(item_ids) - found_item_ids
         if missing_item_ids:
             raise ValueError(f"Items not found or access denied: {missing_item_ids}")
-        
+
         # Create a map of item_id -> new order
         order_map = {item_order.id: item_order.order for item_order in data.items}
-        
+
         # Update order for each item
         for item in items:
             item.order = order_map[item.id]
-        
+
         await self.db.commit()
-        
+
         # Refresh all items
         for item in items:
             await self.db.refresh(item)
-        
+
         return items

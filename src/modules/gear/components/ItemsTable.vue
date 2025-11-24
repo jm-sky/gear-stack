@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Box, ChevronDown, ChevronRight, ChevronUp, Package } from 'lucide-vue-next'
-import type { SortingState } from '@tanstack/vue-table'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -24,6 +23,7 @@ import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 import CategoryIcon from './CategoryIcon.vue'
 import ItemsTableNestedContainerRow from './ItemsTableNestedContainerRow.vue'
 import ItemsTableRowActions from './ItemsTableRowActions.vue'
+import type { SortingState } from '@tanstack/vue-table'
 
 const props = withDefaults(
   defineProps<{
@@ -207,29 +207,31 @@ const sortedItems = computed<IGearItem[]>(() => {
   // If table has active sorting, apply it
   if (tableSorting.value.length > 0) {
     const sortConfig = tableSorting.value[0]
+    if (!sortConfig) return items
+    
     const columnId = sortConfig.id
     const direction = sortConfig.desc ? -1 : 1
     
     return items.sort((a, b) => {
-      let aValue: any = a[columnId as keyof IGearItem]
-      let bValue: any = b[columnId as keyof IGearItem]
+      const aValue: unknown = a[columnId as keyof IGearItem]
+      const bValue: unknown = b[columnId as keyof IGearItem]
       
       // Handle different data types
-      if (aValue === null || aValue === undefined) aValue = ''
-      if (bValue === null || bValue === undefined) bValue = ''
+      const aVal = aValue === null || aValue === undefined ? '' : aValue
+      const bVal = bValue === null || bValue === undefined ? '' : bValue
       
       // String comparison
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return aValue.localeCompare(bValue) * direction
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return aVal.localeCompare(bVal) * direction
       }
       
       // Number comparison
-      if (typeof aValue === 'number' && typeof bValue === 'number') {
-        return (aValue - bValue) * direction
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        return (aVal - bVal) * direction
       }
       
       // Fallback
-      return String(aValue).localeCompare(String(bValue)) * direction
+      return String(aVal).localeCompare(String(bVal)) * direction
     })
   }
   
@@ -265,26 +267,28 @@ watch(
       // Get current sorted items based on new sorting
       const items = [...props.items]
       const sortConfig = newSorting[0]
+      if (!sortConfig) return
+      
       const columnId = sortConfig.id
       const direction = sortConfig.desc ? -1 : 1
       
       // Apply sorting
       const sorted = items.sort((a, b) => {
-        let aValue: any = a[columnId as keyof IGearItem]
-        let bValue: any = b[columnId as keyof IGearItem]
+        const aValue: unknown = a[columnId as keyof IGearItem]
+        const bValue: unknown = b[columnId as keyof IGearItem]
         
-        if (aValue === null || aValue === undefined) aValue = ''
-        if (bValue === null || bValue === undefined) bValue = ''
+        const aVal = aValue === null || aValue === undefined ? '' : aValue
+        const bVal = bValue === null || bValue === undefined ? '' : bValue
         
-        if (typeof aValue === 'string' && typeof bValue === 'string') {
-          return aValue.localeCompare(bValue) * direction
+        if (typeof aVal === 'string' && typeof bVal === 'string') {
+          return aVal.localeCompare(bVal) * direction
         }
         
-        if (typeof aValue === 'number' && typeof bValue === 'number') {
-          return (aValue - bValue) * direction
+        if (typeof aVal === 'number' && typeof bVal === 'number') {
+          return (aVal - bVal) * direction
         }
         
-        return String(aValue).localeCompare(String(bValue)) * direction
+        return String(aVal).localeCompare(String(bVal)) * direction
       })
       
       // Update order field based on current sorted order
