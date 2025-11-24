@@ -21,6 +21,104 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.5.0] - 2025-11-24
+
+### Release: Testing Infrastructure, UI/UX Enhancements & Deployment Automation
+
+This release focuses on improving code quality with comprehensive unit tests, enhancing user experience with app versioning and authentication improvements, and streamlining deployment workflows.
+
+### Added
+- **Testing Infrastructure**:
+  - Added 1348 lines of unit tests for utility functions (#114315c)
+  - Tests for: `cn` function, `valueUpdater`, category recognition, container calculations, weight formatting, item retrieval, parameter recognition, suggested values, and type guards
+  - Backend unit tests for auth service and utilities (#cc93948)
+  - Enhanced test environment setup with proper database engine configuration
+
+- **App Version & Build Information**:
+  - App version and build date now displayed in footer (#35, #8b2f483)
+  - Created `useAppVersion` composable for centralized version management (#78f52b6)
+  - Dynamic company information from environment variables
+  - Build date automatically injected via Vite during build process
+
+- **Authentication & User Experience**:
+  - New `AuthenticationRequiredAlert` component for profile pages (#ab3f991)
+  - `DropdownMenuItemLink` component for better navigation in UserNav
+  - OAuth button added to RegisterForm (#97caa9d)
+  - Improved user authentication flow with conditional rendering
+
+- **Deployment Automation**:
+  - GitHub Actions workflow for automated deployment (#ce6d3cc)
+  - Backend restart and migration script (`backend_restart_migrate.sh`) (#48fcb62)
+  - Frontend build and deploy script (`frontend_build_deploy.sh`)
+  - Comprehensive deployment documentation in `DEPLOYMENT.md`
+
+- **Developer Experience**:
+  - VSCode settings and Pyright configuration for backend development (#f9c3452)
+  - Example environment variables for backend configuration (#3126fe6)
+  - `pnpm-workspace.yaml` for monorepo support
+
+- **UI Components**:
+  - `GuestLayoutFooter` component for consistent footer across guest layouts (#78f52b6)
+
+### Changed
+- **Documentation Improvements**:
+  - Added comprehensive `TODO_FEATURES.md` file consolidating features from both offline and online roadmaps (#b1792d3)
+  - Updated `README.md` with link to TODO features list and completed features (#7bacf27)
+  - Restructured roadmap: split into `ROADMAP_OFFLINE.md` and `ROADMAP_ONLINE.md`
+  - Moved analysis docs to `docs/analysis/` directory
+  - Moved archived docs to `docs/archive/` directory
+  - Updated cursor rules with Question vs. Action Protocol and TailwindCSS best practices
+
+- **User Authentication Refactoring**:
+  - Refactored user profile handling with consistent `avatarUrl` usage (#ab3f991)
+  - UserNav now conditionally shows login/register options based on auth status
+  - Improved profile page with authentication-aware components
+  - Enhanced route handling with constants for user profile paths
+
+- **Footer Component Refactoring**:
+  - Replaced hardcoded footer content with reusable `GuestLayoutFooter` component
+  - Centralized footer logic in `AppFooter.vue` with dynamic configuration
+  - Consistent footer across `GuestLayoutCentered`, `GuestLayoutCenteredGlass`, and `GuestLayoutTwoColumns`
+
+- **Configuration Updates**:
+  - Updated `.env.example` to use array syntax for CORS settings (#6c716ac)
+  - Enhanced `.gitignore` for better environment file handling
+  - Removed draft deployment configurations for cleaner repo
+
+- **Public Containers UI**:
+  - Improved responsive design for public containers browser (#752e210)
+  - Enhanced mobile layout for public container detail pages
+
+- **Deployment Scripts**:
+  - Refactored `deploy.sh` for better maintainability (#48fcb62)
+  - Separated frontend build logic into dedicated script
+  - Improved CI/CD environment variable handling
+
+### Fixed
+- **OAuth Internationalization**:
+  - Fixed OAuth callback i18n interpolation syntax (#e0d2499)
+  - Removed debug log from reCAPTCHA utility
+
+- **Deployment**:
+  - Fixed CI environment variable handling in deployment script
+  - Removed pnpm version specification from deploy workflow (#36)
+  - Updated deployment branch configuration
+
+- **Code Quality**:
+  - Automatic formatting with Black for Python backend code (#80a9012)
+  - Fixed various TypeScript and ESLint issues
+
+### Security
+- Enhanced backend test coverage for authentication and authorization flows
+- Improved environment variable handling and validation
+
+### Development
+- Backend restart and migration workflow streamlined
+- Improved local development setup with proper configuration examples
+- Better separation of concerns between frontend and backend deployment
+
+---
+
 ## [2.4.0] - 2025-11-23
 
 ### Added
