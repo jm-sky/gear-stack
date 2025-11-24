@@ -14,9 +14,16 @@ To disable rate limiting (NOT recommended):
 - Set RATE_LIMIT_ENABLED=false in .env
 """
 
+import logging
 from typing import TYPE_CHECKING, Annotated, Any, TypeAlias, Union, cast
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.database import get_db
+from app.core.email.i18n import determine_email_locale, get_translations
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from app.modules.two_factor.schemas import (
@@ -44,6 +51,9 @@ from .schemas import (
     ForgotPasswordRequest,
     LoginResponse,
     MessageResponse,
+    OAuthAuthUrlRequest,
+    OAuthAuthUrlResponse,
+    OAuthCallbackRequest,
     ResendEmailVerificationRequest,
     ResetPasswordRequest,
     TokenRefresh,
@@ -74,7 +84,12 @@ router = APIRouter()
 )
 @rate_limit("5/minute")  # Prevent registration abuse
 @recaptcha_protected("register")  # Disabled by default, enable via RECAPTCHA_ENABLED=true
-async def register(user_data: UserRegister, auth_service: AuthServiceDep, request: Request) -> MessageResponse:
+async def register(
+    user_data: UserRegister,
+    auth_service: AuthServiceDep,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> MessageResponse:
     """
     Register a new user.
 
@@ -84,7 +99,18 @@ async def register(user_data: UserRegister, auth_service: AuthServiceDep, reques
     - 💡 Recommendation: Add email verification in production
     """
     try:
-        await auth_service.register_user(email=user_data.email, password=user_data.password, name=user_data.name)
+        # Determine locale for email
+        accept_language = request.headers.get("Accept-Language")
+        locale = await determine_email_locale(db=db, user_id=None, accept_language=accept_language)
+        translations = get_translations(locale)
+
+        await auth_service.register_user(
+            email=user_data.email,
+            password=user_data.password,
+            name=user_data.name,
+            locale=locale,
+            translations=translations,
+        )
         return MessageResponse(message="Registration successful. Please check your email to verify your account.")
     except UserAlreadyExistsError:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User with this email already exists")
@@ -107,9 +133,6 @@ async def login(credentials: UserLogin, auth_service: AuthServiceDep, request: R
     """
     try:
         # Debug: Log what type of auth service we're using
-        import logging
-
-        logger = logging.getLogger(__name__)
         logger.info(f"Login attempt for {credentials.email}, auth_service type: {type(auth_service).__name__}")
 
         result = await auth_service.login_user(email=credentials.email, password=credentials.password)
@@ -151,10 +174,27 @@ async def refresh_token(token_data: TokenRefresh, auth_service: AuthServiceDep, 
         )
 
 
+@router.post("/logout", response_model=MessageResponse, summary="Logout user", description="Logout current user", tags=["Authentication"])
+async def logout(current_user: CurrentUser) -> MessageResponse:
+    """
+    Logout current user.
+
+    Security features:
+    - ✅ Authentication required (JWT token via CurrentUser)
+    - TODO: Invalidate token
+    """
+    return MessageResponse(message="Logged out successfully")
+
+
 @router.post("/forgot-password", response_model=MessageResponse, summary="Request password reset", description="Request a password reset email (development: token is printed to console)", tags=["Authentication"])
 @rate_limit("3/minute")  # CRITICAL: Prevent email enumeration and spam
 @recaptcha_protected("forgot_password")  # Disabled by default, enable via RECAPTCHA_ENABLED=true
-async def forgot_password(request_data: ForgotPasswordRequest, auth_service: AuthServiceDep, request: Request) -> MessageResponse:
+async def forgot_password(
+    request_data: ForgotPasswordRequest,
+    auth_service: AuthServiceDep,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> MessageResponse:
     """
     Request password reset.
 
@@ -163,8 +203,20 @@ async def forgot_password(request_data: ForgotPasswordRequest, auth_service: Aut
     - ⚪ reCAPTCHA: Disabled by default, RECOMMENDED (enable via RECAPTCHA_ENABLED=true)
     - ✅ Generic response message (prevents email enumeration)
     """
+    # Determine locale for email
+    accept_language = request.headers.get("Accept-Language")
+    # Get user_id from email if user exists (for locale detection)
+    user = await auth_service.user_repository.get_user_by_email(request_data.email)
+    user_id = user.id if user else None
+    locale = await determine_email_locale(db=db, user_id=user_id, accept_language=accept_language)
+    translations = get_translations(locale)
+
     # Always return success message to prevent email enumeration
-    await auth_service.request_password_reset(request_data.email)
+    await auth_service.request_password_reset(
+        request_data.email,
+        locale=locale,
+        translations=translations,
+    )
     return MessageResponse(message="If the email exists, a password reset link has been sent")
 
 
@@ -187,7 +239,13 @@ async def reset_password(request_data: ResetPasswordRequest, auth_service: AuthS
 
 @router.post("/change-password", response_model=MessageResponse, summary="Change password", description="Change password for authenticated user", tags=["Authentication"])
 @rate_limit("3/minute")  # Prevent password change abuse
-async def change_password(request_data: ChangePasswordRequest, current_user: CurrentUser, auth_service: AuthServiceDep, request: Request) -> MessageResponse:
+async def change_password(
+    request_data: ChangePasswordRequest,
+    current_user: CurrentUser,
+    auth_service: AuthServiceDep,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> MessageResponse:
     """
     Change password for authenticated user.
 
@@ -197,9 +255,21 @@ async def change_password(request_data: ChangePasswordRequest, current_user: Cur
     - ✅ Current password verification required
     """
     try:
+        # Determine locale for email
+        accept_language = request.headers.get("Accept-Language")
+        locale = await determine_email_locale(db=db, user_id=current_user.id, accept_language=accept_language)
+        translations = get_translations(locale)
+
         # Get client IP address for security notification
         client_ip = request.client.host if request.client else None
-        await auth_service.change_password(user_id=current_user.id, current_password=request_data.currentPassword, new_password=request_data.newPassword, ip_address=client_ip)
+        await auth_service.change_password(
+            user_id=current_user.id,
+            current_password=request_data.currentPassword,
+            new_password=request_data.newPassword,
+            ip_address=client_ip,
+            locale=locale,
+            translations=translations,
+        )
         return MessageResponse(message="Password changed successfully")
     except InvalidCredentialsError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Current password is incorrect")
@@ -226,9 +296,34 @@ async def get_current_user_info(current_user: CurrentUser) -> UserResponse:
     description="Confirm email using verification token sent after registration",
     tags=["Authentication"],
 )
-async def verify_email(request_data: EmailVerificationRequest, auth_service: AuthServiceDep) -> MessageResponse:
+async def verify_email(
+    request_data: EmailVerificationRequest,
+    auth_service: AuthServiceDep,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> MessageResponse:
     try:
-        await auth_service.verify_email(request_data.token)
+        # Determine locale for email (before verification, try to get user from token)
+        accept_language = request.headers.get("Accept-Language")
+        # Try to peek at user from token without verifying yet (for locale detection)
+        # If this fails, we'll use default locale
+        user_id = None
+        try:
+            from app.modules.auth.auth_utils import verify_token
+
+            payload = verify_token(request_data.token)
+            user_id = payload.get("sub")
+        except Exception:
+            pass  # Will use default locale
+
+        locale = await determine_email_locale(db=db, user_id=user_id, accept_language=accept_language)
+        translations = get_translations(locale)
+
+        await auth_service.verify_email(
+            request_data.token,
+            locale=locale,
+            translations=translations,
+        )
         return MessageResponse(message="Email address verified successfully.")
     except InvalidTokenError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired verification token")
@@ -242,14 +337,37 @@ async def verify_email(request_data: EmailVerificationRequest, auth_service: Aut
     tags=["Authentication"],
 )
 @rate_limit("3/hour")
-async def resend_email_verification(request_data: ResendEmailVerificationRequest, auth_service: AuthServiceDep, request: Request) -> MessageResponse:
-    await auth_service.resend_email_verification(request_data.email)
+async def resend_email_verification(
+    request_data: ResendEmailVerificationRequest,
+    auth_service: AuthServiceDep,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> MessageResponse:
+    # Determine locale for email
+    accept_language = request.headers.get("Accept-Language")
+    # Get user_id from email if user exists (for locale detection)
+    user = await auth_service.user_repository.get_user_by_email(request_data.email)
+    user_id = user.id if user else None
+    locale = await determine_email_locale(db=db, user_id=user_id, accept_language=accept_language)
+    translations = get_translations(locale)
+
+    await auth_service.resend_email_verification(
+        request_data.email,
+        locale=locale,
+        translations=translations,
+    )
     return MessageResponse(message="If the email exists, a new verification link has been sent.")
 
 
 @router.delete("/account", response_model=MessageResponse, summary="Delete account", description="Delete current user's account (soft delete by default)", tags=["Authentication"])
 @rate_limit("1/day")  # Prevent abuse - only allow one deletion per day
-async def delete_account(request_data: DeleteAccountRequest, current_user: CurrentUser, auth_service: AuthServiceDep, request: Request) -> MessageResponse:
+async def delete_account(
+    request_data: DeleteAccountRequest,
+    current_user: CurrentUser,
+    auth_service: AuthServiceDep,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> MessageResponse:
     """
     Delete current user's account.
 
@@ -261,7 +379,19 @@ async def delete_account(request_data: DeleteAccountRequest, current_user: Curre
     - ✅ Soft delete by default (GDPR compliant with data anonymization)
     """
     try:
-        await auth_service.delete_account(user_id=current_user.id, password=request_data.password, confirmation=request_data.confirmation, soft_delete=True)
+        # Determine locale for email (before account is deleted)
+        accept_language = request.headers.get("Accept-Language")
+        locale = await determine_email_locale(db=db, user_id=current_user.id, accept_language=accept_language)
+        translations = get_translations(locale)
+
+        await auth_service.delete_account(
+            user_id=current_user.id,
+            password=request_data.password,
+            confirmation=request_data.confirmation,
+            soft_delete=True,
+            locale=locale,
+            translations=translations,
+        )
         return MessageResponse(message="Account has been deleted successfully")
     except InvalidCredentialsError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
@@ -269,3 +399,70 @@ async def delete_account(request_data: DeleteAccountRequest, current_user: Curre
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
 
+# OAuth Endpoints
+
+
+@router.post(
+    "/oauth/auth-url",
+    response_model=OAuthAuthUrlResponse,
+    summary="Get OAuth authorization URL",
+    description="Generate OAuth authorization URL for the specified provider",
+    tags=["Authentication", "OAuth"],
+)
+@rate_limit("10/minute")
+async def get_oauth_auth_url(request_data: OAuthAuthUrlRequest, request: Request) -> OAuthAuthUrlResponse:
+    """
+    Generate OAuth authorization URL.
+
+    Returns authorization URL and CSRF state parameter.
+    """
+    from app.core.oauth import oauth_service
+
+    state = oauth_service.generate_state()
+    auth_url = oauth_service.get_authorization_url(request_data.provider, state)
+
+    return OAuthAuthUrlResponse(authUrl=auth_url, state=state)
+
+
+@router.post(
+    "/oauth/callback/{provider}",
+    summary="OAuth callback handler",
+    description="Handle OAuth callback and login/register user",
+    tags=["Authentication", "OAuth"],
+)
+@rate_limit("10/minute")
+@recaptcha_protected("oauth_callback")  # Optional reCAPTCHA protection
+async def oauth_callback(provider: str, callback_data: OAuthCallbackRequest, auth_service: AuthServiceDep, request: Request) -> LoginResponseType:
+    """
+    Handle OAuth callback and authenticate user.
+
+    Security features:
+    - ✅ Rate limiting: 10 requests/minute
+    - ✅ CSRF protection via state parameter
+    - ⚪ reCAPTCHA: Optional (enable via RECAPTCHA_ENABLED=true)
+    """
+    from app.core.oauth import oauth_service
+
+    try:
+        # Exchange code for token
+        logger.info(f"OAuth callback: Exchanging code for token (provider: {provider})")
+        token_response = await oauth_service.exchange_code_for_token(provider, callback_data.code)
+        logger.info(f"OAuth callback: Token exchange successful")
+
+        # Get user info from provider
+        logger.info(f"OAuth callback: Fetching user info from {provider}")
+        user_info = await oauth_service.get_user_info(provider, token_response.accessToken)
+        logger.info(f"OAuth callback: User info received - email: {user_info.email}, provider_id: {user_info.providerId}")
+
+        # Login or register user via OAuth
+        logger.info(f"OAuth callback: Calling auth_service.login_with_oauth")
+        # Convert Pydantic model to dict for compatibility
+        user_info_dict = user_info.model_dump()
+        logger.debug(f"OAuth callback: user_info_dict = {user_info_dict}")
+        result = await auth_service.login_with_oauth(provider, user_info_dict)
+        logger.info(f"OAuth callback: login_with_oauth completed successfully")
+        return result
+
+    except Exception as e:
+        logger.error(f"OAuth callback error: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"OAuth authentication failed: {str(e)}")

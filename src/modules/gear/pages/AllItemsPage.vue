@@ -2,12 +2,11 @@
 import { Package } from 'lucide-vue-next'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import DataTable from '@/components/data-table/DataTable.vue'
 import Badge from '@/components/ui/badge/Badge.vue'
 import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import { useCoreSettings } from '@/modules/settings/composables/useCoreSettings'
 import { ALL_ITEMS_TABLE_COLUMN_VISIBILITY_KEY } from '@/shared/config/config'
 import type { IItemWithContainer } from '../utils/allItemsColumns'
 import CategoryIcon from '../components/CategoryIcon.vue'
@@ -24,8 +23,8 @@ const router = useRouter()
 const { t } = useI18n()
 const { containers } = useGear()
 const { customCategories } = useGearSettings()
-const { settings: coreSettings } = useCoreSettings()
-const settings = computed(() => ({ preferredWeightUnit: coreSettings.value.preferredWeightUnit }))
+const { settings: gearSettings } = useGearSettings()
+const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
 
 // Get all items from all containers
 const allItems = computed<IItemWithContainer[]>(() => {
@@ -72,12 +71,12 @@ watch(
 const columns = computed(() => createAllItemsColumns(t))
 
 // Helper to get category label
-const getCategoryLabel = (categoryKey: string): string => {
-  const customCategory = customCategories.value.find(c => c.key === categoryKey)
+const getCategoryLabel = (categoryValue: string): string => {
+  const customCategory = customCategories.value.find(c => c.value === categoryValue)
   if (customCategory) {
-    return customCategory.label
+    return customCategory.value
   }
-  return t(`gear.item.categories.${categoryKey}`)
+  return t(`gear.item.categories.${categoryValue}`)
 }
 
 // Global filter function
@@ -136,7 +135,12 @@ function navigateToContainer(containerId: string) {
         </template>
 
         <template #name="{ row }">
-          <span class="font-medium">{{ row.original.name }}</span>
+          <RouterLink
+            :to="`/gear/${row.original.containerId}/items/${row.original.id}/edit`"
+            class="font-medium hover:text-primary hover:underline transition-colors"
+          >
+            {{ row.original.name }}
+          </RouterLink>
         </template>
 
         <template #container="{ row }">
@@ -159,7 +163,7 @@ function navigateToContainer(containerId: string) {
         </template>
 
         <template #weight="{ row }">
-          {{ formatWeightWithPreferredUnit(row.original.weight * row.original.quantity, row.original.weightUnit, settings.preferredWeightUnit) }}
+          {{ formatWeightWithPreferredUnit(row.original.weight * row.original.quantity, row.original.weightUnit, settings.preferredWeightUnit ?? 'g') }}
         </template>
 
         <template #status="{ row }">

@@ -7,6 +7,8 @@ from typing import Literal
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from app.core.helpers import parse_list_value
+
 
 # Shared config for all nested settings
 _base_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", case_sensitive=False, extra="ignore")
@@ -27,6 +29,7 @@ class AppSettings(BaseSettings):
     model_config = _base_config
 
     name: str = Field(default="backend", validation_alias="APP_NAME", description="Application name")
+    display_name: str = Field(default="Gear Stack", validation_alias="APP_DISPLAY_NAME", description="Application display name for emails and UI")
     version: str = Field(default="0.1.2", validation_alias="APP_VERSION", description="Application version")
     debug: bool = Field(default=False, validation_alias="DEBUG", description="Debug mode")
     environment: Environment = Field(default=Environment.DEVELOPMENT, validation_alias="ENVIRONMENT", description="Environment (local, development, test, production)")
@@ -49,15 +52,21 @@ class ServerSettings(BaseSettings):
     host: str = Field(default="0.0.0.0", validation_alias="HOST", description="Server host")
     port: int = Field(default=8000, validation_alias="PORT", description="Server port")
     reload: bool = Field(default=True, validation_alias="RELOAD", description="Auto-reload on code changes")
-    cors_origins: list[str] = Field(default=["http://localhost:3000"], validation_alias="CORS_ORIGINS", description="Allowed CORS origins")
+    cors_origins: str | list[str] = Field(default='["http://localhost:3000"]', validation_alias="CORS_ORIGINS", description="Allowed CORS origins")
     cors_credentials: bool = Field(default=True, validation_alias="CORS_CREDENTIALS", description="Allow credentials")
-    cors_methods: list[str] = Field(default=["*"], validation_alias="CORS_METHODS", description="Allowed HTTP methods")
-    cors_headers: list[str] = Field(default=["*"], validation_alias="CORS_HEADERS", description="Allowed HTTP headers")
-    allowed_hosts: list[str] = Field(
-        default=["localhost", "127.0.0.1"],
+    cors_methods: str | list[str] = Field(default='["*"]', validation_alias="CORS_METHODS", description="Allowed HTTP methods")
+    cors_headers: str | list[str] = Field(default='["*"]', validation_alias="CORS_HEADERS", description="Allowed HTTP headers")
+    allowed_hosts: str | list[str] = Field(
+        default='["localhost", "127.0.0.1"]',
         validation_alias="ALLOWED_HOSTS",
         description="Allowed hosts for TrustedHostMiddleware (production security)",
     )
+
+    @field_validator("cors_origins", "cors_methods", "cors_headers", "allowed_hosts", mode="after")
+    @classmethod
+    def parse_list_fields(cls, v: str | list[str]) -> list[str]:
+        """Parse list fields from JSON array or comma-separated string."""
+        return parse_list_value(v)
 
     @field_validator("port")
     @classmethod
@@ -164,6 +173,17 @@ class RecaptchaSettings(BaseSettings):
         return v
 
 
+class OAuthSettings(BaseSettings):
+    """OAuth authentication configuration."""
+
+    model_config = _base_config
+
+    # Google OAuth
+    google_client_id: str = Field(default="", validation_alias="GOOGLE_OAUTH_CLIENT_ID", description="Google OAuth client ID")
+    google_client_secret: str = Field(default="", validation_alias="GOOGLE_OAUTH_CLIENT_SECRET", description="Google OAuth client secret")
+    google_redirect_uri: str = Field(default="", validation_alias="GOOGLE_OAUTH_REDIRECT_URI", description="Google OAuth redirect URI")
+
+
 class EmailSettings(BaseSettings):
     """Email service configuration."""
 
@@ -201,6 +221,7 @@ class Settings(BaseSettings):
     rate_limit: RateLimitSettings = Field(default_factory=RateLimitSettings)
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
     recaptcha: RecaptchaSettings = Field(default_factory=RecaptchaSettings)
+    oauth: OAuthSettings = Field(default_factory=OAuthSettings)
     email: EmailSettings = Field(default_factory=EmailSettings)
 
     # Legacy compatibility - still accessible at root level

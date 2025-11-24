@@ -1,44 +1,19 @@
 <script setup lang="ts">
-import { onMounted, watch } from 'vue'
+import PwaUpdatePrompt from '@/components/PwaUpdatePrompt.vue'
 import { Toaster } from '@/components/ui/sonner'
-import { useCoreSettingsStore } from '@/modules/settings/store/useCoreSettingsStore'
-import { useDarkMode } from '@/shared/composables/useDarkMode'
-import { useLocale } from '@/shared/i18n'
 import 'vue-sonner/style.css'
+import DataMigrationDialog from '@/modules/gear/components/DataMigrationDialog.vue'
+import LoginModal from './shared/components/LoginModal.vue'
+import { useAppInitialization } from './shared/composables/useAppInitialization'
 
-const coreSettingsStore = useCoreSettingsStore()
-const { isDark, setDark } = useDarkMode()
-const { setLocale } = useLocale()
-
-// Sync settings store with composables on mount
-onMounted(() => {
-  // Sync dark mode
-  if (isDark.value !== coreSettingsStore.darkMode) {
-    setDark(coreSettingsStore.darkMode)
-  }
-
-  // Sync locale
-  if (setLocale) {
-    setLocale(coreSettingsStore.locale)
-  }
-})
-
-// Watch for changes in store and sync with composables
-watch(() => coreSettingsStore.darkMode, (newValue) => {
-  if (isDark.value !== newValue) {
-    setDark(newValue)
-  }
-})
-
-watch(() => coreSettingsStore.locale, (newValue) => {
-  if (setLocale) {
-    setLocale(newValue)
-  }
-})
+const { isInitialized } = useAppInitialization()
 </script>
 
 <template>
-  <RouterView />
+  <RouterView :is-initialized />
+  <LoginModal />
+  <DataMigrationDialog />
+  <PwaUpdatePrompt />
   <Toaster rich-colors />
 </template>
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
+import GuestLayoutFooter from '@/components/layout/GuestLayoutFooter.vue'
 import LogoText from '@/components/ui/LogoText.vue'
 import DarkModeToggle from '@/shared/components/DarkModeToggle.vue'
 import LocaleToggle from '@/shared/i18n/components/LocaleToggle.vue'
@@ -29,12 +30,6 @@ const layoutActionsComponent = route.meta.layoutActionsComponent
       <slot />
     </main>
 
-    <footer>
-      <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <p class="text-center text-sm text-muted-foreground">
-          &copy; 2025 Vue Blocks Registry. Demo application.
-        </p>
-      </div>
-    </footer>
+    <GuestLayoutFooter />
   </div>
 </template>

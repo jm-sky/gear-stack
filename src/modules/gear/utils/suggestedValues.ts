@@ -62,6 +62,7 @@ export const SUGGESTED_BRANDS = [
   'NEO Tools',
   'EDCX',
   'YOUKUKE',
+  'M-TAC',
 ] as const
 
 
@@ -120,7 +121,7 @@ export function getColorOptions(): Array<{ value: string; label: string; data: s
  * Convert suggested brands to ComboBox options
  * Includes both default SUGGESTED_BRANDS and custom user brands
  */
-export function getBrandOptions(customBrands?: Array<{ key: string; label: string }>): Array<{ value: string; label: string }> {
+export function getBrandOptions(customBrands?: Array<{ value: string }>): Array<{ value: string; label: string }> {
   const defaultBrands = SUGGESTED_BRANDS.map(brand => ({
     value: brand,
     label: brand,
@@ -131,8 +132,8 @@ export function getBrandOptions(customBrands?: Array<{ key: string; label: strin
   }
 
   const customBrandOptions = customBrands.map(brand => ({
-    value: brand.label,
-    label: brand.label,
+    value: brand.value,
+    label: brand.value,
   }))
 
   // Combine default and custom brands, removing duplicates

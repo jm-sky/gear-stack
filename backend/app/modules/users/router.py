@@ -3,12 +3,18 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.database import get_db
+from app.modules.settings.db_models import UserSettingsDB
 
 from .dependencies import AdminUser, CurrentUser
 from .exceptions import UserAlreadyExistsError
 from .repositories import UserRepository, get_user_repository
 from .schemas import (
     MessageResponse,
+    PublicUserResponse,
     UserCreate,
     UserListResponse,
     UserProfileUpdate,
@@ -94,10 +100,63 @@ async def update_current_user_profile(
         user_id=current_user.id,
         email=user_data.email,
         name=user_data.name,
+        avatar_url=user_data.avatarUrl,
     )
     if not updated_user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return UserResponse(**updated_user.to_response())
+
+
+@router.get(
+    "/{user_id}/public",
+    response_model=PublicUserResponse,
+    summary="Get public user profile",
+    description="Get public profile information for a user (only if profile is public)",
+)
+async def get_public_user_profile(
+    user_id: str,
+    repo: Annotated[UserRepository, Depends(get_user_repository)],
+    db: AsyncSession = Depends(get_db),
+) -> PublicUserResponse:
+    """Get public user profile.
+
+    Returns public profile information if:
+    - User exists
+    - User's profile is set to public (is_public_profile = True)
+
+    Email is only included if:
+    - Profile is public AND
+    - User's emailPublic setting is True
+    """
+    # Get user
+    user = await repo.get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User {user_id} not found")
+
+    # Check if profile is public
+    result = await db.execute(select(UserSettingsDB).where(UserSettingsDB.user_id == user_id))
+    settings = result.scalars().first()
+
+    # If no settings exist, profile is not public (default is False)
+    if not settings or not settings.is_public_profile:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This user profile is not public",
+        )
+
+    # Build public response
+    response_data = {
+        "id": user.id,
+        "name": user.name,
+        "avatarUrl": user.avatarUrl,
+        "emailPublic": settings.is_public_email,
+    }
+
+    # Only include email if user has emailPublic enabled
+    if settings.is_public_email:
+        response_data["email"] = user.email
+
+    return PublicUserResponse(**response_data)
 
 
 @router.get(

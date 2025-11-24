@@ -1,70 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Verify your email</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        line-height: 1.5;
-        color: #1f2933;
-        background-color: #f9fafb;
-        margin: 0;
-        padding: 0;
-      }
-      .container {
-        max-width: 600px;
-        margin: 24px auto;
-        background-color: #ffffff;
-        border-radius: 8px;
-        padding: 32px;
-        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
-      }
-      .button {
-        display: inline-block;
-        padding: 12px 20px;
-        background-color: #2563eb;
-        color: #ffffff !important;
-        text-decoration: none;
-        border-radius: 6px;
-        font-weight: 600;
-        margin-top: 16px;
-      }
-      .footer {
-        margin-top: 24px;
-        font-size: 12px;
-        color: #6b7280;
-      }
-      code {
-        background-color: #f3f4f6;
-        padding: 2px 4px;
-        border-radius: 4px;
-        font-family: 'Courier New', monospace;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h1>Verify your email</h1>
-      <p>Hi {{ name }},</p>
+{% extends "base.html" %}
 
-      <p>Thanks for registering with us! Before you can start using all features, we need to confirm that this email address belongs to you.</p>
+{% block title %}{% if t %}{{ translate('email_verification.title') }}{% else %}Verify your email - {{ app_name }}{% endif %}{% endblock %}
 
-      <p>
-        <a class="button" href="{{ verification_link }}">Verify email address</a>
-      </p>
+{% block content %}
+<h1>{% if t %}{{ translate('email_verification.heading') }}{% else %}Verify your email{% endif %}</h1>
+<p>{% if t %}{{ translate('email_verification.hi') }}{% else %}Hi {{ name }},{% endif %}</p>
 
-      <p>If the button does not work, copy and paste this link into your browser:</p>
-      <p><code>{{ verification_link }}</code></p>
+<p>{% if t %}{{ translate('email_verification.thanks') }}{% else %}Thanks for registering with {{ app_name }}! Before you can start using all features, we need to confirm that this email address belongs to you.{% endif %}</p>
 
-      <p>This link is valid for the next {{ expires_hours }} hours.</p>
+<p>
+  <a class="button" href="{{ verification_link }}">{% if t %}{{ translate('email_verification.verify_button') }}{% else %}Verify email address{% endif %}</a>
+</p>
 
-      <p>If you did not create an account, you can ignore this email.</p>
+<p>{% if t %}{{ translate('email_verification.copy_link') }}{% else %}If the button does not work, copy and paste this link into your browser:{% endif %}</p>
+<p><code>{{ verification_link }}</code></p>
 
-      <div class="footer">
-        <p>Sent automatically from {{ frontend_url }}</p>
-      </div>
-    </div>
-  </body>
-</html>
+<p>{% if t %}{{ translate('email_verification.expires') }}{% else %}This link is valid for the next {{ expires_hours }} hours.{% endif %}</p>
 
+<p>{% if t %}{{ translate('email_verification.ignore') }}{% else %}If you did not create an account, you can ignore this email.{% endif %}</p>
+{% endblock %}

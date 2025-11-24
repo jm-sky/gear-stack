@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -17,7 +18,9 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import type { IGearContainer } from '../types/gear.types'
 import { useGear } from '../composables/useGear'
+import { useGearSettings } from '../composables/useGearSettings'
 import { markdownImportService } from '../services/markdownImportService'
+import { useGearStore } from '../store/useGearStore'
 import GuidelinesDialog from './GuidelinesDialog.vue'
 
 const props = defineProps<{
@@ -30,11 +33,14 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const { createContainer, updateContainer, createItem, updateItem, getContainerById } = useGear()
+const { createContainer, updateContainer, createItem, updateItem } = useGear()
+const store = useGearStore()
+const { customBrands } = useGearSettings()
 
 const markdownContent = ref('')
 const importing = ref(false)
 const importMode = ref<'create' | 'update'>('update') // Default to update mode
+const recognizeFromName = ref(false) // Option to recognize brand and color from item name
 const previewResult = ref<ReturnType<typeof markdownImportService.parseMarkdown> | null>(null)
 const isGuidelinesDialogOpen = ref(false)
 
@@ -57,7 +63,10 @@ const handlePreview = () => {
     return
   }
 
-  const result = markdownImportService.parseMarkdown(markdownContent.value)
+  const result = markdownImportService.parseMarkdown(markdownContent.value, {
+    recognizeFromName: recognizeFromName.value,
+    customBrands: customBrands.value,
+  })
   previewResult.value = result
 
   if (result.containers.length === 0) {
@@ -96,10 +105,10 @@ const handleImport = async () => {
 
       // Check if we should update existing container (has UUID and mode is update)
       if (importMode.value === 'update' && containerData.uuid) {
-        const existing = getContainerById(containerData.uuid)
+        const existing = store.getContainerById(containerData.uuid)
         if (existing) {
           // Update existing container
-          container = updateContainer(existing.id, {
+          container = await updateContainer(existing.id, {
             name: containerData.name,
             weight: containerData.weight,
             weightUnit: containerData.weightUnit,
@@ -109,7 +118,7 @@ const handleImport = async () => {
           updatedCount++
         } else {
           // UUID provided but container not found - create new with same UUID
-          container = createContainer({
+          container = await createContainer({
             name: containerData.name,
             type: 'other',
             description: t('gear.import.importedDescription'),
@@ -123,7 +132,7 @@ const handleImport = async () => {
         }
       } else {
         // Create new container
-        container = createContainer({
+        container = await createContainer({
           name: containerData.name,
           type: 'other',
           description: t('gear.import.importedDescription'),
@@ -148,6 +157,13 @@ const handleImport = async () => {
 
     // Phase 2: Create/update items with nested container resolution
     for (const { containerData, container } of createdContainers) {
+      // Fetch latest container from store to ensure we have up-to-date items
+      const latestContainer = store.getContainerById(container.id)
+      if (!latestContainer) {
+        console.warn(`Container ${container.id} not found in store`)
+        continue
+      }
+
       // Import/update items
       for (const itemData of containerData.items) {
         // Extract nestedContainerId before destructuring
@@ -164,20 +180,20 @@ const handleImport = async () => {
         }
 
         if (importMode.value === 'update' && itemUuid) {
-          // Try to find existing item by UUID
-          const existingItem = container.items.find(i => i.id === itemUuid)
+          // Try to find existing item by UUID in the latest container from store
+          const existingItem = latestContainer.items.find(i => i.id === itemUuid)
           if (existingItem) {
             // Update existing item
-            updateItem(container.id, existingItem.id, itemDto)
+            await updateItem(existingItem.id, itemDto)
             itemUpdatedCount++
           } else {
             // UUID provided but item not found - create new
-            createItem(container.id, itemDto)
+            await createItem(latestContainer.id, itemDto)
             itemCount++
           }
         } else {
           // Create new item
-          createItem(container.id, itemDto)
+          await createItem(latestContainer.id, itemDto)
           itemCount++
         }
       }
@@ -230,6 +246,17 @@ const handleImport = async () => {
             rows="12"
             class="flex flex-1 min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-mono"
           />
+        </div>
+
+        <!-- Recognition Options -->
+        <div class="flex items-center space-x-2">
+          <Checkbox id="recognize-from-name" v-model="recognizeFromName" />
+          <Label for="recognize-from-name" class="text-sm font-normal cursor-pointer">
+            {{ t('gear.import.recognizeFromName') }}
+            <span class="text-xs text-muted-foreground block">
+              {{ t('gear.import.recognizeFromNameDesc') }}
+            </span>
+          </Label>
         </div>
 
         <!-- Import Mode Selection (shown only when UUIDs detected) -->

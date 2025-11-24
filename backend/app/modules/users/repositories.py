@@ -61,6 +61,7 @@ class UserRepository:
             role=role,
             isActive=auth_user.isActive,
             isEmailVerified=auth_user.isEmailVerified,
+            avatarUrl=auth_user.avatarUrl,
             createdAt=auth_user.createdAt,
             updatedAt=auth_user.createdAt,  # users model requires this
         )
@@ -73,10 +74,7 @@ class UserRepository:
             password handling which should only be done through auth endpoints.
             Admin users can create users through the auth module's endpoints.
         """
-        raise NotImplementedError(
-            "User creation with password must be done through auth module endpoints. "
-            "Use POST /auth/register for new user registration."
-        )
+        raise NotImplementedError("User creation with password must be done through auth module endpoints. " "Use POST /auth/register for new user registration.")
 
     async def get_user_by_email(self, email: str) -> User | None:
         """Get user by email from database."""
@@ -119,6 +117,7 @@ class UserRepository:
         name: str | None = None,
         role: str | None = None,
         is_active: bool | None = None,
+        avatar_url: str | None = None,
     ) -> User | None:
         """Update user fields in database.
 
@@ -158,6 +157,9 @@ class UserRepository:
 
         if is_active is not None:
             auth_user.isActive = is_active
+
+        if avatar_url is not None:
+            auth_user.avatarUrl = avatar_url
 
         # Save via auth repository
         updated_auth_user = await self._auth_repo.update_user(auth_user)

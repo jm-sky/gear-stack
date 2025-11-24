@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import DeleteAccountCard from '@/modules/settings/components/DeleteAccountCard.vue'
 import PreferencesSettingsCard from '../components/PreferencesSettingsCard.vue'
+import SecuritySettingsCard from '../components/SecuritySettingsCard.vue'
 
 const { t } = useI18n()
 </script>
@@ -22,8 +24,13 @@ const { t } = useI18n()
         <!-- Core Preferences Settings -->
         <PreferencesSettingsCard />
 
+        <!-- Security Settings (2FA) -->
+        <SecuritySettingsCard />
+
         <!-- Additional Settings from other modules (via slot) -->
         <slot name="after" />
+
+        <DeleteAccountCard />
       </div>
     </div>
   </AuthenticatedLayout>

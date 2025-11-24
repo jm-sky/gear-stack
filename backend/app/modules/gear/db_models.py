@@ -46,6 +46,13 @@ class GearContainerDB(Base):
     parent_container_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("gear_containers.id"), nullable=True)
     brand: Mapped[str | None] = mapped_column(String(255), nullable=True)
     price: Mapped[float | None] = mapped_column(Float, nullable=True)
+    hide_when_nested: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
+    weight: Mapped[float | None] = mapped_column(Float, nullable=True)
+    weight_unit: Mapped[str | None] = mapped_column(String(5), nullable=True)
+    max_weight: Mapped[float | None] = mapped_column(Float, nullable=True)
+    max_weight_unit: Mapped[str | None] = mapped_column(String(5), nullable=True)
+    url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    is_public: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC), nullable=False)
 
@@ -99,6 +106,9 @@ class GearItemDB(Base):
     brand: Mapped[str | None] = mapped_column(String(255), nullable=True)
     color: Mapped[str | None] = mapped_column(String(50), nullable=True)
     quality: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    linked_item_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("gear_items.id"), nullable=True)
+    wearable: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
+    consumable: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC), nullable=False)
 
@@ -118,3 +128,8 @@ GearContainerDB.items = relationship(
     foreign_keys=[GearItemDB.container_id],
     cascade="all, delete-orphan",
 )
+
+# Add user relationship for public containers
+from app.modules.auth.db_models import UserDB  # noqa: E402
+
+GearContainerDB.user = relationship("UserDB", foreign_keys=[GearContainerDB.user_id])

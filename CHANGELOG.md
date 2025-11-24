@@ -21,6 +21,414 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.5.1] - 2025-11-24
+
+### Added
+- **Date Handling**: Added `date-fns` library for better date/time manipulation
+- **New Components**:
+  - `ContainerCardBadges` - Reusable component for displaying container badges
+  - `ContainerCardCreatedDate` - Component showing creation date with time-ago format
+  - `ContainerCardStats` - Component for displaying container statistics
+  - `PublicContainerCard` - Card component for public container browser
+  - `PublicContainerAuthorBadge` - Badge showing container author information
+  - `LandingPageContainerCard` - Card component for landing page statistics
+- **Composables**: New `useContainerTypeLabel` composable for centralized container type label management
+- **Services**: Added `publicContainersService` for public container operations
+- **Utils**: Added `dateTime.ts` and `smallDateTime.ts` utility functions
+
+### Changed
+- **Component Refactoring**: Refactored `ContainerCard` to use smaller, modular sub-components for better maintainability
+- **Component Enhancements**:
+  - Enhanced `Card` component with `as` prop for polymorphic rendering
+  - Updated `ContainerFormFields` to use `getContainerTypeLabel` from composable
+  - Refactored `ContainerHeader` to use `useContainerTypeLabel` composable
+  - Updated `ExportToPromptDialog` to use `getContainerTypeLabel` function
+- **Pages**:
+  - Renamed `HomePage.vue` to `DashboardPage.vue` for clarity
+  - Enhanced `LandingPage` with improved statistics display
+  - Improved `PublicContainersBrowserPage` with better responsive design
+  - Enhanced `PublicContainerDetailPage` with author information
+  - Updated `PublicUserProfilePage` to show user's public containers
+  - Refactored `ShoppingPlanningPage` UI improvements
+- **Routing**: Added new routes for public user profiles and container details
+- **Internationalization**: Updated Polish translations for better consistency (auth, gear, user modules)
+- **Filters**: Enhanced `ContainersFilters` component with better UX
+
+### Fixed
+- Fixed incorrect display of custom container types in `ContainerFormFields` dropdown
+- Fixed type label passing in export functionality (was passing computed value instead of function)
+
+---
+
+## [2.5.0] - 2025-11-24
+
+### Release: Testing Infrastructure, UI/UX Enhancements & Deployment Automation
+
+This release focuses on improving code quality with comprehensive unit tests, enhancing user experience with app versioning and authentication improvements, and streamlining deployment workflows.
+
+### Added
+- **Testing Infrastructure**:
+  - Added 1348 lines of unit tests for utility functions (#114315c)
+  - Tests for: `cn` function, `valueUpdater`, category recognition, container calculations, weight formatting, item retrieval, parameter recognition, suggested values, and type guards
+  - Backend unit tests for auth service and utilities (#cc93948)
+  - Enhanced test environment setup with proper database engine configuration
+
+- **App Version & Build Information**:
+  - App version and build date now displayed in footer (#35, #8b2f483)
+  - Created `useAppVersion` composable for centralized version management (#78f52b6)
+  - Dynamic company information from environment variables
+  - Build date automatically injected via Vite during build process
+
+- **Authentication & User Experience**:
+  - New `AuthenticationRequiredAlert` component for profile pages (#ab3f991)
+  - `DropdownMenuItemLink` component for better navigation in UserNav
+  - OAuth button added to RegisterForm (#97caa9d)
+  - Improved user authentication flow with conditional rendering
+
+- **Deployment Automation**:
+  - GitHub Actions workflow for automated deployment (#ce6d3cc)
+  - Backend restart and migration script (`backend_restart_migrate.sh`) (#48fcb62)
+  - Frontend build and deploy script (`frontend_build_deploy.sh`)
+  - Comprehensive deployment documentation in `DEPLOYMENT.md`
+
+- **Developer Experience**:
+  - VSCode settings and Pyright configuration for backend development (#f9c3452)
+  - Example environment variables for backend configuration (#3126fe6)
+  - `pnpm-workspace.yaml` for monorepo support
+
+- **UI Components**:
+  - `GuestLayoutFooter` component for consistent footer across guest layouts (#78f52b6)
+
+### Changed
+- **Documentation Improvements**:
+  - Added comprehensive `TODO_FEATURES.md` file consolidating features from both offline and online roadmaps (#b1792d3)
+  - Updated `README.md` with link to TODO features list and completed features (#7bacf27)
+  - Restructured roadmap: split into `ROADMAP_OFFLINE.md` and `ROADMAP_ONLINE.md`
+  - Moved analysis docs to `docs/analysis/` directory
+  - Moved archived docs to `docs/archive/` directory
+  - Updated cursor rules with Question vs. Action Protocol and TailwindCSS best practices
+
+- **User Authentication Refactoring**:
+  - Refactored user profile handling with consistent `avatarUrl` usage (#ab3f991)
+  - UserNav now conditionally shows login/register options based on auth status
+  - Improved profile page with authentication-aware components
+  - Enhanced route handling with constants for user profile paths
+
+- **Footer Component Refactoring**:
+  - Replaced hardcoded footer content with reusable `GuestLayoutFooter` component
+  - Centralized footer logic in `AppFooter.vue` with dynamic configuration
+  - Consistent footer across `GuestLayoutCentered`, `GuestLayoutCenteredGlass`, and `GuestLayoutTwoColumns`
+
+- **Configuration Updates**:
+  - Updated `.env.example` to use array syntax for CORS settings (#6c716ac)
+  - Enhanced `.gitignore` for better environment file handling
+  - Removed draft deployment configurations for cleaner repo
+
+- **Public Containers UI**:
+  - Improved responsive design for public containers browser (#752e210)
+  - Enhanced mobile layout for public container detail pages
+
+- **Deployment Scripts**:
+  - Refactored `deploy.sh` for better maintainability (#48fcb62)
+  - Separated frontend build logic into dedicated script
+  - Improved CI/CD environment variable handling
+
+### Fixed
+- **OAuth Internationalization**:
+  - Fixed OAuth callback i18n interpolation syntax (#e0d2499)
+  - Removed debug log from reCAPTCHA utility
+
+- **Deployment**:
+  - Fixed CI environment variable handling in deployment script
+  - Removed pnpm version specification from deploy workflow (#36)
+  - Updated deployment branch configuration
+
+- **Code Quality**:
+  - Automatic formatting with Black for Python backend code (#80a9012)
+  - Fixed various TypeScript and ESLint issues
+
+### Security
+- Enhanced backend test coverage for authentication and authorization flows
+- Improved environment variable handling and validation
+
+### Development
+- Backend restart and migration workflow streamlined
+- Improved local development setup with proper configuration examples
+- Better separation of concerns between frontend and backend deployment
+
+---
+
+## [2.4.0] - 2025-11-23
+
+### Added
+- **Shopping List Features**:
+  - Shopping list persistence functionality (#24)
+  - "Add All" functionality for shopping lists (#24)
+  - Shopping planning page functionality (#21)
+  - Enhanced shopping list functionality and item editing (#23)
+
+- **Progressive Web App (PWA)**:
+  - PWA support with Vue and Vite (#19)
+  - Installable web application support
+  - Offline capabilities
+
+- **Internationalization**:
+  - Email internationalization and translations (#15)
+
+- **Documentation**:
+  - AI plan documentation
+
+### Changed
+- **Data Structure**:
+  - Unified brand, category, and type fields (#20)
+  - Refactored to use 'value' instead of 'key' and 'label' for custom items
+  - Simplified settings card components for brands, categories, and container types
+
+- **OAuth Integration**:
+  - Implemented internationalization for OAuth login
+  - Improved OAuth callback page with better error handling
+
+### Fixed
+- Shopping list and item page issues (#22)
+- Removed unnecessary v-if from create container button
+- Improved OAuth error message display
+
+---
+
+## [2.3.0] - 2025-11-22
+
+### Added
+- **Testing Infrastructure**: Set up Vitest testing framework
+  - Installed Vitest, @vitest/ui, and happy-dom
+  - Created `vitest.config.ts` configuration
+  - Added test scripts: `test`, `test:ui`, `test:run`, `test:coverage`
+  - **57 unit tests** for markdown import service with 100% pass rate
+
+- **Markdown Import Enhancements**:
+  - **Container Descriptions**: Support for parsing container descriptions from markdown
+    - Extracts text between container header and first item
+    - Supports multi-line descriptions with empty lines
+  - **Price Parsing**: Comprehensive price and currency support
+    - PLN formats: `100PLN`, `10 PLN`, `10,00 PLN`, `1 000,00 PLN`, `10zł`
+    - USD formats: `$50`, `50$`, `50 USD`
+    - EUR formats: `€100`, `100€`, `100 EUR`
+    - GBP formats: `£75`, `75£`, `75 GBP`
+  - Added `price` and `currency` fields to `ICreateItemDto` type
+  - Added `description`, `price`, and `currency` fields to `IMarkdownImportResult`
+
+- **Error Handling**:
+  - Global chunk loading error handler for post-deployment errors
+  - User-friendly dialog with i18n support (PL/EN)
+  - Automatic detection of ChunkLoadError and related failures
+  - Graceful page reload option
+
+- **404 Page**:
+  - New NotFoundPage component with proper UI
+  - Wildcard route `/:pathMatch(.*)*` for catching all unmatched routes
+  - Helpful navigation links to Containers, Dashboard, and Settings
+  - Full i18n support (PL/EN)
+
+- **Translations**:
+  - Added `errors.chunkLoadError` translations (PL/EN)
+  - Added `notFound` page translations (PL/EN)
+
+### Fixed
+- **Profile Page Mobile**: Fixed email overflow on mobile devices
+  - Added `break-all` class to email display
+  - Added `flex-shrink-0` to Mail icon to prevent crushing
+
+- **Markdown Export**: Fixed description format in newline mode
+  - Descriptions now appear alone on second line
+  - Metadata (UUID, quantity, brand, weight) stays on first line
+  - No more mixing of description with other fields
+
+### Changed
+- Updated ROADMAP.md with completed features and new planned tasks
+- Enhanced markdown import parser with better field extraction
+- Improved type safety with currency field additions
+
+---
+
+## [2.2.1] - 2025-11-22
+
+### Fixed
+- **reCAPTCHA Configuration**: Fixed environment variable naming issues
+  - Changed `GOOGLE_RECAPTCHA_SITE_KEY` → `RECAPTCHA_SITE_KEY` in backend
+  - Changed `GOOGLE_RECAPTCHA_SECRET_KEY` → `RECAPTCHA_SECRET_KEY` in backend
+  - Enabled reCAPTCHA in both frontend and backend configurations
+  - Added reCAPTCHA variables to docker-compose.yml and docker-compose.dev.yml
+  - Created diagnostic script `backend/scripts/check_env.py` for environment verification
+
+- **reCAPTCHA Logging**: Enhanced debugging capabilities
+  - Added detailed logging in `backend/app/core/recaptcha.py`
+  - Added logging in `backend/app/modules/auth/decorators.py`
+  - Logs now show configuration, request/response details, and error codes
+
+- **OAuth Authentication**: Fixed critical bugs preventing OAuth login
+  - Fixed `login_with_oauth` to support both camelCase and snake_case field names
+  - Fixed missing `logger` import in `backend/app/modules/auth/router.py`
+  - Fixed incorrect settings path: `settings.jwt` → `settings.security`
+  - Added detailed OAuth callback logging for debugging
+
+- **Frontend OAuth Error Handling**: Improved user experience
+  - Replaced hardcoded paths with `AuthRoutePaths` variables in OAuthCallbackPage
+  - Enhanced error message extraction from API responses
+  - Increased error display timeout from 2s to 3s
+
+### Security
+- **reCAPTCHA v3**: Now fully operational with score-based bot detection (min score: 0.5)
+- **OAuth**: Google OAuth authentication now functional end-to-end
+
+---
+
+## [2.2.0] - 2025-01-21
+
+### Release: Security Enhancements - reCAPTCHA & OAuth Integration
+
+This release introduces major security features including Google reCAPTCHA v3 protection and OAuth authentication infrastructure.
+
+### Added
+- **reCAPTCHA v3 Integration (Frontend)**: Invisible bot protection on all authentication forms
+  - Auto-loads reCAPTCHA script on app startup
+  - Integrated into LoginForm, RegisterForm, and ForgotPasswordPage
+  - Sends reCAPTCHA tokens to backend for verification
+  - Zero friction for legitimate users (invisible verification)
+  - Added `useRecaptcha` composable and utility functions
+  - Backend already supported reCAPTCHA, now enabled with frontend integration
+
+- **OAuth Infrastructure (Backend - 90% Complete)**: Foundation for social login
+  - Complete OAuth service with Google provider implementation (`app/core/oauth.py`)
+  - OAuth configuration in settings (`OAuthSettings`)
+  - Database migration for OAuth fields (provider, provider_id, avatar_url)
+  - Repository methods: `create_oauth_user()`, `get_user_by_oauth_provider()`
+  - OAuth schemas: `OAuthAuthUrlRequest/Response`, `OAuthCallbackRequest/Response`
+  - User model updated to support nullable passwords (OAuth users)
+  - OAuth fields added to UserDB model
+
+- **2FA Settings Visibility Fix**: Security settings card now visible on Settings page
+  - Shows TOTP (Authenticator App) status
+  - Shows WebAuthn/Passkeys status
+  - Displays preferred 2FA method selector
+  - Previously existed but wasn't shown due to missing import
+
+- **Documentation**: Comprehensive implementation guides
+  - `FEATURE-014-oauth-authentication.md` - Complete OAuth implementation plan
+  - `FEATURE-015-recaptcha-integration.md` - Complete reCAPTCHA implementation plan
+  - `IMPLEMENTATION_STATUS.md` - Current status and remaining work tracker
+  - `IMPLEMENTATION_COMPLETE.md` - Detailed progress report
+
+### Changed
+- User model `hashedPassword` field is now nullable (supports OAuth users without passwords)
+- Repository `_map_user` method updated to handle OAuth fields
+- Auth types updated to include `recaptchaToken` field in login/register/forgot-password requests
+- Config updated with reCAPTCHA and OAuth settings
+
+### Security
+- ✅ **reCAPTCHA Protection Active**: Login, register, and forgot-password endpoints now protected against bots
+- ✅ **OAuth CSRF Protection**: State parameter generation for preventing CSRF attacks
+- ✅ **Score-based Verification**: reCAPTCHA uses score threshold (0.5) to detect suspicious activity
+- ✅ **Action Verification**: Backend verifies reCAPTCHA action matches expected endpoint
+
+### Technical Details
+
+**Environment Variables**:
+- Backend: `RECAPTCHA_ENABLED=true`, `GOOGLE_RECAPTCHA_SITE_KEY`, `GOOGLE_RECAPTCHA_SECRET_KEY`
+- Frontend: `VITE_GOOGLE_RECAPTCHA_SITE_KEY`, `VITE_GOOGLE_OAUTH_CLIENT_ID`
+- Backend OAuth: `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REDIRECT_URI`
+
+**Database Changes**:
+- New migration: `011_add_oauth_fields.py`
+- Added columns: `oauth_provider`, `oauth_provider_id`, `avatar_url`
+- Made `hashed_password` nullable for OAuth users
+- Index created on `(oauth_provider, oauth_provider_id)` for efficient lookups
+
+**Remaining Work** (OAuth Frontend - ~6-8 hours):
+- OAuth login/callback composable (`useOAuth`)
+- OAuth button component
+- OAuth callback page
+- Integration into login/register pages
+- OAuth endpoints in auth router (backend)
+- OAuth service method in auth service (backend)
+
+---
+
+## [2.1.1] - 2025-01-27
+
+### Added
+- **Landing Page Local Data Detection**: Landing page now detects when user is not logged in but has containers stored in localStorage
+  - Shows container summary statistics (containers count, items count, ready containers count)
+  - Displays login/register call-to-action buttons prominently
+  - Encourages users to log in or register to synchronize their local data
+  - Summary section only appears when local containers exist and user is not authenticated
+
+### Changed
+- Landing page now conditionally shows features section or local data summary based on authentication and localStorage state
+- Improved user experience for users with local data who haven't logged in yet
+
+---
+
+## [2.1.0] - 2025-01-27
+
+### Release: Hybrid Mode & Offline-First Architecture
+
+This release introduces a hybrid mode that allows the application to work seamlessly both with and without user authentication. Users can now use the app immediately without creating an account, with all data stored locally. After logging in, the app automatically switches to API mode while maintaining localStorage as a backup.
+
+**Key highlights:**
+- **Hybrid Mode**: Automatic switching between localStorage (offline) and API (online) based on authentication status
+- **Zero-Friction Onboarding**: Users can start using the app immediately without registration
+- **Data Migration**: Optional migration dialog to transfer local data to API after first login
+- **Offline-First**: All pages and features accessible without login
+- **Smart Fallback**: Automatic fallback to localStorage on API errors
+- **Settings Translations**: Fixed missing translations for settings page and delete account feature
+
+**New Features:**
+- **Hybrid Services**: All services (Gear, Settings, User) now support both localStorage and API modes
+- **Data Migration Dialog**: User-friendly dialog to migrate local data to API after login
+- **Landing Page Enhancement**: Added "Add Container" button for immediate access
+- **Route Accessibility**: All gear pages accessible without authentication
+- **Conditional Features**: Delete Account only visible when authenticated
+
+**Technical improvements:**
+- Extended `useBackend` composable with `isAuthenticated` and `shouldUseAPI` helpers
+- Unified conditional logic across all services (Gear, Settings, User)
+- Enhanced error handling with automatic localStorage fallback
+- Improved service architecture with hybrid implementations
+- Fixed translation structure for settings page sections
+
+**Breaking Changes:**
+- None - fully backward compatible
+
+This release maintains full backward compatibility while adding powerful new capabilities for both offline and online usage.
+
+---
+
+## [2.0.0] - 2025-11-21
+
+### Release: Backend Integration & Authentication
+
+This is the second major release (2.0.0) of Gear Stack, introducing backend integration and full authentication system. The application now supports user accounts, authentication, and backend API integration while maintaining backward compatibility with local storage.
+
+**Key highlights:**
+- **Backend Integration**: Full API integration with backend services
+- **Authentication Module**: Complete user authentication system with email verification
+- **Two-Factor Authentication (2FA)**: Enhanced security with WebAuthn support
+- **User Management**: User accounts, profiles, and session management
+- **Logout Functionality**: Proper session cleanup and logout flow
+- **Enhanced Services**: Refactored gear services with container/item API services
+- **Improved Error Handling**: Enhanced Vite configuration and interceptor error handling
+- **Routing Updates**: Updated routing and layout for landing and home pages
+- **Container Data Handling**: Enhanced container data handling with missing fields support
+
+**Technical improvements:**
+- Service layer refactoring for better separation of concerns
+- Enhanced API interceptors with improved error handling
+- Updated application settings and user authentication flow
+- Workflow permissions fixes for code scanning alerts
+
+This release marks the transition from a pure local storage application to a full-stack application with backend support, while maintaining all existing features and data compatibility.
+
+---
+
 ## [1.0.0] - 2025-11-21
 
 ### Release: Full local storage
@@ -213,8 +621,8 @@ All features documented in the ROADMAP are now implemented and working with loca
 - **Modular Settings Architecture**:
   - Separated core settings (locale, dark mode, preferred weight unit) from gear-specific settings (custom categories, container types)
   - Created dedicated services: `CoreSettingsService` and `GearSettingsService`
-  - Created separate Pinia stores: `useCoreSettingsStore` and `useGearSettingsStore`
-  - Created separate composables: `useCoreSettings()` and `useGearSettings()`
+  - Created separate Pinia stores: `useSettingsStore` and `useGearSettingsStore`
+  - Created separate composables: `useSettings()` and `useGearSettings()`
   - Modular SettingsPage component with slot-based architecture for extensibility
   - Settings page now supports adding module-specific settings via slots
 

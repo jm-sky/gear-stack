@@ -10,31 +10,65 @@ Each migration has two files:
 
 ## Available Migrations
 
+### 000_create_schema_migrations
+- **Created**: 2025-01-XX
+- **Description**: Creates `schema_migrations` table for tracking migration history
+
 ### 001_add_email_audit_log
 - **Created**: 2025-11-13
 - **Description**: Adds `email_audit_log` table for tracking sent emails
 - **Model**: `app.common.models.EmailAuditLog`
+
+### 001.5_create_users_table
+- **Created**: 2025-01-27
+- **Description**: Creates `users` table for authentication (required before gear tables)
+- **Model**: `app.modules.auth.db_models.UserDB`
 
 ### 002_add_gear_tables
 - **Created**: 2025-11-19
 - **Description**: Adds `gear_containers` and `gear_items` tables for gear management
 - **Models**: `app.modules.gear.db_models.GearContainerDB`, `app.modules.gear.db_models.GearItemDB`
 
+### 003_add_missing_gear_fields
+- **Created**: 2025-XX-XX
+- **Description**: Adds missing fields to gear tables (hide_when_nested, weight, weight_unit, etc.)
+
 ## Usage
 
-### Option 1: Automatic Table Creation (Recommended for Development)
+### Option 1: CLI Migration Commands (Recommended)
 
-If you're using `init_db()` in development, the tables are created automatically from SQLAlchemy models:
+Run all pending migrations automatically:
 
-```python
-from app.core.database import init_db
-
-await init_db()  # Creates all tables including email_audit_log
+```bash
+cd backend
+python cli.py db migrate
 ```
 
-### Option 2: Run Python Migration Script
+Check migration status:
 
-Apply specific migration:
+```bash
+python cli.py db migrate-status
+```
+
+The CLI automatically:
+- Discovers all migrations in the `migrations/` directory
+- Checks which migrations have already been applied
+- Runs only pending migrations in order
+- Tracks applied migrations in the `schema_migrations` table
+
+### Option 2: Automatic Table Creation (Alternative for Development)
+
+If you're using `db init`, the `schema_migrations` table is automatically created:
+
+```bash
+python cli.py db init
+```
+
+This will create all tables including `schema_migrations` and mark migration 000 as applied.
+
+### Option 3: Run Individual Migration Script
+
+Apply specific migration manually:
 
 ```bash
 cd backend
@@ -48,7 +82,9 @@ Rollback migration:
 python migrations/001_add_email_audit_log.py downgrade
 ```
 
-### Option 3: Manual SQL Migration
+**Note:** When running migrations manually, they won't be tracked in `schema_migrations` table. Use `cli.py db migrate` for automatic tracking.
+
+### Option 4: Manual SQL Migration
 
 For production environments, you may want to review and apply SQL manually:
 
@@ -60,12 +96,34 @@ psql -d your_database -f migrations/001_add_email_audit_log.sql
 sqlite3 your_database.db < migrations/001_add_email_audit_log.sql
 ```
 
+## Migration Tracking
+
+The application uses a `schema_migrations` table to track which migrations have been applied. This table is automatically created:
+
+- When you run `cli.py db init` (and migration 000 is marked as applied)
+- When you run `cli.py db migrate` for the first time
+- When you run `cli.py db migrate-status` for the first time
+
+The table structure:
+- `version` (PRIMARY KEY): Migration version number (e.g., '001', '002')
+- `name`: Migration name (e.g., 'add_email_audit_log')
+- `applied_at`: Timestamp when migration was applied
+
+To see which migrations have been applied:
+
+```bash
+python cli.py db migrate-status
+```
+
 ## Migration History
 
-| Version | Date       | Description                | Status |
-|---------|------------|----------------------------|--------|
-| 001     | 2025-11-13 | Add email_audit_log table  | ✓      |
-| 002     | 2025-11-19 | Add gear tables            | ✓      |
+| Version | Date       | Description                        | Status |
+|---------|------------|------------------------------------|--------|
+| 000     | 2025-01-XX | Create schema_migrations table     | ✓      |
+| 001     | 2025-11-13 | Add email_audit_log table          | ✓      |
+| 001.5   | 2025-01-27 | Create users table                 | ✓      |
+| 002     | 2025-11-19 | Add gear tables                    | ✓      |
+| 003     | 2025-01-27 | Add missing gear fields            | ✓      |
 
 ## Future: Setting Up Alembic
 

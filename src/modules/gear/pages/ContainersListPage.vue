@@ -7,24 +7,28 @@ import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import { config } from '@/shared/config/config'
 import type { IGearContainer } from '../types/gear.types'
 import ContainerCard from '../components/ContainerCard.vue'
 import ContainersFilters from '../components/ContainersFilters.vue'
 import ContainersListPageDropdown from '../components/ContainersListPageDropdown.vue'
 import ExportToPromptDialog from '../components/ExportToPromptDialog.vue'
 import ImportMarkdownDialog from '../components/ImportMarkdownDialog.vue'
+import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { useGear } from '../composables/useGear'
-import { useGearSettings } from '../composables/useGearSettings'
+import { gearContainerService } from '../services/gearContainerService'
 import { generateSampleSet } from '../services/sampleSetGenerator'
+import { getRootContainers as getRootContainersUtil } from '../utils/containerNesting'
 import type { TUUID } from '@/shared/types/base.type'
 
 const router = useRouter()
 const route = useRoute()
 const { t } = useI18n()
-const { containers, deleteContainer, getRootContainers } = useGear()
-const { customContainerTypes } = useGearSettings()
+const { containers, deleteContainer } = useGear()
+const { getContainerTypeLabel } = useContainerTypeLabel()
 
 // Filters - using refs that will be bound to ContainersFilters via v-model
+const loading = ref(false)
 const searchQueryRaw = ref('')
 const searchQuery = refDebounced(searchQueryRaw, 300)
 const showOnlyRootContainers = ref(false)
@@ -33,12 +37,25 @@ const showOnlyRootContainers = ref(false)
 const importDialogOpen = ref(false)
 const isExportToPromptDialogOpen = ref(false)
 
-// Check for import query parameter and open dialog
-onMounted(() => {
+// Check for import query parameter and open dialog, and load containers from API
+onMounted(async () => {
   if (route.query.import === 'true') {
     importDialogOpen.value = true
     // Remove query parameter from URL
     router.replace({ query: { ...route.query, import: undefined } })
+  }
+
+  // Load containers from API on mount (when backend is enabled)
+  if (config.backend.enabled) {
+    try {
+      loading.value = true
+      await gearContainerService().getContainers()
+    } catch (error) {
+      console.error('Failed to load containers from API:', error)
+      // Fallback to localStorage is handled by store initialization
+    } finally {
+      loading.value = false
+    }
   }
 })
 
@@ -51,21 +68,12 @@ watch(() => route.query.import, (shouldImport) => {
   }
 })
 
-// Helper to get container type label for filtering
-const getContainerTypeLabel = (typeKey: string): string => {
-  const customType = customContainerTypes.value.find(t => t.key === typeKey)
-  if (customType) {
-    return customType.label
-  }
-  return t(`gear.container.types.${typeKey}`)
-}
-
 // Filtered containers
 const filteredContainers = computed<IGearContainer[]>(() => {
   // First filter by root containers if enabled
   let baseContainers = containers.value
   if (showOnlyRootContainers.value) {
-    baseContainers = getRootContainers()
+    baseContainers = getRootContainersUtil(containers.value)
   } else {
     // Hide containers with hideWhenNested=true AND parentContainerId set
     baseContainers = baseContainers.filter(container => {
@@ -104,10 +112,10 @@ const handleImportComplete = () => {
   // Refresh is automatic via store reactivity
 }
 
-const handleDelete = (id: TUUID) => {
+const handleDelete = async (id: TUUID) => {
   if (confirm(t('gear.container.deleteConfirm'))) {
     try {
-      deleteContainer(id)
+      await deleteContainer(id)
       toast.success(t('common.success'))
     } catch {
       toast.error(t('common.error'))
@@ -124,9 +132,9 @@ const handleExportAllToPrompt = () => {
   isExportToPromptDialogOpen.value = true
 }
 
-const handleGenerateSampleSet = () => {
+const handleGenerateSampleSet = async () => {
   try {
-    generateSampleSet(t)
+    await generateSampleSet(t)
     toast.success(t('gear.sampleSet.success'))
   } catch (error) {
     console.error('Error generating sample set:', error)
@@ -161,7 +169,6 @@ const handleGenerateSampleSet = () => {
               <Sparkles class="size-4" />
             </Button>
             <Button
-              v-if="containers.length > 0"
               v-tooltip.bottom="t('gear.container.create.title')"
               variant="default"
               class="shrink-0 flex-1 sm:flex-none"
@@ -179,6 +186,8 @@ const handleGenerateSampleSet = () => {
       <ContainersFilters
         v-model:search-query="searchQueryRaw"
         v-model:show-only-root-containers="showOnlyRootContainers"
+        root-containers-filter
+        :loading
       />
 
       <!-- Containers Grid -->

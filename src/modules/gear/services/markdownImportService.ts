@@ -1,4 +1,5 @@
 import type { ICreateItemDto } from '../types/gear.types'
+import { recognizeParameters } from '../utils/parameterRecognition'
 import { SUGGESTED_BRANDS, SUGGESTED_COLORS } from '../utils/suggestedValues'
 
 // Markdown template for AI guidelines
@@ -91,6 +92,9 @@ export interface IMarkdownImportResult {
     weight?: number // Container weight
     weightUnit?: 'g' | 'kg' | 'oz' | 'lb' // Container weight unit
     url?: string // Container URL
+    description?: string // Container description (text between header and first item)
+    price?: number // Container price
+    currency?: string // Container currency (PLN, USD, EUR, GBP, etc.)
     items: Array<ICreateItemDto & { nestedContainerId?: string; uuid?: string }> // nestedContainerId is temporary slug reference, uuid for updates
   }>
   errors: string[]
@@ -128,6 +132,47 @@ interface IItemParams {
  * - ~N m/cm/kg/g = weight/measurement
  */
 class MarkdownImportService {
+  /**
+   * Parse price from text
+   * Supports formats: 100PLN, 10 PLN, 10,00 PLN, 1 000,00 PLN, 10zł, $50, 50$, €100, 100€, £75, 75£
+   * @returns {price: number, currency: string} or undefined if not found
+   */
+  private parsePrice(text: string): { price: number; currency: string } | undefined {
+    // Currency symbols and codes
+    const currencyPatterns = [
+      // Format: 100PLN, 100 PLN
+      { regex: /(\d+(?:[\s,.]\d+)*)\s*PLN/i, currency: 'PLN' },
+      { regex: /(\d+(?:[\s,.]\d+)*)\s*zł/i, currency: 'PLN' },
+      { regex: /(\d+(?:[\s,.]\d+)*)\s*z[lł]/i, currency: 'PLN' },
+      // Format: $50, 50$
+      { regex: /\$\s*(\d+(?:[\s,.]\d+)*)/i, currency: 'USD' },
+      { regex: /(\d+(?:[\s,.]\d+)*)\s*\$/i, currency: 'USD' },
+      { regex: /(\d+(?:[\s,.]\d+)*)\s*USD/i, currency: 'USD' },
+      // Format: €100, 100€
+      { regex: /€\s*(\d+(?:[\s,.]\d+)*)/i, currency: 'EUR' },
+      { regex: /(\d+(?:[\s,.]\d+)*)\s*€/i, currency: 'EUR' },
+      { regex: /(\d+(?:[\s,.]\d+)*)\s*EUR/i, currency: 'EUR' },
+      // Format: £75, 75£
+      { regex: /£\s*(\d+(?:[\s,.]\d+)*)/i, currency: 'GBP' },
+      { regex: /(\d+(?:[\s,.]\d+)*)\s*£/i, currency: 'GBP' },
+      { regex: /(\d+(?:[\s,.]\d+)*)\s*GBP/i, currency: 'GBP' },
+    ]
+
+    for (const pattern of currencyPatterns) {
+      const match = text.match(pattern.regex)
+      if (match && match[1]) {
+        // Remove spaces and replace comma with dot for parsing
+        const priceStr = match[1].replace(/\s/g, '').replace(',', '.')
+        const price = Number.parseFloat(priceStr)
+        if (!Number.isNaN(price)) {
+          return { price, currency: pattern.currency }
+        }
+      }
+    }
+
+    return undefined
+  }
+
   private categoryKeywords: Record<string, string[]> = {
     water: ['butelka', 'bottle', 'water', 'woda', 'filtr'],
     food: ['racje', 'jedzenie', 'food', 'menażka', 'kubek', 'kuchenka', 'palnik', 'gaz'],
@@ -145,25 +190,55 @@ class MarkdownImportService {
 
   /**
    * Parse markdown content into containers and items
+   * @param markdown - Markdown content to parse
+   * @param options - Parsing options
+   * @param options.recognizeFromName - Whether to recognize brand and color from item name (default: false)
+   * @param options.customBrands - Custom user brands to include in recognition
    */
-  parseMarkdown(markdown: string): IMarkdownImportResult {
+  parseMarkdown(
+    markdown: string,
+    options?: {
+      recognizeFromName?: boolean
+      customBrands?: Array<{ value: string }>
+    }
+  ): IMarkdownImportResult {
     const result: IMarkdownImportResult = {
       containers: [],
       errors: [],
     }
 
     const lines = markdown.split('\n')
-    let currentContainer: { name: string; id?: string; uuid?: string; weight?: number; weightUnit?: 'g' | 'kg' | 'oz' | 'lb'; url?: string; items: ICreateItemDto[] } | null = null
+    let currentContainer: { name: string; id?: string; uuid?: string; weight?: number; weightUnit?: 'g' | 'kg' | 'oz' | 'lb'; url?: string; description?: string; price?: number; currency?: string; items: ICreateItemDto[] } | null = null
+    let descriptionLines: string[] = []
+    let isCollectingDescription = false
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]?.trim()
-      if (!line) continue
+      if (!line) {
+        // Keep empty lines in description
+        if (isCollectingDescription) {
+          descriptionLines.push('')
+        }
+        continue
+      }
 
       // Container header (## Header [#id] [uuid:xxx] (Type) <URL> - weight)
       if (line.startsWith('## ')) {
+        // Save previous container with description
         if (currentContainer && currentContainer.items.length > 0) {
+          // Trim and save description
+          if (descriptionLines.length > 0) {
+            const description = descriptionLines.join('\n').trim()
+            if (description) {
+              currentContainer.description = description
+            }
+          }
           result.containers.push(currentContainer)
         }
+
+        // Reset description collection
+        descriptionLines = []
+        isCollectingDescription = true
 
         let headerText = line.substring(3).trim()
         let containerId: string | undefined
@@ -171,6 +246,17 @@ class MarkdownImportService {
         let containerUrl: string | undefined
         let containerWeight: number | undefined
         let containerWeightUnit: 'g' | 'kg' | 'oz' | 'lb' | undefined
+        let containerPrice: number | undefined
+        let containerCurrency: string | undefined
+
+        // Extract price (before other patterns to avoid conflicts)
+        const priceResult = this.parsePrice(headerText)
+        if (priceResult) {
+          containerPrice = priceResult.price
+          containerCurrency = priceResult.currency
+          // Remove price from header text
+          headerText = headerText.replace(/(\d+(?:[\s,.]\d+)*)\s*(PLN|zł|z[lł]|\$|USD|€|EUR|£|GBP)/gi, '').trim()
+        }
 
         // Extract ID from [#id]
         const idMatch = headerText.match(/\[#([^\]]+)\]/)
@@ -223,6 +309,8 @@ class MarkdownImportService {
           weight: containerWeight,
           weightUnit: containerWeightUnit,
           url: containerUrl,
+          price: containerPrice,
+          currency: containerCurrency,
           items: [],
         }
         continue
@@ -230,19 +318,48 @@ class MarkdownImportService {
 
       // Item line (- Item)
       if (line.startsWith('- ') && currentContainer) {
+        // First item encountered - stop collecting description
+        if (isCollectingDescription) {
+          // Save collected description
+          if (descriptionLines.length > 0) {
+            const description = descriptionLines.join('\n').trim()
+            if (description) {
+              currentContainer.description = description
+            }
+          }
+          descriptionLines = []
+          isCollectingDescription = false
+        }
+
         try {
-          const item = this.parseItemLine(line.substring(2).trim())
+          const item = this.parseItemLine(line.substring(2).trim(), {
+            recognizeFromName: options?.recognizeFromName ?? false,
+            customBrands: options?.customBrands,
+          })
           if (item) {
             currentContainer.items.push(item)
           }
         } catch (error) {
           result.errors.push(`Line ${i + 1}: ${error instanceof Error ? error.message : 'Unknown error'}`)
         }
+        continue
+      }
+
+      // Description line (between header and first item)
+      if (isCollectingDescription && currentContainer) {
+        descriptionLines.push(line)
       }
     }
 
-    // Add last container
+    // Add last container with description
     if (currentContainer && currentContainer.items.length > 0) {
+      // Save description if still collecting
+      if (descriptionLines.length > 0) {
+        const description = descriptionLines.join('\n').trim()
+        if (description) {
+          currentContainer.description = description
+        }
+      }
       result.containers.push(currentContainer)
     }
 
@@ -254,8 +371,17 @@ class MarkdownImportService {
    * New format: - **Item Name** [uuid:xxx] x2 (Brand, Color) [#container-id] (Status) - 500g
    * Old format: - Item name **Brand** (params) x5
    * Flexible: Parser will try to guess all fields
+   * @param options - Parsing options
+   * @param options.recognizeFromName - Whether to recognize brand and color from item name
+   * @param options.customBrands - Custom user brands to include in recognition
    */
-  private parseItemLine(line: string): (ICreateItemDto & { nestedContainerId?: string; uuid?: string }) | null {
+  private parseItemLine(
+    line: string,
+    options?: {
+      recognizeFromName?: boolean
+      customBrands?: Array<{ value: string }>
+    }
+  ): (ICreateItemDto & { nestedContainerId?: string; uuid?: string }) | null {
     if (!line) return null
 
     let workingLine = line
@@ -272,12 +398,32 @@ class MarkdownImportService {
     let uuid: string | undefined
     let wearable: boolean | undefined
     let consumable: boolean | undefined
+    let notes: string | undefined
+    let price: number | undefined
+    let currency: string | undefined
+
+    // 0. Extract price first (before other patterns to avoid conflicts)
+    const priceResult = this.parsePrice(workingLine)
+    if (priceResult) {
+      price = priceResult.price
+      currency = priceResult.currency
+      // Remove price from working line
+      workingLine = workingLine.replace(/(\d+(?:[\s,.]\d+)*)\s*(PLN|zł|z[lł]|\$|USD|€|EUR|£|GBP)/gi, '').trim()
+    }
 
     // 1. Extract bold text as item name (new format: **Item Name**)
     const boldMatch = workingLine.match(/\*\*([^*]+)\*\*/)
     if (boldMatch) {
       name = boldMatch[1]?.trim() ?? ''
       workingLine = workingLine.replace(boldMatch[0] ?? '', '').trim()
+    }
+
+    // 1.5. Extract description/notes in italic format *(text)* BEFORE parsing parentheses
+    // This prevents description from being mistaken for brand/color
+    const italicDescriptionMatch = workingLine.match(/\*\(([^)]+)\)\*/)
+    if (italicDescriptionMatch) {
+      notes = italicDescriptionMatch[1]?.trim()
+      workingLine = workingLine.replace(italicDescriptionMatch[0] ?? '', '').trim()
     }
 
     // 2. Extract UUID from [uuid:xxx]
@@ -445,7 +591,19 @@ class MarkdownImportService {
       name = workingLine.trim()
     }
 
-    // 8. Determine category from name
+    // 8. Recognize brand and color from name if option is enabled and not already set
+    if (options?.recognizeFromName && name) {
+      const recognizedParams = recognizeParameters(name, options.customBrands)
+      // Only use recognized values if brand/color weren't already found in parentheses
+      if (!brand && recognizedParams.brand) {
+        brand = recognizedParams.brand
+      }
+      if (!color && recognizedParams.color) {
+        color = recognizedParams.color
+      }
+    }
+
+    // 9. Determine category from name
     const category = this.matchCategory(name)
 
     const item: ICreateItemDto & { nestedContainerId?: string; uuid?: string } = {
@@ -462,6 +620,9 @@ class MarkdownImportService {
       url,
       wearable,
       consumable,
+      notes,
+      price,
+      currency,
       nestedContainerId, // Temporary slug reference to container
       uuid, // UUID for update workflow
     }

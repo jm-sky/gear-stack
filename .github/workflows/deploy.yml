@@ -1,39 +1,55 @@
-name: Deploy to VPS
+name: Deploy to Production
+
 permissions:
   contents: read
-
-# Required GitHub Secrets:
-# - VPS_HOST: IP address or hostname of your VPS
-# - VPS_USER: SSH username for VPS
-# - VPS_SSH_KEY: Private SSH key for authentication
-# - VPS_PORT: (optional) SSH port, defaults to 22
-# - VPS_DEPLOY_PATH: (optional) Path to project on VPS, defaults to ~/apps/gear-stack
-#
-# The deploy user needs sudo permissions to write to /var/www/gear-stack
 
 on:
   push:
     branches:
-      - develop
-  workflow_dispatch: # Allow manual trigger
+      - main
+  workflow_dispatch:
 
 jobs:
-  deploy:
+  lint-and-typecheck:
+    name: Lint and Type Check
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Deploy to VPS
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run linter
+        run: pnpm lint
+
+      - name: Run type check
+        run: pnpm type-check
+
+  deploy:
+    name: Deploy to Server
+    needs: lint-and-typecheck
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
-          timeout: 30s
-          command_timeout: 10m
           script: |
-            set -e
-            DEPLOY_PATH="${{ secrets.VPS_DEPLOY_PATH || '~/apps/gear-stack' }}"
-            cd ${DEPLOY_PATH/#\~/$HOME}
-            scripts/deploy.sh
-
+            export CI=true
+            cd ${{ secrets.VPS_PROJECT_PATH }}
+            bash scripts/deploy.sh

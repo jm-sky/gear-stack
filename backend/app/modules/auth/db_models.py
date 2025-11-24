@@ -45,7 +45,7 @@ class UserDB(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True)  # ULID
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
+    hashed_password: Mapped[str] = mapped_column(String(255), nullable=True)  # Nullable for OAuth users
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_email_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
@@ -56,6 +56,10 @@ class UserDB(Base):
     email_verification_token: Mapped[str | None] = mapped_column(Text, nullable=True)
     email_verification_sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
+    # OAuth fields
+    oauth_provider: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    oauth_provider_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    avatar_url: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     def __repr__(self) -> str:
         return f"<UserDB(id={self.id}, email={self.email}, name={self.name})>"

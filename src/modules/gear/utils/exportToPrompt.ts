@@ -4,6 +4,7 @@
 
 import type { IGearContainer, IGearItem } from '../types/gear.types'
 import { formatWeight, formatWeightFromGrams } from './formatWeight'
+import { isSet } from './helpers'
 
 interface ExportOptions {
   t?: (key: string, ...args: unknown[]) => string
@@ -140,11 +141,91 @@ function formatItem(
     parts.push(`- ${weightText}`)
   }
 
-  // For newline format, split the line: name on first line, description on second line, then rest
+  // For newline format, split the line: name + metadata on first line, description alone on second line
   if (item.notes && options.descriptionFormat === 'newline') {
     const namePart = `**${item.name}**`
-    const restParts = parts.slice(1) // Everything after name (UUID, quantity, brand, etc.)
-    return `${indentStr}- ${namePart}\n${indentStr}  *${item.notes}*${restParts.length > 0 ? ' ' + restParts.join(' ') : ''}`
+
+    // Build first line with name and all metadata EXCEPT description and weight
+    const firstLineParts: string[] = [namePart]
+
+    // UUID
+    if (options.showUuid !== false) {
+      firstLineParts.push(`[uuid:${item.id}]`)
+    }
+
+    // Quantity
+    if (item.quantity > 1) {
+      firstLineParts.push(`x${item.quantity}`)
+    }
+
+    // Brand and color
+    const brandColorParts: string[] = []
+    if (options.showBrand !== false && item.brand) {
+      brandColorParts.push(item.brand)
+    }
+    if (options.showColor !== false && item.color) {
+      brandColorParts.push(item.color)
+    }
+    if (brandColorParts.length > 0) {
+      firstLineParts.push(`(${brandColorParts.join(', ')})`)
+    }
+
+    // Status, expiration, wearable, consumable
+    const statusParts: string[] = []
+    if (item.expirationDate) {
+      const date = new Date(item.expirationDate)
+      const dateStr = date.toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      statusParts.push(`Expiration: ${dateStr}`)
+    }
+    if (item.status && options.t) {
+      const statusLabel = options.t(`gear.item.statuses.${item.status}`)
+      if (statusLabel !== options.t('gear.item.statuses.owned')) {
+        statusParts.push(statusLabel)
+      }
+    }
+    if (item.wearable) {
+      statusParts.push('Wearable')
+    }
+    if (item.consumable) {
+      statusParts.push('Consumable')
+    }
+    if (statusParts.length > 0) {
+      firstLineParts.push(`(${statusParts.join(', ')})`)
+    }
+
+    // Nested container ID
+    if (options.showNestedContainer !== false && item.containerId && options.getContainerById) {
+      const nestedContainer = options.getContainerById(item.containerId)
+      if (nestedContainer) {
+        const containerId = generateContainerId(nestedContainer.name)
+        firstLineParts.push(`[${containerId}]`)
+      }
+    }
+
+    // URL
+    if (item.url) {
+      firstLineParts.push(`<${item.url}>`)
+    }
+
+    // Weight
+    if (options.showWeight !== false) {
+      let totalWeight: number
+      let weightText: string
+
+      if (item.containerId && options.calculateTotalWeight) {
+        const containerWeightInGrams = options.calculateTotalWeight(item.containerId)
+        totalWeight = containerWeightInGrams * item.quantity
+        weightText = formatWeightFromGrams(totalWeight)
+      } else {
+        totalWeight = item.weight * item.quantity
+        weightText = formatWeight(totalWeight, item.weightUnit ?? 'g')
+      }
+
+      firstLineParts.push(`- ${weightText}`)
+    }
+
+    // Build output: first line with name and metadata, second line with description only
+    return `${indentStr}- ${firstLineParts.join(' ')}\n${indentStr}  *${item.notes}*`
   }
 
   return `${indentStr}- ${parts.join(' ')}`
@@ -230,7 +311,7 @@ export function exportContainerToPrompt(
   }
 
   // Add weight if provided
-  if (container.weight !== undefined && container.weightUnit) {
+  if (isSet(container.weight) && isSet(container.weightUnit)) {
     const weightText = formatWeight(container.weight, container.weightUnit)
     // Extract just the number and unit (e.g., "1.50 kg" -> "1.50kg" or "500 g" -> "500g")
     const weightValue = weightText.replace(/\s/g, '')

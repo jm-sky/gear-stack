@@ -1,14 +1,29 @@
 <script setup lang="ts">
 import Button from '@/components/ui/button/Button.vue'
+import { useUpdateSettings } from '@/modules/settings/composables/useSettings'
 import { useLocale } from '../composables/useLocale'
+import { SUPPORTED_LOCALES } from '../config/i18n'
+import type { SupportedLocale } from '@/shared/config/config'
 
-const { nextLocale, currentLocale, toggleLocale } = useLocale()
+const { nextLocale, currentLocale } = useLocale()
+const updateMutation = useUpdateSettings()
+
+const toggleLocale = async () => {
+  const currentIndex = SUPPORTED_LOCALES.indexOf(currentLocale.value)
+  const nextIndex = (currentIndex + 1) % SUPPORTED_LOCALES.length
+  const newLocale = SUPPORTED_LOCALES[nextIndex] as SupportedLocale
+
+  if (newLocale) {
+    await updateMutation.mutateAsync({ locale: newLocale })
+  }
+}
 </script>
 
 <template>
   <Button
     variant="ghost"
     :aria-label="`Switch language to ${nextLocale.code.toUpperCase()}`"
+    :disabled="updateMutation.isPending.value"
     class="w-12"
     @click="toggleLocale"
   >

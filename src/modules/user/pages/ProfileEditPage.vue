@@ -1,25 +1,37 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
-import { ArrowLeft } from 'lucide-vue-next'
-import { useForm } from 'vee-validate'
+import { ArrowLeft, Sparkles } from 'lucide-vue-next'
+import { useField, useForm } from 'vee-validate'
 import { onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import { useBackend } from '@/shared/composables/useBackend'
 import { useUser } from '../composables/useUser'
+import { UserRoutePaths } from '../routes'
+import { generateGravatarUrl } from '../utils/generateGravatarUrl'
+import { validateAvatarUrl } from '../utils/validateAvatarUrl'
 
 const router = useRouter()
 const { t } = useI18n()
 const { profile, updateProfile } = useUser()
+const { shouldUseAPI: _shouldUseAPI } = useBackend()
 
 const profileSchema = z.object({
   name: z.string().min(1, t('user.edit.name_required')),
   email: z.string().email(t('user.edit.email_invalid')),
+  avatarUrl: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || validateAvatarUrl(val),
+      { message: t('user.edit.avatar_invalid') }
+    ),
 })
 
 const { handleSubmit, setValues } = useForm({
@@ -27,8 +39,13 @@ const { handleSubmit, setValues } = useForm({
   initialValues: {
     name: '',
     email: '',
+    avatarUrl: '',
   },
 })
+
+const { value: emailValue } = useField('email')
+const { value: avatarUrlValue } = useField('avatarUrl')
+
 
 // Populate form with current profile data
 onMounted(() => {
@@ -36,6 +53,7 @@ onMounted(() => {
     setValues({
       name: profile.value.name,
       email: profile.value.email,
+      avatarUrl: profile.value.avatarUrl || '',
     })
   }
 })
@@ -46,23 +64,52 @@ watch(() => profile.value, (newProfile) => {
     setValues({
       name: newProfile.name,
       email: newProfile.email,
+      avatarUrl: newProfile.avatarUrl ?? '',
     })
   }
 })
 
-const onSubmit = handleSubmit(async (values) => {
-  try {
-    updateProfile(values)
-    toast.success(t('common.success'))
-    router.push('/profile')
-  } catch (error) {
-    toast.error(t('common.error'))
-    console.error(error)
+const onSubmit = handleSubmit(
+  async (values) => {
+    try {
+      const updateData = {
+        name: values.name,
+        email: values.email,
+        avatarUrl: values.avatarUrl && values.avatarUrl.trim() ? values.avatarUrl.trim() : undefined,
+      }
+
+      await updateProfile(updateData)
+      toast.success(t('common.success'))
+      router.push(UserRoutePaths.profile)
+    } catch (error) {
+      console.error('Profile update failed:', error)
+      toast.error(t('common.error'))
+    }
+  },
+  () => {
+    toast.error(t('user.edit.validation_error') || 'Validation failed')
   }
-})
+)
 
 const handleCancel = () => {
-  router.push('/profile')
+  router.push(UserRoutePaths.profile)
+}
+
+const handleGenerateGravatar = () => {
+  const email = emailValue.value as string | undefined
+  if (!email || typeof email !== 'string' || !email.trim()) {
+    toast.error(t('user.edit.email_required_for_gravatar') || 'Email is required to generate Gravatar URL')
+    return
+  }
+
+  try {
+    const gravatarUrl = generateGravatarUrl(email)
+    avatarUrlValue.value = gravatarUrl
+    toast.success(t('user.edit.gravatar_generated') || 'Gravatar URL generated')
+  } catch (error) {
+    console.error('Gravatar generation failed:', error)
+    toast.error(t('user.edit.gravatar_generation_failed') || 'Failed to generate Gravatar URL')
+  }
 }
 </script>
 
@@ -89,7 +136,7 @@ const handleCancel = () => {
         </div>
       </div>
 
-      <form v-if="profile" class="max-w-2xl mx-auto bg-card border rounded-lg p-6 space-y-8" @submit="onSubmit">
+      <form v-if="profile" class="max-w-2xl mx-auto bg-card border rounded-lg p-6 space-y-8" @submit.prevent="onSubmit">
         <div class="flex flex-col gap-6">
           <FormField v-slot="{ componentField }" name="name">
             <FormItem>
@@ -119,6 +166,37 @@ const handleCancel = () => {
                   v-bind="componentField"
                 />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
+          <FormField v-slot="{ componentField }" name="avatarUrl">
+            <FormItem>
+              <FormLabel>
+                {{ t('user.edit.avatar_label') }}
+              </FormLabel>
+              <FormControl>
+                <div class="flex gap-2">
+                  <Input
+                    type="url"
+                    :placeholder="t('user.edit.avatar_placeholder')"
+                    class="flex-1"
+                    v-bind="componentField"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    :title="t('user.edit.generate_gravatar') || 'Generate Gravatar URL from email'"
+                    @click="handleGenerateGravatar"
+                  >
+                    <Sparkles class="size-4" />
+                  </Button>
+                </div>
+              </FormControl>
+              <FormDescription>
+                {{ t('user.edit.avatar_help') }}
+              </FormDescription>
               <FormMessage />
             </FormItem>
           </FormField>

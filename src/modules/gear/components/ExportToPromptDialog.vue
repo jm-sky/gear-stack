@@ -22,8 +22,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import type { IGearContainer } from '../types/gear.types'
-import { useGear } from '../composables/useGear'
-import { useGearSettings } from '../composables/useGearSettings'
+import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
+import { useGearStore } from '../store/useGearStore'
+import { calculateTotalWeightSync } from '../utils/containerCalculations'
 import { exportContainersToPrompt, exportContainerToPrompt } from '../utils/exportToPrompt'
 import GuidelinesDialog from './GuidelinesDialog.vue'
 
@@ -38,8 +39,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const { getContainerById, calculateTotalWeight } = useGear()
-const { customContainerTypes } = useGearSettings()
+const store = useGearStore()
 const copied = ref(false)
 const isGuidelinesDialogOpen = ref(false)
 const showUuid = ref(true)
@@ -51,12 +51,17 @@ const showLegend = ref(true)
 const descriptionFormat = ref<'off' | 'inline' | 'newline'>('off')
 
 // Get container type label helper
-const getContainerTypeLabel = (typeKey: string): string => {
-  const customType = customContainerTypes.value.find(t => t.key === typeKey)
-  if (customType) {
-    return customType.label
-  }
-  return t(`gear.container.types.${typeKey}`)
+const { getContainerTypeLabel } = useContainerTypeLabel()
+
+// Sync helpers for computed
+const getContainerById = (id: string): IGearContainer | undefined => {
+  return store.getContainerById(id)
+}
+
+const calculateTotalWeight = (containerId: string): number => {
+  const container = store.getContainerById(containerId)
+  if (!container) return 0
+  return calculateTotalWeightSync(container, store.getAllContainers)
 }
 
 // Generate markdown based on current options

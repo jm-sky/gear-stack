@@ -1,5 +1,17 @@
 """Pytest configuration and fixtures."""
 
+import os
+
+# CRITICAL: Set environment variables BEFORE any app imports
+# This overrides .env file values for testing
+os.environ["ENVIRONMENT"] = "test"
+os.environ["SECRET_KEY"] = "test-secret-key-min-32-characters-long-for-testing"
+os.environ["ALLOWED_HOSTS"] = '["localhost","127.0.0.1"]'
+os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+# SQLite doesn't support pool_size/max_overflow, so disable them for tests
+os.environ["DATABASE_POOL_SIZE"] = "1"
+os.environ["DATABASE_MAX_OVERFLOW"] = "0"
+
 from typing import Generator
 
 import pytest

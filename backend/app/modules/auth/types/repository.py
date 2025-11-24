@@ -157,3 +157,42 @@ class UserRepositoryInterface(ABC):
             Verified user object if token is valid, None otherwise
         """
         ...
+
+    @abstractmethod
+    async def create_oauth_user(
+        self,
+        email: str,
+        name: str,
+        provider: str,
+        provider_id: str,
+        avatar_url: str | None = None,
+    ) -> User:
+        """Create a new user via OAuth (no password).
+
+        Args:
+            email: User email address
+            name: User's full name
+            provider: OAuth provider name (google, github, etc.)
+            provider_id: Provider's unique user ID
+            avatar_url: User's profile picture URL (optional)
+
+        Returns:
+            Created user object
+
+        Raises:
+            UserAlreadyExistsError: If user with email already exists
+        """
+        ...
+
+    @abstractmethod
+    async def get_user_by_oauth_provider(self, provider: str, provider_id: str) -> User | None:
+        """Get user by OAuth provider and provider ID.
+
+        Args:
+            provider: OAuth provider name (google, github, etc.)
+            provider_id: Provider's unique user ID
+
+        Returns:
+            User object if found, None otherwise
+        """
+        ...

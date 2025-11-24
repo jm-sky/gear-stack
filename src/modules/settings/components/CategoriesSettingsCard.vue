@@ -12,21 +12,19 @@ const { t } = useI18n()
 const { customCategories, addCategory, updateCategory, removeCategory } = useGearSettings()
 
 const editingId = ref<string | null>(null)
-const newCategoryKey = ref('')
-const newCategoryLabel = ref('')
+const newCategoryValue = ref('')
 
-const isAdding = computed(() => editingId.value === null && (newCategoryKey.value || newCategoryLabel.value))
+const isAdding = computed(() => editingId.value === null && !!newCategoryValue.value.trim())
 
 const handleAdd = () => {
-  if (!newCategoryKey.value.trim() || !newCategoryLabel.value.trim()) {
+  if (!newCategoryValue.value.trim()) {
     return
   }
 
   const now = new Date().toISOString()
   const category: IUserCategory = {
     id: crypto.randomUUID(),
-    key: newCategoryKey.value.trim().toLowerCase().replace(/\s+/g, '_'),
-    label: newCategoryLabel.value.trim(),
+    value: newCategoryValue.value.trim(),
     createdAt: now,
     updatedAt: now,
   }
@@ -34,14 +32,12 @@ const handleAdd = () => {
   addCategory(category)
 
   // Reset form
-  newCategoryKey.value = ''
-  newCategoryLabel.value = ''
+  newCategoryValue.value = ''
 }
 
 const handleEdit = (category: IUserCategory) => {
   editingId.value = category.id
-  newCategoryKey.value = category.key
-  newCategoryLabel.value = category.label
+  newCategoryValue.value = category.value
 }
 
 const handleSave = (id: string) => {
@@ -50,21 +46,18 @@ const handleSave = (id: string) => {
 
   const updated: IUserCategory = {
     ...category,
-    key: newCategoryKey.value.trim().toLowerCase().replace(/\s+/g, '_'),
-    label: newCategoryLabel.value.trim(),
+    value: newCategoryValue.value.trim(),
     updatedAt: new Date().toISOString(),
   }
 
   updateCategory(updated)
   editingId.value = null
-  newCategoryKey.value = ''
-  newCategoryLabel.value = ''
+  newCategoryValue.value = ''
 }
 
 const handleCancel = () => {
   editingId.value = null
-  newCategoryKey.value = ''
-  newCategoryLabel.value = ''
+  newCategoryValue.value = ''
 }
 
 const handleDelete = (id: string) => {
@@ -88,19 +81,11 @@ const handleDelete = (id: string) => {
         <h4 class="font-medium text-sm">
           {{ editingId ? t('settings.categories.edit') : t('settings.categories.add') }}
         </h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Input
-            v-model="newCategoryKey"
-            :placeholder="t('settings.categories.keyPlaceholder')"
-            :disabled="!!editingId"
-            @keydown.enter="handleAdd"
-          />
-          <Input
-            v-model="newCategoryLabel"
-            :placeholder="t('settings.categories.labelPlaceholder')"
-            @keydown.enter="handleAdd"
-          />
-        </div>
+        <Input
+          v-model="newCategoryValue"
+          :placeholder="t('settings.categories.valuePlaceholder')"
+          @keydown.enter="handleAdd"
+        />
         <div class="flex gap-2">
           <Button
             v-if="isAdding"
@@ -129,22 +114,9 @@ const handleDelete = (id: string) => {
           :key="category.id"
           class="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg gap-3"
         >
-          <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <div class="text-xs text-muted-foreground">
-                {{ t('settings.categories.key') }}
-              </div>
-              <div class="font-mono text-sm">
-                {{ category.key }}
-              </div>
-            </div>
-            <div>
-              <div class="text-xs text-muted-foreground">
-                {{ t('settings.categories.label') }}
-              </div>
-              <div class="text-sm">
-                {{ category.label }}
-              </div>
+          <div class="flex-1">
+            <div class="text-sm">
+              {{ category.value }}
             </div>
           </div>
           <div class="flex gap-2 sm:shrink-0">

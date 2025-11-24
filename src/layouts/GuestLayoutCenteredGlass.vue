@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
+import GuestLayoutFooter from '@/components/layout/GuestLayoutFooter.vue'
 import LogoText from '@/components/ui/LogoText.vue'
 import DarkModeToggle from '@/shared/components/DarkModeToggle.vue'
 import LocaleToggle from '@/shared/i18n/components/LocaleToggle.vue'
@@ -13,7 +14,7 @@ const layoutActionsComponent = route.meta.layoutActionsComponent
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-200 via-slate-100 to-purple-200 dark:from-gray-950 dark:via-gray-800 dark:to-gray-950 flex flex-col relative">
+  <div class="min-h-screen bg-linear-to-br from-blue-200 via-slate-100 to-purple-200 dark:from-gray-950 dark:via-gray-800 dark:to-gray-950 flex flex-col relative">
     <!-- Background image with smooth transitions -->
     <div
       v-if="backgroundImage"
@@ -48,12 +49,6 @@ const layoutActionsComponent = route.meta.layoutActionsComponent
     </main>
 
     <!-- Footer -->
-    <footer class="relative z-0">
-      <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <p class="text-center text-sm text-muted-foreground">
-          &copy; 2025 Vue Blocks Registry. Demo application.
-        </p>
-      </div>
-    </footer>
+    <GuestLayoutFooter />
   </div>
 </template>

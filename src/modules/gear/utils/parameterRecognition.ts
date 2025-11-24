@@ -18,7 +18,7 @@ export interface IRecognizedParameters {
  */
 export function recognizeParameters(
   name: string,
-  customBrands?: Array<{ label: string }>
+  customBrands?: Array<{ value: string }>
 ): IRecognizedParameters {
   if (!name || name.trim().length === 0) {
     return {}
@@ -30,7 +30,7 @@ export function recognizeParameters(
   // Combine default and custom brands
   const allBrands = [
     ...SUGGESTED_BRANDS,
-    ...(customBrands?.map(b => b.label) ?? []),
+    ...(customBrands?.map(b => b.value) ?? []),
   ]
 
   // Match brand - check for brand names in the item name
@@ -57,6 +57,46 @@ export function recognizeParameters(
       if (normalizedBrand.length >= 3 && normalizedName.includes(normalizedBrand)) {
         result.brand = brand
         break
+      }
+    }
+  }
+
+  // If no brand found in suggested list, try to extract brand-like patterns from name
+  // Look for uppercase/mixed-case words or hyphenated patterns early in the name
+  if (!result.brand) {
+    const words = name.trim().split(/\s+/)
+    if (words.length > 1) {
+      // First, check for hyphenated brand patterns (e.g., "M-TAC" in "Materac M-TAC")
+      // These are most likely to be brands/model numbers
+      for (const word of words.slice(0, 3)) { // Check first 3 words
+        if (word.includes('-') && word.match(/^[A-Z][A-Za-z0-9-]+$/)) {
+          // Hyphenated word with uppercase start - likely a brand/model
+          result.brand = word
+          break
+        }
+      }
+      
+      // If no hyphenated pattern found, check first word(s) for brand-like patterns
+      if (!result.brand) {
+        const firstWord = words[0] ?? ''
+        const secondWord = words[1] ?? ''
+        
+        // Exclude common words that aren't brands
+        const commonWords = ['the', 'a', 'an', 'my', 'our', 'your', 'this', 'that', 'these', 'those', 'materac', 'plecak', 'torba', 'saszetka']
+        
+        // Check if first word looks like a brand (has uppercase letters, may have hyphens)
+        if (firstWord.match(/^[A-Z][A-Za-z0-9-]+$/) && !commonWords.includes(firstWord.toLowerCase())) {
+          result.brand = firstWord
+        }
+        
+        // Also check second word if first word is a common article/preposition or common noun
+        if (!result.brand && secondWord) {
+          if (firstWord.toLowerCase().match(/^(the|a|an|my|our|your)$/) || commonWords.includes(firstWord.toLowerCase())) {
+            if (secondWord.match(/^[A-Z][A-Za-z0-9-]+$/)) {
+              result.brand = secondWord
+            }
+          }
+        }
       }
     }
   }

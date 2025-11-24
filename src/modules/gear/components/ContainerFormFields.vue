@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useFocus } from '@vueuse/core'
 import { nextTick, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import ComboBox from '@/components/ui/combo-box/ComboBox.vue'
@@ -16,11 +15,12 @@ import {
 } from '@/components/ui/select'
 import WeightInputWithUnitPicker from '@/components/ui/weight-input/WeightInputWithUnitPicker.vue'
 import type { IGearContainer } from '../types/gear.types'
+import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { useGearSettings } from '../composables/useGearSettings'
 import { COLOR_DOT_CLASSES, CONTAINER_COLORS } from '../utils/containerColors'
 import { getBrandOptions } from '../utils/suggestedValues'
 
-defineProps<{
+const _props = defineProps<{
   container?: IGearContainer
   loading?: boolean
 }>()
@@ -31,8 +31,8 @@ const emit = defineEmits<{
   recognizeParameters: []
 }>()
 
-const { t } = useI18n()
 const { customContainerTypes, customBrands } = useGearSettings()
+const { getContainerTypeLabel } = useContainerTypeLabel()
 
 // Auto-focus na pierwszym polu
 const nameInputRef = ref<HTMLInputElement | undefined>(undefined)
@@ -40,17 +40,6 @@ nextTick(() => {
   useFocus(nameInputRef)
 })
 
-// Get container type label helper
-const getContainerTypeLabel = (typeKey: string): string => {
-  // Check if it's a custom container type
-  const customType = customContainerTypes.value.find(t => t.key === typeKey)
-  if (customType) {
-    return customType.label
-  }
-
-  // Default types
-  return t(`gear.container.types.${typeKey}`)
-}
 
 // Cancel handler
 const handleCancel = () => {
@@ -140,9 +129,9 @@ const handleCancel = () => {
               <SelectItem
                 v-for="containerType in customContainerTypes"
                 :key="containerType.id"
-                :value="containerType.key"
+                :value="containerType.value"
               >
-                {{ getContainerTypeLabel(containerType.key) }}
+                {{ getContainerTypeLabel(containerType.value) }}
               </SelectItem>
             </template>
           </SelectContent>
@@ -192,6 +181,24 @@ const handleCancel = () => {
       </FormItem>
     </FormField>
 
+    <!-- Is Public -->
+    <FormField v-slot="{ componentField, handleChange }" name="isPublic">
+      <FormItem v-slot="{ id }" class="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800 p-4">
+        <Checkbox
+          :id="id"
+          :model-value="componentField.modelValue"
+          @update:model-value="handleChange"
+        />
+        <div class="flex-1 space-y-1">
+          <FormLabel :label="$t('gear.container.isPublic')" class="cursor-pointer" />
+          <p class="text-sm text-muted-foreground">
+            {{ $t('gear.container.isPublicDescription') }}
+          </p>
+        </div>
+        <FormMessage />
+      </FormItem>
+    </FormField>
+
     <!-- Extended Fields Section -->
     <div class="border-t pt-6 space-y-6">
       <h3 class="text-lg font-semibold text-muted-foreground">
@@ -205,7 +212,7 @@ const handleCancel = () => {
             <FormLabel :label="$t('gear.container.brand')" />
             <ComboBox
               :value="value"
-              :options="getBrandOptions(customBrands.map(b => ({ key: b.key, label: b.label })))"
+              :options="getBrandOptions(customBrands)"
               :placeholder="$t('gear.container.brand')"
               :creatable="true"
               :create-label="$t('gear.comboBox.add')"

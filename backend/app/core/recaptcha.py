@@ -54,35 +54,54 @@ async def verify_recaptcha(token: str, action: str = "submit") -> dict[str, Any]
             logger.warning(f"reCAPTCHA failed: {e}")
             raise HTTPException(status_code=400, detail="Bot detected")
     """
+    # Log reCAPTCHA configuration
+    logger.info(f"reCAPTCHA verification called - enabled: {settings.recaptcha.enabled}, action: {action}")
+    logger.debug(f"reCAPTCHA config - secret_key present: {bool(settings.recaptcha.secret_key)}, " f"site_key present: {bool(settings.recaptcha.site_key)}, " f"min_score: {settings.recaptcha.min_score}, " f"verify_url: {settings.recaptcha.verify_url}")
+
     # Skip verification if reCAPTCHA is disabled (for development/testing)
     if not settings.recaptcha.enabled:
         logger.debug("reCAPTCHA verification skipped (disabled in settings)")
         return {"success": True, "score": 1.0, "action": action, "skipped": True}
 
     if not token:
+        logger.error("reCAPTCHA token is missing")
         raise RecaptchaError("reCAPTCHA token is required")
 
+    logger.debug(f"reCAPTCHA token received - length: {len(token)}, first 20 chars: {token[:20]}...")
+
     try:
+        logger.info(f"Sending reCAPTCHA verification request to {settings.recaptcha.verify_url}")
         async with httpx.AsyncClient() as client:
+            request_data = {
+                "secret": settings.recaptcha.secret_key,
+                "response": token,
+            }
+            logger.debug(
+                f"Request data - secret present: {bool(request_data['secret'])}, "
+                f"secret length: {len(request_data['secret']) if request_data['secret'] else 0}, "
+                f"response present: {bool(request_data['response'])}, "
+                f"response length: {len(request_data['response']) if request_data['response'] else 0}"
+            )
+
             response = await client.post(
                 settings.recaptcha.verify_url,
-                data={
-                    "secret": settings.recaptcha.secret_key,
-                    "response": token,
-                },
+                data=request_data,
                 timeout=10.0,
             )
+            logger.info(f"reCAPTCHA API response status: {response.status_code}")
             response.raise_for_status()
             result = response.json()
+            logger.debug(f"reCAPTCHA API raw response: {result}")
 
         # Log the result for debugging
-        logger.info(f"reCAPTCHA verification: success={result.get('success')}, " f"score={result.get('score')}, action={result.get('action')}")
+        logger.info(f"reCAPTCHA verification: success={result.get('success')}, " f"score={result.get('score')}, action={result.get('action')}, " f"hostname={result.get('hostname')}")
 
         # Check if verification was successful
         if not result.get("success"):
             error_codes = result.get("error-codes", [])
-            logger.warning(f"reCAPTCHA verification failed: {error_codes}")
-            raise RecaptchaError(f"reCAPTCHA verification failed: {error_codes}")
+            error_message = ", ".join(error_codes) if error_codes else "unknown error"
+            logger.error(f"reCAPTCHA verification failed: {error_message}. " f"Token length: {len(token)}, Action: {action}, " f"Full error codes: {error_codes}")
+            raise RecaptchaError(f"reCAPTCHA verification failed: {error_message}")
 
         # Verify action matches (prevents token reuse across different forms)
         if result.get("action") != action:

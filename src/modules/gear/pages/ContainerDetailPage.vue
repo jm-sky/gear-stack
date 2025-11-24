@@ -13,13 +13,15 @@ import ExportToPromptDialog from '../components/ExportToPromptDialog.vue'
 import ItemsTable from '../components/ItemsTable.vue'
 import { useContainer } from '../composables/useContainer'
 import { useGear } from '../composables/useGear'
+import { useGearStore } from '../store/useGearStore'
 import { recognizeParameters, recognizeParametersForItems } from '../utils/parameterRecognition'
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
+const store = useGearStore()
 const { container } = useContainer()
-const { deleteItem, updateItem, exportData, importData, createItem, getContainerById } = useGear()
+const { deleteItem, updateItem, exportData, importData, createItem } = useGear()
 
 const containerId = route.params.id as string
 
@@ -37,28 +39,28 @@ const handleEditItem = (item: IGearItem) => {
   router.push(`/gear/${containerId}/items/${item.id}/edit`)
 }
 
-const handleDeleteItem = (item: IGearItem) => {
+const handleDeleteItem = async (item: IGearItem) => {
   if (!confirm(t('gear.item.deleteConfirm'))) return
   try {
-    deleteItem(containerId, item.id)
+    await deleteItem(item.id)
     toast.success(t('common.success'))
   } catch {
     toast.error(t('common.error'))
   }
 }
 
-const handleStatusChange = (item: IGearItem, status: IGearItem['status']) => {
+const handleStatusChange = async (item: IGearItem, status: IGearItem['status']) => {
   try {
-    updateItem(containerId, item.id, { status })
+    await updateItem(item.id, { status })
     toast.success(t('common.success'))
   } catch {
     toast.error(t('common.error'))
   }
 }
 
-const handleExport = () => {
+const handleExport = async () => {
   try {
-    const json = exportData()
+    const json = await exportData()
     const blob = new Blob([json], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
@@ -84,10 +86,10 @@ const handleImport = () => {
     if (!file) return
 
     const reader = new FileReader()
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
         const json = event.target?.result as string
-        importData(json)
+        await importData(json)
         toast.success(t('common.success'))
         // Reload page to show imported data
         window.location.reload()
@@ -105,9 +107,9 @@ const handleAddContainer = () => {
   isAddContainerDialogOpen.value = true
 }
 
-const handleAddNestedContainer = (nestedContainerId: string) => {
+const handleAddNestedContainer = async (nestedContainerId: string) => {
   try {
-    const nestedContainer = getContainerById(nestedContainerId)
+    const nestedContainer = store.getContainerById(nestedContainerId)
     if (!nestedContainer) {
       toast.error(t('common.error'))
       return
@@ -115,7 +117,7 @@ const handleAddNestedContainer = (nestedContainerId: string) => {
 
     // Create an item that references the nested container
     // Use container name as item name
-    createItem(containerId, {
+    await createItem(containerId, {
       name: nestedContainer.name,
       category: 'other',
       quantity: 1,
@@ -155,7 +157,7 @@ const handleRecognizeParameters = async (item: IGearItem) => {
     }
     
     if (Object.keys(updateData).length > 0) {
-      updateItem(containerId, item.id, updateData)
+      await updateItem(item.id, updateData)
       toast.success(t('gear.actions.parametersRecognized'))
     } else {
       toast.info(t('gear.actions.noParametersFound'))
@@ -188,7 +190,7 @@ const handleRecognizeParametersAll = async () => {
       }
       
       if (Object.keys(updateData).length > 0) {
-        updateItem(containerId, item.id, updateData)
+        await updateItem(item.id, updateData)
         updatedCount++
       }
     }

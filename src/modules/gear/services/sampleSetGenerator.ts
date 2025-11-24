@@ -1,5 +1,6 @@
 import type { ICreateItemDto } from '../types/gear.types'
-import { gearService } from './gearService'
+import { gearContainerService } from './gearContainerService'
+import { gearItemService } from './gearItemService'
 import type { TUUID } from '@/shared/types/base.type'
 
 interface ISampleSetItem {
@@ -17,18 +18,20 @@ interface ISampleSetItem {
  * @param t - Translation function from vue-i18n
  * @returns Array of created container IDs
  */
-export function generateSampleSet(t: (key: string) => string): TUUID[] {
-  const backpackId = gearService.createContainer({
+export async function generateSampleSet(t: (key: string) => string): Promise<TUUID[]> {
+  const backpack = await gearContainerService().createContainer({
     name: t('gear.sampleSet.backpack'),
     type: 'backpack',
     description: t('gear.sampleSet.generate'),
-  }).id
+  })
+  const backpackId = backpack.id
 
   // Create pouch container (will be added as nested container item)
-  const pouchId = gearService.createContainer({
+  const pouch = await gearContainerService().createContainer({
     name: t('gear.sampleSet.pouch'),
     type: 'pouch',
-  }).id
+  })
+  const pouchId = pouch.id
 
   // Items in backpack
   const backpackItems: ISampleSetItem[] = [
@@ -104,8 +107,8 @@ export function generateSampleSet(t: (key: string) => string): TUUID[] {
   ]
 
   // Create items in backpack
-  backpackItems.forEach(item => {
-    gearService.createItem(backpackId, {
+  for (const item of backpackItems) {
+    await gearItemService().createItem(backpackId, {
       name: t(`gear.sampleSet.${item.nameKey}`),
       category: item.category,
       weight: item.weight,
@@ -114,10 +117,10 @@ export function generateSampleSet(t: (key: string) => string): TUUID[] {
       priority: item.priority ?? 'medium',
       status: item.status ?? 'owned',
     })
-  })
+  }
 
   // Create pouch as nested container item in backpack
-  gearService.createItem(backpackId, {
+  await gearItemService().createItem(backpackId, {
     name: t('gear.sampleSet.pouch'),
     category: 'tools',
     weight: 50,
@@ -129,8 +132,8 @@ export function generateSampleSet(t: (key: string) => string): TUUID[] {
   })
 
   // Create items in pouch
-  pouchItems.forEach(item => {
-    gearService.createItem(pouchId, {
+  for (const item of pouchItems) {
+    await gearItemService().createItem(pouchId, {
       name: t(`gear.sampleSet.${item.nameKey}`),
       category: item.category,
       weight: item.weight,
@@ -139,7 +142,7 @@ export function generateSampleSet(t: (key: string) => string): TUUID[] {
       priority: item.priority ?? 'medium',
       status: item.status ?? 'owned',
     })
-  })
+  }
 
   return [backpackId]
 }

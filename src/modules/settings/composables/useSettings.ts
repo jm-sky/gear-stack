@@ -1,60 +1,63 @@
-import { computed } from 'vue'
-import type { IUpdateSettingsDto, IUserCategory, IUserContainerType } from '../types/settings.types'
-import { useSettingsStore } from '../store/useSettingsStore'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
+import { settingsService } from '@/modules/settings/services/settingsService'
+import {
+  settingsMutationRetryFunction,
+  settingsQueryKeys,
+  settingsRetryFunction
+} from '@/modules/settings/utils/queryUtils'
+import { useDarkMode } from '@/shared/composables/useDarkMode'
+import { useLocale } from '@/shared/i18n'
+import type { ISettingsService, Settings, UpdateSettingsData } from '@/modules/settings/types/settings.type'
 
-export function useSettings() {
-  const store = useSettingsStore()
-
-  const settings = computed(() => ({
-    locale: store.locale,
-    darkMode: store.darkMode,
-    preferredWeightUnit: store.preferredWeightUnit,
-    customCategories: store.customCategories,
-    customContainerTypes: store.customContainerTypes,
-  }))
-
-  const customCategories = computed<IUserCategory[]>(() => store.getAllCategories)
-  const customContainerTypes = computed<IUserContainerType[]>(() => store.getAllContainerTypes)
-
-  const updateSettings = (data: IUpdateSettingsDto): void => {
-    store.updateSettings(data)
-  }
-
-  const addCategory = (category: IUserCategory): void => {
-    store.addCategory(category)
-  }
-
-  const updateCategory = (category: IUserCategory): void => {
-    store.updateCategory(category)
-  }
-
-  const removeCategory = (id: string): void => {
-    store.removeCategory(id)
-  }
-
-  const addContainerType = (containerType: IUserContainerType): void => {
-    store.addContainerType(containerType)
-  }
-
-  const updateContainerType = (containerType: IUserContainerType): void => {
-    store.updateContainerType(containerType)
-  }
-
-  const removeContainerType = (id: string): void => {
-    store.removeContainerType(id)
-  }
-
-  return {
-    settings,
-    customCategories,
-    customContainerTypes,
-    updateSettings,
-    addCategory,
-    updateCategory,
-    removeCategory,
-    addContainerType,
-    updateContainerType,
-    removeContainerType,
-  }
+export function useSettingsQuery(service?: ISettingsService) {
+  return useQuery({
+    queryKey: settingsQueryKeys.me(),
+    queryFn: () => (service ?? settingsService).getSettings(),
+    staleTime: 5 * 60 * 1000,
+    retry: settingsRetryFunction,
+  })
 }
 
+export function useUpdateSettings(service?: ISettingsService) {
+  const queryClient = useQueryClient()
+  const { setLocale } = useLocale()
+  const { setDark } = useDarkMode()
+
+  return useMutation({
+    mutationFn: (data: UpdateSettingsData) => (service ?? settingsService).updateSettings(data),
+    onSuccess: (updated: Settings) => {
+      queryClient.setQueryData(settingsQueryKeys.me(), updated)
+      // Sync locale via useLocale to ensure LOCALE_STORAGE_KEY is source of truth
+      setLocale(updated.locale)
+      // Sync darkMode via useDarkMode
+      setDark(updated.darkMode)
+      void queryClient.invalidateQueries({ queryKey: settingsQueryKeys.me() })
+    },
+    retry: settingsMutationRetryFunction,
+  })
+}
+
+export function useSettings(service?: ISettingsService) {
+  const queryClient = useQueryClient()
+
+  const settingsQuery = useSettingsQuery(service)
+  const updateMutation = useUpdateSettings(service)
+
+  const settings = settingsQuery.data
+  const isLoading = settingsQuery.isLoading
+  const isError = settingsQuery.isError
+  const error = settingsQuery.error
+
+  const refetchSettings = () => queryClient.invalidateQueries({ queryKey: settingsQueryKeys.me() })
+
+  return {
+    settingsQuery,
+    settings,
+    isLoading,
+    isError,
+    error,
+    updateSettings: updateMutation.mutateAsync,
+    isUpdating: updateMutation.isPending,
+    refetchSettings,
+  }
+}

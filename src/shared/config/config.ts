@@ -16,7 +16,23 @@ export const config = {
     fallbackLocale: (import.meta.env.VITE_FALLBACK_LOCALE ?? 'en') as SupportedLocale,
   },
   contact: {
+    companyName: import.meta.env.VITE_COMPANY_NAME ?? 'DEV Made IT',
+    companyWebsite: import.meta.env.VITE_COMPANY_WEBSITE ?? 'https://dev-made.it',
     email: import.meta.env.VITE_CONTACT_EMAIL ?? 'contact@dev-made.it',
+  },
+  backend: {
+    enabled: import.meta.env.VITE_ENABLE_BACKEND === 'true',
+    baseUrl: import.meta.env.VITE_API_BASE_URL ?? '/api',
+  },
+  recaptcha: {
+    siteKey: import.meta.env.VITE_GOOGLE_RECAPTCHA_SITE_KEY ?? '',
+    enabled: !!import.meta.env.VITE_GOOGLE_RECAPTCHA_SITE_KEY,
+  },
+  oauth: {
+    google: {
+      clientId: import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID ?? '',
+      enabled: !!import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID,
+    },
   },
   defaults: {
     preferredWeightUnit: 'g' as TGearWeightUnit,

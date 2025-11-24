@@ -27,14 +27,20 @@ class Base(DeclarativeBase):
 
 
 # Create async engine with appropriate settings
-engine = create_async_engine(
-    settings.database.url,
-    echo=settings.database.echo,
-    pool_pre_ping=True,  # Verify connections before using
-    pool_size=settings.database.pool_size,
-    max_overflow=settings.database.max_overflow,
-    pool_recycle=settings.database.pool_recycle,
-)
+# SQLite doesn't support pool_size/max_overflow, so conditionally set them
+engine_kwargs: dict = {
+    "url": settings.database.url,
+    "echo": settings.database.echo,
+    "pool_pre_ping": True,  # Verify connections before using
+}
+
+# Only add pool settings for PostgreSQL (SQLite uses StaticPool by default)
+if settings.database.url.startswith("postgresql"):
+    engine_kwargs["pool_size"] = settings.database.pool_size
+    engine_kwargs["max_overflow"] = settings.database.max_overflow
+    engine_kwargs["pool_recycle"] = settings.database.pool_recycle
+
+engine = create_async_engine(**engine_kwargs)
 
 # Create async session factory
 AsyncSessionLocal = async_sessionmaker(

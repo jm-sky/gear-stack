@@ -1,25 +1,29 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import type { IGearContainer, IGearItem, IUpdateItemDto } from '../types/gear.types'
+import { useGearStore } from '../store/useGearStore'
 import { EXPIRATION_SOON_DAYS, MILLISECONDS_PER_DAY } from '../utils/constants'
 import { useGear } from './useGear'
 import type { TUUID } from '@/shared/types/base.type'
 
 export function useItem(containerId?: TUUID, itemId?: TUUID) {
   const route = useRoute()
-  const { getContainerById, getItemById, updateItem, deleteItem } = useGear()
+  const store = useGearStore()
+  const { updateItem, deleteItem } = useGear()
 
   // Pobierz ID z route jeśli nie podano
   const containerIdValue = computed<TUUID>(() => containerId || (route.params.containerId as string))
   const itemIdValue = computed<TUUID>(() => itemId || (route.params.itemId as string))
 
-  // Item data
+  // Item data - use store directly for synchronous access in computed
   const item = computed<IGearItem | undefined>(() => {
-    return getItemById(containerIdValue.value, itemIdValue.value)
+    const container = store.getContainerById(containerIdValue.value)
+    if (!container) return undefined
+    return container.items.find(i => i.id === itemIdValue.value)
   })
 
   const container = computed<IGearContainer | undefined>(() => {
-    return getContainerById(containerIdValue.value)
+    return store.getContainerById(containerIdValue.value)
   })
 
   // Computed properties
@@ -42,14 +46,14 @@ export function useItem(containerId?: TUUID, itemId?: TUUID) {
   })
 
   // Actions
-  const update = (data: IUpdateItemDto): IGearItem | undefined => {
+  const update = async (data: IUpdateItemDto): Promise<IGearItem | undefined> => {
     if (!item.value) return undefined
-    return updateItem(containerIdValue.value, item.value.id, data)
+    return await updateItem(item.value.id, data)
   }
 
-  const remove = (): void => {
+  const remove = async (): Promise<void> => {
     if (!item.value) return
-    deleteItem(containerIdValue.value, item.value.id)
+    await deleteItem(item.value.id)
   }
 
   return {
