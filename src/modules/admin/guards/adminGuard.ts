@@ -33,28 +33,9 @@ export async function adminGuard(
     return
   }
 
-  // IMPORTANT: authGuard should have already fetched user data at this point
-  // but let's add a safety check with a small delay to ensure user data is loaded
-  // This prevents race conditions after page refresh
-  if (!authStore.user) {
-    // Wait a bit for authGuard to finish loading user data
-    let retries = 0
-    const maxRetries = 10
-    while (!authStore.user && retries < maxRetries) {
-      await new Promise(resolve => setTimeout(resolve, 50))
-      retries++
-    }
-
-    // If still no user after waiting, redirect to login
-    if (!authStore.user) {
-      console.warn('[adminGuard] User data not loaded after authGuard, redirecting to login')
-      next({ name: AuthRouteNames.login, query: { redirectTo: to.fullPath } })
-      return
-    }
-  }
-
   // Check if user is admin
-  if (!authStore.user.isAdmin) {
+  // authGuard runs before this and ensures user data is loaded
+  if (!authStore.user?.isAdmin) {
     // Redirect to dashboard or home if not admin
     next({ name: 'home' })
     return

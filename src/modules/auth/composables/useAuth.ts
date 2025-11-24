@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // modules/auth/composables/useAuth.ts
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { computed, watchEffect } from 'vue'
+import { computed } from 'vue'
 import { getAuthConfig } from '@/modules/auth/config/auth.config'
 import { authService } from '@/modules/auth/services/authService'
 import { useAuthStore } from '@/modules/auth/store/useAuthStore'
@@ -29,25 +29,13 @@ export function useCurrentUser(service?: IAuthService) {
   const authStore = useAuthStore()
   const config = getAuthConfig()
 
-  const query = useQuery({
+  return useQuery({
     queryKey: authQueryKeys.me(),
     queryFn: () => (service ?? authService).getCurrentUser(),
     enabled: !!authStore.token, // Only fetch if user is authenticated
     staleTime: config.query.staleTime,
     retry: authRetryFunction,
   })
-
-  // Sync user data to authStore when query data changes (TanStack Query v5 doesn't support onSuccess)
-  watchEffect(() => {
-    if (query.data.value) {
-      authStore.setUser({
-        ...query.data.value,
-        avatarUrl: (query.data.value as any).avatarUrl || query.data.value.avatarUrl,
-      })
-    }
-  })
-
-  return query
 }
 
 /**
