@@ -33,7 +33,11 @@ router = APIRouter()
     summary="Create new user",
     description="Create a new user (admin only)",
 )
-async def create_user(user_data: UserCreate, _: AdminUser, repo: Annotated[UserRepository, Depends(get_user_repository)]) -> UserResponse:
+async def create_user(
+    user_data: UserCreate,
+    _: AdminUser,
+    repo: Annotated[UserRepository, Depends(get_user_repository)],
+) -> UserResponse:
     """Create a new user."""
     try:
         user = await repo.create_user(email=user_data.email, name=user_data.name, role=user_data.role)
@@ -165,7 +169,11 @@ async def get_public_user_profile(
     summary="Get user by ID",
     description="Get a specific user by their ID",
 )
-async def get_user(user_id: str, _: AdminUser, repo: Annotated[UserRepository, Depends(get_user_repository)]) -> UserResponse:
+async def get_user(
+    user_id: str,
+    _: AdminUser,
+    repo: Annotated[UserRepository, Depends(get_user_repository)],
+) -> UserResponse:
     """Get user by ID."""
     user = await repo.get_user_by_id(user_id)
     if not user:
@@ -179,7 +187,12 @@ async def get_user(user_id: str, _: AdminUser, repo: Annotated[UserRepository, D
     summary="Update user",
     description="Update user information (admin only)",
 )
-async def update_user(user_id: str, user_data: UserUpdate, _: AdminUser, repo: Annotated[UserRepository, Depends(get_user_repository)]) -> UserResponse:
+async def update_user(
+    user_id: str,
+    user_data: UserUpdate,
+    _: AdminUser,
+    repo: Annotated[UserRepository, Depends(get_user_repository)],
+) -> UserResponse:
     """Update user information."""
     try:
         user = await repo.update_user(
@@ -205,7 +218,11 @@ async def update_user(user_id: str, user_data: UserUpdate, _: AdminUser, repo: A
     summary="Delete user",
     description="Soft delete user (set isActive to false)",
 )
-async def delete_user(user_id: str, _: AdminUser, repo: Annotated[UserRepository, Depends(get_user_repository)]) -> MessageResponse:
+async def delete_user(
+    user_id: str,
+    _: AdminUser,
+    repo: Annotated[UserRepository, Depends(get_user_repository)],
+) -> MessageResponse:
     """Soft delete user."""
     success = await repo.delete_user(user_id)
     if not success:
@@ -219,7 +236,11 @@ async def delete_user(user_id: str, _: AdminUser, repo: Annotated[UserRepository
     summary="Permanently delete user",
     description="Permanently delete user from the system (admin only)",
 )
-async def hard_delete_user(user_id: str, _: AdminUser, repo: Annotated[UserRepository, Depends(get_user_repository)]) -> MessageResponse:
+async def hard_delete_user(
+    user_id: str,
+    _: AdminUser,
+    repo: Annotated[UserRepository, Depends(get_user_repository)],
+) -> MessageResponse:
     """Permanently delete user."""
     success = await repo.hard_delete_user(user_id)
     if not success:

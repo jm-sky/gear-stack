@@ -16,7 +16,18 @@ GearItemStatus = Literal["owned", "missing", "toBuy"]
 GearItemPriority = Literal["critical", "high", "medium", "low"]
 GearItemQuality = Literal["low", "medium", "high"]
 GearWeightUnit = Literal["g", "kg"]
-ContainerColor = Literal["default", "blue", "green", "red", "yellow", "purple", "orange", "pink", "teal", "indigo"]
+ContainerColor = Literal[
+    "default",
+    "blue",
+    "green",
+    "red",
+    "yellow",
+    "purple",
+    "orange",
+    "pink",
+    "teal",
+    "indigo",
+]
 GearItemCategory = str  # Allows custom categories: 'water', 'food', 'shelter', etc.
 
 
@@ -139,6 +150,7 @@ class ItemCreate(BaseModel):
     linkedItemId: str | None = Field(None, alias="linkedItemId")
     wearable: bool | None = Field(default=None)
     consumable: bool | None = Field(default=None)
+    order: int | None = Field(None, ge=0)
 
     model_config = {"populate_by_name": True}
 
@@ -164,5 +176,6 @@ class ItemUpdate(BaseModel):
     linkedItemId: str | None = Field(None, alias="linkedItemId")
     wearable: bool | None = None
     consumable: bool | None = None
+    order: int | None = Field(None, ge=0)
 
     model_config = {"populate_by_name": True}

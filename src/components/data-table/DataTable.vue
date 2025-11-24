@@ -266,14 +266,17 @@ const handlePageSizeChange = (newPageSize: number) => {
                   <template v-if="!header.isPlaceholder && enableSorting && header.column.getCanSort()">
                     <Button
                       variant="ghost"
-                      class="-ml-3 h-8 data-[state=open]:bg-accent"
+                      class="group -ml-3 h-8 data-[state=open]:bg-accent"
                       @click="header.column.toggleSorting(header.column.getIsSorted() === 'asc')"
                     >
                       <FlexRender
                         :render="header.column.columnDef.header"
                         :props="header.getContext()"
                       />
-                      <ArrowUpDown class="ml-2 size-4" />
+                      <ArrowUpDown
+                        class="ml-2 size-4 group-hover:opacity-100 transition-opacity"
+                        :class="header.column.getIsSorted() ? 'opacity-60' : 'opacity-0'"
+                      />
                     </Button>
                   </template>
                   <!-- Default non-sortable header -->

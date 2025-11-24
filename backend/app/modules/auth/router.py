@@ -113,10 +113,18 @@ async def register(
         )
         return MessageResponse(message="Registration successful. Please check your email to verify your account.")
     except UserAlreadyExistsError:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User with this email already exists")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="User with this email already exists",
+        )
 
 
-@router.post("/login", summary="Login user", description="Authenticate user and return JWT tokens or 2FA challenge", tags=["Authentication"])
+@router.post(
+    "/login",
+    summary="Login user",
+    description="Authenticate user and return JWT tokens or 2FA challenge",
+    tags=["Authentication"],
+)
 @rate_limit("10/minute")  # CRITICAL: Prevent brute force attacks
 @recaptcha_protected("login")  # Disabled by default, enable via RECAPTCHA_ENABLED=true
 async def login(credentials: UserLogin, auth_service: AuthServiceDep, request: Request) -> LoginResponseType:
@@ -154,7 +162,13 @@ async def login(credentials: UserLogin, auth_service: AuthServiceDep, request: R
         )
 
 
-@router.post("/refresh", response_model=dict, summary="Refresh access token", description="Get new access token using refresh token", tags=["Authentication"])
+@router.post(
+    "/refresh",
+    response_model=dict,
+    summary="Refresh access token",
+    description="Get new access token using refresh token",
+    tags=["Authentication"],
+)
 @rate_limit("20/minute")  # Prevent token refresh abuse
 async def refresh_token(token_data: TokenRefresh, auth_service: AuthServiceDep, request: Request) -> dict:
     """
@@ -174,7 +188,13 @@ async def refresh_token(token_data: TokenRefresh, auth_service: AuthServiceDep, 
         )
 
 
-@router.post("/logout", response_model=MessageResponse, summary="Logout user", description="Logout current user", tags=["Authentication"])
+@router.post(
+    "/logout",
+    response_model=MessageResponse,
+    summary="Logout user",
+    description="Logout current user",
+    tags=["Authentication"],
+)
 async def logout(current_user: CurrentUser) -> MessageResponse:
     """
     Logout current user.
@@ -186,7 +206,13 @@ async def logout(current_user: CurrentUser) -> MessageResponse:
     return MessageResponse(message="Logged out successfully")
 
 
-@router.post("/forgot-password", response_model=MessageResponse, summary="Request password reset", description="Request a password reset email (development: token is printed to console)", tags=["Authentication"])
+@router.post(
+    "/forgot-password",
+    response_model=MessageResponse,
+    summary="Request password reset",
+    description="Request a password reset email (development: token is printed to console)",
+    tags=["Authentication"],
+)
 @rate_limit("3/minute")  # CRITICAL: Prevent email enumeration and spam
 @recaptcha_protected("forgot_password")  # Disabled by default, enable via RECAPTCHA_ENABLED=true
 async def forgot_password(
@@ -220,7 +246,13 @@ async def forgot_password(
     return MessageResponse(message="If the email exists, a password reset link has been sent")
 
 
-@router.post("/reset-password", response_model=MessageResponse, summary="Reset password", description="Reset password using reset token", tags=["Authentication"])
+@router.post(
+    "/reset-password",
+    response_model=MessageResponse,
+    summary="Reset password",
+    description="Reset password using reset token",
+    tags=["Authentication"],
+)
 @rate_limit("5/minute")  # Prevent token brute force
 async def reset_password(request_data: ResetPasswordRequest, auth_service: AuthServiceDep, request: Request) -> MessageResponse:
     """
@@ -234,10 +266,19 @@ async def reset_password(request_data: ResetPasswordRequest, auth_service: AuthS
         await auth_service.reset_password(request_data.token, request_data.newPassword)
         return MessageResponse(message="Password has been reset successfully")
     except InvalidTokenError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired reset token")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired reset token",
+        )
 
 
-@router.post("/change-password", response_model=MessageResponse, summary="Change password", description="Change password for authenticated user", tags=["Authentication"])
+@router.post(
+    "/change-password",
+    response_model=MessageResponse,
+    summary="Change password",
+    description="Change password for authenticated user",
+    tags=["Authentication"],
+)
 @rate_limit("3/minute")  # Prevent password change abuse
 async def change_password(
     request_data: ChangePasswordRequest,
@@ -272,12 +313,21 @@ async def change_password(
         )
         return MessageResponse(message="Password changed successfully")
     except InvalidCredentialsError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Current password is incorrect")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect",
+        )
     except UserNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
 
-@router.get("/me", response_model=UserResponse, summary="Get current user", description="Get currently authenticated user information", tags=["Authentication"])
+@router.get(
+    "/me",
+    response_model=UserResponse,
+    summary="Get current user",
+    description="Get currently authenticated user information",
+    tags=["Authentication"],
+)
 async def get_current_user_info(current_user: CurrentUser) -> UserResponse:
     """
     Get current user information.
@@ -326,7 +376,10 @@ async def verify_email(
         )
         return MessageResponse(message="Email address verified successfully.")
     except InvalidTokenError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired verification token")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired verification token",
+        )
 
 
 @router.post(
@@ -359,7 +412,13 @@ async def resend_email_verification(
     return MessageResponse(message="If the email exists, a new verification link has been sent.")
 
 
-@router.delete("/account", response_model=MessageResponse, summary="Delete account", description="Delete current user's account (soft delete by default)", tags=["Authentication"])
+@router.delete(
+    "/account",
+    response_model=MessageResponse,
+    summary="Delete account",
+    description="Delete current user's account (soft delete by default)",
+    tags=["Authentication"],
+)
 @rate_limit("1/day")  # Prevent abuse - only allow one deletion per day
 async def delete_account(
     request_data: DeleteAccountRequest,
@@ -432,7 +491,12 @@ async def get_oauth_auth_url(request_data: OAuthAuthUrlRequest, request: Request
 )
 @rate_limit("10/minute")
 @recaptcha_protected("oauth_callback")  # Optional reCAPTCHA protection
-async def oauth_callback(provider: str, callback_data: OAuthCallbackRequest, auth_service: AuthServiceDep, request: Request) -> LoginResponseType:
+async def oauth_callback(
+    provider: str,
+    callback_data: OAuthCallbackRequest,
+    auth_service: AuthServiceDep,
+    request: Request,
+) -> LoginResponseType:
     """
     Handle OAuth callback and authenticate user.
 
@@ -465,4 +529,7 @@ async def oauth_callback(provider: str, callback_data: OAuthCallbackRequest, aut
 
     except Exception as e:
         logger.error(f"OAuth callback error: {str(e)}", exc_info=True)
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"OAuth authentication failed: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"OAuth authentication failed: {str(e)}",
+        )

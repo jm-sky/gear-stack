@@ -79,6 +79,7 @@ export interface IGearItem {
   quality?: TGearItemQuality | null // Price tier / quality
   wearable?: boolean | null // Item is worn/carried on person (e.g., clothing, watch)
   consumable?: boolean | null // Item is consumed/used up (e.g., food, medicine, fuel)
+  order?: number | null // Manual order for items within container (lower numbers appear first)
   createdAt: TDateTime
   updatedAt: TDateTime
 }
@@ -167,6 +168,7 @@ export interface ICreateItemDto {
   quality?: TGearItemQuality | null
   wearable?: boolean | null
   consumable?: boolean | null
+  order?: number | null
 }
 
 // DTO dla aktualizacji przedmiotu
@@ -189,6 +191,7 @@ export interface IUpdateItemDto {
   quality?: TGearItemQuality | null
   wearable?: boolean | null
   consumable?: boolean | null
+  order?: number | null
 }
 
 // Service interface for gear operations

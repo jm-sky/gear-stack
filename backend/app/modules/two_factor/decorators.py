@@ -37,7 +37,12 @@ def extract_user_from_token(request: Request) -> str | None:
                 import jwt
                 from app.core.config import settings
 
-                payload: dict[str, Any] = jwt.decode(token, settings.security.secret_key, algorithms=[settings.security.jwt_algorithm], options={"verify_exp": False})
+                payload: dict[str, Any] = jwt.decode(
+                    token,
+                    settings.security.secret_key,
+                    algorithms=[settings.security.jwt_algorithm],
+                    options={"verify_exp": False},
+                )
                 user_id = payload.get("sub")
                 return str(user_id) if user_id else None
     except (json.JSONDecodeError, KeyError, ValueError) as e:

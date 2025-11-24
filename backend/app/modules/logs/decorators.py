@@ -69,10 +69,20 @@ def log_errors(message: str | None = None, reraise: bool = True, level: LogLevel
                     # Log the error
                     if log_service:
                         try:
-                            await log_service.log_error(message=error_message, exception=e, module=func.__module__, function=func.__name__, user_id=user_id, request_id=request_id)
+                            await log_service.log_error(
+                                message=error_message,
+                                exception=e,
+                                module=func.__module__,
+                                function=func.__name__,
+                                user_id=user_id,
+                                request_id=request_id,
+                            )
                         except Exception as log_error:
                             # Fallback to standard logging if database logging fails
-                            logger.error(f"Failed to log error to database: {log_error}", exc_info=True)
+                            logger.error(
+                                f"Failed to log error to database: {log_error}",
+                                exc_info=True,
+                            )
                             logger.error(f"Original error: {error_message}", exc_info=e)
                     else:
                         # Fallback to standard logging if no log service available

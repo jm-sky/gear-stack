@@ -83,6 +83,14 @@ export function createItemsColumns(
       enableHiding: true,
     },
     {
+      id: 'order',
+      accessorKey: 'order',
+      header: () => t('gear.item.order', 'Order'),
+      enableSorting: true,
+      enableHiding: true,
+      // Hidden by default (used for manual ordering)
+    },
+    {
       id: 'actions',
       header: () => t('gear.item.actions'),
       enableSorting: false,

@@ -140,7 +140,10 @@ class TestTokenVerification:
         """Test verification of token with invalid signature."""
         # Create a token with wrong secret
         wrong_secret = "wrong_secret_key"
-        payload = {"sub": "user123", "exp": int((datetime.now(UTC) + timedelta(hours=1)).timestamp())}
+        payload = {
+            "sub": "user123",
+            "exp": int((datetime.now(UTC) + timedelta(hours=1)).timestamp()),
+        }
         invalid_token = jwt.encode(payload, wrong_secret, algorithm=settings.security.jwt_algorithm)
 
         with pytest.raises(InvalidTokenError):

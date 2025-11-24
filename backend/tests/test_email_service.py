@@ -33,7 +33,11 @@ async def test_send_email_renders_template(email_service: EmailService, mock_ada
         to="test@example.com",
         subject="Test Subject",
         template_name="welcome",
-        context={"name": "John", "email": "test@example.com", "frontend_url": "http://localhost:3000"},
+        context={
+            "name": "John",
+            "email": "test@example.com",
+            "frontend_url": "http://localhost:3000",
+        },
     )
 
     assert result is True
@@ -56,7 +60,11 @@ async def test_send_email_with_from_email(email_service: EmailService, mock_adap
         to="test@example.com",
         subject="Test",
         template_name="welcome",
-        context={"name": "John", "email": "test@example.com", "frontend_url": "http://localhost:3000"},
+        context={
+            "name": "John",
+            "email": "test@example.com",
+            "frontend_url": "http://localhost:3000",
+        },
         from_email="custom@example.com",
     )
 
@@ -88,14 +96,20 @@ async def test_send_email_handles_adapter_error(email_service: EmailService, moc
         to="test@example.com",
         subject="Test",
         template_name="welcome",
-        context={"name": "John", "email": "test@example.com", "frontend_url": "http://localhost:3000"},
+        context={
+            "name": "John",
+            "email": "test@example.com",
+            "frontend_url": "http://localhost:3000",
+        },
     )
 
     assert result is False
 
 
 @pytest.mark.asyncio
-async def test_html_to_text_converts_html_to_plain_text(email_service: EmailService) -> None:
+async def test_html_to_text_converts_html_to_plain_text(
+    email_service: EmailService,
+) -> None:
     """Test _html_to_text converts HTML to plain text."""
     html = "<html><body><h1>Title</h1><p>Paragraph with <strong>bold</strong> text.</p></body></html>"
     text = email_service._html_to_text(html)
@@ -198,7 +212,11 @@ async def test_send_email_with_real_template() -> None:
             to="test@example.com",
             subject="Test",
             template_name="welcome",
-            context={"name": "Test User", "email": "test@example.com", "frontend_url": "http://localhost:3000"},
+            context={
+                "name": "Test User",
+                "email": "test@example.com",
+                "frontend_url": "http://localhost:3000",
+            },
         )
 
         assert result is True

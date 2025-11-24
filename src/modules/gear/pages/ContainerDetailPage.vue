@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import { useBackend } from '@/shared/composables/useBackend'
 import type { IGearItem } from '../types/gear.types'
 import AddNestedContainerDialog from '../components/AddNestedContainerDialog.vue'
 import CategoryPieChart from '../components/CategoryPieChart.vue'
@@ -20,6 +21,7 @@ const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 const store = useGearStore()
+const { shouldUseAPI } = useBackend()
 const { container } = useContainer()
 const { deleteItem, updateItem, exportData, importData, createItem } = useGear()
 
@@ -53,6 +55,23 @@ const handleStatusChange = async (item: IGearItem, status: IGearItem['status']) 
   try {
     await updateItem(item.id, { status })
     toast.success(t('common.success'))
+  } catch {
+    toast.error(t('common.error'))
+  }
+}
+
+const handleReorder = async (reorderedItems: IGearItem[]) => {
+  try {
+    // Update all items with new order values
+    await Promise.all(
+      reorderedItems.map(item =>
+        updateItem(item.id, { order: item.order }),
+      ),
+    )
+    // Show success toast only when using API/backend
+    if (shouldUseAPI.value) {
+      toast.success(t('gear.item.reorderSuccess', 'Kolejność przedmiotów została zaktualizowana'))
+    }
   } catch {
     toast.error(t('common.error'))
   }
@@ -142,12 +161,12 @@ const handleExportToPrompt = () => {
 const handleRecognizeParameters = async (item: IGearItem) => {
   try {
     const params = recognizeParameters(item.name)
-    
+
     if (!params.brand && !params.color) {
       toast.info(t('gear.actions.noParametersFound'))
       return
     }
-    
+
     const updateData: Partial<IGearItem> = {}
     if (params.brand && !item.brand) {
       updateData.brand = params.brand
@@ -155,7 +174,7 @@ const handleRecognizeParameters = async (item: IGearItem) => {
     if (params.color && !item.color) {
       updateData.color = params.color
     }
-    
+
     if (Object.keys(updateData).length > 0) {
       await updateItem(item.id, updateData)
       toast.success(t('gear.actions.parametersRecognized'))
@@ -170,17 +189,17 @@ const handleRecognizeParameters = async (item: IGearItem) => {
 
 const handleRecognizeParametersAll = async () => {
   if (!container.value || !items.value || items.value.length === 0) return
-  
+
   try {
     toast.loading(t('gear.actions.recognizing'))
-    
+
     const paramsMap = recognizeParametersForItems(items.value)
     let updatedCount = 0
-    
+
     for (const item of items.value) {
       const params = paramsMap.get(item.id)
       if (!params) continue
-      
+
       const updateData: Partial<IGearItem> = {}
       if (params.brand && !item.brand) {
         updateData.brand = params.brand
@@ -188,13 +207,13 @@ const handleRecognizeParametersAll = async () => {
       if (params.color && !item.color) {
         updateData.color = params.color
       }
-      
+
       if (Object.keys(updateData).length > 0) {
         await updateItem(item.id, updateData)
         updatedCount++
       }
     }
-    
+
     toast.dismiss()
     if (updatedCount > 0) {
       toast.success(t('gear.actions.parametersRecognized', { count: updatedCount }))
@@ -233,6 +252,7 @@ if (!container.value) {
         @delete="handleDeleteItem"
         @status-change="handleStatusChange"
         @recognize-parameters="handleRecognizeParameters"
+        @reorder="handleReorder"
       />
 
       <!-- Category Pie Chart -->

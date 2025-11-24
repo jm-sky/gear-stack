@@ -90,7 +90,13 @@ class UserRepository:
             return None
         return self._auth_user_to_users_user(auth_user)
 
-    async def get_all_users(self, skip: int = 0, limit: int = 100, include_inactive: bool = False, search: str | None = None) -> list[User]:
+    async def get_all_users(
+        self,
+        skip: int = 0,
+        limit: int = 100,
+        include_inactive: bool = False,
+        search: str | None = None,
+    ) -> list[User]:
         """Get all users from database with pagination and search.
 
         Args:
@@ -186,7 +192,9 @@ class UserRepository:
         return await self._auth_repo.count_users(include_inactive=include_inactive, search=search)
 
 
-def get_user_repository(auth_repo: AuthUserRepository = Depends(get_auth_repository)) -> UserRepository:
+def get_user_repository(
+    auth_repo: AuthUserRepository = Depends(get_auth_repository),
+) -> UserRepository:
     """FastAPI dependency to get user repository instance.
 
     This creates an adapter that wraps the auth repository using composition.

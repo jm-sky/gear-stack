@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Box, ChevronRight, Package } from 'lucide-vue-next'
+import { Box, ChevronDown, ChevronRight, ChevronUp, Package } from 'lucide-vue-next'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -43,6 +43,7 @@ const emit = defineEmits<{
   delete: [item: IGearItem]
   statusChange: [item: IGearItem, status: IGearItem['status']]
   recognizeParameters: [item: IGearItem]
+  reorder: [items: IGearItem[]]
 }>()
 
 const { t } = useI18n()
@@ -193,13 +194,78 @@ function calculateTotalWeight(containerId: string): number {
   if (!container) return 0
   return calculateTotalWeightSync(container, store.getAllContainers)
 }
+
+// Sort items by order (default sorting)
+const sortedItems = computed<IGearItem[]>(() => {
+  const items = [...props.items]
+  // Sort by order (null/undefined items go to end)
+  return items.sort((a, b) => {
+    const orderA = a.order ?? Number.MAX_SAFE_INTEGER
+    const orderB = b.order ?? Number.MAX_SAFE_INTEGER
+    return orderA - orderB
+  })
+})
+
+// Handle move up
+function handleMoveUp(item: IGearItem) {
+  const currentIndex = sortedItems.value.findIndex(i => i.id === item.id)
+  if (currentIndex <= 0) return
+
+  const reordered = [...sortedItems.value]
+  const movedItem = reordered[currentIndex]
+  if (!movedItem) return
+  
+  reordered.splice(currentIndex, 1)
+  reordered.splice(currentIndex - 1, 0, movedItem)
+
+  // Recalculate order values
+  const updatedItems = reordered.map((item, index) => ({
+    ...item,
+    order: index,
+  }))
+
+  emit('reorder', updatedItems)
+}
+
+// Handle move down
+function handleMoveDown(item: IGearItem) {
+  const currentIndex = sortedItems.value.findIndex(i => i.id === item.id)
+  if (currentIndex < 0 || currentIndex >= sortedItems.value.length - 1) return
+
+  const reordered = [...sortedItems.value]
+  const movedItem = reordered[currentIndex]
+  if (!movedItem) return
+  
+  reordered.splice(currentIndex, 1)
+  reordered.splice(currentIndex + 1, 0, movedItem)
+
+  // Recalculate order values
+  const updatedItems = reordered.map((item, index) => ({
+    ...item,
+    order: index,
+  }))
+
+  emit('reorder', updatedItems)
+}
+
+// Check if item can move up
+function canMoveUp(item: IGearItem): boolean {
+  const currentIndex = sortedItems.value.findIndex(i => i.id === item.id)
+  return currentIndex > 0
+}
+
+// Check if item can move down
+function canMoveDown(item: IGearItem): boolean {
+  const currentIndex = sortedItems.value.findIndex(i => i.id === item.id)
+  return currentIndex >= 0 && currentIndex < sortedItems.value.length - 1
+}
 </script>
 
 <template>
   <DataTable
     v-model:column-visibility="columnVisibility"
     :columns="columns"
-    :data="props.items"
+    :data="sortedItems"
     :search-placeholder="t('gear.filters.search')"
     :global-filter-fn="globalFilterFn"
     :enable-sorting="true"
@@ -210,6 +276,30 @@ function calculateTotalWeight(containerId: string): number {
   >
     <template #name="{ row }">
       <div class="flex items-center gap-2" :class="{ 'text-destructive font-semibold': isExpired(row.original), 'text-yellow-600': isExpiringSoon(row.original) }">
+        <!-- Move up/down buttons (only in non-public mode) -->
+        <div
+          v-if="!publicMode"
+          class="flex flex-col gap-0.5 shrink-0"
+        >
+          <Button
+            variant="ghost"
+            size="sm"
+            class="size-5 p-0 h-4"
+            :disabled="!canMoveUp(row.original)"
+            @click.stop="handleMoveUp(row.original)"
+          >
+            <ChevronUp :size="12" class="text-muted-foreground" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            class="size-5 p-0 h-4"
+            :disabled="!canMoveDown(row.original)"
+            @click.stop="handleMoveDown(row.original)"
+          >
+            <ChevronDown :size="12" class="text-muted-foreground" />
+          </Button>
+        </div>
         <!-- Expand/Collapse button for nested containers -->
         <Button
           v-if="isNestedContainer(row.original)"

@@ -69,6 +69,9 @@ class GearItemApiService {
     if (isSet(data.consumable)) {
       cleaned.consumable = data.consumable
     }
+    if (isSet(data.order)) {
+      cleaned.order = data.order
+    }
 
     return cleaned
   }
@@ -133,6 +136,9 @@ class GearItemApiService {
     }
     if (isSet(data.consumable)) {
       cleaned.consumable = data.consumable
+    }
+    if (isSet(data.order)) {
+      cleaned.order = data.order
     }
 
     return cleaned

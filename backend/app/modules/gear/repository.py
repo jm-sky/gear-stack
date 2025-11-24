@@ -7,7 +7,7 @@ using SQLAlchemy 2.0+.
 import logging
 from typing import Sequence
 
-from sqlalchemy import select, and_, or_
+from sqlalchemy import select, and_, or_, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload, joinedload
 
@@ -89,7 +89,16 @@ class GearRepository(SearchMixin):
         Returns:
             Container if found, None otherwise
         """
-        stmt = select(GearContainerDB).where(and_(GearContainerDB.id == container_id, GearContainerDB.user_id == user_id)).options(selectinload(GearContainerDB.items))
+        stmt = (
+            select(GearContainerDB)
+            .where(
+                and_(
+                    GearContainerDB.id == container_id,
+                    GearContainerDB.user_id == user_id,
+                )
+            )
+            .options(selectinload(GearContainerDB.items))
+        )
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -218,6 +227,15 @@ class GearRepository(SearchMixin):
         if not container:
             return None
 
+        # Calculate order if not provided
+        order = data.order
+        if order is None:
+            # Get max order in container
+            stmt = select(func.max(GearItemDB.order)).where(GearItemDB.container_id == container_id)
+            result = await self.db.execute(stmt)
+            max_order = result.scalar()
+            order = (max_order + 1) if max_order is not None else 0
+
         item = GearItemDB(
             id=generate_id(),
             container_id=container_id,
@@ -239,6 +257,7 @@ class GearRepository(SearchMixin):
             linked_item_id=data.linkedItemId,
             wearable=data.wearable,
             consumable=data.consumable,
+            order=order,
         )
         self.db.add(item)
         await self.db.commit()
@@ -276,7 +295,8 @@ class GearRepository(SearchMixin):
         if not container:
             return []
 
-        stmt = select(GearItemDB).where(GearItemDB.container_id == container_id).offset(skip).limit(limit).order_by(GearItemDB.created_at.desc())
+        # Sort by order (nulls last), then by created_at
+        stmt = select(GearItemDB).where(GearItemDB.container_id == container_id).offset(skip).limit(limit).order_by(GearItemDB.order.asc().nulls_last(), GearItemDB.created_at.desc())
         result = await self.db.execute(stmt)
         return result.scalars().all()
 

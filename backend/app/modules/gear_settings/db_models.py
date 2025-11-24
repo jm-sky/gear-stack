@@ -43,7 +43,12 @@ class GearSettingsDB(Base):
     custom_brands: Mapped[list[dict]] = mapped_column(JSON, nullable=False, default=list)
     preferred_weight_unit: Mapped[str | None] = mapped_column(String(5), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+        nullable=False,
+    )
 
     def __repr__(self) -> str:
         return f"<GearSettingsDB(id={self.id}, user_id={self.user_id})>"

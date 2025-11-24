@@ -192,6 +192,8 @@ export const gearEn = {
       details: 'Details',
       openLink: 'Open Link',
       noDetails: 'No additional details available for this item.',
+      order: 'Order',
+      reorderSuccess: 'Item order has been updated',
       qualities: {
         low: 'Low',
         medium: 'Medium',
@@ -601,6 +603,8 @@ export const gearPl = {
       details: 'Szczegóły',
       openLink: 'Otwórz Link',
       noDetails: 'Brak dodatkowych szczegółów dla tego przedmiotu.',
+      order: 'Kolejność',
+      reorderSuccess: 'Kolejność przedmiotów została zaktualizowana',
       qualities: {
         low: 'Niska',
         medium: 'Średnia',

@@ -8,7 +8,12 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from .service import AuthService
 from .types.repository import UserRepositoryInterface
 from .auth_utils import verify_token
-from .exceptions import EmailNotVerifiedError, ExpiredTokenError, InvalidTokenError, InactiveUserError
+from .exceptions import (
+    EmailNotVerifiedError,
+    ExpiredTokenError,
+    InvalidTokenError,
+    InactiveUserError,
+)
 from .models import User
 from .repositories import get_user_repository
 
@@ -18,7 +23,10 @@ security = HTTPBearer()
 # Try to use 2FA-enabled auth service if available
 HAS_2FA = False
 try:
-    from app.modules.two_factor.auth_integration import AuthServiceWith2FA, get_auth_service_with_2fa
+    from app.modules.two_factor.auth_integration import (
+        AuthServiceWith2FA,
+        get_auth_service_with_2fa,
+    )
     from app.modules.two_factor.repositories import get_two_factor_repository
     from app.modules.two_factor.types.repository import TwoFactorRepositoryInterface
 
@@ -30,7 +38,7 @@ except (ImportError, Exception):
 
 def get_auth_service(
     user_repository: Annotated[UserRepositoryInterface, Depends(get_user_repository)],
-    two_factor_repository: Any = Depends(lambda: None) if not HAS_2FA else Depends(get_two_factor_repository),
+    two_factor_repository: Any = (Depends(lambda: None) if not HAS_2FA else Depends(get_two_factor_repository)),
 ) -> Union[AuthService, Any]:
     """Get auth service with 2FA support if available."""
     if HAS_2FA:
@@ -168,7 +176,7 @@ async def _verify_user_token(
 async def get_current_user(
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
     user_repository: Annotated[UserRepositoryInterface, Depends(get_user_repository)],
-    two_factor_repository: Any = Depends(lambda: None) if not HAS_2FA else Depends(get_two_factor_repository),
+    two_factor_repository: Any = (Depends(lambda: None) if not HAS_2FA else Depends(get_two_factor_repository)),
 ) -> User:
     """Get current user with optional 2FA verification check."""
     token = credentials.credentials

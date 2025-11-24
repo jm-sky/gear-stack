@@ -21,6 +21,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.9.0] - 2025-01-21
+
+### Added
+- **Item Ordering (FEATURE-018)**: Manual item ordering within containers
+  - Added `order` field to items for custom sorting
+  - Up/Down buttons in items table to change item order
+  - Items automatically sorted by order (nulls last)
+  - New items automatically get `order = max(order) + 1`
+  - Order persisted in localStorage and database
+  - Backend support: `order` field in database schema, API, and repository
+  - Database migration: `015_add_order_field.py` for adding order column
+  - Toast success notification only shown when using API/backend (not for localStorage)
+  - Translations for order feature (PL/EN)
+
+### Changed
+- **ItemsTable**: Default sorting now uses `order` field instead of creation date
+- **Backend Repository**: `get_items()` now sorts by `order` (ascending, nulls last), then by `created_at`
+- **Backend Create Item**: Automatically assigns order if not provided (max + 1)
+- **ROADMAP**: Marked FEATURE-018 (Item Ordering) as completed
+
+### Technical Details
+- Frontend: `order` field added to `IGearItem`, `ICreateItemDto`, `IUpdateItemDto`
+- Backend: `order` field added to `GearItemDB` model, `ItemCreate`/`ItemUpdate` schemas
+- Services: Both `gearItemLocalService` and `gearItemApiService` handle order field
+- UI: Up/Down buttons disabled at top/bottom of list for better UX
+
+---
+
 ## [2.8.0] - 2025-01-21
 
 ### Added

@@ -1,6 +1,6 @@
 # FEATURE-018: Item Ordering (Kolejność przedmiotów w kontenerze)
 
-**Status:** 🚧 In Progress
+**Status:** ✅ Completed | **Version:** v2.9.0
 **Priority:** Medium
 **Complexity:** Medium
 **Category:** ✏️ Editing / 🎨 UI/UX

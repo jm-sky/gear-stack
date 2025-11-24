@@ -55,7 +55,11 @@ def create_access_token(
         "tfaMethod": data.get("tfaMethod"),
         "emailVerified": data.get("emailVerified"),
     }
-    encoded_jwt = jwt.encode(dict(payload), settings.security.secret_key, algorithm=settings.security.jwt_algorithm)
+    encoded_jwt = jwt.encode(
+        dict(payload),
+        settings.security.secret_key,
+        algorithm=settings.security.jwt_algorithm,
+    )
     return encoded_jwt
 
 
@@ -64,7 +68,11 @@ def verify_token(token: str) -> JWTPayload:
     from .exceptions import ExpiredTokenError, InvalidTokenError
 
     try:
-        payload = jwt.decode(token, settings.security.secret_key, algorithms=[settings.security.jwt_algorithm])
+        payload = jwt.decode(
+            token,
+            settings.security.secret_key,
+            algorithms=[settings.security.jwt_algorithm],
+        )
         return payload  # type: ignore[no-any-return]
     except jwt.ExpiredSignatureError:
         raise ExpiredTokenError()
@@ -96,7 +104,11 @@ def create_refresh_token(data: CreateRefreshTokenOptions) -> str:
         "emailVerified": data.get("emailVerified"),
         # NOTE: tid/trol are NOT preserved in refresh token (security)
     }
-    encoded_jwt = jwt.encode(dict(payload), settings.security.secret_key, algorithm=settings.security.jwt_algorithm)
+    encoded_jwt = jwt.encode(
+        dict(payload),
+        settings.security.secret_key,
+        algorithm=settings.security.jwt_algorithm,
+    )
     return encoded_jwt
 
 
@@ -110,7 +122,11 @@ def create_password_reset_token(data: dict[str, str]) -> str:
         "type": "password_reset",
         "iat": int(now.timestamp()),
     }
-    encoded_jwt = jwt.encode(to_encode, settings.security.secret_key, algorithm=settings.security.jwt_algorithm)
+    encoded_jwt = jwt.encode(
+        to_encode,
+        settings.security.secret_key,
+        algorithm=settings.security.jwt_algorithm,
+    )
     return encoded_jwt
 
 

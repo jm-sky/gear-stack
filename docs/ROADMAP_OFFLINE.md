@@ -453,8 +453,8 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 - Inline editing dla podstawowych pól (nazwa, ilość, status)
 - Szybkie akcje (zmiana statusu, priorytetu) bezpośrednio z listy
 
-### Kolejność przedmiotów w kontenerze
-**Status:** 🚧 In Progress | **Priority:** Medium | **Complexity:** Medium | **Feature:** [FEATURE-018](./features/FEATURE-018-item-ordering.md)
+### ✅ Kolejność przedmiotów w kontenerze
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium | **Feature:** [FEATURE-018](./features/FEATURE-018-item-ordering.md) | **Version:** v2.9.0
 
 - Dodanie pola `order` (lub `sortOrder`) do przedmiotów w kontenerze
 - Możliwość ręcznego układania przedmiotów w wybranej kolejności

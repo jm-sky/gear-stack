@@ -27,6 +27,18 @@ class GearItemLocalService {
     }
 
     const now = new Date().toISOString()
+    
+    // Calculate order: use provided order or assign max order + 1
+    let order: number
+    if (data.order !== undefined && data.order !== null) {
+      order = data.order
+    } else {
+      const maxOrder = container.items.length > 0
+        ? Math.max(...container.items.map(i => i.order ?? -1), -1)
+        : -1
+      order = maxOrder + 1
+    }
+    
     const item: IGearItem = {
       id: crypto.randomUUID(),
       linkedItemId: data.linkedItemId, // Reference to original item when linking
@@ -47,6 +59,7 @@ class GearItemLocalService {
       wearable: data.wearable,
       consumable: data.consumable,
       containerId: data.containerId && data.containerId.trim() !== '' ? data.containerId : undefined,
+      order,
       createdAt: now,
       updatedAt: now,
     }
@@ -109,6 +122,7 @@ class GearItemLocalService {
 
     const updatedItem: IGearItem = {
       id: existingItem.id,
+      linkedItemId: existingItem.linkedItemId,
       name: data.name ?? existingItem.name,
       category: data.category ?? existingItem.category,
       quantity: data.quantity ?? existingItem.quantity,
@@ -119,11 +133,15 @@ class GearItemLocalService {
       priority: data.priority ?? existingItem.priority,
       status: data.status ?? existingItem.status,
       price: data.price ?? existingItem.price,
+      currency: data.currency ?? existingItem.currency,
       url: data.url ?? existingItem.url,
       brand: data.brand ?? existingItem.brand,
       color: data.color ?? existingItem.color,
       quality: data.quality ?? existingItem.quality,
+      wearable: data.wearable ?? existingItem.wearable,
+      consumable: data.consumable ?? existingItem.consumable,
       containerId: data.containerId !== undefined && data.containerId !== null && data.containerId.trim() !== '' ? data.containerId : (data.containerId === '' ? undefined : existingItem.containerId),
+      order: data.order !== undefined ? data.order : existingItem.order,
       createdAt: existingItem.createdAt,
       updatedAt: new Date().toISOString(),
     }

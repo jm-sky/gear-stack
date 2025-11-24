@@ -178,7 +178,11 @@ class User(BaseModel):
             logger.debug("Invalid email verification token for user %s", self.id)
             return False
         except Exception as e:
-            logger.error("Unexpected error validating email verification token: %s", e, exc_info=True)
+            logger.error(
+                "Unexpected error validating email verification token: %s",
+                e,
+                exc_info=True,
+            )
             return False
 
     def to_response(self) -> dict[str, Any]:

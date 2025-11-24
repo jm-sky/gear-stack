@@ -40,7 +40,11 @@ api_router.include_router(tenants_router)
 try:
     from app.modules.two_factor.router import router as two_factor_router
 
-    api_router.include_router(two_factor_router, prefix="/two-factor", tags=["Two-Factor Authentication", "Security", "WebAuthn", "TOTP"])
+    api_router.include_router(
+        two_factor_router,
+        prefix="/two-factor",
+        tags=["Two-Factor Authentication", "Security", "WebAuthn", "TOTP"],
+    )
 except ImportError:
     # Module may be absent in some builds; ignore if not present
     pass

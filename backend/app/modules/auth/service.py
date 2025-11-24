@@ -7,7 +7,12 @@ from datetime import UTC, datetime
 from ...core.config import settings
 from ...core.email import get_email_service
 from ...core.email.i18n import SupportedLocale, get_translations
-from .auth_utils import create_access_token, create_email_verification_token, create_refresh_token, verify_token
+from .auth_utils import (
+    create_access_token,
+    create_email_verification_token,
+    create_refresh_token,
+    verify_token,
+)
 from .exceptions import (
     InvalidCredentialsError,
     InvalidTokenError,
@@ -190,7 +195,12 @@ class AuthService:
                 }
             )
 
-            return {"accessToken": new_access_token, "refreshToken": new_refresh_token, "tokenType": "bearer", "expiresIn": settings.security.access_token_expires_minutes * 60}
+            return {
+                "accessToken": new_access_token,
+                "refreshToken": new_refresh_token,
+                "tokenType": "bearer",
+                "expiresIn": settings.security.access_token_expires_minutes * 60,
+            }
 
         except InvalidTokenError:
             # Re-raise known errors

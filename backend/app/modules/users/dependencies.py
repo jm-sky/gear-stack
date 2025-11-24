@@ -29,7 +29,9 @@ def _map_auth_user(auth_user: AuthUser) -> User:
     )
 
 
-async def get_current_user(auth_user: Annotated[AuthUser, Depends(auth_get_current_user)]) -> User:
+async def get_current_user(
+    auth_user: Annotated[AuthUser, Depends(auth_get_current_user)],
+) -> User:
     """Bridge auth module user dependency with users module model."""
     if auth_user is None:
         raise HTTPException(
@@ -39,7 +41,9 @@ async def get_current_user(auth_user: Annotated[AuthUser, Depends(auth_get_curre
     return _map_auth_user(auth_user)
 
 
-async def require_admin(current_user: Annotated[User, Depends(get_current_user)]) -> User:
+async def require_admin(
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> User:
     """
     Require the current user to have admin role.
 

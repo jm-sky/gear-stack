@@ -150,5 +150,7 @@ class TwoFactorRepository(TwoFactorRepositoryInterface):
         await self.db.commit()
 
 
-def get_two_factor_repository(db: AsyncSession = Depends(get_db)) -> TwoFactorRepositoryInterface:
+def get_two_factor_repository(
+    db: AsyncSession = Depends(get_db),
+) -> TwoFactorRepositoryInterface:
     return TwoFactorRepository(db)

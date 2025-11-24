@@ -31,7 +31,10 @@ class EmailService:
         """
         self.adapter = adapter
         self.templates_dir = Path(__file__).parent / "templates"
-        self.jinja_env = Environment(loader=FileSystemLoader(str(self.templates_dir)), autoescape=select_autoescape(["html", "xml"]))
+        self.jinja_env = Environment(
+            loader=FileSystemLoader(str(self.templates_dir)),
+            autoescape=select_autoescape(["html", "xml"]),
+        )
         # Primary color from frontend: oklch(0.646 0.222 41.116) converted to hex for email compatibility
         self.primary_color = "#D97757"
 
