@@ -141,21 +141,21 @@ class MarkdownImportService {
     // Currency symbols and codes
     const currencyPatterns = [
       // Format: 100PLN, 100 PLN
-      { regex: /(\d+(?:[\s,.]?\d+)*)\s*PLN/i, currency: 'PLN' },
-      { regex: /(\d+(?:[\s,.]?\d+)*)\s*zł/i, currency: 'PLN' },
-      { regex: /(\d+(?:[\s,.]?\d+)*)\s*z[lł]/i, currency: 'PLN' },
+      { regex: /(\d+(?:[\s,.]\d+)*)\s*PLN/i, currency: 'PLN' },
+      { regex: /(\d+(?:[\s,.]\d+)*)\s*zł/i, currency: 'PLN' },
+      { regex: /(\d+(?:[\s,.]\d+)*)\s*z[lł]/i, currency: 'PLN' },
       // Format: $50, 50$
-      { regex: /\$\s*(\d+(?:[\s,.]?\d+)*)/i, currency: 'USD' },
-      { regex: /(\d+(?:[\s,.]?\d+)*)\s*\$/i, currency: 'USD' },
-      { regex: /(\d+(?:[\s,.]?\d+)*)\s*USD/i, currency: 'USD' },
+      { regex: /\$\s*(\d+(?:[\s,.]\d+)*)/i, currency: 'USD' },
+      { regex: /(\d+(?:[\s,.]\d+)*)\s*\$/i, currency: 'USD' },
+      { regex: /(\d+(?:[\s,.]\d+)*)\s*USD/i, currency: 'USD' },
       // Format: €100, 100€
-      { regex: /€\s*(\d+(?:[\s,.]?\d+)*)/i, currency: 'EUR' },
-      { regex: /(\d+(?:[\s,.]?\d+)*)\s*€/i, currency: 'EUR' },
-      { regex: /(\d+(?:[\s,.]?\d+)*)\s*EUR/i, currency: 'EUR' },
+      { regex: /€\s*(\d+(?:[\s,.]\d+)*)/i, currency: 'EUR' },
+      { regex: /(\d+(?:[\s,.]\d+)*)\s*€/i, currency: 'EUR' },
+      { regex: /(\d+(?:[\s,.]\d+)*)\s*EUR/i, currency: 'EUR' },
       // Format: £75, 75£
-      { regex: /£\s*(\d+(?:[\s,.]?\d+)*)/i, currency: 'GBP' },
-      { regex: /(\d+(?:[\s,.]?\d+)*)\s*£/i, currency: 'GBP' },
-      { regex: /(\d+(?:[\s,.]?\d+)*)\s*GBP/i, currency: 'GBP' },
+      { regex: /£\s*(\d+(?:[\s,.]\d+)*)/i, currency: 'GBP' },
+      { regex: /(\d+(?:[\s,.]\d+)*)\s*£/i, currency: 'GBP' },
+      { regex: /(\d+(?:[\s,.]\d+)*)\s*GBP/i, currency: 'GBP' },
     ]
 
     for (const pattern of currencyPatterns) {
@@ -255,7 +255,7 @@ class MarkdownImportService {
           containerPrice = priceResult.price
           containerCurrency = priceResult.currency
           // Remove price from header text
-          headerText = headerText.replace(/(\d+(?:[\s,.]?\d+)*)\s*(PLN|zł|z[lł]|\$|USD|€|EUR|£|GBP)/gi, '').trim()
+          headerText = headerText.replace(/(\d+(?:[\s,.]\d+)*)\s*(PLN|zł|z[lł]|\$|USD|€|EUR|£|GBP)/gi, '').trim()
         }
 
         // Extract ID from [#id]
@@ -408,7 +408,7 @@ class MarkdownImportService {
       price = priceResult.price
       currency = priceResult.currency
       // Remove price from working line
-      workingLine = workingLine.replace(/(\d+(?:[\s,.]?\d+)*)\s*(PLN|zł|z[lł]|\$|USD|€|EUR|£|GBP)/gi, '').trim()
+      workingLine = workingLine.replace(/(\d+(?:[\s,.]\d+)*)\s*(PLN|zł|z[lł]|\$|USD|€|EUR|£|GBP)/gi, '').trim()
     }
 
     // 1. Extract bold text as item name (new format: **Item Name**)
