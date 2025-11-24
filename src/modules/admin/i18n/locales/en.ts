@@ -24,6 +24,7 @@ export const adminEn = {
       subtitle: 'Manage user accounts and permissions',
       search: 'Search users...',
       loadError: 'Failed to load users',
+      delete: 'Delete',
       deleteConfirm: 'Are you sure you want to delete this user?',
       deleteSuccess: 'User deleted successfully',
       deleteError: 'Failed to delete user',
@@ -34,6 +35,14 @@ export const adminEn = {
       inactive: 'Inactive',
       verified: 'Verified',
       unverified: 'Unverified',
+      toggleAdmin: {
+        promote: 'Make Admin',
+        demote: 'Remove Admin',
+        confirm: 'Are you sure you want to {action}?',
+        promoteSuccess: 'User promoted to administrator',
+        demoteSuccess: 'User demoted from administrator',
+        error: 'Failed to update user admin status',
+      },
       columns: {
         name: 'Name',
         email: 'Email',

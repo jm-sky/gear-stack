@@ -20,7 +20,7 @@ class AdminApiService {
     return response.data
   }
 
-  async updateUser(id: TUUID, data: Partial<IAdminUser>): Promise<IAdminUser> {
+  async updateUser(id: TUUID, data: { role?: 'user' | 'admin'; name?: string; email?: string; isActive?: boolean }): Promise<IAdminUser> {
     const response = await apiClient.patch<IAdminUser>(`/admin/users/${id}`, data)
     return response.data
   }
