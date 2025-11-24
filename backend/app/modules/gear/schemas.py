@@ -96,6 +96,7 @@ class ItemResponse(BaseModel):
     linkedItemId: str | None = Field(None, alias="linkedItemId")
     wearable: bool | None = None
     consumable: bool | None = None
+    order: int | None = Field(None, ge=0)
     createdAt: datetime
     updatedAt: datetime
 
@@ -177,5 +178,20 @@ class ItemUpdate(BaseModel):
     wearable: bool | None = None
     consumable: bool | None = None
     order: int | None = Field(None, ge=0)
+
+    model_config = {"populate_by_name": True}
+
+
+class ItemOrderUpdate(BaseModel):
+    """Schema for updating a single item's order."""
+
+    id: str = Field(..., description="Item ID")
+    order: int = Field(..., ge=0, description="New order value")
+
+
+class BatchOrderUpdateRequest(BaseModel):
+    """Schema for batch updating items' order."""
+
+    items: list[ItemOrderUpdate] = Field(..., min_length=1, description="List of items with their new order values")
 
     model_config = {"populate_by_name": True}

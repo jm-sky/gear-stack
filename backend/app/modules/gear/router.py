@@ -16,6 +16,7 @@ from app.modules.settings.db_models import UserSettingsDB
 
 from .repository import GearRepository
 from .schemas import (
+    BatchOrderUpdateRequest,
     ContainerCreate,
     ContainerResponse,
     ContainerUpdate,
@@ -366,6 +367,38 @@ async def delete_item(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Item not found",
+        )
+
+
+@router.patch(
+    "/items/batch-order",
+    response_model=list[ItemResponse],
+    summary="Batch update items order",
+)
+async def batch_update_item_order(
+    data: BatchOrderUpdateRequest,
+    current_user: CurrentUser,
+    service: GearServiceDep,
+) -> list[ItemResponse]:
+    """Batch update items' order values.
+
+    Args:
+        data: Batch order update request with list of item IDs and their new order values
+        current_user: Authenticated user
+        service: Gear service instance
+
+    Returns:
+        List of updated item responses
+
+    Raises:
+        HTTPException: If validation fails or items not found
+    """
+    try:
+        return await service.batch_update_item_order(current_user.id, data)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
         )
 
 

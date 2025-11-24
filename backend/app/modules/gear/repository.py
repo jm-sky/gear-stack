@@ -16,7 +16,7 @@ from app.common.search import SearchMixin
 from app.modules.auth.db_models import UserDB
 
 from .db_models import GearContainerDB, GearItemDB
-from .schemas import ContainerCreate, ContainerUpdate, ItemCreate, ItemUpdate
+from .schemas import BatchOrderUpdateRequest, ContainerCreate, ContainerUpdate, ItemCreate, ItemUpdate
 
 
 logger = logging.getLogger(__name__)
@@ -350,3 +350,54 @@ class GearRepository(SearchMixin):
         await self.db.delete(item)
         await self.db.commit()
         return True
+
+    async def batch_update_item_order(self, user_id: str, data: BatchOrderUpdateRequest) -> list[GearItemDB]:
+        """Batch update items' order values.
+
+        Args:
+            user_id: Owner user ID
+            data: Batch order update request with list of item IDs and their new order values
+
+        Returns:
+            List of updated items
+
+        Raises:
+            ValueError: If any item ID is not found or doesn't belong to the user
+        """
+        # Get all item IDs from the request
+        item_ids = [item_order.id for item_order in data.items]
+        
+        # Fetch all items and verify they belong to the user
+        stmt = (
+            select(GearItemDB)
+            .join(GearContainerDB, GearItemDB.container_id == GearContainerDB.id)
+            .where(
+                and_(
+                    GearItemDB.id.in_(item_ids),
+                    GearContainerDB.user_id == user_id,
+                )
+            )
+        )
+        result = await self.db.execute(stmt)
+        items = result.scalars().all()
+        
+        # Verify all items were found
+        found_item_ids = {item.id for item in items}
+        missing_item_ids = set(item_ids) - found_item_ids
+        if missing_item_ids:
+            raise ValueError(f"Items not found or access denied: {missing_item_ids}")
+        
+        # Create a map of item_id -> new order
+        order_map = {item_order.id: item_order.order for item_order in data.items}
+        
+        # Update order for each item
+        for item in items:
+            item.order = order_map[item.id]
+        
+        await self.db.commit()
+        
+        # Refresh all items
+        for item in items:
+            await self.db.refresh(item)
+        
+        return items

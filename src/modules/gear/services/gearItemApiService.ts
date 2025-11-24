@@ -175,19 +175,24 @@ class GearItemApiService {
 
   /**
    * Batch update items order
-   * Updates multiple items' order field using parallel API calls
+   * Updates multiple items' order field using batch API endpoint
    */
   async batchUpdateOrder(items: IGearItem[]): Promise<IGearItem[]> {
     if (items.length === 0) {
       return Promise.resolve([])
     }
 
-    // Update all items in parallel
-    const updatePromises = items.map(item =>
-      this.updateItem(item.id, { order: item.order }),
-    )
+    // Prepare batch request payload
+    const batchRequest = {
+      items: items.map(item => ({
+        id: item.id,
+        order: item.order ?? 0,
+      })),
+    }
 
-    return Promise.all(updatePromises)
+    // Call batch endpoint
+    const response = await apiClient.patch<IGearItem[]>('/gear/items/batch-order', batchRequest)
+    return response.data
   }
 }
 
