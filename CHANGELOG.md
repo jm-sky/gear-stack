@@ -21,6 +21,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.5.1] - 2025-11-24
+
+### Added
+- **Date Handling**: Added `date-fns` library for better date/time manipulation
+- **New Components**:
+  - `ContainerCardBadges` - Reusable component for displaying container badges
+  - `ContainerCardCreatedDate` - Component showing creation date with time-ago format
+  - `ContainerCardStats` - Component for displaying container statistics
+  - `PublicContainerCard` - Card component for public container browser
+  - `PublicContainerAuthorBadge` - Badge showing container author information
+  - `LandingPageContainerCard` - Card component for landing page statistics
+- **Composables**: New `useContainerTypeLabel` composable for centralized container type label management
+- **Services**: Added `publicContainersService` for public container operations
+- **Utils**: Added `dateTime.ts` and `smallDateTime.ts` utility functions
+
+### Changed
+- **Component Refactoring**: Refactored `ContainerCard` to use smaller, modular sub-components for better maintainability
+- **Component Enhancements**:
+  - Enhanced `Card` component with `as` prop for polymorphic rendering
+  - Updated `ContainerFormFields` to use `getContainerTypeLabel` from composable
+  - Refactored `ContainerHeader` to use `useContainerTypeLabel` composable
+  - Updated `ExportToPromptDialog` to use `getContainerTypeLabel` function
+- **Pages**:
+  - Renamed `HomePage.vue` to `DashboardPage.vue` for clarity
+  - Enhanced `LandingPage` with improved statistics display
+  - Improved `PublicContainersBrowserPage` with better responsive design
+  - Enhanced `PublicContainerDetailPage` with author information
+  - Updated `PublicUserProfilePage` to show user's public containers
+  - Refactored `ShoppingPlanningPage` UI improvements
+- **Routing**: Added new routes for public user profiles and container details
+- **Internationalization**: Updated Polish translations for better consistency (auth, gear, user modules)
+- **Filters**: Enhanced `ContainersFilters` component with better UX
+
+### Fixed
+- Fixed incorrect display of custom container types in `ContainerFormFields` dropdown
+- Fixed type label passing in export functionality (was passing computed value instead of function)
+
+---
+
 ## [2.5.0] - 2025-11-24
 
 ### Release: Testing Infrastructure, UI/UX Enhancements & Deployment Automation
