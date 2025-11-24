@@ -12,6 +12,7 @@ describe('getAllItems', () => {
     name,
     type: 'backpack',
     isPublic: false,
+    favorite: false,
     items,
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',

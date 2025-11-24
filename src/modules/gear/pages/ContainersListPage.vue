@@ -85,17 +85,25 @@ const filteredContainers = computed<IGearContainer[]>(() => {
   }
 
   // Then filter by search query
-  if (!searchQuery.value.trim()) {
-    return baseContainers
+  let filtered = baseContainers
+  if (searchQuery.value.trim()) {
+    const query = searchQuery.value.toLowerCase()
+    filtered = baseContainers.filter(container => {
+      return (
+        container.name.toLowerCase().includes(query) ||
+        container.description?.toLowerCase().includes(query) ||
+        getContainerTypeLabel(container.type).toLowerCase().includes(query)
+      )
+    })
   }
 
-  const query = searchQuery.value.toLowerCase()
-  return baseContainers.filter(container => {
-    return (
-      container.name.toLowerCase().includes(query) ||
-      container.description?.toLowerCase().includes(query) ||
-      getContainerTypeLabel(container.type).toLowerCase().includes(query)
-    )
+  // Sort: favorites first, then by creation date (newest first)
+  return filtered.sort((a, b) => {
+    // Favorites first
+    if (a.favorite && !b.favorite) return -1
+    if (!a.favorite && b.favorite) return 1
+    // Then by creation date (newest first)
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   })
 })
 

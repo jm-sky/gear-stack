@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { Box, Package } from 'lucide-vue-next'
+import { Box, Package, Star } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import CardContent from '@/components/ui/card/CardContent.vue'
 import type { IGearContainer } from '../types/gear.types'
+import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
 import { useGearStore } from '../store/useGearStore'
 import {
@@ -36,6 +39,7 @@ const emit = defineEmits<{
 const router = useRouter()
 const { t } = useI18n()
 const store = useGearStore()
+const { updateContainer } = useGear()
 const { settings: gearSettings } = useGearSettings()
 const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
 
@@ -67,6 +71,24 @@ const isNested = computed<boolean>(() => {
 const handleShow = () => {
   router.push(`/gear/${props.container.id}`)
 }
+
+// Toggle favorite status
+const handleToggleFavorite = async (e: Event) => {
+  e.stopPropagation()
+  try {
+    await updateContainer(props.container.id, {
+      favorite: !props.container.favorite,
+    })
+    toast.success(
+      props.container.favorite
+        ? t('gear.container.favoriteRemoved')
+        : t('gear.container.favoriteAdded'),
+    )
+  } catch (error) {
+    console.error('Failed to update favorite status:', error)
+    toast.error(t('common.error'))
+  }
+}
 </script>
 
 <template>
@@ -88,7 +110,23 @@ const handleShow = () => {
           {{ t('gear.container.nested') }}
         </Badge>
       </div>
-      <ContainerCardActions :container @delete="emit('delete', $event)" />
+      <div class="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          class="size-8 p-0"
+          :aria-label="container.favorite ? t('gear.container.removeFavorite') : t('gear.container.addFavorite')"
+          @click.stop="handleToggleFavorite"
+        >
+          <Star
+            :class="[
+              'size-4',
+              container.favorite ? 'fill-yellow-500 text-yellow-500' : 'text-muted-foreground',
+            ]"
+          />
+        </Button>
+        <ContainerCardActions :container @delete="emit('delete', $event)" />
+      </div>
     </CardHeader>
 
     <CardContent class="flex flex-col flex-1 gap-3 px-6 pb-4 text-card-foreground">

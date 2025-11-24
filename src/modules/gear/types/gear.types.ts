@@ -94,6 +94,7 @@ export interface IGearContainer {
   parentContainerId?: TUUID | null // Parent container ID (if this container is nested)
   hideWhenNested?: boolean | null // Hide from main list when nested in another container
   isPublic: boolean // Whether container is publicly visible
+  favorite: boolean // Whether container is marked as favorite
   authorName?: string | null // Author name (only for public containers)
   authorId?: TUUID | null // Author user ID (only for public containers)
   // Extended fields
@@ -119,6 +120,7 @@ export interface ICreateContainerDto {
   parentContainerId?: TUUID | null
   hideWhenNested?: boolean | null
   isPublic?: boolean | null
+  favorite?: boolean | null
   brand?: string | null
   price?: number | null
   weight?: number | null
@@ -137,6 +139,7 @@ export interface IUpdateContainerDto {
   parentContainerId?: TUUID | null
   hideWhenNested?: boolean | null
   isPublic?: boolean | null
+  favorite?: boolean | null
   brand?: string | null
   price?: number | null
   currency?: string | null

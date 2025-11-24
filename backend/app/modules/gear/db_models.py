@@ -53,6 +53,7 @@ class GearContainerDB(Base):
     max_weight_unit: Mapped[str | None] = mapped_column(String(5), nullable=True)
     url: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_public: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
+    favorite: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
