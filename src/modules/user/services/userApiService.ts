@@ -10,6 +10,7 @@ interface UserResponse {
   email: string
   name: string
   role?: string
+  isAdmin?: boolean
   isActive?: boolean
   isEmailVerified?: boolean
   avatarUrl?: string
@@ -50,6 +51,7 @@ class UserApiService {
       name: response.name,
       email: response.email,
       avatarUrl: response.avatarUrl,
+      isAdmin: response.isAdmin ?? response.role === 'admin',
       createdAt: response.createdAt,
       updatedAt: response.updatedAt,
     }
