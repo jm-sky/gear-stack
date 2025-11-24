@@ -1,5 +1,18 @@
 # Cursor Rules for Gear Stack
 
+## Question vs. Action Protocol
+
+**CRITICAL:** When user asks a question, answer first, then ask for confirmation before making code changes.
+
+**DO NOT** code automatically when user only asks a question. Only make changes when:
+- User explicitly requests change ("Add...", "Fix...", "Implement...")
+- User confirms after you ask
+- User clearly describes a bug needing fix
+
+**Example:**
+- ❌ User: "Does X support Y?" → You: *starts coding*
+- ✅ User: "Does X support Y?" → You: "No. Would you like me to add it?"
+
 ## Reka-ui / shadcn-vue Checkbox
 
 **CRITICAL:** In Reka-ui (shadcn-vue), Checkbox uses standard `v-model`, **NOT** `v-model:checked`.
