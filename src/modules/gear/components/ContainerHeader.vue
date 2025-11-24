@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ArrowLeft, BoxIcon, CalendarPlus, CalendarSync, Download, Edit, MessageSquare, MoreVertical, Plus, SparklesIcon, Upload } from 'lucide-vue-next'
+import { ArrowLeft, BoxIcon, CalendarPlus, CalendarSync, Download, Edit, MessageSquare, MoreVertical, Plus, SparklesIcon, Star, Upload } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
@@ -10,6 +11,7 @@ import DropdownMenuSeparator from '@/components/ui/dropdown-menu/DropdownMenuSep
 import { smallDateTime } from '@/shared/utils/smallDateTime'
 import type { IGearContainer } from '../types/gear.types'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
+import { useGear } from '../composables/useGear'
 import { useGearStore } from '../store/useGearStore'
 import { calculateWeightLimitPercentageSync } from '../utils/containerCalculations'
 import { formatWeight } from '../utils/formatWeight'
@@ -31,6 +33,7 @@ const emit = defineEmits<{
 const router = useRouter()
 const { t } = useI18n()
 const store = useGearStore()
+const { updateContainer } = useGear()
 const { typeLabel } = useContainerTypeLabel(computed(() => props.container.type))
 
 const weightLimitPercentage = computed<number | null>(() => calculateWeightLimitPercentageSync(props.container, store.getAllContainers))
@@ -63,6 +66,23 @@ const handleExportToPrompt = () => {
 const handleBack = () => {
   router.push('/gear')
 }
+
+const handleToggleFavorite = async () => {
+  try {
+    const newFavoriteStatus = !props.container.favorite
+    await updateContainer(props.container.id, {
+      favorite: newFavoriteStatus,
+    })
+    toast.success(
+      newFavoriteStatus
+        ? t('gear.container.favoriteAdded')
+        : t('gear.container.favoriteRemoved'),
+    )
+  } catch (error) {
+    console.error('Failed to update favorite status:', error)
+    toast.error(t('common.error'))
+  }
+}
 </script>
 
 <template>
@@ -82,6 +102,20 @@ const handleBack = () => {
           @click="handleExportToPrompt"
         >
           <SparklesIcon class="size-4" />
+        </Button>
+        <Button
+          v-tooltip.bottom="container.favorite ? t('gear.container.removeFavorite') : t('gear.container.addFavorite')"
+          variant="ghost"
+          size="sm"
+          :aria-label="container.favorite ? t('gear.container.removeFavorite') : t('gear.container.addFavorite')"
+          @click="handleToggleFavorite"
+        >
+          <Star
+            :class="[
+              'size-4',
+              container.favorite ? 'fill-yellow-500 text-yellow-500' : 'text-muted-foreground',
+            ]"
+          />
         </Button>
       </div>
 

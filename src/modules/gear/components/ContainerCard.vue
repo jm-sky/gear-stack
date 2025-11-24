@@ -76,13 +76,14 @@ const handleShow = () => {
 const handleToggleFavorite = async (e: Event) => {
   e.stopPropagation()
   try {
+    const newFavoriteStatus = !props.container.favorite
     await updateContainer(props.container.id, {
-      favorite: !props.container.favorite,
+      favorite: newFavoriteStatus,
     })
     toast.success(
-      props.container.favorite
-        ? t('gear.container.favoriteRemoved')
-        : t('gear.container.favoriteAdded'),
+      newFavoriteStatus
+        ? t('gear.container.favoriteAdded')
+        : t('gear.container.favoriteRemoved'),
     )
   } catch (error) {
     console.error('Failed to update favorite status:', error)
