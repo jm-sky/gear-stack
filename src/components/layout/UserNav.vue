@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { LogIn, LogOut, User, UserPlus } from 'lucide-vue-next'
+import { LogIn, LogOut, Shield, User, UserPlus } from 'lucide-vue-next'
 import { type Component, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -12,6 +12,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
+import { useAdmin } from '@/modules/admin/composables/useAdmin'
+import { AdminRoutePaths } from '@/modules/admin/routes'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { AuthRoutePaths } from '@/modules/auth/config/routes'
 import { SettingsRoutePaths } from '@/modules/settings/routes'
@@ -37,6 +39,7 @@ export interface UserNavProps {
 const { t } = useI18n()
 const router = useRouter()
 const { isAuthenticated } = useAuth()
+const { isAdmin } = useAdmin()
 
 const props = defineProps<UserNavProps>()
 
@@ -126,6 +129,11 @@ const navigateTo = (path: string) => {
         <DropdownMenuItemLink :to="SettingsRoutePaths.settings">
           <User class="size-4 mr-2" />
           {{ t('settings.page.title', 'Settings') }}
+        </DropdownMenuItemLink>
+
+        <DropdownMenuItemLink v-if="isAdmin" :to="AdminRoutePaths.dashboard">
+          <Shield class="size-4 mr-2" />
+          {{ t('admin.dashboard.title', 'Admin Dashboard') }}
         </DropdownMenuItemLink>
       </slot>
 

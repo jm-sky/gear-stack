@@ -1,4 +1,5 @@
 import { AuthRouteNames, AuthRoutePaths, authRoutes } from '@/modules/auth/config/routes'
+import { adminRoutes } from '@/modules/admin/routes'
 import { gearRoutes } from '@/modules/gear/routes'
 import { settingsRoutes } from '@/modules/settings/routes'
 import { userRoutes } from '@/modules/user/routes'
@@ -35,6 +36,7 @@ export const routes: RouteRecordRaw[] = [
     meta: { layout: 'authenticated' },
   },
   ...authRoutes,
+  ...adminRoutes,
   ...gearRoutes,
   ...settingsRoutes,
   ...userRoutes,
