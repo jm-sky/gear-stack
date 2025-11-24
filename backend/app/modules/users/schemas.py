@@ -33,7 +33,7 @@ class UserProfileUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=100)
     avatarUrl: Optional[str] = Field(None, description="Avatar URL (only allowed providers like Gravatar)")
 
-    @field_validator('avatarUrl')
+    @field_validator("avatarUrl")
     @classmethod
     def validate_avatar_url(cls, v: str | None) -> str | None:
         """Validate avatar URL against allowed providers."""
@@ -73,7 +73,7 @@ class UserListResponse(PaginatedResponse[UserResponse]):
 
 class PublicUserResponse(BaseModel):
     """Public user profile response schema with camelCase.
-    
+
     Only includes public information:
     - id, name, avatarUrl (always public)
     - email (only if user has emailPublic setting enabled)

@@ -62,7 +62,7 @@ class User(BaseModel):
             "role": self.role,
             "isActive": self.isActive,
             "isEmailVerified": self.isEmailVerified,
-            "avatarUrl": getattr(self, 'avatarUrl', None),
+            "avatarUrl": getattr(self, "avatarUrl", None),
             "createdAt": self.createdAt,
             "updatedAt": self.updatedAt,
         }

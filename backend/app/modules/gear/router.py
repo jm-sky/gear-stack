@@ -89,7 +89,7 @@ async def create_container(
     result = await db.execute(select(UserSettingsDB).where(UserSettingsDB.user_id == current_user.id))
     settings = result.scalars().first()
     default_public = settings.default_containers_public if settings else False
-    
+
     return await service.create_container(current_user.id, data, default_public=default_public)
 
 

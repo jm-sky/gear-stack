@@ -185,9 +185,7 @@ class UserRepositoryInterface(ABC):
         ...
 
     @abstractmethod
-    async def get_user_by_oauth_provider(
-        self, provider: str, provider_id: str
-    ) -> User | None:
+    async def get_user_by_oauth_provider(self, provider: str, provider_id: str) -> User | None:
         """Get user by OAuth provider and provider ID.
 
         Args:

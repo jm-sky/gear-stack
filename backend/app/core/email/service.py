@@ -60,6 +60,7 @@ class EmailService:
 
         # Render with Jinja2 to support variables in translations
         from jinja2 import Template
+
         template = Template(value)
         return template.render(**context)
 
@@ -115,6 +116,7 @@ class EmailService:
             if translations:
                 context_with_defaults["t"] = translations
                 context_with_defaults["locale"] = locale or DEFAULT_LOCALE
+
                 # Add helper function for translations in templates
                 def translate(key: str, **kwargs: dict) -> str:
                     """Helper function for translations in templates."""

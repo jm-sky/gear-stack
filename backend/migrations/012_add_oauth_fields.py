@@ -29,14 +29,10 @@ async def upgrade() -> None:
 
     async with engine.begin() as conn:
         # Add oauth_provider column
-        await conn.execute(
-            text("ALTER TABLE users ADD COLUMN oauth_provider VARCHAR(50)")
-        )
+        await conn.execute(text("ALTER TABLE users ADD COLUMN oauth_provider VARCHAR(50)"))
 
         # Add oauth_provider_id column
-        await conn.execute(
-            text("ALTER TABLE users ADD COLUMN oauth_provider_id VARCHAR(255)")
-        )
+        await conn.execute(text("ALTER TABLE users ADD COLUMN oauth_provider_id VARCHAR(255)"))
 
         # Add avatar_url column
         await conn.execute(text("ALTER TABLE users ADD COLUMN avatar_url TEXT"))
@@ -48,18 +44,11 @@ async def upgrade() -> None:
             print("  Note: SQLite detected - hashed_password will remain NOT NULL")
             print("  OAuth users will use a placeholder hash value")
         elif dialect == "postgresql":
-            await conn.execute(
-                text("ALTER TABLE users ALTER COLUMN hashed_password DROP NOT NULL")
-            )
+            await conn.execute(text("ALTER TABLE users ALTER COLUMN hashed_password DROP NOT NULL"))
             print("  ✓ Made hashed_password nullable")
 
         # Create index for OAuth lookups
-        await conn.execute(
-            text(
-                "CREATE INDEX IF NOT EXISTS idx_users_oauth "
-                "ON users(oauth_provider, oauth_provider_id)"
-            )
-        )
+        await conn.execute(text("CREATE INDEX IF NOT EXISTS idx_users_oauth " "ON users(oauth_provider, oauth_provider_id)"))
 
     print("✓ OAuth fields added successfully")
 
@@ -76,22 +65,16 @@ async def downgrade() -> None:
         dialect = conn.dialect.name
         if dialect == "sqlite":
             # SQLite doesn't support DROP COLUMN easily
-            print(
-                "  Warning: SQLite doesn't support DROP COLUMN. Manual intervention required."
-            )
+            print("  Warning: SQLite doesn't support DROP COLUMN. Manual intervention required.")
             print("  You may need to recreate the table to remove these columns.")
         else:
             await conn.execute(text("ALTER TABLE users DROP COLUMN avatar_url"))
-            await conn.execute(
-                text("ALTER TABLE users DROP COLUMN oauth_provider_id")
-            )
+            await conn.execute(text("ALTER TABLE users DROP COLUMN oauth_provider_id"))
             await conn.execute(text("ALTER TABLE users DROP COLUMN oauth_provider"))
 
             # Make hashed_password NOT NULL again (for PostgreSQL)
             if dialect == "postgresql":
-                await conn.execute(
-                    text("ALTER TABLE users ALTER COLUMN hashed_password SET NOT NULL")
-                )
+                await conn.execute(text("ALTER TABLE users ALTER COLUMN hashed_password SET NOT NULL"))
 
     print("✓ OAuth fields removed successfully")
 

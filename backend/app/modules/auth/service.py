@@ -466,13 +466,7 @@ class AuthService:
             raise ValueError("Email is required from OAuth provider")
 
         # Extract provider_id - support both camelCase (providerId) and snake_case (provider_id, id, sub)
-        provider_id = (
-            user_info.get("providerId")
-            or user_info.get("provider_id")
-            or user_info.get("id")
-            or user_info.get("sub")
-            or ""
-        )
+        provider_id = user_info.get("providerId") or user_info.get("provider_id") or user_info.get("id") or user_info.get("sub") or ""
 
         # Extract avatar URL - support both camelCase (avatarUrl) and snake_case (avatar_url, picture)
         avatar_url = user_info.get("avatarUrl") or user_info.get("avatar_url") or user_info.get("picture")

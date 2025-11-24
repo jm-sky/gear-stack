@@ -119,11 +119,11 @@ async def get_public_user_profile(
     db: AsyncSession = Depends(get_db),
 ) -> PublicUserResponse:
     """Get public user profile.
-    
+
     Returns public profile information if:
     - User exists
     - User's profile is set to public (is_public_profile = True)
-    
+
     Email is only included if:
     - Profile is public AND
     - User's emailPublic setting is True
@@ -132,18 +132,18 @@ async def get_public_user_profile(
     user = await repo.get_user_by_id(user_id)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User {user_id} not found")
-    
+
     # Check if profile is public
     result = await db.execute(select(UserSettingsDB).where(UserSettingsDB.user_id == user_id))
     settings = result.scalars().first()
-    
+
     # If no settings exist, profile is not public (default is False)
     if not settings or not settings.is_public_profile:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="This user profile is not public",
         )
-    
+
     # Build public response
     response_data = {
         "id": user.id,
@@ -151,11 +151,11 @@ async def get_public_user_profile(
         "avatarUrl": user.avatarUrl,
         "emailPublic": settings.is_public_email,
     }
-    
+
     # Only include email if user has emailPublic enabled
     if settings.is_public_email:
         response_data["email"] = user.email
-    
+
     return PublicUserResponse(**response_data)
 
 

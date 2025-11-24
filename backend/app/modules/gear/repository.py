@@ -118,14 +118,7 @@ class GearRepository(SearchMixin):
         Returns:
             List of public containers with user relationship loaded
         """
-        stmt = (
-            select(GearContainerDB)
-            .where(GearContainerDB.is_public == True)  # noqa: E712
-            .options(selectinload(GearContainerDB.items), joinedload(GearContainerDB.user))
-            .offset(skip)
-            .limit(limit)
-            .order_by(GearContainerDB.created_at.desc())
-        )
+        stmt = select(GearContainerDB).where(GearContainerDB.is_public == True).options(selectinload(GearContainerDB.items), joinedload(GearContainerDB.user)).offset(skip).limit(limit).order_by(GearContainerDB.created_at.desc())  # noqa: E712
         result = await self.db.execute(stmt)
         return result.unique().scalars().all()
 

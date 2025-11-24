@@ -122,12 +122,12 @@ class GearService:
                 filtered_items.append(item)
             else:
                 filtered_items.append(item)
-        
+
         # Get author name from user relationship if available
         author_name = None
-        if hasattr(container, 'user') and container.user:
+        if hasattr(container, "user") and container.user:
             author_name = container.user.name
-        
+
         return ContainerResponse(
             id=container.id,
             name=container.name,

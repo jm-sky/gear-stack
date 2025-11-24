@@ -310,6 +310,7 @@ async def verify_email(
         user_id = None
         try:
             from app.modules.auth.auth_utils import verify_token
+
             payload = verify_token(request_data.token)
             user_id = payload.get("sub")
         except Exception:
