@@ -12,8 +12,10 @@ import CategoryPieChart from '../components/CategoryPieChart.vue'
 import ContainerHeader from '../components/ContainerHeader.vue'
 import ExportToPromptDialog from '../components/ExportToPromptDialog.vue'
 import ItemsTable from '../components/ItemsTable.vue'
+import SortConfirmationAlert from '../components/SortConfirmationAlert.vue'
 import { useContainer } from '../composables/useContainer'
 import { useGear } from '../composables/useGear'
+import { gearItemService } from '../services/gearItemService'
 import { useGearStore } from '../store/useGearStore'
 import { recognizeParameters, recognizeParametersForItems } from '../utils/parameterRecognition'
 
@@ -35,6 +37,10 @@ const isExportToPromptDialogOpen = ref(false)
 
 // Items
 const items = computed<IGearItem[]>(() => container.value?.items ?? [])
+
+// Pending sorting changes (for batch save when backend enabled)
+const pendingSortingChanges = ref<IGearItem[]>([])
+const isSavingSorting = ref(false)
 
 // Actions
 const handleEditItem = (item: IGearItem) => {
@@ -62,19 +68,74 @@ const handleStatusChange = async (item: IGearItem, status: IGearItem['status']) 
 
 const handleReorder = async (reorderedItems: IGearItem[]) => {
   try {
-    // Update all items with new order values
+    // If backend enabled, use batch update
+    if (shouldUseAPI.value) {
+      const service = gearItemService()
+      if ('batchUpdateOrder' in service && typeof service.batchUpdateOrder === 'function') {
+        await service.batchUpdateOrder(reorderedItems)
+        toast.success(t('gear.item.reorderSuccess', 'Kolejność przedmiotów została zaktualizowana'))
+        return
+      }
+    }
+    
+    // Fallback: Update all items with new order values (for localStorage)
     await Promise.all(
       reorderedItems.map(item =>
         updateItem(item.id, { order: item.order }),
       ),
     )
-    // Show success toast only when using API/backend
-    if (shouldUseAPI.value) {
-      toast.success(t('gear.item.reorderSuccess', 'Kolejność przedmiotów została zaktualizowana'))
-    }
   } catch {
     toast.error(t('common.error'))
   }
+}
+
+const handleSortingChange = async (sortedItems: IGearItem[]) => {
+  // If sorting was cleared (empty array), clear pending changes
+  if (sortedItems.length === 0) {
+    pendingSortingChanges.value = []
+    return
+  }
+  
+  // Always update locally first (for immediate UI feedback and persistence)
+  // This ensures sorting persists even if user navigates away
+  await Promise.all(
+    sortedItems.map(item =>
+      updateItem(item.id, { order: item.order }),
+    ),
+  )
+  
+  // If backend enabled, also show confirmation alert for batch save
+  if (shouldUseAPI.value) {
+    pendingSortingChanges.value = sortedItems
+  }
+}
+
+const handleSaveSorting = async () => {
+  if (pendingSortingChanges.value.length === 0) return
+  
+  try {
+    isSavingSorting.value = true
+    const service = gearItemService()
+    if ('batchUpdateOrder' in service && typeof service.batchUpdateOrder === 'function') {
+      await service.batchUpdateOrder(pendingSortingChanges.value)
+      toast.success(t('gear.item.reorderSuccess', 'Kolejność przedmiotów została zaktualizowana'))
+      pendingSortingChanges.value = []
+    } else {
+      // Fallback
+      await handleReorder(pendingSortingChanges.value)
+      pendingSortingChanges.value = []
+    }
+  } catch {
+    toast.error(t('common.error'))
+  } finally {
+    isSavingSorting.value = false
+  }
+}
+
+const handleCancelSorting = () => {
+  pendingSortingChanges.value = []
+  // Optionally reload container to reset sorting
+  // For now, just clear pending changes - user can manually reset sorting
 }
 
 const handleExport = async () => {
@@ -245,6 +306,15 @@ if (!container.value) {
         @recognize-parameters-all="handleRecognizeParametersAll"
       />
 
+      <!-- Sort Confirmation Alert (only when backend enabled) -->
+      <SortConfirmationAlert
+        v-if="shouldUseAPI"
+        :pending-items="pendingSortingChanges"
+        :loading="isSavingSorting"
+        @save="handleSaveSorting"
+        @cancel="handleCancelSorting"
+      />
+
       <!-- Items Table -->
       <ItemsTable
         :items="items"
@@ -253,6 +323,7 @@ if (!container.value) {
         @status-change="handleStatusChange"
         @recognize-parameters="handleRecognizeParameters"
         @reorder="handleReorder"
+        @sorting-change="handleSortingChange"
       />
 
       <!-- Category Pie Chart -->

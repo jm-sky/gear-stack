@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Box, ChevronDown, ChevronRight, ChevronUp, Package } from 'lucide-vue-next'
+import type { SortingState } from '@tanstack/vue-table'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -44,6 +45,7 @@ const emit = defineEmits<{
   statusChange: [item: IGearItem, status: IGearItem['status']]
   recognizeParameters: [item: IGearItem]
   reorder: [items: IGearItem[]]
+  sortingChange: [items: IGearItem[]]
 }>()
 
 const { t } = useI18n()
@@ -195,16 +197,108 @@ function calculateTotalWeight(containerId: string): number {
   return calculateTotalWeightSync(container, store.getAllContainers)
 }
 
-// Sort items by order (default sorting)
+// Sorting state from DataTable
+const tableSorting = ref<SortingState>([])
+
+// Sort items by order (default sorting) or by table sorting
 const sortedItems = computed<IGearItem[]>(() => {
   const items = [...props.items]
-  // Sort by order (null/undefined items go to end)
+  
+  // If table has active sorting, apply it
+  if (tableSorting.value.length > 0) {
+    const sortConfig = tableSorting.value[0]
+    const columnId = sortConfig.id
+    const direction = sortConfig.desc ? -1 : 1
+    
+    return items.sort((a, b) => {
+      let aValue: any = a[columnId as keyof IGearItem]
+      let bValue: any = b[columnId as keyof IGearItem]
+      
+      // Handle different data types
+      if (aValue === null || aValue === undefined) aValue = ''
+      if (bValue === null || bValue === undefined) bValue = ''
+      
+      // String comparison
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return aValue.localeCompare(bValue) * direction
+      }
+      
+      // Number comparison
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return (aValue - bValue) * direction
+      }
+      
+      // Fallback
+      return String(aValue).localeCompare(String(bValue)) * direction
+    })
+  }
+  
+  // Default: Sort by order (null/undefined items go to end)
   return items.sort((a, b) => {
     const orderA = a.order ?? Number.MAX_SAFE_INTEGER
     const orderB = b.order ?? Number.MAX_SAFE_INTEGER
     return orderA - orderB
   })
 })
+
+// Track previous sorting to detect changes
+const previousSorting = ref<SortingState>([])
+
+// Watch for sorting changes and update local order
+watch(
+  tableSorting,
+  (newSorting) => {
+    // Check if sorting actually changed
+    const sortingChanged = JSON.stringify(newSorting) !== JSON.stringify(previousSorting.value)
+    previousSorting.value = [...newSorting]
+    
+    if (!sortingChanged) return
+    
+    // If sorting was cleared (back to default), emit empty array to clear pending changes
+    if (newSorting.length === 0 && !props.publicMode) {
+      emit('sortingChange', [])
+      return
+    }
+    
+    // Only emit if sorting is active (not default order sorting) and not in public mode
+    if (newSorting.length > 0 && !props.publicMode) {
+      // Get current sorted items based on new sorting
+      const items = [...props.items]
+      const sortConfig = newSorting[0]
+      const columnId = sortConfig.id
+      const direction = sortConfig.desc ? -1 : 1
+      
+      // Apply sorting
+      const sorted = items.sort((a, b) => {
+        let aValue: any = a[columnId as keyof IGearItem]
+        let bValue: any = b[columnId as keyof IGearItem]
+        
+        if (aValue === null || aValue === undefined) aValue = ''
+        if (bValue === null || bValue === undefined) bValue = ''
+        
+        if (typeof aValue === 'string' && typeof bValue === 'string') {
+          return aValue.localeCompare(bValue) * direction
+        }
+        
+        if (typeof aValue === 'number' && typeof bValue === 'number') {
+          return (aValue - bValue) * direction
+        }
+        
+        return String(aValue).localeCompare(String(bValue)) * direction
+      })
+      
+      // Update order field based on current sorted order
+      const updatedItems = sorted.map((item, index) => ({
+        ...item,
+        order: index,
+      }))
+      
+      // Emit event for batch save (parent will handle saving)
+      emit('sortingChange', updatedItems)
+    }
+  },
+  { deep: true },
+)
 
 // Handle move up
 function handleMoveUp(item: IGearItem) {
@@ -264,6 +358,7 @@ function canMoveDown(item: IGearItem): boolean {
 <template>
   <DataTable
     v-model:column-visibility="columnVisibility"
+    v-model:sorting="tableSorting"
     :columns="columns"
     :data="sortedItems"
     :search-placeholder="t('gear.filters.search')"

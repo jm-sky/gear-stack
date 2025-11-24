@@ -172,6 +172,23 @@ class GearItemApiService {
   async deleteItem(itemId: TUUID): Promise<void> {
     await apiClient.delete(`/gear/items/${itemId}`)
   }
+
+  /**
+   * Batch update items order
+   * Updates multiple items' order field using parallel API calls
+   */
+  async batchUpdateOrder(items: IGearItem[]): Promise<IGearItem[]> {
+    if (items.length === 0) {
+      return Promise.resolve([])
+    }
+
+    // Update all items in parallel
+    const updatePromises = items.map(item =>
+      this.updateItem(item.id, { order: item.order }),
+    )
+
+    return Promise.all(updatePromises)
+  }
 }
 
 export const gearItemApiService = new GearItemApiService()

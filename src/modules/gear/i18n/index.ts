@@ -220,6 +220,10 @@ export const gearEn = {
       exportToPromptDescription: 'Copy the content below and paste it into ChatGPT or another AI',
       moreActions: 'More actions',
     },
+    sorting: {
+      unsavedChanges: 'Unsaved sorting changes',
+      unsavedChangesDescription: 'You have reordered {count} item(s). Save changes to update the order in the database?',
+    },
     export: {
       title: 'Lista sprzętu',
       description: 'Lista mojego sprzętu w różnych kontenerach, wygenerowana przez Gear Stack',
@@ -630,6 +634,10 @@ export const gearPl = {
       exportToPromptSuccess: 'Markdown skopiowany do schowka',
       exportToPromptDescription: 'Skopiuj poniższą treść i wklej do ChatGPT lub innego AI',
       moreActions: 'Więcej akcji',
+    },
+    sorting: {
+      unsavedChanges: 'Niezapisane zmiany sortowania',
+      unsavedChangesDescription: 'Zmieniłeś kolejność {count} przedmiot(ów). Zapisać zmiany, aby zaktualizować kolejność w bazie danych?',
     },
     export: {
       title: 'Lista sprzętu',

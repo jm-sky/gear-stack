@@ -99,6 +99,30 @@ export const gearItemService = () => {
       getItem: gearItemApiService.getItem.bind(gearItemApiService),
       // Add method from local service that is not in API service
       getItemById: gearItemLocalService.getItemById.bind(gearItemLocalService),
+      // Batch update order
+      async batchUpdateOrder(items: Parameters<typeof gearItemApiService.batchUpdateOrder>[0]) {
+        try {
+          const updatedItems = await gearItemApiService.batchUpdateOrder(items)
+          // Refresh container from API to get updated items
+          const allContainers = useGearStore().getAllContainers
+          for (const container of allContainers) {
+            if (container.items.some(i => items.some(updated => updated.id === i.id))) {
+              const updatedContainer = await gearContainerApiService.getContainer(container.id)
+              useGearStore().updateContainer(updatedContainer)
+              // Also update in localStorage as backup
+              gearItemLocalService.batchUpdateOrder(items).catch(err => {
+                console.warn('Failed to update items in localStorage backup:', err)
+              })
+              break
+            }
+          }
+          return updatedItems
+        } catch (error) {
+          // Fallback to localStorage on API error
+          console.warn('API failed, falling back to localStorage', error)
+          return gearItemLocalService.batchUpdateOrder(items)
+        }
+      },
     }
   }
 
