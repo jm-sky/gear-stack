@@ -326,8 +326,8 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 - ✅ Pokazywanie powiązania z kontenerem (opcjonalnie)
 - ✅ Pokazywanie legendy (opcjonalnie)
 - ✅ Format opisu przedmiotów (off/inline/newline) - zaimplementowane
-- 🔄 Pokazywanie cen przedmiotów w eksporcie (opcjonalnie) - planowane
-- 🔄 Dodatkowe podsumowanie "Do kupienia" na końcu eksportu - planowane
+- ✅ Pokazywanie cen przedmiotów w eksporcie (opcjonalnie) - zaimplementowane | **Feature:** [FEATURE-020](./features/FEATURE-020-price-display-in-export.md)
+- ✅ Dodatkowe podsumowanie "Do kupienia" na końcu eksportu - zaimplementowane | **Feature:** [FEATURE-020](./features/FEATURE-020-price-display-in-export.md)
 - 🔄 Inne opcje konfiguracji formatu (poziom szczegółowości, metadane, itp.) - planowane
 - 🚧 **Obsługa opisów przedmiotów w markdown** - częściowo zaimplementowane | **Feature:** [FEATURE-013](./features/FEATURE-013-item-descriptions.md)
   - ✅ Opcje formatu opisu w eksporcie: **OFF** (domyślnie), **Inline**, **New Line** - zaimplementowane
@@ -454,7 +454,7 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 - Szybkie akcje (zmiana statusu, priorytetu) bezpośrednio z listy
 
 ### Kolejność przedmiotów w kontenerze
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+**Status:** 🚧 In Progress | **Priority:** Medium | **Complexity:** Medium | **Feature:** [FEATURE-018](./features/FEATURE-018-item-ordering.md)
 
 - Dodanie pola `order` (lub `sortOrder`) do przedmiotów w kontenerze
 - Możliwość ręcznego układania przedmiotów w wybranej kolejności
