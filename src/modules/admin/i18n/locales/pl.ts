@@ -24,6 +24,7 @@ export const adminPl = {
       subtitle: 'Zarządzaj kontami użytkowników i uprawnieniami',
       search: 'Szukaj użytkowników...',
       loadError: 'Nie udało się załadować użytkowników',
+      delete: 'Usuń',
       deleteConfirm: 'Czy na pewno chcesz usunąć tego użytkownika?',
       deleteSuccess: 'Użytkownik został usunięty',
       deleteError: 'Nie udało się usunąć użytkownika',
@@ -34,6 +35,14 @@ export const adminPl = {
       inactive: 'Nieaktywny',
       verified: 'Zweryfikowany',
       unverified: 'Niezweryfikowany',
+      toggleAdmin: {
+        promote: 'Nadaj uprawnienia administratora',
+        demote: 'Odbierz uprawnienia administratora',
+        confirm: 'Czy na pewno chcesz {action}?',
+        promoteSuccess: 'Użytkownik otrzymał uprawnienia administratora',
+        demoteSuccess: 'Użytkownik został pozbawiony uprawnień administratora',
+        error: 'Nie udało się zaktualizować uprawnień użytkownika',
+      },
       columns: {
         name: 'Imię',
         email: 'Email',

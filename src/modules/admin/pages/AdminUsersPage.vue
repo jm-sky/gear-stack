@@ -1,11 +1,18 @@
 <script setup lang="ts">
-import { Trash2, Users } from 'lucide-vue-next'
+import { MoreHorizontal, Shield, ShieldOff, Trash2, Users } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
 import DataTable from '@/components/data-table/DataTable.vue'
 import Badge from '@/components/ui/badge/Badge.vue'
 import Button from '@/components/ui/button/Button.vue'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import type { IAdminUser } from '../types/admin.types'
@@ -26,6 +33,31 @@ async function loadUsers() {
     toast.error(t('admin.users.loadError', 'Failed to load users'))
   } finally {
     loading.value = false
+  }
+}
+
+// Toggle admin status
+async function toggleAdmin(user: IAdminUser) {
+  const newRole = user.isAdmin ? 'user' : 'admin'
+  const action = user.isAdmin
+    ? t('admin.users.toggleAdmin.demote', 'remove admin privileges')
+    : t('admin.users.toggleAdmin.promote', 'grant admin privileges')
+
+  if (!confirm(t('admin.users.toggleAdmin.confirm', 'Are you sure you want to {action}?', { action }))) {
+    return
+  }
+
+  try {
+    await adminApiService.updateUser(user.id, { role: newRole })
+    toast.success(
+      user.isAdmin
+        ? t('admin.users.toggleAdmin.demoteSuccess', 'User demoted from administrator')
+        : t('admin.users.toggleAdmin.promoteSuccess', 'User promoted to administrator'),
+    )
+    await loadUsers()
+  } catch (error) {
+    console.error('Failed to toggle admin status:', error)
+    toast.error(t('admin.users.toggleAdmin.error', 'Failed to update user admin status'))
   }
 }
 
@@ -184,14 +216,34 @@ onMounted(() => {
         </template>
 
         <template #actions="{ row }">
-          <Button
-            variant="ghost"
-            size="sm"
-            class="text-destructive hover:text-destructive"
-            @click="deleteUser(row.original.id)"
-          >
-            <Trash2 class="size-4" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <Button variant="ghost" size="sm">
+                <MoreHorizontal class="size-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem @click="toggleAdmin(row.original)">
+                <Shield v-if="!row.original.isAdmin" class="size-4" />
+                <ShieldOff v-else class="size-4" />
+                <span>
+                  {{
+                    row.original.isAdmin
+                      ? t('admin.users.toggleAdmin.demote', 'Remove Admin')
+                      : t('admin.users.toggleAdmin.promote', 'Make Admin')
+                  }}
+                </span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                class="text-destructive focus:text-destructive"
+                @click="deleteUser(row.original.id)"
+              >
+                <Trash2 class="size-4" />
+                <span>{{ t('admin.users.delete', 'Delete') }}</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </template>
 
         <template #empty>
