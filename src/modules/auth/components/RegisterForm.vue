@@ -7,10 +7,12 @@ import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import OAuthButton from '@/modules/auth/components/OAuthButton.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { AuthRouteNames } from '@/modules/auth/config/routes'
 import { registerSchema } from '@/modules/auth/validation/register.schema'
 import { useRecaptcha } from '@/shared/composables/useRecaptcha'
+import { config } from '@/shared/config/config'
 import { isValidationError } from '@/shared/utils/typeGuards'
 import type { RegisterCredentials } from '@/modules/auth/types/user.type'
 
@@ -105,5 +107,20 @@ const onSubmit = handleSubmit(async (values: RegisterCredentials) => {
     <Button type="submit" class="w-full" :loading="isRegistering">
       {{ t('auth.form.submit_register') }}
     </Button>
+
+    <template v-if="config.oauth.google.enabled">
+      <div class="relative my-6">
+        <div class="absolute inset-0 flex items-center">
+          <span class="w-full border-t" />
+        </div>
+        <div class="relative flex justify-center text-xs uppercase">
+          <span class="bg-background px-2 text-muted-foreground">
+            {{ t('auth.oauth.or_continue_with') }}
+          </span>
+        </div>
+      </div>
+
+      <OAuthButton />
+    </template>
   </form>
 </template>

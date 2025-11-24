@@ -164,7 +164,7 @@ export const authEn = {
     },
     oauth: {
       button: {
-        continue_with_google: 'Continue with Google',
+        continue_with_google: 'Google',
         redirecting: 'Redirecting...',
       },
       or_continue_with: 'Or continue with',
