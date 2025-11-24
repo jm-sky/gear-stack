@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import DropdownMenuSeparator from '@/components/ui/dropdown-menu/DropdownMenuSeparator.vue'
 import type { IGearContainer } from '../types/gear.types'
+import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { useGearSettings } from '../composables/useGearSettings'
 import { useGearStore } from '../store/useGearStore'
 import {
@@ -37,7 +38,6 @@ const emit = defineEmits<{
 const router = useRouter()
 const { t } = useI18n()
 const store = useGearStore()
-const { customContainerTypes } = useGearSettings()
 const { settings: gearSettings } = useGearSettings()
 const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
 
@@ -61,18 +61,7 @@ const readinessColor = computed<string>(() => {
 })
 
 // Get container type label helper
-const getContainerTypeLabel = (typeValue: string): string => {
-  const customType = customContainerTypes.value.find(t => t.value === typeValue)
-  if (customType) {
-    return customType.value
-  }
-  return t(`gear.container.types.${typeValue}`)
-}
-
-// Container type label
-const typeLabel = computed<string>(() => {
-  return getContainerTypeLabel(props.container.type)
-})
+const { typeLabel } = useContainerTypeLabel(computed(() => props.container.type))
 
 // Weight limit
 const weightLimitPercentage = computed<number | null>(() => {
@@ -251,7 +240,7 @@ const handleBack = () => {
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div class="bg-card rounded-lg border p-4">
         <div class="text-sm text-muted-foreground mb-1">
-          {{ t('gear.container.itemsCount') }}
+          {{ t('gear.container.itemsCountLabel') }}
         </div>
         <div class="text-2xl font-bold">
           {{ itemsCount }}

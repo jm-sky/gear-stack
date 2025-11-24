@@ -179,7 +179,7 @@ const handleContainerClick = (containerId: string) => {
                 </span>
               </div>
               <div class="text-sm text-muted-foreground">
-                {{ container.items.length }} {{ t('gear.container.itemsCount') }}
+                {{ t('gear.container.itemsCount', { count: container.items.length }) }}
               </div>
             </CardContent>
           </Card>

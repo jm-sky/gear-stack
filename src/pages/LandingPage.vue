@@ -3,12 +3,16 @@ import { BackpackIcon, LogIn, Plus, UserPlus } from 'lucide-vue-next'
 import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
 import AppFooter from '@/components/layout/AppFooter.vue'
+import LandingPageContainerCard from '@/components/layout/LandingPageContainerCard.vue'
 import { Button } from '@/components/ui/button'
-import { AuthRouteNames } from '@/modules/auth/config/routes'
+import ButtonLink from '@/components/ui/button-link/ButtonLink.vue'
+import { AuthRoutePaths } from '@/modules/auth/config/routes'
 import { useAuthStore } from '@/modules/auth/store/useAuthStore'
-import { GearRouteName } from '@/modules/gear/routes'
+import { GearRouteName, GearRoutePath } from '@/modules/gear/routes'
 import { hasLocalData } from '@/modules/gear/services/dataMigrationService'
+import { generateSampleSet } from '@/modules/gear/services/sampleSetGenerator'
 import { useGearStore } from '@/modules/gear/store/useGearStore'
 import { READINESS_EXCELLENT_THRESHOLD } from '@/modules/gear/utils/constants'
 import DarkModeToggle from '@/shared/components/DarkModeToggle.vue'
@@ -55,16 +59,15 @@ const readyContainersCount = computed(() => {
   }).length
 })
 
-const handleLogin = () => {
-  router.push({ name: AuthRouteNames.login })
-}
-
-const handleRegister = () => {
-  router.push({ name: AuthRouteNames.register })
-}
-
-const handleCreateContainer = () => {
-  router.push({ name: GearRouteName.ContainerNew })
+const handleGenerateSampleSet = () => {
+  try {
+    generateSampleSet(t)
+    toast.success(t('gear.sampleSet.success'))
+    router.push({ name: GearRouteName.Containers })
+  } catch (error) {
+    console.error('Error generating sample set:', error)
+    toast.error(t('common.error'))
+  }
 }
 
 // If backend is disabled, redirect to home (offline mode)
@@ -115,47 +118,41 @@ if (!config.backend.enabled) {
 
             <!-- Container Stats -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div class="bg-background rounded-lg border p-4 text-center">
-                <div class="text-3xl font-bold text-primary mb-2">
-                  {{ containersCount }}
-                </div>
-                <div class="text-muted-foreground text-sm">
-                  {{ t('gear.page.containers', 'Containers') }}
-                </div>
-              </div>
-              <div class="bg-background rounded-lg border p-4 text-center">
-                <div class="text-3xl font-bold text-primary mb-2">
-                  {{ itemsCount }}
-                </div>
-                <div class="text-muted-foreground text-sm">
-                  {{ t('gear.page.items', 'Items') }}
-                </div>
-              </div>
-              <div class="bg-background rounded-lg border p-4 text-center">
-                <div class="text-3xl font-bold text-primary mb-2">
-                  {{ readyContainersCount }}
-                </div>
-                <div class="text-muted-foreground text-sm">
-                  {{ t('gear.page.readyContainers', 'Ready Containers') }}
-                </div>
-              </div>
+              <LandingPageContainerCard
+                :to="GearRoutePath.Containers"
+                :label="t('gear.page.containers', 'Containers')"
+                :containers-count="containersCount"
+              />
+              <LandingPageContainerCard
+                :to="GearRoutePath.AllItems"
+                :label="t('gear.page.items', 'Items')"
+                :containers-count="itemsCount"
+              />
+              <LandingPageContainerCard
+                :to="GearRoutePath.Containers"
+                :label="t('gear.page.readyContainers', 'Ready Containers')"
+                :containers-count="readyContainersCount"
+              />
             </div>
 
             <!-- Login/Register CTA -->
             <div class="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
-              <Button size="lg" class="w-full sm:w-auto" @click="handleLogin">
-                <LogIn class="size-5 mr-2" />
+              <ButtonLink size="lg" class="w-full sm:w-auto" :to="AuthRoutePaths.login">
+                <LogIn class="size-5" />
                 {{ t('landing.login', 'Log In') }}
-              </Button>
-              <Button
+              </ButtonLink>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+              <ButtonLink
                 size="lg"
                 variant="outline"
                 class="w-full sm:w-auto"
-                @click="handleRegister"
+                :to="AuthRoutePaths.register"
               >
-                <UserPlus class="size-5 mr-2" />
+                <UserPlus class="size-5" />
                 {{ t('landing.register', 'Sign Up') }}
-              </Button>
+              </ButtonLink>
             </div>
           </div>
         </div>
@@ -189,29 +186,45 @@ if (!config.backend.enabled) {
         </div>
 
         <!-- CTA Buttons (shown when no local containers) -->
-        <div v-if="!hasLocalContainers" class="flex flex-col sm:flex-row gap-4 justify-center items-center pt-8">
-          <Button size="lg" class="w-full sm:w-auto" @click="handleCreateContainer">
-            <Plus class="size-5 mr-2" />
-            {{ t('gear.container.create.title', 'Add Container') }}
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            class="w-full sm:w-auto"
-            @click="handleLogin"
-          >
-            <LogIn class="size-5 mr-2" />
-            {{ t('landing.login', 'Log In') }}
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            class="w-full sm:w-auto"
-            @click="handleRegister"
-          >
-            <UserPlus class="size-5 mr-2" />
-            {{ t('landing.register', 'Sign Up') }}
-          </Button>
+        <div v-if="!hasLocalContainers" class="flex flex-col gap-4 md:gap-8 justify-center items-center pt-4">
+          <div class="flex flex-col md:flex-row gap-4">
+            <ButtonLink
+              size="lg"
+              class="w-full sm:w-auto"
+              :to="GearRoutePath.ContainerNew"
+            >
+              <Plus class="size-5" />
+              {{ t('gear.container.create.title', 'Add Container') }}
+            </ButtonLink>
+            <Button
+              size="lg"
+              variant="outline"
+              class="flex-1"
+              @click="handleGenerateSampleSet"
+            >
+              {{ t('gear.sampleSet.generateButton', 'Generate Sample Set') }}
+            </Button>
+          </div>
+          <div class="flex flex-col md:flex-row gap-4">
+            <ButtonLink
+              size="lg"
+              variant="outline"
+              class="w-full sm:w-auto"
+              :to="AuthRoutePaths.login"
+            >
+              <LogIn class="size-5" />
+              {{ t('landing.login', 'Log In') }}
+            </ButtonLink>
+            <ButtonLink
+              size="lg"
+              variant="outline"
+              class="w-full sm:w-auto"
+              :to="AuthRoutePaths.register"
+            >
+              <UserPlus class="size-5" />
+              {{ t('landing.register', 'Sign Up') }}
+            </ButtonLink>
+          </div>
         </div>
 
         <!-- Footer text -->

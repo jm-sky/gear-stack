@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { BackpackIcon, FileInput, Globe, Plus } from 'lucide-vue-next'
+import { BackpackIcon, FileInput, Globe, LogIn, Plus, UserPlus } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import { useAuth } from '@/modules/auth/composables/useAuth'
+import { AuthRouteNames } from '@/modules/auth/config/routes'
 import { useGear } from '@/modules/gear/composables/useGear'
 import { GearRoutePath } from '@/modules/gear/routes'
 import { gearContainerService } from '@/modules/gear/services/gearContainerService'
@@ -18,6 +20,7 @@ import type { IGearContainer } from '@/modules/gear/types/gear.types'
 const router = useRouter()
 const { t } = useI18n()
 const { containers } = useGear()
+const { isAuthenticated } = useAuth()
 
 const publicContainersCount = ref<number>(0)
 const isLoadingPublicContainers = ref(false)
@@ -73,6 +76,14 @@ const handleGoToPublicContainers = () => {
   router.push(GearRoutePath.PublicContainers)
 }
 
+const handleLogin = () => {
+  router.push({ name: AuthRouteNames.login })
+}
+
+const handleRegister = () => {
+  router.push({ name: AuthRouteNames.register })
+}
+
 const readyContainersCount = computed(() => {
   return containers.value.filter(c => {
     const ownedItems = c.items.filter(i => i.status === 'owned').length
@@ -102,14 +113,14 @@ const readyContainersCount = computed(() => {
 
       <!-- Quick Stats -->
       <div v-if="containers.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="bg-card rounded-lg border p-6 text-center">
+        <RouterLink :to="GearRoutePath.Containers" class="cursor-pointer bg-card rounded-lg border p-6 text-center hover:shadow-md transition-shadow">
           <div class="text-3xl font-bold text-primary mb-2">
             {{ containers.length }}
           </div>
           <div class="text-muted-foreground">
             {{ t('gear.page.containers', 'Containers') }}
           </div>
-        </div>
+        </RouterLink>
         <div class="bg-card rounded-lg border p-6 text-center">
           <div class="text-3xl font-bold text-primary mb-2">
             {{ containers.reduce((sum, c) => sum + c.items.length, 0) }}
@@ -143,15 +154,52 @@ const readyContainersCount = computed(() => {
 
       <!-- Actions -->
       <div class="flex flex-col items-center gap-4">
-        <div v-if="containers.length > 0" class="flex flex-col sm:flex-row gap-4">
-          <Button size="lg" @click="handleGoToGear">
+        <div v-if="containers.length > 0" class="flex flex-col items-center gap-4 w-full max-w-md">
+          <Button size="lg" class="w-full" @click="handleGoToGear">
             <BackpackIcon class="size-5" />
             {{ t('gear.page.viewContainers', 'View Containers') }}
           </Button>
-          <Button size="lg" variant="outline" @click="handleCreateContainer">
-            <Plus class="size-5" />
-            {{ t('gear.container.create.title', 'Create Container') }}
-          </Button>
+          <!-- Row 1: Create Container, Generate Sample Set -->
+          <div class="flex flex-col sm:flex-row gap-4 w-full">
+            <Button
+              size="lg"
+              variant="outline"
+              class="flex-1"
+              @click="handleCreateContainer"
+            >
+              <Plus class="size-5" />
+              {{ t('gear.container.create.title', 'Create Container') }}
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              class="flex-1"
+              @click="handleGenerateSampleSet"
+            >
+              {{ t('gear.sampleSet.generateButton', 'Generate Sample Set') }}
+            </Button>
+          </div>
+          <!-- Row 2: Login, Register (only if not authenticated) -->
+          <div v-if="!isAuthenticated && config.backend.enabled" class="flex flex-col sm:flex-row gap-4 w-full">
+            <Button
+              size="lg"
+              variant="outline"
+              class="flex-1"
+              @click="handleLogin"
+            >
+              <LogIn class="size-5" />
+              {{ t('auth.login', 'Log In') }}
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              class="flex-1"
+              @click="handleRegister"
+            >
+              <UserPlus class="size-5" />
+              {{ t('auth.register', 'Sign Up') }}
+            </Button>
+          </div>
         </div>
 
         <!-- Empty State -->
@@ -159,21 +207,57 @@ const readyContainersCount = computed(() => {
           <p class="text-muted-foreground mb-6">
             {{ t('gear.page.emptyDescription', 'Get started by creating your first gear container.') }}
           </p>
-          <div class="flex flex-col gap-4 items-center justify-center">
-            <Button size="lg" @click="handleCreateContainer">
-              <Plus class="size-5" />
-              {{ t('gear.container.create.title', 'Create Container') }}
-            </Button>
+          <div class="flex flex-col gap-4 items-center justify-center w-full">
+            <!-- Row 1: Create Container, Generate Sample Set -->
+            <div class="flex flex-col sm:flex-row gap-4 w-full">
+              <Button
+                size="lg"
+                class="flex-1"
+                @click="handleCreateContainer"
+              >
+                <Plus class="size-5" />
+                {{ t('gear.container.create.title', 'Create Container') }}
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                class="flex-1"
+                @click="handleGenerateSampleSet"
+              >
+                {{ t('gear.sampleSet.generateButton', 'Generate Sample Set') }}
+              </Button>
+            </div>
             <div class="flex items-center gap-2 text-muted-foreground">
               <span>{{ t('common.or', 'or') }}</span>
             </div>
-            <div class="flex flex-col md:flex-row gap-2 items-center justify-center">
-              <Button size="lg" variant="outline" @click="handleImport">
-                <FileInput class="size-5" />
-                {{ t('gear.import.fromMarkdown', 'Import from Markdown') }}
+            <Button
+              size="lg"
+              variant="outline"
+              class="w-full"
+              @click="handleImport"
+            >
+              <FileInput class="size-5" />
+              {{ t('gear.import.fromMarkdown', 'Import from Markdown') }}
+            </Button>
+            <!-- Row 2: Login, Register (only if not authenticated) -->
+            <div v-if="!isAuthenticated && config.backend.enabled" class="flex flex-col sm:flex-row gap-4 w-full mt-2">
+              <Button
+                size="lg"
+                variant="outline"
+                class="flex-1"
+                @click="handleLogin"
+              >
+                <LogIn class="size-5" />
+                {{ t('auth.login', 'Log In') }}
               </Button>
-              <Button size="lg" variant="outline" @click="handleGenerateSampleSet">
-                {{ t('gear.sampleSet.generateButton', 'Generate Sample Set') }}
+              <Button
+                size="lg"
+                variant="outline"
+                class="flex-1"
+                @click="handleRegister"
+              >
+                <UserPlus class="size-5" />
+                {{ t('auth.register', 'Sign Up') }}
               </Button>
             </div>
           </div>

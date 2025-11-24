@@ -13,7 +13,7 @@ export const routes: RouteRecordRaw[] = [
   {
     path: AuthRoutePaths.dashboard,
     name: AuthRouteNames.dashboard,
-    component: () => import('@/pages/HomePage.vue'),
+    component: () => import('@/pages/DashboardPage.vue'),
     meta: { layout: 'authenticated' },
   },
   {

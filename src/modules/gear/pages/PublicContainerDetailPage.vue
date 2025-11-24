@@ -1,18 +1,22 @@
 <script setup lang="ts">
-import { ArrowLeft, User } from 'lucide-vue-next'
+import { ArrowLeft, Clock } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
-import { apiClient } from '@/shared/services/apiClient'
+import { smallDateTime } from '@/shared/utils/smallDateTime'
 import type { IGearContainer } from '../types/gear.types'
 import CategoryPieChart from '../components/CategoryPieChart.vue'
 import ContainerReadinessProgressBar from '../components/ContainerReadinessProgressBar.vue'
 import ItemsTable from '../components/ItemsTable.vue'
+import PublicContainerAuthorBadge from '../components/PublicContainerAuthorBadge.vue'
+import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { useGearSettings } from '../composables/useGearSettings'
+import { publicContainersService } from '../services/publicContainersService'
 import { useGearStore } from '../store/useGearStore'
 import {
   calculateReadinessPercentageSync,
@@ -26,16 +30,18 @@ const { t } = useI18n()
 const { isAuthenticated } = useAuth()
 const store = useGearStore()
 const { settings: gearSettings } = useGearSettings()
+
 const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
 
 const containerId = route.params.id as string
 const container = ref<IGearContainer | null>(null)
 const isLoading = ref(true)
 
-onMounted(async () => {
+const { typeLabel } = useContainerTypeLabel(computed(() => container.value?.type ?? ''))
+
+const loadContainer = async () => {
   try {
-    const response = await apiClient.get<IGearContainer>(`/gear/public/containers/${containerId}`)
-    container.value = response.data
+    container.value = await publicContainersService.getPublicContainer(containerId)
     // Filter nested containers - only show items if nested container is public
     if (container.value) {
       container.value.items = container.value.items.filter(item => {
@@ -49,10 +55,15 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error('Failed to load public container:', error)
+    toast.error(t('common.error'))
     router.push('/gear/public')
   } finally {
     isLoading.value = false
   }
+}
+
+onMounted(async () => {
+  await loadContainer()
 })
 
 const items = computed<IGearContainer['items']>(() => container.value?.items ?? [])
@@ -90,41 +101,29 @@ const handleBack = () => {
         </Button>
 
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold mb-2 break-words">
+          <h1 class="text-2xl sm:text-3xl font-bold mb-2 wrap-break-word">
             {{ container.name }}
           </h1>
-          <p v-if="container.description" class="text-muted-foreground mb-3 text-sm sm:text-base break-words">
+          <p v-if="container.description" class="text-muted-foreground mb-3 text-sm sm:text-base wrap-break-word">
             {{ container.description }}
           </p>
           <div class="flex items-center gap-2 flex-wrap">
             <Badge variant="outline">
-              {{ container.type }}
+              {{ typeLabel }}
             </Badge>
-            <RouterLink
+            <PublicContainerAuthorBadge
               v-if="container.authorName && container.authorId && isAuthenticated"
-              :to="`/users/${container.authorId}/public`"
-            >
-              <Badge
-                v-tooltip.bottom="t('gear.publicContainers.author')"
-                variant="secondary"
-                class="cursor-pointer hover:bg-secondary/80"
-                :aria-label="t('gear.publicContainers.author')"
-              >
-                <User class="size-3 mr-1" />
-                {{ container.authorName }}
-              </Badge>
-            </RouterLink>
-            <Badge
-              v-else-if="container.authorName"
-              v-tooltip.bottom="t('gear.publicContainers.author')"
-              variant="secondary"
-              :aria-label="t('gear.publicContainers.author')"
-            >
-              <User class="size-3 mr-1" />
-              {{ container.authorName }}
-            </Badge>
+              :author-name="container.authorName"
+              :author-id="container.authorId"
+              as-link
+            />
+            <PublicContainerAuthorBadge
+              v-else-if="container.authorName && !isAuthenticated"
+              :author-name="container.authorName"
+            />
             <Badge variant="secondary" class="text-xs">
-              {{ $d(new Date(container.createdAt), 'short') }}
+              <Clock class="size-3" />
+              {{ smallDateTime(container.createdAt) }}
             </Badge>
           </div>
         </div>
@@ -134,7 +133,7 @@ const handleBack = () => {
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="bg-card rounded-lg border p-4">
           <div class="text-sm text-muted-foreground mb-1">
-            {{ t('gear.container.itemsCount') }}
+            {{ t('gear.container.itemsCountLabel') }}
           </div>
           <div class="text-2xl font-bold">
             {{ items.length }}

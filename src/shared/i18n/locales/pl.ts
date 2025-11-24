@@ -78,7 +78,7 @@ export default {
   auth: {
     login: 'Zaloguj się',
     logout: 'Wyloguj się',
-    register: 'Zarejestruj się',
+    register: 'Załóż konto',
     email: 'Email',
     password: 'Hasło',
     password_confirm: 'Potwierdź hasło',
@@ -218,7 +218,7 @@ export default {
       description: 'Bądź gotowy na każdą sytuację z dobrze przygotowanym zestawem sprzętu',
     },
     login: 'Zaloguj się',
-    register: 'Zarejestruj się',
+    register: 'Załóż konto',
     footer: 'Zacznij organizować swój sprzęt już dziś',
     localData: {
       title: 'Masz kontenery w przeglądarce',

@@ -10,7 +10,7 @@ export const userPl = {
       auth_required_title: 'Wymagane logowanie',
       auth_required_message: 'Zaloguj się aby korzystać z wszystkich funkcji aplikacji',
       login_button: 'Zaloguj się',
-      register_button: 'Zarejestruj się',
+      register_button: 'Załóż konto',
     },
     edit: {
       title: 'Edytuj Profil',

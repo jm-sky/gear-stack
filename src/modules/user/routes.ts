@@ -4,6 +4,7 @@ export const UserRoutePaths = {
   profile: import.meta.env.VITE_USER_PROFILE_PATH ?? '/profile',
   profileEdit: import.meta.env.VITE_USER_PROFILE_EDIT_PATH ?? '/profile/edit',
   publicUserProfile: import.meta.env.VITE_USER_PUBLIC_USER_PROFILE_PATH ?? '/users/:userId/public',
+  publicUserProfileById: (userId: string) => `/users/${userId}/public`,
 } as const
 
 export const UserRouteNames = {

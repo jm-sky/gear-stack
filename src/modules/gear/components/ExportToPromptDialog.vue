@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import type { IGearContainer } from '../types/gear.types'
-import { useGearSettings } from '../composables/useGearSettings'
+import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { useGearStore } from '../store/useGearStore'
 import { calculateTotalWeightSync } from '../utils/containerCalculations'
 import { exportContainersToPrompt, exportContainerToPrompt } from '../utils/exportToPrompt'
@@ -40,7 +40,6 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const store = useGearStore()
-const { customContainerTypes } = useGearSettings()
 const copied = ref(false)
 const isGuidelinesDialogOpen = ref(false)
 const showUuid = ref(true)
@@ -52,13 +51,7 @@ const showLegend = ref(true)
 const descriptionFormat = ref<'off' | 'inline' | 'newline'>('off')
 
 // Get container type label helper
-const getContainerTypeLabel = (typeValue: string): string => {
-  const customType = customContainerTypes.value.find(t => t.value === typeValue)
-  if (customType) {
-    return customType.value
-  }
-  return t(`gear.container.types.${typeValue}`)
-}
+const { getContainerTypeLabel } = useContainerTypeLabel()
 
 // Sync helpers for computed
 const getContainerById = (id: string): IGearContainer | undefined => {

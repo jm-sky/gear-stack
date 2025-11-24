@@ -19,11 +19,15 @@ export const GearRoutePath = {
   ShoppingPlanning: '/gear/shopping',
   ContainerNew: '/gear/new',
   ContainerDetail: '/gear/:id',
+  ContainerDetailById: (id: string) => `/gear/${id}`,
   ContainerEdit: '/gear/:id/edit',
+  ContainerEditById: (id: string) => `/gear/${id}/edit`,
   ItemNew: '/gear/:containerId/items/new',
   ItemEdit: '/gear/:containerId/items/:itemId/edit',
+  ItemEditById: (containerId: string, itemId: string) => `/gear/${containerId}/items/${itemId}/edit`,
   PublicContainers: '/gear/public',
   PublicContainerDetail: '/gear/public/:id',
+  PublicContainerDetailById: (id: string) => `/gear/public/${id}`,
 }
 
 export const gearRoutes: RouteRecordRaw[] = [

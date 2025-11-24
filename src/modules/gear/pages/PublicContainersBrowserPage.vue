@@ -1,37 +1,62 @@
 <script setup lang="ts">
-import { Package, User } from 'lucide-vue-next'
-import { onMounted, ref } from 'vue'
+import { refDebounced } from '@vueuse/core'
+import { Package } from 'lucide-vue-next'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink, useRouter } from 'vue-router'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { toast } from 'vue-sonner'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import { useAuth } from '@/modules/auth/composables/useAuth'
-import { apiClient } from '@/shared/services/apiClient'
 import type { IGearContainer } from '../types/gear.types'
-import ColorDot from '../components/ColorDot.vue'
+import ContainersFilters from '../components/ContainersFilters.vue'
+import PublicContainerCard from '../components/PublicContainerCard.vue'
+import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
+import { publicContainersService } from '../services/publicContainersService'
 
-const router = useRouter()
 const { t } = useI18n()
-const { isAuthenticated } = useAuth()
+const { getContainerTypeLabel } = useContainerTypeLabel()
 
 const containers = ref<IGearContainer[]>([])
-const isLoading = ref(true)
+const loading = ref(true)
 
-onMounted(async () => {
-  try {
-    const response = await apiClient.get<IGearContainer[]>('/gear/public/containers')
-    containers.value = response.data
-  } catch (error) {
-    console.error('Failed to load public containers:', error)
-  } finally {
-    isLoading.value = false
+// Search filter
+const searchQueryRaw = ref('')
+const searchQuery = refDebounced(searchQueryRaw, 300)
+
+// Filtered containers
+const filteredContainers = computed<IGearContainer[]>(() => {
+  if (!searchQuery.value.trim()) {
+    return containers.value
   }
+
+  const query = searchQuery.value.toLowerCase()
+  return containers.value.filter(container => {
+    return (
+      container.name.toLowerCase().includes(query) ||
+      container.description?.toLowerCase().includes(query) ||
+      getContainerTypeLabel(container.type).toLowerCase().includes(query) ||
+      container.authorName?.toLowerCase().includes(query)
+    )
+  })
 })
 
-const handleContainerClick = (containerId: string) => {
-  router.push(`/gear/public/${containerId}`)
+const loadContainers = async () => {
+  loading.value = true
+  try {
+    containers.value = await publicContainersService.getPublicContainers()
+  } catch (error) {
+    toast.error(t('common.error'))
+    console.error('Failed to load public containers:', error)
+  } finally {
+    loading.value = false
+  }
 }
+
+const handleRefresh = () => {
+  loadContainers()
+}
+
+onMounted(() => {
+  loadContainers()
+})
 </script>
 
 <template>
@@ -47,65 +72,25 @@ const handleContainerClick = (containerId: string) => {
         </p>
       </div>
 
+      <!-- Search and Filters -->
+      <ContainersFilters
+        v-model:search-query="searchQueryRaw"
+        :loading
+        @refresh="handleRefresh"
+      />
+
       <!-- Loading State -->
-      <div v-if="isLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div v-for="i in 6" :key="i" class="h-48 bg-muted rounded-lg animate-pulse" />
       </div>
 
       <!-- Containers Grid -->
-      <div v-else-if="containers.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card
-          v-for="container in containers"
+      <div v-else-if="filteredContainers.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <PublicContainerCard
+          v-for="container in filteredContainers"
           :key="container.id"
-          class="gap-1 hover:shadow-lg hover:bg-current/5 hover:scale-102 hover:-translate-y-1 transition-all duration-300 cursor-pointer"
-          @click="handleContainerClick(container.id)"
-        >
-          <CardHeader class="text-card-foreground">
-            <div class="flex items-center gap-2">
-              <ColorDot :color="container.color ?? undefined" />
-              <Package class="size-5" />
-              <CardTitle>{{ container.name }}</CardTitle>
-            </div>
-            <CardDescription v-if="container.description">
-              {{ container.description }}
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent class="flex flex-col gap-3 px-6 pb-4 text-card-foreground">
-            <div class="flex items-center gap-2 flex-wrap">
-              <Badge variant="outline">
-                {{ container.type }}
-              </Badge>
-              <RouterLink
-                v-if="container.authorName && container.authorId && isAuthenticated"
-                :to="`/users/${container.authorId}/public`"
-                @click.stop
-              >
-                <Badge
-                  v-tooltip.bottom="t('gear.publicContainers.author')"
-                  variant="secondary"
-                  class="cursor-pointer hover:bg-secondary/80"
-                  :aria-label="t('gear.publicContainers.author')"
-                >
-                  <User class="size-3 mr-1" />
-                  {{ container.authorName }}
-                </Badge>
-              </RouterLink>
-              <Badge
-                v-else-if="container.authorName"
-                v-tooltip.bottom="t('gear.publicContainers.author')"
-                variant="secondary"
-                :aria-label="t('gear.publicContainers.author')"
-              >
-                <User class="size-3 mr-1" />
-                {{ container.authorName }}
-              </Badge>
-            </div>
-            <div class="text-sm text-muted-foreground">
-              {{ container.items.length }} {{ t('gear.container.itemsCount') }}
-            </div>
-          </CardContent>
-        </Card>
+          :container
+        />
       </div>
 
       <!-- Empty State -->

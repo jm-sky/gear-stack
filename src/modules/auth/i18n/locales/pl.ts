@@ -2,7 +2,7 @@ export const authPl = {
   auth: {
     login: 'Zaloguj się',
     logout: 'Wyloguj się',
-    register: 'Zarejestruj się',
+    register: 'Załóż konto',
     email: 'Email',
     password: 'Hasło',
     password_confirm: 'Potwierdź hasło',
@@ -18,7 +18,7 @@ export const authPl = {
     already_have_account: 'Masz już konto?',
     dont_have_account: 'Nie masz konta?',
     sign_in: 'Zaloguj się',
-    sign_up: 'Zarejestruj się',
+    sign_up: 'Załóż konto',
     sign_in_to_account: 'Zaloguj się do swojego konta',
     create_account: 'Utwórz nowe konto',
     current_password: 'Obecne hasło',
@@ -48,7 +48,7 @@ export const authPl = {
       logging_in: 'Logowanie...',
       login_with_google: 'Kontynuuj z Google',
       no_account: 'Nie masz konta?',
-      sign_up_link: 'Zarejestruj się',
+      sign_up_link: 'Załóż konto',
     },
     form: {
       name: 'Imię i nazwisko',

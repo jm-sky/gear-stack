@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useFocus } from '@vueuse/core'
 import { nextTick, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import ComboBox from '@/components/ui/combo-box/ComboBox.vue'
@@ -16,11 +15,12 @@ import {
 } from '@/components/ui/select'
 import WeightInputWithUnitPicker from '@/components/ui/weight-input/WeightInputWithUnitPicker.vue'
 import type { IGearContainer } from '../types/gear.types'
+import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { useGearSettings } from '../composables/useGearSettings'
 import { COLOR_DOT_CLASSES, CONTAINER_COLORS } from '../utils/containerColors'
 import { getBrandOptions } from '../utils/suggestedValues'
 
-defineProps<{
+const _props = defineProps<{
   container?: IGearContainer
   loading?: boolean
 }>()
@@ -31,8 +31,8 @@ const emit = defineEmits<{
   recognizeParameters: []
 }>()
 
-const { t } = useI18n()
 const { customContainerTypes, customBrands } = useGearSettings()
+const { getContainerTypeLabel } = useContainerTypeLabel()
 
 // Auto-focus na pierwszym polu
 const nameInputRef = ref<HTMLInputElement | undefined>(undefined)
@@ -40,17 +40,6 @@ nextTick(() => {
   useFocus(nameInputRef)
 })
 
-// Get container type label helper
-const getContainerTypeLabel = (typeValue: string): string => {
-  // Check if it's a custom container type
-  const customType = customContainerTypes.value.find(t => t.value === typeValue)
-  if (customType) {
-    return customType.value
-  }
-
-  // Default types
-  return t(`gear.container.types.${typeValue}`)
-}
 
 // Cancel handler
 const handleCancel = () => {

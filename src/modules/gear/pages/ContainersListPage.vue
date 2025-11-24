@@ -14,8 +14,8 @@ import ContainersFilters from '../components/ContainersFilters.vue'
 import ContainersListPageDropdown from '../components/ContainersListPageDropdown.vue'
 import ExportToPromptDialog from '../components/ExportToPromptDialog.vue'
 import ImportMarkdownDialog from '../components/ImportMarkdownDialog.vue'
+import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { useGear } from '../composables/useGear'
-import { useGearSettings } from '../composables/useGearSettings'
 import { gearContainerService } from '../services/gearContainerService'
 import { generateSampleSet } from '../services/sampleSetGenerator'
 import { getRootContainers as getRootContainersUtil } from '../utils/containerNesting'
@@ -25,9 +25,10 @@ const router = useRouter()
 const route = useRoute()
 const { t } = useI18n()
 const { containers, deleteContainer } = useGear()
-const { customContainerTypes } = useGearSettings()
+const { getContainerTypeLabel } = useContainerTypeLabel()
 
 // Filters - using refs that will be bound to ContainersFilters via v-model
+const loading = ref(false)
 const searchQueryRaw = ref('')
 const searchQuery = refDebounced(searchQueryRaw, 300)
 const showOnlyRootContainers = ref(false)
@@ -47,10 +48,13 @@ onMounted(async () => {
   // Load containers from API on mount (when backend is enabled)
   if (config.backend.enabled) {
     try {
+      loading.value = true
       await gearContainerService().getContainers()
     } catch (error) {
       console.error('Failed to load containers from API:', error)
       // Fallback to localStorage is handled by store initialization
+    } finally {
+      loading.value = false
     }
   }
 })
@@ -63,15 +67,6 @@ watch(() => route.query.import, (shouldImport) => {
     router.replace({ query: { ...route.query, import: undefined } })
   }
 })
-
-// Helper to get container type label for filtering
-const getContainerTypeLabel = (typeValue: string): string => {
-  const customType = customContainerTypes.value.find(t => t.value === typeValue)
-  if (customType) {
-    return customType.value
-  }
-  return t(`gear.container.types.${typeValue}`)
-}
 
 // Filtered containers
 const filteredContainers = computed<IGearContainer[]>(() => {
@@ -191,6 +186,8 @@ const handleGenerateSampleSet = async () => {
       <ContainersFilters
         v-model:search-query="searchQueryRaw"
         v-model:show-only-root-containers="showOnlyRootContainers"
+        root-containers-filter
+        :loading
       />
 
       <!-- Containers Grid -->

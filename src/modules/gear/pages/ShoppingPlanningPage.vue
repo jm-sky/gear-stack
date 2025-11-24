@@ -137,7 +137,7 @@ interface IItemWithContainerId extends IGearItem {
 // Get available items (toBuy + optionally expiring soon/expired) with container IDs
 const availableItems = computed<IItemWithContainerId[]>(() => {
   const items: IItemWithContainerId[] = []
-  
+
   containers.value.forEach(container => {
     container.items.forEach(item => {
       // Include items with status "toBuy"
@@ -150,7 +150,7 @@ const availableItems = computed<IItemWithContainerId[]>(() => {
       }
     })
   })
-  
+
   return items
 })
 
@@ -222,12 +222,12 @@ const priorityOrder: Record<TGearItemPriority, number> = {
 // Filtered and sorted items
 const filteredItems = computed<IItemWithContainerId[]>(() => {
   let items = [...availableItems.value]
-  
+
   // Filter by categories
   if (selectedCategories.value.length > 0) {
     items = items.filter(item => selectedCategories.value.includes(item.category))
   }
-  
+
   // Filter by budget (if set)
   if (budget.value !== null && budget.value > 0) {
     items = items.filter(item => {
@@ -236,12 +236,12 @@ const filteredItems = computed<IItemWithContainerId[]>(() => {
       return totalPrice <= budget.value!
     })
   }
-  
+
   // Sort by priority
   items.sort((a, b) => {
     return priorityOrder[a.priority] - priorityOrder[b.priority]
   })
-  
+
   return items
 })
 
@@ -374,12 +374,12 @@ const addAllToShoppingList = () => {
 const generateMarkdown = (): string => {
   // Filter shopping list items by current filters
   let itemsToExport = [...shoppingList.value]
-  
+
   // Apply category filter
   if (selectedCategories.value.length > 0) {
     itemsToExport = itemsToExport.filter(item => selectedCategories.value.includes(item.category))
   }
-  
+
   // Apply budget filter
   if (budget.value !== null && budget.value > 0) {
     itemsToExport = itemsToExport.filter(item => {
@@ -388,14 +388,14 @@ const generateMarkdown = (): string => {
       return totalPrice <= budget.value!
     })
   }
-  
+
   if (itemsToExport.length === 0) {
     return t('gear.shopping.emptyList', 'Shopping list is empty')
   }
-  
+
   let markdown = `# ${t('gear.shopping.title', 'Shopping List')}\n\n`
   markdown += `${t('gear.shopping.generatedAt', 'Generated at')}: ${new Date().toLocaleString()}\n\n`
-  
+
   // Group by priority
   const byPriority: Record<TGearItemPriority, IGearItem[]> = {
     critical: [],
@@ -403,11 +403,11 @@ const generateMarkdown = (): string => {
     medium: [],
     low: [],
   }
-  
+
   itemsToExport.forEach(item => {
     byPriority[item.priority].push(item)
   })
-  
+
   // Output by priority
   Object.entries(byPriority).forEach(([priority, items]) => {
     if (items.length > 0) {
@@ -418,22 +418,22 @@ const generateMarkdown = (): string => {
         const quantity = item.quantity > 1 ? ` x${item.quantity}` : ''
         const brand = item.brand ? ` **${item.brand}**` : ''
         const expiration = item.expirationDate ? ` (${t('gear.item.expiration.expiringSoon')}: ${new Date(item.expirationDate).toLocaleDateString()})` : ''
-        
+
         markdown += `- ${item.name}${brand}${quantity}${price}${expiration} [${categoryLabel}]\n`
       })
       markdown += '\n'
     }
   })
-  
+
   const exportTotalPrice = itemsToExport.reduce((sum, item) => {
     const itemPrice = item.price ?? 0
     return sum + (itemPrice * item.quantity)
   }, 0)
-  
+
   if (exportTotalPrice > 0) {
     markdown += `\n**${t('gear.shopping.totalPrice', 'Total')}**: ${exportTotalPrice.toFixed(2)} ${t('gear.shopping.currency', 'PLN')}\n`
   }
-  
+
   return markdown
 }
 
@@ -475,7 +475,7 @@ const onAddItemSubmit = handleAddItemSubmit(async (data: ICreateItemDto) => {
     toast.error(t('gear.shopping.noContainer', 'No container available'))
     return
   }
-  
+
   try {
     const newItem = await createItem(firstContainerId.value, data)
     // Add to shopping list
@@ -494,7 +494,7 @@ const onAddItemSubmit = handleAddItemSubmit(async (data: ICreateItemDto) => {
 // This ensures items in shopping list are up-to-date with container data
 function syncShoppingListWithContainers() {
   const updatedList: IItemWithContainerId[] = []
-  
+
   shoppingList.value.forEach(shoppingItem => {
     // Find the item in current containers
     let found = false
@@ -506,21 +506,21 @@ function syncShoppingListWithContainers() {
         found = true
       }
     })
-    
+
     // If item not found in containers, it might have been deleted
     // We keep it in the list for now, but it will be filtered out
     if (!found) {
       updatedList.push(shoppingItem)
     }
   })
-  
+
   shoppingList.value = updatedList
 }
 
 // Sync deleted items with current container data
 function syncDeletedItemsWithContainers() {
   const updatedDeleted: IItemWithContainerId[] = []
-  
+
   deletedItems.value.forEach(deletedItem => {
     // Find the item in current containers
     let found = false
@@ -532,13 +532,13 @@ function syncDeletedItemsWithContainers() {
         found = true
       }
     })
-    
+
     // If item not found, keep it as is
     if (!found) {
       updatedDeleted.push(deletedItem)
     }
   })
-  
+
   deletedItems.value = updatedDeleted
 }
 
@@ -555,7 +555,7 @@ onMounted(() => {
     // Clear the query param
     router.replace({ query: {} })
   }
-  
+
   // Sync shopping list with current container data on mount
   syncShoppingListWithContainers()
   syncDeletedItemsWithContainers()
@@ -628,9 +628,9 @@ onMounted(() => {
         <h3 class="font-semibold text-sm">
           {{ t('gear.shopping.filters', 'Filters') }}
         </h3>
-        
+
         <!-- Categories filter -->
-        <div class="space-y-2">
+        <div v-if="allCategories.length > 0" class="space-y-2">
           <Label class="text-sm">{{ t('gear.shopping.filterByCategory', 'Filter by Category') }}</Label>
           <div class="flex flex-wrap gap-2">
             <div
@@ -712,7 +712,7 @@ onMounted(() => {
             {{ t('gear.shopping.clearList', 'Clear List') }}
           </Button>
         </div>
-        
+
         <div class="space-y-2">
           <div
             v-for="item in shoppingList"
@@ -831,7 +831,7 @@ onMounted(() => {
             {{ t('gear.shopping.addAll', 'Add All') }}
           </Button>
         </div>
-        
+
         <div class="space-y-2">
           <div
             v-if="filteredItems.length === 0"
@@ -844,7 +844,7 @@ onMounted(() => {
               {{ t('gear.shopping.noItemsDescription', 'Try adjusting your filters') }}
             </p>
           </div>
-          
+
           <div
             v-for="item in filteredItems"
             :key="item.id"
@@ -950,7 +950,7 @@ onMounted(() => {
         <h2 class="text-xl font-semibold text-muted-foreground">
           {{ t('gear.shopping.deletedItems', 'Deleted Items') }}
         </h2>
-        
+
         <div class="space-y-2">
           <div
             v-for="item in deletedItems"
