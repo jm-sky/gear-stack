@@ -1,9 +1,19 @@
-# Roadmap V2 - Gear Stack (Backend/DB/Auth Required)
+# Roadmap Online - Gear Stack
 
-Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub autoryzacji użytkowników.
+<!-- 
+AI_METADATA:
+- Type: Online roadmap (backend/cloud-dependent)
+- Requirements: Backend, PostgreSQL, user authentication required
+- Status: Active development (auth features completed)
+- Related: See ROADMAP_OFFLINE.md for offline/localStorage features
+- Total Features: ~30+ features
+-->
+
+Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub autoryzacji użytkowników (online/cloud features).
 
 > 📋 **Zobacz też:** 
-> - [ROADMAP.md](./ROADMAP.md) - funkcjonalności front-end only (localStorage)
+> - [ROADMAP.md](./ROADMAP.md) - główny indeks roadmap
+> - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md) - funkcjonalności offline (localStorage)
 > - [Features Implementation Plans](./features/README.md) - szczegółowe plany implementacji
 
 ---

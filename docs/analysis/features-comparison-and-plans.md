@@ -2,14 +2,14 @@
 
 > 📋 **Zobacz też:**
 > - [ROADMAP.md](./ROADMAP.md) - funkcjonalności front-end only (localStorage)
-> - [ROADMAP_V2.md](./ROADMAP_V2.md) - funkcjonalności wymagające backendu/DB/auth
+> - [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md) - funkcjonalności wymagające backendu/DB/auth
 
 Legenda:
 - **[=]** – funkcjonalność pokrywa się z LighterPack  
 - **[≠]** – funkcjonalność jest, ale działa inaczej niż w LighterPack  
 - **[+]** – nowość w Waszej aplikacji (LighterPack tego nie ma)  
 - **[→]** – funkcjonalność planowana  
-- **[🔐]** – wymaga backendu/DB/auth (zobacz [ROADMAP_V2.md](./ROADMAP_V2.md))
+- **[🔐]** – wymaga backendu/DB/auth (zobacz [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md))
 
 ---
 

@@ -733,7 +733,7 @@ export function useIsAdmin() {
 
 ## 🔗 Related Documentation
 
-- [ROADMAP_V2.md](../ROADMAP_V2.md) - Backend features roadmap
+- [ROADMAP_ONLINE.md](../ROADMAP_ONLINE.md) - Online/backend features roadmap
 - [FEATURE-012](./FEATURE-012-add-existing-items.md) - Add existing items (similar UI patterns)
 - [FEATURE-013](./FEATURE-013-item-descriptions.md) - Item descriptions (form enhancements)
 - Backend auth module: `backend/app/modules/auth/`

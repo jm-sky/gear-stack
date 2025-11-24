@@ -191,42 +191,49 @@ Gear Stack is a full-stack application designed for outdoor enthusiasts, prepper
 ### 🔄 Planned Features
 
 #### High Priority
-- **All Items List Page** - Dedicated page showing all items from all containers with filtering and sorting [✅ Done]
-- **Inline Editing** - Quick edit items directly in the list without opening forms
-- **Item Ordering** - Manual drag & drop reordering of items within containers
+- ✅ **All Items List Page** - Dedicated page showing all items from all containers with filtering and sorting
+- ✅ **Shopping Planning Page** - Page for managing items to buy and expiring soon, with shopping list functionality
+- ✅ **Container Cloning** - Duplicate containers with all items and nested containers
+- ✅ **Add Existing Items** - Add items from other containers using catalog selector
+- 🔄 **Inline Editing** - Quick edit items directly in the list without opening forms
+- 🔄 **Item Ordering** - Manual drag & drop reordering of items within containers
 
 #### Medium Priority
-- **Preferred Weight Unit** - User setting to display all weights in grams or kilograms consistently ✅
-- **Extended Fields** - Additional fields for items (price, URL, quality tier, brand, color) ✅
-- **Extended Container Fields** - Brand and price fields for containers ✅
+- ✅ **Preferred Weight Unit** - User setting to display all weights in grams or kilograms consistently
+- ✅ **Extended Fields** - Additional fields for items (price, URL, quality tier, brand, color)
+- ✅ **Extended Container Fields** - Brand and price fields for containers
+- ✅ **Max Weight Limit** - Set maximum weight for containers with visual warnings
+- ✅ **Parameter Recognition** - Automatic recognition of brand and color from item names
+- ✅ **404 Page** - User-friendly not found page with navigation suggestions
 
 #### Low Priority
-- **Brand Color Selection** - Choose primary brand color (coyote, olive, or other survival/outdoor themes) ✅
-- **Footer & Legal Pages** - Cookie information, RODO compliance, privacy policy ✅
+- ⏸️ **Brand Color Selection** - Choose primary brand color (on hold - current color is satisfactory)
+- ✅ **Footer & Legal Pages** - Cookie information, RODO compliance, privacy policy
 
 ### 🔮 Future Roadmap
 
-**High Priority:**
-- Container sharing between users with permission levels
-- Public container gallery and community templates
-- Advanced search with filters across all items
-- Data versioning and change history
+**Frontend Features (see [ROADMAP.md](./docs/ROADMAP.md)):**
+- Inline editing of items directly in lists
+- Drag & drop item ordering
+- Custom brand management
+- Currency support
+- Markdown support in notes
+- Integrated weight input with unit picker
 
-**Medium Priority:**
-- Progressive Web App (PWA) for mobile installation
-- Global item catalog with autocomplete ✅ (or partially done) 
-- Custom category and brand management
-- Advanced statistics and reports
-
-**Low Priority:**
-- AI-powered gear suggestions based on activity/weather
-- Automatic image search for items
-- SVG visualization of pack contents
+**Backend Features (see [ROADMAP_ONLINE.md](./docs/ROADMAP_ONLINE.md)):**
+- ✅ User authentication (OAuth, 2FA, reCAPTCHA) - Completed
+- Multi-device synchronization
+- Container sharing between users
+- Public container gallery
+- Global item catalog
+- Progressive Web App (PWA)
+- AI-powered features
 - Item photo uploads (requires S3 storage)
 
 > 📋 **See also:**
-> - [ROADMAP.md](./docs/ROADMAP.md) - Frontend-only features
-> - [ROADMAP_V2.md](./docs/ROADMAP_V2.md) - Backend-dependent features
+> - [ROADMAP.md](./docs/ROADMAP.md) - 📍 Roadmap index (start here)
+> - [ROADMAP_OFFLINE.md](./docs/ROADMAP_OFFLINE.md) - Offline features (localStorage)
+> - [ROADMAP_ONLINE.md](./docs/ROADMAP_ONLINE.md) - Online features (backend/DB/auth)
 > - [Features Documentation](./docs/features/) - Detailed implementation plans
 
 ---
@@ -315,8 +322,9 @@ gear-stack/
 │   └── migrations/           # Database migrations
 ├── docs/                     # Documentation
 │   ├── features/             # Feature implementation plans
-│   ├── ROADMAP.md            # Frontend roadmap
-│   └── ROADMAP_V2.md         # Backend roadmap
+│   ├── ROADMAP.md            # Roadmap index (entry point)
+│   ├── ROADMAP_OFFLINE.md    # Offline features (localStorage)
+│   └── ROADMAP_ONLINE.md     # Online features (backend/DB/auth)
 └── docker-compose.yml        # Docker configuration
 ```
 

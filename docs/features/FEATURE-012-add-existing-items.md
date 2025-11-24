@@ -3,7 +3,7 @@
 **Status:** ✅ Completed (v0.22.0)  
 **Priority:** High  
 **Category:** ⚡ Item Addition Improvements  
-**Related:** ROADMAP.md - Dodawanie istniejących przedmiotów do kontenera, ROADMAP_V2.md - Linkowanie przedmiotów
+**Related:** ROADMAP_OFFLINE.md - Dodawanie istniejących przedmiotów do kontenera, ROADMAP_ONLINE.md - Linkowanie przedmiotów
 
 ---
 
@@ -316,13 +316,13 @@ When backend is implemented with full linking:
 - **Default values (FEATURE-004)** - Pre-filled form uses defaults when creating from catalog
 - **Category recognition (FEATURE-005)** - Category icons shown in ComboBox
 - **Quick edit (FEATURE-007)** - Different workflow for inline editing
-- **Item linking (ROADMAP_V2)** - Full linking implementation with backend
+- **Item linking (ROADMAP_ONLINE)** - Full linking implementation with backend
 
 ---
 
 ## 🚀 Future Enhancements
 
-### Backend Integration (ROADMAP_V2)
+### Backend Integration (ROADMAP_ONLINE)
 
 When backend is implemented:
 

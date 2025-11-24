@@ -290,7 +290,7 @@ async loadContainers(): Promise<void> {
 ## 📚 Zasoby
 
 - [BACKEND_INTEGRATION.md](./BACKEND_INTEGRATION.md) - Podstawowa infrastruktura
-- [ROADMAP_V2.md](./ROADMAP_V2.md) - Funkcjonalności wymagające backendu
+- [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md) - Funkcjonalności wymagające backendu
 - Backend API docs: `backend/README.md`
 - Frontend services: `src/modules/gear/services/`
 
