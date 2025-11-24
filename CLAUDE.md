@@ -211,3 +211,24 @@ const checked = ref(true)
 - `v-model:checked` only works with `defineModel()` (as in `ContainersFilters.vue`)
 - For regular `ref`, use standard `v-model`
 - Checkbox in Reka-ui uses `modelValue` and `@update:model-value` under the hood
+
+## TailwindCSS Best Practices
+
+**Sizing:**
+- Prefer `size-{value}` utility class instead of separate `w-{value} h-{value}` when width and height are the same
+- ✅ **Correct:** `size-4`, `size-8`, `size-12`
+- ❌ **Avoid:** `w-4 h-4`, `w-8 h-8`, `w-12 h-12`
+
+**Button Component Spacing:**
+- The Button component already includes `flex` and `gap-2` classes
+- Icons inside buttons do **NOT** need `mr-2` or similar margin utilities
+- ✅ **Correct:** `<Button><Icon />Label</Button>` (gap handled automatically)
+- ❌ **Avoid:** `<Button><Icon class="mr-2" />Label</Button>`
+
+## Responsive Design
+
+**Always consider mobile-first responsive design:**
+- Start with mobile styles (base classes)
+- Add desktop variants using Tailwind breakpoint prefixes (eg. `sm:`)
+- Example: `text-sm sm:text-base lg:text-lg` (small on mobile, base on tablet, large on desktop)
+- Consider spacing, typography, layout, and visibility across breakpoints
