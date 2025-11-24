@@ -55,9 +55,15 @@ const initials = computed(() => {
     <div class="space-y-6">
       <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div class="space-y-1">
-          <h1 class="text-3xl font-bold tracking-tight">
-            {{ t('user.profile.title') }}
-          </h1>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="text-3xl font-bold tracking-tight">
+              {{ t('user.profile.title') }}
+            </h1>
+            <Badge v-if="profile?.isAdmin" variant="default" class="gap-1">
+              <Shield class="size-3" />
+              {{ t('user.profile.admin_badge', 'Admin') }}
+            </Badge>
+          </div>
           <p class="text-sm text-muted-foreground">
             {{ t('user.profile.subtitle') }}
           </p>
