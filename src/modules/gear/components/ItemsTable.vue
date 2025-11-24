@@ -10,6 +10,7 @@ import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
 import { ITEMS_TABLE_COLUMN_VISIBILITY_KEY } from '@/shared/config/config'
 import type { IGearItem } from '../types/gear.types'
 import { useGearSettings } from '../composables/useGearSettings'
+import { GearRoutePath } from '../routes'
 import { useGearStore } from '../store/useGearStore'
 import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 import { EXPIRATION_WARNING_DAYS } from '../utils/constants'
@@ -27,9 +28,13 @@ const props = withDefaults(
   defineProps<{
     items: IGearItem[]
     loading?: boolean
+    publicMode?: boolean
+    containerId?: string
   }>(),
   {
     loading: false,
+    publicMode: false,
+    containerId: undefined,
   },
 )
 
@@ -138,7 +143,20 @@ function isNestedContainer(item: IGearItem): boolean {
 // Navigate to nested container
 function navigateToNestedContainer(item: IGearItem) {
   if (item.containerId) {
-    router.push(`/gear/${item.containerId}`)
+    if (props.publicMode) {
+      router.push(GearRoutePath.PublicContainerDetailById(item.containerId))
+    } else {
+      router.push(GearRoutePath.ContainerDetailById(item.containerId))
+    }
+  }
+}
+
+// Navigate to item (public or edit)
+function navigateToItem(item: IGearItem) {
+  if (props.publicMode && props.containerId) {
+    router.push(GearRoutePath.PublicItemDetailById(props.containerId, item.id))
+  } else {
+    emit('edit', item)
   }
 }
 
@@ -217,7 +235,7 @@ function calculateTotalWeight(containerId: string): number {
           </span>
         </template>
 
-        <span v-else class="cursor-pointer hover:text-primary transition-colors" @click="emit('edit', row.original)">
+        <span v-else class="cursor-pointer hover:text-primary transition-colors" @click="navigateToItem(row.original)">
           {{ row.original.name }}
         </span>
 
@@ -307,6 +325,7 @@ function calculateTotalWeight(containerId: string): number {
 
     <template #actions="{ row }">
       <ItemsTableRowActions
+        v-if="!publicMode"
         :row="row.original"
         @edit="emit('edit', row.original)"
         @delete="emit('delete', row.original)"

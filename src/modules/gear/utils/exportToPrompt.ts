@@ -270,17 +270,17 @@ function formatNestedContainer(
   const containerId = generateContainerId(container.name)
   const containerIdPart = options.showNestedContainer !== false ? ` [${containerId}]` : ''
   const uuidPart = options.showUuid !== false ? ` [uuid:${container.id}]` : ''
-  
+
   // Build container header parts
   const headerParts: string[] = [`${indentStr}## ${container.name}${containerIdPart}${uuidPart} (${typeLabel})`]
-  
+
   // Add price to header if enabled
   if (options.showPrices && container.price) {
     const currency = getCurrency(container.currency, defaultCurrency)
     const formattedPrice = formatCurrency(container.price, currency)
     headerParts.push(`- ${formattedPrice}`)
   }
-  
+
   lines.push(headerParts.join(' '))
 
   // Container items
@@ -304,14 +304,14 @@ function generateToBuySummary(
   defaultCurrency: string = 'PLN',
 ): string {
   const { t } = options
-  
+
   const toBuyItems: Array<{
     name: string
     price: number
     quantity: number
     currency: string
   }> = []
-  
+
   containers.forEach(container => {
     container.items
       .filter(item => item.status === 'toBuy' && item.price)
@@ -324,11 +324,11 @@ function generateToBuySummary(
         })
       })
   })
-  
+
   if (toBuyItems.length === 0) {
     return ''
   }
-  
+
   // Group by currency
   const byCurrency = new Map<string, typeof toBuyItems>()
   toBuyItems.forEach(item => {
@@ -336,19 +336,19 @@ function generateToBuySummary(
     existing.push(item)
     byCurrency.set(item.currency, existing)
   })
-  
+
   // Generate summary
   const toBuyTitle = t ? t('gear.export.toBuyTitle', 'To Buy') : 'To Buy'
   const toBuyTotalCost = t ? t('gear.export.toBuyTotalCost', 'Total Cost') : 'Total Cost'
   const toBuyItemsToPurchase = t ? t('gear.export.toBuyItemsToPurchase', 'Items to purchase') : 'Items to purchase'
-  
+
   let summary = '\n---\n\n'
   summary += `## ${toBuyTitle}\n\n`
-  
+
   byCurrency.forEach((items, currency) => {
     const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
     const formattedTotal = formatCurrency(total, currency)
-    
+
     summary += `**${toBuyTotalCost} (${currency}):** ${formattedTotal}\n\n`
     summary += `${toBuyItemsToPurchase}:\n`
     items.forEach(item => {
@@ -358,7 +358,7 @@ function generateToBuySummary(
     })
     summary += '\n'
   })
-  
+
   return summary
 }
 

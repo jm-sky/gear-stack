@@ -21,6 +21,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.7.0] - 2025-01-21
+
+### Added
+- **Public Item Detail Page**: Added read-only public item detail page (`PublicItemDetailPage.vue`)
+  - Public route `/gear/public/:containerId/items/:itemId` for viewing public items
+  - Displays all item information including category, priority, status, weight, price, and extended fields
+  - Visual indicators for expired and expiring items
+  - Empty state placeholder when no additional details are available
+- **ItemsTable Public Mode**: Enhanced `ItemsTable` component with public mode support
+  - New `publicMode` prop to enable public viewing mode
+  - New `containerId` prop for navigation in public mode
+  - Clicking items in public mode navigates to public item detail page instead of edit page
+  - Actions column hidden in public mode (read-only)
+  - Navigation to nested containers uses public routes in public mode
+- **i18n Translations**: Added translations for public item detail page (EN/PL)
+  - `gear.item.details` - Details section title
+  - `gear.item.openLink` - Open link button text
+  - `gear.item.noDetails` - Empty state message
+
+### Changed
+- **PublicContainerDetailPage**: Updated to pass `publicMode` and `containerId` props to `ItemsTable`
+- **Routes**: Added `PublicItemDetail` route and helper function `PublicItemDetailById()`
+
+---
+
 ## [2.6.0] - 2025-01-21
 
 ### Added

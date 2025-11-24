@@ -163,6 +163,8 @@ const handleBack = () => {
       <!-- Items Table (read-only - no edit/delete actions) -->
       <ItemsTable
         :items="items"
+        :public-mode="true"
+        :container-id="containerId"
       />
 
       <!-- Category Pie Chart -->

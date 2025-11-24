@@ -11,6 +11,7 @@ export const GearRouteName = {
   ItemEdit: 'gear-item-edit',
   PublicContainers: 'gear-public-containers',
   PublicContainerDetail: 'gear-public-container-detail',
+  PublicItemDetail: 'gear-public-item-detail',
 }
 
 export const GearRoutePath = {
@@ -28,6 +29,8 @@ export const GearRoutePath = {
   PublicContainers: '/gear/public',
   PublicContainerDetail: '/gear/public/:id',
   PublicContainerDetailById: (id: string) => `/gear/public/${id}`,
+  PublicItemDetail: '/gear/public/:containerId/items/:itemId',
+  PublicItemDetailById: (containerId: string, itemId: string) => `/gear/public/${containerId}/items/${itemId}`,
 }
 
 export const gearRoutes: RouteRecordRaw[] = [
@@ -96,6 +99,12 @@ export const gearRoutes: RouteRecordRaw[] = [
     path: GearRoutePath.PublicContainerDetail,
     name: GearRouteName.PublicContainerDetail,
     component: () => import('@/modules/gear/pages/PublicContainerDetailPage.vue'),
+    meta: { layout: 'authenticated' },
+  },
+  {
+    path: GearRoutePath.PublicItemDetail,
+    name: GearRouteName.PublicItemDetail,
+    component: () => import('@/modules/gear/pages/PublicItemDetailPage.vue'),
     meta: { layout: 'authenticated' },
   },
 ]

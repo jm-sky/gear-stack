@@ -109,6 +109,7 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - ✅ Publiczny link do kontenera (`/gear/public/:id`)
 - ✅ Przeglądarka publicznych kontenerów (`PublicContainersBrowserPage`)
 - ✅ Strona szczegółów publicznego kontenera (`PublicContainerDetailPage`)
+- ✅ Publiczna strona szczegółów przedmiotu (`PublicItemDetailPage`)
 - ✅ Pole `isPublic` w formularzu kontenera
 - ✅ Domyślna widoczność w ustawieniach użytkownika
 - 🔄 Udostępnianie nie-publicznych kontenerów przez token w query params - planowane
