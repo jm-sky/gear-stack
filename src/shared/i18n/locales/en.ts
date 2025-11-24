@@ -226,6 +226,12 @@ export default {
       title: 'You have containers in your browser',
       description: 'Log in or register to synchronize your data',
     },
+    stats: {
+      totalUsers: 'Total Users',
+      totalContainers: 'Total Containers',
+      totalItems: 'Total Items',
+      newThisMonth: 'this month',
+    },
   },
   notFound: {
     title: 'Page Not Found',

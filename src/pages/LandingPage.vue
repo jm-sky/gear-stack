@@ -6,6 +6,7 @@ import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import AppFooter from '@/components/layout/AppFooter.vue'
 import LandingPageContainerCard from '@/components/layout/LandingPageContainerCard.vue'
+import TotalsStats from '@/components/layout/TotalsStats.vue'
 import { Button } from '@/components/ui/button'
 import ButtonLink from '@/components/ui/button-link/ButtonLink.vue'
 import { AuthRoutePaths } from '@/modules/auth/config/routes'
@@ -103,7 +104,14 @@ if (!config.backend.enabled) {
             {{ t('landing.subtitle', 'Organize and manage your survival gear and bug-out bag equipment') }}
           </p>
         </div>
+      </div>
 
+      <!-- Stats Widgets (wider container) -->
+      <div class="max-w-4xl w-full px-4">
+        <TotalsStats />
+      </div>
+
+      <div class="max-w-2xl w-full space-y-8 text-center">
         <!-- Local Containers Summary (shown when not logged in but has containers) -->
         <div v-if="hasLocalContainers" class="space-y-6 py-8">
           <div class="bg-card/50 backdrop-blur-sm rounded-lg border p-6 space-y-4">
