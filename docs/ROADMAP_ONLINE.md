@@ -79,13 +79,15 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 ## 💾 Synchronizacja i przechowywanie danych
 
 ### Synchronizacja między urządzeniami (cloud storage)
-**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Large
+**Status:** 🚧 Partially Completed | **Priority:** High | **Complexity:** Large
 
-- Synchronizacja danych między różnymi urządzeniami użytkownika
-- Cloud storage dla kontenerów i przedmiotów
-- Automatyczna synchronizacja w tle
-- Rozwiązywanie konfliktów przy równoczesnych edycjach
-- Offline-first approach z synchronizacją przy połączeniu
+- ✅ Cloud storage dla kontenerów i przedmiotów (PostgreSQL database)
+- ✅ API endpoints dla wszystkich operacji CRUD
+- ✅ Factory pattern wybierający między localStorage a API
+- ✅ Migracja danych z localStorage do API
+- 🔄 Automatyczna synchronizacja w tle - planowane
+- 🔄 Rozwiązywanie konfliktów przy równoczesnych edycjach - planowane
+- ✅ Offline-first approach z synchronizacją przy połączeniu (podstawowa implementacja)
 
 ### Wersjonowanie danych (historia zmian)
 **Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Large
@@ -101,13 +103,17 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 ## 👥 Udostępnianie i współpraca
 
 ### Udostępnianie kontenerów
-**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium
+**Status:** 🚧 Partially Completed | **Priority:** High | **Complexity:** Medium
 
-- Publiczny link do listy/kontenera
-- Poziomy widoczności: publiczna / niepubliczna / prywatna
-- Udostępnianie kontenerów między użytkownikami
-- Uprawnienia: tylko odczyt / edycja
-- Lista osób, z którymi kontener jest udostępniony
+- ✅ Publiczne kontenery (`isPublic` flag)
+- ✅ Publiczny link do kontenera (`/gear/public/:id`)
+- ✅ Przeglądarka publicznych kontenerów (`PublicContainersBrowserPage`)
+- ✅ Strona szczegółów publicznego kontenera (`PublicContainerDetailPage`)
+- ✅ Pole `isPublic` w formularzu kontenera
+- ✅ Domyślna widoczność w ustawieniach użytkownika
+- 🔄 Udostępnianie nie-publicznych kontenerów przez token w query params - planowane
+- 🔄 Uprawnienia: tylko odczyt / edycja - planowane
+- 🔄 Lista osób, z którymi kontener jest udostępniony - planowane
 
 ### Galeria publiczna list/kontenerów
 **Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
@@ -311,14 +317,18 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 
 ## 📱 Aplikacja mobilna
 
-### PWA (Progressive Web App)
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+### ✅ PWA (Progressive Web App)
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium
 
-- Konwersja aplikacji na PWA
-- Instalacja na urządzenia mobilne
-- Offline support z synchronizacją
-- Push notifications (opcjonalnie)
-- Responsywny design dla urządzeń mobilnych
+- ✅ Konwersja aplikacji na PWA (`vite-plugin-pwa`)
+- ✅ Manifest.json z konfiguracją PWA
+- ✅ Service Worker (Workbox)
+- ✅ Instalacja na urządzenia mobilne
+- ✅ Offline support z cache'owaniem
+- ✅ Komponent `PwaUpdatePrompt` do aktualizacji
+- ✅ Runtime caching dla API, fonts, assets
+- 🔄 Push notifications - opcjonalnie (planowane)
+- ✅ Responsywny design dla urządzeń mobilnych
 
 ---
 

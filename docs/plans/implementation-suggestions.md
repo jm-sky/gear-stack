@@ -1,46 +1,38 @@
 # Funkcjonalności do wdrożenia z ROADMAP
 
-Lista funkcjonalności z ROADMAP.md gotowych do implementacji, uporządkowana według priorytetu i złożoności.
+> 📋 **Zobacz też:**
+> - [ROADMAP.md](../ROADMAP.md) - Główny indeks roadmap
+> - [ROADMAP_OFFLINE.md](../ROADMAP_OFFLINE.md) - Funkcjonalności offline
+> - [TODO_FEATURES.md](../TODO_FEATURES.md) - Aktualne podsumowanie funkcji do zaimplementowania
+
+Lista funkcjonalności z ROADMAP_OFFLINE.md gotowych do implementacji, uporządkowana według priorytetu i złożoności.
+
+> ⚠️ **Uwaga:** Ten dokument może zawierać przestarzałe informacje. Sprawdź [TODO_FEATURES.md](../TODO_FEATURES.md) dla aktualnego statusu.
 
 ---
 
 ## 🎯 Rekomendowane do wdrożenia (w kolejności)
 
-### 1. **Dodawanie własnych marek (brand)** ⭐
-**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium
+### 1. ✅ **Dodawanie własnych marek (brand)** ⭐ - ZAIMPLEMENTOWANE
+**Status:** ✅ Completed | **Priority:** High | **Complexity:** Medium
 
-**Dlaczego teraz:**
-- Wysoki priorytet
-- Średnia złożoność (nie za proste, nie za skomplikowane)
-- Istnieje już infrastruktura (podobnie jak kategorie)
-- Pole `brand` już istnieje w modelu danych
-
-**Co trzeba zrobić:**
-- Utworzyć UI w ustawieniach (podobnie jak `CategoriesSettingsCard.vue`)
-- Dodać store/composable dla zarządzania markami (podobnie jak `useGearSettings`)
-- Rozszerzyć `suggestedValues.ts` o łączenie SUGGESTED_BRANDS + własne marki
-- Zintegrować z ComboBox w formularzach
-- Zintegrować z rozpoznawaniem parametrów
-
-**Szacowany czas:** 3-5 dni
+**Zaimplementowane:**
+- ✅ UI w ustawieniach (`BrandsSettingsCard.vue`)
+- ✅ Store/composable dla zarządzania markami
+- ✅ Funkcja `getBrandOptions()` łącząca SUGGESTED_BRANDS + własne marki
+- ✅ Integracja z ComboBox w formularzach
+- ✅ Integracja z rozpoznawaniem parametrów
 
 ---
 
-### 2. **Zintegrowany input wagi z wyborem jednostki** ⭐
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+### 2. ✅ **Zintegrowany input wagi z wyborem jednostki** ⭐ - ZAIMPLEMENTOWANE
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Small
 
-**Dlaczego teraz:**
-- Mała złożoność (łatwe do zrobienia)
-- Poprawia UX (wszystko w jednym miejscu)
-- Można zrobić szybko jako "quick win"
-
-**Co trzeba zrobić:**
-- Utworzyć komponent `<WeightInputWithUnitPicker>`
-- Zastąpić obecne pola wagi w `ItemFormFields.vue`
-- Zastąpić pola wagi w `ContainerFormFields.vue` (weight, maxWeight)
-- Obsługa wszystkich jednostek: g, kg, oz, lb
-
-**Szacowany czas:** 1-2 dni
+**Zaimplementowane:**
+- ✅ Komponent `<WeightInputWithUnitPicker>` utworzony
+- ✅ Używany w `ItemFormFields.vue`
+- ✅ Używany w `ContainerFormFields.vue` (weight, maxWeight)
+- ✅ Obsługa wszystkich jednostek: g, kg, oz, lb
 
 ---
 
@@ -160,9 +152,9 @@ Lista funkcjonalności z ROADMAP.md gotowych do implementacji, uporządkowana we
 
 ## 📊 Podsumowanie - rekomendowana kolejność
 
-### Faza 1: Quick Wins (1-2 tygodnie)
-1. ✅ **Zintegrowany input wagi** - Small complexity, szybki efekt
-2. ✅ **Dodawanie własnych marek** - High priority, średnia złożoność
+### Faza 1: Quick Wins (1-2 tygodnie) - ✅ UKOŃCZONE
+1. ✅ **Zintegrowany input wagi** - Small complexity, szybki efekt - **ZAIMPLEMENTOWANE**
+2. ✅ **Dodawanie własnych marek** - High priority, średnia złożoność - **ZAIMPLEMENTOWANE**
 
 ### Faza 2: Core Features (2-3 tygodnie)
 3. ✅ **Obsługa waluty** - Uzupełnia istniejące funkcje
@@ -178,17 +170,16 @@ Lista funkcjonalności z ROADMAP.md gotowych do implementacji, uporządkowana we
 
 ---
 
-## 🎯 Moja rekomendacja: Zacznij od tego
+## 🎯 Moja rekomendacja: Następne do zrobienia
 
-**Najlepszy wybór na start:**
-1. **Zintegrowany input wagi** (1-2 dni) - szybki sukces, poprawia UX
-2. **Dodawanie własnych marek** (3-5 dni) - high priority, średnia złożoność
+**✅ Ukończone:**
+1. ✅ **Zintegrowany input wagi** - ZAIMPLEMENTOWANE
+2. ✅ **Dodawanie własnych marek** - ZAIMPLEMENTOWANE
 
-**Dlaczego:**
-- Oba są wykonalne w krótkim czasie
-- Mają duży wpływ na UX
-- Nie wymagają zewnętrznych zależności
-- Można zrobić równolegle lub sekwencyjnie
+**Następne do zrobienia:**
+1. **Obsługa waluty** (3-5 dni) - częściowo zaimplementowane (parsowanie w import, brak UI w formularzach)
+2. **Kolejność przedmiotów** (3-5 dni) - poprawia UX, średnia złożoność
+3. **Edycja bezpośrednio na liście** (1-2 tygodnie) - high priority, large complexity
 
 ---
 

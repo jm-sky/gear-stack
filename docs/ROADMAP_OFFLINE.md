@@ -127,21 +127,21 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 - Obecny kolor "dark orange" jest zadowalający, zadanie wstrzymane
 - **Uwaga:** Warianty kolorów są już przygotowane w `src/css/style.css` jako zakomentowany kod (na wypadek potrzeby zmiany w przyszłości)
 
-### Zintegrowany input wagi z wyborem jednostki
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+### ✅ Zintegrowany input wagi z wyborem jednostki
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Small
 
-- Utworzenie komponentu `<WeightInputWithUnitPicker>` łączącego input wagi z wyborem jednostki w jednym elemencie UI
-- Komponent powinien łączyć:
-  - Input numeryczny dla wagi
-  - Select/dropdown dla jednostki wagi (g, kg, oz, lb)
-- Użycie w formularzach:
-  - `ItemFormFields.vue` - pole wagi przedmiotu
-  - `ContainerFormFields.vue` - pola wagi kontenera (weight, maxWeight)
-- Korzyści:
-  - Lepszy UX - wszystko w jednym miejscu
-  - Spójny wygląd we wszystkich formularzach
-  - Łatwiejsze zarządzanie stanem (jedna kompozycja zamiast dwóch osobnych pól)
-- Obsługa wszystkich jednostek: g, kg, oz, lb
+- ✅ Komponent `<WeightInputWithUnitPicker>` łączący input wagi z wyborem jednostki w jednym elemencie UI
+- ✅ Komponent łączy:
+  - ✅ Input numeryczny dla wagi
+  - ✅ Select/dropdown dla jednostki wagi (g, kg, oz, lb)
+- ✅ Użycie w formularzach:
+  - ✅ `ItemFormFields.vue` - pole wagi przedmiotu
+  - ✅ `ContainerFormFields.vue` - pola wagi kontenera (weight, maxWeight)
+- ✅ Korzyści:
+  - ✅ Lepszy UX - wszystko w jednym miejscu
+  - ✅ Spójny wygląd we wszystkich formularzach
+  - ✅ Łatwiejsze zarządzanie stanem (jedna kompozycja zamiast dwóch osobnych pól)
+- ✅ Obsługa wszystkich jednostek: g, kg, oz, lb
 
 ---
 
@@ -211,43 +211,35 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 
 > **Uwaga:** Ta funkcjonalność jest już zaimplementowana i działa z localStorage. W przyszłości może być rozszerzona o synchronizację z backendem (zobacz [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md)).
 
-### Dodawanie własnych marek (brand)
-**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium
+### ✅ Dodawanie własnych marek (brand)
+**Status:** ✅ Completed | **Priority:** High | **Complexity:** Medium
 
-- Możliwość dodawania własnych marek w ustawieniach (podobnie jak kategorie)
-- UI w ustawieniach do zarządzania markami: dodawanie, edycja, usuwanie
-- Marki mają strukturę `key` i `label` (wymagane przez komponenty)
-- Lista marek łączona: domyślne (SUGGESTED_BRANDS) + własne użytkownika
-- Własne marki dostępne w:
-  - Autocomplete przy wyborze marki w formularzach przedmiotów i kontenerów
-  - Rozpoznawaniu parametrów przedmiotów (fuzzy matching)
-- Marki zapisywane w localStorage
-- Integracja z istniejącym polem `brand` w modelu danych
+- ✅ UI w ustawieniach do zarządzania markami (`BrandsSettingsCard.vue`) - dodawanie, edycja, usuwanie
+- ✅ Marki mają strukturę `id`, `value`, `createdAt`, `updatedAt`
+- ✅ Lista marek łączona: domyślne (SUGGESTED_BRANDS) + własne użytkownika
+- ✅ Własne marki dostępne w:
+  - ✅ Autocomplete przy wyborze marki w formularzach przedmiotów i kontenerów
+  - ✅ Rozpoznawaniu parametrów przedmiotów (fuzzy matching)
+- ✅ Marki zapisywane w localStorage
+- ✅ Integracja z istniejącym polem `brand` w modelu danych
+- ✅ Funkcja `getBrandOptions()` łącząca domyślne i własne marki
 
 > **Uwaga:** Ta funkcjonalność działa z localStorage (front-end only). W przyszłości może być rozszerzona o synchronizację z backendem (zobacz [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md)).
 
 ### Obsługa waluty (currency)
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+**Status:** 🚧 Partially Completed | **Priority:** Medium | **Complexity:** Medium
 
-- Dodanie pola `currency` do przedmiotów i kontenerów (opcjonalne)
-- Domyślna waluta użytkownika w ustawieniach (localStorage)
-- Automatyczne rozpoznawanie domyślnej waluty na podstawie języka:
-  - Polski (PL) → PLN
-  - Inne języki → EUR
-- Obsługiwane waluty: PLN, EUR, USD, GBP oraz inne popularne waluty
-- Wyświetlanie waluty:
-  - W formularzach: pole wyboru waluty obok pola ceny
-  - W tabelach: cena z walutą (np. "100,00 PLN")
-  - W statystykach kontenera: suma cen z odpowiednimi walutami
-- Formatowanie cen używając `Intl.NumberFormat`:
-  - Separatory tysięcy
-  - Miejsca dziesiętne zgodne z konwencją waluty
-  - Symbol waluty w odpowiednim miejscu
-- Logika wyboru waluty:
-  - Jeśli przedmiot/kontener ma ustawioną walutę → użyj jej
-  - Jeśli nie ma → użyj domyślnej waluty użytkownika
-  - Jeśli użytkownik nie ma domyślnej → rozpoznaj z języka
-- Waluta zapisywana w localStorage
+- ✅ Pole `currency` dodane do przedmiotów i kontenerów (w typach `IGearItem`, `IGearContainer`)
+- ✅ Parsowanie waluty w markdown import (rozpoznawanie PLN, USD, EUR, GBP z różnych formatów)
+- ✅ Obsługiwane waluty: PLN, EUR, USD, GBP
+- 🔄 Domyślna waluta użytkownika w ustawieniach (localStorage) - planowane
+- 🔄 Automatyczne rozpoznawanie domyślnej waluty na podstawie języka - planowane
+- 🔄 Wyświetlanie waluty:
+  - 🔄 W formularzach: pole wyboru waluty obok pola ceny - planowane
+  - 🔄 W tabelach: cena z walutą (np. "100,00 PLN") - planowane
+  - 🔄 W statystykach kontenera: suma cen z odpowiednimi walutami - planowane
+- 🔄 Formatowanie cen używając `Intl.NumberFormat` - planowane
+- 🔄 Logika wyboru waluty w UI - planowane
 
 > **Uwaga:** Ta funkcjonalność działa z localStorage (front-end only). W przyszłości może być rozszerzona o synchronizację z backendem (zobacz [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md)).
 
@@ -344,16 +336,17 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
     - ✅ **Opcja B (New Line):** opis w osobnej linii z wcięciem 2 spacje, od razu pod nazwą (przed wagą/marką)
   - 🔄 Parsowanie opisów w imporcie markdown (automatyczne rozpoznawanie obu formatów) - planowane
   - 🔄 Obsługa zagnieżdżonych nawiasów w opisach - planowane
-- 🔄 **Obsługa opisu kontenera w markdown import** - planowane
-  - 🔄 Parser markdown wykrywa opis kontenera (tekst między nagłówkiem a pierwszą listą przedmiotów)
-  - 🔄 Opis zapisywany w polu `description` kontenera
-  - 🔄 Unit tests dla parsowania opisów kontenerów
-- 🔄 **Obsługa ceny w markdown import** - planowane
-  - 🔄 Parser wykrywa ceny przedmiotów i kontenerów w różnych formatach
-  - 🔄 Obsługiwane formaty: `100PLN`, `10 PLN`, `10,00 PLN`, `1 000,00 PLN`, `10zł`, `$50`, `50$`
-  - 🔄 Automatyczne rozpoznawanie waluty (PLN, zł, $, EUR, €, GBP, £)
-  - 🔄 Cena zapisywana w polu `price` przedmiotu/kontenera
-  - 🔄 Unit tests dla parsowania cen
+- ✅ **Obsługa opisu kontenera w markdown import** - ZAIMPLEMENTOWANE
+  - ✅ Parser markdown wykrywa opis kontenera (tekst między nagłówkiem a pierwszą listą przedmiotów)
+  - ✅ Opis zapisywany w polu `description` kontenera
+  - ✅ Unit tests dla parsowania opisów kontenerów
+- ✅ **Obsługa ceny w markdown import** - ZAIMPLEMENTOWANE
+  - ✅ Parser wykrywa ceny przedmiotów i kontenerów w różnych formatach
+  - ✅ Obsługiwane formaty: `100PLN`, `10 PLN`, `10,00 PLN`, `1 000,00 PLN`, `10zł`, `$50`, `50$`
+  - ✅ Automatyczne rozpoznawanie waluty (PLN, zł, $, EUR, €, GBP, £)
+  - ✅ Cena zapisywana w polu `price` przedmiotu/kontenera
+  - ✅ Waluta zapisywana w polu `currency`
+  - ✅ Unit tests dla parsowania cen (kontenery i przedmioty)
 
 > **Uwaga:** UUID support dla update workflow wymaga backendu/DB - zobacz [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md)
 
@@ -573,20 +566,19 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 - ✅ Tłumaczenia PL/EN
 - ✅ Layout: `public` (dostępna dla wszystkich)
 
-### Error handler dla chunk loading errors
-**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium
+### ✅ Error handler dla chunk loading errors
+**Status:** ✅ Completed | **Priority:** High | **Complexity:** Medium
 
-- Obsługa błędu "ChunkLoadError" (błąd ładowania chunk po deploy nowej wersji)
-- Wykrywanie błędów ładowania chunk w runtime
-- Dialog z komunikatem:
-  - Tytuł: "Nowa wersja aplikacji"
-  - Treść: "Aplikacja została zaktualizowana. Zapisz swoją pracę i odśwież stronę."
-  - Przycisk "Odśwież stronę"
-  - Przycisk "Anuluj" (opcjonalnie, jeśli użytkownik chce dokończyć pracę)
-- Tłumaczenia PL/EN
-- Global error handler w `main.ts` lub dedykowany composable
-- Auto-refresh (opcjonalnie, po potwierdzeniu użytkownika)
-- Toast notification (opcjonalnie, zamiast dialogu)
+- ✅ Obsługa błędu "ChunkLoadError" (błąd ładowania chunk po deploy nowej wersji)
+- ✅ Wykrywanie błędów ładowania chunk w runtime
+- ✅ Dialog z komunikatem (window.confirm):
+  - ✅ Tytuł: "Nowa wersja aplikacji" / "New Version Available"
+  - ✅ Treść: "Aplikacja została zaktualizowana. Aby kontynuować, należy odświeżyć stronę."
+  - ✅ Przycisk "OK" (odświeża stronę) / "Cancel" (kontynuuje, niektóre funkcje mogą nie działać)
+- ✅ Tłumaczenia PL/EN (automatyczne wykrywanie locale)
+- ✅ Global error handler w `main.ts`
+- ✅ Dedykowany composable `useChunkLoadErrorHandler.ts` (opcjonalny)
+- ✅ Auto-refresh po potwierdzeniu użytkownika
 
 **Use cases:**
 - Użytkownik ma otwartą aplikację
@@ -653,14 +645,15 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 ### High Priority (Następne do zrobienia)
 1. ✅ **Strona z listą wszystkich przedmiotów** - High priority, Medium complexity (Completed in v0.10.0)
 2. ✅ **Dodawanie istniejących przedmiotów do kontenera** - High priority, Medium complexity (Completed in v0.22.0)
-3. **Dodawanie własnych marek (brand)** - High priority, Medium complexity
-4. **Edycja bezpośrednio na liście** - High priority, Large complexity
+3. ✅ **Dodawanie własnych marek (brand)** - High priority, Medium complexity (Completed)
+4. ✅ **Error handler dla chunk loading errors** - High priority, Medium complexity (Completed)
+5. **Edycja bezpośrednio na liście** - High priority, Large complexity
 
 ### Medium Priority
 1. ✅ **Kopiowanie/klonowanie kontenerów** - Medium priority, Small complexity (Completed in v0.21.0)
 2. ✅ **Maksymalna waga kontenera (maxWeight)** - Medium priority, Medium complexity (Completed in v0.20.0)
-3. **Obsługa waluty (currency)** - Medium priority, Medium complexity
-4. **Zintegrowany input wagi z wyborem jednostki** - Medium priority, Small complexity
+3. ✅ **Zintegrowany input wagi z wyborem jednostki** - Medium priority, Small complexity (Completed)
+4. **Obsługa waluty (currency)** - Medium priority, Medium complexity
 5. **Kolejność przedmiotów w kontenerze** - Medium priority, Medium complexity
 6. **Oznaczanie kontenerów jako fragmentów rodzica** - Medium priority, Medium complexity
 7. **Obsługa Markdown w notatkach** - Medium priority, Medium complexity
