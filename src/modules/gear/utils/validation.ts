@@ -12,6 +12,7 @@ export const containerSchema = z.object({
   isPublic: z.boolean().optional(),
   brand: z.string().optional(),
   price: z.number().min(0, 'Cena nie może być ujemna').optional(),
+  currency: z.string().optional(),
   weight: z.number().min(0, 'Waga nie może być ujemna').optional(),
   weightUnit: z.enum(['g', 'kg', 'oz', 'lb']).optional(),
   maxWeight: z.number().min(0, 'Maksymalna waga nie może być ujemna').optional(),
@@ -33,6 +34,7 @@ export const itemSchema = z.object({
   status: z.enum(['owned', 'missing', 'toBuy']),
   containerId: z.union([z.string().uuid(), z.literal('')]).optional(), // Reference to nested container (empty string = no container)
   price: z.number().min(0, 'Cena nie może być ujemna').optional(),
+  currency: z.string().optional(),
   url: z.string().url('Nieprawidłowy URL').optional().or(z.literal('')),
   brand: z.string().optional(),
   color: z.string().optional(),

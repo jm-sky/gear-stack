@@ -91,6 +91,11 @@ export const settingsEn = {
           lb: 'Pounds (lb)',
         },
       },
+      defaultCurrency: {
+        label: 'Default Currency',
+        subtitle: 'Default currency for prices in items and containers',
+        placeholder: 'Select a currency',
+      },
     },
     categories: {
       title: 'Custom Categories',

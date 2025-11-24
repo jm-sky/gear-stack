@@ -1,4 +1,5 @@
 import type { IGearContainer } from '../types/gear.types'
+import { getCurrency } from './currencyFormatter'
 import { convertToGrams } from './formatWeight'
 import { isSet } from './helpers'
 
@@ -73,5 +74,54 @@ export function calculateWeightLimitPercentageSync(
   }
 
   return Math.round((totalWeight / maxWeightInGrams) * 100)
+}
+
+/**
+ * Calculate total price of a container synchronously (for use in computed)
+ * Groups prices by currency and returns totals per currency
+ * @param container - Container to calculate price for
+ * @param allContainers - All containers (for nested container calculations)
+ * @param defaultCurrency - Default currency to use when item/container has no currency
+ * @returns Object with currency totals: { [currency: string]: number }
+ */
+export function calculateTotalPriceSync(
+  container: IGearContainer,
+  allContainers: IGearContainer[],
+  defaultCurrency: string,
+): Record<string, number> {
+  const totals: Record<string, number> = {}
+
+  // Helper to add price to totals
+  const addPrice = (price: number | null | undefined, currency: string | null | undefined) => {
+    if (price == null || price <= 0) return
+    const curr = getCurrency(currency, defaultCurrency)
+    totals[curr] = (totals[curr] || 0) + price
+  }
+
+  // Add container's own price (if set)
+  addPrice(container.price, container.currency)
+
+  // Add prices of direct items
+  for (const item of container.items) {
+    // If item is a nested container, calculate its total price recursively
+    if (item.containerId) {
+      const nestedContainer = allContainers.find(c => c.id === item.containerId)
+      if (nestedContainer) {
+        const nestedTotals = calculateTotalPriceSync(nestedContainer, allContainers, defaultCurrency)
+        // Multiply by quantity and add to totals
+        for (const [currency, amount] of Object.entries(nestedTotals)) {
+          totals[currency] = (totals[currency] || 0) + amount * item.quantity
+        }
+      }
+    } else {
+      // Regular item price (multiply by quantity)
+      if (item.price != null && item.price > 0) {
+        const curr = getCurrency(item.currency, defaultCurrency)
+        totals[curr] = (totals[curr] || 0) + item.price * item.quantity
+      }
+    }
+  }
+
+  return totals
 }
 

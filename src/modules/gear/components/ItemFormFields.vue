@@ -17,6 +17,7 @@ import {
 import WeightInputWithUnitPicker from '@/components/ui/weight-input/WeightInputWithUnitPicker.vue'
 import type { IGearItem } from '../types/gear.types'
 import { useGearSettings } from '../composables/useGearSettings'
+import { SUPPORTED_CURRENCIES } from '../utils/currencyFormatter'
 import { getBrandOptions } from '../utils/suggestedValues'
 import CategoryIcon from './CategoryIcon.vue'
 import ColorAutocomplete from './ColorAutocomplete.vue'
@@ -34,7 +35,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const { customCategories, customBrands } = useGearSettings()
+const { customCategories, customBrands, defaultCurrency } = useGearSettings()
 
 // Auto-focus na pierwszym polu
 const nameInputRef = ref<HTMLInputElement | undefined>(undefined)
@@ -303,7 +304,7 @@ const handleCancel = () => {
         {{ $t('gear.item.extendedFields') }}
       </h3>
 
-      <!-- Price and Brand -->
+      <!-- Price and Currency -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormField v-slot="{ componentField }" name="price">
           <FormItem>
@@ -319,22 +320,44 @@ const handleCancel = () => {
           </FormItem>
         </FormField>
 
-        <FormField v-slot="{ value, handleChange }" name="brand">
+        <FormField v-slot="{ value, handleChange }" name="currency">
           <FormItem>
-            <FormLabel :label="$t('gear.item.brand')" />
-            <ComboBox
-              :value="value"
-              :options="getBrandOptions(customBrands)"
-              :placeholder="''"
-              :creatable="true"
-              :create-label="$t('gear.comboBox.add')"
-              class="w-full"
-              @update:value="handleChange"
-            />
+            <FormLabel :label="$t('gear.item.currency')" />
+            <Select :model-value="value || defaultCurrency" @update:model-value="handleChange">
+              <SelectTrigger class="w-full">
+                <SelectValue :placeholder="$t('gear.item.currency')" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="curr in SUPPORTED_CURRENCIES"
+                  :key="curr.value"
+                  :value="curr.value"
+                >
+                  {{ curr.label }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
             <FormMessage />
           </FormItem>
         </FormField>
       </div>
+
+      <!-- Brand -->
+      <FormField v-slot="{ value, handleChange }" name="brand">
+        <FormItem>
+          <FormLabel :label="$t('gear.item.brand')" />
+          <ComboBox
+            :value="value"
+            :options="getBrandOptions(customBrands)"
+            :placeholder="''"
+            :creatable="true"
+            :create-label="$t('gear.comboBox.add')"
+            class="w-full"
+            @update:value="handleChange"
+          />
+          <FormMessage />
+        </FormItem>
+      </FormField>
 
       <!-- URL -->
       <FormField v-slot="{ componentField }" name="url">

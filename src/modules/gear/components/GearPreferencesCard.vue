@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useGearSettings } from '@/modules/gear/composables/useGearSettings'
+import { SUPPORTED_CURRENCIES } from '@/modules/gear/utils/currencyFormatter'
 import { config } from '@/shared/config/config'
 import type { TGearWeightUnit } from '@/modules/gear/types/gear.types'
 
@@ -23,14 +24,16 @@ const { t } = useI18n()
 
 const settingsSchema = z.object({
   preferredWeightUnit: z.enum(['g', 'kg', 'oz', 'lb']), // TODO: Extract to file for one source of truth
+  defaultCurrency: z.string().optional(),
 })
 
-const { settings, updateSettings } = useGearSettings()
+const { settings, updateSettings, defaultCurrency } = useGearSettings()
 
 const { handleSubmit, setValues } = useForm({
   validationSchema: toTypedSchema(settingsSchema),
   initialValues: {
     preferredWeightUnit: config.defaults.preferredWeightUnit,
+    defaultCurrency: defaultCurrency.value,
   },
 })
 
@@ -38,6 +41,7 @@ watch(() => settings.value, (val) => {
   if (val) {
     setValues({
       preferredWeightUnit: val.preferredWeightUnit ?? config.defaults.preferredWeightUnit,
+      defaultCurrency: defaultCurrency.value,
     })
   }
 }, { immediate: true })
@@ -46,6 +50,7 @@ watch(() => settings.value, (val) => {
 const onSubmit = handleSubmit(async (values) => {
   updateSettings({
     preferredWeightUnit: values.preferredWeightUnit as TGearWeightUnit,
+    defaultCurrency: values.defaultCurrency,
   })
 })
 </script>
@@ -91,6 +96,37 @@ const onSubmit = handleSubmit(async (values) => {
                       </SelectItem>
                       <SelectItem value="lb">
                         {{ t('settings.preferences.preferredWeightUnit.options.lb') }}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            </FormField>
+          </div>
+
+          <!-- Default Currency -->
+          <div class="space-y-3">
+            <FormField v-slot="{ componentField }" name="defaultCurrency">
+              <FormItem>
+                <FormLabel>
+                  {{ t('settings.preferences.defaultCurrency.label') }}
+                </FormLabel>
+                <p class="text-sm text-muted-foreground">
+                  {{ t('settings.preferences.defaultCurrency.subtitle') }}
+                </p>
+                <FormControl>
+                  <Select v-bind="componentField">
+                    <SelectTrigger>
+                      <SelectValue :placeholder="t('settings.preferences.defaultCurrency.placeholder')" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem
+                        v-for="curr in SUPPORTED_CURRENCIES"
+                        :key="curr.value"
+                        :value="curr.value"
+                      >
+                        {{ curr.label }}
                       </SelectItem>
                     </SelectContent>
                   </Select>

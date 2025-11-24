@@ -72,7 +72,10 @@ function onItemSelect(option: ComboBoxOption) {
         :aria-expanded="open"
         :class="cn('w-full justify-between font-normal', props.class)"
       >
-        <span>
+        <slot v-if="value" name="value">
+          {{ displayValue ?? placeholder }}
+        </slot>
+        <span v-else>
           {{ displayValue ?? placeholder }}
         </span>
         <ChevronsUpDownIcon class="ml-2 size-4 shrink-0 opacity-50" />

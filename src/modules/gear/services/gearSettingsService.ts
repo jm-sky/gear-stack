@@ -67,6 +67,7 @@ class GearSettingsService implements IGearSettingsService {
       customContainerTypes: settings.customContainerTypes ?? [],
       customBrands: settings.customBrands ?? [],
       preferredWeightUnit: settings.preferredWeightUnit,
+      defaultCurrency: settings.defaultCurrency,
     })
   }
 
@@ -80,6 +81,7 @@ class GearSettingsService implements IGearSettingsService {
         customContainerTypes: settings.customContainerTypes,
         customBrands: settings.customBrands,
         preferredWeightUnit: settings.preferredWeightUnit,
+        defaultCurrency: settings.defaultCurrency,
       }))
       return Promise.resolve()
     } catch (error) {
@@ -97,6 +99,7 @@ class GearSettingsService implements IGearSettingsService {
       customContainerTypes: updates.customContainerTypes ?? current.customContainerTypes,
       customBrands: updates.customBrands ?? current.customBrands,
       preferredWeightUnit: updates.preferredWeightUnit ?? current.preferredWeightUnit,
+      defaultCurrency: updates.defaultCurrency ?? current.defaultCurrency,
     }
 
     await this.saveToStorage(updated)

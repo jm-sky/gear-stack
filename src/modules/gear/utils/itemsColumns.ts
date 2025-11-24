@@ -48,6 +48,13 @@ export function createItemsColumns(
       enableHiding: true,
     },
     {
+      id: 'price',
+      accessorKey: 'price',
+      header: () => t('gear.item.price'),
+      enableSorting: true,
+      enableHiding: true,
+    },
+    {
       id: 'brand',
       accessorKey: 'brand',
       header: () => t('gear.item.brand'),

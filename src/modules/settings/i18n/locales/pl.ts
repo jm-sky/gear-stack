@@ -91,6 +91,11 @@ export const settingsPl = {
           lb: 'Funty (lb)',
         },
       },
+      defaultCurrency: {
+        label: 'Domyślna Waluta',
+        subtitle: 'Domyślna waluta dla cen w przedmiotach i kontenerach',
+        placeholder: 'Wybierz walutę',
+      },
     },
     categories: {
       title: 'Własne Kategorie',

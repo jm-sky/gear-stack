@@ -15,6 +15,7 @@ import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 import { EXPIRATION_WARNING_DAYS } from '../utils/constants'
 import { calculateTotalWeightSync } from '../utils/containerCalculations'
 import { COLOR_TEXT_CLASSES } from '../utils/containerColors'
+import { formatCurrency, getCurrency } from '../utils/currencyFormatter'
 import { formatWeightToPreferredUnit, formatWeightWithPreferredUnit } from '../utils/formatWeight'
 import { createItemsColumns } from '../utils/itemsColumns'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
@@ -42,7 +43,7 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const router = useRouter()
 const store = useGearStore()
-const { settings: gearSettings } = useGearSettings()
+const { settings: gearSettings, defaultCurrency } = useGearSettings()
 const { customCategories } = useGearSettings()
 const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
 
@@ -264,6 +265,13 @@ function calculateTotalWeight(containerId: string): number {
       <Badge :variant="getStatusVariant(row.original.status)">
         {{ t(`gear.item.statuses.${row.original.status}`) }}
       </Badge>
+    </template>
+
+    <template #price="{ row }">
+      <div v-if="row.original.price != null" class="text-end px-4">
+        {{ formatCurrency(row.original.price, getCurrency(row.original.currency, defaultCurrency)) }}
+      </div>
+      <span v-else class="text-muted-foreground">-</span>
     </template>
 
     <template #brand="{ row }">

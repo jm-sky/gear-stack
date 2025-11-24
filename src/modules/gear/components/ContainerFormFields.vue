@@ -18,6 +18,7 @@ import type { IGearContainer } from '../types/gear.types'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { useGearSettings } from '../composables/useGearSettings'
 import { COLOR_DOT_CLASSES, CONTAINER_COLORS } from '../utils/containerColors'
+import { SUPPORTED_CURRENCIES } from '../utils/currencyFormatter'
 import { getBrandOptions } from '../utils/suggestedValues'
 
 const _props = defineProps<{
@@ -31,7 +32,7 @@ const emit = defineEmits<{
   recognizeParameters: []
 }>()
 
-const { customContainerTypes, customBrands } = useGearSettings()
+const { customContainerTypes, customBrands, defaultCurrency } = useGearSettings()
 const { getContainerTypeLabel } = useContainerTypeLabel()
 
 // Auto-focus na pierwszym polu
@@ -205,24 +206,25 @@ const handleCancel = () => {
         {{ $t('gear.container.extendedFields') }}
       </h3>
 
-      <!-- Brand and Price -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <FormField v-slot="{ value, handleChange }" name="brand">
-          <FormItem>
-            <FormLabel :label="$t('gear.container.brand')" />
-            <ComboBox
-              :value="value"
-              :options="getBrandOptions(customBrands)"
-              :placeholder="$t('gear.container.brand')"
-              :creatable="true"
-              :create-label="$t('gear.comboBox.add')"
-              class="w-full"
-              @update:value="handleChange"
-            />
-            <FormMessage />
-          </FormItem>
-        </FormField>
+      <!-- Brand -->
+      <FormField v-slot="{ value, handleChange }" name="brand">
+        <FormItem>
+          <FormLabel :label="$t('gear.container.brand')" />
+          <ComboBox
+            :value="value"
+            :options="getBrandOptions(customBrands)"
+            :placeholder="$t('gear.container.brand')"
+            :creatable="true"
+            :create-label="$t('gear.comboBox.add')"
+            class="w-full"
+            @update:value="handleChange"
+          />
+          <FormMessage />
+        </FormItem>
+      </FormField>
 
+      <!-- Price and Currency -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormField v-slot="{ componentField }" name="price">
           <FormItem>
             <FormLabel :label="$t('gear.container.price')" />
@@ -233,6 +235,27 @@ const handleCancel = () => {
               min="0"
               step="0.01"
             />
+            <FormMessage />
+          </FormItem>
+        </FormField>
+
+        <FormField v-slot="{ value, handleChange }" name="currency">
+          <FormItem>
+            <FormLabel :label="$t('gear.container.currency')" />
+            <Select :model-value="value || defaultCurrency" @update:model-value="handleChange">
+              <SelectTrigger class="w-full">
+                <SelectValue :placeholder="$t('gear.container.currency')" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="curr in SUPPORTED_CURRENCIES"
+                  :key="curr.value"
+                  :value="curr.value"
+                >
+                  {{ curr.label }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
             <FormMessage />
           </FormItem>
         </FormField>

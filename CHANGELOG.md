@@ -21,6 +21,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.6.0] - 2025-01-21
+
+### Added
+- **Currency Support (FEATURE-017)**: Comprehensive currency support throughout the application
+  - Default currency setting in user preferences with auto-detection based on browser locale
+  - Currency selector in item and container forms (8 supported currencies: PLN, EUR, USD, GBP, JPY, CHF, CAD, AUD)
+  - Proper currency formatting using `Intl.NumberFormat` for locale-aware display
+  - Currency display in tables, statistics, and container details
+  - Multi-currency support in statistics (totals grouped by currency)
+  - Helper function `getCurrency()` for consistent currency handling
+  - Currency field added to `IGearItem` and `IGearContainer` types
+  - Currency validation in form schemas
+- **New Utilities**:
+  - `currencyFormatter.ts` - Currency formatting utilities with `formatCurrency()`, `getCurrency()`, and `detectDefaultCurrency()`
+  - Enhanced `containerCalculations.ts` with `calculateTotalPriceSync()` for multi-currency price calculations
+- **i18n Translations**: Added currency-related translations (EN/PL) and date format `short` for both locales
+- **Settings**: Added default currency selector to `GearPreferencesCard.vue`
+
+### Changed
+- **Forms**: Updated `ItemFormFields.vue` and `ContainerFormFields.vue` to include currency selection next to price input
+- **Tables**: Added price column to `ItemsTable.vue` with formatted currency display
+- **Statistics**: Enhanced `ContainerHeader.vue` to show total prices grouped by currency
+- **Shopping Planning**: Updated `ShoppingPlanningPage.vue` to use currency formatting throughout
+- **Settings**: Extended `IGearSettings` interface with `defaultCurrency` field
+
+---
+
 ## [2.5.1] - 2025-11-24
 
 ### Added

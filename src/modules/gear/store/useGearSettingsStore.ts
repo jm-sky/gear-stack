@@ -15,6 +15,7 @@ function loadSettingsSync(): IGearSettings {
         customContainerTypes: parsed.customContainerTypes ?? [],
         customBrands: parsed.customBrands ?? [],
         preferredWeightUnit: parsed.preferredWeightUnit,
+        defaultCurrency: parsed.defaultCurrency,
       }
     } catch {
       // Fall through to default
@@ -24,6 +25,7 @@ function loadSettingsSync(): IGearSettings {
     customCategories: [],
     customContainerTypes: [],
     customBrands: [],
+    defaultCurrency: undefined,
   }
 }
 
@@ -41,6 +43,7 @@ export const useGearSettingsStore = defineStore('gearSettings', () => {
     state.customContainerTypes = updated.customContainerTypes
     state.customBrands = updated.customBrands
     state.preferredWeightUnit = updated.preferredWeightUnit
+    state.defaultCurrency = updated.defaultCurrency
   }
 
   async function addCategory(category: IUserCategory): Promise<void> {
@@ -94,6 +97,7 @@ export const useGearSettingsStore = defineStore('gearSettings', () => {
     state.customContainerTypes = loaded.customContainerTypes
     state.customBrands = loaded.customBrands
     state.preferredWeightUnit = loaded.preferredWeightUnit
+    state.defaultCurrency = loaded.defaultCurrency
   }
 
   return {
@@ -102,6 +106,7 @@ export const useGearSettingsStore = defineStore('gearSettings', () => {
     customContainerTypes: computed(() => state.customContainerTypes),
     customBrands: computed(() => state.customBrands),
     preferredWeightUnit: computed(() => state.preferredWeightUnit),
+    defaultCurrency: computed(() => state.defaultCurrency),
 
     // Getters
     getAllCategories,

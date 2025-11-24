@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowLeft, Clock } from 'lucide-vue-next'
+import { ArrowLeft, CalendarPlus } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -122,7 +122,7 @@ const handleBack = () => {
               :author-name="container.authorName"
             />
             <Badge variant="secondary" class="text-xs">
-              <Clock class="size-3" />
+              <CalendarPlus class="size-3" />
               {{ smallDateTime(container.createdAt) }}
             </Badge>
           </div>

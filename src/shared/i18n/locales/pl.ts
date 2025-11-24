@@ -30,6 +30,8 @@ export default {
     done: 'Gotowe',
     never: 'Nigdy',
     or: 'lub',
+    created: 'Utworzono',
+    updated: 'Zaktualizowano',
     copyToClipboard: {
       success: 'Skopiowano do schowka',
       copied: 'Skopiowano',

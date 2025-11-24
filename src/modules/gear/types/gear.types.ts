@@ -72,6 +72,7 @@ export interface IGearItem {
   containerId?: TUUID | null // Reference to a nested container (if this item is a container)
   // Extended fields
   price?: number | null // Price in currency (optional)
+  currency?: string | null // Currency code (PLN, USD, EUR, GBP, etc.)
   url?: string | null // Link to product, review, etc.
   brand?: string | null // Manufacturer/brand
   color?: string | null // Item color
@@ -97,6 +98,7 @@ export interface IGearContainer {
   // Extended fields
   brand?: string | null // Manufacturer/brand
   price?: number | null // Price in currency (optional)
+  currency?: string | null // Currency code (PLN, USD, EUR, GBP, etc.)
   weight?: number | null // Container weight value
   weightUnit?: TGearWeightUnit | null // Container weight unit (g or kg)
   maxWeight?: number | null // Maximum weight limit value
@@ -136,6 +138,7 @@ export interface IUpdateContainerDto {
   isPublic?: boolean | null
   brand?: string | null
   price?: number | null
+  currency?: string | null
   weight?: number | null
   weightUnit?: TGearWeightUnit | null
   maxWeight?: number | null
@@ -179,6 +182,7 @@ export interface IUpdateItemDto {
   status?: TGearItemStatus | null
   containerId?: TUUID | null // Reference to a nested container (if this item is a container)
   price?: number | null
+  currency?: string | null
   url?: string | null
   brand?: string | null
   color?: string | null

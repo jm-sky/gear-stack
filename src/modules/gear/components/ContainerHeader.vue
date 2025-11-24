@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowLeft, BoxIcon, Download, Edit, MessageSquare, MoreVertical, Plus, SparklesIcon, Upload } from 'lucide-vue-next'
+import { ArrowLeft, BoxIcon, CalendarPlus, CalendarSync, Download, Edit, MessageSquare, MoreVertical, Plus, SparklesIcon, Upload } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import DropdownMenuSeparator from '@/components/ui/dropdown-menu/DropdownMenuSeparator.vue'
+import { smallDateTime } from '@/shared/utils/smallDateTime'
 import type { IGearContainer } from '../types/gear.types'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { useGearSettings } from '../composables/useGearSettings'
@@ -17,9 +18,11 @@ import {
 } from '../utils/constants'
 import {
   calculateReadinessPercentageSync,
+  calculateTotalPriceSync,
   calculateTotalWeightSync,
   calculateWeightLimitPercentageSync,
 } from '../utils/containerCalculations'
+import { formatCurrency } from '../utils/currencyFormatter'
 import { convertToGrams, formatWeight, formatWeightToPreferredUnit } from '../utils/formatWeight'
 import { isSet } from '../utils/helpers'
 
@@ -38,7 +41,7 @@ const emit = defineEmits<{
 const router = useRouter()
 const { t } = useI18n()
 const store = useGearStore()
-const { settings: gearSettings } = useGearSettings()
+const { settings: gearSettings, defaultCurrency } = useGearSettings()
 const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
 
 // Computed properties - use sync helpers for computed
@@ -49,6 +52,9 @@ const readinessPercentage = computed<number>(() => {
   return calculateReadinessPercentageSync(props.container)
 })
 const itemsCount = computed<number>(() => props.container.items.length)
+const totalPriceByCurrency = computed<Record<string, number>>(() => {
+  return calculateTotalPriceSync(props.container, store.getAllContainers, defaultCurrency.value)
+})
 
 // Format weight (totalWeight is in grams)
 const formattedWeight = computed<string>(() => formatWeightToPreferredUnit(totalWeight.value, settings.value.preferredWeightUnit))
@@ -145,11 +151,21 @@ const handleBack = () => {
             <Badge variant="outline">
               {{ typeLabel }}
             </Badge>
-            <Badge variant="secondary" class="text-xs">
-              {{ $d(new Date(container.createdAt), 'short') }}
+            <Badge
+              v-tooltip.bottom="t('common.created')"
+              variant="secondary"
+              class="text-xs"
+            >
+              <CalendarPlus class="size-4" />
+              {{ smallDateTime(container.createdAt) }}
             </Badge>
-            <Badge v-if="container.updatedAt !== container.createdAt" variant="secondary" class="text-xs">
-              {{ $t('gear.container.updated') }}: {{ $d(new Date(container.updatedAt), 'short') }}
+            <Badge
+              v-if="container.updatedAt !== container.createdAt"
+              v-tooltip.bottom="t('common.updated')"
+              variant="secondary"
+              class="text-xs"
+            >
+              <CalendarSync class="size-4" /> {{ smallDateTime(container.updatedAt) }}
             </Badge>
             <Badge v-if="container.brand" variant="secondary" class="normal-case">
               {{ container.brand }}
@@ -281,6 +297,22 @@ const handleBack = () => {
             ]"
             :style="{ width: `${readinessPercentage}%` }"
           />
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Price (if any items have prices) -->
+    <div v-if="Object.keys(totalPriceByCurrency).length > 0" class="bg-card rounded-lg border p-4">
+      <div class="text-sm text-muted-foreground mb-2">
+        {{ t('gear.item.totalPrice') }}
+      </div>
+      <div class="space-y-1">
+        <div
+          v-for="(amount, currency) in totalPriceByCurrency"
+          :key="currency"
+          class="text-xl font-bold"
+        >
+          {{ formatCurrency(amount, currency) }}
         </div>
       </div>
     </div>

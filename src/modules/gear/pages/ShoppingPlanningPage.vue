@@ -28,6 +28,7 @@ import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
 import { getPriorityVariant } from '../utils/badgeVariants'
 import { EXPIRATION_WARNING_DAYS, MILLISECONDS_PER_DAY } from '../utils/constants'
+import { formatCurrency, getCurrency } from '../utils/currencyFormatter'
 import { getDefaultItemValues } from '../utils/defaultValues'
 import { formatWeightWithPreferredUnit } from '../utils/formatWeight'
 import { type ItemFormData, itemSchema } from '../utils/validation'
@@ -36,7 +37,7 @@ const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
 const { containers, createItem, updateItem } = useGear()
-const { customCategories, settings: gearSettings } = useGearSettings()
+const { customCategories, settings: gearSettings, defaultCurrency } = useGearSettings()
 const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
 
 // Filters
@@ -245,12 +246,18 @@ const filteredItems = computed<IItemWithContainerId[]>(() => {
   return items
 })
 
-// Calculate total price for shopping list
-const totalPrice = computed(() => {
-  return shoppingList.value.reduce((sum, item) => {
-    const itemPrice = item.price ?? 0
-    return sum + (itemPrice * item.quantity)
-  }, 0)
+// Calculate total price for shopping list (per currency)
+const totalPriceByCurrency = computed(() => {
+  const totals: Record<string, number> = {}
+  const defaultCurr = defaultCurrency.value
+  shoppingList.value.forEach(item => {
+    if (item.price != null && item.price > 0) {
+      const currency = getCurrency(item.currency, defaultCurr)
+      const totalPrice = item.price * item.quantity
+      totals[currency] = (totals[currency] || 0) + totalPrice
+    }
+  })
+  return totals
 })
 
 // Calculate total items count
@@ -414,7 +421,8 @@ const generateMarkdown = (): string => {
       markdown += `## ${t(`gear.item.priorities.${priority}`)}\n\n`
       items.forEach(item => {
         const categoryLabel = getCategoryLabel(item.category)
-        const price = item.price ? ` - ${item.price} ${t('gear.shopping.currency', 'PLN')}` : ''
+        const currency = item.currency ?? defaultCurrency.value
+        const price = item.price ? ` - ${item.price.toFixed(2)} ${currency}` : ''
         const quantity = item.quantity > 1 ? ` x${item.quantity}` : ''
         const brand = item.brand ? ` **${item.brand}**` : ''
         const expiration = item.expirationDate ? ` (${t('gear.item.expiration.expiringSoon')}: ${new Date(item.expirationDate).toLocaleDateString()})` : ''
@@ -425,13 +433,21 @@ const generateMarkdown = (): string => {
     }
   })
 
-  const exportTotalPrice = itemsToExport.reduce((sum, item) => {
-    const itemPrice = item.price ?? 0
-    return sum + (itemPrice * item.quantity)
-  }, 0)
+  // Calculate total price per currency
+  const exportTotalPriceByCurrency: Record<string, number> = {}
+  itemsToExport.forEach(item => {
+    if (item.price != null && item.price > 0) {
+      const currency = item.currency ?? defaultCurrency.value
+      const totalPrice = item.price * item.quantity
+      exportTotalPriceByCurrency[currency] = (exportTotalPriceByCurrency[currency] || 0) + totalPrice
+    }
+  })
 
-  if (exportTotalPrice > 0) {
-    markdown += `\n**${t('gear.shopping.totalPrice', 'Total')}**: ${exportTotalPrice.toFixed(2)} ${t('gear.shopping.currency', 'PLN')}\n`
+  if (Object.keys(exportTotalPriceByCurrency).length > 0) {
+    markdown += `\n**${t('gear.shopping.totalPrice', 'Total')}**:\n`
+    Object.entries(exportTotalPriceByCurrency).forEach(([currency, amount]) => {
+      markdown += `- ${amount.toFixed(2)} ${currency}\n`
+    })
   }
 
   return markdown
@@ -615,8 +631,15 @@ onMounted(() => {
             <p class="text-sm text-muted-foreground">
               {{ t('gear.shopping.itemsCount', { count: shoppingList.length }) }}
               ({{ t('gear.shopping.totalQuantity', { count: totalItemsCount }) }})
-              <span v-if="totalPrice > 0">
-                - {{ totalPrice.toFixed(2) }} {{ t('gear.shopping.currency', 'PLN') }}
+              <span v-if="Object.keys(totalPriceByCurrency).length > 0">
+                -
+                <span
+                  v-for="(amount, currency) in totalPriceByCurrency"
+                  :key="currency"
+                  class="ml-1"
+                >
+                  {{ formatCurrency(amount, currency) }}
+                </span>
               </span>
             </p>
           </div>
@@ -668,7 +691,7 @@ onMounted(() => {
                 budget = value === '' ? null : Number(value)
               }"
             />
-            <span class="text-sm text-muted-foreground">{{ t('gear.shopping.currency', 'PLN') }}</span>
+            <span class="text-sm text-muted-foreground">{{ defaultCurrency }}</span>
             <Button
               v-if="budget !== null"
               variant="ghost"
@@ -763,7 +786,7 @@ onMounted(() => {
                   {{ formatWeightWithPreferredUnit(item.weight * item.quantity, item.weightUnit, settings.preferredWeightUnit) }}
                 </span>
                 <span v-if="item.price">
-                  {{ (item.price * item.quantity).toFixed(2) }} {{ t('gear.shopping.currency', 'PLN') }}
+                  {{ formatCurrency(item.price * item.quantity, getCurrency(item.currency, defaultCurrency)) }}
                 </span>
                 <span v-if="item.expirationDate" :class="isExpired(item) ? 'text-red-600' : 'text-yellow-600'">
                   {{ isExpired(item) ? t('gear.item.expiration.expired') : t('gear.item.expiration.expiringSoon') }}: {{ new Date(item.expirationDate).toLocaleDateString() }}
@@ -910,7 +933,7 @@ onMounted(() => {
                   {{ formatWeightWithPreferredUnit(item.weight * item.quantity, item.weightUnit, settings.preferredWeightUnit) }}
                 </span>
                 <span v-if="item.price">
-                  {{ (item.price * item.quantity).toFixed(2) }} {{ t('gear.shopping.currency', 'PLN') }}
+                  {{ formatCurrency(item.price * item.quantity, getCurrency(item.currency, defaultCurrency)) }}
                 </span>
                 <span v-if="item.expirationDate" :class="isExpired(item) ? 'text-red-600' : 'text-yellow-600'">
                   {{ isExpired(item) ? t('gear.item.expiration.expired') : t('gear.item.expiration.expiringSoon') }}: {{ new Date(item.expirationDate).toLocaleDateString() }}
@@ -934,8 +957,15 @@ onMounted(() => {
             <p class="text-sm text-muted-foreground">
               {{ t('gear.shopping.itemsCount', { count: shoppingList.length }) }}
               ({{ t('gear.shopping.totalQuantity', { count: totalItemsCount }) }})
-              <span v-if="totalPrice > 0">
-                - {{ totalPrice.toFixed(2) }} {{ t('gear.shopping.currency', 'PLN') }}
+              <span v-if="Object.keys(totalPriceByCurrency).length > 0">
+                -
+                <span
+                  v-for="(amount, currency) in totalPriceByCurrency"
+                  :key="currency"
+                  class="ml-1"
+                >
+                  {{ formatCurrency(amount, currency) }}
+                </span>
               </span>
             </p>
           </div>
@@ -976,7 +1006,7 @@ onMounted(() => {
                 <span v-if="item.brand">{{ item.brand }}</span>
                 <span>{{ t('gear.item.quantity') }}: {{ item.quantity }}</span>
                 <span v-if="item.price">
-                  {{ (item.price * item.quantity).toFixed(2) }} {{ t('gear.shopping.currency', 'PLN') }}
+                  {{ formatCurrency(item.price * item.quantity, getCurrency(item.currency, defaultCurrency)) }}
                 </span>
               </div>
             </div>

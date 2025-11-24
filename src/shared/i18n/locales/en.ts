@@ -30,6 +30,8 @@ export default {
     done: 'Done',
     never: 'Never',
     or: 'or',
+    created: 'Created',
+    updated: 'Updated',
     copyToClipboard: {
       success: 'Copied to clipboard',
       copied: 'Copied',
