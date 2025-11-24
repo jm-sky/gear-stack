@@ -70,13 +70,12 @@ export async function executeRecaptcha(action: string): Promise<string | null> {
     })
 
     const token = await window.grecaptcha.execute(config.recaptcha.siteKey, { action })
-    
+
     if (!token) {
       console.warn('[reCAPTCHA] Token generation returned empty token')
       return null
     }
 
-    console.debug(`[reCAPTCHA] Token generated for action: ${action}`)
     return token
   }
   catch (error) {
