@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import HoverLink from '@/components/ui/hover-link/HoverLink.vue'
+import { useAppVersion } from '@/shared/composables/useAppVersion'
+import { config } from '@/shared/config/config'
 import HoverLinkExternal from '../ui/hover-link/HoverLinkExternal.vue'
 import GithubIcon from '../ui/icons/GithubIcon.vue'
 
 const { t } = useI18n()
 
 const currentYear = new Date().getFullYear()
-const version = __APP_VERSION__
-const buildDate = new Date(__BUILD_DATE__).toLocaleDateString()
+const { version, buildDate } = useAppVersion()
 </script>
 
 <template>
@@ -17,8 +18,8 @@ const buildDate = new Date(__BUILD_DATE__).toLocaleDateString()
       <div class="flex flex-col items-center justify-between gap-4 md:flex-row">
         <div class="text-sm">
           &copy; {{ currentYear }}
-          <HoverLinkExternal href="https://dev-made.it">
-            DEV Made IT
+          <HoverLinkExternal :href="config.contact.companyWebsite">
+            {{ config.contact.companyName }}
           </HoverLinkExternal>
           <span class="ml-2 text-xs opacity-70">
             v{{ version }} – {{ buildDate }}

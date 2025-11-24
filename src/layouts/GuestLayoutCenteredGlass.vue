@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
+import GuestLayoutFooter from '@/components/layout/GuestLayoutFooter.vue'
 import LogoText from '@/components/ui/LogoText.vue'
 import DarkModeToggle from '@/shared/components/DarkModeToggle.vue'
-import { config } from '@/shared/config/config'
 import LocaleToggle from '@/shared/i18n/components/LocaleToggle.vue'
 
 defineProps<{
@@ -11,13 +11,10 @@ defineProps<{
 
 const route = useRoute()
 const layoutActionsComponent = route.meta.layoutActionsComponent
-
-const version = __APP_VERSION__
-const buildDate = new Date(__BUILD_DATE__).toLocaleDateString()
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-200 via-slate-100 to-purple-200 dark:from-gray-950 dark:via-gray-800 dark:to-gray-950 flex flex-col relative">
+  <div class="min-h-screen bg-linear-to-br from-blue-200 via-slate-100 to-purple-200 dark:from-gray-950 dark:via-gray-800 dark:to-gray-950 flex flex-col relative">
     <!-- Background image with smooth transitions -->
     <div
       v-if="backgroundImage"
@@ -52,15 +49,6 @@ const buildDate = new Date(__BUILD_DATE__).toLocaleDateString()
     </main>
 
     <!-- Footer -->
-    <footer class="relative z-0">
-      <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <p class="text-center text-sm text-muted-foreground">
-          &copy; 2025 {{ config.app.name }}.
-          <span class="ml-2 text-xs opacity-70">
-            v{{ version }} – {{ buildDate }}
-          </span>
-        </p>
-      </div>
-    </footer>
+    <GuestLayoutFooter />
   </div>
 </template>

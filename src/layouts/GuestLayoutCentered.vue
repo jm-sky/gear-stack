@@ -1,16 +1,13 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
+import GuestLayoutFooter from '@/components/layout/GuestLayoutFooter.vue'
 import LogoText from '@/components/ui/LogoText.vue'
 import DarkModeToggle from '@/shared/components/DarkModeToggle.vue'
-import { config } from '@/shared/config/config'
 import LocaleToggle from '@/shared/i18n/components/LocaleToggle.vue'
 
 // Auth layout for login, register, forgot password pages
 const route = useRoute()
 const layoutActionsComponent = route.meta.layoutActionsComponent
-
-const version = __APP_VERSION__
-const buildDate = new Date(__BUILD_DATE__).toLocaleDateString()
 </script>
 
 <template>
@@ -33,15 +30,6 @@ const buildDate = new Date(__BUILD_DATE__).toLocaleDateString()
       <slot />
     </main>
 
-    <footer>
-      <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <p class="text-center text-sm text-muted-foreground">
-          &copy; 2025 {{ config.app.name }}.
-          <span class="ml-2 text-xs opacity-70">
-            v{{ version }} – {{ buildDate }}
-          </span>
-        </p>
-      </div>
-    </footer>
+    <GuestLayoutFooter />
   </div>
 </template>

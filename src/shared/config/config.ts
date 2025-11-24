@@ -16,6 +16,8 @@ export const config = {
     fallbackLocale: (import.meta.env.VITE_FALLBACK_LOCALE ?? 'en') as SupportedLocale,
   },
   contact: {
+    companyName: import.meta.env.VITE_COMPANY_NAME ?? 'DEV Made IT',
+    companyWebsite: import.meta.env.VITE_COMPANY_WEBSITE ?? 'https://dev-made.it',
     email: import.meta.env.VITE_CONTACT_EMAIL ?? 'contact@dev-made.it',
   },
   backend: {
