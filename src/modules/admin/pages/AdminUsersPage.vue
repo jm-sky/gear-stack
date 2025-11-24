@@ -43,7 +43,7 @@ async function toggleAdmin(user: IAdminUser) {
     ? t('admin.users.toggleAdmin.demote', 'remove admin privileges')
     : t('admin.users.toggleAdmin.promote', 'grant admin privileges')
 
-  if (!confirm(t('admin.users.toggleAdmin.confirm', 'Are you sure you want to {action}?', { action }))) {
+  if (!confirm(t('admin.users.toggleAdmin.confirm', { action }, `Are you sure you want to ${action}?`))) {
     return
   }
 
