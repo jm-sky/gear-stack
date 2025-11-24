@@ -228,6 +228,57 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 
 ## 🤖 Funkcje AI (wymagające backend)
 
+### Infrastruktura AI
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Large
+
+**Integracja z OpenRouter:**
+- OpenRouter jako główny provider AI (dostęp do wielu modeli z różnych providerów)
+- Użytkownik wybiera jeden aktywny model z listy 5-15 modeli
+- Obsługa własnych tokenów użytkownika (opcjonalnie)
+- Billing dokładnie jak OpenRouter (tokeny wejściowe + wyjściowe)
+- Zero ukrytych limitów, przejrzyste statystyki
+- Brak fallbacku modeli - użytkownik sam wybiera inny model przy niedostępności
+- Krótka informacja ostrzegawcza przy pierwszym użyciu (AI działa na odpowiedzialność użytkownika)
+
+**Zarządzanie tokenami:**
+- Klucze encrypt-at-rest (szyfrowane w bazie danych)
+- Możliwość podmiany lub usunięcia tokena przez użytkownika
+- Wsparcie dla tokenów systemowych (dla użytkowników bez własnych tokenów)
+- Limity dotyczą tylko użycia tokena systemowego
+- Walidacja tokena przy dodawaniu (test API call)
+
+**Konfiguracja kontekstu:**
+- Użytkownik wybiera, które pola idą do kontekstu (nazwy, opisy, wagi, kategorie, etc.)
+- Brak automatycznego skracania kontekstu
+- Komunikat gdy kontekst przekracza limity modelu
+- Brak ustawień typu temperature, max_tokens (standardowe parametry w pierwszej wersji)
+
+**Historia AI:**
+- Zapisywanie pełnych danych: finalny prompt, modyfikacje, kontekst, odpowiedź
+- Metadane: model, provider, timestamp, liczba tokenów, koszt
+- Nie zapisujemy template'u promptu (tylko finalny prompt)
+- Mechanizm limitu historii (domyślnie 100 wpisów) + automatyczne usuwanie najstarszych
+- Użytkownik może przeglądać, filtrować i zarządzać historią
+
+**Cache:**
+- Cache dla powtarzalnych operacji (klasyfikacje, embeddingi)
+- Zmniejsza koszty oraz liczbę requestów
+- TTL: 7 dni dla klasyfikacji, 30 dni dla embedów
+- Storage: Redis lub PostgreSQL JSONB
+
+**Logi i monitoring:**
+- Logowanie błędów, czasów odpowiedzi, zużycia tokenów
+- Podstawowy monitoring stabilności OpenRouter API
+- Health check per model (status, response times, success rate)
+- Jasne komunikaty przy awarii: "Usługa OpenRouter jest niedostępna - spróbuj ponownie później"
+- Integracja z Sentry dla alertów (opcjonalnie)
+
+**Endpointy:**
+- `/ai/chat` - Chat completions (generowanie tekstu, sugestie)
+- `/ai/classify` - Klasyfikacje (kategorie, worn, consumable)
+- `/ai/embed` - Embeddingi (semantic search w przyszłości)
+- `/ai/vision` - Vision models (planowane na później)
+
 ### Sugestie sprzętu (na podstawie pogody, aktywności itp.)
 **Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Large
 
@@ -235,6 +286,8 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - Sugestie sprzętu na podstawie warunków pogodowych
 - Sugestie na podstawie typu aktywności
 - Personalizacja sugestii na podstawie historii użytkownika
+- Wykorzystanie wybranego przez użytkownika modelu AI
+- Konfigurowalny kontekst (użytkownik wybiera jakie dane wysłać)
 
 ### Analiza listy (co dodać, co usunąć, alternatywy)
 **Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Large
@@ -244,6 +297,7 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - Sugestie co można usunąć (redundancja)
 - Propozycje alternatywnych przedmiotów
 - Analiza wagi i optymalizacja
+- Konfigurowalny kontekst (użytkownik wybiera co wysłać do AI)
 
 ### Automatyczne oznaczanie kategorii / worn / consumable
 **Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Medium
@@ -252,13 +306,15 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - Automatyczne oznaczanie przedmiotów jako "worn" lub "consumable"
 - Uczenie się na podstawie wyborów użytkownika
 - Zapisywanie preferencji w DB
+- Cache dla powtarzalnych klasyfikacji (zmniejsza koszty)
 
 ### Konwersja: opis → gotowy kontener
 **Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Large
 
 - Konwersja tekstowego opisu na gotowy kontener z przedmiotami
-- Integracja z AI (np. OpenAI API)
+- Integracja przez OpenRouter (dostęp do różnych modeli)
 - Zapisywanie wygenerowanych kontenerów w DB
+- Historia generowania w bazie danych
 
 ---
 
