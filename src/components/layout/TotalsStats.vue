@@ -14,6 +14,10 @@ const authStore = useAuthStore()
 // Stats state
 const totalUsers = ref(0)
 const newUsersThisMonth = ref(0)
+const totalContainers = ref(0)
+const newContainersThisMonth = ref(0)
+const totalItems = ref(0)
+const newItemsThisMonth = ref(0)
 const loading = ref(true)
 
 // Calculate current month start date
@@ -29,16 +33,16 @@ const isThisMonth = (dateString: string): boolean => {
   return date >= monthStart
 }
 
-// Calculate containers stats
-const containersStats = computed(() => {
+// Calculate containers stats from localStorage (fallback)
+const containersStatsLocal = computed(() => {
   const containers = gearStore.getAllContainers
   const total = containers.length
   const newThisMonth = containers.filter(c => isThisMonth(c.createdAt)).length
   return { total, newThisMonth }
 })
 
-// Calculate items stats
-const itemsStats = computed(() => {
+// Calculate items stats from localStorage (fallback)
+const itemsStatsLocal = computed(() => {
   const containers = gearStore.getAllContainers
   const allItems = containers.flatMap(c => c.items)
   const total = allItems.length
@@ -46,24 +50,49 @@ const itemsStats = computed(() => {
   return { total, newThisMonth }
 })
 
-// Fetch user stats from API if backend is enabled
-const fetchUserStats = async () => {
+// Computed stats that use API data if available, otherwise fallback to local
+const containersStats = computed(() => {
+  if (config.backend.enabled && !loading.value) {
+    return { total: totalContainers.value, newThisMonth: newContainersThisMonth.value }
+  }
+  return containersStatsLocal.value
+})
+
+const itemsStats = computed(() => {
+  if (config.backend.enabled && !loading.value) {
+    return { total: totalItems.value, newThisMonth: newItemsThisMonth.value }
+  }
+  return itemsStatsLocal.value
+})
+
+// Fetch stats from API if backend is enabled
+const fetchStats = async () => {
   if (!config.backend.enabled) {
     loading.value = false
     return
   }
 
   try {
-    // Try to fetch stats from API (if endpoint exists)
-    // For now, we'll set to 0 if endpoint doesn't exist
-    const response = await apiClient.get<{
-      total: number
-      newThisMonth: number
-    }>('/stats/users').catch(() => null)
+    // Fetch all stats in parallel
+    const [usersResponse, containersResponse, itemsResponse] = await Promise.allSettled([
+      apiClient.get<{ total: number; newThisMonth: number }>('/stats/users'),
+      apiClient.get<{ total: number; newThisMonth: number }>('/stats/containers'),
+      apiClient.get<{ total: number; newThisMonth: number }>('/stats/items'),
+    ])
 
-    if (response?.data) {
-      totalUsers.value = response.data.total
-      newUsersThisMonth.value = response.data.newThisMonth
+    if (usersResponse.status === 'fulfilled' && usersResponse.value?.data) {
+      totalUsers.value = usersResponse.value.data.total
+      newUsersThisMonth.value = usersResponse.value.data.newThisMonth
+    }
+
+    if (containersResponse.status === 'fulfilled' && containersResponse.value?.data) {
+      totalContainers.value = containersResponse.value.data.total
+      newContainersThisMonth.value = containersResponse.value.data.newThisMonth
+    }
+
+    if (itemsResponse.status === 'fulfilled' && itemsResponse.value?.data) {
+      totalItems.value = itemsResponse.value.data.total
+      newItemsThisMonth.value = itemsResponse.value.data.newThisMonth
     }
   } catch (error) {
     // Endpoint might not exist, that's okay
@@ -78,7 +107,7 @@ onMounted(() => {
   if (!authStore.isAuthenticated) {
     gearStore.loadFromStorage()
   }
-  fetchUserStats()
+  fetchStats()
 })
 </script>
 
