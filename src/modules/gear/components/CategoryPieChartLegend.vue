@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import { useGearSettings } from '../composables/useGearSettings'
+import { formatCurrency } from '../utils/currencyFormatter'
 import type { ChartConfig } from '@/components/ui/chart'
 
 interface CategoryData {
   category: string
   weight: number
   quantity: number
+  price?: number
+  priority?: string
   percentage: number
   value: number
 }
@@ -13,13 +17,14 @@ interface CategoryData {
 interface Props {
   categoryData: CategoryData[]
   chartConfig: ChartConfig
-  chartMode: 'weight' | 'quantity'
+  chartMode: 'weight' | 'quantity' | 'price' | 'priority'
   totalValue: number
 }
 
 defineProps<Props>()
 
 const { t } = useI18n()
+const { defaultCurrency } = useGearSettings()
 </script>
 
 <template>
@@ -41,13 +46,26 @@ const { t } = useI18n()
             }"
           />
           <span class="text-sm font-medium truncate">
-            {{ t(`gear.item.categories.${data.category}`, data.category) }}
+            <template v-if="chartMode === 'priority' && data.priority">
+              {{ t(`gear.item.priorities.${data.priority}`, data.priority) }}
+            </template>
+            <template v-else>
+              {{ t(`gear.item.categories.${data.category}`, data.category) }}
+            </template>
           </span>
         </div>
         <div class="text-sm text-muted-foreground shrink-0">
           <span class="font-semibold">{{ data.percentage.toFixed(1) }}%</span>
           <span class="ml-2">
-            ({{ chartMode === 'weight' ? `${data.weight.toFixed(2)} g` : `${data.quantity}` }})
+            <template v-if="chartMode === 'weight'">
+              ({{ data.weight.toFixed(2) }} g)
+            </template>
+            <template v-else-if="chartMode === 'price' && data.price != null">
+              ({{ formatCurrency(data.price, defaultCurrency) }})
+            </template>
+            <template v-else>
+              ({{ data.quantity }})
+            </template>
           </span>
         </div>
       </div>
@@ -56,7 +74,15 @@ const { t } = useI18n()
       <div class="flex flex-row items-center justify-between gap-2">
         {{ t('gear.chart.total', 'Łącznie') }}:
         <span class="font-semibold">
-          {{ chartMode === 'weight' ? `${totalValue.toFixed(2)} g` : `${totalValue}` }}
+          <template v-if="chartMode === 'weight'">
+            {{ totalValue.toFixed(2) }} g
+          </template>
+          <template v-else-if="chartMode === 'price'">
+            {{ formatCurrency(totalValue, defaultCurrency) }}
+          </template>
+          <template v-else>
+            {{ totalValue }}
+          </template>
         </span>
       </div>
     </div>

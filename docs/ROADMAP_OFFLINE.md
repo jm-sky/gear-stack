@@ -226,20 +226,20 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 
 > **Uwaga:** Ta funkcjonalność działa z localStorage (front-end only). W przyszłości może być rozszerzona o synchronizację z backendem (zobacz [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md)).
 
-### Obsługa waluty (currency)
-**Status:** 🚧 Partially Completed | **Priority:** Medium | **Complexity:** Medium
+### ✅ Obsługa waluty (currency)
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium | **Feature:** [FEATURE-017](./features/FEATURE-017-currency-support.md)
 
 - ✅ Pole `currency` dodane do przedmiotów i kontenerów (w typach `IGearItem`, `IGearContainer`)
 - ✅ Parsowanie waluty w markdown import (rozpoznawanie PLN, USD, EUR, GBP z różnych formatów)
 - ✅ Obsługiwane waluty: PLN, EUR, USD, GBP
-- 🔄 Domyślna waluta użytkownika w ustawieniach (localStorage) - planowane
-- 🔄 Automatyczne rozpoznawanie domyślnej waluty na podstawie języka - planowane
-- 🔄 Wyświetlanie waluty:
-  - 🔄 W formularzach: pole wyboru waluty obok pola ceny - planowane
-  - 🔄 W tabelach: cena z walutą (np. "100,00 PLN") - planowane
-  - 🔄 W statystykach kontenera: suma cen z odpowiednimi walutami - planowane
-- 🔄 Formatowanie cen używając `Intl.NumberFormat` - planowane
-- 🔄 Logika wyboru waluty w UI - planowane
+- ✅ Domyślna waluta użytkownika w ustawieniach (localStorage)
+- ✅ Automatyczne rozpoznawanie domyślnej waluty na podstawie języka
+- ✅ Wyświetlanie waluty:
+  - ✅ W formularzach: pole wyboru waluty obok pola ceny
+  - ✅ W tabelach: cena z walutą (np. "100,00 PLN")
+  - ✅ W statystykach kontenera: suma cen z odpowiednimi walutami
+- ✅ Formatowanie cen używając `Intl.NumberFormat`
+- ✅ Logika wyboru waluty w UI
 
 > **Uwaga:** Ta funkcjonalność działa z localStorage (front-end only). W przyszłości może być rozszerzona o synchronizację z backendem (zobacz [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md)).
 
@@ -481,24 +481,24 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 - ✅ Legenda z nazwami kategorii i wartościami procentowymi
 - ✅ Uwzględnienie zagnieżdżonych kontenerów w obliczeniach (opcjonalnie)
 
-### Rozszerzenie wykresów na stronie szczegółów kontenera
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+### ✅ Rozszerzenie wykresów na stronie szczegółów kontenera
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium | **Feature:** [FEATURE-019](./features/FEATURE-019-extended-charts.md)
 
-- Dodanie wykresu kołowego według **ceny** (price) - rozkład kosztów według kategorii
-  - Suma cen przedmiotów w każdej kategorii
-  - Procentowy udział każdej kategorii w całkowitym koszcie kontenera
-  - Wyświetlanie tylko dla przedmiotów z ustawioną ceną
-- Dodanie wykresu kołowego według **priorytetu** (priority) - rozkład przedmiotów według priorytetu
-  - Liczba przedmiotów w każdej kategorii priorytetu (critical, high, medium, low)
-  - Procentowy udział każdego priorytetu w całkowitej liczbie przedmiotów
-  - Możliwość wyświetlania według wagi lub ilości dla każdego priorytetu
-- Rozszerzenie przełącznika trybów wykresu o nowe opcje:
-  - Waga (istniejące)
-  - Ilość (istniejące)
-  - Cena (nowe)
-  - Priorytet (nowe)
-- Wizualne oznaczenie brakujących danych (np. gdy przedmioty nie mają ustawionej ceny)
-- **Uwaga:** Wszystkie wykresy powinny używać spójnego systemu kolorów i stylu
+- ✅ Dodanie wykresu kołowego według **ceny** (price) - rozkład kosztów według kategorii
+  - ✅ Suma cen przedmiotów w każdej kategorii
+  - ✅ Procentowy udział każdej kategorii w całkowitym koszcie kontenera
+  - ✅ Wyświetlanie tylko dla przedmiotów z ustawioną ceną
+- ✅ Dodanie wykresu kołowego według **priorytetu** (priority) - rozkład przedmiotów według priorytetu
+  - ✅ Liczba przedmiotów w każdej kategorii priorytetu (critical, high, medium, low)
+  - ✅ Procentowy udział każdego priorytetu w całkowitej liczbie przedmiotów
+- ✅ Rozszerzenie przełącznika trybów wykresu o nowe opcje:
+  - ✅ Waga (istniejące)
+  - ✅ Ilość (istniejące)
+  - ✅ Cena (nowe)
+  - ✅ Priorytet (nowe)
+- ✅ Wizualne oznaczenie brakujących danych (np. gdy przedmioty nie mają ustawionej ceny)
+- ✅ Wszystkie wykresy używają spójnego systemu kolorów i stylu
+- ✅ Kolory dla priorytetów: Critical (czerwony), High (pomarańczowy), Medium (żółty), Low (zielony)
 
 ### Wielowymiarowe wykresy (category x price, category x priority)
 **Status:** 🔄 Planned | **Priority:** Low | **Complexity:** High

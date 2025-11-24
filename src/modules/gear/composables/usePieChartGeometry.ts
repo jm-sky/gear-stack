@@ -18,16 +18,20 @@ export interface CategoryData {
   category: string
   weight: number
   quantity: number
+  price?: number
+  priority?: string
   percentage: number
   value: number
 }
 
-export interface ChartDataPoint extends Record<string, number | string> {
+export interface ChartDataPoint extends Record<string, number | string | undefined> {
   category: string
   value: number
   percentage: number
   weight: number
   quantity: number
+  price?: number
+  priority?: string
   labelX: number
   labelY: number
 }
@@ -89,7 +93,7 @@ export function usePieChartGeometry(options: UsePieChartGeometryOptions = {}) {
 
   const calculateLabelPositions = (
     categoryData: readonly CategoryData[],
-    mode: 'weight' | 'quantity',
+    mode: 'weight' | 'quantity' | 'price' | 'priority',
   ): ChartDataPoint[] => {
     const geometry = chartGeometry.value
     let currentAngle = -90 // Start from top (12 o'clock)
@@ -101,7 +105,14 @@ export function usePieChartGeometry(options: UsePieChartGeometryOptions = {}) {
     const padAngleDeg = padAngle * (180 / Math.PI) // Convert single pad angle to degrees
 
     return categoryData.map((data) => {
-      const value = mode === 'weight' ? data.weight : data.quantity
+      let value: number
+      if (mode === 'weight') {
+        value = data.weight
+      } else if (mode === 'price') {
+        value = data.price ?? 0
+      } else {
+        value = data.quantity
+      }
       // Calculate angle proportionally to available space (accounting for pad-angle)
       const angle = (data.percentage / 100) * availableAngle
       const midAngle = currentAngle + angle / 2
@@ -120,6 +131,8 @@ export function usePieChartGeometry(options: UsePieChartGeometryOptions = {}) {
         percentage: data.percentage,
         weight: data.weight,
         quantity: data.quantity,
+        price: data.price,
+        priority: data.priority,
         labelX,
         labelY,
       }

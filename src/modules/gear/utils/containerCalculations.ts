@@ -1,4 +1,4 @@
-import type { IGearContainer } from '../types/gear.types'
+import type { IGearContainer, IGearItem, TGearItemPriority } from '../types/gear.types'
 import { getCurrency } from './currencyFormatter'
 import { convertToGrams } from './formatWeight'
 import { isSet } from './helpers'
@@ -123,5 +123,73 @@ export function calculateTotalPriceSync(
   }
 
   return totals
+}
+
+/**
+ * Calculate price distribution by category
+ * @param items - Items to calculate price distribution for
+ * @returns Array of category price data with totals and percentages
+ */
+export function calculatePriceByCategory(
+  items: IGearItem[],
+): Array<{ category: string; totalPrice: number; percentage: number }> {
+  const categoryMap = new Map<string, number>()
+  let totalPrice = 0
+
+  items.forEach(item => {
+    if (item.price != null && item.price > 0 && item.quantity > 0) {
+      const itemTotal = item.price * item.quantity
+      const category = item.category || 'other'
+      const current = categoryMap.get(category) || 0
+      categoryMap.set(category, current + itemTotal)
+      totalPrice += itemTotal
+    }
+  })
+
+  return Array.from(categoryMap.entries())
+    .map(([category, price]) => ({
+      category,
+      totalPrice: price,
+      percentage: totalPrice > 0 ? (price / totalPrice) * 100 : 0,
+    }))
+    .sort((a, b) => b.totalPrice - a.totalPrice)
+}
+
+/**
+ * Calculate item distribution by priority
+ * @param items - Items to calculate priority distribution for
+ * @returns Array of priority data with counts and percentages
+ */
+export function calculateItemsByPriority(
+  items: IGearItem[],
+): Array<{ priority: TGearItemPriority; count: number; percentage: number }> {
+  const priorityMap = new Map<TGearItemPriority, number>()
+
+  items.forEach(item => {
+    const priority = item.priority || 'medium'
+    const current = priorityMap.get(priority) || 0
+    priorityMap.set(priority, current + (item.quantity || 1))
+  })
+
+  const totalQuantity = Array.from(priorityMap.values()).reduce((a, b) => a + b, 0)
+
+  const result = Array.from(priorityMap.entries())
+    .map(([priority, count]) => ({
+      priority,
+      count,
+      percentage: totalQuantity > 0 ? (count / totalQuantity) * 100 : 0,
+    }))
+    .sort((a, b) => {
+      // Sort by priority order: critical, high, medium, low
+      const order: Record<TGearItemPriority, number> = {
+        critical: 0,
+        high: 1,
+        medium: 2,
+        low: 3,
+      }
+      return order[a.priority] - order[b.priority]
+    })
+
+  return result
 }
 

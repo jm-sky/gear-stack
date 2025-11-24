@@ -21,6 +21,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.8.0] - 2025-01-21
+
+### Added
+- **Extended Charts (FEATURE-019)**: Enhanced category pie chart with additional visualization modes
+  - **Price Mode**: Pie chart showing cost distribution by category
+    - Sums prices per category (price × quantity)
+    - Percentage distribution of total cost
+    - Displays only items with price data
+    - Currency formatting using `formatCurrency()` utility
+  - **Priority Mode**: Pie chart showing item distribution by priority level
+    - Counts items per priority (critical, high, medium, low)
+    - Percentage distribution of total items
+    - Color-coded segments: Critical (red), High (orange), Medium (yellow), Low (green)
+  - **Chart Mode Selector**: Extended with 4 options (Weight, Quantity, Price, Priority)
+  - **New Utilities**:
+    - `calculatePriceByCategory()` - Calculates price distribution by category
+    - `calculateItemsByPriority()` - Calculates item distribution by priority
+  - **i18n Translations**: Added `gear.chart.byPrice` and `gear.chart.byPriority` (EN/PL)
+
+### Changed
+- **CategoryPieChart**: Extended to support 4 chart modes (weight, quantity, price, priority)
+- **CategoryPieChartLegend**: Updated to display data for all chart modes with proper formatting
+- **usePieChartGeometry**: Enhanced to handle price and priority modes
+- **Chart Types**: Updated `CategoryData` and `ChartDataPoint` interfaces to support optional `price` and `priority` fields
+- **ROADMAP**: Marked currency support (FEATURE-017) and extended charts (FEATURE-019) as completed
+
+---
+
 ## [2.7.0] - 2025-01-21
 
 ### Added
