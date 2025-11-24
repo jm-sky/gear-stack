@@ -67,6 +67,9 @@ class GearContainerApiService {
     if (data.isPublic !== undefined && data.isPublic !== null) {
       cleaned.isPublic = data.isPublic
     }
+    if (data.favorite !== undefined && data.favorite !== null) {
+      cleaned.favorite = data.favorite
+    }
 
     return cleaned
   }
@@ -141,6 +144,9 @@ class GearContainerApiService {
     }
     if (data.isPublic !== undefined && data.isPublic !== null) {
       cleaned.isPublic = data.isPublic
+    }
+    if (data.favorite !== undefined && data.favorite !== null) {
+      cleaned.favorite = data.favorite
     }
 
     return cleaned

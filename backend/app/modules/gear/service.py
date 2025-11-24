@@ -98,6 +98,7 @@ class GearService:
             maxWeightUnit=container.max_weight_unit,
             url=container.url,
             isPublic=container.is_public,
+            favorite=container.favorite,
             authorName=None,  # Will be populated for public containers
             items=items,
             createdAt=container.created_at,
@@ -146,6 +147,7 @@ class GearService:
             maxWeightUnit=container.max_weight_unit,
             url=container.url,
             isPublic=container.is_public,
+            favorite=container.favorite,
             authorName=author_name,
             items=filtered_items,
             createdAt=container.created_at,

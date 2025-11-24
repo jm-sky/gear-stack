@@ -68,6 +68,7 @@ class GearRepository(SearchMixin):
             max_weight_unit=data.maxWeightUnit,
             url=data.url,
             is_public=data.isPublic if data.isPublic is not None else False,
+            favorite=data.favorite if data.favorite is not None else False,
         )
         self.db.add(container)
         await self.db.commit()
@@ -113,7 +114,7 @@ class GearRepository(SearchMixin):
         Returns:
             List of containers
         """
-        stmt = select(GearContainerDB).where(GearContainerDB.user_id == user_id).options(selectinload(GearContainerDB.items)).offset(skip).limit(limit).order_by(GearContainerDB.created_at.desc())
+        stmt = select(GearContainerDB).where(GearContainerDB.user_id == user_id).options(selectinload(GearContainerDB.items)).offset(skip).limit(limit).order_by(GearContainerDB.favorite.desc(), GearContainerDB.created_at.desc())
         result = await self.db.execute(stmt)
         return result.scalars().all()
 
@@ -177,6 +178,7 @@ class GearRepository(SearchMixin):
             "maxWeight": "max_weight",
             "maxWeightUnit": "max_weight_unit",
             "isPublic": "is_public",
+            "favorite": "favorite",
         }
 
         for key, value in update_data.items():

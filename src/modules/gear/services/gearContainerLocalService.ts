@@ -51,6 +51,7 @@ class GearContainerLocalService {
       color: data.color,
       parentContainerId: data.parentContainerId,
       isPublic: data.isPublic ?? false,
+      favorite: data.favorite ?? false,
       authorName: null,
       brand: data.brand,
       price: data.price,
@@ -95,6 +96,8 @@ class GearContainerLocalService {
     if (isSet(data.color)) updateData.color = data.color
     if (isSet(data.parentContainerId)) updateData.parentContainerId = data.parentContainerId
     if (isSet(data.hideWhenNested)) updateData.hideWhenNested = data.hideWhenNested
+    if (isSet(data.isPublic)) updateData.isPublic = data.isPublic
+    if (isSet(data.favorite)) updateData.favorite = data.favorite
     if (isSet(data.brand)) updateData.brand = data.brand
     if (isSet(data.price)) updateData.price = data.price
     if (isSet(data.weight)) updateData.weight = data.weight
