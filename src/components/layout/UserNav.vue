@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { cn } from '@/lib/utils'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { AuthRoutePaths } from '@/modules/auth/config/routes'
 import { SettingsRoutePaths } from '@/modules/settings/routes'
@@ -71,10 +72,16 @@ const navigateTo = (path: string) => {
 <template>
   <DropdownMenu>
     <DropdownMenuTrigger as-child>
-      <Avatar aria-label="User menu" class="cursor-pointer">
+      <Avatar
+        aria-label="User menu"
+        :class="cn('cursor-pointer hover:brightness-95 transition-all duration-300', !isAuthenticated && 'ring-2 ring-muted-foreground/30')"
+      >
         <AvatarImage :src="userAvatar ?? ''" />
-        <AvatarFallback class="bg-primary text-primary-foreground">
-          {{ initials }}
+        <AvatarFallback :class="isAuthenticated ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'">
+          <User v-if="!isAuthenticated" class="size-4" />
+          <template v-else>
+            {{ initials }}
+          </template>
         </AvatarFallback>
       </Avatar>
     </DropdownMenuTrigger>
