@@ -48,7 +48,16 @@ export async function authGuard(
   const isIn2FAFlow = !!authStore.twoFactorToken && !hasToken
   if (hasToken && !hasUser && !isIn2FAFlow && requiresAuth) {
     try {
-      const user = await authService.getCurrentUser()
+      // Add timeout to prevent hanging forever
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('User fetch timeout')), 5000)
+      })
+
+      const user = await Promise.race([
+        authService.getCurrentUser(),
+        timeoutPromise
+      ])
+
       // Map avatarUrl from backend to avatar in frontend
       authStore.setUser({
         ...user,
