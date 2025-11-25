@@ -386,17 +386,32 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 ## 🔍 Monitoring i diagnostyka
 
 ### Integracja z Sentry
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+**Status:** 🚧 Partially Completed | **Priority:** Medium | **Complexity:** Small
 
-- Monitoring błędów w czasie rzeczywistym (backend + frontend)
-- Automatyczne raportowanie wyjątków i błędów
-- Performance monitoring (transakcje, zapytania DB)
-- Release tracking i deployment notifications
-- User feedback integration
-- Source maps dla lepszego debugowania (frontend)
-- Contextualne informacje (user ID, environment, breadcrumbs)
-- Alerting dla krytycznych błędów
-- Integracja z CI/CD pipeline
+**Backend (Python):**
+- ✅ Monitoring błędów w czasie rzeczywistym (backend)
+- ✅ Automatyczne raportowanie wyjątków i błędów
+- ✅ Performance monitoring (transakcje, zapytania DB)
+- ✅ Release tracking i deployment notifications
+- ✅ Contextualne informacje (user ID, environment, breadcrumbs)
+- ✅ Opcjonalne włączenie przez zmienną środowiskową `SENTRY_ENABLED=true`
+- ✅ Konfiguracja przez zmienne środowiskowe (DSN, environment, sample rates)
+
+**Frontend (Vue.js):**
+- 🔄 **Do omówienia** - Integracja z Sentry dla Vue.js będzie omówiona w przyszłości (nie zaimplementowane na razie)
+- 🔄 Source maps dla lepszego debugowania (frontend)
+- 🔄 User feedback integration
+- 🔄 Browser performance monitoring
+
+**Konfiguracja (Backend):**
+- ✅ Opcjonalne włączenie przez zmienną środowiskową `SENTRY_ENABLED=true`
+- ✅ Wymagane zmienne: `SENTRY_DSN` (DSN z Sentry dashboard)
+- ✅ Opcjonalne zmienne:
+  - `SENTRY_ENVIRONMENT` - środowisko (development, staging, production)
+  - `SENTRY_RELEASE` - wersja release (domyślnie APP_VERSION)
+  - `SENTRY_TRACES_SAMPLE_RATE` - sample rate dla performance monitoring (0.0-1.0, domyślnie 1.0)
+  - `SENTRY_PROFILES_SAMPLE_RATE` - sample rate dla profiling (0.0-1.0, domyślnie 1.0)
+- ✅ Jeśli `SENTRY_ENABLED=false` lub brak `SENTRY_DSN`, Sentry nie jest inicjalizowane
 
 **Korzyści:**
 - Szybsze wykrywanie i diagnozowanie błędów w produkcji

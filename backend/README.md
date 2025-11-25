@@ -30,6 +30,35 @@ cp .env.example .env
 # Edit .env and update with your configuration
 ```
 
+### Environment Variables
+
+#### Sentry Error Monitoring (Optional)
+
+Sentry integration is **optional** and disabled by default. To enable:
+
+```bash
+# Enable Sentry
+SENTRY_ENABLED=true
+
+# Required: Your Sentry DSN (get it from Sentry dashboard)
+SENTRY_DSN=https://your-key@your-org.ingest.sentry.io/project-id
+
+# Optional: Environment name (defaults to APP_ENVIRONMENT)
+SENTRY_ENVIRONMENT=production
+
+# Optional: Release version (defaults to APP_VERSION)
+SENTRY_RELEASE=v2.11.0
+
+# Optional: Performance monitoring sample rate (0.0-1.0, default: 1.0)
+# Use lower values (e.g., 0.1) in production to reduce overhead
+SENTRY_TRACES_SAMPLE_RATE=1.0
+
+# Optional: Profiling sample rate (0.0-1.0, default: 1.0)
+SENTRY_PROFILES_SAMPLE_RATE=1.0
+```
+
+**Note:** If `SENTRY_ENABLED=false` or `SENTRY_DSN` is not set, Sentry will not be initialized and the application will run normally without error monitoring.
+
 5. Initialize the database:
 ```bash
 # Run migrations if using Alembic

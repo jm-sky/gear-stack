@@ -496,6 +496,61 @@ class StorageSettings(BaseSettings):
         return v
 
 
+class SentrySettings(BaseSettings):
+    """Sentry error monitoring configuration."""
+
+    model_config = _base_config
+
+    enabled: bool = Field(
+        default=False,
+        validation_alias="SENTRY_ENABLED",
+        description="Enable Sentry error monitoring",
+    )
+    dsn: str = Field(
+        default="",
+        validation_alias="SENTRY_DSN",
+        description="Sentry DSN (Data Source Name) for error reporting",
+    )
+    environment: str = Field(
+        default="development",
+        validation_alias="SENTRY_ENVIRONMENT",
+        description="Environment name for Sentry (development, staging, production)",
+    )
+    traces_sample_rate: float = Field(
+        default=1.0,
+        validation_alias="SENTRY_TRACES_SAMPLE_RATE",
+        description="Performance monitoring sample rate (0.0-1.0)",
+    )
+    profiles_sample_rate: float = Field(
+        default=1.0,
+        validation_alias="SENTRY_PROFILES_SAMPLE_RATE",
+        description="Profiling sample rate (0.0-1.0)",
+    )
+    release: str | None = Field(
+        default=None,
+        validation_alias="SENTRY_RELEASE",
+        description="Release version for Sentry (e.g., git commit SHA or version number)",
+    )
+
+    @field_validator("enabled", mode="before")
+    @classmethod
+    def parse_enabled(cls, v: str | bool) -> bool:
+        """Parse enabled field from string or bool."""
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, str):
+            return v.lower() in ("true", "1", "yes", "on")
+        return False
+
+    @field_validator("traces_sample_rate", "profiles_sample_rate")
+    @classmethod
+    def validate_sample_rate(cls, v: float) -> float:
+        """Validate sample rate is in valid range."""
+        if not 0.0 <= v <= 1.0:
+            raise ValueError(f"Sample rate must be between 0.0 and 1.0, got: {v}")
+        return v
+
+
 class Settings(BaseSettings):
     """
     Main application settings composed of nested configuration classes.
@@ -517,6 +572,7 @@ class Settings(BaseSettings):
     oauth: OAuthSettings = Field(default_factory=OAuthSettings)
     email: EmailSettings = Field(default_factory=EmailSettings)
     storage: StorageSettings = Field(default_factory=StorageSettings)
+    sentry: SentrySettings = Field(default_factory=SentrySettings)
 
     # Legacy compatibility - still accessible at root level
     frontend_url: str = Field(

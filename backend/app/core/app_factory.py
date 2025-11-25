@@ -11,6 +11,44 @@ from app.core.config import settings
 from app.core.middleware import setup_middleware
 
 
+def init_sentry() -> None:
+    """Initialize Sentry error monitoring if enabled."""
+    if not settings.sentry.enabled or not settings.sentry.dsn:
+        return
+
+    try:
+        import sentry_sdk
+        from sentry_sdk.integrations.fastapi import FastApiIntegration
+        from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+        from sentry_sdk.integrations.logging import LoggingIntegration
+
+        sentry_sdk.init(
+            dsn=settings.sentry.dsn,
+            environment=settings.sentry.environment or settings.app.environment.value,
+            release=settings.sentry.release or settings.app.version,
+            traces_sample_rate=settings.sentry.traces_sample_rate,
+            profiles_sample_rate=settings.sentry.profiles_sample_rate,
+            integrations=[
+                FastApiIntegration(transaction_style="endpoint"),
+                SqlalchemyIntegration(),
+                LoggingIntegration(level=None, event_level="ERROR"),
+            ],
+            # Set user context in middleware or route handlers
+            send_default_pii=False,  # Don't send PII by default
+            before_send=lambda event, hint: event,  # Can filter events here
+        )
+    except ImportError:
+        import logging
+
+        logger = logging.getLogger(__name__)
+        logger.warning("Sentry SDK not installed. Install with: pip install sentry-sdk[fastapi]")
+    except Exception as e:
+        import logging
+
+        logger = logging.getLogger(__name__)
+        logger.error(f"Failed to initialize Sentry: {e}", exc_info=True)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """
@@ -55,6 +93,9 @@ def create_app() -> FastAPI:
     Returns:
         Configured FastAPI application
     """
+    # Initialize Sentry before creating app (to catch all errors)
+    init_sentry()
+
     app = FastAPI(
         title=settings.app.name,
         version=settings.app.version,
@@ -109,6 +150,26 @@ def register_exception_handlers(app: FastAPI) -> None:
 
         logger = logging.getLogger(__name__)
         logger.exception("Unhandled exception occurred")
+
+        # Sentry will automatically capture exceptions, but we can add context
+        if settings.sentry.enabled:
+            try:
+                import sentry_sdk
+
+                with sentry_sdk.push_scope() as scope:
+                    scope.set_context(
+                        "request",
+                        {
+                            "url": str(request.url),
+                            "method": request.method,
+                            "path": request.url.path,
+                        },
+                    )
+                    scope.set_user({"id": getattr(request.state, "user_id", None)})
+                    sentry_sdk.capture_exception(exc)
+            except Exception:
+                # Don't fail if Sentry fails
+                pass
 
         if settings.is_development():
             return JSONResponse(
