@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import Textarea from '@/components/ui/textarea/Textarea.vue'
 import WeightInputWithUnitPicker from '@/components/ui/weight-input/WeightInputWithUnitPicker.vue'
 import type { IGearContainer } from '../types/gear.types'
 import { useGearSettings } from '../composables/useGearSettings'
@@ -67,7 +68,7 @@ const handleCancel = () => {
     <FormField v-slot="{ componentField }" name="description">
       <FormItem>
         <FormLabel :label="$t('gear.container.description')" />
-        <textarea
+        <Textarea
           v-bind="componentField"
           :placeholder="$t('gear.container.description')"
           rows="3"

@@ -34,7 +34,7 @@ Wygenerowano aplikacją do zarządzania [Gear-stack](https://github.com/jm-sky/g
 - **Rozpałka żelowa** (Greenheat) - 15g
 
 ## Plecak Helikon EDC Cordura [#plecak-helikon-edc] [uuid:fcd6542e-4203-4b36-9ebf-6c503d14fb7f] (Backpack) *(coyote)*
-- **Nóż Ontario SP2 Air Force** [uuid:04d9332f-4e50-4a47-91ca-5fc1b86aebdf] (Ontario) - 220g
+- **Nóż Ontario SP2 Air Force** [uuid:04d9332f-4e50-4a47-91ca-5fc1b86aebdf] (Ontario) - 357g
 - **Scyzoryk Victorinox Ranger/Huntsman Elinox** [uuid:0adff64e-c469-48fd-9099-04b0cba34464] (Victorinox) - 120g
 - **Paracord EDCX 550 Type III** [uuid:132fa0b3-6bd9-49eb-9dc5-4c77cd09c32e] (EDCX, Black) - 50g
 - **Sznurek murarski** [uuid:1930b53d-ca66-4175-b653-e4531f3c2f6a] - 20g
@@ -42,7 +42,7 @@ Wygenerowano aplikacją do zarządzania [Gear-stack](https://github.com/jm-sky/g
 - **Kubek tytanowy 450ml YOUKUKE** *(W torebce ze ściągaczem, Rozmiar 8,5 x 9,7 cm (średnica x wysokość))* [uuid:26abc1c7-b1f1-46e0-9bdb-11d219c6c5c1] (YOUKUKE) - 90g
 - **Chusteczki jednorazowe** [uuid:2c41cbb9-a171-42ed-9f89-73c7e41df7ce] - 50g
 - **Rękawice budowlane odporne na przecięcia** [uuid:32a73c66-9e57-49ef-bf0d-3dc385d5b83d] - 150g
-- **Kompas z lupą i linijką** [uuid:38d82201-0e64-4b3c-b89c-179b0f9f73ef] - 80g
+- **Kompas z lupą i linijką** [uuid:38d82201-0e64-4b3c-b89c-179b0f9f73ef] - 44g
 - **Niezbędnik NEO Tools** [uuid:3f91b573-4a0c-43d5-9331-e69edc296d33] (NEO Tools) - 150g
 - **Racje NRG-5** x2 [uuid:444db52e-0a48-4bc4-bb6d-53d18653cf1b] - 400g
 - **Płaszcz/tarp/poncho** *(stary)* [uuid:4bdcd0c7-35b3-43b0-a590-12134687ea33] (green) - 180g
@@ -51,20 +51,20 @@ Wygenerowano aplikacją do zarządzania [Gear-stack](https://github.com/jm-sky/g
 - **Notatnik Rite in the Rain** [uuid:5ec4414a-f687-4a49-8aaf-21deed00b36a] (Rite in the Rain) - 120g
 - **Zip/trytytki** [uuid:64bb8f49-7f77-40a4-8b0e-866f4eb1e268] x15 - 30g
 - **Duct tape** *(czarny, 1/3 rolki)* [uuid:6b40d4c1-5e1c-4c86-b1d1-14288e4f2a87] - 60g
-- **Zestaw do szycia** *(2 igły, mocna nitka)* [uuid:71f970f0-8bc3-48b2-8f59-57491ac2f23b] - 40g
+- **Zestaw do szycia** *(2 igły, mocna nitka)* [uuid:71f970f0-8bc3-48b2-8f59-57491ac2f23b] - 56g
 - **Zestaw wędkarski** *(parę haczyków, kawałek żyłki, i ciężarki)* [uuid:78d6fc91-9715-459c-a794-909decb3a090] - 50g
 - **Folia aluminiowa** [uuid:7f740ae5-b5bf-4c13-8901-e79c4c456271] - 20g
 - **Pouch Maxpedition Barnacle** [uuid:9c4fc7c8-95b2-46cd-bb09-ef3ca52a3f45] (Maxpedition Barnacle) [#pouch-maxpedition-barnacle] - 180g
-- **Apteczka Blackhawk** [uuid:bd404a57-4c08-46c4-9c93-162fd047dca1] (Blackhawk) [#apteczka-blackhawk] - 300g
+- **Apteczka Blackhawk** [uuid:bd404a57-4c08-46c4-9c93-162fd047dca1] (Blackhawk) [#apteczka-blackhawk] - 470g
 - **Menażka Primus Eta Power** [uuid:f81e28e8-0228-4f89-be41-7a0333db4e9f] (Primus) [#menazka] - 350g
 
-## Pouch Maxpedition Barnacle [#pouch-maxpedition-barnacle] [uuid:9c4fc7c8-95b2-46cd-bb09-ef3ca52a3f45] (Pouch)
-- **Krzesiwo magnezowe** [uuid:a1ed9792-1f84-4e76-8e44-463baec2de3b] - 30g
-- **Świeczka** [uuid:a8bfce98-50bf-4a58-a80f-daf23779f7fe] x2 - 50g
-- **Waciki bawełniane** [uuid:b0a33c09-56ff-4a63-8e64-632ca4cf0a2e] - 10g
-- **Drut ogrodniczy** [uuid:b6cbb7d3-f0d4-4689-b6e1-59e571baa361] - 20g
+## Pouch Maxpedition Barnacle [#pouch-maxpedition-barnacle] [uuid:9c4fc7c8-95b2-46cd-bb09-ef3ca52a3f45] (Pouch) - 92 g
+- **Krzesiwo magnezowe** [uuid:a1ed9792-1f84-4e76-8e44-463baec2de3b] - 47g
+- **Świeczka** [uuid:a8bfce98-50bf-4a58-a80f-daf23779f7fe] x2 - 38g
+- **Waciki bawełniane** [uuid:b0a33c09-56ff-4a63-8e64-632ca4cf0a2e] x2 - 3g
+- **Drut ogrodniczy** *(~2 metrów)* [uuid:b6cbb7d3-f0d4-4689-b6e1-59e571baa361] - 5g
 
-## Apteczka Blackhawk [#apteczka-blackhawk] [uuid:bd404a57-4c08-46c4-9c93-162fd047dca1] (Pouch)
+## Apteczka Blackhawk [#apteczka-blackhawk] [uuid:bd404a57-4c08-46c4-9c93-162fd047dca1] *(Łączna waga 470 g)* (Pouch)
 - **Scyzoryk** [uuid:c40f175f-6df1-4ac4-afcd-eef56676b4e4] - 40g
 - **Zapalniczka** [uuid:caf7b663-62ae-48a7-9efc-024c2ec99f81] - 15g
 - **Elektrolity** [uuid:d0e4e8a3-6800-4ca3-8b32-4bb0d3f4c8a7] - 50g

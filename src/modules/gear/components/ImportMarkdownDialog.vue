@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import Textarea from '@/components/ui/textarea/Textarea.vue'
 import type { IGearContainer } from '../types/gear.types'
 import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
@@ -234,15 +235,16 @@ const handleImport = async () => {
         </DialogDescription>
       </DialogHeader>
 
-      <div class="flex flex-col flex-1 overflow-y-auto space-y-4">
+      <div class="flex flex-col flex-1 overflow-y-auto space-y-4" :class="{ 'opacity-50': importing }">
         <!-- Markdown Input -->
         <div class="flex flex-col flex-1">
           <label class="text-sm font-medium mb-2 block">
             {{ t('gear.import.markdownContent') }}
           </label>
-          <textarea
+          <Textarea
             v-model="markdownContent"
             :placeholder="t('gear.import.placeholder')"
+            :disabled="importing"
             rows="12"
             class="flex flex-1 min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-mono"
           />
