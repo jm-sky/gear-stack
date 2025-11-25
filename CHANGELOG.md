@@ -21,6 +21,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.11.1] - 2025-01-24
+
+### Fixed
+- **Duplicate Containers/Items Bug**: Fixed critical bug causing duplicate containers and items when using "Generate Sample Set" feature
+  - Removed redundant localStorage backup calls in `gearContainerService` and `gearItemService`
+  - Store already automatically saves to localStorage via `saveToStorage()` method
+  - Local service methods were creating new objects with new IDs, causing duplicates
+  - Affected operations: `createContainer`, `updateContainer`, `createItem`, `updateItem`, `batchUpdateOrder`
+  - Now containers and items are created only once (via API) and properly synced to store/localStorage
+
+### Technical Details
+- Removed unnecessary `gearContainerLocalService.createContainer()` backup call
+- Removed unnecessary `gearContainerLocalService.updateContainer()` backup call
+- Removed unnecessary `gearItemLocalService.createItem()` backup call
+- Removed unnecessary `gearItemLocalService.updateItem()` backup call
+- Removed unnecessary `gearItemLocalService.batchUpdateOrder()` backup call
+- Store's `addContainer()` and `updateContainer()` methods already handle localStorage persistence automatically
+
+---
+
 ## [2.11.0] - 2025-01-24
 
 ### Added

@@ -24,10 +24,7 @@ export const gearItemService = () => {
           // Refresh container from API to get updated items
           const container = await gearContainerApiService.getContainer(containerId)
           useGearStore().updateContainer(container)
-          // Also save to localStorage as backup
-          gearItemLocalService.createItem(containerId, data).catch(err => {
-            console.warn('Failed to save item to localStorage backup:', err)
-          })
+          // Store automatically saves to localStorage via saveToStorage()
           return item
         } catch (error) {
           // Fallback to localStorage on API error
@@ -58,10 +55,7 @@ export const gearItemService = () => {
             if (container.items.some(i => i.id === itemId)) {
               const updatedContainer = await gearContainerApiService.getContainer(container.id)
               store.updateContainer(updatedContainer)
-              // Also update in localStorage as backup
-              gearItemLocalService.updateItem(itemId, data).catch(err => {
-                console.warn('Failed to update item in localStorage backup:', err)
-              })
+              // Store automatically saves to localStorage via saveToStorage()
               break
             }
           }
@@ -109,10 +103,7 @@ export const gearItemService = () => {
             if (container.items.some(i => items.some(updated => updated.id === i.id))) {
               const updatedContainer = await gearContainerApiService.getContainer(container.id)
               useGearStore().updateContainer(updatedContainer)
-              // Also update in localStorage as backup
-              gearItemLocalService.batchUpdateOrder(items).catch(err => {
-                console.warn('Failed to update items in localStorage backup:', err)
-              })
+              // Store automatically saves to localStorage via saveToStorage()
               break
             }
           }

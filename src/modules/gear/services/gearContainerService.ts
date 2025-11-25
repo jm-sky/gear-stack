@@ -22,10 +22,7 @@ export const gearContainerService = () => {
           const container = await gearContainerApiService.createContainer(data)
           const store = useGearStore()
           store.addContainer(container)
-          // Also save to localStorage as backup
-          gearContainerLocalService.createContainer(data).catch(err => {
-            console.warn('Failed to save container to localStorage backup:', err)
-          })
+          // Store automatically saves to localStorage via saveToStorage()
           return container
         } catch (error) {
           // Fallback to localStorage on API error
@@ -38,10 +35,7 @@ export const gearContainerService = () => {
           const container = await gearContainerApiService.updateContainer(id, data)
           const store = useGearStore()
           store.updateContainer(container)
-          // Also save to localStorage as backup
-          gearContainerLocalService.updateContainer(id, data).catch(err => {
-            console.warn('Failed to save container to localStorage backup:', err)
-          })
+          // Store automatically saves to localStorage via saveToStorage()
           return container
         } catch (error) {
           // Fallback to localStorage on API error
