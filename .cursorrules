@@ -97,3 +97,21 @@ import { MessageSquare, Sparkles } from 'lucide-vue-next'
 - Example: `text-sm sm:text-base lg:text-lg` (small on mobile, base on tablet, large on desktop)
 - Consider spacing, typography, layout, and visibility across breakpoints
 
+## FastAPI Dependencies (Backend)
+
+**CRITICAL:** Annotated dependencies (`AdminUser`, `CurrentUser`) must be used as function parameters, NOT in `dependencies=[Depends(...)]`.
+
+✅ **Correct:**
+```python
+@router.post("/endpoint")
+async def endpoint(current_user: AdminUser):
+    ...
+```
+
+❌ **Incorrect:**
+```python
+@router.post("/endpoint", dependencies=[Depends(AdminUser)])
+async def endpoint():
+    ...
+```
+
