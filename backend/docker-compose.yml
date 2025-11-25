@@ -54,6 +54,9 @@ services:
       - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
       - RECAPTCHA_MIN_SCORE=${RECAPTCHA_MIN_SCORE}
       - STORAGE_BASE_URL=${STORAGE_BASE_URL:-}
+      # Image Search Engines API Keys
+      - PIXABAY_API_KEY=${PIXABAY_API_KEY:-}
+      - UNSPLASH_API_KEY=${UNSPLASH_API_KEY:-}
     ports:
       - "${APP_PORT:-8000}:8000"
     # Volumes (optional - for persistent logs)

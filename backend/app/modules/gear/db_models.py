@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, JSON, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -202,6 +202,16 @@ class ItemImageDB(Base):
     is_processed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     original_file_size: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
+    # Source attribution (for images fetched from web)
+    search_engine_id: Mapped[str | None] = mapped_column(
+        String(36),
+        ForeignKey("image_search_engines.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    source_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    source_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -212,6 +222,7 @@ class ItemImageDB(Base):
 
     # Relationships
     item: Mapped["GearItemDB"] = relationship("GearItemDB", back_populates="images")
+    search_engine: Mapped["ImageSearchEngineDB | None"] = relationship("ImageSearchEngineDB", foreign_keys=[search_engine_id])
 
     def __repr__(self) -> str:
         return f"<ItemImageDB(id={self.id}, item_id={self.item_id}, file_name={self.file_name})>"
@@ -224,6 +235,63 @@ GearItemDB.images = relationship(
     cascade="all, delete-orphan",
     order_by="ItemImageDB.order",
 )
+
+
+class ImageSearchEngineDB(Base):
+    """SQLAlchemy model for image search engines.
+
+    Represents configurable image search engines (HTML scrapers or API-based)
+    for automatically fetching item images from external sources.
+
+    Attributes:
+        id: Unique identifier (ULID format, 36 chars)
+        name: Display name (e.g., "Militaria.pl", "Allegro")
+        type: Engine type ("html_scraper" or "api")
+        base_url: Base URL for the search engine
+        search_template: URL template for search queries (for HTML scrapers)
+        image_selectors: JSON object with CSS selectors (for HTML scrapers)
+        api_endpoint: API endpoint path (for API-based engines)
+        api_key: API key (encrypted at rest, for API-based engines)
+        request_headers: JSON object with custom headers (for API-based engines)
+        response_mapping: JSON object with JSON path mappings (for API-based engines)
+        is_active: Whether this engine is active
+        priority: Search priority (lower numbers = higher priority)
+        created_at: Creation timestamp
+        updated_at: Last update timestamp
+    """
+
+    __tablename__ = "image_search_engines"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    type: Mapped[str] = mapped_column(String(20), nullable=False)  # "html_scraper" | "api"
+    base_url: Mapped[str] = mapped_column(String(500), nullable=False)
+
+    # HTML Scraper fields
+    search_template: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    image_selectors: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+
+    # API fields
+    api_endpoint: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    api_key: Mapped[str | None] = mapped_column(Text, nullable=True)  # Encrypted at rest
+    request_headers: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    response_mapping: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+
+    # Status
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    priority: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    def __repr__(self) -> str:
+        return f"<ImageSearchEngineDB(id={self.id}, name={self.name}, type={self.type})>"
+
 
 # Add user relationship for public containers
 from app.modules.auth.db_models import UserDB  # noqa: E402

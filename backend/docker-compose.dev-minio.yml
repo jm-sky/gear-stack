@@ -106,6 +106,9 @@ services:
       - STORAGE_S3_SECRET_KEY=${STORAGE_S3_SECRET_KEY:-${MINIO_ROOT_PASSWORD:-minioadmin123}}
       - STORAGE_S3_REGION=${STORAGE_S3_REGION:-us-east-1}
       - STORAGE_S3_ENDPOINT_URL=${STORAGE_S3_ENDPOINT_URL:-http://minio:9000}
+      # Image Search Engines API Keys
+      - PIXABAY_API_KEY=${PIXABAY_API_KEY:-}
+      - UNSPLASH_API_KEY=${UNSPLASH_API_KEY:-}
     ports:
       - "${APP_PORT:-8000}:8000"
     volumes:

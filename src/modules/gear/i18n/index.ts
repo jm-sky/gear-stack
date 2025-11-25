@@ -241,6 +241,10 @@ export const gearEn = {
       noResults: 'No images found',
       imageAdded: 'Image added successfully',
       error: 'Failed to search images',
+      selectImage: 'Select Image',
+      selectImageDescription: 'Choose an image to add to this item',
+      source: 'Source',
+      adding: 'Adding...',
     },
     sorting: {
       unsavedChanges: 'Unsaved sorting changes',
@@ -770,6 +774,10 @@ export const gearPl = {
       noResults: 'Nie znaleziono obrazków',
       imageAdded: 'Obrazek został dodany',
       error: 'Nie udało się wyszukać obrazków',
+      selectImage: 'Wybierz Obrazek',
+      selectImageDescription: 'Wybierz obrazek, aby dodać go do tego przedmiotu',
+      source: 'Źródło',
+      adding: 'Dodawanie...',
     },
     sorting: {
       unsavedChanges: 'Niezapisane zmiany sortowania',
