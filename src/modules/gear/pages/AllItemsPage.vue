@@ -1,15 +1,17 @@
 <script setup lang="ts">
-import { Package } from 'lucide-vue-next'
+import { Box, Package } from 'lucide-vue-next'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRouter } from 'vue-router'
 import DataTable from '@/components/data-table/DataTable.vue'
+import AllItemsFilters from '@/components/layout/AllItemsFilters.vue'
 import Badge from '@/components/ui/badge/Badge.vue'
 import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { ALL_ITEMS_TABLE_COLUMN_VISIBILITY_KEY } from '@/shared/config/config'
 import type { IItemWithContainer } from '../utils/allItemsColumns'
 import CategoryIcon from '../components/CategoryIcon.vue'
+import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
 import { createAllItemsColumns } from '../utils/allItemsColumns'
@@ -24,11 +26,26 @@ const { t } = useI18n()
 const { containers } = useGear()
 const { customCategories } = useGearSettings()
 const { settings: gearSettings } = useGearSettings()
+const { getContainerTypeLabel } = useContainerTypeLabel()
 const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
 
-// Get all items from all containers
-const allItems = computed<IItemWithContainer[]>(() => {
+// Filter type: 'all' | 'containers' | 'items'
+const filterType = ref<'all' | 'containers' | 'items'>('all')
+
+// Get all items from all containers (includes containers as items)
+const allItemsRaw = computed<IItemWithContainer[]>(() => {
   return getAllItems(containers.value)
+})
+
+// Filter items based on filterType
+const allItems = computed<IItemWithContainer[]>(() => {
+  if (filterType.value === 'all') {
+    return allItemsRaw.value
+  } else if (filterType.value === 'containers') {
+    return allItemsRaw.value.filter(item => item.isContainer === true)
+  } else {
+    return allItemsRaw.value.filter(item => item.isContainer !== true)
+  }
 })
 
 // Column visibility
@@ -127,20 +144,34 @@ function navigateToContainer(containerId: string) {
         :enable-column-visibility="true"
         :initial-page-size="20"
       >
+        <template #toolbar-filters>
+          <AllItemsFilters v-model:filter-type="filterType" />
+        </template>
         <template #category="{ row }">
           <div class="flex items-center gap-2">
-            <CategoryIcon :category="row.original.category" :size="16" class="text-muted-foreground" />
-            <span>{{ getCategoryLabel(row.original.category) }}</span>
+            <template v-if="row.original.isContainer">
+              <Box :size="16" class="text-muted-foreground shrink-0" :class="COLOR_TEXT_CLASSES[row.original.containerColor]" />
+              <span>{{ getContainerTypeLabel(row.original.containerType ?? 'other') }}</span>
+            </template>
+            <template v-else>
+              <CategoryIcon :category="row.original.category" :size="16" class="text-muted-foreground" />
+              <span>{{ getCategoryLabel(row.original.category) }}</span>
+            </template>
           </div>
         </template>
 
         <template #name="{ row }">
-          <RouterLink
-            :to="`/gear/${row.original.containerId}/items/${row.original.id}/edit`"
-            class="font-medium hover:text-primary hover:underline transition-colors"
-          >
-            {{ row.original.name }}
-          </RouterLink>
+          <div class="flex items-center gap-2">
+            <RouterLink
+              :to="row.original.isContainer ? `/gear/${row.original.id}` : `/gear/${row.original.containerId}/items/${row.original.id}/edit`"
+              class="font-medium hover:text-primary hover:underline transition-colors"
+            >
+              {{ row.original.name }}
+            </RouterLink>
+            <Badge v-if="row.original.isContainer" variant="outline" class="text-xs">
+              {{ t('gear.item.container', 'Container') }}
+            </Badge>
+          </div>
         </template>
 
         <template #container="{ row }">

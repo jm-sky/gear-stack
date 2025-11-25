@@ -329,13 +329,13 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 - ✅ Pokazywanie cen przedmiotów w eksporcie (opcjonalnie) - zaimplementowane | **Feature:** [FEATURE-020](./features/FEATURE-020-price-display-in-export.md)
 - ✅ Dodatkowe podsumowanie "Do kupienia" na końcu eksportu - zaimplementowane | **Feature:** [FEATURE-020](./features/FEATURE-020-price-display-in-export.md)
 - 🔄 Inne opcje konfiguracji formatu (poziom szczegółowości, metadane, itp.) - planowane
-- 🚧 **Obsługa opisów przedmiotów w markdown** - częściowo zaimplementowane | **Feature:** [FEATURE-013](./features/FEATURE-013-item-descriptions.md)
+- ✅ **Obsługa opisów przedmiotów w markdown** - zaimplementowane | **Feature:** [FEATURE-013](./features/FEATURE-013-item-descriptions.md)
   - ✅ Opcje formatu opisu w eksporcie: **OFF** (domyślnie), **Inline**, **New Line** - zaimplementowane
   - ✅ Dwie opcje formatu eksportu:
     - ✅ **Opcja A (Inline):** `- Nóż *(mały, składany)* - 100g` - opis w nawiasie kursywą zaraz po nazwie
     - ✅ **Opcja B (New Line):** opis w osobnej linii z wcięciem 2 spacje, od razu pod nazwą (przed wagą/marką)
-  - 🔄 Parsowanie opisów w imporcie markdown (automatyczne rozpoznawanie obu formatów) - planowane
-  - 🔄 Obsługa zagnieżdżonych nawiasów w opisach - planowane
+  - ✅ Parsowanie opisów w imporcie markdown (automatyczne rozpoznawanie obu formatów) - zaimplementowane
+  - ✅ Obsługa zagnieżdżonych nawiasów w opisach - zaimplementowane
 - ✅ **Obsługa opisu kontenera w markdown import** - ZAIMPLEMENTOWANE
   - ✅ Parser markdown wykrywa opis kontenera (tekst między nagłówkiem a pierwszą listą przedmiotów)
   - ✅ Opis zapisywany w polu `description` kontenera
@@ -446,7 +446,7 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 ## ✏️ Szybka edycja
 
 ### Edycja bezpośrednio na liście
-**Status:** 🔄 Planned | **Priority:** High | **Feature:** FEATURE-007 | **Complexity:** Large
+**Status:** 🔄 Planned | **Priority:** Medium | **Feature:** FEATURE-007 | **Complexity:** Large
 
 - Możliwość szybkiej edycji listy - dodawanie i zmienianie przedmiotów bezpośrednio na liście
 - Bez wchodzenia w formularz
@@ -613,15 +613,6 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 
 ## 🤖 Funkcje AI (front-end only)
 
-### Funkcje AI z API calls (bez auth)
-**Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Medium
-
-- Sugestie sprzętu (na podstawie pogody, aktywności itp.) - przez API calls
-- Analiza listy (co dodać, co usunąć, alternatywy) - przez API calls
-- Generowanie gotowych presetów (UL, bushcraft, EDC) - przez API calls
-- Konwersja: opis → gotowy kontener - przez API calls
-
-> **Uwaga:** Podstawowe funkcje AI mogą działać przez API calls bez autoryzacji. Zaawansowane funkcje wymagające personalizacji i uczenia się na podstawie historii użytkownika wymagają backendu/DB - zobacz [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md)
 
 ### ✅ Rozpoznawanie parametrów przedmiotów na żądanie
 **Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium | **Version:** v0.19.0
@@ -647,23 +638,23 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 2. ✅ **Dodawanie istniejących przedmiotów do kontenera** - High priority, Medium complexity (Completed in v0.22.0)
 3. ✅ **Dodawanie własnych marek (brand)** - High priority, Medium complexity (Completed)
 4. ✅ **Error handler dla chunk loading errors** - High priority, Medium complexity (Completed)
-5. **Edycja bezpośrednio na liście** - High priority, Large complexity
+5. ✅ **Wyświetlanie kontenerów na liście wszystkich przedmiotów** - High priority, Small complexity (Completed)
 
 ### Medium Priority
 1. ✅ **Kopiowanie/klonowanie kontenerów** - Medium priority, Small complexity (Completed in v0.21.0)
 2. ✅ **Maksymalna waga kontenera (maxWeight)** - Medium priority, Medium complexity (Completed in v0.20.0)
 3. ✅ **Zintegrowany input wagi z wyborem jednostki** - Medium priority, Small complexity (Completed)
-4. **Obsługa waluty (currency)** - Medium priority, Medium complexity
-5. **Kolejność przedmiotów w kontenerze** - Medium priority, Medium complexity
-6. **Oznaczanie kontenerów jako fragmentów rodzica** - Medium priority, Medium complexity
-7. **Obsługa Markdown w notatkach** - Medium priority, Medium complexity
-8. ✅ **Rozszerzone pola** - Medium priority, Medium complexity (Completed in v0.8.0)
-9. ✅ **Rozpoznawanie parametrów przedmiotów na żądanie** - Medium priority, Medium complexity (Completed in v0.19.0)
+4. ✅ **Obsługa waluty (currency)** - Medium priority, Medium complexity (Completed)
+5. ✅ **Kolejność przedmiotów w kontenerze** - Medium priority, Medium complexity (Completed)
+6. **Edycja bezpośrednio na liście** - Medium priority, Large complexity
+7. **Oznaczanie kontenerów jako fragmentów rodzica** - Medium priority, Medium complexity
+8. **Obsługa Markdown w notatkach** - Medium priority, Medium complexity
+9. ✅ **Rozszerzone pola** - Medium priority, Medium complexity (Completed in v0.8.0)
+10. ✅ **Rozpoznawanie parametrów przedmiotów na żądanie** - Medium priority, Medium complexity (Completed in v0.19.0)
 
 ### Low Priority (Polish/Enhancement)
 1. ⏸️ **Wybór primary color** - Low priority, Small complexity (On Hold - obecny kolor zadowalający)
 2. ✅ **Footer i strony prawne** - Low priority, Small complexity (Completed)
-3. **Funkcje AI (podstawowe)** - Low priority, Medium complexity
 
 ---
 
@@ -683,8 +674,8 @@ Wszystkie funkcjonalności wymagające backendu, bazy danych lub autoryzacji zos
 
 ## 🐛 Znane błędy (Bugs)
 
-### 🚧 Pole notatek puste podczas edycji przedmiotu
-**Status:** 🚧 In Progress | **Priority:** High | **Complexity:** Medium | **Bug:** [BUG_ITEM_EDIT_NOTES_EMPTY.md](./BUG_ITEM_EDIT_NOTES_EMPTY.md)
+### ✅ Pole notatek puste podczas edycji przedmiotu
+**Status:** ✅ Completed | **Priority:** High | **Complexity:** Medium | **Bug:** [BUG_ITEM_EDIT_NOTES_EMPTY.md](./BUG_ITEM_EDIT_NOTES_EMPTY.md)
 
 - Na stronie podglądu przedmiotu (`ItemDetailPage.vue`) pole "Notatki" wyświetla poprawną zawartość
 - Na stronie edycji przedmiotu (`ItemFormPage.vue`) pole notatek jest puste

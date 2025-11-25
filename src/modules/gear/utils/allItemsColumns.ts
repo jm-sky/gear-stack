@@ -18,6 +18,8 @@ export interface IItemWithContainer {
   expirationDate?: string
   wearable?: boolean
   consumable?: boolean
+  isContainer?: boolean // True if this is a container (not a regular item)
+  containerType?: string // Container type (if isContainer is true)
 }
 
 export function createAllItemsColumns(

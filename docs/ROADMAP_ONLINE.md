@@ -79,7 +79,7 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 ## 💾 Synchronizacja i przechowywanie danych
 
 ### Synchronizacja między urządzeniami (cloud storage)
-**Status:** 🚧 Partially Completed | **Priority:** High | **Complexity:** Large
+**Status:** 🚧 Partially Completed | **Priority:** Medium | **Complexity:** Large
 
 - ✅ Cloud storage dla kontenerów i przedmiotów (PostgreSQL database)
 - ✅ API endpoints dla wszystkich operacji CRUD
@@ -103,7 +103,7 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 ## 👥 Udostępnianie i współpraca
 
 ### Udostępnianie kontenerów
-**Status:** 🚧 Partially Completed | **Priority:** High | **Complexity:** Medium
+**Status:** 🚧 Partially Completed | **Priority:** Medium | **Complexity:** Medium
 
 - ✅ Publiczne kontenery (`isPublic` flag)
 - ✅ Publiczny link do kontenera (`/gear/public/:id`)
@@ -131,7 +131,7 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 ## 🗂️ Globalny katalog i linkowanie
 
 ### Globalny katalog itemów
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium
 
 - Globalny katalog wszystkich przedmiotów (wszystkich użytkowników lub tylko własnych)
 - Przeglądarka przedmiotów (globalny katalog)
@@ -139,16 +139,17 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - Możliwość dodawania przedmiotów z katalogu do własnych kontenerów
 - Wersjonowanie przedmiotów w katalogu
 
-### Wyświetlanie kontenerów na liście wszystkich przedmiotów
-**Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Small
+### ✅ Wyświetlanie kontenerów na liście wszystkich przedmiotów
+**Status:** ✅ Completed | **Priority:** Low | **Complexity:** Small
 
-- Kontenery (plecaki, torby, itp.) powinny być widoczne na liście wszystkich przedmiotów
-- Plecak to też przedmiot - powinien być traktowany jako taki w katalogu
-- Wizualne rozróżnienie między kontenerami a zwykłymi przedmiotami na liście
-- Możliwość filtrowania: tylko kontenery / tylko przedmioty / wszystkie
+- ✅ Kontenery (plecaki, torby, itp.) są widoczne na liście wszystkich przedmiotów
+- ✅ Plecak to też przedmiot - traktowany jako taki w katalogu
+- ✅ Wizualne rozróżnienie między kontenerami a zwykłymi przedmiotami na liście (ikona Box, badge "Container")
+- ✅ Możliwość filtrowania: tylko kontenery / tylko przedmioty / wszystkie
+- ✅ Kontenery wyświetlane z całkowitą wagą (waga kontenera + zawartość)
 
 ### Linkowanie przedmiotów (zmiana w jednym → zmiana w wielu listach)
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Large
+**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Large
 
 - Przedmioty mogą być linkowane między kontenerami
 - Zmiana w jednym miejscu aktualizuje wszystkie referencje
@@ -170,13 +171,13 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - Dodawanie firm / marek (brand) - zapisywane w DB
 - Uczenie się na podstawie wcześniejszych wyborów użytkownika (dla kategorii)
 
-### Profil użytkownika - link do Gravatara
-**Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Small
+### ✅ Profil użytkownika - link do Gravatara
+**Status:** ✅ Completed | **Priority:** Low | **Complexity:** Small
 
-- Umożliwienie zapisania URL do obrazu awatara użytkownika
-- Integracja z Gravatar (automatyczne pobieranie awatara na podstawie email)
-- Pole `avatar_url` w profilu użytkownika (już istnieje w DB)
-- Możliwość podania własnego URL do awatara
+- ✅ Umożliwienie zapisania URL do obrazu awatara użytkownika
+- ✅ Integracja z Gravatar (automatyczne pobieranie awatara na podstawie email)
+- ✅ Pole `avatar_url` w profilu użytkownika (już istnieje w DB)
+- ✅ Możliwość podania własnego URL do awatara
 
 ---
 
@@ -425,21 +426,22 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 ## 📈 Priorytetyzacja
 
 ### High Priority (Następne do zrobienia)
-1. **Autoryzacja i konta użytkowników** - High priority, Large complexity
-2. **Synchronizacja między urządzeniami** - High priority, Large complexity
-3. **Udostępnianie kontenerów** - High priority, Medium complexity
+1. ✅ **Autoryzacja i konta użytkowników** - High priority, Large complexity (Completed)
+2. **Globalny katalog itemów** - High priority, Medium complexity
+3. **Linkowanie przedmiotów** - High priority, Large complexity
 
 ### Medium Priority
-1. **Globalny katalog itemów** - Medium priority, Medium complexity
-2. **Linkowanie przedmiotów** - Medium priority, Large complexity
+1. **Synchronizacja między urządzeniami** - Medium priority, Large complexity
+2. **Udostępnianie kontenerów** - Medium priority, Medium complexity
 3. **Szablony kontenerów** - Medium priority, Medium complexity
 4. **PWA** - Medium priority, Medium complexity
 
 ### Low Priority
-1. **Wersjonowanie danych** - Low priority, Large complexity
-2. **Galeria publiczna** - Low priority, Medium complexity
-3. **Funkcje AI** - Low priority, Large complexity
-4. **Statystyki i raporty** - Low priority, Medium complexity
+1. ✅ **Profil użytkownika - link do Gravatara** - Low priority, Small complexity (Completed)
+2. **Wersjonowanie danych** - Low priority, Large complexity
+3. **Galeria publiczna** - Low priority, Medium complexity
+4. **Funkcje AI** - Low priority, Large complexity
+5. **Statystyki i raporty** - Low priority, Medium complexity
 
 ---
 

@@ -36,13 +36,32 @@ describe('getAllItems', () => {
     ...overrides,
   })
 
-  it('should return empty array for empty containers', () => {
+  it('should return empty array for empty containers list', () => {
     const containers: IGearContainer[] = []
     const result = getAllItems(containers)
     expect(result).toEqual([])
   })
 
-  it('should return all items from single container', () => {
+  it('should include container properties when container is added as item', () => {
+    const container = createMockContainer('container-1', 'Backpack', [
+      createMockItem('item-1', 'Water Bottle'),
+    ])
+    container.type = 'backpack'
+    container.color = 'blue'
+    container.brand = 'Osprey'
+
+    const result = getAllItems([container])
+
+    const containerItem = result.find(item => item.isContainer === true)
+    expect(containerItem).toBeDefined()
+    expect(containerItem?.name).toBe('Backpack')
+    expect(containerItem?.containerType).toBe('backpack')
+    expect(containerItem?.containerColor).toBe('blue')
+    expect(containerItem?.brand).toBe('Osprey')
+    expect(containerItem?.isContainer).toBe(true)
+  })
+
+  it('should return all items from single container (including container itself)', () => {
     const container = createMockContainer('container-1', 'Backpack', [
       createMockItem('item-1', 'Water Bottle'),
       createMockItem('item-2', 'Knife'),
@@ -50,14 +69,21 @@ describe('getAllItems', () => {
 
     const result = getAllItems([container])
 
-    expect(result).toHaveLength(2)
-    expect(result[0]?.name).toBe('Water Bottle')
+    expect(result).toHaveLength(3) // Container + 2 items
+    // First item should be the container itself
+    expect(result[0]?.name).toBe('Backpack')
+    expect(result[0]?.isContainer).toBe(true)
     expect(result[0]?.containerId).toBe('container-1')
     expect(result[0]?.containerName).toBe('Backpack')
-    expect(result[1]?.name).toBe('Knife')
+    // Then regular items
+    expect(result[1]?.name).toBe('Water Bottle')
+    expect(result[1]?.isContainer).toBe(false)
+    expect(result[1]?.containerId).toBe('container-1')
+    expect(result[2]?.name).toBe('Knife')
+    expect(result[2]?.isContainer).toBe(false)
   })
 
-  it('should return all items from multiple containers', () => {
+  it('should return all items from multiple containers (including containers themselves)', () => {
     const container1 = createMockContainer('container-1', 'Backpack', [
       createMockItem('item-1', 'Water Bottle'),
     ])
@@ -68,10 +94,26 @@ describe('getAllItems', () => {
 
     const result = getAllItems([container1, container2])
 
-    expect(result).toHaveLength(3)
+    expect(result).toHaveLength(5) // 2 containers + 3 items
+    // First container
+    expect(result[0]?.name).toBe('Backpack')
+    expect(result[0]?.isContainer).toBe(true)
     expect(result[0]?.containerName).toBe('Backpack')
-    expect(result[1]?.containerName).toBe('Pouch')
+    // First container's items
+    expect(result[1]?.name).toBe('Water Bottle')
+    expect(result[1]?.isContainer).toBe(false)
+    expect(result[1]?.containerName).toBe('Backpack')
+    // Second container
+    expect(result[2]?.name).toBe('Pouch')
+    expect(result[2]?.isContainer).toBe(true)
     expect(result[2]?.containerName).toBe('Pouch')
+    // Second container's items
+    expect(result[3]?.name).toBe('Knife')
+    expect(result[3]?.isContainer).toBe(false)
+    expect(result[3]?.containerName).toBe('Pouch')
+    expect(result[4]?.name).toBe('Flashlight')
+    expect(result[4]?.isContainer).toBe(false)
+    expect(result[4]?.containerName).toBe('Pouch')
   })
 
   it('should exclude items from specified container', () => {
@@ -160,12 +202,14 @@ describe('getAllItems', () => {
     expect(result[0]?.containerColor).toBe('default')
   })
 
-  it('should handle container with no items', () => {
+  it('should handle container with no items (still includes container itself)', () => {
     const container = createMockContainer('container-1', 'Empty Backpack', [])
 
     const result = getAllItems([container])
 
-    expect(result).toHaveLength(0)
+    expect(result).toHaveLength(1) // Container itself
+    expect(result[0]?.name).toBe('Empty Backpack')
+    expect(result[0]?.isContainer).toBe(true)
   })
 
   it('should preserve item order from containers', () => {

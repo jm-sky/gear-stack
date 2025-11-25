@@ -107,6 +107,8 @@ const getColumnHeaderText = (column: ReturnType<Table<TData>['getColumn']>): str
       @update:model-value="(value: string | number) => handleGlobalFilterChange(String(value))"
     />
 
+    <slot name="filters" />
+
     <!-- Column Visibility Toggle -->
     <DropdownMenu v-if="enableColumnVisibility">
       <DropdownMenuTrigger as-child>

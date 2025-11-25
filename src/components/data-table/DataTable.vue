@@ -245,7 +245,11 @@ const handlePageSizeChange = (newPageSize: number) => {
         :search-placeholder="searchPlaceholder"
         :enable-filtering="enableFiltering"
         :enable-column-visibility="enableColumnVisibility"
-      />
+      >
+        <template #filters>
+          <slot name="toolbar-filters" />
+        </template>
+      </DataTableToolbar>
     </slot>
 
     <!-- Table -->

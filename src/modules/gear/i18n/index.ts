@@ -283,6 +283,11 @@ export const gearEn = {
       container: 'Container',
       empty: 'No items found',
       emptyDescription: 'Create containers and add items to see them here.',
+      filter: {
+        all: 'All',
+        containers: 'Containers',
+        items: 'Items',
+      },
     },
     shopping: {
       title: 'Shopping Planning',
@@ -800,6 +805,11 @@ export const gearPl = {
       container: 'Kontener',
       empty: 'Brak przedmiotów',
       emptyDescription: 'Utwórz kontenery i dodaj przedmioty, aby zobaczyć je tutaj.',
+      filter: {
+        all: 'Wszystkie',
+        containers: 'Kontenery',
+        items: 'Przedmioty',
+      },
     },
     shopping: {
       title: 'Planowanie Zakupów',
