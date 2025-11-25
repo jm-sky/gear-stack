@@ -14,6 +14,7 @@ from rich.table import Table
 db_app = typer.Typer(
     name="db",
     help="Database management commands",
+    no_args_is_help=True,
 )
 
 console = Console()

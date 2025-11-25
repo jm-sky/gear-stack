@@ -10,6 +10,7 @@ from rich.table import Table
 tenants_app = typer.Typer(
     name="tenants",
     help="Tenant management commands",
+    no_args_is_help=True,
 )
 
 console = Console()

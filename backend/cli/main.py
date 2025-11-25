@@ -24,7 +24,7 @@ def main() -> None:
     """Main entry point for the CLI."""
     # Initialize Sentry before running CLI (to catch all errors)
     init_sentry()
-    
+
     app()
 
 

@@ -25,6 +25,7 @@ from ..utils import (
 users_app = typer.Typer(
     name="users",
     help="User management commands",
+    no_args_is_help=True,
 )
 
 
