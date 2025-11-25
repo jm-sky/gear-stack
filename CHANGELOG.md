@@ -21,6 +21,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.12.0] - 2025-11-25
+
+### Added
+- **S3 Storage Support**: Scaleway Object Storage integration for backend
+  - Storage CLI command for testing S3 connectivity (`storage info`, `storage test`)
+  - S3 environment variables in production docker-compose.yml
+  - Support for Scaleway Object Storage (Warsaw region: pl-waw)
+  - Automatic storage adapter switching between local and S3 based on configuration
+
+### Changed
+- Image uploads now use configured storage backend (local or S3)
+- Backend storage adapter automatically selects S3 when `STORAGE_TYPE=s3` is set
+
+---
+
 ## [2.11.1] - 2025-01-24
 
 ### Fixed
