@@ -9,9 +9,11 @@ import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { useBackend } from '@/shared/composables/useBackend'
+import { config } from '@/shared/config/config'
 import type { IGearContainer, IGearItem } from '../types/gear.types'
 import CategoryIcon from '../components/CategoryIcon.vue'
 import ItemImageGallery from '../components/ItemImageGallery.vue'
+import SearchImagesButton from '../components/SearchImagesButton.vue'
 import { useGearSettings } from '../composables/useGearSettings'
 import { GearRoutePath } from '../routes'
 import { gearContainerService } from '../services/gearContainerService'
@@ -338,7 +340,15 @@ const hasDetails = computed<boolean>(() => {
         <ItemImageGallery
           :item-id="itemId"
           :editable="canManageImages"
-        />
+        >
+          <template #header-actions>
+            <SearchImagesButton
+              v-if="canManageImages && shouldUseAPI && config.features.imageSearch.enabled"
+              :item-id="item.id"
+              @reload="loadItem"
+            />
+          </template>
+        </ItemImageGallery>
       </div>
     </div>
   </AuthenticatedLayout>

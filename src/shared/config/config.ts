@@ -34,6 +34,11 @@ export const config = {
       enabled: !!import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID,
     },
   },
+  features: {
+    imageSearch: {
+      enabled: import.meta.env.VITE_ENABLE_IMAGE_SEARCH === 'true',
+    },
+  },
   defaults: {
     preferredWeightUnit: 'g' as TGearWeightUnit,
   },

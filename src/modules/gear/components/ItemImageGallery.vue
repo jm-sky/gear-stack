@@ -272,9 +272,14 @@ onMounted(() => {
 
 <template>
   <div class="space-y-4">
-    <h3 class="text-lg font-semibold">
-      {{ t('fileUpload.imageGallery.title') }}
-    </h3>
+    <div class="flex flex-row items-center justify-between gap-2">
+      <h3 class="text-lg font-semibold">
+        {{ t('fileUpload.imageGallery.title') }}
+      </h3>
+      <div class="flex flex-row gap-2 items-center justify-end">
+        <slot name="header-actions" />
+      </div>
+    </div>
 
     <!-- Loading skeleton -->
     <div v-if="isLoading && images.length === 0" class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">

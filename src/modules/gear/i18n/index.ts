@@ -235,6 +235,13 @@ export const gearEn = {
       exportToPromptDescription: 'Copy the content below and paste it into ChatGPT or another AI',
       moreActions: 'More actions',
     },
+    imageSearch: {
+      searchImages: 'Search Images',
+      searching: 'Searching...',
+      noResults: 'No images found',
+      imageAdded: 'Image added successfully',
+      error: 'Failed to search images',
+    },
     sorting: {
       unsavedChanges: 'Unsaved sorting changes',
       unsavedChangesDescription: 'You have reordered {count} item(s). Save changes to update the order in the database?',
@@ -756,6 +763,13 @@ export const gearPl = {
       exportToPromptSuccess: 'Markdown skopiowany do schowka',
       exportToPromptDescription: 'Skopiuj poniższą treść i wklej do ChatGPT lub innego AI',
       moreActions: 'Więcej akcji',
+    },
+    imageSearch: {
+      searchImages: 'Wyszukaj Obrazki',
+      searching: 'Wyszukiwanie...',
+      noResults: 'Nie znaleziono obrazków',
+      imageAdded: 'Obrazek został dodany',
+      error: 'Nie udało się wyszukać obrazków',
     },
     sorting: {
       unsavedChanges: 'Niezapisane zmiany sortowania',
