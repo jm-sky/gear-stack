@@ -143,6 +143,16 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
   - ✅ Łatwiejsze zarządzanie stanem (jedna kompozycja zamiast dwóch osobnych pól)
 - ✅ Obsługa wszystkich jednostek: g, kg, oz, lb
 
+### Przycisk "Importuj z Markdown" w empty state Container List
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+
+- Na stronie Container List (`ContainersListPage.vue`), gdy nie ma żadnych kontenerów (empty state), powinien być dostępny przycisk "Importuj z Markdown"
+- Obecnie w empty state są tylko przyciski:
+  - "Utwórz kontener"
+  - "Wygeneruj przykładowy zestaw"
+- Dodanie przycisku "Importuj z Markdown" w empty state ułatwi użytkownikom szybkie rozpoczęcie pracy z aplikacją poprzez import istniejących danych
+- Przycisk powinien otwierać dialog importu markdown (już istniejący `ImportMarkdownDialog`)
+
 ---
 
 ## 🔗 Relacje i Nesting
