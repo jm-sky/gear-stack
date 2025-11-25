@@ -35,6 +35,10 @@ if [ -d "$BACKEND_DIR" ] && [ -f "$BACKEND_DIR/$COMPOSE_FILE" ]; then
   sleep 5
 
   echo ""
+  echo -e "${YELLOW}📦 Installing Python dependencies...${NC}"
+  docker compose -f "$COMPOSE_FILE" exec app pip install -r requirements.txt
+
+  echo ""
   echo -e "${YELLOW}🔄 Running database migrations...${NC}"
   docker compose -f "$COMPOSE_FILE" exec app python cli.py db migrate
 
