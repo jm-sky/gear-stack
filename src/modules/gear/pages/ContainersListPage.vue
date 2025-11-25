@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { refDebounced } from '@vueuse/core'
-import { Package, Plus, PlusIcon, Sparkles } from 'lucide-vue-next'
+import { Package } from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -13,13 +13,18 @@ import ContainerCard from '../components/ContainerCard.vue'
 import ContainersFilters from '../components/ContainersFilters.vue'
 import ContainersListPageDropdown from '../components/ContainersListPageDropdown.vue'
 import ExportToPromptDialog from '../components/ExportToPromptDialog.vue'
+import GenerateExampleGearButton from '../components/GenerateExampleGearButton.vue'
 import ImportMarkdownDialog from '../components/ImportMarkdownDialog.vue'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { useGear } from '../composables/useGear'
 import { gearContainerService } from '../services/gearContainerService'
-import { generateSampleSet } from '../services/sampleSetGenerator'
+import { getActionIcon } from '../utils/actionIcons'
 import { getRootContainers as getRootContainersUtil } from '../utils/containerNesting'
 import type { TUUID } from '@/shared/types/base.type'
+
+// Action icons
+const ExportAllToPromptIcon = getActionIcon('exportAllToPrompt')
+const CreateIcon = getActionIcon('create')
 
 const router = useRouter()
 const route = useRoute()
@@ -139,16 +144,6 @@ const handleExportAllToPrompt = () => {
 
   isExportToPromptDialogOpen.value = true
 }
-
-const handleGenerateSampleSet = async () => {
-  try {
-    await generateSampleSet(t)
-    toast.success(t('gear.sampleSet.success'))
-  } catch (error) {
-    console.error('Error generating sample set:', error)
-    toast.error(t('common.error'))
-  }
-}
 </script>
 
 <template>
@@ -174,7 +169,7 @@ const handleGenerateSampleSet = async () => {
               :aria-label="$t('gear.export.allToPrompt')"
               @click="handleExportAllToPrompt"
             >
-              <Sparkles class="size-4" />
+              <ExportAllToPromptIcon class="size-4" />
             </Button>
             <Button
               v-tooltip.bottom="t('gear.container.create.title')"
@@ -182,7 +177,7 @@ const handleGenerateSampleSet = async () => {
               class="shrink-0 flex-1 sm:flex-none"
               @click="handleCreate"
             >
-              <PlusIcon class="size-4" />
+              <CreateIcon class="size-4" />
               {{ t('gear.container.create.title') }}
             </Button>
             <ContainersListPageDropdown @export-all-to-prompt="handleExportAllToPrompt" @import="handleImport" />
@@ -221,12 +216,10 @@ const handleGenerateSampleSet = async () => {
         </p>
         <div class="flex flex-col md:flex-row flex-wrap gap-2">
           <Button @click="handleCreate">
-            <Plus class="size-4" />
+            <CreateIcon class="size-4" />
             {{ t('gear.container.create.title') }}
           </Button>
-          <Button variant="outline" @click="handleGenerateSampleSet">
-            {{ t('gear.sampleSet.generateButton') }}
-          </Button>
+          <GenerateExampleGearButton size="default" :redirect="false" />
         </div>
       </div>
     </div>

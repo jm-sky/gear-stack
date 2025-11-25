@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import Alert from '@/components/ui/alert/Alert.vue'
-import AlertTitle from '@/components/ui/alert/AlertTitle.vue'
+import AlertDescription from '@/components/ui/alert/AlertDescription.vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -30,6 +30,7 @@ const emailInput = ref<string>('')
 const redirectTimeout = ref<number | null>(null)
 
 const token = computed(() => typeof route.query.token === 'string' ? route.query.token : null)
+const isVerified = computed(() => verificationStatus.value === 'success')
 
 const existingEmail = computed(() => {
   if (typeof route.query.email === 'string') {
@@ -116,19 +117,19 @@ onBeforeUnmount(() => {
 
       <div v-else class="space-y-4">
         <Alert v-if="message" variant="success">
-          <AlertTitle>
+          <AlertDescription>
             {{ message }}
-          </AlertTitle>
+          </AlertDescription>
         </Alert>
         <Alert v-if="verificationError" variant="destructive">
-          <AlertTitle>
+          <AlertDescription>
             {{ verificationError }}
-          </AlertTitle>
+          </AlertDescription>
         </Alert>
         <Alert v-else-if="!token" variant="info">
-          <AlertTitle>
+          <AlertDescription>
             {{ t('auth.verify_email.instructions') }}
-          </AlertTitle>
+          </AlertDescription>
         </Alert>
       </div>
 
@@ -154,12 +155,13 @@ onBeforeUnmount(() => {
             type="button"
             variant="default"
             :loading="isResendingVerification"
+            :disabled="isVerified || isResendingVerification"
             @click="handleResend"
           >
             {{ t('auth.verify_email.resend_button') }}
           </Button>
           <Button
-            v-if="verificationStatus === 'success'"
+            v-if="isVerified"
             type="button"
             variant="outline"
             @click="goToDashboard"

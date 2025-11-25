@@ -5,7 +5,7 @@ including validation, calculations, and orchestration of repository operations.
 """
 
 import logging
-from typing import Sequence
+from typing import Literal, Sequence, cast
 
 from .repository import GearRepository
 from .schemas import (
@@ -21,6 +21,13 @@ from .db_models import GearContainerDB, GearItemDB
 
 
 logger = logging.getLogger(__name__)
+
+# Type aliases for Literal types
+WeightUnit = Literal["g", "kg"]
+Priority = Literal["critical", "high", "medium", "low"]
+ItemStatus = Literal["owned", "missing", "toBuy"]
+Quality = Literal["low", "medium", "high"]
+ContainerColor = Literal["default", "blue", "green", "red", "yellow", "purple", "orange", "pink", "teal", "indigo"]
 
 
 class GearService:
@@ -47,27 +54,29 @@ class GearService:
         Returns:
             Item response schema
         """
+        # Cast database string fields to their Literal types
         return ItemResponse(
             id=item.id,
             name=item.name,
             category=item.category,
             quantity=item.quantity,
             weight=item.weight,
-            weightUnit=item.weight_unit,
+            weightUnit=cast(WeightUnit, item.weight_unit),
             notes=item.notes,
             expirationDate=item.expiration_date,
-            priority=item.priority,
-            status=item.status,
+            priority=cast(Priority, item.priority),
+            status=cast(ItemStatus, item.status),
             containerId=item.nested_container_id,
             price=item.price,
             url=item.url,
             brand=item.brand,
             color=item.color,
-            quality=item.quality,
+            quality=cast(Quality | None, item.quality),
             linkedItemId=item.linked_item_id,
             wearable=item.wearable,
             consumable=item.consumable,
             order=item.order,
+            showOnContainer=item.show_on_container,
             createdAt=item.created_at,
             updatedAt=item.updated_at,
         )
@@ -81,24 +90,27 @@ class GearService:
         Returns:
             Container response schema
         """
-        items = [self._map_item_to_response(item) for item in container.items]
+        # Access items through the relationship - mypy doesn't know about SQLAlchemy relationships
+        items = [self._map_item_to_response(item) for item in container.items]  # type: ignore[attr-defined]
+        # Cast database string fields to their Literal types
         return ContainerResponse(
             id=container.id,
             name=container.name,
             description=container.description,
             type=container.type,
-            color=container.color,
+            color=cast(ContainerColor | None, container.color),
             parentContainerId=container.parent_container_id,
             brand=container.brand,
             price=container.price,
             hideWhenNested=container.hide_when_nested,
             weight=container.weight,
-            weightUnit=container.weight_unit,
+            weightUnit=cast(WeightUnit | None, container.weight_unit),
             maxWeight=container.max_weight,
-            maxWeightUnit=container.max_weight_unit,
+            maxWeightUnit=cast(WeightUnit | None, container.max_weight_unit),
             url=container.url,
             isPublic=container.is_public,
             favorite=container.favorite,
+            showItemImages=container.show_item_images,
             authorName=None,  # Will be populated for public containers
             items=items,
             createdAt=container.created_at,
@@ -114,7 +126,8 @@ class GearService:
         Returns:
             Container response schema with author name
         """
-        items = [self._map_item_to_response(item) for item in container.items]
+        # Access items through the relationship - mypy doesn't know about SQLAlchemy relationships
+        items = [self._map_item_to_response(item) for item in container.items]  # type: ignore[attr-defined]
         # Filter nested containers - only show items if nested container is public
         filtered_items = []
         for item in items:
@@ -131,23 +144,25 @@ class GearService:
         if hasattr(container, "user") and container.user:
             author_name = container.user.name
 
+        # Cast database string fields to their Literal types
         return ContainerResponse(
             id=container.id,
             name=container.name,
             description=container.description,
             type=container.type,
-            color=container.color,
+            color=cast(ContainerColor | None, container.color),
             parentContainerId=container.parent_container_id,
             brand=container.brand,
             price=container.price,
             hideWhenNested=container.hide_when_nested,
             weight=container.weight,
-            weightUnit=container.weight_unit,
+            weightUnit=cast(WeightUnit | None, container.weight_unit),
             maxWeight=container.max_weight,
-            maxWeightUnit=container.max_weight_unit,
+            maxWeightUnit=cast(WeightUnit | None, container.max_weight_unit),
             url=container.url,
             isPublic=container.is_public,
             favorite=container.favorite,
+            showItemImages=container.show_item_images,
             authorName=author_name,
             items=filtered_items,
             createdAt=container.created_at,

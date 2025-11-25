@@ -1,0 +1,72 @@
+<script setup lang="ts">
+import { ChevronDown } from 'lucide-vue-next'
+import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { GearRouteName } from '@/modules/gear/routes'
+import { generateSampleSet } from '@/modules/gear/services/sampleSetGenerator'
+import type { ButtonProps } from '@/components/ui/button'
+
+export type SampleSetVariant = 'firePouch' | 'bugOutBag' | 'edc'
+
+const props = withDefaults(defineProps<{
+  size?: ButtonProps['size']
+  variant?: ButtonProps['variant']
+  class?: string
+  redirect?: boolean
+}>(), {
+  size: 'lg',
+  variant: 'outline',
+  redirect: true,
+})
+
+const router = useRouter()
+const { t } = useI18n()
+
+const handleGenerate = async (variant: SampleSetVariant) => {
+  try {
+    await generateSampleSet(t, variant)
+    toast.success(t('gear.sampleSet.success'))
+    if (props.redirect) {
+      router.push({ name: GearRouteName.Containers })
+    }
+  } catch (error) {
+    console.error('Error generating sample set:', error)
+    toast.error(t('common.error'))
+  }
+}
+</script>
+
+<template>
+  <DropdownMenu>
+    <DropdownMenuTrigger as-child>
+      <Button
+        :size="size"
+        :variant="variant"
+        :class="props.class"
+      >
+        {{ t('gear.sampleSet.generateButton', 'Generate Sample Set') }}
+        <ChevronDown class="size-4" />
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="end" class="min-w-48">
+      <DropdownMenuItem @click="handleGenerate('firePouch')">
+        {{ t('gear.sampleSet.variants.firePouch.name', 'Fire Pouch') }}
+      </DropdownMenuItem>
+      <DropdownMenuItem @click="handleGenerate('bugOutBag')">
+        {{ t('gear.sampleSet.variants.bugOutBag.name', 'Bug Out Bag') }}
+      </DropdownMenuItem>
+      <DropdownMenuItem @click="handleGenerate('edc')">
+        {{ t('gear.sampleSet.variants.edc.name', 'EDC (Every Day Carry)') }}
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
+</template>
+

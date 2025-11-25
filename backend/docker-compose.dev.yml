@@ -23,6 +23,50 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  # MinIO Object Storage (S3-compatible)
+  # Check https://quay.io/repository/minio/minio?tab=tags for latest version
+  minio:
+    image: quay.io/minio/minio:RELEASE.2025-11-24T18-20-07Z
+    container_name: gear-stack-minio
+    restart: unless-stopped
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"  # API port
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"  # Console port
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin123}
+    volumes:
+      - gear_stack_minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -x minio || exit 1"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # MinIO Client - Initialize buckets
+  # Check https://quay.io/repository/minio/mc?tab=tags for latest version
+  minio-init:
+    image: quay.io/minio/mc:RELEASE.2025-11-24T18-20-07Z
+    container_name: gear-stack-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set localminio http://minio:9000 ${MINIO_ROOT_USER:-minioadmin} ${MINIO_ROOT_PASSWORD:-minioadmin123};
+      /usr/bin/mc mb localminio/uploads --ignore-existing;
+      /usr/bin/mc anonymous set download localminio/uploads;
+      exit 0;
+      "
+    restart: "no"
+
   # Application (Development Mode)
   app:
     build:
@@ -33,6 +77,8 @@ services:
     restart: unless-stopped
     depends_on:
       db:
+        condition: service_healthy
+      minio:
         condition: service_healthy
     env_file:
       - .env
@@ -52,6 +98,14 @@ services:
       - RECAPTCHA_SITE_KEY=${RECAPTCHA_SITE_KEY}
       - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
       - RECAPTCHA_MIN_SCORE=${RECAPTCHA_MIN_SCORE}
+      - STORAGE_BASE_URL=${STORAGE_BASE_URL:-http://localhost:8000}
+      # MinIO/S3 Storage Configuration (optional - set STORAGE_TYPE=s3 to use)
+      - STORAGE_TYPE=${STORAGE_TYPE:-local}
+      - STORAGE_S3_BUCKET=${STORAGE_S3_BUCKET:-uploads}
+      - STORAGE_S3_ACCESS_KEY=${STORAGE_S3_ACCESS_KEY:-${MINIO_ROOT_USER:-minioadmin}}
+      - STORAGE_S3_SECRET_KEY=${STORAGE_S3_SECRET_KEY:-${MINIO_ROOT_PASSWORD:-minioadmin123}}
+      - STORAGE_S3_REGION=${STORAGE_S3_REGION:-us-east-1}
+      - STORAGE_S3_ENDPOINT_URL=${STORAGE_S3_ENDPOINT_URL:-http://minio:9000}
     ports:
       - "${APP_PORT:-8000}:8000"
     volumes:
@@ -65,6 +119,8 @@ services:
       - ./main.py:/app/main.py:rw,delegated
       - ./cli:/app/cli:ro,delegated
       - ./cli.py:/app/cli.py:ro,delegated
+      # Mount uploads directory for persistent file storage
+      - gear_stack_uploads:/app/uploads
     logging:
       driver: "json-file"
       options:
@@ -73,5 +129,9 @@ services:
 
 volumes:
   gear_stack_postgres_data:
+    driver: local
+  gear_stack_uploads:
+    driver: local
+  gear_stack_minio_data:
     driver: local
 

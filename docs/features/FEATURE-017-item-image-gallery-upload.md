@@ -1,6 +1,6 @@
 # FEATURE-017: Item Image Gallery Upload
 
-**Status:** 🔄 Planned
+**Status:** ✅ Completed | **Version:** v2.10.0
 **Priority:** High
 **Complexity:** Large
 **Category:** 📷 Media & Resources

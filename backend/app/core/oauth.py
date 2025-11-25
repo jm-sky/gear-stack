@@ -50,7 +50,7 @@ class OAuthProvider(ABC):
 class GoogleOAuthProvider(OAuthProvider):
     """Google OAuth provider implementation."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.client_id = settings.oauth.google_client_id
         self.client_secret = settings.oauth.google_client_secret
         self.redirect_uri = settings.oauth.google_redirect_uri
@@ -130,8 +130,8 @@ class GoogleOAuthProvider(OAuthProvider):
 class OAuthService:
     """Central OAuth service for managing multiple providers."""
 
-    def __init__(self):
-        self.providers = {
+    def __init__(self) -> None:
+        self.providers: dict[str, OAuthProvider] = {
             "google": GoogleOAuthProvider(),
         }
 

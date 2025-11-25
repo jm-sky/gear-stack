@@ -97,3 +97,5 @@ Uwaga: Większość funkcji jest w ROADMAP.md (frontend-first approach)
 
 **Ostatnia aktualizacja:** 2025-01-21
 
+
+

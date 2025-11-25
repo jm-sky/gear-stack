@@ -40,7 +40,7 @@ class AdminService:
         self.user_repository = user_repository
         self.auth_user_repository = auth_user_repository
 
-    def _serialize_datetime(self, dt) -> str | None:
+    def _serialize_datetime(self, dt: object) -> str | None:
         """Serialize datetime to ISO format string.
 
         Args:
@@ -52,13 +52,11 @@ class AdminService:
         if dt is None:
             return None
         if hasattr(dt, "isoformat"):
-            return dt.isoformat()
+            return str(dt.isoformat())
         return str(dt)
 
     # User operations
-    async def get_all_users(
-        self, skip: int = 0, limit: int = 100
-    ) -> list[AdminUserResponse]:
+    async def get_all_users(self, skip: int = 0, limit: int = 100) -> list[AdminUserResponse]:
         """Get all users with admin metadata.
 
         Args:
@@ -116,9 +114,7 @@ class AdminService:
             updatedAt=self._serialize_datetime(user.created_at) or "",  # UserDB doesn't have updated_at
         )
 
-    async def update_user(
-        self, user_id: str, user_data: UserUpdate
-    ) -> AdminUserResponse | None:
+    async def update_user(self, user_id: str, user_data: UserUpdate) -> AdminUserResponse | None:
         """Update user information.
 
         Args:
@@ -134,7 +130,7 @@ class AdminService:
             email=user_data.email,
             name=user_data.name,
             is_active=user_data.isActive,
-            role=user_data.role
+            role=user_data.role,
         )
         if not user_model:
             return None
@@ -169,9 +165,7 @@ class AdminService:
         return await self.user_repository.delete_user(user_id)
 
     # Container operations
-    async def get_all_containers(
-        self, skip: int = 0, limit: int = 100
-    ) -> list[AdminContainerResponse]:
+    async def get_all_containers(self, skip: int = 0, limit: int = 100) -> list[AdminContainerResponse]:
         """Get all containers with metadata.
 
         Args:
@@ -181,14 +175,12 @@ class AdminService:
         Returns:
             List of admin container responses
         """
-        containers_with_counts = await self.repository.get_all_containers(
-            skip=skip, limit=limit
-        )
+        containers_with_counts = await self.repository.get_all_containers(skip=skip, limit=limit)
 
         result = []
         for container_db, item_count in containers_with_counts:
-            author_name = container_db.user.name if hasattr(container_db, 'user') and container_db.user else None  # type: ignore[attr-defined]
-            author_id = container_db.user.id if hasattr(container_db, 'user') and container_db.user else None  # type: ignore[attr-defined]
+            author_name = container_db.user.name if hasattr(container_db, "user") and container_db.user else None
+            author_id = container_db.user.id if hasattr(container_db, "user") and container_db.user else None
 
             result.append(
                 AdminContainerResponse(
@@ -222,9 +214,9 @@ class AdminService:
         if not container_db:
             return None
 
-        author_name = container_db.user.name if hasattr(container_db, 'user') and container_db.user else None  # type: ignore[attr-defined]
-        author_id = container_db.user.id if hasattr(container_db, 'user') and container_db.user else None  # type: ignore[attr-defined]
-        items_count = len(container_db.items) if hasattr(container_db, 'items') else 0  # type: ignore[attr-defined]
+        author_name = container_db.user.name if hasattr(container_db, "user") and container_db.user else None
+        author_id = container_db.user.id if hasattr(container_db, "user") and container_db.user else None
+        items_count = len(container_db.items) if hasattr(container_db, "items") else 0
 
         return AdminContainerResponse(
             id=container_db.id,
@@ -252,9 +244,7 @@ class AdminService:
         return await self.repository.delete_container(container_id)
 
     # Item operations
-    async def get_all_items(
-        self, skip: int = 0, limit: int = 100
-    ) -> list[AdminItemResponse]:
+    async def get_all_items(self, skip: int = 0, limit: int = 100) -> list[AdminItemResponse]:
         """Get all items with metadata.
 
         Args:

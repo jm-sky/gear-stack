@@ -330,16 +330,26 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - Obsługa formatów: JPG, PNG, WebP
 - **Wymaga:** Wdrożenie S3 lub innego cloud storage
 
-### Zdjęcia przedmiotów (wymaga S3)
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium | **Prerequisite:** S3 Storage
+### ✅ Zdjęcia przedmiotów
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium | **Feature:** [FEATURE-017](./features/FEATURE-017-item-image-gallery-upload.md) | **Version:** v2.11.0
 
-- Możliwość dodawania zdjęć do przedmiotów w kontenerach
-- Wielokrotne zdjęcia per przedmiot (galeria)
-- Limity przestrzeni per użytkownik
-- Limity liczby plików
-- Automatyczne skalowanie i kompresja
-- Obsługa formatów: JPG, PNG, WebP
-- **Wymaga:** Wdrożenie S3 lub innego cloud storage
+- ✅ Możliwość dodawania zdjęć do przedmiotów w kontenerach (admin-only)
+- ✅ Wielokrotne zdjęcia per przedmiot (galeria, max 10 zdjęć)
+- ✅ Limity rozmiaru pliku (10 MB default)
+- ✅ Automatyczne skalowanie i kompresja (do 1920x1920, JPEG quality 85%)
+- ✅ Obsługa formatów: JPG, PNG, WebP, GIF
+- ✅ Storage adapter pattern (local filesystem + S3 support)
+- ✅ Drag-and-drop upload z VueUse
+- ✅ Primary image selection
+- ✅ Image reordering (drag-and-drop)
+- ✅ FileDropZone component (reusable)
+- ✅ Transaction safety (rollback on failure)
+- ✅ Docker volume persistence
+- ✅ Frontend integration into ItemDetailPage (ItemImageGallery component)
+- ✅ ContainerItemImagesGallery component (wyświetlanie obrazków przedmiotów na stronie kontenera)
+- ✅ Pole `showItemImages` w kontenerze (opcja pokazywania obrazków w widoku kontenera)
+- 🔄 Limity przestrzeni per użytkownik (nie zaimplementowane - future enhancement)
+- **Wsparcie:** Local storage (development) + S3 (production ready)
 
 ### Automatyczne wyszukiwanie obrazków dla przedmiotów
 **Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Large | **Feature:** [FEATURE-016](./features/FEATURE-016-automatic-item-image-fetching.md)

@@ -1,5 +1,14 @@
 <script setup lang="ts">
-import { MoreHorizontal } from 'lucide-vue-next'
+import {
+  AlertCircle,
+  CheckCircle2,
+  Edit,
+  Eye,
+  MoreHorizontal,
+  Scan,
+  ShoppingCart,
+  Trash2,
+} from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
@@ -38,6 +47,7 @@ const isNestedContainer = computed(() => {
       <!-- For nested containers: show "View Container" first -->
       <template v-if="isNestedContainer">
         <DropdownMenuItem @click="emit('viewContainer', row)">
+          <Eye class="size-4 mr-2" />
           {{ t('gear.item.viewContainer') }}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -45,15 +55,18 @@ const isNestedContainer = computed(() => {
           class="text-destructive hover:text-destructive! hover:bg-destructive/4!"
           @click="emit('delete', row)"
         >
+          <Trash2 class="size-4 mr-2" />
           {{ t('gear.actions.delete') }}
         </DropdownMenuItem>
       </template>
       <!-- For regular items: standard actions -->
       <template v-else>
         <DropdownMenuItem @click="emit('edit', row)">
+          <Edit class="size-4 mr-2" />
           {{ t('gear.actions.edit') }}
         </DropdownMenuItem>
         <DropdownMenuItem @click="emit('recognizeParameters', row)">
+          <Scan class="size-4 mr-2" />
           {{ t('gear.actions.recognizeParameters') }}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -61,18 +74,21 @@ const isNestedContainer = computed(() => {
           v-if="row.status !== 'owned'"
           @click="emit('statusChange', 'owned')"
         >
+          <CheckCircle2 class="size-4 mr-2" />
           {{ t('gear.item.statuses.owned') }}
         </DropdownMenuItem>
         <DropdownMenuItem
           v-if="row.status !== 'missing'"
           @click="emit('statusChange', 'missing')"
         >
+          <AlertCircle class="size-4 mr-2" />
           {{ t('gear.item.statuses.missing') }}
         </DropdownMenuItem>
         <DropdownMenuItem
           v-if="row.status !== 'toBuy'"
           @click="emit('statusChange', 'toBuy')"
         >
+          <ShoppingCart class="size-4 mr-2" />
           {{ t('gear.item.statuses.toBuy') }}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -80,6 +96,7 @@ const isNestedContainer = computed(() => {
           class="text-destructive hover:text-destructive! hover:bg-destructive/4!"
           @click="emit('delete', row)"
         >
+          <Trash2 class="size-4 mr-2" />
           {{ t('gear.actions.delete') }}
         </DropdownMenuItem>
       </template>

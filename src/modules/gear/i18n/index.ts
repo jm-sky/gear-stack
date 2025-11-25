@@ -43,6 +43,11 @@ export const gearEn = {
       readiness: 'Readiness',
       itemsCount: '0 items | 1 item | {count} items',
       itemsCountLabel: 'Items',
+      itemImages: {
+        title: 'Item Images',
+      },
+      showItemImages: 'Show Item Images',
+      showItemImagesDescription: 'Display item images in container view (only items with primary image)',
       color: 'Color',
       empty: 'No containers yet',
       emptyDescription: 'Create your first container to start organizing your gear.',
@@ -150,12 +155,13 @@ export const gearEn = {
         shelter: 'Shelter',
         fire: 'Fire',
         firstAid: 'First Aid',
+        blades: 'Blades',
         tools: 'Tools',
+        light: 'Light',
         navigation: 'Navigation',
         communication: 'Communication',
         clothing: 'Clothing',
         hygiene: 'Hygiene',
-        light: 'Light',
         other: 'Other',
       },
       priorities: {
@@ -193,6 +199,10 @@ export const gearEn = {
       wearableDescription: 'Item is worn/carried on person (e.g., clothing, watch, shoes)',
       consumable: 'Consumable',
       consumableDescription: 'Item is consumed/used up (e.g., food, medicine, fuel)',
+      showOnContainer: 'Show on Container',
+      showOnContainerDescription: 'Display item image in container view gallery',
+      hideFromContainer: 'Hide from container view',
+      showOnContainerDisabled: 'Image hidden from container view',
       actions: 'Actions',
       details: 'Details',
       openLink: 'Open Link',
@@ -389,6 +399,91 @@ export const gearEn = {
       ferroRod: 'Ferro Rod / Fire Starter',
       tinder: 'Tinder / Char Cloth',
       lighter: 'Lighter',
+      variants: {
+        firePouch: {
+          name: 'Fire Pouch',
+          description: 'Minimalist fire starting kit',
+        },
+        bugOutBag: {
+          name: 'Bug Out Bag',
+          description: 'Complete survival kit for emergency situations',
+          firePouch: 'Fire Pouch',
+        },
+        edc: {
+          name: 'EDC (Every Day Carry)',
+          description: 'Essential items for daily carry',
+        },
+      },
+      items: {
+        lightMyFireFiresteel: {
+          name: 'Light My Fire FireSteel 2.0',
+          notes: 'Ferrocerium rod with striker',
+        },
+        coghlansTinderQuik: {
+          name: 'Coghlan\'s Tinder Quik',
+          notes: 'Tinder tabs',
+        },
+        bicLighter: {
+          name: 'BIC Lighter',
+          notes: 'Classic disposable lighter',
+        },
+        ucoStormproofMatches: {
+          name: 'UCO Stormproof Matches',
+          notes: 'Waterproof matches in case',
+        },
+        moraknivCompanion: {
+          name: 'Morakniv Companion',
+          notes: 'Fixed blade knife',
+        },
+        leathermanWave: {
+          name: 'Leatherman Wave+',
+          notes: 'Multi-tool with pliers',
+        },
+        fenixPD36R: {
+          name: 'Fenix PD36R',
+          notes: 'Rechargeable flashlight',
+        },
+        adventureMedicalKitsUltralight: {
+          name: 'Adventure Medical Kits Ultralight',
+          notes: 'First aid kit',
+        },
+        paracord550: {
+          name: 'Paracord 550',
+          notes: '50ft paracord',
+        },
+        lifestrawPersonal: {
+          name: 'LifeStraw Personal Water Filter',
+          notes: 'Portable water filter',
+        },
+        solEmergencyBivvy: {
+          name: 'SOL Emergency Bivvy',
+          notes: 'Emergency shelter',
+        },
+        victorinoxClassicSD: {
+          name: 'Victorinox Swiss Army Knife Classic SD',
+          notes: 'Compact multi-tool',
+        },
+        olightI3TEOS: {
+          name: 'Olight I3T EOS',
+          notes: 'Keychain flashlight',
+        },
+        zippoLighter: {
+          name: 'Zippo Lighter',
+          notes: 'Windproof lighter',
+        },
+        fieldNotesNotebook: {
+          name: 'Field Notes Notebook',
+          notes: 'Pocket notebook',
+        },
+        fisherSpacePen: {
+          name: 'Fisher Space Pen',
+          notes: 'Pressurized pen',
+        },
+        ankerPowerCore10000: {
+          name: 'Anker PowerCore 10000',
+          notes: 'Portable power bank',
+        },
+      },
     },
     migration: {
       title: 'Migrate Local Data?',
@@ -463,6 +558,13 @@ export const gearPl = {
       readiness: 'Gotowość',
       itemsCount: '0 przedmiotów | 1 przedmiot | {count} przedmioty(ów)',
       itemsCountLabel: 'Przedmiotów',
+      itemImages: {
+        title: 'Obrazki Przedmiotów',
+        hidden: 'Obrazki przedmiotów ukryte',
+      },
+      showItemImages: 'Pokaż Obrazki Przedmiotów',
+      showItemImagesDescription: 'Wyświetl obrazki przedmiotów w widoku kontenera (tylko przedmioty z obrazkiem głównym)',
+      hideItemImages: 'Ukryj Obrazki Przedmiotów',
       color: 'Kolor',
       empty: 'Brak kontenerów',
       emptyDescription: 'Utwórz swój pierwszy kontener, aby zacząć organizować sprzęt.',
@@ -570,12 +672,13 @@ export const gearPl = {
         shelter: 'Schronienie',
         fire: 'Ogień',
         firstAid: 'Pierwsza Pomoc',
+        blades: 'Ostrza',
         tools: 'Narzędzia',
+        light: 'Światło',
         navigation: 'Nawigacja',
         communication: 'Komunikacja',
         clothing: 'Odzież',
         hygiene: 'Higiena',
-        light: 'Światło',
         other: 'Inne',
       },
       priorities: {
@@ -613,6 +716,10 @@ export const gearPl = {
       wearableDescription: 'Przedmiot noszony na sobie (np. odzież, zegarek, buty)',
       consumable: 'Zużywalne',
       consumableDescription: 'Przedmiot zużywany/zużywalny (np. jedzenie, lekarstwa, paliwo)',
+      showOnContainer: 'Pokaż w Kontenerze',
+      showOnContainerDescription: 'Wyświetl obrazek przedmiotu w galerii widoku kontenera',
+      hideFromContainer: 'Ukryj z widoku kontenera',
+      showOnContainerDisabled: 'Obrazek ukryty z widoku kontenera',
       actions: 'Akcje',
       details: 'Szczegóły',
       openLink: 'Otwórz Link',
@@ -809,6 +916,91 @@ export const gearPl = {
       ferroRod: 'Krzesiwo magnezowe / Ferro Rod',
       tinder: 'Rozpałka / Char Cloth',
       lighter: 'Zapalniczka',
+      variants: {
+        firePouch: {
+          name: 'Saszetka na ogień',
+          description: 'Minimalistyczny zestaw do rozpalania ognia',
+        },
+        bugOutBag: {
+          name: 'Bug Out Bag',
+          description: 'Kompletny zestaw survivalowy na wypadek sytuacji awaryjnych',
+          firePouch: 'Saszetka na ogień',
+        },
+        edc: {
+          name: 'EDC (Every Day Carry)',
+          description: 'Niezbędne przedmioty do codziennego noszenia',
+        },
+      },
+      items: {
+        lightMyFireFiresteel: {
+          name: 'Light My Fire FireSteel 2.0',
+          notes: 'Krzesiwo ferrocerowe ze strykerem',
+        },
+        coghlansTinderQuik: {
+          name: 'Coghlan\'s Tinder Quik',
+          notes: 'Zapalające tabliczki',
+        },
+        bicLighter: {
+          name: 'Zapalniczka BIC',
+          notes: 'Klasyczna jednorazowa zapalniczka',
+        },
+        ucoStormproofMatches: {
+          name: 'Zapałki wodoodporne UCO',
+          notes: 'Wodoodporne zapałki w etui',
+        },
+        moraknivCompanion: {
+          name: 'Morakniv Companion',
+          notes: 'Nóż z stałym ostrzem',
+        },
+        leathermanWave: {
+          name: 'Leatherman Wave+',
+          notes: 'Multi-tool z szczypcami',
+        },
+        fenixPD36R: {
+          name: 'Fenix PD36R',
+          notes: 'Latarka z możliwością ładowania',
+        },
+        adventureMedicalKitsUltralight: {
+          name: 'Apteczka Adventure Medical Kits Ultralight',
+          notes: 'Apteczka pierwszej pomocy',
+        },
+        paracord550: {
+          name: 'Paracord 550',
+          notes: 'Paracord 50 stóp',
+        },
+        lifestrawPersonal: {
+          name: 'Filtr do wody LifeStraw Personal',
+          notes: 'Przenośny filtr do wody',
+        },
+        solEmergencyBivvy: {
+          name: 'SOL Emergency Bivvy',
+          notes: 'Awaryjne schronienie',
+        },
+        victorinoxClassicSD: {
+          name: 'Victorinox Swiss Army Knife Classic SD',
+          notes: 'Kompaktowy multi-tool',
+        },
+        olightI3TEOS: {
+          name: 'Olight I3T EOS',
+          notes: 'Latarka na brelok',
+        },
+        zippoLighter: {
+          name: 'Zapalniczka Zippo',
+          notes: 'Zapalniczka wiatroodporna',
+        },
+        fieldNotesNotebook: {
+          name: 'Notatnik Field Notes',
+          notes: 'Kieszonkowy notatnik',
+        },
+        fisherSpacePen: {
+          name: 'Długopis Fisher Space Pen',
+          notes: 'Długopis ciśnieniowy',
+        },
+        ankerPowerCore10000: {
+          name: 'Power bank Anker PowerCore 10000',
+          notes: 'Przenośny power bank',
+        },
+      },
     },
     migration: {
       title: 'Migrować dane lokalne?',

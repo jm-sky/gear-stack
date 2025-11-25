@@ -1,15 +1,12 @@
 <script setup lang="ts">
-import { Box, Package, Star } from 'lucide-vue-next'
+import { Box, Package } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { toast } from 'vue-sonner'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import CardContent from '@/components/ui/card/CardContent.vue'
 import type { IGearContainer } from '../types/gear.types'
-import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
 import { useGearStore } from '../store/useGearStore'
 import {
@@ -28,6 +25,7 @@ import ContainerCardBadges from './ContainerCardBadges.vue'
 import ContainerCardCreatedDate from './ContainerCardCreatedDate.vue'
 import ContainerCardStats from './ContainerCardStats.vue'
 import ContainerReadinessProgressBar from './ContainerReadinessProgressBar.vue'
+import FavoriteContainerButton from './FavoriteContainerButton.vue'
 
 const props = defineProps<{
   container: IGearContainer
@@ -39,7 +37,6 @@ const emit = defineEmits<{
 const router = useRouter()
 const { t } = useI18n()
 const store = useGearStore()
-const { updateContainer } = useGear()
 const { settings: gearSettings } = useGearSettings()
 const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
 
@@ -71,25 +68,6 @@ const isNested = computed<boolean>(() => {
 const handleShow = () => {
   router.push(`/gear/${props.container.id}`)
 }
-
-// Toggle favorite status
-const handleToggleFavorite = async (e: Event) => {
-  e.stopPropagation()
-  try {
-    const newFavoriteStatus = !props.container.favorite
-    await updateContainer(props.container.id, {
-      favorite: newFavoriteStatus,
-    })
-    toast.success(
-      newFavoriteStatus
-        ? t('gear.container.favoriteAdded')
-        : t('gear.container.favoriteRemoved'),
-    )
-  } catch (error) {
-    console.error('Failed to update favorite status:', error)
-    toast.error(t('common.error'))
-  }
-}
 </script>
 
 <template>
@@ -112,20 +90,7 @@ const handleToggleFavorite = async (e: Event) => {
         </Badge>
       </div>
       <div class="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          class="size-8 p-0"
-          :aria-label="container.favorite ? t('gear.container.removeFavorite') : t('gear.container.addFavorite')"
-          @click.stop="handleToggleFavorite"
-        >
-          <Star
-            :class="[
-              'size-4',
-              container.favorite ? 'fill-yellow-500 text-yellow-500' : 'text-muted-foreground',
-            ]"
-          />
-        </Button>
+        <FavoriteContainerButton :container />
         <ContainerCardActions :container @delete="emit('delete', $event)" />
       </div>
     </CardHeader>

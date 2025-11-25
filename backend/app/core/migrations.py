@@ -175,9 +175,11 @@ async def is_database_initialized() -> bool:
     try:
         async with engine.begin() as conn:
             # Use run_sync to execute inspect on the sync connection
-            def _check_tables(sync_conn):
-                inspector = inspect(sync_conn)
-                tables = inspector.get_table_names()
+            def _check_tables(sync_conn: object) -> bool:
+                insp = inspect(sync_conn)
+                if insp is None:
+                    return False
+                tables = insp.get_table_names()
                 return len(tables) > 0
 
             return await conn.run_sync(_check_tables)

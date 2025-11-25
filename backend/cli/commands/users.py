@@ -673,9 +673,7 @@ async def _users_toggle_admin_async(identifier: str | None, yes: bool) -> None:
         with console.status(f"[bold green]Updating user...", spinner="dots"):
             await _toggle_admin_in_db(user["id"], new_admin_status)
 
-        console.print(
-            f"\n[bold green]✓[/bold green] User {'promoted to administrator' if new_admin_status else 'demoted to regular user'} successfully\n"
-        )
+        console.print(f"\n[bold green]✓[/bold green] User {'promoted to administrator' if new_admin_status else 'demoted to regular user'} successfully\n")
 
     except Exception as e:
         console.print(f"\n[red]Error toggling admin status:[/red] {e}\n")

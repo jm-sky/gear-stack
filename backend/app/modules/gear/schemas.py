@@ -50,6 +50,7 @@ class ContainerCreate(BaseModel):
     url: str | None = None
     isPublic: bool | None = Field(default=None, alias="isPublic")
     favorite: bool | None = Field(default=None)
+    showItemImages: bool | None = Field(default=None, alias="showItemImages")
 
     model_config = {"populate_by_name": True}
 
@@ -72,6 +73,7 @@ class ContainerUpdate(BaseModel):
     url: str | None = None
     isPublic: bool | None = Field(default=None, alias="isPublic")
     favorite: bool | None = Field(default=None)
+    showItemImages: bool | None = Field(default=None, alias="showItemImages")
 
     model_config = {"populate_by_name": True}
 
@@ -99,6 +101,7 @@ class ItemResponse(BaseModel):
     wearable: bool | None = None
     consumable: bool | None = None
     order: int | None = Field(None, ge=0)
+    showOnContainer: bool | None = Field(None, alias="showOnContainer")
     createdAt: datetime
     updatedAt: datetime
 
@@ -124,6 +127,7 @@ class ContainerResponse(BaseModel):
     url: str | None = None
     isPublic: bool
     favorite: bool
+    showItemImages: bool | None = Field(None, alias="showItemImages")
     authorName: str | None = None  # Only populated for public containers
     items: list[ItemResponse] = []
     createdAt: datetime
@@ -155,6 +159,7 @@ class ItemCreate(BaseModel):
     wearable: bool | None = Field(default=None)
     consumable: bool | None = Field(default=None)
     order: int | None = Field(None, ge=0)
+    showOnContainer: bool | None = Field(default=None, alias="showOnContainer")
 
     model_config = {"populate_by_name": True}
 
@@ -181,6 +186,7 @@ class ItemUpdate(BaseModel):
     wearable: bool | None = None
     consumable: bool | None = None
     order: int | None = Field(None, ge=0)
+    showOnContainer: bool | None = Field(None, alias="showOnContainer")
 
     model_config = {"populate_by_name": True}
 

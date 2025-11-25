@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { FileInput, MoreVertical, Plus, Sparkles, Trash2 } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -12,6 +11,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useGear } from '../composables/useGear'
+import { getActionIcon } from '../utils/actionIcons'
+
+// Action icons
+const MoreActionsIcon = getActionIcon('moreActions')
+const CreateIcon = getActionIcon('create')
+const ImportFromMarkdownIcon = getActionIcon('importFromMarkdown')
+const ExportAllToPromptIcon = getActionIcon('exportAllToPrompt')
+const DeleteAllIcon = getActionIcon('deleteAll')
 
 const router = useRouter()
 const { t } = useI18n()
@@ -54,16 +61,16 @@ const handleExportAllToPrompt = () => {
         class="sm:shrink-0"
         :aria-label="$t('gear.actions.moreActions')"
       >
-        <MoreVertical class="size-4" />
+        <MoreActionsIcon class="size-4" />
       </Button>
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end">
       <DropdownMenuItem @click="handleCreate">
-        <Plus class="size-4 mr-2" />
+        <CreateIcon class="size-4 mr-2" />
         {{ t('gear.container.create.new') }}
       </DropdownMenuItem>
       <DropdownMenuItem @click="handleImport">
-        <FileInput class="size-4 mr-2" />
+        <ImportFromMarkdownIcon class="size-4 mr-2" />
         {{ t('gear.import.fromMarkdown') }}
       </DropdownMenuItem>
       <DropdownMenuSeparator v-if="containers.length > 0" />
@@ -71,7 +78,7 @@ const handleExportAllToPrompt = () => {
         v-if="containers.length > 0"
         @click="handleExportAllToPrompt"
       >
-        <Sparkles class="size-4 mr-2" />
+        <ExportAllToPromptIcon class="size-4 mr-2" />
         {{ t('gear.export.allToPrompt') }}
       </DropdownMenuItem>
       <DropdownMenuSeparator v-if="containers.length > 0" />
@@ -80,7 +87,7 @@ const handleExportAllToPrompt = () => {
         class="text-destructive focus:text-destructive"
         @click="handleDeleteAll"
       >
-        <Trash2 class="size-4 mr-2" />
+        <DeleteAllIcon class="size-4 mr-2" />
         {{ t('gear.container.deleteAll') }}
       </DropdownMenuItem>
     </DropdownMenuContent>

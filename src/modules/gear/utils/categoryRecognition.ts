@@ -35,11 +35,17 @@ export const CATEGORY_KEYWORDS: Record<TGearItemCategory, string[]> = {
     // Polish
     'apteczka', 'pierwsza', 'pomoc', 'medyczny', 'bandaż', 'lek', 'zdrowie', 'rana', 'uraz',
   ],
+  blades: [
+    // English
+    'knife', 'knives', 'blade', 'blades', 'machete', 'machetes', 'axe', 'axes', 'hatchet', 'hatchets', 'sword', 'swords', 'dagger', 'daggers', 'cleaver', 'cleavers',
+    // Polish
+    'nóż', 'noże', 'ostrze', 'ostrza', 'maczeta', 'maczety', 'siekiera', 'siekery', 'toporek', 'toporki', 'miecz', 'miecze', 'sztylet', 'sztylety', 'tasak', 'tasaki',
+  ],
   tools: [
     // English
-    'tool', 'knife', 'multitool', 'axe', 'hatchet', 'saw', 'hammer', 'screwdriver', 'wrench', 'pliers', 'shovel', 'trowel', 'entrenching',
+    'tool', 'tools', 'multitool', 'multitools', 'saw', 'saws', 'hammer', 'hammers', 'screwdriver', 'screwdrivers', 'wrench', 'wrenches', 'pliers', 'shovel', 'shovels', 'trowel', 'trowels', 'entrenching',
     // Polish
-    'narzędzie', 'nóż', 'siekiera', 'toporek', 'piła', 'młotek', 'śrubokręt', 'klucz', 'obcęgi', 'niezbędnik', 'saperka', 'łopatka',
+    'narzędzie', 'narzędzia', 'niezbędnik', 'niezbędniki', 'piła', 'piły', 'młotek', 'młotki', 'śrubokręt', 'śrubokręty', 'klucz', 'klucze', 'obcęgi', 'saperka', 'saperki', 'łopatka', 'łopatki',
   ],
   navigation: [
     // English

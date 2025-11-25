@@ -10,7 +10,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.modules.auth.repositories import UserRepository as AuthUserRepository, get_user_repository as get_auth_user_repository
+from app.modules.auth.repositories import (
+    UserRepository as AuthUserRepository,
+    get_user_repository as get_auth_user_repository,
+)
 from app.modules.users.dependencies import AdminUser
 from app.modules.users.repositories import UserRepository, get_user_repository
 from app.modules.users.schemas import UserUpdate

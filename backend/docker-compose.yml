@@ -53,6 +53,7 @@ services:
       - RECAPTCHA_SITE_KEY=${RECAPTCHA_SITE_KEY}
       - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
       - RECAPTCHA_MIN_SCORE=${RECAPTCHA_MIN_SCORE}
+      - STORAGE_BASE_URL=${STORAGE_BASE_URL:-}
     ports:
       - "${APP_PORT:-8000}:8000"
     # Volumes (optional - for persistent logs)

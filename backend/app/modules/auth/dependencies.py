@@ -186,6 +186,24 @@ async def get_current_user(
         return await _verify_user_token(token, user_repository, None)
 
 
+async def require_admin(
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> User:
+    """
+    Dependency to require admin privileges.
+
+    Raises:
+        HTTPException: If user is not an admin
+    """
+    if not current_user.isAdmin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin privileges required",
+        )
+    return current_user
+
+
 # Type alias for dependency injection
 CurrentUser = Annotated[User, Depends(get_current_user)]
+AdminUser = Annotated[User, Depends(require_admin)]
 AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]

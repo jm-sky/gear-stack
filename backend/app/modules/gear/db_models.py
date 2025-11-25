@@ -54,6 +54,7 @@ class GearContainerDB(Base):
     url: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_public: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
     favorite: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
+    show_item_images: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -89,6 +90,10 @@ class GearItemDB(Base):
         brand: Manufacturer/brand
         color: Item color
         quality: Quality tier (low, medium, high)
+        wearable: Whether item is worn/carried on person
+        consumable: Whether item is consumed/used up
+        order: Manual order for items within container
+        show_on_container: Whether to show item image in container view gallery
         created_at: Creation timestamp
         updated_at: Last update timestamp
     """
@@ -116,6 +121,7 @@ class GearItemDB(Base):
     wearable: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
     consumable: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
     order: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    show_on_container: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -141,7 +147,86 @@ GearContainerDB.items = relationship(
     cascade="all, delete-orphan",
 )
 
+
+class ItemImageDB(Base):
+    """SQLAlchemy model for item images.
+
+    Represents images uploaded for gear items.
+
+    Attributes:
+        id: Unique identifier (ULID format, 36 chars)
+        item_id: Parent item ID
+        user_id: Uploader user ID
+        storage_type: Storage backend type (local or s3)
+        file_path: Relative path for local storage, S3 key for S3
+        file_name: Original filename
+        file_size: File size in bytes
+        mime_type: MIME type (image/jpeg, image/png, etc.)
+        width: Image width in pixels
+        height: Image height in pixels
+        is_primary: Whether this is the primary image for the item
+        order: Display order (0-based)
+        is_processed: Whether image has been processed (resized/optimized)
+        original_file_size: Original file size before processing
+        created_at: Upload timestamp
+        updated_at: Last update timestamp
+        item: Relationship to gear item
+        user: Relationship to user
+    """
+
+    __tablename__ = "item_images"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    item_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("gear_items.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), nullable=False, index=True)
+
+    # Storage info
+    storage_type: Mapped[str] = mapped_column(String(10), nullable=False)
+    file_path: Mapped[str] = mapped_column(String(500), nullable=False)
+    file_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    file_size: Mapped[int] = mapped_column(Integer, nullable=False)
+    mime_type: Mapped[str] = mapped_column(String(50), nullable=False)
+
+    # Image metadata
+    width: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    height: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    is_primary: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+    # Processing flags
+    is_processed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    original_file_size: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    # Relationships
+    item: Mapped["GearItemDB"] = relationship("GearItemDB", back_populates="images")
+
+    def __repr__(self) -> str:
+        return f"<ItemImageDB(id={self.id}, item_id={self.item_id}, file_name={self.file_name})>"
+
+
+# Add images relationship to GearItemDB
+GearItemDB.images = relationship(
+    "ItemImageDB",
+    back_populates="item",
+    cascade="all, delete-orphan",
+    order_by="ItemImageDB.order",
+)
+
 # Add user relationship for public containers
 from app.modules.auth.db_models import UserDB  # noqa: E402
 
 GearContainerDB.user = relationship("UserDB", foreign_keys=[GearContainerDB.user_id])
+ItemImageDB.user = relationship("UserDB", foreign_keys=[ItemImageDB.user_id])

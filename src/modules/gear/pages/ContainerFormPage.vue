@@ -46,6 +46,7 @@ const getInitialValues = (): ContainerFormData => {
       maxWeight: container.value.maxWeight ?? undefined,
       maxWeightUnit: container.value.maxWeightUnit ?? 'kg',
       url: container.value.url ?? '',
+      showItemImages: container.value.showItemImages ?? false,
     }
   }
   // For new containers, use default from settings (will be updated via watch)
@@ -63,6 +64,7 @@ const getInitialValues = (): ContainerFormData => {
     maxWeight: undefined,
     maxWeightUnit: 'kg' as const,
     url: '',
+    showItemImages: false,
   }
 }
 

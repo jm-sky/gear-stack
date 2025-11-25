@@ -215,7 +215,7 @@ class UserRepository(SearchMixin, UserRepositoryInterface):
         # Update fields
         user_db.email = user.email
         user_db.name = user.name
-        user_db.hashed_password = user.hashedPassword
+        user_db.hashed_password = user.hashedPassword  # type: ignore[assignment]
         user_db.is_active = user.isActive
         user_db.is_admin = user.isAdmin
         user_db.reset_token = user.resetToken
@@ -274,8 +274,8 @@ class UserRepository(SearchMixin, UserRepositoryInterface):
         if not user or not user.isActive:
             return False
 
-        # Verify current password
-        if not verify_password(current_password, user.hashedPassword):
+        # Verify current password (hashedPassword is guaranteed non-empty for active users)
+        if not user.hashedPassword or not verify_password(current_password, user.hashedPassword):
             return False
 
         # Update password

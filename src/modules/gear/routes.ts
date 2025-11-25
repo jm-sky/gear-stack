@@ -8,6 +8,7 @@ export const GearRouteName = {
   ContainerDetail: 'gear-container-detail',
   ContainerEdit: 'gear-container-edit',
   ItemNew: 'gear-item-new',
+  ItemDetail: 'gear-item-detail',
   ItemEdit: 'gear-item-edit',
   PublicContainers: 'gear-public-containers',
   PublicContainerDetail: 'gear-public-container-detail',
@@ -24,6 +25,8 @@ export const GearRoutePath = {
   ContainerEdit: '/gear/:id/edit',
   ContainerEditById: (id: string) => `/gear/${id}/edit`,
   ItemNew: '/gear/:containerId/items/new',
+  ItemDetail: '/gear/:containerId/items/:itemId',
+  ItemDetailById: (containerId: string, itemId: string) => `/gear/${containerId}/items/${itemId}`,
   ItemEdit: '/gear/:containerId/items/:itemId/edit',
   ItemEditById: (containerId: string, itemId: string) => `/gear/${containerId}/items/${itemId}/edit`,
   PublicContainers: '/gear/public',
@@ -76,13 +79,12 @@ export const gearRoutes: RouteRecordRaw[] = [
     component: () => import('@/modules/gear/pages/ItemFormPage.vue'),
     meta: { layout: 'authenticated' },
   },
-  // TODO: Implement ItemDetailPage
-  // {
-  //   path: '/gear/:containerId/items/:itemId',
-  //   name: 'gear-item-detail',
-  //   component: () => import('@/modules/gear/pages/ItemDetailPage.vue'),
-  //   meta: { layout: 'authenticated' },
-  // },
+  {
+    path: GearRoutePath.ItemDetail,
+    name: GearRouteName.ItemDetail,
+    component: () => import('@/modules/gear/pages/ItemDetailPage.vue'),
+    meta: { layout: 'authenticated' },
+  },
   {
     path: GearRoutePath.ItemEdit,
     name: GearRouteName.ItemEdit,

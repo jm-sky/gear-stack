@@ -3,15 +3,14 @@ import { BackpackIcon, FileInput, Globe, LogIn, Plus, UserPlus } from 'lucide-vu
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { AuthRouteNames } from '@/modules/auth/config/routes'
+import GenerateExampleGearButton from '@/modules/gear/components/GenerateExampleGearButton.vue'
 import { useGear } from '@/modules/gear/composables/useGear'
 import { GearRoutePath } from '@/modules/gear/routes'
 import { gearContainerService } from '@/modules/gear/services/gearContainerService'
-import { generateSampleSet } from '@/modules/gear/services/sampleSetGenerator'
 import { READINESS_EXCELLENT_THRESHOLD } from '@/modules/gear/utils/constants'
 import { config } from '@/shared/config/config'
 import { apiClient } from '@/shared/services/apiClient'
@@ -60,16 +59,6 @@ const handleCreateContainer = () => {
 
 const handleImport = () => {
   router.push('/gear?import=true')
-}
-
-const handleGenerateSampleSet = () => {
-  try {
-    generateSampleSet(t)
-    toast.success(t('gear.sampleSet.success'))
-  } catch (error) {
-    console.error('Error generating sample set:', error)
-    toast.error(t('common.error'))
-  }
 }
 
 const handleGoToPublicContainers = () => {
@@ -170,14 +159,7 @@ const readyContainersCount = computed(() => {
               <Plus class="size-5" />
               {{ t('gear.container.create.title', 'Create Container') }}
             </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              class="flex-1"
-              @click="handleGenerateSampleSet"
-            >
-              {{ t('gear.sampleSet.generateButton', 'Generate Sample Set') }}
-            </Button>
+            <GenerateExampleGearButton class="flex-1" />
           </div>
           <!-- Row 2: Login, Register (only if not authenticated) -->
           <div v-if="!isAuthenticated && config.backend.enabled" class="flex flex-col sm:flex-row gap-4 w-full">
@@ -218,14 +200,7 @@ const readyContainersCount = computed(() => {
                 <Plus class="size-5" />
                 {{ t('gear.container.create.title', 'Create Container') }}
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                class="flex-1"
-                @click="handleGenerateSampleSet"
-              >
-                {{ t('gear.sampleSet.generateButton', 'Generate Sample Set') }}
-              </Button>
+              <GenerateExampleGearButton class="flex-1" />
             </div>
             <div class="flex items-center gap-2 text-muted-foreground">
               <span>{{ t('common.or', 'or') }}</span>

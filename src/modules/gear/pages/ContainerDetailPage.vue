@@ -5,11 +5,13 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import { useAuth } from '@/modules/auth/composables/useAuth'
 import { useBackend } from '@/shared/composables/useBackend'
 import type { IGearItem } from '../types/gear.types'
 import AddNestedContainerDialog from '../components/AddNestedContainerDialog.vue'
 import CategoryPieChart from '../components/CategoryPieChart.vue'
 import ContainerHeader from '../components/ContainerHeader.vue'
+import ContainerItemImagesGallery from '../components/ContainerItemImagesGallery.vue'
 import ExportToPromptDialog from '../components/ExportToPromptDialog.vue'
 import ItemsTable from '../components/ItemsTable.vue'
 import SortConfirmationAlert from '../components/SortConfirmationAlert.vue'
@@ -25,9 +27,29 @@ const { t } = useI18n()
 const store = useGearStore()
 const { shouldUseAPI } = useBackend()
 const { container } = useContainer()
-const { deleteItem, updateItem, exportData, importData, createItem } = useGear()
+const { deleteItem, updateItem, updateContainer, exportData, importData, createItem } = useGear()
+const { user, isAuthenticated } = useAuth()
 
 const containerId = route.params.id as string
+
+// Check if user can edit container (admin AND owner)
+const canEditContainer = computed(() => {
+  if (!isAuthenticated.value || !user.value || !container.value) {
+    return false
+  }
+  // Check if user is admin
+  const isAdmin = user.value?.isAdmin ?? false
+  if (!isAdmin) return false
+
+  // For public containers, check authorId
+  if (container.value.authorId) {
+    return container.value.authorId === user.value.id
+  }
+  // For private containers (no authorId), if we can access the container,
+  // it means we own it (backend handles authorization)
+  // For localStorage, all containers are considered owned by current user
+  return true
+})
 
 // Dialog state
 const isAddContainerDialogOpen = ref(false)
@@ -66,6 +88,16 @@ const handleStatusChange = async (item: IGearItem, status: IGearItem['status']) 
   }
 }
 
+const handleHideItemImages = async () => {
+  if (!container.value) return
+  try {
+    await updateContainer(container.value.id, { showItemImages: false })
+    toast.success(t('gear.container.itemImages.hidden', 'Item images hidden'))
+  } catch {
+    toast.error(t('common.error'))
+  }
+}
+
 const handleReorder = async (reorderedItems: IGearItem[]) => {
   try {
     // If backend enabled, use batch update
@@ -77,7 +109,7 @@ const handleReorder = async (reorderedItems: IGearItem[]) => {
         return
       }
     }
-    
+
     // Fallback: Update all items with new order values (for localStorage)
     await Promise.all(
       reorderedItems.map(item =>
@@ -95,7 +127,7 @@ const handleSortingChange = async (sortedItems: IGearItem[]) => {
     pendingSortingChanges.value = []
     return
   }
-  
+
   // Always update locally first (for immediate UI feedback and persistence)
   // This ensures sorting persists even if user navigates away
   await Promise.all(
@@ -103,7 +135,7 @@ const handleSortingChange = async (sortedItems: IGearItem[]) => {
       updateItem(item.id, { order: item.order }),
     ),
   )
-  
+
   // If backend enabled, also show confirmation alert for batch save
   if (shouldUseAPI.value) {
     pendingSortingChanges.value = sortedItems
@@ -112,7 +144,7 @@ const handleSortingChange = async (sortedItems: IGearItem[]) => {
 
 const handleSaveSorting = async () => {
   if (pendingSortingChanges.value.length === 0) return
-  
+
   try {
     isSavingSorting.value = true
     const service = gearItemService()
@@ -296,7 +328,7 @@ if (!container.value) {
 
 <template>
   <AuthenticatedLayout>
-    <div v-if="container" class="space-y-6 w-full max-w-full overflow-hidden">
+    <div v-if="container" class="space-y-6 w-full max-w-full">
       <ContainerHeader
         :container="container"
         @export="handleExport"
@@ -318,12 +350,22 @@ if (!container.value) {
       <!-- Items Table -->
       <ItemsTable
         :items="items"
+        :container-id="containerId"
         @edit="handleEditItem"
         @delete="handleDeleteItem"
         @status-change="handleStatusChange"
         @recognize-parameters="handleRecognizeParameters"
         @reorder="handleReorder"
         @sorting-change="handleSortingChange"
+      />
+
+      <!-- Container Item Images Gallery -->
+      <ContainerItemImagesGallery
+        :items="items"
+        :container-id="containerId"
+        :editable="canEditContainer"
+        :show-item-images="container.showItemImages"
+        @hide="handleHideItemImages"
       />
 
       <!-- Category Pie Chart -->

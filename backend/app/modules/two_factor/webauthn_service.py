@@ -258,10 +258,18 @@ class WebAuthnService:
         }
 
         # Create authentication options
+        # Get domain from frontend URL or default to localhost
+        frontend_url = settings.frontend_url
+        # Extract domain from URL (e.g., "http://localhost:3000" -> "localhost")
+        from urllib.parse import urlparse
+
+        parsed = urlparse(frontend_url)
+        rp_id = parsed.hostname or "localhost"
+
         options = {
             "challenge": challenge,
             "timeout": 300000,  # 5 minutes in milliseconds
-            "rpId": settings.app.domain.split(":")[0],  # Remove port
+            "rpId": rp_id,
             "allowCredentials": allow_credentials,
             "userVerification": "required",
         }
@@ -407,7 +415,7 @@ class WebAuthnService:
         else:
             return "Security Key"
 
-    def _passkey_to_dict(self, passkey) -> dict[str, Any]:
+    def _passkey_to_dict(self, passkey: Any) -> dict[str, Any]:
         """Convert passkey DB model to dict.
 
         Args:

@@ -16,7 +16,13 @@ from app.common.search import SearchMixin
 from app.modules.auth.db_models import UserDB
 
 from .db_models import GearContainerDB, GearItemDB
-from .schemas import BatchOrderUpdateRequest, ContainerCreate, ContainerUpdate, ItemCreate, ItemUpdate
+from .schemas import (
+    BatchOrderUpdateRequest,
+    ContainerCreate,
+    ContainerUpdate,
+    ItemCreate,
+    ItemUpdate,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -69,13 +75,14 @@ class GearRepository(SearchMixin):
             url=data.url,
             is_public=data.isPublic if data.isPublic is not None else False,
             favorite=data.favorite if data.favorite is not None else False,
+            show_item_images=data.showItemImages if data.showItemImages is not None else False,
         )
         self.db.add(container)
         await self.db.commit()
         await self.db.refresh(container)
         # Reload container with items relationship to avoid lazy loading issues
         # For a newly created container, items will be empty, but we need to load the relationship
-        stmt = select(GearContainerDB).where(GearContainerDB.id == container.id).options(selectinload(GearContainerDB.items))
+        stmt = select(GearContainerDB).where(GearContainerDB.id == container.id).options(selectinload(GearContainerDB.items))  # type: ignore[attr-defined]
         result = await self.db.execute(stmt)
         container = result.scalar_one()
         return container
@@ -98,7 +105,7 @@ class GearRepository(SearchMixin):
                     GearContainerDB.user_id == user_id,
                 )
             )
-            .options(selectinload(GearContainerDB.items))
+            .options(selectinload(GearContainerDB.items))  # type: ignore[attr-defined]
         )
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
@@ -114,7 +121,9 @@ class GearRepository(SearchMixin):
         Returns:
             List of containers
         """
-        stmt = select(GearContainerDB).where(GearContainerDB.user_id == user_id).options(selectinload(GearContainerDB.items)).offset(skip).limit(limit).order_by(GearContainerDB.favorite.desc(), GearContainerDB.created_at.desc())
+        stmt = (
+            select(GearContainerDB).where(GearContainerDB.user_id == user_id).options(selectinload(GearContainerDB.items)).offset(skip).limit(limit).order_by(GearContainerDB.favorite.desc(), GearContainerDB.created_at.desc())  # type: ignore[attr-defined]
+        )
         result = await self.db.execute(stmt)
         return result.scalars().all()
 
@@ -128,7 +137,17 @@ class GearRepository(SearchMixin):
         Returns:
             List of public containers with user relationship loaded
         """
-        stmt = select(GearContainerDB).where(GearContainerDB.is_public == True).options(selectinload(GearContainerDB.items), joinedload(GearContainerDB.user)).offset(skip).limit(limit).order_by(GearContainerDB.created_at.desc())  # noqa: E712
+        stmt = (
+            select(GearContainerDB)
+            .where(GearContainerDB.is_public == True)  # noqa: E712
+            .options(
+                selectinload(GearContainerDB.items),  # type: ignore[attr-defined]
+                joinedload(GearContainerDB.user),  # type: ignore[attr-defined]
+            )
+            .offset(skip)
+            .limit(limit)
+            .order_by(GearContainerDB.created_at.desc())
+        )
         result = await self.db.execute(stmt)
         return result.unique().scalars().all()
 
@@ -149,7 +168,10 @@ class GearRepository(SearchMixin):
                     GearContainerDB.is_public == True,  # noqa: E712
                 )
             )
-            .options(selectinload(GearContainerDB.items), joinedload(GearContainerDB.user))
+            .options(
+                selectinload(GearContainerDB.items),  # type: ignore[attr-defined]
+                joinedload(GearContainerDB.user),  # type: ignore[attr-defined]
+            )
         )
         result = await self.db.execute(stmt)
         return result.unique().scalar_one_or_none()
@@ -179,6 +201,7 @@ class GearRepository(SearchMixin):
             "maxWeightUnit": "max_weight_unit",
             "isPublic": "is_public",
             "favorite": "favorite",
+            "showItemImages": "show_item_images",
         }
 
         for key, value in update_data.items():
@@ -189,7 +212,7 @@ class GearRepository(SearchMixin):
         await self.db.commit()
         await self.db.refresh(container)
         # Reload container with items relationship to avoid lazy loading issues
-        stmt = select(GearContainerDB).where(GearContainerDB.id == container.id).options(selectinload(GearContainerDB.items))
+        stmt = select(GearContainerDB).where(GearContainerDB.id == container.id).options(selectinload(GearContainerDB.items))  # type: ignore[attr-defined]
         result = await self.db.execute(stmt)
         container = result.scalar_one()
         return container
@@ -260,6 +283,7 @@ class GearRepository(SearchMixin):
             wearable=data.wearable,
             consumable=data.consumable,
             order=order,
+            show_on_container=data.showOnContainer,
         )
         self.db.add(item)
         await self.db.commit()
@@ -324,6 +348,7 @@ class GearRepository(SearchMixin):
             "expirationDate": "expiration_date",
             "containerId": "nested_container_id",
             "linkedItemId": "linked_item_id",
+            "showOnContainer": "show_on_container",
         }
 
         for key, value in update_data.items():
@@ -402,4 +427,4 @@ class GearRepository(SearchMixin):
         for item in items:
             await self.db.refresh(item)
 
-        return items
+        return list(items)

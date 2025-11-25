@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useFocus } from '@vueuse/core'
 import { nextTick, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import ComboBox from '@/components/ui/combo-box/ComboBox.vue'
@@ -14,12 +13,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import Textarea from '@/components/ui/textarea/Textarea.vue'
 import WeightInputWithUnitPicker from '@/components/ui/weight-input/WeightInputWithUnitPicker.vue'
 import type { IGearItem } from '../types/gear.types'
 import { useGearSettings } from '../composables/useGearSettings'
 import { SUPPORTED_CURRENCIES } from '../utils/currencyFormatter'
 import { getBrandOptions } from '../utils/suggestedValues'
-import CategoryIcon from './CategoryIcon.vue'
+import CategorySelect from './CategorySelect.vue'
 import ColorAutocomplete from './ColorAutocomplete.vue'
 
 defineProps<{
@@ -34,26 +34,13 @@ const emit = defineEmits<{
   recognizeParameters: []
 }>()
 
-const { t } = useI18n()
-const { customCategories, customBrands, defaultCurrency } = useGearSettings()
+const { customBrands, defaultCurrency } = useGearSettings()
 
 // Auto-focus na pierwszym polu
 const nameInputRef = ref<HTMLInputElement | undefined>(undefined)
 nextTick(() => {
   useFocus(nameInputRef)
 })
-
-// Get category label helper
-const getCategoryLabel = (categoryValue: string): string => {
-  // Check if it's a custom category
-  const customCategory = customCategories.value.find(c => c.value === categoryValue)
-  if (customCategory) {
-    return customCategory.value
-  }
-
-  // Default categories
-  return t(`gear.item.categories.${categoryValue}`)
-}
 
 // Cancel handler
 const handleCancel = () => {
@@ -85,103 +72,7 @@ const handleCancel = () => {
     <FormField v-slot="{ value, handleChange }" name="category">
       <FormItem>
         <FormLabel :label="$t('gear.item.category')" required />
-        <Select :model-value="value" @update:model-value="handleChange">
-          <SelectTrigger class="min-w-36">
-            <SelectValue :placeholder="$t('gear.item.category')" />
-          </SelectTrigger>
-          <SelectContent>
-            <!-- Default Categories -->
-            <SelectItem value="water">
-              <div class="flex items-center gap-2">
-                <CategoryIcon category="water" :size="16" />
-                <span>{{ $t('gear.item.categories.water') }}</span>
-              </div>
-            </SelectItem>
-            <SelectItem value="food">
-              <div class="flex items-center gap-2">
-                <CategoryIcon category="food" :size="16" />
-                <span>{{ $t('gear.item.categories.food') }}</span>
-              </div>
-            </SelectItem>
-            <SelectItem value="shelter">
-              <div class="flex items-center gap-2">
-                <CategoryIcon category="shelter" :size="16" />
-                <span>{{ $t('gear.item.categories.shelter') }}</span>
-              </div>
-            </SelectItem>
-            <SelectItem value="fire">
-              <div class="flex items-center gap-2">
-                <CategoryIcon category="fire" :size="16" />
-                <span>{{ $t('gear.item.categories.fire') }}</span>
-              </div>
-            </SelectItem>
-            <SelectItem value="firstAid">
-              <div class="flex items-center gap-2">
-                <CategoryIcon category="firstAid" :size="16" />
-                <span>{{ $t('gear.item.categories.firstAid') }}</span>
-              </div>
-            </SelectItem>
-            <SelectItem value="tools">
-              <div class="flex items-center gap-2">
-                <CategoryIcon category="tools" :size="16" />
-                <span>{{ $t('gear.item.categories.tools') }}</span>
-              </div>
-            </SelectItem>
-            <SelectItem value="navigation">
-              <div class="flex items-center gap-2">
-                <CategoryIcon category="navigation" :size="16" />
-                <span>{{ $t('gear.item.categories.navigation') }}</span>
-              </div>
-            </SelectItem>
-            <SelectItem value="communication">
-              <div class="flex items-center gap-2">
-                <CategoryIcon category="communication" :size="16" />
-                <span>{{ $t('gear.item.categories.communication') }}</span>
-              </div>
-            </SelectItem>
-            <SelectItem value="clothing">
-              <div class="flex items-center gap-2">
-                <CategoryIcon category="clothing" :size="16" />
-                <span>{{ $t('gear.item.categories.clothing') }}</span>
-              </div>
-            </SelectItem>
-            <SelectItem value="hygiene">
-              <div class="flex items-center gap-2">
-                <CategoryIcon category="hygiene" :size="16" />
-                <span>{{ $t('gear.item.categories.hygiene') }}</span>
-              </div>
-            </SelectItem>
-            <SelectItem value="light">
-              <div class="flex items-center gap-2">
-                <CategoryIcon category="light" :size="16" />
-                <span>{{ $t('gear.item.categories.light') }}</span>
-              </div>
-            </SelectItem>
-            <SelectItem value="other">
-              <div class="flex items-center gap-2">
-                <CategoryIcon category="other" :size="16" />
-                <span>{{ $t('gear.item.categories.other') }}</span>
-              </div>
-            </SelectItem>
-
-            <!-- Custom Categories -->
-            <template v-if="customCategories.length > 0">
-              <div class="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                {{ $t('settings.categories.title') }}
-              </div>
-              <SelectItem
-                v-for="category in customCategories"
-                :key="category.id"
-                :value="category.value"
-              >
-                <div class="flex items-center gap-2">
-                  <CategoryIcon :category="category.value" :size="16" />
-                  <span>{{ getCategoryLabel(category.value) }}</span>
-                </div>
-              </SelectItem>
-            </template>
-          </SelectContent>
-        </Select>
+        <CategorySelect :model-value="value" @update:model-value="handleChange" />
         <FormMessage />
       </FormItem>
     </FormField>
@@ -207,7 +98,7 @@ const handleCancel = () => {
             <FormLabel :label="$t('gear.item.weight')" required />
             <WeightInputWithUnitPicker
               :model-value="weightValue"
-              :unit="unitValue || 'g'"
+              :unit="unitValue"
               :placeholder="$t('gear.item.weight')"
               :required="true"
               @update:model-value="handleWeightChange"
@@ -288,7 +179,7 @@ const handleCancel = () => {
     <FormField v-slot="{ componentField }" name="notes">
       <FormItem>
         <FormLabel :label="$t('gear.item.notes')" />
-        <textarea
+        <Textarea
           v-bind="componentField"
           :placeholder="$t('gear.item.notes')"
           rows="3"
@@ -446,6 +337,26 @@ const handleCancel = () => {
           </FormItem>
         </FormField>
       </div>
+
+      <!-- Show on Container (Implementation postponed - use container.showItemImages instead) -->
+      <FormField v-slot="{ componentField, handleChange }" name="showOnContainer">
+        <FormItem v-slot="{ id }" class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 opacity-50">
+          <div class="flex-1 space-y-1">
+            <FormLabel :label="$t('gear.item.showOnContainer')" class="cursor-not-allowed" />
+            <p class="text-sm text-muted-foreground">
+              {{ $t('gear.item.showOnContainerDescription') }}
+              <span class="text-xs italic"> (Implementation postponed)</span>
+            </p>
+          </div>
+          <Checkbox
+            :id
+            :model-value="componentField.modelValue"
+            :disabled="true"
+            @update:model-value="handleChange"
+          />
+          <FormMessage />
+        </FormItem>
+      </FormField>
     </div>
 
     <div class="border-t my-4" />

@@ -288,6 +288,17 @@ class RecaptchaSettings(BaseSettings):
         description="reCAPTCHA verification endpoint",
     )
 
+    @field_validator("enabled", mode="before")
+    @classmethod
+    def parse_enabled(cls, v: str | bool) -> bool:
+        """Parse enabled field from string or bool."""
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, str):
+            # Handle common boolean string representations
+            return v.lower() in ("true", "1", "yes", "on")
+        return False
+
     @field_validator("min_score")
     @classmethod
     def validate_min_score(cls, v: float) -> float:
@@ -375,6 +386,116 @@ class EmailSettings(BaseSettings):
     )
 
 
+class StorageSettings(BaseSettings):
+    """Storage configuration for file uploads."""
+
+    model_config = _base_config
+
+    # Storage type
+    type: Literal["local", "s3"] = Field(
+        default="local",
+        validation_alias="STORAGE_TYPE",
+        description="Storage backend type (local or s3)",
+    )
+
+    # Local storage
+    local_path: str = Field(
+        default="./uploads",
+        validation_alias="STORAGE_LOCAL_PATH",
+        description="Local storage base path",
+    )
+    base_url: str | None = Field(
+        default=None,
+        validation_alias="STORAGE_BASE_URL",
+        description="Base URL for serving uploaded files (e.g., https://api.gear-stack.com or http://localhost:8000). If not set, uses relative paths.",
+    )
+
+    # S3 storage
+    s3_bucket: str = Field(
+        default="",
+        validation_alias="STORAGE_S3_BUCKET",
+        description="S3 bucket name",
+    )
+    s3_access_key: str = Field(
+        default="",
+        validation_alias="STORAGE_S3_ACCESS_KEY",
+        description="S3 access key ID",
+    )
+    s3_secret_key: str = Field(
+        default="",
+        validation_alias="STORAGE_S3_SECRET_KEY",
+        description="S3 secret access key",
+    )
+    s3_region: str = Field(
+        default="us-east-1",
+        validation_alias="STORAGE_S3_REGION",
+        description="S3 region",
+    )
+    s3_endpoint_url: str | None = Field(
+        default=None,
+        validation_alias="STORAGE_S3_ENDPOINT_URL",
+        description="S3 endpoint URL (for S3-compatible services)",
+    )
+
+    # Upload limits
+    max_file_size: int = Field(
+        default=10 * 1024 * 1024,  # 10 MB
+        validation_alias="STORAGE_MAX_FILE_SIZE",
+        description="Maximum file size in bytes",
+    )
+    max_files_per_item: int = Field(
+        default=10,
+        validation_alias="STORAGE_MAX_FILES_PER_ITEM",
+        description="Maximum number of images per item",
+    )
+    allowed_mime_types: str | list[str] = Field(
+        default='["image/jpeg", "image/png", "image/webp", "image/gif"]',
+        validation_alias="STORAGE_ALLOWED_MIME_TYPES",
+        description="Allowed MIME types for uploads",
+    )
+
+    # Image processing
+    enable_processing: bool = Field(
+        default=True,
+        validation_alias="STORAGE_ENABLE_PROCESSING",
+        description="Enable auto-resize and optimization",
+    )
+    max_width: int = Field(
+        default=1920,
+        validation_alias="STORAGE_MAX_WIDTH",
+        description="Maximum image width (auto-resize)",
+    )
+    max_height: int = Field(
+        default=1920,
+        validation_alias="STORAGE_MAX_HEIGHT",
+        description="Maximum image height (auto-resize)",
+    )
+    jpeg_quality: int = Field(
+        default=85,
+        validation_alias="STORAGE_JPEG_QUALITY",
+        description="JPEG compression quality (1-100)",
+    )
+    convert_to_webp: bool = Field(
+        default=False,
+        validation_alias="STORAGE_CONVERT_TO_WEBP",
+        description="Convert images to WebP format",
+    )
+
+    @field_validator("allowed_mime_types", mode="after")
+    @classmethod
+    def parse_mime_types(cls, v: str | list[str]) -> list[str]:
+        """Parse MIME types from JSON array or comma-separated string."""
+        return parse_list_value(v)
+
+    @field_validator("jpeg_quality")
+    @classmethod
+    def validate_jpeg_quality(cls, v: int) -> int:
+        """Validate JPEG quality is in valid range."""
+        if not 1 <= v <= 100:
+            raise ValueError(f"JPEG quality must be between 1 and 100, got: {v}")
+        return v
+
+
 class Settings(BaseSettings):
     """
     Main application settings composed of nested configuration classes.
@@ -395,6 +516,7 @@ class Settings(BaseSettings):
     recaptcha: RecaptchaSettings = Field(default_factory=RecaptchaSettings)
     oauth: OAuthSettings = Field(default_factory=OAuthSettings)
     email: EmailSettings = Field(default_factory=EmailSettings)
+    storage: StorageSettings = Field(default_factory=StorageSettings)
 
     # Legacy compatibility - still accessible at root level
     frontend_url: str = Field(

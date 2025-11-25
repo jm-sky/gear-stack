@@ -70,6 +70,9 @@ class GearContainerApiService {
     if (data.favorite !== undefined && data.favorite !== null) {
       cleaned.favorite = data.favorite
     }
+    if (data.showItemImages !== undefined && data.showItemImages !== null) {
+      cleaned.showItemImages = data.showItemImages
+    }
 
     return cleaned
   }
@@ -147,6 +150,9 @@ class GearContainerApiService {
     }
     if (data.favorite !== undefined && data.favorite !== null) {
       cleaned.favorite = data.favorite
+    }
+    if (data.showItemImages !== undefined && data.showItemImages !== null) {
+      cleaned.showItemImages = data.showItemImages
     }
 
     return cleaned

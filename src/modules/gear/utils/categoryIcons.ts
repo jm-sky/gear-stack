@@ -5,6 +5,7 @@ import {
   HeartPulse,     // firstAid
   Lightbulb,      // light
   Package,        // other (default)
+  PocketKnife,    // blades
   Radio,          // communication
   Shirt,          // clothing
   Sparkles,       // hygiene
@@ -21,12 +22,13 @@ export const CATEGORY_ICONS: Record<string, Component> = {
   shelter: Tent,
   fire: Flame,
   firstAid: HeartPulse,
+  blades: PocketKnife,
   tools: Wrench,
+  light: Lightbulb,
   navigation: Compass,
   communication: Radio,
   clothing: Shirt,
   hygiene: Sparkles,
-  light: Lightbulb,
   other: Package,
 }
 

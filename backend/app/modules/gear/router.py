@@ -25,9 +25,12 @@ from .schemas import (
     ItemUpdate,
 )
 from .service import GearService
-
+from .item_image_router import router as item_image_router
 
 router = APIRouter(prefix="/gear", tags=["gear"])
+
+# Include item images router
+router.include_router(item_image_router)
 
 
 def get_gear_repository(db: AsyncSession = Depends(get_db)) -> GearRepository:

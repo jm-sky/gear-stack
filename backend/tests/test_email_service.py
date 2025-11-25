@@ -133,7 +133,8 @@ async def test_send_welcome_email(email_service: EmailService, mock_adapter: Any
 
     call_args = mock_adapter.send_email.call_args
     assert call_args.kwargs["to"] == "user@example.com"
-    assert call_args.kwargs["subject"] == "Welcome to our platform!"
+    # Subject should contain "Welcome" and app name
+    assert "Welcome" in call_args.kwargs["subject"]
     assert "welcome" in call_args.kwargs["html_body"].lower() or "John Doe" in call_args.kwargs["html_body"]
 
 
@@ -148,7 +149,8 @@ async def test_send_password_reset_email(email_service: EmailService, mock_adapt
 
     call_args = mock_adapter.send_email.call_args
     assert call_args.kwargs["to"] == "user@example.com"
-    assert call_args.kwargs["subject"] == "Password Reset Request"
+    # Subject should contain password reset indication
+    assert "Password Reset" in call_args.kwargs["subject"]
     assert reset_token in call_args.kwargs["html_body"]
 
 
@@ -162,7 +164,8 @@ async def test_send_password_changed_email(email_service: EmailService, mock_ada
 
     call_args = mock_adapter.send_email.call_args
     assert call_args.kwargs["to"] == "user@example.com"
-    assert call_args.kwargs["subject"] == "Password Changed"
+    # Subject should contain password changed indication
+    assert "Password Changed" in call_args.kwargs["subject"]
     assert "192.168.1.1" in call_args.kwargs["html_body"]
 
 
@@ -186,7 +189,8 @@ async def test_send_account_deleted_email(email_service: EmailService, mock_adap
 
     call_args = mock_adapter.send_email.call_args
     assert call_args.kwargs["to"] == "user@example.com"
-    assert call_args.kwargs["subject"] == "Account Deleted"
+    # Subject should contain account deleted indication
+    assert "Account Deleted" in call_args.kwargs["subject"]
 
 
 @pytest.mark.asyncio
@@ -253,7 +257,7 @@ async def test_get_email_service_with_smtp_adapter(monkeypatch: Any) -> None:
     """Test get_email_service returns service with SMTP adapter when configured."""
     from app.core.email.service import get_email_service
 
-    # Mock settings to have SMTP enabled
+    # Mock settings to have SMTP enabled (with retry disabled)
     mock_email_settings = MagicMock()
     mock_email_settings.enabled = True
     mock_email_settings.adapter = "smtp"
@@ -263,6 +267,7 @@ async def test_get_email_service_with_smtp_adapter(monkeypatch: Any) -> None:
     mock_email_settings.smtp_password = "password"
     mock_email_settings.smtp_from = "noreply@example.com"
     mock_email_settings.smtp_use_tls = True
+    mock_email_settings.enable_retry = False  # Disable retry to get plain SMTP adapter
 
     mock_settings = MagicMock()
     mock_settings.email = mock_email_settings

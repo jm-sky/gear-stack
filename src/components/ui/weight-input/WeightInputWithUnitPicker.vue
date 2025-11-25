@@ -3,9 +3,15 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { config } from '@/shared/config/config'
 import type { TGearWeightUnit } from '@/modules/gear/types/gear.types'
 
-interface Props {
+interface Emits {
+  (e: 'update:modelValue', value: number | undefined): void
+  (e: 'update:unit', value: TGearWeightUnit): void
+}
+
+const props = withDefaults(defineProps<{
   modelValue?: number
   unit?: TGearWeightUnit
   placeholder?: string
@@ -13,20 +19,13 @@ interface Props {
   disabled?: boolean
   min?: number
   step?: number
-}
-
-interface Emits {
-  (e: 'update:modelValue', value: number | undefined): void
-  (e: 'update:unit', value: TGearWeightUnit): void
-}
-
-const props = withDefaults(defineProps<Props>(), {
+}>(), {
   placeholder: '',
   required: false,
   disabled: false,
   min: 0,
   step: 0.01,
-  unit: 'g',
+  unit: config.defaults.preferredWeightUnit,
 })
 
 const emit = defineEmits<Emits>()

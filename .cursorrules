@@ -40,11 +40,41 @@ const checked = ref(true)
 - For regular `ref`, use standard `v-model`
 - Checkbox in Reka-ui uses `modelValue` and `@update:model-value` under the hood
 
+## Action Icons
+
+**CRITICAL:** Action icons must use the centralized mapping from `src/modules/gear/utils/actionIcons.ts`. This is the single source of truth for all action icons.
+
+✅ **Correct usage:**
+```vue
+<script setup>
+import { getActionIcon } from '@/modules/gear/utils/actionIcons'
+const ExportIcon = getActionIcon('exportToPrompt')
+</script>
+<template>
+  <Button><ExportIcon class="size-4" />Export</Button>
+</template>
+```
+
+❌ **Incorrect usage:**
+```vue
+<!-- DO NOT import icons directly -->
+<script setup>
+import { MessageSquare, Sparkles } from 'lucide-vue-next'
+</script>
+```
+
+**Notes:**
+- Always use `getActionIcon(actionKey)` instead of importing icons directly
+- Ensures consistency (e.g., `exportToPrompt` always uses `Sparkles`, not `MessageSquare`)
+- Available keys: `back`, `moreActions`, `create`, `addItem`, `addContainer`, `edit`, `delete`, `deleteAll`, `export`, `import`, `importFromMarkdown`, `exportToPrompt`, `exportAllToPrompt`, `recognizeParameters`, `recognizeParametersAll`
+- Similar pattern for category icons in `categoryIcons.ts`
+
 ## General Guidelines
 
 - Always use `v-model` for Checkbox components with regular `ref` variables
 - Use `v-model:checked` only when using `defineModel()` in component props
 - When in doubt, check existing usage in `ContainersFilters.vue` or `columns-full.ts`
+- Always use `getActionIcon()` from `actionIcons.ts` for action icons, never import icons directly
 
 ## TailwindCSS Best Practices
 

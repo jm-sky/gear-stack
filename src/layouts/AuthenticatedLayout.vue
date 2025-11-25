@@ -105,7 +105,7 @@ const handleLogout = async () => {
 
     <!-- Main Content -->
     <main class="w-full max-w-7xl mx-auto flex-1 py-6 px-2 sm:px-6 lg:px-8">
-      <div class="rounded-xl bg-card p-4 sm:p-6 shadow-lg w-full max-w-full overflow-hidden">
+      <div class="rounded-xl bg-card p-4 sm:p-6 shadow-lg w-full max-w-full">
         <slot />
       </div>
     </main>

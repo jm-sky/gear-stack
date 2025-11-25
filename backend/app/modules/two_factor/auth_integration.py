@@ -54,8 +54,8 @@ class AuthServiceWith2FA(AuthService):
         if not user:
             raise InvalidCredentialsError("Invalid email or password")
 
-        # Verify password
-        if not verify_password(password, user.hashedPassword):
+        # Verify password (hashedPassword is guaranteed non-empty for password auth)
+        if not user.hashedPassword or not verify_password(password, user.hashedPassword):
             raise InvalidCredentialsError("Invalid email or password")
 
         # Check if user is active

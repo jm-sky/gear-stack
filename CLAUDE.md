@@ -185,6 +185,48 @@ The Vite config proxies `/api` requests to the configured backend URL.
 
 ## UI Component Notes
 
+### Action Icons
+
+**CRITICAL:** Action icons must use the centralized mapping from `src/modules/gear/utils/actionIcons.ts`. This is the single source of truth for all action icons.
+
+✅ **Correct usage:**
+```vue
+<script setup>
+import { getActionIcon } from '@/modules/gear/utils/actionIcons'
+
+const ExportIcon = getActionIcon('exportToPrompt')
+const CreateIcon = getActionIcon('create')
+</script>
+
+<template>
+  <Button>
+    <ExportIcon class="size-4" />
+    Export to Prompt
+  </Button>
+</template>
+```
+
+❌ **Incorrect usage:**
+```vue
+<!-- DO NOT import icons directly -->
+<script setup>
+import { MessageSquare, Sparkles } from 'lucide-vue-next'
+</script>
+
+<template>
+  <Button>
+    <MessageSquare class="size-4" />
+    Export to Prompt
+  </Button>
+</template>
+```
+
+**Notes:**
+- Always use `getActionIcon(actionKey)` instead of importing icons directly
+- This ensures consistency across the application (e.g., `exportToPrompt` always uses `Sparkles`, not `MessageSquare`)
+- Available action keys: `back`, `moreActions`, `create`, `addItem`, `addContainer`, `edit`, `delete`, `deleteAll`, `export`, `import`, `importFromMarkdown`, `exportToPrompt`, `exportAllToPrompt`, `recognizeParameters`, `recognizeParametersAll`
+- Similar pattern exists for category icons in `src/modules/gear/utils/categoryIcons.ts`
+
 ### Reka-ui / shadcn-vue Checkbox
 
 **CRITICAL:** In Reka-ui (shadcn-vue), Checkbox uses standard `v-model`, **NOT** `v-model:checked`.

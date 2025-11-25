@@ -1,0 +1,135 @@
+"""API router for item image uploads."""
+
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.database import get_db
+from app.modules.auth.dependencies import AdminUser
+from app.modules.gear.image_upload_service import ImageUploadService
+from app.modules.gear.item_image_schemas import ImageOrdersUpdate, ItemImageResponse
+
+router = APIRouter(prefix="/items", tags=["item-images"])
+
+
+@router.post("/{item_id}/images", response_model=dict)
+async def upload_item_image(
+    item_id: str,
+    current_user: AdminUser,
+    file: UploadFile = File(...),
+    is_primary: bool = Query(False, description="Whether this should be the primary image"),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """
+    Upload image for item (admin only).
+
+    Args:
+        item_id: Item ID
+        file: Image file to upload
+        is_primary: Whether this should be the primary image
+        current_user: Current authenticated admin user
+        db: Database session
+
+    Returns:
+        Image metadata
+    """
+    service = ImageUploadService(db)
+
+    # Validate upload
+    await service.validate_upload(file, item_id)
+
+    # Upload and process
+    result = await service.upload_image(file, item_id, current_user.id, is_primary)
+
+    return result
+
+
+@router.get("/{item_id}/images", response_model=list[ItemImageResponse])
+async def get_item_images(item_id: str, db: AsyncSession = Depends(get_db)) -> list[dict]:
+    """
+    Get all images for an item.
+
+    Args:
+        item_id: Item ID
+        db: Database session
+
+    Returns:
+        List of images with URLs
+    """
+    service = ImageUploadService(db)
+    images = await service.get_item_images(item_id)
+    return images
+
+
+@router.delete("/images/{image_id}")
+async def delete_item_image(
+    image_id: str,
+    current_user: AdminUser,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """
+    Delete item image (admin only).
+
+    Args:
+        image_id: Image ID
+        current_user: Current authenticated admin user
+        db: Database session
+
+    Returns:
+        Success message
+    """
+    service = ImageUploadService(db)
+    success = await service.delete_image(image_id, current_user.id)
+
+    if not success:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image not found")
+
+    return {"message": "Image deleted successfully"}
+
+
+@router.put("/{item_id}/images/reorder")
+async def reorder_item_images(
+    item_id: str,
+    data: ImageOrdersUpdate,
+    current_user: AdminUser,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """
+    Reorder images for item (admin only).
+
+    Args:
+        item_id: Item ID
+        data: Image order updates
+        current_user: Current authenticated admin user
+        db: Database session
+
+    Returns:
+        Success message
+    """
+    service = ImageUploadService(db)
+    image_orders = [{"id": item.id, "order": item.order} for item in data.image_orders]
+    await service.reorder_images(item_id, image_orders)
+    return {"message": "Images reordered successfully"}
+
+
+@router.put("/{item_id}/images/{image_id}/primary")
+async def set_primary_image(
+    item_id: str,
+    image_id: str,
+    current_user: AdminUser,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """
+    Set image as primary for item (admin only).
+
+    Args:
+        item_id: Item ID
+        image_id: Image ID to set as primary
+        current_user: Current authenticated admin user
+        db: Database session
+
+    Returns:
+        Success message
+    """
+    service = ImageUploadService(db)
+    await service.set_primary_image(item_id, image_id)
+    return {"message": "Primary image set successfully"}

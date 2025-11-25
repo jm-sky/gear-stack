@@ -681,6 +681,30 @@ Wszystkie funkcjonalności wymagające backendu, bazy danych lub autoryzacji zos
 
 ---
 
+## 🐛 Znane błędy (Bugs)
+
+### 🚧 Pole notatek puste podczas edycji przedmiotu
+**Status:** 🚧 In Progress | **Priority:** High | **Complexity:** Medium | **Bug:** [BUG_ITEM_EDIT_NOTES_EMPTY.md](./BUG_ITEM_EDIT_NOTES_EMPTY.md)
+
+- Na stronie podglądu przedmiotu (`ItemDetailPage.vue`) pole "Notatki" wyświetla poprawną zawartość
+- Na stronie edycji przedmiotu (`ItemFormPage.vue`) pole notatek jest puste
+- Problem dotyczy trybu edycji - formularz nie jest poprawnie inicjalizowany danymi przedmiotu
+- **Przyczyna (hipoteza):** Formularz inicjalizowany jest przed załadowaniem danych przedmiotu ze store'a
+- **Kroki do reprodukcji:**
+  1. Wygeneruj zestaw przykładowy "Bug Out Bag"
+  2. Przejdź do kontenera "Bug Out Bag" → "Fire Pouch"
+  3. Wybierz przedmiot "Morakniv Companion" (ma notatki)
+  4. Na stronie podglądu widoczne są notatki
+  5. Kliknij przycisk edycji - pole notatek jest puste
+
+**Powiązane pliki:**
+- `src/modules/gear/pages/ItemFormPage.vue`
+- `src/modules/gear/pages/ItemDetailPage.vue`
+- `src/modules/gear/composables/useItem.ts`
+- `src/modules/gear/store/useGearStore.ts`
+
+---
+
 ## 📝 Notatki
 
 - Wszystkie funkcjonalności w tym pliku działają z localStorage (front-end only)

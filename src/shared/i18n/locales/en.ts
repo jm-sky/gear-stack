@@ -249,4 +249,48 @@ export default {
       later: 'Later',
     },
   },
+  fileUpload: {
+    dropZone: {
+      idle: 'Click to upload or drag and drop',
+      dragging: 'Drop files here',
+      disabled: 'Upload disabled',
+    },
+    formats: {
+      image: 'JPEG, PNG, WEBP, GIF',
+      any: 'Any file type',
+    },
+    limits: {
+      maxSize: 'max {size} MB',
+      maxFiles: '{count} files',
+      maxFile: '{count} file',
+    },
+    errors: {
+      tooManyFiles: 'Maximum {max} file(s) allowed',
+      fileTooLarge: '{name}: File size exceeds {size} MB',
+      invalidType: '{name}: Invalid file type',
+    },
+    imageGallery: {
+      title: 'Images',
+      noImages: 'No images uploaded yet',
+      primary: 'Primary',
+      tooltips: {
+        setPrimary: 'Set as primary',
+        dragToReorder: 'Drag to reorder',
+        deleteImage: 'Delete image',
+      },
+      confirmDelete: 'Are you sure you want to delete this image?',
+      messages: {
+        loadFailed: 'Failed to load images',
+        uploadSuccess: 'Image uploaded successfully',
+        uploadSuccessMultiple: '{count} images uploaded successfully',
+        uploadFailed: 'Failed to upload image',
+        deleteSuccess: 'Image deleted successfully',
+        deleteFailed: 'Failed to delete image',
+        primarySuccess: 'Primary image updated',
+        primaryFailed: 'Failed to set primary image',
+        reorderSuccess: 'Images reordered',
+        reorderFailed: 'Failed to reorder images',
+      },
+    },
+  },
 }

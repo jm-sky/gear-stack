@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
-import { ref, watch } from 'vue'
+import { nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -10,13 +10,16 @@ import TabsContent from '@/components/ui/tabs/TabsContent.vue'
 import TabsList from '@/components/ui/tabs/TabsList.vue'
 import TabsTrigger from '@/components/ui/tabs/TabsTrigger.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import type { ICreateItemDto, IUpdateItemDto } from '../types/gear.types'
+import { useBackend } from '@/shared/composables/useBackend'
+import type { ICreateItemDto, IGearItem, IUpdateItemDto } from '../types/gear.types'
 import type { IItemWithContainer } from '../utils/allItemsColumns'
 import ItemCatalogSelector from '../components/ItemCatalogSelector.vue'
 import ItemFormFields from '../components/ItemFormFields.vue'
 import { useContainer } from '../composables/useContainer'
 import { useGear } from '../composables/useGear'
-import { useItem } from '../composables/useItem'
+import { GearRoutePath } from '../routes'
+import { gearItemService } from '../services/gearItemService'
+import { useGearStore } from '../store/useGearStore'
 import { recognizeCategory } from '../utils/categoryRecognition'
 import { getDefaultItemValues } from '../utils/defaultValues'
 import { recognizeParameters } from '../utils/parameterRecognition'
@@ -26,13 +29,18 @@ const router = useRouter()
 const route = useRoute()
 const { t } = useI18n()
 const { createItem, updateItem } = useGear()
+const { shouldUseAPI } = useBackend()
+const store = useGearStore()
 
 const containerId = route.params.containerId as string
 const itemId = route.params.itemId as string | undefined
 const isEditMode: boolean = !!itemId
 
 const { container } = useContainer(containerId)
-const { item } = useItem(containerId, itemId)
+
+// Local state for item (loaded explicitly, not from computed)
+const item = ref<IGearItem | null>(null)
+const isLoading = ref(isEditMode) // Only show loading when editing
 
 // Redirect if container not found
 if (!container.value) {
@@ -62,6 +70,7 @@ const getInitialValues = (): ItemFormData => {
       quality: item.value.quality ?? undefined,
       wearable: item.value.wearable ?? false,
       consumable: item.value.consumable ?? false,
+      showOnContainer: item.value.showOnContainer ?? false,
     }
   }
   return {
@@ -74,7 +83,70 @@ const form = useForm({
   initialValues: getInitialValues(),
 })
 
-const { handleSubmit, isSubmitting, setFieldValue, values, resetForm } = form
+const { handleSubmit, isSubmitting, setFieldValue, setValues, values, resetForm } = form
+
+// Load item data for edit mode
+const loadItem = async () => {
+  if (!isEditMode || !itemId) {
+    isLoading.value = false
+    return
+  }
+
+  try {
+    const service = gearItemService()
+
+    if (shouldUseAPI.value && 'getItem' in service) {
+      item.value = await service.getItem(itemId)
+    } else {
+      const containerData = store.getContainerById(containerId)
+      const foundItem = containerData?.items.find(i => i.id === itemId)
+
+      if (!foundItem) {
+        toast.error(t('common.error'))
+        router.push(GearRoutePath.ContainerDetailById(containerId))
+        return
+      }
+
+      item.value = foundItem
+    }
+  } catch (error) {
+    console.error('Failed to load item:', error)
+    toast.error(t('common.error'))
+    router.push(GearRoutePath.ContainerDetailById(containerId))
+  } finally {
+    // First: show the form
+    isLoading.value = false
+
+    // Then: wait for Vue to render the form fields, then set values
+    if (item.value) {
+      await nextTick()
+
+      const loadedItem = item.value
+      setValues({
+        name: loadedItem.name,
+        category: loadedItem.category,
+        quantity: loadedItem.quantity,
+        weight: loadedItem.weight,
+        weightUnit: loadedItem.weightUnit ?? 'g',
+        notes: loadedItem.notes ?? '',
+        expirationDate: loadedItem.expirationDate ?? '',
+        priority: loadedItem.priority,
+        status: loadedItem.status,
+        price: loadedItem.price ?? undefined,
+        url: loadedItem.url ?? '',
+        brand: loadedItem.brand ?? '',
+        color: loadedItem.color ?? '',
+        quality: loadedItem.quality ?? undefined,
+        wearable: loadedItem.wearable ?? false,
+        consumable: loadedItem.consumable ?? false,
+      })
+    }
+  }
+}
+
+onMounted(async () => {
+  await loadItem()
+})
 
 // Reset form when switching tabs
 watch(tabMode, () => {
@@ -115,11 +187,11 @@ const handleCatalogItemSelect = (selectedItem: IItemWithContainer) => {
 const onSubmit = handleSubmit(async (data: ICreateItemDto | IUpdateItemDto) => {
   try {
     const returnTo = route.query.returnTo as string | undefined
-    
+
     if (isEditMode && itemId) {
       await updateItem(itemId, data as IUpdateItemDto)
       toast.success(t('common.success'))
-      
+
       // Redirect based on returnTo query param
       if (returnTo === 'shopping') {
         router.push('/gear/shopping')
@@ -134,7 +206,7 @@ const onSubmit = handleSubmit(async (data: ICreateItemDto | IUpdateItemDto) => {
       }
       await createItem(containerId, createData)
       toast.success(t('common.success'))
-      
+
       // Redirect based on returnTo query param
       if (returnTo === 'shopping') {
         router.push('/gear/shopping')
@@ -191,6 +263,7 @@ const handleRecognizeParameters = () => {
 <template>
   <AuthenticatedLayout>
     <div v-if="container" class="max-w-2xl mx-auto space-y-6">
+      <!-- Header - always visible -->
       <div>
         <h1 class="text-3xl font-bold">
           {{ isEditMode ? t('gear.item.edit') : t('gear.item.create') }}
@@ -205,7 +278,10 @@ const handleRecognizeParameters = () => {
         </p>
       </div>
 
-      <div class="bg-card rounded-lg border p-6">
+      <!-- Loading state for form -->
+      <div v-if="isLoading" class="h-96 animate-pulse rounded-lg bg-muted" />
+
+      <div v-else class="bg-card rounded-lg border p-6">
         <!-- Tabs - only show when creating new item (not editing) -->
         <Tabs
           v-if="!isEditMode"
@@ -248,7 +324,7 @@ const handleRecognizeParameters = () => {
             </TabsContent>
 
             <ItemFormFields
-              :item="item"
+              :item="item ?? undefined"
               :loading="isSubmitting"
               :hide-name="!isEditMode && tabMode === 'catalog' && !selectedCatalogItemId"
               @cancel="handleCancel"
@@ -264,7 +340,7 @@ const handleRecognizeParameters = () => {
           @submit="onSubmit"
         >
           <ItemFormFields
-            :item="item"
+            :item="item ?? undefined"
             :loading="isSubmitting"
             @cancel="handleCancel"
             @name-blur="handleNameBlur"
@@ -275,4 +351,3 @@ const handleRecognizeParameters = () => {
     </div>
   </AuthenticatedLayout>
 </template>
-

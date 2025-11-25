@@ -249,4 +249,48 @@ export default {
       later: 'Później',
     },
   },
+  fileUpload: {
+    dropZone: {
+      idle: 'Kliknij aby przesłać lub przeciągnij i upuść',
+      dragging: 'Upuść pliki tutaj',
+      disabled: 'Przesyłanie wyłączone',
+    },
+    formats: {
+      image: 'JPEG, PNG, WEBP, GIF',
+      any: 'Dowolny typ pliku',
+    },
+    limits: {
+      maxSize: 'maks. {size} MB',
+      maxFiles: '{count} plików',
+      maxFile: '{count} plik',
+    },
+    errors: {
+      tooManyFiles: 'Maksymalnie {max} plik(ów) dozwolone',
+      fileTooLarge: '{name}: Rozmiar pliku przekracza {size} MB',
+      invalidType: '{name}: Nieprawidłowy typ pliku',
+    },
+    imageGallery: {
+      title: 'Zdjęcia',
+      noImages: 'Nie przesłano jeszcze żadnych zdjęć',
+      primary: 'Główne',
+      tooltips: {
+        setPrimary: 'Ustaw jako główne',
+        dragToReorder: 'Przeciągnij aby zmienić kolejność',
+        deleteImage: 'Usuń zdjęcie',
+      },
+      confirmDelete: 'Czy na pewno chcesz usunąć to zdjęcie?',
+      messages: {
+        loadFailed: 'Nie udało się wczytać zdjęć',
+        uploadSuccess: 'Zdjęcie przesłane pomyślnie',
+        uploadSuccessMultiple: '{count} zdjęć przesłanych pomyślnie',
+        uploadFailed: 'Nie udało się przesłać zdjęcia',
+        deleteSuccess: 'Zdjęcie usunięte pomyślnie',
+        deleteFailed: 'Nie udało się usunąć zdjęcia',
+        primarySuccess: 'Główne zdjęcie zaktualizowane',
+        primaryFailed: 'Nie udało się ustawić głównego zdjęcia',
+        reorderSuccess: 'Zmieniono kolejność zdjęć',
+        reorderFailed: 'Nie udało się zmienić kolejności zdjęć',
+      },
+    },
+  },
 }

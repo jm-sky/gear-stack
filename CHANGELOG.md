@@ -21,6 +21,99 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.11.0] - 2025-01-24
+
+### Added
+- **Item Image Gallery Upload (FEATURE-017)**: Complete image upload system for gear items
+  - **Admin-Only Upload**: Only users with admin privileges can upload images
+  - **Multi-Image Gallery**: Support for up to 10 images per item with gallery view
+  - **Drag-and-Drop Upload**: Modern drag-and-drop interface using VueUse
+  - **Image Management**:
+    - Primary image selection (first image auto-set as primary)
+    - Drag-and-drop reordering of images
+    - Image deletion with confirmation
+    - Visual feedback during drag operations
+  - **Image Processing**:
+    - Automatic resize to max 1920x1920px (preserves aspect ratio)
+    - JPEG compression (quality 85%)
+    - RGBA to RGB conversion for JPEG (white background)
+    - Optional WebP conversion support
+  - **Storage Adapter Pattern**: Pluggable storage backends
+    - Local filesystem storage (development)
+    - S3-compatible storage (production ready)
+    - Factory pattern for dynamic adapter selection
+  - **Validation & Security**:
+    - File size limits (10 MB default, configurable)
+    - MIME type validation (JPG, PNG, WebP, GIF)
+    - Double MIME detection (content-type header + magic numbers/Pillow)
+    - Transaction safety with rollback on database failure
+    - File deletion from storage if database insert fails
+  - **Frontend Components**:
+    - `ItemImageGallery.vue` - Main gallery component with upload, display, reorder, delete
+    - `ItemImageCard.vue` - Individual image card with controls
+    - `ItemImageCardControls.vue` - Image controls (primary, delete)
+    - `ContainerItemImagesGallery.vue` - Gallery view for container items (shows primary images)
+    - `FileDropZone.vue` - Reusable drag-and-drop file upload component
+    - `ItemImageGalleryEmptyState.vue` - Empty state component
+  - **Item Detail Page**: New dedicated page for viewing item details
+    - Complete item information display
+    - Integrated image gallery
+    - Edit button navigation
+    - Proper loading states and error handling
+  - **Backend Services**:
+    - `ImageUploadService` - Complete upload service with validation and processing
+    - `ItemImageRepository` - Database repository for image operations
+    - `ImageProcessor` - Async image processing with Pillow
+    - `StorageAdapter` - Abstract storage interface
+    - `LocalStorageAdapter` - Filesystem storage implementation
+    - `S3StorageAdapter` - S3-compatible storage implementation
+  - **API Endpoints** (admin-only):
+    - `POST /api/gear/items/{item_id}/images` - Upload image
+    - `GET /api/gear/items/{item_id}/images` - Get all images for item
+    - `DELETE /api/gear/items/images/{image_id}` - Delete image
+    - `PUT /api/gear/items/{item_id}/images/reorder` - Reorder images
+    - `PUT /api/gear/items/{item_id}/images/{image_id}/primary` - Set primary image
+  - **Database Schema**:
+    - New `item_images` table with proper indexes
+    - Foreign keys with CASCADE delete
+    - Migration: `017_add_item_images_table.py`
+  - **Container Image Display**: Option to show item images in container view
+    - `showItemImages` field in container settings
+    - Displays primary images for items in container
+    - Limited to 12 items for performance
+
+### Changed
+- **ItemFormPage**: Fixed type-check error (`item` prop type: `IGearItem | null` → `IGearItem | undefined`)
+- **ROADMAP**: Marked FEATURE-017 (Item Image Gallery Upload) as completed
+
+### Technical Details
+- **Backend**:
+  - Storage adapter pattern for flexible storage backends
+  - Async image processing with `asyncio.to_thread()` (non-blocking)
+  - Proper error handling with HTTPException and detailed error messages
+  - Transaction safety: rollback file upload if database insert fails
+  - Configurable via environment variables (storage type, paths, limits)
+- **Frontend**:
+  - TypeScript types: `IItemImage`, `IImageOrderUpdate`
+  - API service: `itemImageApiService` with all CRUD operations
+  - Proper loading states, error handling, and user feedback
+  - Responsive grid layout for image gallery
+  - Admin-only access control (checks both `isAdmin` and container ownership)
+- **Storage**:
+  - Local storage: files served via FastAPI static files (`/uploads/...`)
+  - Docker volume persistence for local storage
+  - S3 support with configurable endpoint (compatible with S3-compatible services)
+- **Dependencies**:
+  - Backend: Pillow, python-magic, aiofiles, aioboto3
+  - Frontend: No new dependencies (uses existing VueUse for drag-and-drop)
+- **Documentation**:
+  - `ITEM_IMAGE_GALLERY_INTEGRATION.md` - Integration guide
+  - `ITEM_DETAIL_PAGE_IMPLEMENTATION.md` - Item detail page documentation
+  - `CODE_REVIEW_v2.10.0.md` - Comprehensive code review
+- All type checking and linting passes successfully
+
+---
+
 ## [2.10.0] - 2025-01-24
 
 ### Added

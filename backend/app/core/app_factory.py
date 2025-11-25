@@ -68,6 +68,11 @@ def create_app() -> FastAPI:
     # Setup middleware
     setup_middleware(app)
 
+    # Setup static file serving
+    from app.core.static import setup_static_routes
+
+    setup_static_routes(app)
+
     # Register exception handlers
     register_exception_handlers(app)
 
@@ -136,8 +141,12 @@ def register_routers(app: FastAPI) -> None:
         from app.api.router import api_router
 
         app.include_router(api_router, prefix="/api", tags=["API"])
-    except ImportError:
-        pass
+    except ImportError as e:
+        import logging
+
+        logger = logging.getLogger(__name__)
+        logger.error(f"Failed to import API router: {e}", exc_info=True)
+        raise
 
     @app.get("/", tags=["System"])
     async def root() -> dict:

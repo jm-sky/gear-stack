@@ -15,11 +15,11 @@ import {
 } from '@/components/ui/select'
 import WeightInputWithUnitPicker from '@/components/ui/weight-input/WeightInputWithUnitPicker.vue'
 import type { IGearContainer } from '../types/gear.types'
-import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { useGearSettings } from '../composables/useGearSettings'
 import { COLOR_DOT_CLASSES, CONTAINER_COLORS } from '../utils/containerColors'
 import { SUPPORTED_CURRENCIES } from '../utils/currencyFormatter'
 import { getBrandOptions } from '../utils/suggestedValues'
+import ContainerTypeSelect from './ContainerTypeSelect.vue'
 
 const _props = defineProps<{
   container?: IGearContainer
@@ -32,8 +32,7 @@ const emit = defineEmits<{
   recognizeParameters: []
 }>()
 
-const { customContainerTypes, customBrands, defaultCurrency } = useGearSettings()
-const { getContainerTypeLabel } = useContainerTypeLabel()
+const { customBrands, defaultCurrency } = useGearSettings()
 
 // Auto-focus na pierwszym polu
 const nameInputRef = ref<HTMLInputElement | undefined>(undefined)
@@ -82,61 +81,7 @@ const handleCancel = () => {
     <FormField v-slot="{ value, handleChange }" name="type">
       <FormItem>
         <FormLabel :label="$t('gear.container.type')" required />
-        <Select :model-value="value" @update:model-value="handleChange">
-          <SelectTrigger>
-            <SelectValue :placeholder="$t('gear.container.type')" />
-          </SelectTrigger>
-          <SelectContent>
-            <!-- Default Container Types -->
-            <SelectItem value="backpack">
-              {{ $t('gear.container.types.backpack') }}
-            </SelectItem>
-            <SelectItem value="bag">
-              {{ $t('gear.container.types.bag') }}
-            </SelectItem>
-            <SelectItem value="pouch">
-              {{ $t('gear.container.types.pouch') }}
-            </SelectItem>
-            <SelectItem value="box">
-              {{ $t('gear.container.types.box') }}
-            </SelectItem>
-            <SelectItem value="cabinet">
-              {{ $t('gear.container.types.cabinet') }}
-            </SelectItem>
-            <SelectItem value="vehicle">
-              {{ $t('gear.container.types.vehicle') }}
-            </SelectItem>
-            <SelectItem value="shelf">
-              {{ $t('gear.container.types.shelf') }}
-            </SelectItem>
-            <SelectItem value="drawer">
-              {{ $t('gear.container.types.drawer') }}
-            </SelectItem>
-            <SelectItem value="case">
-              {{ $t('gear.container.types.case') }}
-            </SelectItem>
-            <SelectItem value="trunk">
-              {{ $t('gear.container.types.trunk') }}
-            </SelectItem>
-            <SelectItem value="other">
-              {{ $t('gear.container.types.other') }}
-            </SelectItem>
-
-            <!-- Custom Container Types -->
-            <template v-if="customContainerTypes.length > 0">
-              <div class="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                {{ $t('settings.containerTypes.title') }}
-              </div>
-              <SelectItem
-                v-for="containerType in customContainerTypes"
-                :key="containerType.id"
-                :value="containerType.value"
-              >
-                {{ getContainerTypeLabel(containerType.value) }}
-              </SelectItem>
-            </template>
-          </SelectContent>
-        </Select>
+        <ContainerTypeSelect :model-value="value" @update:model-value="handleChange" />
         <FormMessage />
       </FormItem>
     </FormField>
@@ -164,24 +109,6 @@ const handleCancel = () => {
       </FormItem>
     </FormField>
 
-    <!-- Hide When Nested -->
-    <FormField v-slot="{ componentField, handleChange }" name="hideWhenNested">
-      <FormItem v-slot="{ id }" class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-        <Checkbox
-          :id="id"
-          :model-value="componentField.modelValue"
-          @update:model-value="handleChange"
-        />
-        <div class="flex-1 space-y-1">
-          <FormLabel :label="$t('gear.container.hideWhenNested')" class="cursor-pointer" />
-          <p class="text-sm text-muted-foreground">
-            {{ $t('gear.container.hideWhenNestedDescription') }}
-          </p>
-        </div>
-        <FormMessage />
-      </FormItem>
-    </FormField>
-
     <!-- Is Public -->
     <FormField v-slot="{ componentField, handleChange }" name="isPublic">
       <FormItem v-slot="{ id }" class="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800 p-4">
@@ -194,6 +121,42 @@ const handleCancel = () => {
           <FormLabel :label="$t('gear.container.isPublic')" class="cursor-pointer" />
           <p class="text-sm text-muted-foreground">
             {{ $t('gear.container.isPublicDescription') }}
+          </p>
+        </div>
+        <FormMessage />
+      </FormItem>
+    </FormField>
+
+    <!-- Show Item Images -->
+    <FormField v-slot="{ componentField, handleChange }" name="showItemImages">
+      <FormItem v-slot="{ id }" class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+        <Checkbox
+          :id
+          :model-value="componentField.modelValue"
+          @update:model-value="handleChange"
+        />
+        <div class="flex-1 space-y-1">
+          <FormLabel :label="$t('gear.container.showItemImages')" class="cursor-pointer" />
+          <p class="text-sm text-muted-foreground">
+            {{ $t('gear.container.showItemImagesDescription') }}
+          </p>
+        </div>
+        <FormMessage />
+      </FormItem>
+    </FormField>
+
+    <!-- Hide When Nested -->
+    <FormField v-slot="{ componentField, handleChange }" name="hideWhenNested">
+      <FormItem v-slot="{ id }" class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+        <Checkbox
+          :id="id"
+          :model-value="componentField.modelValue"
+          @update:model-value="handleChange"
+        />
+        <div class="flex-1 space-y-1">
+          <FormLabel :label="$t('gear.container.hideWhenNested')" class="cursor-pointer" />
+          <p class="text-sm text-muted-foreground">
+            {{ $t('gear.container.hideWhenNestedDescription') }}
           </p>
         </div>
         <FormMessage />
@@ -268,7 +231,7 @@ const handleCancel = () => {
             <FormLabel :label="$t('gear.container.weight')" />
             <WeightInputWithUnitPicker
               :model-value="weightValue"
-              :unit="unitValue || 'g'"
+              :unit="unitValue"
               :placeholder="$t('gear.container.weight')"
               @update:model-value="handleWeightChange"
               @update:unit="handleUnitChange"

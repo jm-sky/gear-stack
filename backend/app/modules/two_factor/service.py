@@ -162,10 +162,10 @@ class TwoFactorService:
         Combines TOTP and WebAuthn status checks.
         """
         totp_status = await self.totp.get_status(user_id)
-        has_totp = totp_status.get("isEnabled", False)
+        has_totp = bool(totp_status.get("isEnabled", False))
 
         webauthn_status = await self.webauthn.get_status(user_id)
-        has_passkeys = webauthn_status.get("enabled", False)
+        has_passkeys = bool(webauthn_status.get("enabled", False))
 
         logger.info(f"2FA check for user {user_id}: " f"TOTP enabled={has_totp}, " f"Passkeys enabled={has_passkeys}, " f"Has 2FA={has_totp or has_passkeys}")
 

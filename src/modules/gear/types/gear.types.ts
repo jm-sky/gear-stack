@@ -47,12 +47,13 @@ export type TGearItemCategory =
   | 'shelter'
   | 'fire'
   | 'firstAid'
+  | 'blades'
   | 'tools'
+  | 'light'
   | 'navigation'
   | 'communication'
   | 'clothing'
   | 'hygiene'
-  | 'light'
   | 'other'
   | string // Allow custom categories
 
@@ -80,6 +81,7 @@ export interface IGearItem {
   wearable?: boolean | null // Item is worn/carried on person (e.g., clothing, watch)
   consumable?: boolean | null // Item is consumed/used up (e.g., food, medicine, fuel)
   order?: number | null // Manual order for items within container (lower numbers appear first)
+  showOnContainer?: boolean | null // Show item image in container view gallery (Implementation postponed - use container.showItemImages instead)
   createdAt: TDateTime
   updatedAt: TDateTime
 }
@@ -106,6 +108,7 @@ export interface IGearContainer {
   maxWeight?: number | null // Maximum weight limit value
   maxWeightUnit?: TGearWeightUnit | null // Maximum weight unit (g or kg)
   url?: string | null // Link to product, review, etc.
+  showItemImages?: boolean | null // Show item images in container view (only items with primary image)
   items: IGearItem[]
   createdAt: TDateTime
   updatedAt: TDateTime
@@ -128,6 +131,7 @@ export interface ICreateContainerDto {
   maxWeight?: number | null
   maxWeightUnit?: TGearWeightUnit | null
   url?: string | null
+  showItemImages?: boolean | null
 }
 
 // DTO dla aktualizacji kontenera
@@ -148,6 +152,7 @@ export interface IUpdateContainerDto {
   maxWeight?: number | null
   maxWeightUnit?: TGearWeightUnit | null
   url?: string | null
+  showItemImages?: boolean | null
 }
 
 // DTO dla tworzenia przedmiotu
@@ -172,6 +177,7 @@ export interface ICreateItemDto {
   wearable?: boolean | null
   consumable?: boolean | null
   order?: number | null
+  showOnContainer?: boolean | null
 }
 
 // DTO dla aktualizacji przedmiotu
@@ -195,6 +201,7 @@ export interface IUpdateItemDto {
   wearable?: boolean | null
   consumable?: boolean | null
   order?: number | null
+  showOnContainer?: boolean | null
 }
 
 // Service interface for gear operations

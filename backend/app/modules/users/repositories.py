@@ -10,6 +10,7 @@ a base class, we wrap and adapt the auth repository to our needs.
 
 import logging
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,6 +22,9 @@ from app.modules.auth.repositories import get_user_repository as get_auth_reposi
 
 from .models import User
 from .exceptions import UserAlreadyExistsError
+
+if TYPE_CHECKING:
+    from app.modules.auth.models import User as AuthUser
 
 
 logger = logging.getLogger(__name__)
@@ -43,7 +47,7 @@ class UserRepository:
         """
         self._auth_repo = auth_repo
 
-    def _auth_user_to_users_user(self, auth_user) -> User:
+    def _auth_user_to_users_user(self, auth_user: "AuthUser") -> User:
         """Convert auth module's User to users module's User.
 
         Args:

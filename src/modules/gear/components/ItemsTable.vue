@@ -154,11 +154,14 @@ function navigateToNestedContainer(item: IGearItem) {
   }
 }
 
-// Navigate to item (public or edit)
+// Navigate to item detail page
 function navigateToItem(item: IGearItem) {
   if (props.publicMode && props.containerId) {
     router.push(GearRoutePath.PublicItemDetailById(props.containerId, item.id))
+  } else if (props.containerId) {
+    router.push(GearRoutePath.ItemDetailById(props.containerId, item.id))
   } else {
+    // Fallback: emit edit event if containerId is not available
     emit('edit', item)
   }
 }

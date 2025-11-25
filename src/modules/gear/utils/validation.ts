@@ -18,6 +18,7 @@ export const containerSchema = z.object({
   maxWeight: z.number().min(0, 'Maksymalna waga nie może być ujemna').optional(),
   maxWeightUnit: z.enum(['g', 'kg', 'oz', 'lb']).optional(),
   url: z.string().url('Nieprawidłowy URL').optional().or(z.literal('')),
+  showItemImages: z.boolean().optional(),
 })
 
 // Schema dla przedmiotu
@@ -41,6 +42,7 @@ export const itemSchema = z.object({
   quality: z.enum(['low', 'medium', 'high']).optional(),
   wearable: z.boolean().optional(),
   consumable: z.boolean().optional(),
+  showOnContainer: z.boolean().optional(),
 })
 
 // Type inference dla TypeScript

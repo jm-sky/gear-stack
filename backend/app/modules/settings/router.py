@@ -1,6 +1,7 @@
 """API router for user settings."""
 
 from datetime import UTC, datetime
+from typing import Literal, cast
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
@@ -38,13 +39,15 @@ async def get_my_settings(
 ) -> SettingsResponse:
     """Return preferences for the authenticated user."""
     settings = await _get_or_create_settings(db, current_user.id)
+    # Cast locale to Literal type - database stores it as string
+    locale = cast(Literal["en", "pl"], settings.locale)
     return SettingsResponse(
         darkMode=settings.dark_mode,
-        locale=settings.locale,
+        locale=locale,
         defaultContainersPublic=settings.default_containers_public,
         profilePublic=settings.is_public_profile,
         emailPublic=settings.is_public_email,
-    )  # type: ignore[arg-type]
+    )
 
 
 @router.patch("", response_model=SettingsResponse)
@@ -77,10 +80,12 @@ async def update_my_settings(
     settings.updated_at = datetime.now(UTC)
     await db.commit()
     await db.refresh(settings)
+    # Cast locale to Literal type - database stores it as string
+    locale = cast(Literal["en", "pl"], settings.locale)
     return SettingsResponse(
         darkMode=settings.dark_mode,
-        locale=settings.locale,
+        locale=locale,
         defaultContainersPublic=settings.default_containers_public,
         profilePublic=settings.is_public_profile,
         emailPublic=settings.is_public_email,
-    )  # type: ignore[arg-type]
+    )

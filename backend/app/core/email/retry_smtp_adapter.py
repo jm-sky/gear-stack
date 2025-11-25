@@ -154,7 +154,7 @@ class RetrySMTPAdapter(EmailAdapter):
                 logger.error(f"Permanent SMTP error sending to {to}: " f"{type(e).__name__}: {e}. Not retrying.")
                 return False
 
-            except (TRANSIENT_SMTP_ERRORS, SMTPException, Exception) as e:
+            except (*TRANSIENT_SMTP_ERRORS, SMTPException) as e:
                 last_error = e
 
                 if attempt < self.max_retries:
