@@ -54,6 +54,13 @@ services:
       - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
       - RECAPTCHA_MIN_SCORE=${RECAPTCHA_MIN_SCORE}
       - STORAGE_BASE_URL=${STORAGE_BASE_URL:-}
+      # S3 Storage Configuration
+      - STORAGE_TYPE=${STORAGE_TYPE:-local}
+      - STORAGE_S3_BUCKET=${STORAGE_S3_BUCKET:-}
+      - STORAGE_S3_ACCESS_KEY=${STORAGE_S3_ACCESS_KEY:-}
+      - STORAGE_S3_SECRET_KEY=${STORAGE_S3_SECRET_KEY:-}
+      - STORAGE_S3_REGION=${STORAGE_S3_REGION:-us-east-1}
+      - STORAGE_S3_ENDPOINT_URL=${STORAGE_S3_ENDPOINT_URL:-}
     ports:
       - "${APP_PORT:-8000}:8000"
     # Volumes (optional - for persistent logs)
