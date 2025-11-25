@@ -15,6 +15,8 @@ Gear Stack is a full-stack application designed for outdoor enthusiasts, prepper
 - **Rich Metadata** - Track weight, expiration dates, priorities, brands, and custom categories
 - **Data Portability** - Import/export functionality with AI-ready markdown format
 
+> 📋 **[Zobacz pełną listę funkcjonalności w języku polskim →](./FEATURES.md)**
+
 ---
 
 ### Core Features

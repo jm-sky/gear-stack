@@ -88,6 +88,24 @@ Gear Stack to zaawansowana aplikacja webowa do zarządzania ekwipunkiem survival
 - ✅ **Import z Markdown** - import kontenerów z plików markdown
 - ✅ **Transfer między urządzeniami** - export z jednego urządzenia, import na drugim
 
+### Galeria Zdjęć Przedmiotów
+- ✅ **Upload zdjęć** - możliwość dodawania zdjęć do przedmiotów (wymaga uprawnień admina)
+- ✅ **Wiele zdjęć na przedmiot** - galeria obrazów dla każdego przedmiotu
+- ✅ **Zmiana kolejności** - drag & drop do zmiany kolejności zdjęć
+- ✅ **Główne zdjęcie** - oznaczanie zdjęcia jako głównego dla przedmiotu
+- ✅ **Usuwanie zdjęć** - możliwość usunięcia pojedynczych zdjęć z galerii
+- ✅ **Storage adapter pattern** - wsparcie dla local filesystem i S3 (Scaleway)
+- ✅ **Automatyczne przetwarzanie** - resize, optymalizacja JPEG, walidacja formatów
+- ✅ **Limity** - maksymalny rozmiar pliku (10 MB), maksymalna liczba zdjęć na przedmiot (10)
+- 🔄 **Automatyczne pobieranie zdjęć** - integracja z wyszukiwarkami obrazów (planowane)
+
+### Cloud Storage (S3)
+- ✅ **Scaleway S3 Integration** - wsparcie dla Scaleway jako providera S3
+- ✅ **Local storage fallback** - lokalny filesystem dla środowiska deweloperskiego
+- ✅ **Konfiguracja przez ENV** - elastyczna konfiguracja przez zmienne środowiskowe
+- ✅ **Storage type selection** - wybór między local a S3 przez `STORAGE_TYPE`
+- ✅ **Przyszłe rozszerzenia** - gotowość na inne providery (AWS S3, MinIO, itp.)
+
 ---
 
 ## 👤 Profil Użytkownika
@@ -96,6 +114,37 @@ Gear Stack to zaawansowana aplikacja webowa do zarządzania ekwipunkiem survival
 - ✅ **Wsparcie dla avatarów** - dostawcy OAuth automatycznie dostarczają zdjęcia profilowe (Gravatar jako fallback)
 - ✅ **Preferowane ustawienia** - jednostki wagi, język, motyw, preferencje wyświetlania
 - ✅ **Ustawienia bezpieczeństwa** - zarządzanie metodami 2FA, wyświetlanie statusu bezpieczeństwa
+
+---
+
+## 🔧 Panel Administracyjny
+
+### Admin Dashboard (`/admin`)
+- ✅ **Centralny panel admina** - przegląd wszystkich funkcji administracyjnych
+- ✅ **Statystyki** - szybki dostęp do zarządzania użytkownikami, kontenerami i przedmiotami
+- ✅ **Ochrona dostępu** - wymagane uprawnienia admina (`requiresAdmin: true`)
+
+### Zarządzanie Użytkownikami (`/admin/users`)
+- ✅ **Lista wszystkich użytkowników** - przegląd kont z paginacją
+- ✅ **Wyszukiwanie użytkowników** - szybkie wyszukiwanie po nazwie lub emailu
+- ✅ **Promowanie/degradowanie adminów** - zarządzanie uprawnieniami administratora
+- ✅ **Usuwanie użytkowników** - możliwość usunięcia konta użytkownika z potwierdzeniem
+- ✅ **Statusy użytkowników** - widoczność statusów: aktywny/nieaktywny, zweryfikowany/niezweryfikowany, admin/user
+- ✅ **Sortowanie i filtrowanie** - po dacie utworzenia, statusie, uprawnieniach
+
+### Zarządzanie Kontenerami (`/admin/containers`)
+- ✅ **Lista wszystkich kontenerów** - przegląd kontenerów wszystkich użytkowników
+- ✅ **Wyszukiwanie kontenerów** - po nazwie, typie, autorze
+- ✅ **Informacje o kontenerach** - typ, autor, status publiczny/prywatny, liczba przedmiotów
+- ✅ **Usuwanie kontenerów** - możliwość usunięcia kontenera z potwierdzeniem
+- ✅ **Filtrowanie** - po typie kontenera, statusie publicznym/prywatnym, autorze
+
+### Zarządzanie Przedmiotami (`/admin/items`)
+- ✅ **Lista wszystkich przedmiotów** - przegląd przedmiotów ze wszystkich kontenerów
+- ✅ **Wyszukiwanie przedmiotów** - po nazwie, kategorii, kontenerze, autorze
+- ✅ **Szczegółowe informacje** - nazwa, kategoria, kontener, autor, ilość, waga, status, priorytet
+- ✅ **Usuwanie przedmiotów** - możliwość usunięcia przedmiotu z potwierdzeniem
+- ✅ **Sortowanie** - po wszystkich kolumnach (nazwa, waga, data utworzenia, itp.)
 
 ---
 
