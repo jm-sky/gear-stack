@@ -6,6 +6,8 @@ This module configures the main Typer application and registers all command grou
 import typer
 from rich.console import Console
 
+from app.core.app_factory import init_sentry
+
 # Initialize Typer app
 app = typer.Typer(
     name="cli",
@@ -20,6 +22,9 @@ console = Console()
 
 def main() -> None:
     """Main entry point for the CLI."""
+    # Initialize Sentry before running CLI (to catch all errors)
+    init_sentry()
+    
     app()
 
 
