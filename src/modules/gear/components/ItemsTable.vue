@@ -78,6 +78,8 @@ function loadColumnVisibility(): Record<string, boolean> {
     color: false,
     wearable: false,
     consumable: false,
+    order: false,
+    price: false,
   }
 }
 
@@ -206,38 +208,38 @@ const tableSorting = ref<SortingState>([])
 // Sort items by order (default sorting) or by table sorting
 const sortedItems = computed<IGearItem[]>(() => {
   const items = [...props.items]
-  
+
   // If table has active sorting, apply it
   if (tableSorting.value.length > 0) {
     const sortConfig = tableSorting.value[0]
     if (!sortConfig) return items
-    
+
     const columnId = sortConfig.id
     const direction = sortConfig.desc ? -1 : 1
-    
+
     return items.sort((a, b) => {
       const aValue: unknown = a[columnId as keyof IGearItem]
       const bValue: unknown = b[columnId as keyof IGearItem]
-      
+
       // Handle different data types
       const aVal = aValue === null || aValue === undefined ? '' : aValue
       const bVal = bValue === null || bValue === undefined ? '' : bValue
-      
+
       // String comparison
       if (typeof aVal === 'string' && typeof bVal === 'string') {
         return aVal.localeCompare(bVal) * direction
       }
-      
+
       // Number comparison
       if (typeof aVal === 'number' && typeof bVal === 'number') {
         return (aVal - bVal) * direction
       }
-      
+
       // Fallback
       return String(aVal).localeCompare(String(bVal)) * direction
     })
   }
-  
+
   // Default: Sort by order (null/undefined items go to end)
   return items.sort((a, b) => {
     const orderA = a.order ?? Number.MAX_SAFE_INTEGER
@@ -256,50 +258,50 @@ watch(
     // Check if sorting actually changed
     const sortingChanged = JSON.stringify(newSorting) !== JSON.stringify(previousSorting.value)
     previousSorting.value = [...newSorting]
-    
+
     if (!sortingChanged) return
-    
+
     // If sorting was cleared (back to default), emit empty array to clear pending changes
     if (newSorting.length === 0 && !props.publicMode) {
       emit('sortingChange', [])
       return
     }
-    
+
     // Only emit if sorting is active (not default order sorting) and not in public mode
     if (newSorting.length > 0 && !props.publicMode) {
       // Get current sorted items based on new sorting
       const items = [...props.items]
       const sortConfig = newSorting[0]
       if (!sortConfig) return
-      
+
       const columnId = sortConfig.id
       const direction = sortConfig.desc ? -1 : 1
-      
+
       // Apply sorting
       const sorted = items.sort((a, b) => {
         const aValue: unknown = a[columnId as keyof IGearItem]
         const bValue: unknown = b[columnId as keyof IGearItem]
-        
+
         const aVal = aValue === null || aValue === undefined ? '' : aValue
         const bVal = bValue === null || bValue === undefined ? '' : bValue
-        
+
         if (typeof aVal === 'string' && typeof bVal === 'string') {
           return aVal.localeCompare(bVal) * direction
         }
-        
+
         if (typeof aVal === 'number' && typeof bVal === 'number') {
           return (aVal - bVal) * direction
         }
-        
+
         return String(aVal).localeCompare(String(bVal)) * direction
       })
-      
+
       // Update order field based on current sorted order
       const updatedItems = sorted.map((item, index) => ({
         ...item,
         order: index,
       }))
-      
+
       // Emit event for batch save (parent will handle saving)
       emit('sortingChange', updatedItems)
     }
@@ -315,7 +317,7 @@ function handleMoveUp(item: IGearItem) {
   const reordered = [...sortedItems.value]
   const movedItem = reordered[currentIndex]
   if (!movedItem) return
-  
+
   reordered.splice(currentIndex, 1)
   reordered.splice(currentIndex - 1, 0, movedItem)
 
@@ -336,7 +338,7 @@ function handleMoveDown(item: IGearItem) {
   const reordered = [...sortedItems.value]
   const movedItem = reordered[currentIndex]
   if (!movedItem) return
-  
+
   reordered.splice(currentIndex, 1)
   reordered.splice(currentIndex + 1, 0, movedItem)
 

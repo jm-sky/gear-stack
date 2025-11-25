@@ -707,6 +707,25 @@ Wszystkie funkcjonalności wymagające backendu, bazy danych lub autoryzacji zos
 
 ---
 
+### 🔄 Usuwanie wszystkich kontenerów - rozjazd między backend a localStorage
+**Status:** 🔄 Open | **Priority:** High | **Complexity:** Medium
+
+- Po użyciu funkcji "Usuń wszystkie kontenery" wszystkie kontenery znikają ze strony
+- Po odświeżeniu strony pokazuje się jeszcze kilka kontenerów, które trzeba usunąć ponownie
+- **Przyczyna (hipoteza):** Rozjazd między synchronizacją backendu i localStorage - niektóre kontenery są usuwane tylko z jednego źródła
+- **Kroki do reprodukcji:**
+  1. Użyj funkcji "Usuń wszystkie kontenery"
+  2. Wszystkie kontenery znikają z widoku
+  3. Odśwież stronę (F5)
+  4. Kilka kontenerów nadal się pojawia
+
+**Powiązane pliki:**
+- `src/modules/gear/services/gearContainerService.ts` (metoda `deleteAllContainers`)
+- `src/modules/gear/services/gearContainerLocalService.ts`
+- `src/modules/gear/store/useGearStore.ts`
+
+---
+
 ## 📝 Notatki
 
 - Wszystkie funkcjonalności w tym pliku działają z localStorage (front-end only)

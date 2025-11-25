@@ -111,6 +111,7 @@ const handleImport = async () => {
           // Update existing container
           container = await updateContainer(existing.id, {
             name: containerData.name,
+            description: containerData.description,
             weight: containerData.weight,
             weightUnit: containerData.weightUnit,
             url: containerData.url,
@@ -122,7 +123,7 @@ const handleImport = async () => {
           container = await createContainer({
             name: containerData.name,
             type: 'other',
-            description: t('gear.import.importedDescription'),
+            description: containerData.description || t('gear.import.importedDescription'),
             weight: containerData.weight,
             weightUnit: containerData.weightUnit,
             url: containerData.url,
@@ -136,7 +137,7 @@ const handleImport = async () => {
         container = await createContainer({
           name: containerData.name,
           type: 'other',
-          description: t('gear.import.importedDescription'),
+          description: containerData.description || t('gear.import.importedDescription'),
           weight: containerData.weight,
           weightUnit: containerData.weightUnit,
           url: containerData.url,

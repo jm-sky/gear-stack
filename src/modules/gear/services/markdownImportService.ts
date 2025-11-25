@@ -226,8 +226,8 @@ class MarkdownImportService {
       if (line.startsWith('## ')) {
         // Save previous container with description
         if (currentContainer && currentContainer.items.length > 0) {
-          // Trim and save description
-          if (descriptionLines.length > 0) {
+          // Trim and save description (only if not already set from header)
+          if (descriptionLines.length > 0 && !currentContainer.description) {
             const description = descriptionLines.join('\n').trim()
             if (description) {
               currentContainer.description = description
@@ -272,6 +272,15 @@ class MarkdownImportService {
           headerText = headerText.replace(uuidMatch[0] ?? '', '').trim()
         }
 
+        // Extract description/notes in italic format *(text)* BEFORE parsing name
+        // This prevents description from being included in the container name
+        let containerDescription: string | undefined
+        const italicDescriptionMatch = headerText.match(/\*\(([^)]+)\)\*/)
+        if (italicDescriptionMatch) {
+          containerDescription = italicDescriptionMatch[1]?.trim()
+          headerText = headerText.replace(italicDescriptionMatch[0] ?? '', '').trim()
+        }
+
         // Extract URL from <URL> or plain URL
         const urlAngleMatch = headerText.match(/<([^>]+)>/)
         if (urlAngleMatch) {
@@ -309,6 +318,7 @@ class MarkdownImportService {
           weight: containerWeight,
           weightUnit: containerWeightUnit,
           url: containerUrl,
+          description: containerDescription, // Description from *(text)* in header
           price: containerPrice,
           currency: containerCurrency,
           items: [],
@@ -320,8 +330,8 @@ class MarkdownImportService {
       if (line.startsWith('- ') && currentContainer) {
         // First item encountered - stop collecting description
         if (isCollectingDescription) {
-          // Save collected description
-          if (descriptionLines.length > 0) {
+          // Save collected description (only if not already set from header)
+          if (descriptionLines.length > 0 && !currentContainer.description) {
             const description = descriptionLines.join('\n').trim()
             if (description) {
               currentContainer.description = description
@@ -353,8 +363,8 @@ class MarkdownImportService {
 
     // Add last container with description
     if (currentContainer && currentContainer.items.length > 0) {
-      // Save description if still collecting
-      if (descriptionLines.length > 0) {
+      // Save description if still collecting (only if not already set from header)
+      if (descriptionLines.length > 0 && !currentContainer.description) {
         const description = descriptionLines.join('\n').trim()
         if (description) {
           currentContainer.description = description
