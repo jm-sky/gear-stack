@@ -30,6 +30,7 @@ This directory contains detailed implementation plans for features from the [ROA
 | [FEATURE-020](./FEATURE-020-price-display-in-export.md) | Price Display in Export | ✅ Completed | Medium | 🚀 Import/Export |
 | [FEATURE-021](./FEATURE-021-csv-export.md) | CSV Export | ✅ Completed | Medium | 🚀 Import/Export |
 | [FEATURE-022](./FEATURE-022-accessibility.md) | Accessibility (Dostępność) | 🔄 Planned | Medium | ♿ Accessibility / 🎨 UI/UX |
+| [FEATURE-023](./FEATURE-023-rating-system.md) | Rating System (System Ocen) | 🔄 Planned | Medium | 📊 User Feedback / ⭐ Ratings |
 
 ---
 
