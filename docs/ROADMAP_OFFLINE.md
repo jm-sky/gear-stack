@@ -153,6 +153,41 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 - Dodanie przycisku "Importuj z Markdown" w empty state ułatwi użytkownikom szybkie rozpoczęcie pracy z aplikacją poprzez import istniejących danych
 - Przycisk powinien otwierać dialog importu markdown (już istniejący `ImportMarkdownDialog`)
 
+### 🔄 Sidebar menu kompatybilny z LighterPack
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+
+- Dodanie sidebar menu (bocznego menu) kompatybilnego z LighterPack
+- Sidebar powinien wyświetlać:
+  - Listę wszystkich kontenerów (z możliwością szybkiego przejścia)
+  - Główne linki nawigacyjne (Kontenery, Wszystkie przedmioty, Planowanie zakupów, itp.)
+- Sidebar powinien być dostępny na wszystkich stronach (lub na wybranych stronach)
+- Możliwość zwijania/rozwijania sidebar (toggle)
+- Wizualne oznaczenie aktywnego kontenera/strony
+- Responsywność - na mobile może być ukryty lub przekształcony w drawer
+
+### 🔄 Szybka edycja nazwy kontenera na stronie Container Details
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+
+- Możliwość szybkiej edycji nazwy kontenera bezpośrednio na stronie Container Details
+- Inline editing nazwy kontenera (podobnie jak inline editing przedmiotów)
+- Kliknięcie w nazwę kontenera → przejście w tryb edycji
+- Zapisywanie zmian po zatwierdzeniu (Enter) lub anulowanie (Escape)
+- Wizualne oznaczenie trybu edycji (input field, ikona edycji)
+
+### 🔄 Zwijanie sekcji statystyk i konfigurowalna kolejność sekcji na Container Details
+**Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Medium
+
+- Możliwość zwijania/rozwijania sekcji statystyk na stronie Container Details
+- Użytkownik może ukryć sekcje, które nie są mu potrzebne (np. wykresy, statystyki wagi)
+- Konfigurowalna kolejność sekcji - możliwość zmiany kolejności wyświetlania sekcji (drag & drop lub ustawienia)
+- Preferencje użytkownika zapisywane w localStorage
+- Sekcje do rozważenia:
+  - Statystyki kontenera (waga, ilość przedmiotów, itp.)
+  - Wykresy (kategorie, cena, priorytet)
+  - Lista przedmiotów
+  - Opis kontenera
+- Możliwość resetowania do domyślnej kolejności
+
 ---
 
 ## ♿ Accessibility (Dostępność)
@@ -540,6 +575,16 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
   - Zmiana statusu (owned, to buy, itp.)
   - Zmiana priorytetu
 - Wzorzec: LighterPack - wszystkie akcje dostępne bezpośrednio z wiersza tabeli
+
+### 🔄 Szybka edycja nazwy kontenera (Inline Editing)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+
+- Możliwość szybkiej edycji nazwy kontenera bezpośrednio na stronie Container Details
+- Inline editing nazwy kontenera (podobnie jak inline editing przedmiotów)
+- Kliknięcie w nazwę kontenera → przejście w tryb edycji
+- Zapisywanie zmian po zatwierdzeniu (Enter) lub anulowanie (Escape)
+- Wizualne oznaczenie trybu edycji (input field, ikona edycji)
+- Zobacz też: [Szybka edycja nazwy kontenera na stronie Container Details](#-szybka-edycja-nazwy-kontenera-na-stronie-container-details) w sekcji UI/UX
 
 ### ✅ Kolejność przedmiotów w kontenerze
 **Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium | **Feature:** [FEATURE-018](./features/FEATURE-018-item-ordering.md) | **Version:** v2.9.0
