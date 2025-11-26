@@ -155,6 +155,44 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 
 ---
 
+## ♿ Accessibility (Dostępność)
+
+### 🔄 Podstawowe oznaczenia ARIA i dostępność
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+
+**Zakres implementacji:**
+
+1. **Podstawowe oznaczenia ARIA**
+   - Dodanie odpowiednich atrybutów ARIA do komponentów (aria-label, aria-describedby, aria-expanded, aria-hidden, itp.)
+   - Zapewnienie poprawnej semantyki HTML (użycie odpowiednich tagów: button, nav, main, itp.)
+   - Poprawne oznaczenie regionów strony (landmarks)
+   - Obsługa nawigacji klawiaturą (focus management, keyboard shortcuts)
+
+2. **Tooltips na przyciskach z ikonami**
+   - Użycie `v-tooltip="t(...)"` na wszystkich przyciskach zawierających tylko ikonę (bez tekstu)
+   - Tooltip powinien zawierać przetłumaczoną nazwę akcji (krótki opis funkcji przycisku)
+   - Tooltip powinien być dostępny zarówno przy hover jak i focus (dla użytkowników klawiatury)
+
+3. **aria-label i tooltip z tą samą treścią**
+   - Dla przycisków z ikonami: `aria-label` i tooltip mogą mieć tę samą treść
+   - Zapewnia to spójność między doświadczeniem użytkowników korzystających z czytników ekranu a użytkowników korzystających z tooltipów
+   - Przykład: `<Button v-tooltip="t('actions.edit')" :aria-label="t('actions.edit')">`
+
+**Korzyści:**
+- ✅ Lepsza dostępność dla użytkowników z niepełnosprawnościami
+- ✅ Zgodność z wytycznymi WCAG
+- ✅ Lepsze doświadczenie użytkownika dla wszystkich (tooltips pomagają zrozumieć funkcje przycisków)
+- ✅ Poprawa SEO (semantyczny HTML)
+
+**Priorytetowe obszary:**
+- Przyciski akcji w tabelach (edycja, usuwanie, itp.)
+- Przyciski nawigacyjne w topbar
+- Przyciski w formularzach
+- Dialogi i modale
+- Menu i dropdowny
+
+---
+
 ## 🔗 Relacje i Nesting
 
 ### ✅ Relacja parent-children (nesting kontenerów)
