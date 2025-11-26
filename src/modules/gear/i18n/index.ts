@@ -216,6 +216,14 @@ export const gearEn = {
         high: 'High',
       },
     },
+    itemsTable: {
+      imageCell: {
+        uploadSuccess: 'Image uploaded successfully',
+        deleteSuccess: 'Image deleted successfully',
+        confirmDelete: 'Are you sure you want to delete this image?',
+        deleteImage: 'Delete image',
+      },
+    },
     actions: {
       show: 'Show',
       add: 'Add',
@@ -808,6 +816,14 @@ export const gearPl = {
         low: 'Niska',
         medium: 'Średnia',
         high: 'Wysoka',
+      },
+    },
+    itemsTable: {
+      imageCell: {
+        uploadSuccess: 'Obrazek został dodany',
+        deleteSuccess: 'Obrazek został usunięty',
+        confirmDelete: 'Czy na pewno chcesz usunąć ten obrazek?',
+        deleteImage: 'Usuń obrazek',
       },
     },
     actions: {
