@@ -29,14 +29,11 @@ import { calculateTotalWeightSync } from '../utils/containerCalculations'
 import { exportContainersToPrompt, exportContainerToPrompt } from '../utils/exportToPrompt'
 import GuidelinesDialog from './GuidelinesDialog.vue'
 
+const open = defineModel<boolean>('open', { required: true })
+
 const props = defineProps<{
-  open: boolean
   container?: IGearContainer
   containers?: IGearContainer[]
-}>()
-
-const emit = defineEmits<{
-  'update:open': [value: boolean]
 }>()
 
 const { t } = useI18n()
@@ -111,13 +108,10 @@ const handleOpenGuidelines = () => {
   isGuidelinesDialogOpen.value = true
 }
 
-const handleOpenChange = (value: boolean) => {
-  emit('update:open', value)
-}
 </script>
 
 <template>
-  <Dialog :open="open" @update:open="handleOpenChange">
+  <Dialog v-model:open="open">
     <DialogContent class="min-w-full md:min-w-3xl max-w-screen md:max-w-6xl max-h-[90vh] flex flex-col">
       <DialogHeader>
         <DialogTitle>
@@ -210,7 +204,7 @@ const handleOpenChange = (value: boolean) => {
           {{ t('gear.export.guidelines', 'Guidelines') }}
         </Button>
         <div class="flex gap-2">
-          <Button class="flex-1" variant="outline" @click="handleOpenChange(false)">
+          <Button class="flex-1" variant="outline" @click="open = false">
             {{ t('common.close') }}
           </Button>
           <Button class="flex-1" @click="handleCopy">

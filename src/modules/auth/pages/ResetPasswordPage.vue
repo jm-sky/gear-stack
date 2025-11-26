@@ -11,6 +11,7 @@ import GuestLayoutCentered from '@/layouts/GuestLayoutCentered.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { resetPasswordSchema } from '@/modules/auth/validation/resetPassword.schema'
 import { useHandleError } from '@/shared/composables/useHandleError'
+import { AuthRoutePaths } from '../config/routes'
 import type { ResetPasswordData } from '@/modules/auth/types/user.type'
 
 const { t } = useI18n()
@@ -35,7 +36,7 @@ const onSubmit = handleSubmit(async (values: ResetPasswordData) => {
   try {
     const response = await resetPassword(values)
     successMessage.value = response.message
-    setTimeout(() => void router.push('/auth/login'), 2000)
+    setTimeout(() => void router.push(AuthRoutePaths.login), 2000)
   } catch (error: unknown) {
     console.error('Reset password error:', error)
     handleError(error, { setErrors })

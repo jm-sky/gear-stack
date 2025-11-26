@@ -28,7 +28,8 @@ This directory contains detailed implementation plans for features from the [ROA
 | [FEATURE-018](./FEATURE-018-item-ordering.md) | Item Ordering | 🚧 In Progress | Medium | ✏️ Editing / 🎨 UI/UX |
 | [FEATURE-019](./FEATURE-019-extended-charts.md) | Extended Charts | 🚧 In Progress | Medium | 📊 Visualizations / Analytics |
 | [FEATURE-020](./FEATURE-020-price-display-in-export.md) | Price Display in Export | ✅ Completed | Medium | 🚀 Import/Export |
-| [FEATURE-021](./FEATURE-021-csv-export.md) | CSV Export | 🔄 Planned | Medium | 🚀 Import/Export |
+| [FEATURE-021](./FEATURE-021-csv-export.md) | CSV Export | ✅ Completed | Medium | 🚀 Import/Export |
+| [FEATURE-022](./FEATURE-022-accessibility.md) | Accessibility (Dostępność) | 🔄 Planned | Medium | ♿ Accessibility / 🎨 UI/UX |
 
 ---
 

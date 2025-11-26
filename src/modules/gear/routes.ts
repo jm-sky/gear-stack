@@ -17,6 +17,7 @@ export const GearRouteName = {
 
 export const GearRoutePath = {
   Containers: '/gear',
+  Import: '/gear?import=true',
   AllItems: '/gear/items',
   ShoppingPlanning: '/gear/shopping',
   ContainerNew: '/gear/new',

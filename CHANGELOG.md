@@ -21,6 +21,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.13.0] - 2025-01-27
+
+### Added
+- **CSV Export Functionality** (FEATURE-021): Complete CSV export feature for containers
+  - Export dialog with column selection (Basic and Additional columns)
+  - Support for comma and semicolon separators (auto-detected based on locale)
+  - UTF-8 with BOM encoding option for Excel compatibility (enabled by default)
+  - Export of nested containers with container identification columns
+  - Export single container from ContainerHeader menu
+  - Export all containers from ContainersListPage (button and dropdown menu)
+  - Comprehensive column support: name, category, quantity, weight, weight unit, price, currency, brand, color, status, priority, URL, notes, container name, container type
+  - Default selection: only basic columns (name, category, quantity, weight, weight unit, status, priority)
+  - Proper CSV escaping according to RFC 4180
+  - File naming: `gear-export-[container-name]-[date].csv` for single container, `gear-export-all-[date].csv` for all containers
+
+### Changed
+- Updated cursor rules to clarify Checkbox component usage (`model-value` / `v-model` instead of `checked`)
+- Export menu item label changed from "Export Data" to "Export to JSON" for clarity
+
+---
+
 ## [2.12.0] - 2025-11-25
 
 ### Added

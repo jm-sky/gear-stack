@@ -26,6 +26,7 @@ const AddContainerIcon = getActionIcon('addContainer')
 const AddItemIcon = getActionIcon('addItem')
 const MoreActionsIcon = getActionIcon('moreActions')
 const ExportIcon = getActionIcon('export')
+const ExportToCSVIcon = getActionIcon('exportToCSV')
 const ImportIcon = getActionIcon('import')
 const RecognizeParametersAllIcon = getActionIcon('recognizeParametersAll')
 
@@ -38,6 +39,7 @@ const emit = defineEmits<{
   import: []
   addContainer: []
   exportToPrompt: []
+  exportToCsv: []
   recognizeParametersAll: []
 }>()
 
@@ -67,6 +69,10 @@ const handleImport = () => {
 
 const handleExportToPrompt = () => {
   emit('exportToPrompt')
+}
+
+const handleExportToCSV = () => {
+  emit('exportToCsv')
 }
 
 const handleBack = () => {
@@ -177,13 +183,18 @@ const handleBack = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem @click="handleExport">
-                <ExportIcon class="size-4" />
-                {{ t('gear.actions.export') }}
-              </DropdownMenuItem>
               <DropdownMenuItem @click="handleImport">
                 <ImportIcon class="size-4" />
                 {{ t('gear.actions.import') }}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem @click="handleExport">
+                <ExportIcon class="size-4" />
+                {{ t('gear.actions.exportToJSON') }}
+              </DropdownMenuItem>
+              <DropdownMenuItem @click="handleExportToCSV">
+                <ExportToCSVIcon class="size-4" />
+                {{ t('gear.actions.exportToCSV') }}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem @click="handleExportToPrompt">

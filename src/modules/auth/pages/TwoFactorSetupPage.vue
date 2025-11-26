@@ -2,9 +2,9 @@
 import { CheckCircle2, Shield } from 'lucide-vue-next'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
 import PageCard from '@/components/layout/PageCard.vue'
 import { Button } from '@/components/ui/button'
+import ButtonLink from '@/components/ui/button-link/ButtonLink.vue'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
@@ -21,7 +21,6 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
-const router = useRouter()
 
 const isDisableTotpDialogOpen = ref(false)
 
@@ -151,9 +150,9 @@ const handleDisableTotpSuccess = async () => {
 
           <!-- Back Button -->
           <div class="flex justify-start">
-            <Button variant="outline" @click="router.push(SettingsRoutePaths.settings)">
+            <ButtonLink variant="outline" :to="SettingsRoutePaths.settings">
               {{ t('common.back') }}
-            </Button>
+            </ButtonLink>
           </div>
         </div>
       </div>

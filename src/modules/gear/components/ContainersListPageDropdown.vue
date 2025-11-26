@@ -18,7 +18,8 @@ import { getActionIcon } from '../utils/actionIcons'
 const MoreActionsIcon = getActionIcon('moreActions')
 const CreateIcon = getActionIcon('create')
 const ImportFromMarkdownIcon = getActionIcon('importFromMarkdown')
-const ExportAllToPromptIcon = getActionIcon('exportAllToPrompt')
+const ExportAllToMarkdownIcon = getActionIcon('exportAllToMarkdown')
+const ExportToCSVIcon = getActionIcon('exportToCSV')
 const DeleteAllIcon = getActionIcon('deleteAll')
 
 const router = useRouter()
@@ -26,7 +27,8 @@ const { t } = useI18n()
 const { containers, deleteAllContainers } = useGear()
 
 const emit = defineEmits<{
-  exportAllToPrompt: [],
+  exportAllToMarkdown: [],
+  exportAllToCSV: [],
   import: [],
 }>()
 
@@ -49,8 +51,12 @@ const handleDeleteAll = () => {
   }
 }
 
-const handleExportAllToPrompt = () => {
-  emit('exportAllToPrompt')
+const handleExportAllToMarkdown = () => {
+  emit('exportAllToMarkdown')
+}
+
+const handleExportAllToCSV = () => {
+  emit('exportAllToCSV')
 }
 </script>
 
@@ -77,10 +83,17 @@ const handleExportAllToPrompt = () => {
       <DropdownMenuSeparator v-if="containers.length > 0" />
       <DropdownMenuItem
         v-if="containers.length > 0"
-        @click="handleExportAllToPrompt"
+        @click="handleExportAllToMarkdown"
       >
-        <ExportAllToPromptIcon class="size-4 mr-2" />
-        {{ t('gear.export.allToPrompt') }}
+        <ExportAllToMarkdownIcon class="size-4 mr-2" />
+        {{ t('gear.export.allToMarkdown') }}
+      </DropdownMenuItem>
+      <DropdownMenuItem
+        v-if="containers.length > 0"
+        @click="handleExportAllToCSV"
+      >
+        <ExportToCSVIcon class="size-4 mr-2" />
+        {{ t('gear.export.allToCSV') }}
       </DropdownMenuItem>
       <DropdownMenuSeparator v-if="containers.length > 0" />
       <DropdownMenuItem

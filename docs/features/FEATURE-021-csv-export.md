@@ -1,6 +1,6 @@
 # FEATURE-021: CSV Export (Eksport do CSV)
 
-**Status:** 🔄 Planned
+**Status:** ✅ Completed
 **Priority:** Medium
 **Complexity:** Medium
 **Category:** 🚀 Import/Export

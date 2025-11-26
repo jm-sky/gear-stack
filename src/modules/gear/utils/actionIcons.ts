@@ -4,10 +4,11 @@ import {
   Download,
   Edit,
   FileInput,
+  FileOutput,
+  FileSpreadsheet,
   Image,
   MoreVertical,
   Plus,
-  Sparkles,
   SparklesIcon,
   Trash2,
   Upload,
@@ -46,8 +47,9 @@ export const ACTION_ICONS: Record<string, Component> = {
   export: Download,
   import: Upload,
   importFromMarkdown: FileInput,
-  exportToPrompt: Sparkles, // AI-related export action
-  exportAllToPrompt: Sparkles, // AI-related export action
+  exportToPrompt: FileOutput, // AI-related export action
+  exportAllToMarkdown: FileOutput, // AI-related export action
+  exportToCSV: FileSpreadsheet, // CSV export action
 
   // AI/Automation
   recognizeParameters: SparklesIcon,

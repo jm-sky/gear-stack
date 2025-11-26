@@ -2,11 +2,11 @@
 import { BackpackIcon, FileInput, Globe, LogIn, Plus, UserPlus } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
-import { Button } from '@/components/ui/button'
+import ButtonLink from '@/components/ui/button-link/ButtonLink.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
-import { AuthRouteNames } from '@/modules/auth/config/routes'
+import { AuthRoutePaths } from '@/modules/auth/config/routes'
+import DashboardContainerCard from '@/modules/gear/components/dashboard/DashboardContainerCard.vue'
 import GenerateExampleGearButton from '@/modules/gear/components/GenerateExampleGearButton.vue'
 import { useGear } from '@/modules/gear/composables/useGear'
 import { GearRoutePath } from '@/modules/gear/routes'
@@ -16,7 +16,6 @@ import { config } from '@/shared/config/config'
 import { apiClient } from '@/shared/services/apiClient'
 import type { IGearContainer } from '@/modules/gear/types/gear.types'
 
-const router = useRouter()
 const { t } = useI18n()
 const { containers } = useGear()
 const { isAuthenticated } = useAuth()
@@ -49,30 +48,6 @@ onMounted(async () => {
   }
 })
 
-const handleGoToGear = () => {
-  router.push('/gear')
-}
-
-const handleCreateContainer = () => {
-  router.push('/gear/new')
-}
-
-const handleImport = () => {
-  router.push('/gear?import=true')
-}
-
-const handleGoToPublicContainers = () => {
-  router.push(GearRoutePath.PublicContainers)
-}
-
-const handleLogin = () => {
-  router.push({ name: AuthRouteNames.login })
-}
-
-const handleRegister = () => {
-  router.push({ name: AuthRouteNames.register })
-}
-
 const readyContainersCount = computed(() => {
   return containers.value.filter(c => {
     const ownedItems = c.items.filter(i => i.status === 'owned').length
@@ -102,85 +77,70 @@ const readyContainersCount = computed(() => {
 
       <!-- Quick Stats -->
       <div v-if="containers.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <RouterLink :to="GearRoutePath.Containers" class="cursor-pointer bg-card rounded-lg border p-6 text-center hover:shadow-md transition-shadow">
-          <div class="text-3xl font-bold text-primary mb-2">
-            {{ containers.length }}
-          </div>
-          <div class="text-muted-foreground">
-            {{ t('gear.page.containers', 'Containers') }}
-          </div>
-        </RouterLink>
-        <div class="bg-card rounded-lg border p-6 text-center">
-          <div class="text-3xl font-bold text-primary mb-2">
-            {{ containers.reduce((sum, c) => sum + c.items.length, 0) }}
-          </div>
-          <div class="text-muted-foreground">
-            {{ t('gear.page.items', 'Items') }}
-          </div>
-        </div>
-        <div class="bg-card rounded-lg border p-6 text-center">
-          <div class="text-3xl font-bold text-primary mb-2">
-            {{ readyContainersCount }}
-          </div>
-          <div class="text-muted-foreground">
-            {{ t('gear.page.readyContainers', 'Ready Containers') }}
-          </div>
-        </div>
-        <div
+        <DashboardContainerCard
+          :to="GearRoutePath.Containers"
+          :count="containers.length"
+          :label="t('gear.page.containers', 'Containers')"
+        />
+        <DashboardContainerCard
+          :to="GearRoutePath.AllItems"
+          :count="containers.reduce((sum, c) => sum + c.items.length, 0)"
+          :label="t('gear.page.items', 'Items')"
+        />
+        <DashboardContainerCard
+          :to="GearRoutePath.Containers"
+          :count="readyContainersCount"
+          :label="t('gear.page.readyContainers', 'Ready Containers')"
+        />
+        <DashboardContainerCard
           v-if="config.backend.enabled"
-          class="bg-card rounded-lg border p-6 text-center cursor-pointer hover:bg-accent/50 transition-colors"
-          @click="handleGoToPublicContainers"
-        >
-          <div class="text-3xl font-bold text-primary mb-2">
-            {{ isLoadingPublicContainers ? '...' : publicContainersCount }}
-          </div>
-          <div class="text-muted-foreground flex items-center justify-center gap-1">
-            <Globe class="size-4" />
-            {{ t('gear.publicContainers.navTitle', 'Public Browser') }}
-          </div>
-        </div>
+          :to="GearRoutePath.PublicContainers"
+          :count="isLoadingPublicContainers ? '...' : publicContainersCount"
+          :label="t('gear.publicContainers.navTitle', 'Public Browser')"
+          :icon="Globe"
+        />
       </div>
 
       <!-- Actions -->
       <div class="flex flex-col items-center gap-4">
         <div v-if="containers.length > 0" class="flex flex-col items-center gap-4 w-full max-w-md">
-          <Button size="lg" class="w-full" @click="handleGoToGear">
+          <ButtonLink size="lg" class="w-full" :to="GearRoutePath.Containers">
             <BackpackIcon class="size-5" />
             {{ t('gear.page.viewContainers', 'View Containers') }}
-          </Button>
+          </ButtonLink>
           <!-- Row 1: Create Container, Generate Sample Set -->
           <div class="flex flex-col sm:flex-row gap-4 w-full">
-            <Button
+            <ButtonLink
               size="lg"
               variant="outline"
               class="flex-1"
-              @click="handleCreateContainer"
+              :to="GearRoutePath.ContainerNew"
             >
               <Plus class="size-5" />
               {{ t('gear.container.create.title', 'Create Container') }}
-            </Button>
+            </ButtonLink>
             <GenerateExampleGearButton class="flex-1" />
           </div>
           <!-- Row 2: Login, Register (only if not authenticated) -->
           <div v-if="!isAuthenticated && config.backend.enabled" class="flex flex-col sm:flex-row gap-4 w-full">
-            <Button
+            <ButtonLink
               size="lg"
               variant="outline"
               class="flex-1"
-              @click="handleLogin"
+              :to="AuthRoutePaths.login"
             >
               <LogIn class="size-5" />
               {{ t('auth.login', 'Log In') }}
-            </Button>
-            <Button
+            </ButtonLink>
+            <ButtonLink
               size="lg"
               variant="outline"
               class="flex-1"
-              @click="handleRegister"
+              :to="AuthRoutePaths.register"
             >
               <UserPlus class="size-5" />
               {{ t('auth.register', 'Sign Up') }}
-            </Button>
+            </ButtonLink>
           </div>
         </div>
 
@@ -192,48 +152,48 @@ const readyContainersCount = computed(() => {
           <div class="flex flex-col gap-4 items-center justify-center w-full">
             <!-- Row 1: Create Container, Generate Sample Set -->
             <div class="flex flex-col sm:flex-row gap-4 w-full">
-              <Button
+              <ButtonLink
                 size="lg"
                 class="flex-1"
-                @click="handleCreateContainer"
+                :to="GearRoutePath.ContainerNew"
               >
                 <Plus class="size-5" />
                 {{ t('gear.container.create.title', 'Create Container') }}
-              </Button>
+              </ButtonLink>
               <GenerateExampleGearButton class="flex-1" />
             </div>
             <div class="flex items-center gap-2 text-muted-foreground">
               <span>{{ t('common.or', 'or') }}</span>
             </div>
-            <Button
+            <ButtonLink
               size="lg"
               variant="outline"
               class="w-full"
-              @click="handleImport"
+              :to="GearRoutePath.Import"
             >
               <FileInput class="size-5" />
               {{ t('gear.import.fromMarkdown', 'Import from Markdown') }}
-            </Button>
+            </ButtonLink>
             <!-- Row 2: Login, Register (only if not authenticated) -->
             <div v-if="!isAuthenticated && config.backend.enabled" class="flex flex-col sm:flex-row gap-4 w-full mt-2">
-              <Button
+              <ButtonLink
                 size="lg"
                 variant="outline"
                 class="flex-1"
-                @click="handleLogin"
+                :to="AuthRoutePaths.login"
               >
                 <LogIn class="size-5" />
                 {{ t('auth.login', 'Log In') }}
-              </Button>
-              <Button
+              </ButtonLink>
+              <ButtonLink
                 size="lg"
                 variant="outline"
                 class="flex-1"
-                @click="handleRegister"
+                :to="AuthRoutePaths.register"
               >
                 <UserPlus class="size-5" />
                 {{ t('auth.register', 'Sign Up') }}
-              </Button>
+              </ButtonLink>
             </div>
           </div>
         </div>

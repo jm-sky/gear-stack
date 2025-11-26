@@ -343,7 +343,7 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
   - Parser automatycznie tworzy relację
 
 **Eksport do CSV:**
-- 🔄 Eksport kontenera do formatu CSV (planowane) | **Feature:** [FEATURE-021](./features/FEATURE-021-csv-export.md)
+- ✅ Eksport kontenera do formatu CSV | **Feature:** [FEATURE-021](./features/FEATURE-021-csv-export.md) | **Version:** 2.13.0
 - Kolumny: nazwa, kategoria, ilość, waga, cena, waluta, marka, kolor, status, priorytet, URL, notatki
 - Opcja wyboru kolumn do eksportu
 - Obsługa różnych separatorów (przecinek, średnik)
@@ -405,6 +405,27 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
   - ✅ Unit tests dla parsowania cen (kontenery i przedmioty)
 
 > **Uwaga:** UUID support dla update workflow wymaga backendu/DB - zobacz [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md)
+
+### 🔄 Obsługa różnych formatów importu
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+
+**Problem:**
+- Obecnie import obsługuje tylko format JSON (w `ContainerHeader.vue` linia 186-189)
+- Brak obsługi importu z innych formatów (CSV, Markdown) przez ten sam interfejs
+
+**Rozwiązania do rozważenia:**
+1. **Dialog wyboru formatu** - po kliknięciu "Import" otwiera się dialog z wyborem formatu (JSON, CSV, Markdown)
+2. **Osobne akcje menu** - oddzielne pozycje menu dla każdego formatu (Import JSON, Import CSV, Import Markdown)
+3. **Auto-detekcja formatu** - automatyczne rozpoznawanie formatu na podstawie zawartości pliku/tekstu
+
+**Wymagania:**
+- Obsługa importu JSON (już istnieje, ale wymaga ulepszenia)
+- Obsługa importu CSV (nowa funkcjonalność)
+- Obsługa importu Markdown (już istnieje jako osobna akcja, ale można zintegrować)
+- Spójny UX dla wszystkich formatów importu
+- Walidacja i obsługa błędów dla każdego formatu
+
+**Lokalizacja:** `src/modules/gear/components/ContainerHeader.vue:186-189`
 
 ---
 

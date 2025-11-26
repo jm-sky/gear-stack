@@ -12,6 +12,7 @@ import type { IGearContainer } from '../types/gear.types'
 import ContainerCard from '../components/ContainerCard.vue'
 import ContainersFilters from '../components/ContainersFilters.vue'
 import ContainersListPageDropdown from '../components/ContainersListPageDropdown.vue'
+import ExportToCSVDialog from '../components/ExportToCSVDialog.vue'
 import ExportToPromptDialog from '../components/ExportToPromptDialog.vue'
 import GenerateExampleGearButton from '../components/GenerateExampleGearButton.vue'
 import ImportMarkdownDialog from '../components/ImportMarkdownDialog.vue'
@@ -24,7 +25,7 @@ import { getRootContainers as getRootContainersUtil } from '../utils/containerNe
 import type { TUUID } from '@/shared/types/base.type'
 
 // Action icons
-const ExportAllToPromptIcon = getActionIcon('exportAllToPrompt')
+const ExportAllToMarkdownIcon = getActionIcon('exportAllToMarkdown')
 const CreateIcon = getActionIcon('create')
 
 const router = useRouter()
@@ -42,6 +43,7 @@ const showOnlyRootContainers = ref(false)
 // Dialogs
 const importDialogOpen = ref(false)
 const isExportToPromptDialogOpen = ref(false)
+const isExportToCSVDialogOpen = ref(false)
 
 // Check for import query parameter and open dialog, and load containers from API
 onMounted(async () => {
@@ -137,13 +139,22 @@ const handleDelete = async (id: TUUID) => {
   }
 }
 
-const handleExportAllToPrompt = () => {
+const handleExportAllToMarkdown = () => {
   if (containers.value.length === 0) {
     toast.error(t('gear.export.noContainers'))
     return
   }
 
   isExportToPromptDialogOpen.value = true
+}
+
+const handleExportAllToCSV = () => {
+  if (containers.value.length === 0) {
+    toast.error(t('gear.export.noContainers'))
+    return
+  }
+
+  isExportToCSVDialogOpen.value = true
 }
 </script>
 
@@ -164,13 +175,13 @@ const handleExportAllToPrompt = () => {
           <div class="flex gap-2">
             <Button
               v-if="containers.length > 0"
-              v-tooltip.bottom="t('gear.export.allToPrompt')"
+              v-tooltip.bottom="t('gear.export.allToMarkdown')"
               variant="outline"
               class="shrink-0"
-              :aria-label="$t('gear.export.allToPrompt')"
-              @click="handleExportAllToPrompt"
+              :aria-label="$t('gear.export.allToMarkdown')"
+              @click="handleExportAllToMarkdown"
             >
-              <ExportAllToPromptIcon class="size-4" />
+              <ExportAllToMarkdownIcon class="size-4" />
             </Button>
             <Button
               v-tooltip.bottom="t('gear.container.create.title')"
@@ -181,7 +192,7 @@ const handleExportAllToPrompt = () => {
               <CreateIcon class="size-4" />
               {{ t('gear.container.create.title') }}
             </Button>
-            <ContainersListPageDropdown @export-all-to-prompt="handleExportAllToPrompt" @import="handleImport" />
+            <ContainersListPageDropdown @export-all-to-prompt="handleExportAllToMarkdown" @export-all-to-csv="handleExportAllToCSV" @import="handleImport" />
           </div>
         </div>
       </div>
@@ -234,6 +245,12 @@ const handleExportAllToPrompt = () => {
     <!-- Export to Prompt Dialog -->
     <ExportToPromptDialog
       v-model:open="isExportToPromptDialogOpen"
+      :containers="containers"
+    />
+
+    <!-- Export to CSV Dialog -->
+    <ExportToCSVDialog
+      v-model:open="isExportToCSVDialogOpen"
       :containers="containers"
     />
   </AuthenticatedLayout>

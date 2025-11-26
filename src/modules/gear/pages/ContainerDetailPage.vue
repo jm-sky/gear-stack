@@ -12,6 +12,7 @@ import AddNestedContainerDialog from '../components/AddNestedContainerDialog.vue
 import CategoryPieChart from '../components/CategoryPieChart.vue'
 import ContainerHeader from '../components/ContainerHeader.vue'
 import ContainerItemImagesGallery from '../components/ContainerItemImagesGallery.vue'
+import ExportToCSVDialog from '../components/ExportToCSVDialog.vue'
 import ExportToPromptDialog from '../components/ExportToPromptDialog.vue'
 import ItemsTable from '../components/ItemsTable.vue'
 import SortConfirmationAlert from '../components/SortConfirmationAlert.vue'
@@ -55,6 +56,7 @@ const canEditContainer = computed(() => {
 // Dialog state
 const isAddContainerDialogOpen = ref(false)
 const isExportToPromptDialogOpen = ref(false)
+const isExportToCSVDialogOpen = ref(false)
 
 // File operations handled in handleImport
 
@@ -255,6 +257,11 @@ const handleExportToPrompt = () => {
   isExportToPromptDialogOpen.value = true
 }
 
+const handleExportToCSV = () => {
+  if (!container.value) return
+  isExportToCSVDialogOpen.value = true
+}
+
 const handleRecognizeParameters = async (item: IGearItem) => {
   try {
     const params = recognizeParameters(item.name)
@@ -339,6 +346,7 @@ if (!container.value) {
         @import="handleImport"
         @add-container="handleAddContainer"
         @export-to-prompt="handleExportToPrompt"
+        @export-to-csv="handleExportToCSV"
         @recognize-parameters-all="handleRecognizeParametersAll"
       />
 
@@ -385,6 +393,12 @@ if (!container.value) {
       <!-- Export to Prompt Dialog -->
       <ExportToPromptDialog
         v-model:open="isExportToPromptDialogOpen"
+        :container="container"
+      />
+
+      <!-- Export to CSV Dialog -->
+      <ExportToCSVDialog
+        v-model:open="isExportToCSVDialogOpen"
         :container="container"
       />
     </div>

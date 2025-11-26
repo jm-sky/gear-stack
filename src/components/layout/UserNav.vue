@@ -2,7 +2,6 @@
 import { LogIn, LogOut, Shield, User, UserPlus } from 'lucide-vue-next'
 import { type Component, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,7 +36,6 @@ export interface UserNavProps {
 }
 
 const { t } = useI18n()
-const router = useRouter()
 const { isAuthenticated } = useAuth()
 const { isAdmin } = useAdmin()
 
@@ -65,10 +63,6 @@ const initials = computed(() => {
 
 const handleLogout = () => {
   emit('logout')
-}
-
-const navigateTo = (path: string) => {
-  router.push(path)
 }
 </script>
 
@@ -107,14 +101,14 @@ const navigateTo = (path: string) => {
       <!-- Navigation Links (mobile only) -->
       <template v-if="navLinks && navLinks.length > 0">
         <div class="md:hidden">
-          <DropdownMenuItem
+          <DropdownMenuItemLink
             v-for="link in navLinks"
             :key="link.to"
-            @click="navigateTo(link.to)"
+            :to="link.to"
           >
             <component :is="link.icon" v-if="link.icon" class="size-4 mr-2" />
             {{ link.label }}
-          </DropdownMenuItem>
+          </DropdownMenuItemLink>
           <DropdownMenuSeparator />
         </div>
       </template>

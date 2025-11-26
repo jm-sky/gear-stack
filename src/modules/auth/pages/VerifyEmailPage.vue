@@ -6,11 +6,12 @@ import { toast } from 'vue-sonner'
 import Alert from '@/components/ui/alert/Alert.vue'
 import AlertDescription from '@/components/ui/alert/AlertDescription.vue'
 import { Button } from '@/components/ui/button'
+import ButtonLink from '@/components/ui/button-link/ButtonLink.vue'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import GuestLayoutCentered from '@/layouts/GuestLayoutCentered.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
-import { AuthRouteNames, AuthRoutePaths } from '@/modules/auth/config/routes'
+import { AuthRoutePaths } from '@/modules/auth/config/routes'
 import { useAuthStore } from '@/modules/auth/store/useAuthStore'
 
 type VerificationStatus = 'idle' | 'success' | 'error'
@@ -83,14 +84,6 @@ async function handleResend() {
   }
 }
 
-function goToLogin() {
-  router.push({ name: AuthRouteNames.login })
-}
-
-function goToDashboard() {
-  router.push(AuthRoutePaths.dashboard)
-}
-
 onBeforeUnmount(() => {
   if (redirectTimeout.value) {
     clearTimeout(redirectTimeout.value)
@@ -160,22 +153,22 @@ onBeforeUnmount(() => {
           >
             {{ t('auth.verify_email.resend_button') }}
           </Button>
-          <Button
+          <ButtonLink
             v-if="isVerified"
             type="button"
             variant="outline"
-            @click="goToDashboard"
+            :to="AuthRoutePaths.dashboard"
           >
             {{ t('auth.verify_email.go_to_app') }}
-          </Button>
-          <Button
+          </ButtonLink>
+          <ButtonLink
             v-else
             type="button"
             variant="outline"
-            @click="goToLogin"
+            :to="AuthRoutePaths.login"
           >
             {{ t('auth.verify_email.back_to_login') }}
-          </Button>
+          </ButtonLink>
         </div>
       </div>
     </div>
