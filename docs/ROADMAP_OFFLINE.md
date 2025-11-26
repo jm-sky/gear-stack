@@ -304,6 +304,14 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
   - Osobna definicja kontenera z tym samym `[#id]` w nagłówku
   - Parser automatycznie tworzy relację
 
+**Eksport do CSV:**
+- 🔄 Eksport kontenera do formatu CSV (planowane)
+- Kolumny: nazwa, kategoria, ilość, waga, cena, waluta, marka, kolor, status, priorytet, URL, notatki
+- Opcja wyboru kolumn do eksportu
+- Obsługa różnych separatorów (przecinek, średnik)
+- Encoding: UTF-8 z BOM (dla Excel)
+- Eksport z cenami (jeśli dostępne)
+
 **Import z markdown:**
 - ✅ Przycisk "Import z markdown" w dropdown menu na liście kontenerów
 - ✅ Dialog z textarea do wklejenia markdown i przyciskiem "Preview"
@@ -455,13 +463,24 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 
 ## ✏️ Szybka edycja
 
-### Edycja bezpośrednio na liście
+### Edycja bezpośrednio na liście (Inline Editing)
 **Status:** 🔄 Planned | **Priority:** Medium | **Feature:** FEATURE-007 | **Complexity:** Large
 
 - Możliwość szybkiej edycji listy - dodawanie i zmienianie przedmiotów bezpośrednio na liście
 - Bez wchodzenia w formularz
-- Inline editing dla podstawowych pól (nazwa, ilość, status)
-- Szybkie akcje (zmiana statusu, priorytetu) bezpośrednio z listy
+- Inline editing dla podstawowych pól:
+  - Zmiana nazwy przedmiotu (edytowalne pole w wierszu)
+  - Zmiana opisu/notatek (edytowalne pole w wierszu)
+  - Zmiana innych kolumn (ilość, waga, cena, itp.)
+- Szybkie akcje bezpośrednio z wiersza:
+  - Upload photo (dodawanie zdjęcia do przedmiotu)
+  - Add link for this item (dodawanie URL)
+  - Mark as worn (oznaczenie jako worn)
+  - Mark as consumable (oznaczenie jako consumable)
+  - Star item (oznaczenie jako ulubiony/priorytetowy)
+  - Zmiana statusu (owned, to buy, itp.)
+  - Zmiana priorytetu
+- Wzorzec: LighterPack - wszystkie akcje dostępne bezpośrednio z wiersza tabeli
 
 ### ✅ Kolejność przedmiotów w kontenerze
 **Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium | **Feature:** [FEATURE-018](./features/FEATURE-018-item-ordering.md) | **Version:** v2.9.0
@@ -598,6 +617,20 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
   - ✅ Przycisk "OK" (odświeża stronę) / "Cancel" (kontynuuje, niektóre funkcje mogą nie działać)
 - ✅ Tłumaczenia PL/EN (automatyczne wykrywanie locale)
 - ✅ Global error handler w `main.ts`
+
+### 🔄 Poprawa przekierowania z formularza edycji przedmiotu
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+
+- Problem: Przekierowanie z formularza edycji przedmiotu (`ItemFormPage`) jest niespójne
+- Obecnie: Czasem przekierowuje do kontenera, czasem do podglądu przedmiotu
+- Rozwiązanie: Przekierowanie powinno zależeć od tego, skąd użytkownik wszedł w edycję:
+  - Jeśli z `ItemDetailPage` (podgląd przedmiotu) → po zapisaniu wróć do `ItemDetailPage`
+  - Jeśli z `ContainerDetailPage` (lista przedmiotów) → po zapisaniu wróć do `ContainerDetailPage`
+  - Jeśli bezpośrednio (np. z linku) → wróć do kontenera (domyślnie)
+- Implementacja:
+  - Przechowywanie `returnTo` w route query params lub state
+  - Sprawdzanie `returnTo` przed przekierowaniem po zapisaniu
+  - Fallback do kontenera, jeśli brak `returnTo`
 - ✅ Dedykowany composable `useChunkLoadErrorHandler.ts` (opcjonalny)
 - ✅ Auto-refresh po potwierdzeniu użytkownika
 

@@ -57,6 +57,8 @@ This directory contains detailed implementation plans for features from the [ROA
 4. Update status when starting/completing
 5. Reference related features
 
+**Note:** Some features have additional integration guides (e.g., `FEATURE-017-integration-guide.md`) that provide practical examples and troubleshooting tips.
+
 ---
 
 ## 🔄 Updating Feature Plans

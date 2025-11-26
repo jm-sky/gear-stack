@@ -12,6 +12,8 @@ The Item Image Gallery feature allows admin users to upload, manage, and reorder
 - ✨ **Auto-resize and compression**
 - 💾 **Local + S3 storage support**
 
+**Related:** [FEATURE-017: Item Image Gallery Upload](./FEATURE-017-item-image-gallery-upload.md)
+
 ---
 
 ## Backend Setup
@@ -412,3 +414,4 @@ Authorization: Bearer {token}
 
 **Last Updated:** 2025-01-25
 **Status:** 🚧 In Progress (backend complete, frontend integration manual)
+

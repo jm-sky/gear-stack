@@ -7,7 +7,6 @@ Ten katalog zawiera dokumentację projektu Gear Stack.
 - **[ROADMAP.md](./ROADMAP.md)** - 📍 **Punkt wejścia** - przegląd struktury roadmap
 - **[ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md)** - Funkcjonalności offline (localStorage) - 688 linii, ~50+ funkcji
 - **[ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md)** - Funkcjonalności online (backend/DB/auth) - 342 linie, ~30+ funkcji
-- **[TODO_FEATURES.md](./TODO_FEATURES.md)** - 📋 **Lista funkcji do zaimplementowania** - podsumowanie z obu roadmap
 - **[features/](./features/)** - Szczegółowe plany implementacji funkcji
 
 ## 📁 Struktura katalogów
@@ -37,6 +36,7 @@ Przestarzałe dokumenty przeniesione do archiwum:
 - `IMPLEMENTATION_COMPLETE.md` - Stary raport implementacji (2025-01-21)
 - `IMPLEMENTATION_STATUS.md` - Stary status implementacji (2025-01-21)
 - `IMPLEMENTATION_PLAN.md` - Stary plan implementacji
+- `ITEM_DETAIL_PAGE_IMPLEMENTATION.md` - Dokumentacja implementacji ItemDetailPage (2025-01-25)
 
 ## 🔧 Dokumenty operacyjne
 
