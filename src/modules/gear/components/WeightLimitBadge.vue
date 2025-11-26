@@ -13,13 +13,13 @@ const props = defineProps<{
 const { t } = useI18n()
 const store = useGearStore()
 
-const weightLimitPercentage = computed<number | null>(() => 
+const weightLimitPercentage = computed<number | null>(() =>
   calculateWeightLimitPercentageSync(props.container, store.getAllContainers)
 )
 
 const hasWeightLimit = computed<boolean>(() => weightLimitPercentage.value !== null)
 
-const shouldShow = computed<boolean>(() => 
+const shouldShow = computed<boolean>(() =>
   hasWeightLimit.value && weightLimitPercentage.value !== null && weightLimitPercentage.value >= 90
 )
 
@@ -47,5 +47,3 @@ const badgeText = computed<string>(() => {
     {{ badgeText }}
   </Badge>
 </template>
-
-
