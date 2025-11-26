@@ -66,7 +66,10 @@ const isSavingSorting = ref(false)
 
 // Actions
 const handleEditItem = (item: IGearItem) => {
-  router.push(`/gear/${containerId}/items/${item.id}/edit`)
+  router.push({
+    path: `/gear/${containerId}/items/${item.id}/edit`,
+    query: { returnTo: 'container' },
+  })
 }
 
 const handleDeleteItem = async (item: IGearItem) => {

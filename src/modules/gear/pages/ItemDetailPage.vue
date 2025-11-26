@@ -139,7 +139,10 @@ const handleBack = () => {
 }
 
 const handleEdit = () => {
-  router.push(GearRoutePath.ItemEditById(containerId, itemId))
+  router.push({
+    path: GearRoutePath.ItemEditById(containerId, itemId),
+    query: { returnTo: 'detail' },
+  })
 }
 
 const formattedWeight = computed<string>(() => {

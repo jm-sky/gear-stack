@@ -139,6 +139,9 @@ Locale is persisted in localStorage and synced via `useLocale()` composable.
 - **Self-closing tags** required for all HTML/SVG/Vue components
 - **Max attributes per line**: 3 for single-line, 1 for multi-line
 - Unused variables starting with `_` are allowed
+- **No line breaks before `else`, `catch`, `finally`** - Keep control flow keywords on the same line as closing brace
+  - ✅ Use: `} else {`, `} catch (error) {`, `} finally {`
+  - ❌ Avoid: Line breaks before these keywords
 
 ### TypeScript Conventions
 
@@ -153,6 +156,40 @@ Locale is persisted in localStorage and synced via `useLocale()` composable.
 - Import order: external packages → internal modules (alphabetical, enforced by ESLint)
 - Use composables for reusable logic (e.g., `useGearStore`, `useLocale`)
 - Layouts are rendered via `<RouterView />` in App.vue
+
+### Vue 3.5+ Best Practices
+
+**v-model with defineModel:**
+- ✅ Use: `const open = defineModel<boolean>('open', { required: true })`
+- ❌ Avoid: `defineProps<{ open: boolean }>()` + `emit('update:open')`
+- Benefits: Simpler syntax, automatic reactivity, less boilerplate
+
+**Reactive Destructured Props:**
+- Destructured props are reactive in Vue 3.5+ (no need for `toRefs`)
+- ✅ Use: `const { item } = defineProps<{ item: IGearItem }>()`
+- Props can be used directly in computed/watch without losing reactivity
+
+**Prop Shortcuts:**
+- When passing a prop with the same name as the variable
+- ✅ Use: `<Dialog :open />` instead of `<Dialog :open="open" />`
+
+**TypeScript Generics:**
+- Always provide explicit types for `ref<T>`, `computed<T>`, `reactive<T>`
+- ✅ Use: `const count = ref<number>(0)`, `const label = computed<string>(() => ...)`
+- ❌ Avoid: `const count = ref(0)` (implicit types)
+
+**Declaration Order in `<script setup>`:**
+1. Composables (e.g., `useI18n()`, `useRouter()`)
+2. `defineProps()`
+3. `defineModel()`
+4. `defineEmits()`
+5. Computed properties and reactive state
+6. Functions and methods
+
+**Routing:**
+- Use route helper functions from `routes.ts` instead of hardcoded paths
+- ✅ Use: `GearRoutePath.ItemEditById(containerId, itemId)`
+- ❌ Avoid: `` `/gear/${containerId}/items/${itemId}/edit` ``
 
 ## Environment & Configuration
 

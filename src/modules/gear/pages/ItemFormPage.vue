@@ -193,10 +193,13 @@ const onSubmit = handleSubmit(async (data: ICreateItemDto | IUpdateItemDto) => {
       toast.success(t('common.success'))
 
       // Redirect based on returnTo query param
-      if (returnTo === 'shopping') {
+      if (returnTo === 'detail') {
+        router.push(GearRoutePath.ItemDetailById(containerId, itemId))
+      } else if (returnTo === 'shopping') {
         router.push('/gear/shopping')
       } else {
-        router.push(`/gear/${containerId}`)
+        // Default: return to container (returnTo === 'container' or undefined)
+        router.push(GearRoutePath.ContainerDetailById(containerId))
       }
     } else {
       // Add linkedItemId if selecting from catalog
@@ -211,7 +214,8 @@ const onSubmit = handleSubmit(async (data: ICreateItemDto | IUpdateItemDto) => {
       if (returnTo === 'shopping') {
         router.push('/gear/shopping')
       } else {
-        router.push(`/gear/${containerId}`)
+        // Default: return to container (returnTo === 'container' or undefined)
+        router.push(GearRoutePath.ContainerDetailById(containerId))
       }
     }
   } catch (error) {
@@ -223,10 +227,13 @@ const onSubmit = handleSubmit(async (data: ICreateItemDto | IUpdateItemDto) => {
 // Cancel handler
 const handleCancel = () => {
   const returnTo = route.query.returnTo as string | undefined
-  if (returnTo === 'shopping') {
+  if (returnTo === 'detail' && itemId) {
+    router.push(GearRoutePath.ItemDetailById(containerId, itemId))
+  } else if (returnTo === 'shopping') {
     router.push('/gear/shopping')
   } else {
-    router.push(`/gear/${containerId}`)
+    // Default: return to container (returnTo === 'container' or undefined)
+    router.push(GearRoutePath.ContainerDetailById(containerId))
   }
 }
 
