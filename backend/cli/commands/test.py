@@ -1,7 +1,7 @@
 """Test commands for development and debugging.
 
-This module provides test commands for various purposes like testing Sentry integration
-and storage adapters (local and S3).
+This module provides test commands for various purposes like testing Sentry integration,
+storage adapters (local and S3), and email functionality.
 """
 
 import asyncio
@@ -11,6 +11,7 @@ import typer
 from rich.console import Console
 
 from app.core.config import settings
+from app.core.email import get_email_service
 from app.core.storage.factory import get_storage_adapter
 
 # Create test subcommand app
@@ -173,6 +174,126 @@ async def _test_storage_async(skip_cleanup: bool) -> None:
             console.print("  • Check bucket exists and is accessible")
             console.print("  • Verify network connectivity to S3 endpoint")
             console.print("  • Check IAM permissions for the access key")
+
+        console.print()
+        raise typer.Exit(1)
+
+
+@test_app.command("email")
+def test_email(
+    to: str = typer.Argument(..., help="Recipient email address"),
+    template: str = typer.Option("welcome", "--template", "-t", help="Email template to use (welcome, password_reset, etc.)"),
+) -> None:
+    """Test email sending via configured SMTP adapter.
+
+    Sends a test email to verify SMTP configuration is working correctly.
+    You can specify different email templates to test various email types.
+
+    Examples:
+        python -m cli test email jan.madeyski@gmail.com
+        python -m cli test email user@example.com --template password_reset
+    """
+    asyncio.run(_test_email_async(to, template))
+
+
+async def _test_email_async(to: str, template: str) -> None:
+    """Async implementation of email test."""
+    console.print("\n[bold cyan]Testing Email Service[/bold cyan]")
+    console.print("=" * 50)
+
+    # Show config
+    console.print(f"[dim]Email Enabled:[/dim] {settings.email.enabled}")
+    console.print(f"[dim]Email Adapter:[/dim] {settings.email.adapter}")
+    if settings.email.adapter == "smtp":
+        console.print(f"[dim]SMTP Host:[/dim] {settings.email.smtp_host}")
+        console.print(f"[dim]SMTP Port:[/dim] {settings.email.smtp_port}")
+        console.print(f"[dim]SMTP User:[/dim] {settings.email.smtp_user}")
+        console.print(f"[dim]SMTP From:[/dim] {settings.email.smtp_from}")
+        console.print(f"[dim]SMTP TLS:[/dim] {settings.email.smtp_use_tls}")
+    console.print(f"[dim]Template:[/dim] {template}")
+    console.print(f"[dim]Recipient:[/dim] {to}")
+    console.print()
+
+    try:
+        # Initialize email service
+        console.print("[1/3] [cyan]Initializing email service...[/cyan]")
+        email_service = get_email_service()
+        console.print("    [green]✓ Email service initialized[/green]")
+
+        # Prepare test data based on template
+        console.print(f"[2/3] [cyan]Sending test email (template: {template})...[/cyan]")
+
+        success = False
+        if template == "welcome":
+            success = await email_service.send_welcome_email(
+                to=to,
+                name="Test User",
+            )
+        elif template == "password_reset":
+            success = await email_service.send_password_reset_email(
+                to=to,
+                name="Test User",
+                reset_token="test-token-123",
+            )
+        elif template == "email_verification":
+            success = await email_service.send_email_verification_email(
+                to=to,
+                name="Test User",
+                verification_token="test-verification-token-123",
+            )
+        elif template == "password_changed":
+            success = await email_service.send_password_changed_email(
+                to=to,
+                name="Test User",
+                ip_address="127.0.0.1",
+            )
+        elif template == "account_deleted":
+            success = await email_service.send_account_deleted_email(
+                to=to,
+                name="Test User",
+            )
+        else:
+            console.print(f"    [red]✗ Unknown template: {template}[/red]")
+            console.print(f"    [dim]Available templates: welcome, password_reset, email_verification, password_changed, account_deleted[/dim]")
+            raise typer.Exit(1)
+
+        # Check result
+        console.print("[3/3] [cyan]Checking result...[/cyan]")
+        if success:
+            console.print("    [green]✓ Email sent successfully[/green]")
+        else:
+            console.print("    [red]✗ Failed to send email[/red]")
+            raise Exception("Email sending failed")
+
+        # Success summary
+        console.print()
+        console.print("[bold green]✓ Email test passed successfully![/bold green]")
+        console.print(f"[dim]Check inbox at: {to}[/dim]")
+        console.print()
+
+    except ImportError as e:
+        console.print()
+        console.print(f"[bold red]✗ Email service dependencies missing![/bold red]")
+        console.print(f"[dim]Error: {e}[/dim]")
+        console.print()
+        raise typer.Exit(1)
+
+    except Exception as e:
+        console.print()
+        console.print(f"[bold red]✗ Email test failed![/bold red]")
+        console.print(f"[dim]Error: {e}[/dim]")
+        console.print()
+
+        # Provide helpful troubleshooting tips
+        if settings.email.adapter == "smtp":
+            console.print("[yellow]Troubleshooting tips:[/yellow]")
+            console.print("  • Verify SMTP host and port are correct")
+            console.print("  • Check SMTP username and password")
+            console.print("  • Verify SMTP server allows connections from your IP")
+            console.print("  • Check if TLS/SSL settings are correct (use_tls)")
+            console.print(f"  • For port 465: use SSL (automatic)")
+            console.print(f"  • For port 587: use TLS with STARTTLS")
+            console.print("  • Check firewall settings")
 
         console.print()
         raise typer.Exit(1)
