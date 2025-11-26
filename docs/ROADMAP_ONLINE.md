@@ -190,15 +190,35 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 
 ## 🚀 Import/Export - rozszerzenia wymagające DB
 
-### UUID support dla update workflow
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+### ✅ UUID support dla update workflow
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium
 
-- Dodanie pola `uuid` do kontenerów i przedmiotów w DB
-- Export zawiera UUID w nagłówku: `## Container [#slug] [uuid:abc-123] (Type)`
-- Import rozpoznaje UUID i może zaktualizować istniejące kontenery/przedmioty zamiast tylko tworzyć nowe
-- Umożliwia cykl export → edycja w AI → import z zachowaniem relacji
-- Stabilne referencje nawet po zmianie nazw kontenerów
-- Opcja w import dialog: "Aktualizuj istniejące" vs "Twórz nowe"
+**Koncepcja:**
+Kontenery i przedmioty już mają UUID - to ich pole `id` (typu `TUUID`). UUID support to system wykorzystujący ten istniejący UUID do identyfikacji podczas importu/eksportu, co umożliwia aktualizację istniejących danych zamiast tworzenia duplikatów.
+
+**Zaimplementowane funkcjonalności:**
+- ✅ Export markdown zawiera UUID w formacie `[uuid:xxx]` (opcjonalnie, przez `showUuid`)
+- ✅ Import parsuje UUID z markdowna i używa go do identyfikacji kontenerów/przedmiotów
+- ✅ Import rozpoznaje UUID i może zaktualizować istniejące kontenery/przedmioty zamiast tylko tworzyć nowe
+- ✅ Jeśli UUID istnieje w systemie → aktualizacja istniejącego kontenera/przedmiotu
+- ✅ Jeśli UUID nie istnieje → tworzenie nowego kontenera/przedmiotu z tym samym UUID (zachowuje UUID z eksportu)
+- ✅ Opcja w import dialog: "Aktualizuj istniejące (po UUID)" vs "Twórz nowe" (już działa)
+- ✅ Umożliwia cykl export → edycja w AI → import z zachowaniem relacji i aktualizacją danych
+- ✅ Stabilne referencje nawet po zmianie nazw kontenerów (UUID się nie zmienia)
+- ✅ Wsparcie dla UUID zarówno w localStorage (local services) jak i w backend API
+- ✅ Aktualizacja wszystkich parsowanych pól podczas update (nazwa, opis, waga, URL, cena, waluta)
+
+**Zaimplementowane zmiany techniczne:**
+- ✅ Dodać opcjonalne pole `id` do `ICreateContainerDto` i `ICreateItemDto` (frontend)
+- ✅ Dodać opcjonalne pole `id` do `ContainerCreate` i `ItemCreate` schemas (backend)
+- ✅ Zmodyfikować `createContainer` i `createItem` w local services, aby używały podanego UUID
+- ✅ Zmodyfikować backend repository, aby akceptowało opcjonalny UUID
+- ✅ Zaktualizować `ImportMarkdownDialog.vue`, aby przekazywał UUID podczas tworzenia i aktualizacji
+- ✅ Zaktualizować API services (`gearContainerApiService.ts`, `gearItemApiService.ts`), aby przekazywały UUID do backendu
+- ✅ Dodać testy jednostkowe dla UUID support w lokalnych serwisach:
+  - `gearContainerLocalService.spec.ts` - 5 testów sprawdzających użycie UUID przy tworzeniu kontenerów
+  - `gearItemLocalService.spec.ts` - 5 testów sprawdzających użycie UUID przy tworzeniu przedmiotów
+- ✅ Testy parsowania UUID już istnieją w `markdownImportService.spec.ts`
 
 ---
 

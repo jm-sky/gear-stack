@@ -116,6 +116,7 @@ export interface IGearContainer {
 
 // DTO dla tworzenia kontenera
 export interface ICreateContainerDto {
+  id?: TUUID | null // Optional UUID for import/update workflow (when UUID is provided in markdown export)
   name: string
   description?: string | null
   type: TGearContainerType
@@ -126,6 +127,7 @@ export interface ICreateContainerDto {
   favorite?: boolean | null
   brand?: string | null
   price?: number | null
+  currency?: string | null // Currency code (PLN, USD, EUR, GBP, etc.)
   weight?: number | null
   weightUnit?: TGearWeightUnit | null
   maxWeight?: number | null
@@ -157,6 +159,7 @@ export interface IUpdateContainerDto {
 
 // DTO dla tworzenia przedmiotu
 export interface ICreateItemDto {
+  id?: TUUID | null // Optional UUID for import/update workflow (when UUID is provided in markdown export)
   linkedItemId?: TUUID | null // Reference to original item when linking
   name: string
   category: TGearItemCategory

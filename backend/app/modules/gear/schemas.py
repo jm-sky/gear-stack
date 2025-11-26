@@ -35,6 +35,7 @@ GearItemCategory = str  # Allows custom categories: 'water', 'food', 'shelter', 
 class ContainerCreate(BaseModel):
     """Schema for creating a new gear container."""
 
+    id: str | None = Field(None, description="Optional UUID for import/update workflow (when UUID is provided in markdown export)")
     name: str = Field(..., min_length=1, max_length=255)
     description: str | None = None
     type: GearContainerType
@@ -140,6 +141,7 @@ class ContainerResponse(BaseModel):
 class ItemCreate(BaseModel):
     """Schema for creating a new gear item."""
 
+    id: str | None = Field(None, description="Optional UUID for import/update workflow (when UUID is provided in markdown export)")
     name: str = Field(..., min_length=1, max_length=255)
     category: GearItemCategory
     quantity: int = Field(default=1, ge=1)

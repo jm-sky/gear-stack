@@ -35,10 +35,7 @@ class UserApiService {
    * Update current user profile
    */
   async updateUser(data: IUpdateUserDto): Promise<IUser> {
-    console.log('userApiService.updateUser called with data:', data)
-    console.log('Making PATCH request to /users/me')
     const response = await apiClient.patch<UserResponse>('/users/me', data)
-    console.log('API response received:', response.data)
     return this.mapToIUser(response.data)
   }
 

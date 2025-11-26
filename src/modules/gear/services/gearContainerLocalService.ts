@@ -44,7 +44,7 @@ class GearContainerLocalService {
 
     const now = new Date().toISOString()
     const container: IGearContainer = {
-      id: crypto.randomUUID(),
+      id: data.id ?? crypto.randomUUID(), // Use provided UUID if available, otherwise generate new one
       name: data.name,
       description: data.description,
       type: data.type,

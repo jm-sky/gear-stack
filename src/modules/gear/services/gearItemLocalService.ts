@@ -40,7 +40,7 @@ class GearItemLocalService {
     }
     
     const item: IGearItem = {
-      id: crypto.randomUUID(),
+      id: data.id ?? crypto.randomUUID(), // Use provided UUID if available, otherwise generate new one
       linkedItemId: data.linkedItemId, // Reference to original item when linking
       name: data.name,
       category: data.category,

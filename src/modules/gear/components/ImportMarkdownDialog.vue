@@ -110,28 +110,31 @@ const handleImport = async () => {
       if (importMode.value === 'update' && containerData.uuid) {
         const existing = store.getContainerById(containerData.uuid)
         if (existing) {
-          // Update existing container
+          // Update existing container with all parsed fields
           container = await updateContainer(existing.id, {
             name: containerData.name,
             description: containerData.description,
             weight: containerData.weight,
             weightUnit: containerData.weightUnit,
             url: containerData.url,
-            // Keep existing type and other fields
+            price: containerData.price,
+            currency: containerData.currency,
+            // Keep existing type, color, brand, and other fields that aren't in markdown
           })
           updatedCount++
         } else {
           // UUID provided but container not found - create new with same UUID
           container = await createContainer({
+            id: containerData.uuid, // Use UUID from markdown export
             name: containerData.name,
             type: 'other',
             description: containerData.description || t('gear.import.importedDescription'),
             weight: containerData.weight,
             weightUnit: containerData.weightUnit,
             url: containerData.url,
+            price: containerData.price,
+            currency: containerData.currency,
           })
-          // Note: We can't override the auto-generated UUID in createContainer
-          // This is a limitation - we'd need to modify the service to accept UUID
           importedCount++
         }
       } else {
@@ -143,6 +146,8 @@ const handleImport = async () => {
           weight: containerData.weight,
           weightUnit: containerData.weightUnit,
           url: containerData.url,
+          price: containerData.price,
+          currency: containerData.currency,
         })
         importedCount++
       }
@@ -191,8 +196,11 @@ const handleImport = async () => {
             await updateItem(existingItem.id, itemDto)
             itemUpdatedCount++
           } else {
-            // UUID provided but item not found - create new
-            await createItem(latestContainer.id, itemDto)
+            // UUID provided but item not found - create new with same UUID
+            await createItem(latestContainer.id, {
+              ...itemDto,
+              id: itemUuid, // Use UUID from markdown export
+            })
             itemCount++
           }
         } else {

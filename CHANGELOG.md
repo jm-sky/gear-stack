@@ -21,6 +21,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.14.0] - 2025-11-26
+
+### Added
+- **UUID Import/Export Update Workflow**: UUID-based update flow for containers and items in markdown import/export
+  - Export can include stable UUID identifiers in the format `[uuid:xxx]` (optional, via `showUuid`)
+  - Import parses UUIDs from markdown and uses them to identify existing containers/items
+  - When UUID exists in the system, import updates the existing container/item instead of creating a duplicate
+  - When UUID does not exist, import creates a new container/item reusing the UUID from export (keeps references stable)
+  - Import dialog now exposes an explicit option: **“Aktualizuj istniejące (po UUID)” vs “Twórz nowe”**
+  - UUID support is wired through frontend DTOs (`ICreateContainerDto`, `ICreateItemDto`), local services, API services, and backend schemas/repository
+
+- **Batch Sorting with Confirmation Alert (ItemsTable)**: Batch-based item ordering with explicit save in Container Detail page
+  - Reordering items via column sorting or Up/Down buttons no longer saves immediately
+  - New `SortConfirmationAlert` is shown whenever there are pending sorting changes
+  - **Save** button persists the new order using `batchUpdateOrder` for both backend API and localStorage
+  - **Cancel** button clears pending changes and restores original order (reloads container from API when backend is enabled)
+  - Works consistently for both inline sorting and manual Up/Down moves
+
+### Changed
+- **Markdown Import Containers**: `ICreateContainerDto` now supports `currency` to keep container price data consistent with items
+- **Gear Services**: Updated gear container/item API and local services to:
+  - Accept optional UUID when creating containers/items
+  - Use `batchUpdateOrder` as the single path for saving reordered items, both for backend and localStorage
+
+---
+
 ## [2.13.0] - 2025-01-27
 
 ### Added

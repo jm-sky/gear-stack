@@ -9,6 +9,56 @@ AI_METADATA:
 
 Ten dokument jest punktem wejścia do roadmap projektu Gear Stack. Projekt ma **2 osobne roadmapy** ze względu na architekturę aplikacji (offline-first z opcjonalnym backendem).
 
+---
+
+## 🎯 Nadchodzące zadania (Prioritized)
+
+Lista zadań, którymi chcę się zająć w najbliższym czasie:
+
+### Wysoki priorytet
+
+1. ✅ **UUID support dla update workflow** - Zakończone
+   - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#uuid-support-dla-update-workflow)
+   - Wykorzystanie istniejącego UUID (`id`) do aktualizacji istniejących kontenerów/przedmiotów podczas importu markdown
+   - Status: ✅ Completed | Priority: Medium | Complexity: Medium
+
+2. **Media**
+   - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-media-i-zasoby-graficzne)
+   - **Show from URL** — opcja dodawania obrazków z URL
+   - **Primary image w wierszu tabeli** — opcjonalne wyświetlanie miniaturki primary image w tabeli przedmiotów
+   - Status: 🔄 Planned
+
+3. **Katalog i linkowanie**
+   - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-globalny-katalog-i-linkowanie)
+   - **Globalny katalog itemów** — High priority, Medium complexity
+   - **Linkowanie przedmiotów** — High priority, Large complexity
+   - Status: 🔄 Planned
+
+4. **Rozszerzone ustawienia użytkownika (waluta, widoczność, kategorie, marki w DB)**
+   - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-ustawienia-użytkownika-wymagające-db)
+   - Domyślna waluta użytkownika (zapisywana w DB)
+   - Domyślna widoczność nowych kontenerów
+   - Dodawanie nowych kategorii (zapisywane w DB)
+   - Dodawanie firm/marek (brand) — zapisywane w DB
+   - Status: 🔄 Planned | Priority: Medium | Complexity: Small
+
+5. **Funkcje AI**
+   - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-funkcje-ai-wymagające-backend)
+   - Infrastruktura AI (OpenRouter, zarządzanie tokenami, historia, cache)
+   - Status: 🔄 Planned | Priority: Medium | Complexity: Large
+
+### Obniżony priorytet (trudne zadania)
+
+1. **Automatyczne wyszukiwanie obrazków dla przedmiotów**
+   - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#automatyczne-wyszukiwanie-obrazków-dla-przedmiotów)
+   - Status: 🔄 Planned | Priority: Medium | Complexity: Large
+
+2. **Generowanie SVG z obrazków**
+   - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#generowanie-svg-z-obrazków)
+   - Status: 🔄 Planned | Priority: Low | Complexity: Large
+
+---
+
 ## 📋 Struktura Roadmap
 
 ### [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md) - Offline Features
@@ -95,5 +145,5 @@ Uwaga: Większość funkcji jest w ROADMAP_OFFLINE.md (offline-first approach)
 
 ---
 
-**Ostatnia aktualizacja:** 2025-01-21
+**Ostatnia aktualizacja:** 2025-01-28
 

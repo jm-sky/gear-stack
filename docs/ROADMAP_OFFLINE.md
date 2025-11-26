@@ -553,16 +553,15 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 - Opcja sortowania według innych kryteriów (nazwa, waga, kategoria) z możliwością powrotu do kolejności ręcznej
 - Wizualne wskaźniki podczas przeciągania (highlight, placeholder)
 
-### 🚧 Sortowanie w trybie batch z Alertem (ItemsTable)
-**Status:** 🚧 In Progress | **Priority:** High | **Complexity:** Medium
+### ✅ Sortowanie w trybie batch z Alertem (ItemsTable)
+**Status:** ✅ Completed | **Priority:** High | **Complexity:** Medium
 
-- Sortowanie w ItemsTable na stronie Container Details powinno działać w trybie batch
-- Po zmianie sortowania powinien pojawić się Alert z guzikiem "Zapisz"
-- Zmiany nie powinny być zapisywane automatycznie, tylko po kliknięciu guzika w Alert
+- Sortowanie w ItemsTable na stronie Container Details działa w trybie batch (bez natychmiastowego zapisu)
+- Po zmianie sortowania pojawia się Alert z guzikiem "Zapisz"
+- Zmiany nie są zapisywane automatycznie, tylko po kliknięciu guzika w Alert
 - Po kliknięciu "Zapisz" - zapis przez `batchUpdateOrder` (dla backendu i localStorage)
 - Po kliknięciu "Anuluj" - przeładowanie kontenera i przywrócenie oryginalnej kolejności
-- Alert powinien pokazywać się zawsze, gdy są pending sorting changes (nie tylko dla backendu)
-- **Problem:** Obecna implementacja zapisuje zmiany od razu zamiast czekać na potwierdzenie przez użytkownika
+- Alert pokazuje się zawsze, gdy są pending sorting changes (nie tylko dla backendu)
 
 ---
 

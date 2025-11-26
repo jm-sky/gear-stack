@@ -58,7 +58,7 @@ class GearRepository(SearchMixin):
             Created container
         """
         container = GearContainerDB(
-            id=generate_id(),
+            id=data.id if data.id else generate_id(),  # Use provided UUID if available, otherwise generate new one
             user_id=user_id,
             name=data.name,
             description=data.description,
@@ -262,7 +262,7 @@ class GearRepository(SearchMixin):
             order = (max_order + 1) if max_order is not None else 0
 
         item = GearItemDB(
-            id=generate_id(),
+            id=data.id if data.id else generate_id(),  # Use provided UUID if available, otherwise generate new one
             container_id=container_id,
             name=data.name,
             category=data.category,

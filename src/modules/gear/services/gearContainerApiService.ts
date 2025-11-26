@@ -24,6 +24,11 @@ class GearContainerApiService {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const cleaned: any = {}
 
+    // Optional UUID field (for import/update workflow)
+    if (isSet(data.id)) {
+      cleaned.id = data.id || null
+    }
+
     // Required fields
     cleaned.name = data.name
     cleaned.type = data.type

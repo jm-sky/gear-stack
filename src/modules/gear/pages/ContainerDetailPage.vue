@@ -29,7 +29,7 @@ const { t } = useI18n()
 const store = useGearStore()
 const { shouldUseAPI } = useBackend()
 const { container } = useContainer()
-const { deleteItem, updateItem, updateContainer, exportData, importData, createItem } = useGear()
+const { deleteItem, updateItem, updateContainer, exportData, importData, createItem, getContainerById } = useGear()
 const { user, isAuthenticated } = useAuth()
 
 const containerId = route.params.id as string
@@ -62,6 +62,40 @@ const isExportToCSVDialogOpen = ref(false)
 
 // Items
 const items = computed<IGearItem[]>(() => container.value?.items ?? [])
+
+// Display items with pending sorting changes applied
+// This ensures that when user reorders items, the table shows the new order immediately
+// even before saving, allowing for multiple reorders in sequence
+const displayItems = computed<IGearItem[]>(() => {
+  if (pendingSortingChanges.value.length === 0) {
+    return items.value
+  }
+
+  // Create a map of pending changes by item ID
+  const pendingMap = new Map(pendingSortingChanges.value.map(item => [item.id, item]))
+
+  // Merge pending changes with current items
+  // Items with pending changes use pending order, others keep their current order
+  const mergedItems = items.value.map(item => {
+    const pending = pendingMap.get(item.id)
+    if (pending) {
+      return { ...item, order: pending.order }
+    }
+    return item
+  })
+
+  // If pending changes contain all items (complete reorder), sort by order
+  // Otherwise, items are already in correct order from items.value
+  if (pendingSortingChanges.value.length === items.value.length) {
+    return [...mergedItems].sort((a, b) => {
+      const orderA = a.order ?? Number.MAX_SAFE_INTEGER
+      const orderB = b.order ?? Number.MAX_SAFE_INTEGER
+      return orderA - orderB
+    })
+  }
+
+  return mergedItems
+})
 
 // Pending sorting changes (for batch save when backend enabled)
 const pendingSortingChanges = ref<IGearItem[]>([])
@@ -104,48 +138,23 @@ const handleHideItemImages = async () => {
   }
 }
 
-const handleReorder = async (reorderedItems: IGearItem[]) => {
-  try {
-    // If backend enabled, use batch update
-    if (shouldUseAPI.value) {
-      const service = gearItemService()
-      if ('batchUpdateOrder' in service && typeof service.batchUpdateOrder === 'function') {
-        await service.batchUpdateOrder(reorderedItems)
-        toast.success(t('gear.item.reorderSuccess', 'Kolejność przedmiotów została zaktualizowana'))
-        return
-      }
-    }
-
-    // Fallback: Update all items with new order values (for localStorage)
-    await Promise.all(
-      reorderedItems.map(item =>
-        updateItem(item.id, { order: item.order }),
-      ),
-    )
-  } catch {
-    toast.error(t('common.error'))
-  }
+const handleReorder = (reorderedItems: IGearItem[]) => {
+  // Store pending changes - don't save yet, wait for user confirmation
+  // Alert will show for both backend and localStorage
+  // This works the same way as handleSortingChange - batch mode with confirmation
+  pendingSortingChanges.value = reorderedItems
 }
 
-const handleSortingChange = async (sortedItems: IGearItem[]) => {
+const handleSortingChange = (sortedItems: IGearItem[]) => {
   // If sorting was cleared (empty array), clear pending changes
   if (sortedItems.length === 0) {
     pendingSortingChanges.value = []
     return
   }
 
-  // Always update locally first (for immediate UI feedback and persistence)
-  // This ensures sorting persists even if user navigates away
-  await Promise.all(
-    sortedItems.map(item =>
-      updateItem(item.id, { order: item.order }),
-    ),
-  )
-
-  // If backend enabled, also show confirmation alert for batch save
-  if (shouldUseAPI.value) {
-    pendingSortingChanges.value = sortedItems
-  }
+  // Store pending changes - don't save yet, wait for user confirmation
+  // Alert will show for both backend and localStorage
+  pendingSortingChanges.value = sortedItems
 }
 
 const handleSaveSorting = async () => {
@@ -154,13 +163,20 @@ const handleSaveSorting = async () => {
   try {
     isSavingSorting.value = true
     const service = gearItemService()
+
+    // Use batchUpdateOrder for both backend and localStorage
     if ('batchUpdateOrder' in service && typeof service.batchUpdateOrder === 'function') {
       await service.batchUpdateOrder(pendingSortingChanges.value)
       toast.success(t('gear.item.reorderSuccess', 'Kolejność przedmiotów została zaktualizowana'))
       pendingSortingChanges.value = []
     } else {
-      // Fallback
-      await handleReorder(pendingSortingChanges.value)
+      // Fallback: Update all items with new order values
+      await Promise.all(
+        pendingSortingChanges.value.map(item =>
+          updateItem(item.id, { order: item.order }),
+        ),
+      )
+      toast.success(t('gear.item.reorderSuccess', 'Kolejność przedmiotów została zaktualizowana'))
       pendingSortingChanges.value = []
     }
   } catch {
@@ -170,10 +186,23 @@ const handleSaveSorting = async () => {
   }
 }
 
-const handleCancelSorting = () => {
+const handleCancelSorting = async () => {
+  // Clear pending changes
   pendingSortingChanges.value = []
-  // Optionally reload container to reset sorting
-  // For now, just clear pending changes - user can manually reset sorting
+
+  // Reload container to restore original order
+  // For localStorage: store is reactive, so clearing pending changes is enough
+  // For backend: we need to reload from API to get original order
+  if (shouldUseAPI.value && container.value) {
+    try {
+      // Reload container from API to restore original order
+      await getContainerById(container.value.id)
+      // Container will automatically update via reactive computed property
+    } catch {
+      // If refresh fails, just clear pending changes
+      // User can manually reset sorting
+    }
+  }
 }
 
 const handleExport = async () => {
@@ -350,9 +379,9 @@ if (!container.value) {
         @recognize-parameters-all="handleRecognizeParametersAll"
       />
 
-      <!-- Sort Confirmation Alert (only when backend enabled) -->
+      <!-- Sort Confirmation Alert (always show when there are pending changes) -->
       <SortConfirmationAlert
-        v-if="shouldUseAPI"
+        v-if="pendingSortingChanges.length > 0"
         :pending-items="pendingSortingChanges"
         :loading="isSavingSorting"
         @save="handleSaveSorting"
@@ -361,7 +390,7 @@ if (!container.value) {
 
       <!-- Items Table -->
       <ItemsTable
-        :items="items"
+        :items="displayItems"
         :container-id="containerId"
         @edit="handleEditItem"
         @delete="handleDeleteItem"
