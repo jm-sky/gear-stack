@@ -155,14 +155,14 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - ✅ Możliwość filtrowania: tylko kontenery / tylko przedmioty / wszystkie
 - ✅ Kontenery wyświetlane z całkowitą wagą (waga kontenera + zawartość)
 
-### Linkowanie przedmiotów (zmiana w jednym → zmiana w wielu listach)
-**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Large
+### ✅ Linkowanie przedmiotów (zmiana w jednym → zmiana w wielu listach)
+**Status:** ✅ Completed | **Priority:** High | **Complexity:** Large
 
-- Przedmioty mogą być linkowane między kontenerami
-- Zmiana w jednym miejscu aktualizuje wszystkie referencje
-- Możliwość "odlinkowania" przedmiotu (tworzenie kopii)
-- Wizualne oznaczenie linkowanych przedmiotów
-- Zarządzanie referencjami
+- ✅ Przedmioty mogą być linkowane między kontenerami (przez autocomplete w ItemFormPage)
+- ✅ Zmiana w jednym miejscu aktualizuje wszystkie referencje (propagacja w useGear.updateItem)
+- ✅ Wizualne oznaczenie linkowanych przedmiotów (ring + ikona Link2 w ItemsTableNameCell)
+- ⏸️ "Odlinkowanie" przedmiotu (tworzenie kopii) - na razie nie implementowane (usuwanie = usunięcie z kontenera)
+- ⏸️ Zarządzanie referencjami - nie wymagane (uproszczona wersja)
 
 ---
 

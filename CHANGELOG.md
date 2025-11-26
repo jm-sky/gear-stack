@@ -21,6 +21,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.16.0] - 2025-01-28
+
+### Added
+- **Item Linking**: Link items across containers with automatic change propagation
+  - Items can be linked when adding from catalog (autocomplete selection)
+  - Changes to one linked item automatically propagate to all linked instances
+  - Visual indication of linked items (violet ring + chain icon in table)
+  - Backend automatically handles propagation for API mode
+  - Frontend handles propagation for localStorage mode
+
+### Changed
+- **Item Update Logic**: Enhanced `useGear.updateItem` to support linked items
+  - Single API call for backend (automatic propagation)
+  - Multiple updates for localStorage (manual propagation)
+  - Master item detection based on `linkedItemId` or `id`
+
+---
+
 ## [2.15.0] - 2025-11-26
 
 ### Added
