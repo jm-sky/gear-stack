@@ -90,6 +90,37 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 - ✅ Wyszukiwarka przedmiotów (globalne filtrowanie)
 - ✅ Zarządzanie widocznością kolumn z zapisem w localStorage
 
+### 🔄 Zapisywanie wartości search/filtrów w localStorage
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+
+**Koncepcja:**
+Na stronach z filtrami (np. AllItemsPage, ShoppingPlanningPage, ContainersListPage, PublicContainersBrowserPage), zapisywać wartości search i filtrów w localStorage, aby przy powrocie (przycisk "Wróć" lub nawigacja wstecz) użytkownik wracał dokładnie w to samo miejsce z zachowanymi filtrami.
+
+**Implementacja:**
+- Zapisywanie do localStorage:
+  - Wartość pola search/wyszukiwarki
+  - Wartości wszystkich aktywnych filtrów (kategorie, status, priorytet, typ kontenera, itp.)
+  - Opcjonalnie: sortowanie i widoczność kolumn (jeśli jeszcze nie są zapisywane)
+- Przywracanie stanu:
+  - Przy montowaniu komponentu (`onMounted`) sprawdzić localStorage
+  - Jeśli istnieją zapisane wartości → przywrócić je do stanu komponentu
+  - Opcjonalnie: wyczyścić localStorage po załadowaniu (jednorazowe przywrócenie) lub zachować dla następnej sesji
+- Klucze localStorage:
+  - Unikalne klucze per strona (np. `gear-stack:all-items:filters`, `gear-stack:shopping-planning:filters`)
+  - Struktura: obiekt z wartościami filtrów i search
+
+**Strony do zaktualizowania:**
+- `AllItemsPage.vue` - search, filterType, filtry kategorii/statusu/priorytetu
+- `ShoppingPlanningPage.vue` - search, filtry kategorii, budget, includeExpiringSoon
+- `ContainersListPage.vue` - search, filtry typu kontenera, showOnlyRootContainers
+- `PublicContainersBrowserPage.vue` - search, filtry
+- Inne strony z filtrami (jeśli istnieją)
+
+**Zalety:**
+- Lepsze UX - użytkownik nie traci ustawionych filtrów przy nawigacji
+- Szybsze wracanie do wcześniejszego stanu wyszukiwania
+- Spójność z innymi funkcjami zapisującymi stan w localStorage (np. column visibility)
+
 ### ✅ Strona planowania zakupów
 **Status:** ✅ Completed | **Priority:** High | **Complexity:** Medium
 
@@ -120,6 +151,28 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 - ✅ 10 dostępnych kolorów do wyboru (default, blue, green, red, yellow, purple, orange, pink, teal, indigo)
 - ✅ Wizualne rozróżnienie kontenerów na liście (kolorowa kropka i ramka)
 - ✅ Kolor wyświetlany w kartach kontenerów i rozwiniętych wierszach zagnieżdżonych kontenerów
+
+### 🔄 Obrazek kontenera jako okrągły avatar w liście kontenerów
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+
+**Koncepcja:**
+Jeżeli kontener będzie miał obrazek (primary image), wyświetlać go w nagłówku karty kontenera jako okrągły avatar zamiast ikonki `Package` i kropki koloru. Kolor kontenera powinien być wyświetlany jako border tego avatara.
+
+**Implementacja:**
+- W `ContainerCard.vue` (i `PublicContainerCard.vue`):
+  - Jeśli kontener ma `primaryImageUrl` → wyświetl okrągły avatar z obrazkiem
+  - Jeśli kontener nie ma obrazka → wyświetl obecną ikonkę `Package` i kropkę koloru
+  - Avatar powinien mieć border w kolorze kontenera (jeśli kolor jest ustawiony)
+  - Avatar powinien być okrągły (rounded-full)
+  - Rozmiar avatara: podobny do obecnej ikonki (np. size-8 lub size-10)
+- Fallback: Jeśli obrazek nie załaduje się, pokaż ikonkę `Package` z kropką koloru
+- Wsparcie dla kontenerów bez obrazka: zachować obecne zachowanie (ikona + kropka)
+
+**Zalety:**
+- Lepsza wizualna identyfikacja kontenerów
+- Wykorzystanie obrazków kontenerów (gdy będą zaimplementowane)
+- Zachowanie informacji o kolorze (jako border avatara)
+- Spójność z innymi miejscami, gdzie mogą być wyświetlane avatary
 
 ### Wybór primary color (brand color)
 **Status:** ⏸️ On Hold | **Priority:** Low | **Complexity:** Small
