@@ -206,3 +206,24 @@ class BatchOrderUpdateRequest(BaseModel):
     items: list[ItemOrderUpdate] = Field(..., min_length=1, description="List of items with their new order values")
 
     model_config = {"populate_by_name": True}
+
+
+# Share token schemas
+class ShareTokenCreate(BaseModel):
+    """Schema for creating a share token."""
+
+    expiresAt: datetime | None = Field(None, alias="expiresAt", description="Optional expiration timestamp")
+
+    model_config = {"populate_by_name": True}
+
+
+class ShareTokenResponse(BaseModel):
+    """Schema for share token response."""
+
+    token: str = Field(..., description="Share token")
+    containerId: str = Field(..., alias="containerId", description="Container ID")
+    expiresAt: datetime | None = Field(None, alias="expiresAt", description="Expiration timestamp if set")
+    createdAt: datetime = Field(..., alias="createdAt", description="Token creation timestamp")
+    shareUrl: str = Field(..., alias="shareUrl", description="Full share URL")
+
+    model_config = {"populate_by_name": True}
