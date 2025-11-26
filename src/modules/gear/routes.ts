@@ -38,6 +38,8 @@ export const GearRoutePath = {
   PublicItemDetailById: (containerId: string, itemId: string) => `/gear/public/${containerId}/items/${itemId}`,
   SharedContainerDetail: '/shared/container/:token',
   SharedContainerDetailByToken: (token: string) => `/shared/container/${token}`,
+  ContainerShareTokens: '/gear/:id/share-tokens',
+  ContainerShareTokensById: (id: string) => `/gear/${id}/share-tokens`,
 }
 
 export const gearRoutes: RouteRecordRaw[] = [
@@ -117,6 +119,12 @@ export const gearRoutes: RouteRecordRaw[] = [
     path: GearRoutePath.SharedContainerDetail,
     name: GearRouteName.SharedContainerDetail,
     component: () => import('@/modules/gear/pages/SharedContainerDetailPage.vue'),
+    meta: { layout: 'authenticated' },
+  },
+  {
+    path: GearRoutePath.ContainerShareTokens,
+    name: GearRouteName.ContainerShareTokens,
+    component: () => import('@/modules/gear/pages/ContainerShareTokensPage.vue'),
     meta: { layout: 'authenticated' },
   },
 ]

@@ -287,6 +287,30 @@ class GearService:
 
         return token
 
+    async def get_share_tokens(self, container_id: str, user_id: str) -> list[dict]:
+        """Get all share tokens for a container.
+
+        Args:
+            container_id: Container ID
+            user_id: Owner user ID
+
+        Returns:
+            List of share token dictionaries with share URLs
+        """
+        tokens = await self.repository.get_share_tokens_by_container(container_id, user_id)
+        result = []
+        for token_db in tokens:
+            # Construct share URL (frontend will handle the base URL)
+            share_url = f"/shared/container/{token_db.token}"
+            result.append({
+                "token": token_db.token,
+                "containerId": token_db.container_id,
+                "expiresAt": token_db.expires_at,
+                "createdAt": token_db.created_at,
+                "shareUrl": share_url,
+            })
+        return result
+
     async def revoke_share_token(self, token: str, user_id: str) -> bool:
         """Revoke a share token.
 
