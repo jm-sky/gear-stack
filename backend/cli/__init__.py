@@ -16,13 +16,12 @@ The CLI is organized into command groups:
 """
 
 from .main import app, main
-from .commands import db_app, storage_app, tenants_app, test_app, users_app
+from .commands import db_app, tenants_app, test_app, users_app
 
 # Register command groups
 app.add_typer(db_app, name="db")
 app.add_typer(users_app, name="users")
 app.add_typer(tenants_app, name="tenants")
 app.add_typer(test_app, name="test")
-app.add_typer(storage_app, name="storage")
 
 __all__ = ["app", "main"]
