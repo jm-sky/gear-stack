@@ -458,6 +458,49 @@ Kontenery i przedmioty już mają UUID - to ich pole `id` (typu `TUUID`). UUID s
 
 ---
 
+## 🎨 UI/UX Improvements
+
+### Uporządkowanie nazewnictwa komponentów autocomplete/select
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+
+**Problem:**
+W `ItemFormFields.vue` występuje niespójność w nazewnictwie komponentów autocomplete/select. Niektóre pola używają dedykowanych komponentów, a inne używają bezpośrednio komponentów bazowych.
+
+**Aktualny stan:**
+- ✅ `ColorAutocomplete` - dedykowany komponent (OK)
+- ✅ `CategorySelect` - dedykowany komponent (OK)
+- ❌ `ComboBox` dla brands - powinien być dedykowany komponent (np. `BrandSelect` lub `BrandAutocomplete`)
+- ❌ `Select` dla priority - powinien być dedykowany komponent (np. `PrioritySelect`)
+- ❌ `Select` dla status - powinien być dedykowany komponent (np. `StatusSelect`)
+- ❌ `Select` dla currency - powinien być dedykowany komponent (np. `CurrencySelect`)
+- ❌ `Select` dla quality - powinien być dedykowany komponent (np. `QualitySelect`)
+
+**Zadanie:**
+- Utworzenie dedykowanych komponentów dla wszystkich pól select/autocomplete
+- Ujednolicenie nazewnictwa (wszystkie jako `*Select` lub `*Autocomplete` w zależności od funkcjonalności)
+- Refaktoring `ItemFormFields.vue` do użycia dedykowanych komponentów
+- Zapewnienie spójności w całej aplikacji
+
+### Uporządkowanie labeli formularzy (`<Label>` vs ręczne `<label>`)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+
+**Problem:**
+W `ItemFormPage.vue` (np. linie 325–328) oraz innych miejscach ręcznie używane są tagi `<label>` z klasami i gwiazdką wymaganego pola, zamiast spójnego komponentu `Label` z propem `required`.
+
+**Przykład:**
+- Ręczny label:
+  - `ItemFormPage.vue:325-328` – zwykły `<label>` z klasami Tailwinda i `*` w treści
+- Docelowo:
+  - Użycie komponentu `Label` z API typu `<Label required>…</Label>`
+
+**Zadanie:**
+- Przejrzenie formularzy itemów/kontenerów (m.in. `ItemFormPage.vue`, `ItemFormFields.vue`)
+- Zamiana ręcznych `<label>` na komponent `Label` tam, gdzie to ma sens
+- Ustalenie i udokumentowanie wzorca: kiedy używać `FormLabel`, a kiedy `Label`
+- Zapewnienie spójności wyglądu i oznaczeń pól wymaganych w całej aplikacji
+
+---
+
 ## 📱 Aplikacja mobilna
 
 ### ✅ PWA (Progressive Web App)
