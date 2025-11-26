@@ -173,5 +173,59 @@ export default defineConfig(({ mode }) => {
     watch: {
       ignored: ['**/backend/**'],
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: (id) => {
+            // Vue core and ecosystem
+            if (id.includes('vue') && !id.includes('node_modules')) {
+              return
+            }
+            if (id.includes('node_modules/vue') || id.includes('node_modules/@vue')) {
+              return 'vue-vendor'
+            }
+            // Vue Router
+            if (id.includes('node_modules/vue-router')) {
+              return 'vue-vendor'
+            }
+            // Pinia
+            if (id.includes('node_modules/pinia')) {
+              return 'vue-vendor'
+            }
+            // TanStack Query and Table
+            if (id.includes('node_modules/@tanstack')) {
+              return 'tanstack-vendor'
+            }
+            // UI libraries
+            if (id.includes('node_modules/reka-ui') || id.includes('node_modules/lucide-vue-next')) {
+              return 'ui-vendor'
+            }
+            // Validation libraries
+            if (id.includes('node_modules/vee-validate') || id.includes('node_modules/@vee-validate') || id.includes('node_modules/zod')) {
+              return 'validation-vendor'
+            }
+            // i18n
+            if (id.includes('node_modules/vue-i18n')) {
+              return 'i18n-vendor'
+            }
+            // Other large dependencies
+            if (id.includes('node_modules/axios')) {
+              return 'http-vendor'
+            }
+            if (id.includes('node_modules/date-fns')) {
+              return 'utils-vendor'
+            }
+            if (id.includes('node_modules/floating-vue')) {
+              return 'ui-vendor'
+            }
+            // All other node_modules
+            if (id.includes('node_modules')) {
+              return 'vendor'
+            }
+          },
+        },
+      },
+      chunkSizeWarningLimit: 600, // Increase limit slightly since we're splitting chunks
+    },
   }
 })
