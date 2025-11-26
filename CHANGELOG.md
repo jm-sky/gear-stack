@@ -21,6 +21,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.17.1] - 2025-11-26
+
+### Fixed
+- **Share Token Deletion**: Fixed critical bug where share tokens were not actually deleted from database
+  - Added missing `await` to `self.db.delete()` call in `backend/app/modules/gear/repository.py:576`
+  - SQLAlchemy 2.0+ async sessions require `await` on delete operations
+  - Previous behavior: API returned 204 No Content but token remained in database
+  - Tokens now properly delete and disappear from the table immediately
+
+---
+
 ## [2.17.0] - 2025-11-26
 
 ### Added

@@ -573,6 +573,6 @@ class GearRepository(SearchMixin):
         if not share_token or share_token.user_id != user_id:
             return False
 
-        self.db.delete(share_token)
+        await self.db.delete(share_token)
         await self.db.commit()
         return True
