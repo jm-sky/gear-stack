@@ -30,9 +30,9 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
 
 3. **Katalog i linkowanie**
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-globalny-katalog-i-linkowanie)
-   - **Globalny katalog itemów** — High priority, Medium complexity
-   - **Linkowanie przedmiotów** — High priority, Large complexity
-   - Status: 🔄 Planned
+   - **Globalny katalog itemów** — High priority, Medium complexity (na później)
+   - ✅ **Linkowanie przedmiotów** — High priority, Large complexity (Completed)
+   - Status: ✅ Linkowanie completed | 🔄 Katalog planned
 
 4. **Rozszerzone ustawienia użytkownika (waluta, widoczność, kategorie, marki w DB)**
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-ustawienia-użytkownika-wymagające-db)
