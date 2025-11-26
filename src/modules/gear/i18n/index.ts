@@ -595,6 +595,11 @@ export const gearEn = {
       empty: 'No public containers',
       emptyDescription: 'There are no public containers available yet. Create a container and mark it as public to share it with others.',
     },
+    sharedContainers: {
+      title: 'Shared Container',
+      notFound: 'Shared container not found or token expired',
+      invalidToken: 'Invalid or expired share token',
+    },
   },
 }
 
@@ -1196,6 +1201,11 @@ export const gearPl = {
       author: 'Autor',
       empty: 'Brak publicznych kontenerów',
       emptyDescription: 'Nie ma jeszcze dostępnych publicznych kontenerów. Utwórz kontener i oznacz go jako publiczny, aby udostępnić go innym.',
+    },
+    sharedContainers: {
+      title: 'Udostępniony Kontener',
+      notFound: 'Udostępniony kontener nie został znaleziony lub token wygasł',
+      invalidToken: 'Nieprawidłowy lub wygasły token udostępniania',
     },
   },
 }

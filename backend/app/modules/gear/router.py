@@ -520,3 +520,34 @@ async def get_public_container(
             detail="Public container not found",
         )
     return container
+
+
+# Shared container endpoints (no authentication required, token-based access)
+@router.get(
+    "/shared/containers/{token}",
+    response_model=ContainerResponse,
+    summary="Get a shared container by token",
+)
+async def get_shared_container(
+    token: str,
+    service: GearServiceDep,
+) -> ContainerResponse:
+    """Get a container by share token.
+
+    Args:
+        token: Share token
+        service: Gear service instance
+
+    Returns:
+        Shared container with author name
+
+    Raises:
+        HTTPException: If token is invalid, expired, or container not found
+    """
+    container = await service.get_container_by_share_token(token)
+    if not container:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Shared container not found or token expired",
+        )
+    return container

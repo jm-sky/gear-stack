@@ -5,6 +5,8 @@ including validation, calculations, and orchestration of repository operations.
 """
 
 import logging
+import secrets
+from datetime import datetime
 from typing import Literal, Sequence, cast
 
 from .repository import GearRepository
@@ -241,6 +243,61 @@ class GearService:
         if not container:
             return None
         return self._map_container_to_response_with_author(container)
+
+    async def get_container_by_share_token(self, token: str) -> ContainerResponse | None:
+        """Get a container by share token.
+
+        Args:
+            token: Share token
+
+        Returns:
+            Container response with author name if token is valid and not expired, None otherwise
+        """
+        container = await self.repository.get_container_by_token(token)
+        if not container:
+            return None
+        return self._map_container_to_response_with_author(container)
+
+    async def create_share_token(
+        self, container_id: str, user_id: str, expires_at: datetime | None = None
+    ) -> str:
+        """Create a share token for a container.
+
+        Args:
+            container_id: Container ID to share
+            user_id: Owner user ID
+            expires_at: Optional expiration timestamp
+
+        Returns:
+            Generated share token
+
+        Raises:
+            ValueError: If container not found or user doesn't own it
+        """
+        # Verify container ownership
+        container = await self.repository.get_container(container_id, user_id)
+        if not container:
+            raise ValueError("Container not found or access denied")
+
+        # Generate unique token
+        token = secrets.token_urlsafe(32)
+
+        # Create share token
+        await self.repository.create_share_token(container_id, user_id, token, expires_at)
+
+        return token
+
+    async def revoke_share_token(self, token: str, user_id: str) -> bool:
+        """Revoke a share token.
+
+        Args:
+            token: Share token to revoke
+            user_id: Owner user ID
+
+        Returns:
+            True if token was revoked, False otherwise
+        """
+        return await self.repository.revoke_share_token(token, user_id)
 
     async def update_container(self, container_id: str, user_id: str, data: ContainerUpdate) -> ContainerResponse | None:
         """Update a container.

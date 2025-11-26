@@ -112,11 +112,14 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - ✅ Publiczna strona szczegółów przedmiotu (`PublicItemDetailPage`)
 - ✅ Pole `isPublic` w formularzu kontenera
 - ✅ Domyślna widoczność w ustawieniach użytkownika
-- 🔄 Udostępnianie nie-publicznych kontenerów przez token w query params - planowane
-  - Link w formacie: `/gear/public/:id?token=abc123`
+- 🚧 **Udostępnianie kontenerów przez token** - w trakcie implementacji
+  - Link w formacie: `/shared/container/:token` (read-only access)
   - Token generowany przez właściciela kontenera
-  - Możliwość odwołania tokena
-  - Minimalny layout przy share (podobnie jak LighterPack) - uproszczony widok bez pełnego UI
+  - Opcjonalna data wygaśnięcia tokena
+  - Dostęp tylko przez token (nie wymaga container ID)
+  - Wspólny komponent nagłówka (`PublicContainerHeader`) dla publicznych i udostępnionych kontenerów
+  - Przycisk edycji widoczny tylko dla autora kontenera
+  - Strona szczegółów udostępnionego kontenera (`SharedContainerDetailPage`) - podobna do publicznego kontenera
 - 🔄 Uprawnienia: tylko odczyt / edycja - planowane
 - 🔄 Lista osób, z którymi kontener jest udostępniony - planowane
 

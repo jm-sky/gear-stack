@@ -5,6 +5,7 @@ using SQLAlchemy 2.0+.
 """
 
 import logging
+from datetime import UTC, datetime
 from typing import Sequence
 
 from sqlalchemy import select, and_, or_, func
@@ -15,7 +16,7 @@ from app.common.id_utils import generate_id
 from app.common.search import SearchMixin
 from app.modules.auth.db_models import UserDB
 
-from .db_models import GearContainerDB, GearItemDB
+from .db_models import GearContainerDB, GearItemDB, ContainerShareTokenDB
 from .schemas import (
     BatchOrderUpdateRequest,
     ContainerCreate,
@@ -467,3 +468,111 @@ class GearRepository(SearchMixin):
             await self.db.refresh(item)
 
         return list(items)
+
+    # Share token operations
+    async def create_share_token(
+        self, container_id: str, user_id: str, token: str, expires_at: datetime | None = None
+    ) -> ContainerShareTokenDB:
+        """Create a share token for a container.
+
+        Args:
+            container_id: Container ID to share
+            user_id: Owner user ID
+            token: Unique share token
+            expires_at: Optional expiration timestamp
+
+        Returns:
+            Created share token
+        """
+        share_token = ContainerShareTokenDB(
+            token=token,
+            container_id=container_id,
+            user_id=user_id,
+            expires_at=expires_at,
+        )
+        self.db.add(share_token)
+        await self.db.commit()
+        await self.db.refresh(share_token)
+        return share_token
+
+    async def get_container_by_token(self, token: str) -> GearContainerDB | None:
+        """Get a container by share token.
+
+        Args:
+            token: Share token
+
+        Returns:
+            Container if token is valid and not expired, None otherwise (with user relationship loaded)
+        """
+        # Check if token exists and is not expired
+        token_stmt = (
+            select(ContainerShareTokenDB)
+            .where(ContainerShareTokenDB.token == token)
+            .where(
+                or_(
+                    ContainerShareTokenDB.expires_at.is_(None),
+                    ContainerShareTokenDB.expires_at > datetime.now(UTC),
+                )
+            )
+        )
+        token_result = await self.db.execute(token_stmt)
+        share_token = token_result.scalar_one_or_none()
+
+        if not share_token:
+            return None
+
+        # Get container with items and user relationship
+        stmt = (
+            select(GearContainerDB)
+            .where(GearContainerDB.id == share_token.container_id)
+            .options(
+                selectinload(GearContainerDB.items),  # type: ignore[attr-defined]
+                joinedload(GearContainerDB.user),  # type: ignore[attr-defined]
+            )
+        )
+        result = await self.db.execute(stmt)
+        return result.unique().scalar_one_or_none()
+
+    async def get_share_tokens_by_container(self, container_id: str, user_id: str) -> Sequence[ContainerShareTokenDB]:
+        """Get all share tokens for a container (only for owner).
+
+        Args:
+            container_id: Container ID
+            user_id: Owner user ID
+
+        Returns:
+            List of share tokens for the container
+        """
+        # Verify container ownership
+        container = await self.get_container(container_id, user_id)
+        if not container:
+            return []
+
+        stmt = (
+            select(ContainerShareTokenDB)
+            .where(ContainerShareTokenDB.container_id == container_id)
+            .order_by(ContainerShareTokenDB.created_at.desc())
+        )
+        result = await self.db.execute(stmt)
+        return result.scalars().all()
+
+    async def revoke_share_token(self, token: str, user_id: str) -> bool:
+        """Revoke a share token (only by owner).
+
+        Args:
+            token: Share token to revoke
+            user_id: Owner user ID
+
+        Returns:
+            True if token was revoked, False otherwise
+        """
+        token_stmt = select(ContainerShareTokenDB).where(ContainerShareTokenDB.token == token)
+        token_result = await self.db.execute(token_stmt)
+        share_token = token_result.scalar_one_or_none()
+
+        if not share_token or share_token.user_id != user_id:
+            return False
+
+        self.db.delete(share_token)
+        await self.db.commit()
+        return True

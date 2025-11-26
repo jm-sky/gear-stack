@@ -225,8 +225,39 @@ GearItemDB.images = relationship(
     order_by="ItemImageDB.order",
 )
 
+class ContainerShareTokenDB(Base):
+    """SQLAlchemy model for container share tokens.
+
+    Represents tokens that allow read-only access to containers via a shareable link.
+    Tokens can have optional expiry dates and are used to share non-public containers.
+
+    Attributes:
+        token: Unique share token (URL-safe, 32+ chars)
+        container_id: Container ID being shared
+        user_id: Owner of the container (who created the token)
+        expires_at: Optional expiration timestamp
+        created_at: Token creation timestamp
+        container: Relationship to gear container
+    """
+
+    __tablename__ = "container_share_tokens"
+
+    token: Mapped[str] = mapped_column(String(255), primary_key=True, index=True)
+    container_id: Mapped[str] = mapped_column(String(36), ForeignKey("gear_containers.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), nullable=False, index=True)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<ContainerShareTokenDB(token={self.token[:8]}..., container_id={self.container_id})>"
+
+
 # Add user relationship for public containers
 from app.modules.auth.db_models import UserDB  # noqa: E402
 
 GearContainerDB.user = relationship("UserDB", foreign_keys=[GearContainerDB.user_id])
 ItemImageDB.user = relationship("UserDB", foreign_keys=[ItemImageDB.user_id])
+
+# Add relationships for share tokens
+ContainerShareTokenDB.container = relationship("GearContainerDB", foreign_keys=[ContainerShareTokenDB.container_id])
+ContainerShareTokenDB.user = relationship("UserDB", foreign_keys=[ContainerShareTokenDB.user_id])
