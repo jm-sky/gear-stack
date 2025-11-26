@@ -127,6 +127,7 @@ onMounted(() => {
 
       <!-- Table -->
       <DataTable
+        :loading="loading"
         :columns="columns"
         :data="containers"
         :search-placeholder="t('admin.containers.search', 'Search containers...')"

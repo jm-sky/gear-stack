@@ -103,7 +103,7 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 ## 👥 Udostępnianie i współpraca
 
 ### Udostępnianie kontenerów
-**Status:** 🚧 Partially Completed | **Priority:** Medium | **Complexity:** Medium
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium
 
 - ✅ Publiczne kontenery (`isPublic` flag)
 - ✅ Publiczny link do kontenera (`/gear/public/:id`)
@@ -112,14 +112,17 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - ✅ Publiczna strona szczegółów przedmiotu (`PublicItemDetailPage`)
 - ✅ Pole `isPublic` w formularzu kontenera
 - ✅ Domyślna widoczność w ustawieniach użytkownika
-- 🚧 **Udostępnianie kontenerów przez token** - w trakcie implementacji
-  - Link w formacie: `/shared/container/:token` (read-only access)
-  - Token generowany przez właściciela kontenera
-  - Opcjonalna data wygaśnięcia tokena
-  - Dostęp tylko przez token (nie wymaga container ID)
-  - Wspólny komponent nagłówka (`PublicContainerHeader`) dla publicznych i udostępnionych kontenerów
-  - Przycisk edycji widoczny tylko dla autora kontenera
-  - Strona szczegółów udostępnionego kontenera (`SharedContainerDetailPage`) - podobna do publicznego kontenera
+- ✅ **Udostępnianie kontenerów przez token** (v2.16.0+)
+  - ✅ Link w formacie: `/shared/container/:token` (read-only access)
+  - ✅ Token generowany przez właściciela kontenera (`ContainerShareTokensPage`)
+  - ✅ Opcjonalna data wygaśnięcia tokena
+  - ✅ Dostęp tylko przez token (nie wymaga container ID)
+  - ✅ Wspólny komponent nagłówka (`PublicContainerHeader`) dla publicznych i udostępnionych kontenerów
+  - ✅ Przycisk edycji widoczny tylko dla autora kontenera
+  - ✅ Strona szczegółów udostępnionego kontenera (`SharedContainerDetailPage`)
+  - ✅ Zarządzanie tokenami (tworzenie, wyświetlanie, anulowanie)
+  - ✅ Kopiowanie linku do schowka
+  - ✅ UI improvements for mobile (v2.17.0)
 - 🔄 Uprawnienia: tylko odczyt / edycja - planowane
 - 🔄 Lista osób, z którymi kontener jest udostępniony - planowane
 
@@ -234,6 +237,21 @@ Kontenery i przedmioty już mają UUID - to ich pole `id` (typu `TUUID`). UUID s
 - Porównywanie z innymi użytkownikami (opcjonalnie)
 - Raporty okresowe
 - Analiza trendów w czasie
+
+### Statystyki wyświetleń kontenerów
+**Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Medium
+
+- Licznik wyświetleń kontenera (ile razy ktoś obejrzał kontener)
+- Licznik unikalnych wyświetleń (tracking unikalnych użytkowników/sesji)
+- Historia wyświetleń z timestampami
+- Dashboard ze statystykami dla właściciela kontenera:
+  - Całkowita liczba wyświetleń per kontener
+  - Wyświetlenia w czasie (wykresy)
+  - Top 10 najczęściej oglądanych kontenerów
+  - Statystyki wyświetleń dla udostępnionych tokenów (które tokeny były najczęściej używane)
+- Prywatność: statystyki widoczne tylko dla właściciela kontenera
+- Tracking dla publicznych kontenerów i kontenerów udostępnionych przez token
+- Opcjonalne geolokalizacja (kraj/region) wyświetleń (anonimowe, zgodne z GDPR)
 
 ---
 

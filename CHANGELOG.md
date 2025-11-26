@@ -21,6 +21,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.17.0] - 2025-11-26
+
+### Added
+- **DataTable Loading State**: Comprehensive loading state support for DataTable component
+  - New `loading` prop for DataTable component
+  - `TableLoadingSkeleton` component with animated spinner
+  - Customizable loading state via `#loading` slot
+  - Loading state takes priority over empty state display
+  - Applied to all admin pages (Containers, Users, Items)
+  - Improved user feedback during data fetching operations
+
+- **Translations**: Added `create` translation to common translations
+  - Polish: `common.create: 'Utwórz'`
+  - English: `common.create: 'Create'`
+
+- **ROADMAP**: Added Container View Statistics feature to roadmap
+  - View count tracking (total and unique visitors)
+  - Dashboard for container owners with analytics
+  - Privacy-first design (stats visible only to owner)
+  - Planned for future implementation
+
+### Changed
+- **Share Token Management UI**: Improved responsive design for header
+  - Header buttons stack vertically on mobile, horizontal on desktop
+  - Equal-width buttons on mobile for better touch targets
+  - Better spacing and layout on small screens
+  - Empty state with full-width button on mobile
+
+### Fixed
+- **Share Token Page**: Removed complex table RWD that degraded mobile experience
+- **Translation**: Fixed missing Polish translation for create button
+
+---
+
 ## [2.16.1] - 2025-11-26
 
 ### Fixed

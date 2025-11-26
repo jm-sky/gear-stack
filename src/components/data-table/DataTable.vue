@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { TableLoadingSkeleton } from '@/components/ui/table'
 import { valueUpdater } from '@/lib/utils'
 import DataTableEmpty from './DataTableEmpty.vue'
 import DataTableToolbar from './DataTableToolbar.vue'
@@ -33,6 +34,8 @@ import type {
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  // Loading state
+  loading?: boolean
   // Feature toggles
   enableSorting?: boolean
   enableFiltering?: boolean
@@ -53,6 +56,7 @@ interface DataTableProps<TData, TValue> {
 }
 
 const props = withDefaults(defineProps<DataTableProps<TData, TValue>>(), {
+  loading: false,
   enableSorting: true,
   enableFiltering: true,
   enablePagination: true,
@@ -294,7 +298,14 @@ const handlePageSizeChange = (newPageSize: number) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            <template v-if="!isEmpty">
+            <!-- Loading State -->
+            <template v-if="loading">
+              <slot name="loading" :table="table" :columns="columns">
+                <TableLoadingSkeleton :colspan="columns.length" />
+              </slot>
+            </template>
+            <!-- Data Rows -->
+            <template v-else-if="!isEmpty">
               <template v-for="row in table.getRowModel().rows" :key="row.id">
                 <TableRow
                   :data-state="row.getIsSelected() ? 'selected' : undefined"
@@ -316,8 +327,8 @@ const handlePageSizeChange = (newPageSize: number) => {
                 <slot name="row-after" :row="row" :columns="columns" />
               </template>
             </template>
+            <!-- Empty State -->
             <template v-else>
-              <!-- Empty State Slot -->
               <slot name="empty" :table="table" :columns="columns">
                 <DataTableEmpty
                   :table="table"

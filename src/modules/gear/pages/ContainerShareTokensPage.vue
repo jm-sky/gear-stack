@@ -123,7 +123,7 @@ const handleBack = () => {
   <AuthenticatedLayout>
     <div class="space-y-6">
       <!-- Header -->
-      <div class="flex items-center justify-between">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 class="text-2xl sm:text-3xl font-bold">
             {{ t('gear.shareTokens.title') }}
@@ -133,10 +133,10 @@ const handleBack = () => {
           </p>
         </div>
         <div class="flex items-center gap-2">
-          <Button variant="outline" @click="handleBack">
+          <Button variant="outline" class="flex-1 sm:flex-initial" @click="handleBack">
             {{ t('common.back') }}
           </Button>
-          <Button @click="isCreateDialogOpen = true">
+          <Button class="flex-1 sm:flex-initial" @click="isCreateDialogOpen = true">
             <CreateIcon class="size-4" />
             {{ t('gear.shareTokens.create') }}
           </Button>
@@ -149,11 +149,11 @@ const handleBack = () => {
         <div class="h-64 bg-muted rounded animate-pulse" />
       </div>
 
-      <div v-else-if="tokens.length === 0" class="text-center py-12">
-        <p class="text-muted-foreground mb-4">
+      <div v-else-if="tokens.length === 0" class="text-center py-12 px-4">
+        <p class="text-muted-foreground mb-4 text-sm sm:text-base">
           {{ t('gear.shareTokens.empty') }}
         </p>
-        <Button @click="isCreateDialogOpen = true">
+        <Button class="w-full sm:w-auto" @click="isCreateDialogOpen = true">
           <CreateIcon class="size-4" />
           {{ t('gear.shareTokens.createFirst') }}
         </Button>
