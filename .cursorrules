@@ -15,7 +15,7 @@
 
 ## Reka-ui / shadcn-vue Checkbox
 
-**CRITICAL:** In Reka-ui (shadcn-vue), Checkbox uses standard `v-model`, **NOT** `v-model:checked`.
+**CRITICAL:** In Reka-ui (shadcn-vue), Checkbox uses `model-value` / `v-model`, **NOT** `checked` / `v-model:checked`.
 
 ✅ **Correct usage:**
 ```vue
@@ -24,21 +24,27 @@ const checked = ref(true)
 </script>
 
 <template>
+  <!-- Preferred: v-model -->
   <Checkbox v-model="checked" />
+  
+  <!-- Alternative: explicit model-value binding -->
+  <Checkbox :model-value="checked" @update:model-value="checked = $event" />
 </template>
 ```
 
 ❌ **Incorrect usage:**
 ```vue
-<!-- DOES NOT WORK -->
+<!-- DOES NOT WORK - Checkbox doesn't use 'checked' prop -->
 <Checkbox v-model:checked="checked" />
 <Checkbox :checked="checked" @update:checked="..." />
 ```
 
 **Notes:**
+- Checkbox in Reka-ui uses `modelValue` prop and `@update:model-value` event under the hood
+- Use `v-model` for simple cases (preferred)
+- Use `:model-value` and `@update:model-value` when you need explicit control (e.g., in loops with toggle functions)
 - `v-model:checked` only works with `defineModel()` (as in `ContainersFilters.vue`)
-- For regular `ref`, use standard `v-model`
-- Checkbox in Reka-ui uses `modelValue` and `@update:model-value` under the hood
+- For regular `ref`, use standard `v-model` or `:model-value` / `@update:model-value`
 
 ## Action Icons
 
