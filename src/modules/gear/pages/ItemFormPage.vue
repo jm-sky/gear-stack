@@ -302,10 +302,7 @@ const handleRecognizeParameters = () => {
 
       <div v-else class="bg-card rounded-lg border p-6">
         <!-- Tabs - only show when creating new item (not editing) -->
-        <Tabs
-          v-if="!isEditMode"
-          v-model="tabMode"
-        >
+        <Tabs v-if="!isEditMode" v-model="tabMode">
           <TabsList class="mb-6">
             <TabsTrigger value="new">
               {{ t('gear.item.catalog.tabNew') }}
@@ -335,10 +332,7 @@ const handleRecognizeParameters = () => {
               </div>
             </TabsContent>
 
-            <TabsContent
-              value="new"
-              class="mt-0"
-            >
+            <TabsContent value="new" class="mt-0">
               <div />
             </TabsContent>
 
@@ -354,10 +348,7 @@ const handleRecognizeParameters = () => {
         </Tabs>
 
         <!-- No tabs when editing -->
-        <form
-          v-else
-          @submit="onSubmit"
-        >
+        <form v-else @submit="onSubmit">
           <ItemFormFields
             :item="item ?? undefined"
             :loading="isSubmitting"
