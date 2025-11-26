@@ -60,6 +60,8 @@ Gear Stack to zaawansowana aplikacja webowa do zarządzania ekwipunkiem survival
 - ✅ **Śledzenie daty ważności** - monitorowanie materiałów zużywalnych
 - ✅ **Dodawanie istniejących przedmiotów** - dodawanie przedmiotów z innych kontenerów przez selektor katalogu
 - ✅ **Rozpoznawanie parametrów** - automatyczne wykrywanie marki i koloru z nazw przedmiotów
+- ✅ **Zarządzanie markami** - własne marki z kolorami, zarządzanie w ustawieniach, integracja z formularzami i rozpoznawaniem parametrów
+- ✅ **Wsparcie dla walut** - ceny w różnych walutach (PLN, EUR, USD, GBP, JPY, CHF, CAD, AUD), domyślna waluta użytkownika z auto-detekcją, formatowanie cen, wyświetlanie w tabelach i statystykach
 
 ### Analityka i Statystyki
 - ✅ **Obliczenia wagi:**
@@ -102,9 +104,6 @@ Gear Stack to zaawansowana aplikacja webowa do zarządzania ekwipunkiem survival
 ### Cloud Storage (S3)
 - ✅ **Scaleway S3 Integration** - wsparcie dla Scaleway jako providera S3
 - ✅ **Local storage fallback** - lokalny filesystem dla środowiska deweloperskiego
-- ✅ **Konfiguracja przez ENV** - elastyczna konfiguracja przez zmienne środowiskowe
-- ✅ **Storage type selection** - wybór między local a S3 przez `STORAGE_TYPE`
-- ✅ **Przyszłe rozszerzenia** - gotowość na inne providery (AWS S3, MinIO, itp.)
 
 ---
 
@@ -114,6 +113,18 @@ Gear Stack to zaawansowana aplikacja webowa do zarządzania ekwipunkiem survival
 - ✅ **Wsparcie dla avatarów** - dostawcy OAuth automatycznie dostarczają zdjęcia profilowe (Gravatar jako fallback)
 - ✅ **Preferowane ustawienia** - jednostki wagi, język, motyw, preferencje wyświetlania
 - ✅ **Ustawienia bezpieczeństwa** - zarządzanie metodami 2FA, wyświetlanie statusu bezpieczeństwa
+
+---
+
+## 👥 Udostępnianie i Współpraca
+
+### Publiczna Galeria Kontenerów
+- ✅ **Przeglądarka publicznych kontenerów** - strona z listą wszystkich publicznie udostępnionych kontenerów (`PublicContainersBrowserPage`)
+- ✅ **Filtrowanie i wyszukiwanie** - wyszukiwanie po nazwie, opisie, typie kontenera lub autorze
+- ✅ **Strona szczegółów publicznego kontenera** - przeglądanie publicznego kontenera z wszystkimi przedmiotami (`PublicContainerDetailPage`)
+- ✅ **Publiczna strona szczegółów przedmiotu** - wyświetlanie szczegółów przedmiotu w trybie publicznym (`PublicItemDetailPage`)
+- ✅ **Backend endpoint** - API dla pobierania publicznych kontenerów (`/gear/public/containers`)
+- ✅ **Pole publiczne w formularzu** - możliwość oznaczenia kontenera jako publiczny podczas tworzenia/edycji
 
 ---
 
@@ -207,6 +218,16 @@ Gear Stack to zaawansowana aplikacja webowa do zarządzania ekwipunkiem survival
 - **Nginx** - reverse proxy
 - **Docker Compose** - orkiestracja usług
 
+### Progressive Web App (PWA)
+- ✅ **Konwersja na PWA** - aplikacja dostępna jako Progressive Web App (`vite-plugin-pwa`)
+- ✅ **Manifest.json** - pełna konfiguracja PWA z ikonami i metadanymi
+- ✅ **Service Worker (Workbox)** - cache'owanie zasobów i offline support
+- ✅ **Instalacja na urządzenia mobilne** - możliwość instalacji jak natywna aplikacja
+- ✅ **Offline support** - podstawowa funkcjonalność działa offline dzięki cache'owaniu
+- ✅ **Komponent aktualizacji** - `PwaUpdatePrompt` do powiadamiania o nowych wersjach
+- ✅ **Runtime caching** - automatyczne cache'owanie dla API, fonts i assets
+- ✅ **Responsywny design** - pełne wsparcie dla urządzeń mobilnych
+
 ---
 
 ## 📊 Persystencja Danych
@@ -226,18 +247,13 @@ Gear Stack to zaawansowana aplikacja webowa do zarządzania ekwipunkiem survival
 - 🔄 **Drag & drop** - ręczne zmienianie kolejności przedmiotów
 
 ### Średniopriorytetowe
-- 🔄 **Zarządzanie markami** - własne marki z kolorami
-- 🔄 **Wsparcie dla walut** - ceny w różnych walutach
 - 🔄 **Markdown w notatkach** - formatowane notatki
 
 ### Backend i Online
 - 🔄 **Synchronizacja wielourządzeniowa** - dane zsynchronizowane między wszystkimi urządzeniami
-- 🔄 **Udostępnianie kontenerów** - między użytkownikami
-- 🔄 **Publiczna galeria kontenerów** - przeglądanie zestawów innych użytkowników
+- 🔄 **Udostępnianie kontenerów** - między użytkownikami (oprócz publicznych kontenerów)
 - 🔄 **Globalny katalog przedmiotów** - baza wspólnych przedmiotów
-- 🔄 **Progressive Web App (PWA)** - instalacja jak natywna aplikacja
 - 🔄 **Funkcje AI** - rekomendacje, analiza, optymalizacja
-- 🔄 **Upload zdjęć przedmiotów** - wsparcie S3 (Scaleway)
 
 ---
 

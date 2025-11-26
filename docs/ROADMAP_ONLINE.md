@@ -116,15 +116,18 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - 🔄 Uprawnienia: tylko odczyt / edycja - planowane
 - 🔄 Lista osób, z którymi kontener jest udostępniony - planowane
 
-### Galeria publiczna list/kontenerów
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+### ✅ Galeria publiczna list/kontenerów
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium
 
-- Publiczna galeria dostępnych kontenerów
-- Przeglądanie kontenerów innych użytkowników
-- Filtrowanie i wyszukiwanie w galerii
-- Ocenianie (gwiazdki) kontenerów
-- Komentarze pod kontenerami
-- Możliwość skopiowania publicznego kontenera do własnych
+- ✅ Publiczna galeria dostępnych kontenerów (`PublicContainersBrowserPage`)
+- ✅ Przeglądanie kontenerów innych użytkowników
+- ✅ Filtrowanie i wyszukiwanie w galerii
+- ✅ Strona szczegółów publicznego kontenera (`PublicContainerDetailPage`)
+- ✅ Publiczna strona szczegółów przedmiotu (`PublicItemDetailPage`)
+- ✅ Backend endpoint `/gear/public/containers` dla pobierania publicznych kontenerów
+- 🔄 Ocenianie (gwiazdki) kontenerów - planowane
+- 🔄 Komentarze pod kontenerami - planowane
+- 🔄 Możliwość skopiowania publicznego kontenera do własnych - planowane
 
 ---
 
@@ -449,12 +452,13 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 1. **Synchronizacja między urządzeniami** - Medium priority, Large complexity
 2. **Udostępnianie kontenerów** - Medium priority, Medium complexity
 3. **Szablony kontenerów** - Medium priority, Medium complexity
-4. **PWA** - Medium priority, Medium complexity
+4. ✅ **PWA** - Medium priority, Medium complexity (Completed)
+5. ✅ **Galeria publiczna kontenerów** - Medium priority, Medium complexity (Completed)
 
 ### Low Priority
 1. ✅ **Profil użytkownika - link do Gravatara** - Low priority, Small complexity (Completed)
 2. **Wersjonowanie danych** - Low priority, Large complexity
-3. **Galeria publiczna** - Low priority, Medium complexity
+3. ✅ **Galeria publiczna** - Low priority, Medium complexity (Completed - główna funkcja zaimplementowana, ocenianie i komentarze planowane)
 4. **Funkcje AI** - Low priority, Large complexity
 5. **Statystyki i raporty** - Low priority, Medium complexity
 
