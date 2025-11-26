@@ -22,11 +22,11 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - Wykorzystanie istniejącego UUID (`id`) do aktualizacji istniejących kontenerów/przedmiotów podczas importu markdown
    - Status: ✅ Completed | Priority: Medium | Complexity: Medium
 
-2. **Media**
+2. ✅ **Media** - Zakończone (v2.15.0)
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-media-i-zasoby-graficzne)
-   - **Show from URL** — opcja dodawania obrazków z URL
-   - **Primary image w wierszu tabeli** — opcjonalne wyświetlanie miniaturki primary image w tabeli przedmiotów
-   - Status: 🔄 Planned
+   - ✅ **Show from URL** — opcja dodawania obrazków z URL
+   - ✅ **Primary image w wierszu tabeli** — opcjonalne wyświetlanie miniaturki primary image w tabeli przedmiotów
+   - Status: ✅ Completed
 
 3. **Katalog i linkowanie**
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-globalny-katalog-i-linkowanie)

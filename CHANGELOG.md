@@ -21,6 +21,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.15.0] - 2025-11-26
+
+### Added
+- **PWA Configuration**: Comprehensive Progressive Web App configuration
+  - Dedicated `pwa.config.ts` file for centralized PWA settings
+  - Manifest properties: app name, description, theme color, icons
+  - Runtime caching strategies for Google Fonts and API requests
+  - Enhanced build process for PWA capabilities
+
+- **Image Management Enhancements**:
+  - **Upload Images from URL**: New functionality to add images from external URLs
+    - `ItemImageGalleryUrlForm` component for URL-based image uploads
+    - URL validation and error handling
+    - Support for fetching and processing images from external sources
+    - Alternative to file upload, especially useful for admins
+  - **Primary Image in Table Rows**: Optional display of primary image thumbnails in items table
+    - `ItemsTableImageCell` component for displaying image thumbnails
+    - Primary image shown in table rows for quick visual identification
+    - Lazy loading for performance optimization
+    - Clickable thumbnails navigate to item details
+    - Available in both `ItemsTable` and `AllItemsPage`
+  - **Image Preview Overlay**: Full-screen image preview functionality
+    - `ItemImagePreviewOverlay` component with overlay display
+    - `ItemImagePreviewOverlayButton` for triggering preview
+    - Enhanced image viewing experience in gallery
+
+- **Backend Image Management API**:
+  - Enhanced image upload service with URL support
+  - New API endpoints and schemas for URL-based image operations
+  - Improved image deletion, reordering, and primary image setting methods
+
+### Changed
+- **PWA Configuration**: Refactored PWA settings from `vite.config.ts` to dedicated `pwa.config.ts` for better maintainability
+- **Image Gallery**: Enhanced `ItemImageGallery` component with URL upload form integration
+- **Items Table**: Added optional image column support in `ItemsTable` and `AllItemsPage`
+- **i18n Translations**: Added new translations for image-related messages and tooltips
+
+---
+
 ## [2.14.0] - 2025-11-26
 
 ### Added

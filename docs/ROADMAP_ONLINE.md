@@ -376,16 +376,16 @@ Kontenery i przedmioty już mają UUID - to ich pole `id` (typu `TUUID`). UUID s
 - ✅ Frontend integration into ItemDetailPage (ItemImageGallery component)
 - ✅ ContainerItemImagesGallery component (wyświetlanie obrazków przedmiotów na stronie kontenera)
 - ✅ Pole `showItemImages` w kontenerze (opcja pokazywania obrazków w widoku kontenera)
-- 🔄 **Show from URL** - opcja dodawania obrazków z URL zamiast uploadu (planowane)
-  - Pole URL w formularzu dodawania obrazka
-  - Walidacja URL i formatu obrazka
-  - Pobieranie i cache'owanie obrazka z URL
-  - Alternatywa dla uploadu (szczególnie przydatne dla adminów)
-- 🔄 **Primary image w wierszu tabeli** - opcjonalne wyświetlanie miniaturki primary image w tabeli przedmiotów (planowane)
-  - Opcja w ustawieniach widoku tabeli
-  - Miniaturka primary image w pierwszej kolumnie lub obok nazwy
-  - Lazy loading dla wydajności
-  - Kliknięcie w miniaturkę → przejście do szczegółów przedmiotu
+- ✅ **Show from URL** - opcja dodawania obrazków z URL zamiast uploadu (v2.15.0)
+  - ✅ Pole URL w formularzu dodawania obrazka (`ItemImageGalleryUrlForm`)
+  - ✅ Walidacja URL i formatu obrazka
+  - ✅ Pobieranie i przetwarzanie obrazka z URL
+  - ✅ Alternatywa dla uploadu (szczególnie przydatne dla adminów)
+- ✅ **Primary image w wierszu tabeli** - opcjonalne wyświetlanie miniaturki primary image w tabeli przedmiotów (v2.15.0)
+  - ✅ Miniaturka primary image w tabeli (`ItemsTableImageCell`)
+  - ✅ Lazy loading dla wydajności
+  - ✅ Kliknięcie w miniaturkę → przejście do szczegółów przedmiotu
+  - ✅ Dostępne w `ItemsTable` i `AllItemsPage`
 - 🔄 Limity przestrzeni per użytkownik (nie zaimplementowane - future enhancement)
 - **Wsparcie:** Local storage (development) + S3 (production ready)
 
