@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Box, ChevronRight } from 'lucide-vue-next'
+import { Box, ChevronRight, Link2 } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Badge from '@/components/ui/badge/Badge.vue'
@@ -46,13 +46,20 @@ const textClass = computed<string>(() => {
   return ''
 })
 
+const isLinkedItem = computed<boolean>(() => {
+  return !!item.linkedItemId
+})
+
 const containerColor = computed<string>(() => {
   return COLOR_TEXT_CLASSES[nestedContainer?.color ?? 'default']
 })
 </script>
 
 <template>
-  <div class="flex items-center gap-2" :class="textClass">
+  <div
+    class="flex items-center gap-2"
+    :class="textClass"
+  >
     <!-- Move up/down buttons (only in non-public mode) -->
     <ItemsTableMoveButtons
       v-if="!publicMode"
@@ -71,15 +78,14 @@ const containerColor = computed<string>(() => {
       @click.stop="emit('toggleExpand')"
     >
       <ChevronRight
-        :size="16"
-        class="text-muted-foreground transition-transform"
+        class="size-4 text-muted-foreground transition-transform"
         :class="{ 'rotate-90': isRowExpanded }"
       />
     </Button>
 
     <!-- Nested container display -->
     <template v-if="isNestedContainer">
-      <Box :size="16" class="text-muted-foreground shrink-0" :class="containerColor" />
+      <Box class="size-4 text-muted-foreground shrink-0" :class="containerColor" />
       <span
         class="font-semibold cursor-pointer text-foreground/80 hover:text-primary transition-colors"
         @click="emit('navigateToNestedContainer')"
@@ -89,13 +95,16 @@ const containerColor = computed<string>(() => {
     </template>
 
     <!-- Regular item display -->
-    <span
+    <div
       v-else
-      class="cursor-pointer hover:text-primary transition-colors"
+      class="flex items-center gap-1.5 cursor-pointer hover:text-primary transition-colors"
       @click="emit('navigate')"
     >
-      {{ item.name }}
-    </span>
+      <span>
+        {{ item.name }}
+      </span>
+      <Link2 v-if="isLinkedItem" class="size-3 text-violet-500" aria-hidden="true" />
+    </div>
 
     <!-- Badges -->
     <Badge v-if="isNestedContainer" variant="outline" class="text-xs">

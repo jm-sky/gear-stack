@@ -1,4 +1,5 @@
 import { computed } from 'vue'
+import { useBackend } from '@/shared/composables/useBackend'
 import type {
   ICreateContainerDto,
   ICreateItemDto,
@@ -60,7 +61,68 @@ export function useGear() {
   }
 
   const updateItem = async (itemId: TUUID, data: IUpdateItemDto): Promise<IGearItem> => {
-    return await gearItemService().updateItem(itemId, data)
+    const service = gearItemService()
+    const { shouldUseAPI } = useBackend()
+
+    // Backend automatycznie propaguje zmiany do wszystkich linkowanych itemów
+    // Więc dla API wystarczy jedno wywołanie
+    if (shouldUseAPI.value) {
+      return await service.updateItem(itemId, data)
+    }
+
+    // Dla localStorage musimy ręcznie zaktualizować wszystkie linkowane itemy
+    const allContainers = store.getAllContainers
+    let masterItemId: TUUID | null = null
+
+    for (const container of allContainers) {
+      const found = container.items.find(item => item.id === itemId)
+      if (found) {
+        masterItemId = (found.linkedItemId as TUUID | null) ?? found.id
+        break
+      }
+    }
+
+    // Fallback: jeśli nie znaleziono w store, pobierz z serwisu
+    if (!masterItemId) {
+      try {
+        const current = await service.getItem(itemId)
+        masterItemId = (current.linkedItemId as TUUID | null) ?? current.id
+      } catch {
+        // Jeśli z jakiegoś powodu nie uda się pobrać, zaktualizuj tylko pojedynczy item
+        return await service.updateItem(itemId, data)
+      }
+    }
+
+    // Znajdź wszystkie itemy należące do tej samej grupy linkowania:
+    // - sam "master" (id === masterItemId)
+    // - wszystkie, które wskazują na niego przez linkedItemId
+    const targetIds = new Set<TUUID>()
+
+    for (const container of allContainers) {
+      for (const item of container.items) {
+        if (item.id === masterItemId || item.linkedItemId === masterItemId) {
+          targetIds.add(item.id)
+        }
+      }
+    }
+
+    // Jeśli nie znaleziono innych powiązań, aktualizujemy tylko wskazany item
+    if (targetIds.size === 0 || (targetIds.size === 1 && targetIds.has(itemId))) {
+      return await service.updateItem(itemId, data)
+    }
+
+    // Zaktualizuj wszystkie powiązane itemy (ta sama paczka zmian)
+    const updatedItems: IGearItem[] = []
+    for (const targetId of targetIds) {
+      // Reuse tego samego payloadu dla wszystkich referencji
+      // (zgodnie z wymaganiem: zmiana w jednym → zmiana we wszystkich)
+
+      const updated = await service.updateItem(targetId, data)
+      updatedItems.push(updated)
+    }
+
+    // Zwróć zaktualizowany item odpowiadający oryginalnemu itemId (albo pierwszy z listy)
+    return updatedItems.find(item => item.id === itemId) ?? updatedItems[0]!
   }
 
   const deleteItem = async (itemId: TUUID): Promise<void> => {

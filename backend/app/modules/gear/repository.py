@@ -327,7 +327,10 @@ class GearRepository(SearchMixin):
         return result.scalars().all()
 
     async def update_item(self, item_id: str, user_id: str, data: ItemUpdate) -> GearItemDB | None:
-        """Update a gear item.
+        """Update a gear item and propagate changes to all linked items.
+
+        When updating an item, if it's part of a linked group (via linked_item_id),
+        all items in that group will be updated with the same changes.
 
         Args:
             item_id: Item ID
@@ -341,6 +344,30 @@ class GearRepository(SearchMixin):
         if not item:
             return None
 
+        # Determine master item ID: if item has linked_item_id, use that; otherwise use item.id
+        master_item_id = item.linked_item_id if item.linked_item_id else item.id
+
+        # Find all items that belong to the same linked group:
+        # - The master item itself (id == master_item_id)
+        # - All items that link to it (linked_item_id == master_item_id)
+        # All must belong to the user (via container.user_id)
+        stmt = (
+            select(GearItemDB)
+            .join(GearContainerDB, GearItemDB.container_id == GearContainerDB.id)
+            .where(
+                and_(
+                    GearContainerDB.user_id == user_id,
+                    or_(
+                        GearItemDB.id == master_item_id,
+                        GearItemDB.linked_item_id == master_item_id,
+                    ),
+                ),
+            )
+        )
+        result = await self.db.execute(stmt)
+        linked_items = result.scalars().all()
+
+        # Prepare update data
         update_data = data.model_dump(exclude_unset=True)
         # Map camelCase to snake_case
         field_mapping = {
@@ -351,14 +378,26 @@ class GearRepository(SearchMixin):
             "showOnContainer": "show_on_container",
         }
 
-        for key, value in update_data.items():
-            db_key = field_mapping.get(key, key)
-            if hasattr(item, db_key):
-                setattr(item, db_key, value)
+        # Update all linked items with the same data
+        # Note: We don't update linked_item_id itself (it should remain unchanged)
+        updated_item = None
+        for linked_item in linked_items:
+            for key, value in update_data.items():
+                # Skip linkedItemId - don't change the linking relationship
+                if key == "linkedItemId":
+                    continue
+                db_key = field_mapping.get(key, key)
+                if hasattr(linked_item, db_key):
+                    setattr(linked_item, db_key, value)
+
+            # Track the originally requested item for return
+            if linked_item.id == item_id:
+                updated_item = linked_item
 
         await self.db.commit()
-        await self.db.refresh(item)
-        return item
+        if updated_item:
+            await self.db.refresh(updated_item)
+        return updated_item
 
     async def delete_item(self, item_id: str, user_id: str) -> bool:
         """Delete a gear item.
