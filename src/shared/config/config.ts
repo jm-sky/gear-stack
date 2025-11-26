@@ -2,8 +2,23 @@
 
 // Supported locales type (defined here to avoid cyclic dependencies)
 export type SupportedLocale = 'en' | 'pl'
-
 export type TGearWeightUnit = 'g' | 'kg' | 'oz' | 'lb'
+
+export interface IAiModelPricing {
+  input: number // per 1M tokens
+  output: number // per 1M tokens
+}
+
+export interface IAiModel {
+  id: string
+  name: string
+  provider: string
+  context_window: number
+  pricing: IAiModelPricing
+  recommended_for: string[]
+  description?: string
+  available?: boolean
+}
 
 export const config = {
   app: {
@@ -38,6 +53,19 @@ export const config = {
     imageSearch: {
       enabled: import.meta.env.VITE_ENABLE_IMAGE_SEARCH === 'true',
     },
+    ai: {
+      defaultModels: [
+        {
+          'id': 'google/gemini-flash-1.5',
+          'name': 'Gemini Flash 1.5',
+          'provider': 'google',
+          'context_window': 1000000,
+          'pricing': {'input': 0.075, 'output': 0.30},
+          'recommended_for': ['classify', 'chat'],
+          'description': 'Very fast with huge context',
+        } as IAiModel
+      ]
+    }
   },
   defaults: {
     preferredWeightUnit: 'g' as TGearWeightUnit,

@@ -236,6 +236,7 @@ export const gearEn = {
       exportToPromptSuccess: 'Markdown copied to clipboard',
       exportToPromptDescription: 'Copy the content below and paste it into ChatGPT or another AI',
       exportToCSV: 'Export to CSV',
+      aiAssistant: 'AI Assistant',
       moreActions: 'More actions',
     },
     imageSearch: {
@@ -830,6 +831,7 @@ export const gearPl = {
       exportToPromptSuccess: 'Markdown skopiowany do schowka',
       exportToPromptDescription: 'Skopiuj poniższą treść i wklej do ChatGPT lub innego AI',
       exportToCSV: 'Eksport do CSV',
+      aiAssistant: 'Asystent AI',
       moreActions: 'Więcej akcji',
     },
     imageSearch: {

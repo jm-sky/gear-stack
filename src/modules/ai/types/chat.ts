@@ -1,0 +1,71 @@
+/**
+ * AI Chat types
+ */
+
+export type AiOperationType = 'chat' | 'classify' | 'analyze' | 'generate'
+
+export type AiActionType = 'update_items' | 'create_items' | 'update_container' | 'create_container'
+
+export interface IAiChatMessage {
+  id: string
+  role: 'user' | 'assistant'
+  content: string
+  tokens?: IAiTokenUsage
+  cost?: IAiCost
+  created_at?: string
+}
+
+export interface IAiTokenUsage {
+  input: number
+  output: number
+  total: number
+}
+
+export interface IAiCost {
+  input: number
+  output: number
+  total: number
+}
+
+export interface IAiStructuredData {
+  action: AiActionType
+  items?: IAiStructuredItem[]
+  container_id?: string
+  updates?: Record<string, unknown>
+}
+
+export interface IAiStructuredItem {
+  id?: string // For update_items
+  name?: string // For create_items
+  category?: string
+  weight?: number
+  quantity?: number
+  price?: number
+  url?: string
+  notes?: string
+  description?: string
+  worn?: boolean
+  consumable?: boolean
+  updates?: Record<string, unknown> // For update_items
+}
+
+export interface IAiChatRequest {
+  prompt: string
+  context?: {
+    container_ids?: string[]
+    fields?: string[]
+  }
+  model?: string
+  expect_structured_output?: boolean
+}
+
+export interface IAiChatResponse {
+  message: string
+  structured_data?: IAiStructuredData
+  model: string
+  provider: string
+  tokens: IAiTokenUsage
+  cost: IAiCost
+  history_id: string
+}
+

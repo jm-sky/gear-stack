@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import AiChatDialog from '@/modules/ai/components/AiChatDialog.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { useBackend } from '@/shared/composables/useBackend'
 import type { IGearItem } from '../types/gear.types'
@@ -57,6 +58,7 @@ const canEditContainer = computed(() => {
 const isAddContainerDialogOpen = ref(false)
 const isExportToPromptDialogOpen = ref(false)
 const isExportToCSVDialogOpen = ref(false)
+const isAiDialogOpen = ref(false)
 
 // File operations handled in handleImport
 
@@ -377,6 +379,7 @@ if (!container.value) {
         @export-to-prompt="handleExportToPrompt"
         @export-to-csv="handleExportToCSV"
         @recognize-parameters-all="handleRecognizeParametersAll"
+        @ai-chat="isAiDialogOpen = true"
       />
 
       <!-- Sort Confirmation Alert (always show when there are pending changes) -->
@@ -429,6 +432,13 @@ if (!container.value) {
       <ExportToCSVDialog
         v-model:open="isExportToCSVDialogOpen"
         :container="container"
+      />
+
+      <!-- AI Chat Dialog -->
+      <AiChatDialog
+        v-if="user?.isAdmin"
+        v-model:open="isAiDialogOpen"
+        :context="{ container_ids: [containerId] }"
       />
     </div>
   </AuthenticatedLayout>
