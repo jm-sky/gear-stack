@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
 import FileDropZone from '@/components/ui/FileDropZone.vue'
 import { itemImageApiService } from '@/modules/gear/services/itemImageApiService'
+import { useHandleError } from '@/shared/composables/useHandleError'
 import ItemImageCard from './ItemImageCard.vue'
 import ItemImageGalleryEmptyState from './ItemImageGalleryEmptyState.vue'
 import type { IItemImage } from '@/modules/gear/types/itemImage.types'
@@ -16,6 +17,7 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
+const { handleError } = useHandleError()
 
 const images = ref<IItemImage[]>([])
 const draggedImages = ref<IItemImage[]>([]) // Separate state for drag operations
@@ -35,12 +37,10 @@ async function loadImages() {
     isLoading.value = true
     images.value = await itemImageApiService.getImages(props.itemId)
     imageLoadErrors.value.clear()
-  }
-  catch (error: unknown) {
-    toast.error(t('fileUpload.imageGallery.messages.loadFailed'))
+  } catch (error: unknown) {
     console.error(error)
-  }
-  finally {
+    handleError(error)
+  } finally {
     isLoading.value = false
   }
 }
@@ -76,8 +76,7 @@ async function uploadImages(files: File[]) {
         const newImage = await itemImageApiService.uploadImage(props.itemId, file, isPrimary)
         uploadedImages.push(newImage)
         images.value.push(newImage)
-      }
-      catch (error: unknown) {
+      } catch (error: unknown) {
         const message = isAxiosError(error) ? error.response?.data?.detail : null
         const errorMessage = message ?? t('fileUpload.imageGallery.messages.uploadFailed')
         errors.push(`${file.name}: ${errorMessage}`)
@@ -89,8 +88,7 @@ async function uploadImages(files: File[]) {
     if (uploadedImages.length > 0) {
       if (uploadedImages.length === 1) {
         toast.success(t('fileUpload.imageGallery.messages.uploadSuccess'))
-      }
-      else {
+      } else {
         toast.success(t('fileUpload.imageGallery.messages.uploadSuccessMultiple', { count: uploadedImages.length }))
       }
     }
@@ -98,12 +96,10 @@ async function uploadImages(files: File[]) {
     if (errors.length > 0) {
       toast.error(errors.join(', '))
     }
-  }
-  catch (error: unknown) {
-    toast.error(t('fileUpload.imageGallery.messages.uploadFailed'))
+  } catch (error: unknown) {
     console.error(error)
-  }
-  finally {
+    handleError(error)
+  } finally {
     isLoading.value = false
   }
 }
@@ -118,10 +114,9 @@ async function deleteImage(imageId: TUUID) {
     images.value = images.value.filter(img => img.id !== imageId)
     imageLoadErrors.value.delete(imageId)
     toast.success(t('fileUpload.imageGallery.messages.deleteSuccess'))
-  }
-  catch (error: unknown) {
-    toast.error(t('fileUpload.imageGallery.messages.deleteFailed'))
+  } catch (error: unknown) {
     console.error(error)
+    handleError(error)
   }
 }
 
@@ -133,10 +128,9 @@ async function setPrimary(imageId: TUUID) {
       isPrimary: img.id === imageId,
     }))
     toast.success(t('fileUpload.imageGallery.messages.primarySuccess'))
-  }
-  catch (error: unknown) {
-    toast.error(t('fileUpload.imageGallery.messages.primaryFailed'))
+  } catch (error: unknown) {
     console.error(error)
+    handleError(error)
   }
 }
 
@@ -247,14 +241,12 @@ async function handleDragEnd() {
       order: index,
     }))
     toast.success(t('fileUpload.imageGallery.messages.reorderSuccess'))
-  }
-  catch (error: unknown) {
-    toast.error(t('fileUpload.imageGallery.messages.reorderFailed'))
+  } catch (error: unknown) {
     console.error(error)
+    handleError(error)
     // Reset to server state
     await loadImages()
-  }
-  finally {
+  } finally {
     draggedIndex.value = -1
     initialDragIndex.value = -1
     draggedImages.value = []

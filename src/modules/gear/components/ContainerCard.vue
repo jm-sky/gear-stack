@@ -8,6 +8,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/ca
 import CardContent from '@/components/ui/card/CardContent.vue'
 import type { IGearContainer } from '../types/gear.types'
 import { useGearSettings } from '../composables/useGearSettings'
+import { GearRoutePath } from '../routes'
 import { useGearStore } from '../store/useGearStore'
 import {
   READINESS_EXCELLENT_THRESHOLD,
@@ -66,7 +67,7 @@ const isNested = computed<boolean>(() => {
 
 // Navigate to container detail
 const handleShow = () => {
-  router.push(`/gear/${props.container.id}`)
+  router.push(GearRoutePath.ContainerDetailById(props.container.id))
 }
 </script>
 

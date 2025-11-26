@@ -6,6 +6,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import ButtonLink from '@/components/ui/button-link/ButtonLink.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { useBackend } from '@/shared/composables/useBackend'
@@ -104,8 +105,7 @@ const loadItem = async () => {
       const containerService = gearContainerService()
       const containerData = await store.getContainerById(containerId) || await containerService.getContainer(containerId)
       container.value = containerData || null
-    }
-    else {
+    } else {
       // Load from localStorage
       const containerData = store.getContainerById(containerId)
       container.value = containerData || null
@@ -119,13 +119,11 @@ const loadItem = async () => {
 
       item.value = foundItem
     }
-  }
-  catch (error) {
+  } catch (error) {
     console.error('Failed to load item:', error)
     toast.error(t('common.error'))
     router.push(GearRoutePath.ContainerDetailById(containerId))
-  }
-  finally {
+  } finally {
     isLoading.value = false
   }
 }
@@ -134,20 +132,27 @@ onMounted(async () => {
   await loadItem()
 })
 
-const handleBack = () => {
-  router.push(GearRoutePath.ContainerDetailById(containerId))
-}
+// Determine back navigation target based on query parameter
+const backTo = computed<string>(() => {
+  if ((route.query.from as string | undefined) === 'all-items') {
+    return GearRoutePath.AllItems
+  }
+  return GearRoutePath.ContainerDetailById(containerId)
+})
 
 const handleEdit = () => {
+  const from = route.query.from as string | undefined
   router.push({
     path: GearRoutePath.ItemEditById(containerId, itemId),
-    query: { returnTo: 'detail' },
+    query: {
+      returnTo: 'detail',
+      ...(from && { from }),
+    },
   })
 }
 
 const formattedWeight = computed<string>(() => {
-  if (!item.value)
-    return '-'
+  if (!item.value) return '-'
   return formatWeightWithPreferredUnit(
     item.value.weight * item.value.quantity,
     item.value.weightUnit ?? 'g',
@@ -156,15 +161,13 @@ const formattedWeight = computed<string>(() => {
 })
 
 const formattedPrice = computed<string>(() => {
-  if (!item.value?.price)
-    return '-'
+  if (!item.value?.price) return '-'
   return formatCurrency(item.value.price, getCurrency(item.value.currency, defaultCurrency.value))
 })
 
 // Check if there are any details to display
 const hasDetails = computed<boolean>(() => {
-  if (!item.value)
-    return false
+  if (!item.value) return false
   return !!(
     item.value.brand
     || item.value.color
@@ -186,10 +189,10 @@ const hasDetails = computed<boolean>(() => {
       <!-- Header -->
       <div class="space-y-4">
         <div class="flex items-center justify-between gap-4">
-          <Button variant="ghost" size="sm" @click="handleBack">
+          <ButtonLink :to="backTo" variant="ghost" size="sm">
             <ArrowLeft class="size-4" />
             {{ t('common.back') }}
-          </Button>
+          </ButtonLink>
 
           <Button size="sm" @click="handleEdit">
             <Pencil class="size-4" />

@@ -6,6 +6,7 @@ import ButtonLink from '@/components/ui/button-link/ButtonLink.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import type { IGearContainer } from '../types/gear.types'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
+import { GearRoutePath } from '../routes'
 import { useGearStore } from '../store/useGearStore'
 import PublicContainerAuthorBadge from './PublicContainerAuthorBadge.vue'
 
@@ -73,7 +74,7 @@ const additionalParentsCount = computed<number>(() => {
     </div>
     <div v-if="firstParentContainer" class="flex items-center gap-1">
       <ButtonLink
-        :to="`/gear/${firstParentContainer.id}`"
+        :to="GearRoutePath.ContainerDetailById(firstParentContainer.id)"
         variant="outline"
         size="sm"
         class="h-5 px-2! text-xs text-muted-foreground"

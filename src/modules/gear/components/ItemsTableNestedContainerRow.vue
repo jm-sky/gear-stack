@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { TableCell, TableRow } from '@/components/ui/table'
 import type { IGearContainer, IGearItem, TContainerColor } from '../types/gear.types'
 import { useGearSettings } from '../composables/useGearSettings'
+import { GearRoutePath } from '../routes'
 import { useGearStore } from '../store/useGearStore'
 import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 import { COLOR_BORDER_CLASSES, COLOR_TEXT_CLASSES } from '../utils/containerColors'
@@ -49,7 +50,7 @@ function getNestedContainerForItem(item: IGearItem): IGearContainer | undefined 
 // Navigate to nested container
 function navigateToNestedContainer(item: IGearItem) {
   if (item.containerId) {
-    router.push(`/gear/${item.containerId}`)
+    router.push(GearRoutePath.ContainerDetailById(item.containerId))
   }
 }
 </script>

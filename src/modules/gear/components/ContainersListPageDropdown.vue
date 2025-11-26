@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useGear } from '../composables/useGear'
+import { GearRoutePath } from '../routes'
 import { getActionIcon } from '../utils/actionIcons'
 
 // Action icons
@@ -30,7 +31,7 @@ const emit = defineEmits<{
 }>()
 
 const handleCreate = () => {
-  router.push('/gear/new')
+  router.push(GearRoutePath.ContainerNew)
 }
 
 const handleImport = () => {

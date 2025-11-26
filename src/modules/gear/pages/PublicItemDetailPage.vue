@@ -10,6 +10,7 @@ import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import type { IGearItem } from '../types/gear.types'
 import CategoryIcon from '../components/CategoryIcon.vue'
 import { useGearSettings } from '../composables/useGearSettings'
+import { GearRoutePath } from '../routes'
 import { publicContainersService } from '../services/publicContainersService'
 import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 import { EXPIRATION_WARNING_DAYS } from '../utils/constants'
@@ -62,7 +63,7 @@ const loadItem = async () => {
     
     if (!foundItem) {
       toast.error(t('common.error'))
-      router.push(`/gear/public/${containerId}`)
+      router.push(GearRoutePath.PublicContainerDetailById(containerId))
       return
     }
     
@@ -70,7 +71,7 @@ const loadItem = async () => {
   } catch (error) {
     console.error('Failed to load public item:', error)
     toast.error(t('common.error'))
-    router.push('/gear/public')
+    router.push(GearRoutePath.PublicContainers)
   } finally {
     isLoading.value = false
   }
@@ -81,7 +82,7 @@ onMounted(async () => {
 })
 
 const handleBack = () => {
-  router.push(`/gear/public/${containerId}`)
+  router.push(GearRoutePath.PublicContainerDetailById(containerId))
 }
 
 const formattedWeight = computed<string>(() => {

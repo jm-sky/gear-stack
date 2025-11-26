@@ -13,6 +13,7 @@ import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessa
 import { Input } from '@/components/ui/input'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useBackend } from '@/shared/composables/useBackend'
+import { useHandleError } from '@/shared/composables/useHandleError'
 import { useUser } from '../composables/useUser'
 import { UserRoutePaths } from '../routes'
 import { generateGravatarUrl } from '../utils/generateGravatarUrl'
@@ -22,6 +23,7 @@ const router = useRouter()
 const { t } = useI18n()
 const { profile, updateProfile } = useUser()
 const { shouldUseAPI: _shouldUseAPI } = useBackend()
+const { handleError } = useHandleError()
 
 const profileSchema = z.object({
   name: z.string().min(1, t('user.edit.name_required')),
@@ -35,7 +37,7 @@ const profileSchema = z.object({
     ),
 })
 
-const { handleSubmit, setValues } = useForm({
+const { handleSubmit, setValues, setErrors } = useForm({
   validationSchema: toTypedSchema(profileSchema),
   initialValues: {
     name: '',
@@ -84,7 +86,7 @@ const onSubmit = handleSubmit(
       router.push(UserRoutePaths.profile)
     } catch (error) {
       console.error('Profile update failed:', error)
-      toast.error(t('common.error'))
+      handleError(error, { setErrors })
     }
   },
   () => {

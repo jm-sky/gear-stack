@@ -15,8 +15,10 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useHandleError } from '@/shared/composables/useHandleError'
 import type { IGearContainer } from '../types/gear.types'
 import { useGear } from '../composables/useGear'
+import { GearRoutePath } from '../routes'
 
 const props = defineProps<{
   open: boolean
@@ -30,6 +32,7 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const router = useRouter()
 const { cloneContainer } = useGear()
+const { handleError } = useHandleError()
 
 const newName = ref('')
 const includeNestedContainers = ref(false)
@@ -68,10 +71,10 @@ const handleClone = async () => {
     handleOpenChange(false)
     
     // Navigate to the cloned container
-    router.push(`/gear/${clonedContainer.id}`)
+    router.push(GearRoutePath.ContainerDetailById(clonedContainer.id))
   } catch (error) {
     console.error('Error cloning container:', error)
-    toast.error(t('common.error'))
+    handleError(error)
   } finally {
     isCloning.value = false
   }

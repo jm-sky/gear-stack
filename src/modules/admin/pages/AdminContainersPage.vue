@@ -10,11 +10,13 @@ import Button from '@/components/ui/button/Button.vue'
 import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { GearRoutePath } from '@/modules/gear/routes'
+import { useHandleError } from '@/shared/composables/useHandleError'
 import type { IAdminContainer } from '../types/admin.types'
 import { adminApiService } from '../services/adminApiService'
 import type { ColumnDef } from '@tanstack/vue-table'
 
 const { t } = useI18n()
+const { handleError } = useHandleError()
 const containers = ref<IAdminContainer[]>([])
 const loading = ref(false)
 
@@ -25,7 +27,7 @@ async function loadContainers() {
     containers.value = await adminApiService.getContainers(0, 1000)
   } catch (error) {
     console.error('Failed to load containers:', error)
-    toast.error(t('admin.containers.loadError', 'Failed to load containers'))
+    handleError(error, { fallbackMessage: t('admin.containers.loadError', 'Failed to load containers') })
   } finally {
     loading.value = false
   }
@@ -43,7 +45,7 @@ async function deleteContainer(containerId: string) {
     await loadContainers()
   } catch (error) {
     console.error('Failed to delete container:', error)
-    toast.error(t('admin.containers.deleteError', 'Failed to delete container'))
+    handleError(error, { fallbackMessage: t('admin.containers.deleteError', 'Failed to delete container') })
   }
 }
 

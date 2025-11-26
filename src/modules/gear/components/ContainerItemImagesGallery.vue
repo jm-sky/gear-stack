@@ -2,9 +2,9 @@
 import { X } from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { itemImageApiService } from '@/modules/gear/services/itemImageApiService'
+import { useHandleError } from '@/shared/composables/useHandleError'
 import type { IGearItem } from '../types/gear.types'
 import type { IItemImage } from '../types/itemImage.types'
 import ContainerItemImageCard from './ContainerItemImageCard.vue'
@@ -21,6 +21,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const { handleError } = useHandleError()
 
 function handleHide() {
   emit('hide')
@@ -44,8 +45,7 @@ async function getItemImage(itemId: string): Promise<IItemImage | null> {
     // Only return primary image
     const primaryImage = images.find(img => img.isPrimary)
     return primaryImage || null
-  }
-  catch (error) {
+  } catch (error) {
     console.error(`Failed to load images for item ${itemId}:`, error)
     imageLoadErrors.value.add(itemId)
     return null
@@ -92,12 +92,10 @@ async function loadImages() {
     itemsWithImages.value = results
       .filter(result => result.image !== null)
       .slice(0, 12)
-  }
-  catch (error) {
+  } catch (error) {
     console.error('Failed to load container images:', error)
-    toast.error(t('fileUpload.imageGallery.messages.loadFailed'))
-  }
-  finally {
+    handleError(error)
+  } finally {
     isLoading.value = false
   }
 }

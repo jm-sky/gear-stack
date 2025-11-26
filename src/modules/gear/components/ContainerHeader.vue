@@ -10,6 +10,7 @@ import DropdownMenuSeparator from '@/components/ui/dropdown-menu/DropdownMenuSep
 import { smallDateTime } from '@/shared/utils/smallDateTime'
 import type { IGearContainer } from '../types/gear.types'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
+import { GearRoutePath } from '../routes'
 import { getActionIcon } from '../utils/actionIcons'
 import { formatWeight } from '../utils/formatWeight'
 import { isSet } from '../utils/helpers'
@@ -45,11 +46,11 @@ const { t } = useI18n()
 const { typeLabel } = useContainerTypeLabel(computed(() => props.container.type))
 
 const handleEdit = () => {
-  router.push(`/gear/${props.container.id}/edit`)
+  router.push(GearRoutePath.ContainerEditById(props.container.id))
 }
 
 const handleAddItem = () => {
-  router.push(`/gear/${props.container.id}/items/new`)
+  router.push(GearRoutePath.ItemNew.replace(':containerId', props.container.id))
 }
 
 const handleAddContainer = () => {
@@ -69,7 +70,7 @@ const handleExportToPrompt = () => {
 }
 
 const handleBack = () => {
-  router.push('/gear')
+  router.push(GearRoutePath.Containers)
 }
 </script>
 

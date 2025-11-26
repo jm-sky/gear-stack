@@ -1,26 +1,26 @@
 <script setup lang="ts">
-import { Box, ChevronDown, ChevronRight, ChevronUp, Package } from 'lucide-vue-next'
+import { Package } from 'lucide-vue-next'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import DataTable from '@/components/data-table/DataTable.vue'
 import Badge from '@/components/ui/badge/Badge.vue'
-import { Button } from '@/components/ui/button'
 import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
 import { ITEMS_TABLE_COLUMN_VISIBILITY_KEY } from '@/shared/config/config'
 import type { IGearItem } from '../types/gear.types'
+import { useCategoryLabel } from '../composables/useCategoryLabel'
 import { useGearSettings } from '../composables/useGearSettings'
 import { GearRoutePath } from '../routes'
 import { useGearStore } from '../store/useGearStore'
 import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 import { EXPIRATION_WARNING_DAYS } from '../utils/constants'
 import { calculateTotalWeightSync } from '../utils/containerCalculations'
-import { COLOR_TEXT_CLASSES } from '../utils/containerColors'
 import { formatCurrency, getCurrency } from '../utils/currencyFormatter'
-import { formatWeightToPreferredUnit, formatWeightWithPreferredUnit } from '../utils/formatWeight'
 import { createItemsColumns } from '../utils/itemsColumns'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
-import CategoryIcon from './CategoryIcon.vue'
+import ItemsTableCategoryCell from './items-table/ItemsTableCategoryCell.vue'
+import ItemsTableNameCell from './items-table/ItemsTableNameCell.vue'
+import ItemsTableWeightCell from './items-table/ItemsTableWeightCell.vue'
 import ItemsTableNestedContainerRow from './ItemsTableNestedContainerRow.vue'
 import ItemsTableRowActions from './ItemsTableRowActions.vue'
 import type { SortingState } from '@tanstack/vue-table'
@@ -51,8 +51,10 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const router = useRouter()
 const store = useGearStore()
+
 const { settings: gearSettings, defaultCurrency } = useGearSettings()
-const { customCategories } = useGearSettings()
+const { getCategoryLabel } = useCategoryLabel()
+
 const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
 
 // Expanded rows state (which containers are expanded)
@@ -98,15 +100,6 @@ watch(
   },
   { deep: true },
 )
-
-// Helper to get category label for filtering
-const getCategoryLabel = (categoryValue: string): string => {
-  const customCategory = customCategories.value.find(c => c.value === categoryValue)
-  if (customCategory) {
-    return customCategory.value
-  }
-  return t(`gear.item.categories.${categoryValue}`)
-}
 
 // Columns
 const columns = computed<ReturnType<typeof createItemsColumns>>(() => {
@@ -161,7 +154,10 @@ function navigateToItem(item: IGearItem) {
   if (props.publicMode && props.containerId) {
     router.push(GearRoutePath.PublicItemDetailById(props.containerId, item.id))
   } else if (props.containerId) {
-    router.push(GearRoutePath.ItemDetailById(props.containerId, item.id))
+    router.push({
+      path: GearRoutePath.ItemDetailById(props.containerId, item.id),
+      query: { from: 'container' },
+    })
   } else {
     // Fallback: emit edit event if containerId is not available
     emit('edit', item)
@@ -379,77 +375,26 @@ function canMoveDown(item: IGearItem): boolean {
     :initial-page-size="10"
   >
     <template #name="{ row }">
-      <div class="flex items-center gap-2" :class="{ 'text-destructive font-semibold': isExpired(row.original), 'text-yellow-600': isExpiringSoon(row.original) }">
-        <!-- Move up/down buttons (only in non-public mode) -->
-        <div
-          v-if="!publicMode"
-          class="flex flex-col gap-0.5 shrink-0"
-        >
-          <Button
-            variant="ghost"
-            size="sm"
-            class="size-5 p-0 h-4"
-            :disabled="!canMoveUp(row.original)"
-            @click.stop="handleMoveUp(row.original)"
-          >
-            <ChevronUp :size="12" class="text-muted-foreground" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            class="size-5 p-0 h-4"
-            :disabled="!canMoveDown(row.original)"
-            @click.stop="handleMoveDown(row.original)"
-          >
-            <ChevronDown :size="12" class="text-muted-foreground" />
-          </Button>
-        </div>
-        <!-- Expand/Collapse button for nested containers -->
-        <Button
-          v-if="isNestedContainer(row.original)"
-          variant="ghost"
-          size="sm"
-          class="size-6 p-0 shrink-0"
-          @click.stop="toggleRowExpansion(row.original.id)"
-        >
-          <ChevronRight
-            :size="16"
-            class="text-muted-foreground transition-transform"
-            :class="{ 'rotate-90': isRowExpanded(row.original.id) }"
-          />
-        </Button>
-
-        <template v-if="isNestedContainer(row.original)">
-          <Box :size="16" class="text-muted-foreground shrink-0" :class="COLOR_TEXT_CLASSES[getNestedContainer(row.original)?.color ?? 'default']" />
-          <span
-            class="font-semibold cursor-pointer text-foreground/80 hover:text-primary transition-colors"
-            @click="navigateToNestedContainer(row.original)"
-          >
-            {{ row.original.name }}
-          </span>
-        </template>
-
-        <span v-else class="cursor-pointer hover:text-primary transition-colors" @click="navigateToItem(row.original)">
-          {{ row.original.name }}
-        </span>
-
-        <Badge v-if="isNestedContainer(row.original)" variant="outline" class="text-xs">
-          {{ t('gear.item.nestedContainer') }}
-        </Badge>
-        <Badge v-if="isExpired(row.original)" variant="destructive" class="text-xs">
-          {{ t('gear.item.expiration.expired') }}
-        </Badge>
-        <Badge v-if="isExpiringSoon(row.original)" variant="outline" class="text-xs text-yellow-600 border-yellow-600">
-          {{ t('gear.item.expiration.expiringSoon') }}
-        </Badge>
-      </div>
+      <ItemsTableNameCell
+        :item="row.original"
+        :public-mode="publicMode"
+        :is-expired="isExpired(row.original)"
+        :is-expiring-soon="isExpiringSoon(row.original)"
+        :is-nested-container="isNestedContainer(row.original)"
+        :is-row-expanded="isRowExpanded(row.original.id)"
+        :can-move-up="canMoveUp(row.original)"
+        :can-move-down="canMoveDown(row.original)"
+        :nested-container="getNestedContainer(row.original)"
+        @move-up="handleMoveUp(row.original)"
+        @move-down="handleMoveDown(row.original)"
+        @navigate="navigateToItem(row.original)"
+        @navigate-to-nested-container="navigateToNestedContainer(row.original)"
+        @toggle-expand="toggleRowExpansion(row.original.id)"
+      />
     </template>
 
     <template #category="{ row }">
-      <div class="flex items-center gap-2">
-        <CategoryIcon :category="row.original.category" :size="16" class="text-muted-foreground" />
-        <span>{{ getCategoryLabel(row.original.category) }}</span>
-      </div>
+      <ItemsTableCategoryCell :category="row.original.category" />
     </template>
 
     <template #quantity="{ row }">
@@ -457,14 +402,12 @@ function canMoveDown(item: IGearItem): boolean {
     </template>
 
     <template #weight="{ row }">
-      <div class="text-end px-4">
-        <template v-if="isNestedContainer(row.original)">
-          {{ formatWeightToPreferredUnit(calculateTotalWeight(row.original.containerId!) * row.original.quantity, settings.preferredWeightUnit) }}
-        </template>
-        <template v-else>
-          {{ formatWeightWithPreferredUnit(row.original.weight * row.original.quantity, row.original.weightUnit ?? 'g', settings.preferredWeightUnit) }}
-        </template>
-      </div>
+      <ItemsTableWeightCell
+        :item="row.original"
+        :is-nested-container="isNestedContainer(row.original)"
+        :total-weight="isNestedContainer(row.original) ? calculateTotalWeight(row.original.containerId!) : undefined"
+        :preferred-weight-unit="settings.preferredWeightUnit"
+      />
     </template>
 
     <template #priority="{ row }">

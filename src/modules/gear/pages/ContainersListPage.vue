@@ -17,6 +17,7 @@ import GenerateExampleGearButton from '../components/GenerateExampleGearButton.v
 import ImportMarkdownDialog from '../components/ImportMarkdownDialog.vue'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { useGear } from '../composables/useGear'
+import { GearRoutePath } from '../routes'
 import { gearContainerService } from '../services/gearContainerService'
 import { getActionIcon } from '../utils/actionIcons'
 import { getRootContainers as getRootContainersUtil } from '../utils/containerNesting'
@@ -114,7 +115,7 @@ const filteredContainers = computed<IGearContainer[]>(() => {
 
 // Actions
 const handleCreate = () => {
-  router.push('/gear/new')
+  router.push(GearRoutePath.ContainerNew)
 }
 
 const handleImport = () => {

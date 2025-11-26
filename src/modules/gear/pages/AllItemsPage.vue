@@ -14,6 +14,7 @@ import CategoryIcon from '../components/CategoryIcon.vue'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
+import { GearRoutePath } from '../routes'
 import { createAllItemsColumns } from '../utils/allItemsColumns'
 import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 import { COLOR_DOT_CLASSES, COLOR_TEXT_CLASSES } from '../utils/containerColors'
@@ -111,7 +112,7 @@ const globalFilterFn = (row: IItemWithContainer, filterValue: string) => {
 
 // Navigate to container
 function navigateToContainer(containerId: string) {
-  router.push(`/gear/${containerId}`)
+  router.push(GearRoutePath.ContainerDetailById(containerId))
 }
 </script>
 
@@ -147,6 +148,7 @@ function navigateToContainer(containerId: string) {
         <template #toolbar-filters>
           <AllItemsFilters v-model:filter-type="filterType" />
         </template>
+
         <template #category="{ row }">
           <div class="flex items-center gap-2">
             <template v-if="row.original.isContainer">
@@ -163,7 +165,7 @@ function navigateToContainer(containerId: string) {
         <template #name="{ row }">
           <div class="flex items-center gap-2">
             <RouterLink
-              :to="row.original.isContainer ? `/gear/${row.original.id}` : `/gear/${row.original.containerId}/items/${row.original.id}/edit`"
+              :to="row.original.isContainer ? GearRoutePath.ContainerDetailById(row.original.id) : { path: GearRoutePath.ItemDetailById(row.original.containerId, row.original.id), query: { from: 'all-items' } }"
               class="font-medium hover:text-primary hover:underline transition-colors"
             >
               {{ row.original.name }}

@@ -17,6 +17,7 @@ import ItemsTable from '../components/ItemsTable.vue'
 import SortConfirmationAlert from '../components/SortConfirmationAlert.vue'
 import { useContainer } from '../composables/useContainer'
 import { useGear } from '../composables/useGear'
+import { GearRoutePath } from '../routes'
 import { gearItemService } from '../services/gearItemService'
 import { useGearStore } from '../store/useGearStore'
 import { recognizeParameters, recognizeParametersForItems } from '../utils/parameterRecognition'
@@ -67,7 +68,7 @@ const isSavingSorting = ref(false)
 // Actions
 const handleEditItem = (item: IGearItem) => {
   router.push({
-    path: `/gear/${containerId}/items/${item.id}/edit`,
+    path: GearRoutePath.ItemEditById(containerId, item.id),
     query: { returnTo: 'container' },
   })
 }
@@ -325,7 +326,7 @@ const handleRecognizeParametersAll = async () => {
 
 // Redirect if container not found
 if (!container.value) {
-  router.push('/gear')
+  router.push(GearRoutePath.Containers)
 }
 </script>
 

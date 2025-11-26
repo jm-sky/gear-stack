@@ -16,7 +16,10 @@ const { t } = useI18n()
 const router = useRouter()
 
 function handleImageClick() {
-  router.push(GearRoutePath.ItemDetailById(props.containerId, props.item.id))
+  router.push({
+    path: GearRoutePath.ItemDetailById(props.containerId, props.item.id),
+    query: { from: 'container' },
+  })
 }
 </script>
 

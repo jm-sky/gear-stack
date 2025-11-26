@@ -305,7 +305,7 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
   - Parser automatycznie tworzy relację
 
 **Eksport do CSV:**
-- 🔄 Eksport kontenera do formatu CSV (planowane)
+- 🔄 Eksport kontenera do formatu CSV (planowane) | **Feature:** [FEATURE-021](./features/FEATURE-021-csv-export.md)
 - Kolumny: nazwa, kategoria, ilość, waga, cena, waluta, marka, kolor, status, priorytet, URL, notatki
 - Opcja wyboru kolumn do eksportu
 - Obsługa różnych separatorów (przecinek, średnik)
@@ -618,6 +618,11 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 - ✅ Tłumaczenia PL/EN (automatyczne wykrywanie locale)
 - ✅ Global error handler w `main.ts`
 
+### ✅ Refaktoryzacja obsługi błędów - ujednolicenie użycia `useHandleError`
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium | **Plan:** [USE_HANDLE_ERROR_REFACTORING_PLAN.md](../plans/USE_HANDLE_ERROR_REFACTORING_PLAN.md)
+
+- ✅ Ujednolicenie obsługi błędów w całej aplikacji poprzez użycie helpera `useHandleError`
+
 ### 🔄 Poprawa przekierowania z formularza edycji przedmiotu
 **Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
 
@@ -640,6 +645,54 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 - Użytkownik próbuje przejść do nowej trasy
 - Stara chunk jest usunięta → ChunkLoadError
 - Dialog informuje użytkownika o nowej wersji i oferuje odświeżenie strony
+
+### 🔄 Refaktoryzacja systemu query parametrów (`returnTo` i `from`)
+**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium | **Analysis:** [query-params-analysis.md](../analysis/query-params-analysis.md)
+
+**Problem:**
+- Niespójne użycie query parametrów `returnTo` i `from` w całej aplikacji
+- Hardcoded stringi w URL zamiast funkcji z `routes.ts`
+- Brak typowania wartości parametrów
+- Rozproszona logika obsługi parametrów
+- Brak automatycznego czyszczenia parametrów po użyciu
+
+**Zakres refaktoryzacji:**
+
+1. **Stworzenie typów i helper functions** (Wysoki priorytet)
+   - Utworzenie `src/modules/gear/utils/navigationParams.ts`
+   - Typy: `ReturnToValue`, `FromValue`
+   - Helper functions: `createNavigationQuery()`, `getReturnTo()`, `getFrom()`, `createItemEditPath()`
+   - Funkcje walidacji: `isValidReturnTo()`, `isValidFrom()`
+
+2. **Zastąpienie hardcoded stringów** (Wysoki priorytet)
+   - `ShoppingListItem.vue` - użycie `createItemEditPath()` zamiast hardcoded URL
+   - `AvailableItemCard.vue` - użycie `createItemEditPath()` zamiast hardcoded URL
+   - Wszystkie miejsca przekazujące query parametry
+
+3. **Centralizacja logiki nawigacji** (Średni priorytet)
+   - Composable `useNavigationReturn()` do obsługi `returnTo`
+   - Composable `useNavigationFrom()` do obsługi `from`
+   - Refaktoryzacja `ItemFormPage`, `ItemDetailPage`, `ShoppingPlanningPage`
+
+4. **Automatyczne czyszczenie parametrów** (Średni priorytet)
+   - Usuwanie query parametrów z URL po ich obsłużeniu
+   - Implementacja w composables lub guardach
+
+**Korzyści:**
+- ✅ Type safety i autocompletion w IDE
+- ✅ Spójność w całej aplikacji
+- ✅ Łatwość refaktoryzacji ścieżek
+- ✅ Mniej duplikacji kodu
+- ✅ Czyste URL-e w historii przeglądarki
+
+**Plan implementacji:**
+1. Faza 1: Stworzenie `navigationParams.ts` z typami i helper functions
+2. Faza 2: Zastąpienie hardcoded stringów w `ShoppingListItem` i `AvailableItemCard`
+3. Faza 3: Refaktoryzacja `ItemFormPage` do użycia helper functions
+4. Faza 4: Stworzenie composable `useNavigationReturn`
+5. Faza 5: Dodanie automatycznego czyszczenia parametrów
+
+**Szczegóły:** Zobacz [query-params-analysis.md](../analysis/query-params-analysis.md)
 
 ---
 

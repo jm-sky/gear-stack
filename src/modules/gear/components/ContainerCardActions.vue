@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import type { IGearContainer } from '../types/gear.types'
+import { GearRoutePath } from '../routes'
 import CloneContainerDialog from './CloneContainerDialog.vue'
 
 const props = defineProps<{
@@ -28,11 +29,11 @@ const isCloneDialogOpen = ref(false)
 
 // Actions
 const handleShow = () => {
-  router.push(`/gear/${props.container.id}`)
+  router.push(GearRoutePath.ContainerDetailById(props.container.id))
 }
 
 const handleEdit = () => {
-  router.push(`/gear/${props.container.id}/edit`)
+  router.push(GearRoutePath.ContainerEditById(props.container.id))
 }
 
 const handleClone = () => {

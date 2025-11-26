@@ -15,11 +15,13 @@ import {
 } from '@/components/ui/dropdown-menu'
 import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import { useHandleError } from '@/shared/composables/useHandleError'
 import type { IAdminUser } from '../types/admin.types'
 import { adminApiService } from '../services/adminApiService'
 import type { ColumnDef } from '@tanstack/vue-table'
 
 const { t } = useI18n()
+const { handleError } = useHandleError()
 const users = ref<IAdminUser[]>([])
 const loading = ref(false)
 
@@ -30,7 +32,7 @@ async function loadUsers() {
     users.value = await adminApiService.getUsers(0, 1000)
   } catch (error) {
     console.error('Failed to load users:', error)
-    toast.error(t('admin.users.loadError', 'Failed to load users'))
+    handleError(error, { fallbackMessage: t('admin.users.loadError', 'Failed to load users') })
   } finally {
     loading.value = false
   }
@@ -57,7 +59,7 @@ async function toggleAdmin(user: IAdminUser) {
     await loadUsers()
   } catch (error) {
     console.error('Failed to toggle admin status:', error)
-    toast.error(t('admin.users.toggleAdmin.error', 'Failed to update user admin status'))
+    handleError(error, { fallbackMessage: t('admin.users.toggleAdmin.error', 'Failed to update user admin status') })
   }
 }
 
@@ -73,7 +75,7 @@ async function deleteUser(userId: string) {
     await loadUsers()
   } catch (error) {
     console.error('Failed to delete user:', error)
-    toast.error(t('admin.users.deleteError', 'Failed to delete user'))
+    handleError(error, { fallbackMessage: t('admin.users.deleteError', 'Failed to delete user') })
   }
 }
 

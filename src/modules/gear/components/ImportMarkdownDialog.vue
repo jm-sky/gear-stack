@@ -17,6 +17,7 @@ import {
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import Textarea from '@/components/ui/textarea/Textarea.vue'
+import { useHandleError } from '@/shared/composables/useHandleError'
 import type { IGearContainer } from '../types/gear.types'
 import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
@@ -37,6 +38,7 @@ const { t } = useI18n()
 const { createContainer, updateContainer, createItem, updateItem } = useGear()
 const store = useGearStore()
 const { customBrands } = useGearSettings()
+const { handleError } = useHandleError()
 
 const markdownContent = ref('')
 const importing = ref(false)
@@ -218,8 +220,8 @@ const handleImport = async () => {
     emit('import-complete')
     handleClose()
   } catch (error) {
-    toast.error(t('common.error'))
     console.error('Import error:', error)
+    handleError(error)
   } finally {
     importing.value = false
   }

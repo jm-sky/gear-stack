@@ -155,12 +155,10 @@ async function loadItem() {
   try {
     isLoading.value = true
     item.value = await gearItemService.getItem(itemId.value)
-  }
-  catch (error) {
+  } catch (error) {
     toast.error('Failed to load item')
     console.error(error)
-  }
-  finally {
+  } finally {
     isLoading.value = false
   }
 }

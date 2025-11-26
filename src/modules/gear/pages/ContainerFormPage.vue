@@ -8,11 +8,13 @@ import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useSettings } from '@/modules/settings/composables/useSettings'
+import { useHandleError } from '@/shared/composables/useHandleError'
 import type { ICreateContainerDto, IUpdateContainerDto, TContainerColor } from '../types/gear.types'
 import ContainerFormFields from '../components/ContainerFormFields.vue'
 import { useContainer } from '../composables/useContainer'
 import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
+import { GearRoutePath } from '../routes'
 import { CONTAINER_COLORS } from '../utils/containerColors'
 import { recognizeContainerType } from '../utils/containerTypeRecognition'
 import { recognizeParameters } from '../utils/parameterRecognition'
@@ -24,6 +26,7 @@ const { t } = useI18n()
 const { createContainer, updateContainer } = useGear()
 const { customBrands } = useGearSettings()
 const { settings } = useSettings()
+const { handleError } = useHandleError()
 
 const containerId = route.params.id as string | undefined
 const isEditMode: boolean = !!containerId
@@ -68,7 +71,7 @@ const getInitialValues = (): ContainerFormData => {
   }
 }
 
-const { handleSubmit, isSubmitting, setFieldValue, values } = useForm({
+const { handleSubmit, isSubmitting, setFieldValue, values, setErrors } = useForm({
   validationSchema: toTypedSchema(containerSchema),
   initialValues: getInitialValues(),
 })
@@ -180,24 +183,24 @@ const onSubmit = handleSubmit(async (data: ContainerFormData) => {
     if (isEditMode && containerId) {
       updateContainer(containerId, data as IUpdateContainerDto)
       toast.success(t('common.success'))
-      router.push(`/gear/${containerId}`)
+      router.push(GearRoutePath.ContainerDetailById(containerId))
     } else {
       const newContainer = await createContainer(data as ICreateContainerDto)
       toast.success(t('common.success'))
-      router.push(`/gear/${newContainer.id}`)
+      router.push(GearRoutePath.ContainerDetailById(newContainer.id))
     }
   } catch (error) {
-    toast.error(t('common.error'))
     console.error(error)
+    handleError(error, { setErrors })
   }
 })
 
 // Cancel handler
 const handleCancel = () => {
   if (isEditMode && containerId) {
-    router.push(`/gear/${containerId}`)
+    router.push(GearRoutePath.ContainerDetailById(containerId))
   } else {
-    router.push('/gear')
+    router.push(GearRoutePath.Containers)
   }
 }
 

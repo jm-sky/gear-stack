@@ -2,12 +2,14 @@
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
+import { useHandleError } from '@/shared/composables/useHandleError'
 import type { IGearContainer } from '../types/gear.types'
 import { useGear } from '../composables/useGear'
 import FavoriteStarIcon from './FavoriteStarIcon.vue'
 
 const { t } = useI18n()
 const { updateContainer } = useGear()
+const { handleError } = useHandleError()
 
 const { container } = defineProps<{
   container: IGearContainer
@@ -26,7 +28,7 @@ const handleToggleFavorite = async () => {
     )
   } catch (error) {
     console.error('Failed to update favorite status:', error)
-    toast.error(t('common.error'))
+    handleError(error)
   }
 }
 </script>

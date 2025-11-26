@@ -11,15 +11,16 @@ import OAuthButton from '@/modules/auth/components/OAuthButton.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { AuthRouteNames } from '@/modules/auth/config/routes'
 import { registerSchema } from '@/modules/auth/validation/register.schema'
+import { useHandleError } from '@/shared/composables/useHandleError'
 import { useRecaptcha } from '@/shared/composables/useRecaptcha'
 import { config } from '@/shared/config/config'
-import { isValidationError } from '@/shared/utils/typeGuards'
 import type { RegisterCredentials } from '@/modules/auth/types/user.type'
 
 const { t } = useI18n()
 const router = useRouter()
 const { register, isRegistering } = useAuth()
 const { getToken } = useRecaptcha()
+const { handleError } = useHandleError()
 
 const { handleSubmit, setErrors } = useForm({
   validationSchema: toTypedSchema(registerSchema),
@@ -42,14 +43,9 @@ const onSubmit = handleSubmit(async (values: RegisterCredentials) => {
     })
     toast.success(response.message ?? t('auth.register_success'))
     await router.push({ name: AuthRouteNames.verifyEmail, query: { email: values.email } })
-  } catch (err: unknown) {
-    if (isValidationError(err)) {
-      setErrors(err.response.data.errors)
-    } else {
-      // TODO: add toast/sonner notification from shadcn-vue
-      toast.error(t('errors.generic'))
-      console.error('Register error:', err)
-    }
+  } catch (error: unknown) {
+    console.error('Register error:', error)
+    handleError(error, { setErrors })
   }
 })
 </script>

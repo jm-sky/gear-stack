@@ -16,6 +16,7 @@ import ItemsTable from '../components/ItemsTable.vue'
 import PublicContainerAuthorBadge from '../components/PublicContainerAuthorBadge.vue'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { useGearSettings } from '../composables/useGearSettings'
+import { GearRoutePath } from '../routes'
 import { publicContainersService } from '../services/publicContainersService'
 import { useGearStore } from '../store/useGearStore'
 import {
@@ -56,7 +57,7 @@ const loadContainer = async () => {
   } catch (error) {
     console.error('Failed to load public container:', error)
     toast.error(t('common.error'))
-    router.push('/gear/public')
+    router.push(GearRoutePath.PublicContainers)
   } finally {
     isLoading.value = false
   }
@@ -81,7 +82,7 @@ const readinessPercentage = computed<number>(() => {
 const formattedWeight = computed<string>(() => formatWeightToPreferredUnit(totalWeight.value, settings.value.preferredWeightUnit))
 
 const handleBack = () => {
-  router.push('/gear/public')
+  router.push(GearRoutePath.PublicContainers)
 }
 </script>
 

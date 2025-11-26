@@ -1,56 +1,45 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
-import { CheckCircle2, Download, Minus, Plus, RotateCcw, ShoppingCart, Trash2, X } from 'lucide-vue-next'
+import { Download, Plus, RotateCcw, ShoppingCart } from 'lucide-vue-next'
 import { useForm } from 'vee-validate'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import Badge from '@/components/ui/badge/Badge.vue'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import type { ICreateItemDto, IGearItem } from '../types/gear.types'
-import type { TGearItemCategory, TGearItemPriority } from '../types/gear.types'
-import CategoryIcon from '../components/CategoryIcon.vue'
-import ItemFormFields from '../components/ItemFormFields.vue'
+import { config } from '@/shared/config/config'
+import type { ICreateItemDto, IGearItem, TGearItemCategory, TGearItemPriority } from '../types/gear.types'
+import type { IItemWithContainerId } from '../types/shopping.types'
+import AddItemToShoppingDialog from '../components/shopping/AddItemToShoppingDialog.vue'
+import AvailableItemCard from '../components/shopping/AvailableItemCard.vue'
+import DeletedItemsList from '../components/shopping/DeletedItemsList.vue'
+import ShoppingExportDialog from '../components/shopping/ShoppingExportDialog.vue'
+import ShoppingListFilters from '../components/shopping/ShoppingListFilters.vue'
+import ShoppingListItem from '../components/shopping/ShoppingListItem.vue'
+import ShoppingListSummary from '../components/shopping/ShoppingListSummary.vue'
 import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
-import { getPriorityVariant } from '../utils/badgeVariants'
 import { EXPIRATION_WARNING_DAYS, MILLISECONDS_PER_DAY } from '../utils/constants'
-import { formatCurrency, getCurrency } from '../utils/currencyFormatter'
 import { getDefaultItemValues } from '../utils/defaultValues'
-import { formatWeightWithPreferredUnit } from '../utils/formatWeight'
 import { type ItemFormData, itemSchema } from '../utils/validation'
+import type { TUUID } from '@/shared/types/base.type'
 
 const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
 const { containers, createItem, updateItem } = useGear()
-const { customCategories, settings: gearSettings, defaultCurrency } = useGearSettings()
-const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
+const { customCategories, defaultCurrency } = useGearSettings()
 
 // Filters
 const selectedCategories = ref<TGearItemCategory[]>([])
 const budget = ref<number | null>(null)
 const includeExpiringSoon = ref(true)
+const itemsBeingPurchased = ref<Set<TUUID>>(new Set<TUUID>())
 
-// Category checkbox states - using reactive object for v-model compatibility
-const categoryChecked = ref<Record<string, boolean>>({})
-
-// Storage key for shopping list
-const SHOPPING_LIST_STORAGE_KEY = 'gear-stack:shopping-list'
-const DELETED_ITEMS_STORAGE_KEY = 'gear-stack:shopping-deleted-items'
+// Storage keys
+const SHOPPING_LIST_STORAGE_KEY = `${config.app.id}:shopping-list`
+const DELETED_ITEMS_STORAGE_KEY = `${config.app.id}:shopping-deleted-items`
 
 // Helper to load shopping list from localStorage
 function loadShoppingListFromStorage(): IItemWithContainerId[] {
@@ -112,14 +101,6 @@ watch(deletedItems, (newItems) => {
   saveDeletedItemsToStorage(newItems)
 }, { deep: true })
 
-// Helper to check if item is expired
-function isExpired(item: IGearItem): boolean {
-  if (!item.expirationDate) return false
-  const expirationDate = new Date(item.expirationDate)
-  const now = new Date()
-  return expirationDate < now
-}
-
 // Helper to check if item is expiring soon (includes expired items)
 function isExpiringSoon(item: IGearItem, days: number = EXPIRATION_WARNING_DAYS): boolean {
   if (!item.expirationDate) return false
@@ -128,11 +109,6 @@ function isExpiringSoon(item: IGearItem, days: number = EXPIRATION_WARNING_DAYS)
   const daysUntilExpiration = Math.ceil((expirationDate.getTime() - now.getTime()) / MILLISECONDS_PER_DAY)
   // Include expired items (daysUntilExpiration <= 0) and items expiring soon
   return daysUntilExpiration <= days
-}
-
-// Item with container ID for navigation
-interface IItemWithContainerId extends IGearItem {
-  _containerId: string // Internal field to track container ID
 }
 
 // Get available items (toBuy + optionally expiring soon/expired) with container IDs
@@ -172,45 +148,6 @@ const getCategoryLabel = (categoryValue: string): string => {
   }
   return t(`gear.item.categories.${categoryValue}`)
 }
-
-// Sync categoryChecked with selectedCategories
-watch(
-  () => allCategories.value,
-  (categories) => {
-    categories.forEach(category => {
-      if (!(category in categoryChecked.value)) {
-        categoryChecked.value[category] = selectedCategories.value.includes(category)
-      }
-    })
-  },
-  { immediate: true },
-)
-
-// Watch categoryChecked changes and sync to selectedCategories
-watch(
-  categoryChecked,
-  (checked) => {
-    const newSelected: TGearItemCategory[] = []
-    Object.entries(checked).forEach(([category, isChecked]) => {
-      if (isChecked && allCategories.value.includes(category as TGearItemCategory)) {
-        newSelected.push(category as TGearItemCategory)
-      }
-    })
-    selectedCategories.value = newSelected
-  },
-  { deep: true },
-)
-
-// Watch selectedCategories changes and sync to categoryChecked
-watch(
-  selectedCategories,
-  (selected) => {
-    allCategories.value.forEach(category => {
-      categoryChecked.value[category] = selected.includes(category)
-    })
-  },
-  { immediate: true },
-)
 
 // Priority order for sorting
 const priorityOrder: Record<TGearItemPriority, number> = {
@@ -252,17 +189,12 @@ const totalPriceByCurrency = computed(() => {
   const defaultCurr = defaultCurrency.value
   shoppingList.value.forEach(item => {
     if (item.price != null && item.price > 0) {
-      const currency = getCurrency(item.currency, defaultCurr)
+      const currency = item.currency ?? defaultCurr
       const totalPrice = item.price * item.quantity
       totals[currency] = (totals[currency] || 0) + totalPrice
     }
   })
   return totals
-})
-
-// Calculate total items count
-const totalItemsCount = computed(() => {
-  return shoppingList.value.reduce((sum, item) => sum + item.quantity, 0)
 })
 
 // Check if item is in shopping list
@@ -299,12 +231,16 @@ const toggleShoppingList = (item: IItemWithContainerId) => {
 // Mark item as purchased (change status to Owned and remove from list)
 const markAsPurchased = async (item: IItemWithContainerId) => {
   try {
+    itemsBeingPurchased.value.add(item.id)
     await updateItem(item.id, { status: 'owned' })
+    itemsBeingPurchased.value.delete(item.id)
     removeFromShoppingList(item)
     toast.success(t('gear.shopping.markedAsPurchased', 'Item marked as purchased'))
   } catch (error) {
     console.error('Failed to mark item as purchased:', error)
     toast.error(t('common.error', 'Error'))
+  } finally {
+    itemsBeingPurchased.value.delete(item.id)
   }
 }
 
@@ -506,6 +442,11 @@ const onAddItemSubmit = handleAddItemSubmit(async (data: ICreateItemDto) => {
   }
 })
 
+const handleCancelAddItem = () => {
+  addItemDialogOpen.value = false
+  resetAddItemForm({ values: getInitialAddItemValues() })
+}
+
 // Sync shopping list with current container data
 // This ensures items in shopping list are up-to-date with container data
 function syncShoppingListWithContainers() {
@@ -619,104 +560,22 @@ onMounted(() => {
       </div>
 
       <!-- Summary above list -->
-      <div
-        v-if="shoppingList.length > 0"
-        class="p-4 border rounded-lg bg-primary/5"
-      >
-        <div class="flex items-center justify-between">
-          <div>
-            <h3 class="font-semibold">
-              {{ t('gear.shopping.summary', 'Summary') }}
-            </h3>
-            <p class="text-sm text-muted-foreground">
-              {{ t('gear.shopping.itemsCount', { count: shoppingList.length }) }}
-              ({{ t('gear.shopping.totalQuantity', { count: totalItemsCount }) }})
-              <span v-if="Object.keys(totalPriceByCurrency).length > 0">
-                -
-                <span
-                  v-for="(amount, currency) in totalPriceByCurrency"
-                  :key="currency"
-                  class="ml-1"
-                >
-                  {{ formatCurrency(amount, currency) }}
-                </span>
-              </span>
-            </p>
-          </div>
-        </div>
-      </div>
+      <ShoppingListSummary
+        :shopping-list="shoppingList"
+        :total-price-by-currency="totalPriceByCurrency"
+      />
 
       <!-- Filters -->
-      <div class="space-y-4 p-4 border rounded-lg bg-muted/50">
-        <h3 class="font-semibold text-sm">
-          {{ t('gear.shopping.filters', 'Filters') }}
-        </h3>
-
-        <!-- Categories filter -->
-        <div v-if="allCategories.length > 0" class="space-y-2">
-          <Label class="text-sm">{{ t('gear.shopping.filterByCategory', 'Filter by Category') }}</Label>
-          <div class="flex flex-wrap gap-2">
-            <div
-              v-for="category in allCategories"
-              :key="category"
-              class="flex items-center gap-2"
-            >
-              <Checkbox
-                :id="`category-${category}`"
-                v-model="categoryChecked[category]"
-              />
-              <Label
-                :for="`category-${category}`"
-                class="text-sm cursor-pointer flex items-center gap-2"
-              >
-                <CategoryIcon :category="category" :size="14" />
-                {{ getCategoryLabel(category) }}
-              </Label>
-            </div>
-          </div>
-        </div>
-
-        <!-- Budget filter -->
-        <div class="space-y-2">
-          <Label class="text-sm">{{ t('gear.shopping.filterByBudget', 'Filter by Budget') }}</Label>
-          <div class="flex items-center gap-2">
-            <Input
-              :model-value="budget?.toString() ?? ''"
-              type="number"
-              :placeholder="t('gear.shopping.budgetPlaceholder', 'Enter budget amount')"
-              class="max-w-xs"
-              min="0"
-              step="0.01"
-              @update:model-value="(value) => {
-                budget = value === '' ? null : Number(value)
-              }"
-            />
-            <span class="text-sm text-muted-foreground">{{ defaultCurrency }}</span>
-            <Button
-              v-if="budget !== null"
-              variant="ghost"
-              size="sm"
-              @click="budget = null"
-            >
-              {{ t('gear.shopping.clearBudget', 'Clear') }}
-            </Button>
-          </div>
-        </div>
-
-        <!-- Include expiring soon -->
-        <div class="flex items-center gap-2">
-          <Checkbox
-            id="include-expiring"
-            v-model="includeExpiringSoon"
-          />
-          <Label
-            for="include-expiring"
-            class="text-sm cursor-pointer"
-          >
-            {{ t('gear.shopping.includeExpiringSoon', 'Include items expiring soon') }}
-          </Label>
-        </div>
-      </div>
+      <ShoppingListFilters
+        :all-categories="allCategories"
+        :selected-categories="selectedCategories"
+        :budget="budget"
+        :include-expiring-soon="includeExpiringSoon"
+        :default-currency="defaultCurrency"
+        @update:selected-categories="selectedCategories = $event"
+        @update:budget="budget = $event"
+        @update:include-expiring-soon="includeExpiringSoon = $event"
+      />
 
       <!-- Shopping list section -->
       <div
@@ -737,104 +596,16 @@ onMounted(() => {
         </div>
 
         <div class="space-y-2">
-          <div
+          <ShoppingListItem
             v-for="item in shoppingList"
             :key="item.id"
-            class="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-          >
-            <!-- Category icon -->
-            <CategoryIcon :category="item.category" :size="20" class="text-muted-foreground shrink-0" />
-
-            <!-- Item info -->
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2 flex-wrap">
-                <RouterLink
-                  :to="`/gear/${item._containerId}/items/${item.id}/edit?returnTo=shopping`"
-                  class="font-medium hover:text-primary hover:underline transition-colors"
-                >
-                  {{ item.name }}
-                </RouterLink>
-                <Badge
-                  :variant="getPriorityVariant(item.priority)"
-                  class="text-xs"
-                >
-                  {{ t(`gear.item.priorities.${item.priority}`) }}
-                </Badge>
-                <Badge
-                  v-if="item.status === 'toBuy'"
-                  variant="outline"
-                  class="text-xs"
-                >
-                  {{ t('gear.item.statuses.toBuy') }}
-                </Badge>
-                <Badge
-                  v-else-if="isExpiringSoon(item)"
-                  variant="outline"
-                  :class="[
-                    'text-xs',
-                    isExpired(item) ? 'text-red-600 border-red-600' : 'text-yellow-600 border-yellow-600'
-                  ]"
-                >
-                  {{ isExpired(item) ? t('gear.item.expiration.expired') : t('gear.item.expiration.expiringSoon') }}
-                </Badge>
-              </div>
-              <div class="flex items-center gap-4 mt-1 text-sm text-muted-foreground flex-wrap">
-                <span>{{ getCategoryLabel(item.category) }}</span>
-                <span v-if="item.brand">{{ item.brand }}</span>
-                <span>{{ t('gear.item.quantity') }}: {{ item.quantity }}</span>
-                <span>
-                  {{ formatWeightWithPreferredUnit(item.weight * item.quantity, item.weightUnit, settings.preferredWeightUnit) }}
-                </span>
-                <span v-if="item.price">
-                  {{ formatCurrency(item.price * item.quantity, getCurrency(item.currency, defaultCurrency)) }}
-                </span>
-                <span v-if="item.expirationDate" :class="isExpired(item) ? 'text-red-600' : 'text-yellow-600'">
-                  {{ isExpired(item) ? t('gear.item.expiration.expired') : t('gear.item.expiration.expiringSoon') }}: {{ new Date(item.expirationDate).toLocaleDateString() }}
-                </span>
-              </div>
-            </div>
-
-            <!-- Quantity controls -->
-            <div class="flex items-center gap-2 shrink-0">
-              <Button
-                variant="outline"
-                size="sm"
-                :disabled="item.quantity <= 1"
-                @click="decrementQuantity(item)"
-              >
-                <Minus class="size-4" />
-              </Button>
-              <span class="text-sm font-medium min-w-[2ch] text-center">
-                {{ item.quantity }}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                @click="incrementQuantity(item)"
-              >
-                <Plus class="size-4" />
-              </Button>
-            </div>
-
-            <!-- Actions -->
-            <div class="flex items-center gap-2 shrink-0">
-              <Button
-                variant="default"
-                size="sm"
-                @click="markAsPurchased(item)"
-              >
-                <CheckCircle2 class="size-4" />
-                <span class="hidden sm:inline">{{ t('gear.shopping.purchased', 'Purchased') }}</span>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                @click="deleteFromShoppingList(item)"
-              >
-                <X class="size-4" />
-              </Button>
-            </div>
-          </div>
+            :item="item"
+            :is-being-purchased="itemsBeingPurchased.has(item.id)"
+            @purchase="markAsPurchased(item)"
+            @increment="incrementQuantity(item)"
+            @decrement="decrementQuantity(item)"
+            @delete="deleteFromShoppingList(item)"
+          />
         </div>
       </div>
 
@@ -868,217 +639,44 @@ onMounted(() => {
             </p>
           </div>
 
-          <div
+          <AvailableItemCard
             v-for="item in filteredItems"
             :key="item.id"
-            class="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-          >
-            <!-- Toggle button -->
-            <Button
-              :variant="isInShoppingList(item) ? 'default' : 'outline'"
-              size="sm"
-              @click="toggleShoppingList(item)"
-            >
-              <Plus
-                v-if="!isInShoppingList(item)"
-                class="size-4"
-              />
-              <Trash2
-                v-else
-                class="size-4"
-              />
-            </Button>
-
-            <!-- Category icon -->
-            <CategoryIcon :category="item.category" :size="20" class="text-muted-foreground shrink-0" />
-
-            <!-- Item info -->
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2 flex-wrap">
-                <RouterLink
-                  :to="`/gear/${item._containerId}/items/${item.id}/edit?returnTo=shopping`"
-                  class="font-medium hover:text-primary hover:underline transition-colors"
-                >
-                  {{ item.name }}
-                </RouterLink>
-                <Badge
-                  :variant="getPriorityVariant(item.priority)"
-                  class="text-xs"
-                >
-                  {{ t(`gear.item.priorities.${item.priority}`) }}
-                </Badge>
-                <Badge
-                  v-if="item.status === 'toBuy'"
-                  variant="outline"
-                  class="text-xs"
-                >
-                  {{ t('gear.item.statuses.toBuy') }}
-                </Badge>
-                <Badge
-                  v-else-if="isExpiringSoon(item)"
-                  variant="outline"
-                  :class="[
-                    'text-xs',
-                    isExpired(item) ? 'text-red-600 border-red-600' : 'text-yellow-600 border-yellow-600'
-                  ]"
-                >
-                  {{ isExpired(item) ? t('gear.item.expiration.expired') : t('gear.item.expiration.expiringSoon') }}
-                </Badge>
-              </div>
-              <div class="flex items-center gap-4 mt-1 text-sm text-muted-foreground flex-wrap">
-                <span>{{ getCategoryLabel(item.category) }}</span>
-                <span v-if="item.brand">{{ item.brand }}</span>
-                <span>{{ t('gear.item.quantity') }}: {{ item.quantity }}</span>
-                <span>
-                  {{ formatWeightWithPreferredUnit(item.weight * item.quantity, item.weightUnit, settings.preferredWeightUnit) }}
-                </span>
-                <span v-if="item.price">
-                  {{ formatCurrency(item.price * item.quantity, getCurrency(item.currency, defaultCurrency)) }}
-                </span>
-                <span v-if="item.expirationDate" :class="isExpired(item) ? 'text-red-600' : 'text-yellow-600'">
-                  {{ isExpired(item) ? t('gear.item.expiration.expired') : t('gear.item.expiration.expiringSoon') }}: {{ new Date(item.expirationDate).toLocaleDateString() }}
-                </span>
-              </div>
-            </div>
-          </div>
+            :item="item"
+            :is-in-shopping-list="isInShoppingList(item)"
+            :is-being-purchased="itemsBeingPurchased.has(item.id)"
+            @toggle="toggleShoppingList(item)"
+            @purchase="markAsPurchased(item)"
+          />
         </div>
       </div>
 
       <!-- Summary below list -->
-      <div
-        v-if="shoppingList.length > 0"
-        class="p-4 border rounded-lg bg-primary/5"
-      >
-        <div class="flex items-center justify-between">
-          <div>
-            <h3 class="font-semibold">
-              {{ t('gear.shopping.summary', 'Summary') }}
-            </h3>
-            <p class="text-sm text-muted-foreground">
-              {{ t('gear.shopping.itemsCount', { count: shoppingList.length }) }}
-              ({{ t('gear.shopping.totalQuantity', { count: totalItemsCount }) }})
-              <span v-if="Object.keys(totalPriceByCurrency).length > 0">
-                -
-                <span
-                  v-for="(amount, currency) in totalPriceByCurrency"
-                  :key="currency"
-                  class="ml-1"
-                >
-                  {{ formatCurrency(amount, currency) }}
-                </span>
-              </span>
-            </p>
-          </div>
-        </div>
-      </div>
+      <ShoppingListSummary
+        :shopping-list="shoppingList"
+        :total-price-by-currency="totalPriceByCurrency"
+      />
 
       <!-- Deleted items section -->
-      <div
-        v-if="deletedItems.length > 0"
-        class="space-y-4"
-      >
-        <h2 class="text-xl font-semibold text-muted-foreground">
-          {{ t('gear.shopping.deletedItems', 'Deleted Items') }}
-        </h2>
-
-        <div class="space-y-2">
-          <div
-            v-for="item in deletedItems"
-            :key="item.id"
-            class="flex items-center gap-4 p-4 border rounded-lg bg-muted/30 opacity-75"
-          >
-            <!-- Category icon -->
-            <CategoryIcon :category="item.category" :size="20" class="text-muted-foreground shrink-0" />
-
-            <!-- Item info -->
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2 flex-wrap">
-                <span class="font-medium">{{ item.name }}</span>
-                <Badge
-                  :variant="getPriorityVariant(item.priority)"
-                  class="text-xs"
-                >
-                  {{ t(`gear.item.priorities.${item.priority}`) }}
-                </Badge>
-              </div>
-              <div class="flex items-center gap-4 mt-1 text-sm text-muted-foreground flex-wrap">
-                <span>{{ getCategoryLabel(item.category) }}</span>
-                <span v-if="item.brand">{{ item.brand }}</span>
-                <span>{{ t('gear.item.quantity') }}: {{ item.quantity }}</span>
-                <span v-if="item.price">
-                  {{ formatCurrency(item.price * item.quantity, getCurrency(item.currency, defaultCurrency)) }}
-                </span>
-              </div>
-            </div>
-
-            <!-- Restore button -->
-            <Button
-              variant="outline"
-              size="sm"
-              @click="restoreToShoppingList(item)"
-            >
-              {{ t('gear.shopping.restore', 'Restore') }}
-            </Button>
-          </div>
-        </div>
-      </div>
+      <DeletedItemsList
+        :deleted-items="deletedItems"
+        @restore="restoreToShoppingList"
+      />
 
       <!-- Export Dialog -->
-      <Dialog v-model:open="exportDialogOpen">
-        <DialogContent class="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{{ t('gear.shopping.exportMarkdown', 'Export Markdown') }}</DialogTitle>
-            <DialogDescription>
-              {{ t('gear.shopping.exportDescription', 'Copy the markdown content below') }}
-            </DialogDescription>
-          </DialogHeader>
-          <div class="space-y-4">
-            <pre class="p-4 bg-muted rounded-lg text-sm overflow-x-auto whitespace-pre-wrap">{{ markdownContent }}</pre>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" @click="exportDialogOpen = false">
-              {{ t('gear.actions.cancel', 'Cancel') }}
-            </Button>
-            <Button @click="handleCopyMarkdown">
-              {{ t('gear.shopping.copyMarkdown', 'Copy to Clipboard') }}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ShoppingExportDialog
+        v-model:open="exportDialogOpen"
+        :markdown-content="markdownContent"
+        @copy="handleCopyMarkdown"
+      />
 
       <!-- Add Item Dialog -->
-      <Dialog v-model:open="addItemDialogOpen">
-        <DialogContent class="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{{ t('gear.shopping.addItem', 'Add') }}</DialogTitle>
-            <DialogDescription>
-              {{ t('gear.shopping.addItemDescription', 'Add a new item to your shopping list') }}
-            </DialogDescription>
-          </DialogHeader>
-          <form @submit="onAddItemSubmit">
-            <ItemFormFields
-              :item="undefined"
-              :loading="isAddingItem"
-              @cancel="() => {
-                addItemDialogOpen = false
-                resetAddItemForm({ values: getInitialAddItemValues() })
-              }"
-            />
-            <DialogFooter>
-              <Button
-                variant="outline"
-                type="button"
-                @click="() => {
-                  addItemDialogOpen = false
-                  resetAddItemForm({ values: getInitialAddItemValues() })
-                }"
-              >
-                {{ t('gear.actions.cancel', 'Cancel') }}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <AddItemToShoppingDialog
+        v-model:open="addItemDialogOpen"
+        :loading="isAddingItem"
+        @submit="onAddItemSubmit"
+        @cancel="handleCancelAddItem"
+      />
     </div>
   </AuthenticatedLayout>
 </template>

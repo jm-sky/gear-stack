@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { GearRouteName } from '@/modules/gear/routes'
 import { generateSampleSet } from '@/modules/gear/services/sampleSetGenerator'
+import { useHandleError } from '@/shared/composables/useHandleError'
 import type { ButtonProps } from '@/components/ui/button'
 
 export type SampleSetVariant = 'firePouch' | 'bugOutBag' | 'edc'
@@ -29,6 +30,7 @@ const props = withDefaults(defineProps<{
 
 const router = useRouter()
 const { t } = useI18n()
+const { handleError } = useHandleError()
 
 const handleGenerate = async (variant: SampleSetVariant) => {
   try {
@@ -39,7 +41,7 @@ const handleGenerate = async (variant: SampleSetVariant) => {
     }
   } catch (error) {
     console.error('Error generating sample set:', error)
-    toast.error(t('common.error'))
+    handleError(error)
   }
 }
 </script>

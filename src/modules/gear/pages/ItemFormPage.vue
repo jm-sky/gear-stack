@@ -11,6 +11,7 @@ import TabsList from '@/components/ui/tabs/TabsList.vue'
 import TabsTrigger from '@/components/ui/tabs/TabsTrigger.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useBackend } from '@/shared/composables/useBackend'
+import { useHandleError } from '@/shared/composables/useHandleError'
 import type { ICreateItemDto, IGearItem, IUpdateItemDto } from '../types/gear.types'
 import type { IItemWithContainer } from '../utils/allItemsColumns'
 import ItemCatalogSelector from '../components/ItemCatalogSelector.vue'
@@ -31,6 +32,7 @@ const { t } = useI18n()
 const { createItem, updateItem } = useGear()
 const { shouldUseAPI } = useBackend()
 const store = useGearStore()
+const { handleError } = useHandleError()
 
 const containerId = route.params.containerId as string
 const itemId = route.params.itemId as string | undefined
@@ -44,7 +46,7 @@ const isLoading = ref(isEditMode) // Only show loading when editing
 
 // Redirect if container not found
 if (!container.value) {
-  router.push('/gear')
+  router.push(GearRoutePath.Containers)
 }
 
 // Tabs mode - only show tabs when creating new item (not editing)
@@ -83,7 +85,7 @@ const form = useForm({
   initialValues: getInitialValues(),
 })
 
-const { handleSubmit, isSubmitting, setFieldValue, setValues, values, resetForm } = form
+const { handleSubmit, isSubmitting, setFieldValue, setValues, values, resetForm, setErrors } = form
 
 // Load item data for edit mode
 const loadItem = async () => {
@@ -194,9 +196,14 @@ const onSubmit = handleSubmit(async (data: ICreateItemDto | IUpdateItemDto) => {
 
       // Redirect based on returnTo query param
       if (returnTo === 'detail') {
-        router.push(GearRoutePath.ItemDetailById(containerId, itemId))
+        // Preserve 'from' query param if it exists
+        const from = route.query.from as string | undefined
+        router.push({
+          path: GearRoutePath.ItemDetailById(containerId, itemId),
+          ...(from && { query: { from } }),
+        })
       } else if (returnTo === 'shopping') {
-        router.push('/gear/shopping')
+        router.push(GearRoutePath.ShoppingPlanning)
       } else {
         // Default: return to container (returnTo === 'container' or undefined)
         router.push(GearRoutePath.ContainerDetailById(containerId))
@@ -212,15 +219,15 @@ const onSubmit = handleSubmit(async (data: ICreateItemDto | IUpdateItemDto) => {
 
       // Redirect based on returnTo query param
       if (returnTo === 'shopping') {
-        router.push('/gear/shopping')
+        router.push(GearRoutePath.ShoppingPlanning)
       } else {
         // Default: return to container (returnTo === 'container' or undefined)
         router.push(GearRoutePath.ContainerDetailById(containerId))
       }
     }
   } catch (error) {
-    toast.error(t('common.error'))
     console.error(error)
+    handleError(error, { setErrors })
   }
 })
 
@@ -228,9 +235,14 @@ const onSubmit = handleSubmit(async (data: ICreateItemDto | IUpdateItemDto) => {
 const handleCancel = () => {
   const returnTo = route.query.returnTo as string | undefined
   if (returnTo === 'detail' && itemId) {
-    router.push(GearRoutePath.ItemDetailById(containerId, itemId))
+    // Preserve 'from' query param if it exists
+    const from = route.query.from as string | undefined
+    router.push({
+      path: GearRoutePath.ItemDetailById(containerId, itemId),
+      ...(from && { query: { from } }),
+    })
   } else if (returnTo === 'shopping') {
-    router.push('/gear/shopping')
+    router.push(GearRoutePath.ShoppingPlanning)
   } else {
     // Default: return to container (returnTo === 'container' or undefined)
     router.push(GearRoutePath.ContainerDetailById(containerId))
@@ -277,7 +289,7 @@ const handleRecognizeParameters = () => {
         </h1>
         <p class="text-muted-foreground mt-1">
           <RouterLink
-            :to="`/gear/${container.id}`"
+            :to="GearRoutePath.ContainerDetailById(container.id)"
             class="hover:text-primary hover:underline transition-colors"
           >
             {{ container.name }}

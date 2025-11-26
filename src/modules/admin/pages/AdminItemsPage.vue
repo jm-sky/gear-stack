@@ -10,11 +10,13 @@ import Button from '@/components/ui/button/Button.vue'
 import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { GearRoutePath } from '@/modules/gear/routes'
+import { useHandleError } from '@/shared/composables/useHandleError'
 import type { IAdminItem } from '../types/admin.types'
 import { adminApiService } from '../services/adminApiService'
 import type { ColumnDef } from '@tanstack/vue-table'
 
 const { t } = useI18n()
+const { handleError } = useHandleError()
 const items = ref<IAdminItem[]>([])
 const loading = ref(false)
 
@@ -25,7 +27,7 @@ async function loadItems() {
     items.value = await adminApiService.getItems(0, 1000)
   } catch (error) {
     console.error('Failed to load items:', error)
-    toast.error(t('admin.items.loadError', 'Failed to load items'))
+    handleError(error, { fallbackMessage: t('admin.items.loadError', 'Failed to load items') })
   } finally {
     loading.value = false
   }
@@ -43,7 +45,7 @@ async function deleteItem(itemId: string) {
     await loadItems()
   } catch (error) {
     console.error('Failed to delete item:', error)
-    toast.error(t('admin.items.deleteError', 'Failed to delete item'))
+    handleError(error, { fallbackMessage: t('admin.items.deleteError', 'Failed to delete item') })
   }
 }
 
