@@ -21,6 +21,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.16.1] - 2025-11-26
+
+### Fixed
+- **Admin Repository SQL Error**: Fixed PostgreSQL GROUP BY error in `get_all_containers` query
+  - Changed `joinedload(GearContainerDB.user)` to `selectinload(GearContainerDB.user)` in `backend/app/modules/admin/repository.py:88`
+  - `joinedload` was adding user table columns to SELECT list without including them in GROUP BY clause
+  - `selectinload` issues a separate query for the relationship, avoiding GROUP BY conflicts
+  - Error: `column "users_1.id" must appear in the GROUP BY clause or be used in an aggregate function`
+
+---
+
 ## [2.16.0] - 2025-01-28
 
 ### Added

@@ -85,7 +85,7 @@ class AdminRepository:
         stmt = (
             select(GearContainerDB, func.count(GearItemDB.id).label("item_count"))
             .outerjoin(GearItemDB, GearContainerDB.id == GearItemDB.container_id)
-            .options(joinedload(GearContainerDB.user))  # type: ignore[attr-defined]
+            .options(selectinload(GearContainerDB.user))  # type: ignore[attr-defined]
             .group_by(GearContainerDB.id)
             .offset(skip)
             .limit(limit)
