@@ -14,6 +14,7 @@ export const GearRouteName = {
   PublicContainerDetail: 'gear-public-container-detail',
   SharedContainerDetail: 'gear-shared-container-detail',
   PublicItemDetail: 'gear-public-item-detail',
+  ContainerShareTokens: 'gear-container-share-tokens',
 }
 
 export const GearRoutePath = {

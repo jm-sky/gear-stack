@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Copy, Plus, Trash2 } from 'lucide-vue-next'
-import { computed, onMounted, ref } from 'vue'
+import { Copy } from 'lucide-vue-next'
+import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -27,7 +27,7 @@ import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { smallDateTime } from '@/shared/utils/smallDateTime'
 import { useContainer } from '../composables/useContainer'
 import { GearRoutePath } from '../routes'
-import { sharedContainersService, type IShareToken } from '../services/sharedContainersService'
+import { type IShareToken, sharedContainersService } from '../services/sharedContainersService'
 import { getActionIcon } from '../utils/actionIcons'
 
 const route = useRoute()
@@ -166,7 +166,9 @@ const handleBack = () => {
               <TableHead>{{ t('gear.shareTokens.shareUrl') }}</TableHead>
               <TableHead>{{ t('gear.shareTokens.created') }}</TableHead>
               <TableHead>{{ t('gear.shareTokens.expires') }}</TableHead>
-              <TableHead class="text-right">{{ t('common.actions') }}</TableHead>
+              <TableHead class="text-right">
+                {{ t('common.actions') }}
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

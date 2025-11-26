@@ -6,13 +6,13 @@ import { useRouter } from 'vue-router'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import ButtonLink from '@/components/ui/button-link/ButtonLink.vue'
-import { smallDateTime } from '@/shared/utils/smallDateTime'
 import { useAuth } from '@/modules/auth/composables/useAuth'
+import { smallDateTime } from '@/shared/utils/smallDateTime'
 import type { IGearContainer } from '../types/gear.types'
-import PublicContainerAuthorBadge from './PublicContainerAuthorBadge.vue'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { GearRoutePath } from '../routes'
 import { getActionIcon } from '../utils/actionIcons'
+import PublicContainerAuthorBadge from './PublicContainerAuthorBadge.vue'
 
 const props = defineProps<{
   container: IGearContainer
