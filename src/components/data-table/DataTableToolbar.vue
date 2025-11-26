@@ -97,7 +97,7 @@ const getColumnHeaderText = (column: ReturnType<Table<TData>['getColumn']>): str
 </script>
 
 <template>
-  <div v-if="enableFiltering || enableColumnVisibility" class="flex items-center gap-4 py-4">
+  <div v-if="enableFiltering || enableColumnVisibility" class="flex flex-wrap items-center gap-4 py-4">
     <!-- Global Filter Input -->
     <Input
       v-if="enableFiltering"

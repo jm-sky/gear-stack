@@ -116,6 +116,7 @@ export const gearEn = {
     item: {
       title: 'Item',
       name: 'Name',
+      image: 'Image',
       category: 'Category',
       quantity: 'Quantity',
       weight: 'Weight',
@@ -243,6 +244,31 @@ export const gearEn = {
       noResults: 'No images found',
       imageAdded: 'Image added successfully',
       error: 'Failed to search images',
+    },
+    fileUpload: {
+      imageGallery: {
+        title: 'Images',
+        noImages: 'No images uploaded yet',
+        primary: 'Primary',
+        addFromUrl: 'Add from URL',
+        urlPlaceholder: 'Paste image URL (https://...)',
+        confirmDelete: 'Are you sure you want to delete this image?',
+        messages: {
+          uploadSuccess: 'Image uploaded successfully',
+          uploadSuccessMultiple: '{count} images uploaded successfully',
+          uploadFailed: 'Failed to upload image',
+          deleteSuccess: 'Image deleted successfully',
+          primarySuccess: 'Primary image updated',
+          reorderSuccess: 'Images reordered successfully',
+          urlRequired: 'Image URL is required',
+          urlInvalid: 'Please provide a valid URL',
+        },
+        tooltips: {
+          setPrimary: 'Set as primary',
+          dragToReorder: 'Drag to reorder',
+          deleteImage: 'Delete image',
+        },
+      },
     },
     sorting: {
       unsavedChanges: 'Unsaved sorting changes',
@@ -684,6 +710,7 @@ export const gearPl = {
     item: {
       title: 'Przedmiot',
       name: 'Nazwa',
+      image: 'Obrazek',
       category: 'Kategoria',
       quantity: 'Ilość',
       weight: 'Waga',
@@ -806,11 +833,36 @@ export const gearPl = {
       moreActions: 'Więcej akcji',
     },
     imageSearch: {
-      searchImages: 'Wyszukaj Obrazki',
+      searchImages: 'Wyszukaj obrazki',
       searching: 'Wyszukiwanie...',
       noResults: 'Nie znaleziono obrazków',
       imageAdded: 'Obrazek został dodany',
       error: 'Nie udało się wyszukać obrazków',
+    },
+    fileUpload: {
+      imageGallery: {
+        title: 'Galeria obrazków',
+        noImages: 'Brak dodanych obrazków',
+        primary: 'Główny',
+        addFromUrl: 'Dodaj z URL',
+        urlPlaceholder: 'Wklej adres URL obrazka (https://...)',
+        confirmDelete: 'Czy na pewno chcesz usunąć ten obrazek?',
+        messages: {
+          uploadSuccess: 'Obrazek został dodany',
+          uploadSuccessMultiple: 'Dodano {count} obrazków',
+          uploadFailed: 'Nie udało się dodać obrazka',
+          deleteSuccess: 'Obrazek został usunięty',
+          primarySuccess: 'Obrazek główny został zaktualizowany',
+          reorderSuccess: 'Kolejność obrazków została zaktualizowana',
+          urlRequired: 'Adres URL obrazka jest wymagany',
+          urlInvalid: 'Podaj poprawny adres URL',
+        },
+        tooltips: {
+          setPrimary: 'Ustaw jako główny',
+          dragToReorder: 'Przeciągnij, aby zmienić kolejność',
+          deleteImage: 'Usuń obrazek',
+        },
+      },
     },
     sorting: {
       unsavedChanges: 'Niezapisane zmiany sortowania',

@@ -6,6 +6,13 @@ export function createItemsColumns(
 ): ColumnDef<IGearItem>[] {
   return [
     {
+      id: 'image',
+      accessorKey: 'id',
+      header: () => t('gear.item.image', 'Image'),
+      enableSorting: false,
+      enableHiding: true,
+    },
+    {
       id: 'name',
       accessorKey: 'name',
       header: () => t('gear.item.name'),

@@ -27,6 +27,13 @@ export function createAllItemsColumns(
 ): ColumnDef<IItemWithContainer>[] {
   return [
     {
+      id: 'image',
+      accessorKey: 'id',
+      header: () => t('gear.item.image'),
+      enableSorting: false,
+      enableHiding: true,
+    },
+    {
       id: 'category',
       accessorKey: 'category',
       header: () => t('gear.item.category'),

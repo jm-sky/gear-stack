@@ -31,6 +31,22 @@ class ItemImageApiService {
   }
 
   /**
+   * Create image for an item from external URL
+   *
+   * @param itemId - Item ID
+   * @param url - External image URL
+   * @param isPrimary - Whether this should be the primary image
+   * @returns Created image metadata
+   */
+  async uploadImageFromUrl(itemId: TUUID, url: string, isPrimary: boolean = false): Promise<IItemImage> {
+    const response = await apiClient.post<IItemImage>(`/gear/items/${itemId}/images/from-url`, {
+      url,
+      isPrimary,
+    })
+    return response.data
+  }
+
+  /**
    * Get all images for an item
    *
    * @param itemId - Item ID

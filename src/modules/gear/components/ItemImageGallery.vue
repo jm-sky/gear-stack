@@ -3,11 +3,14 @@ import { isAxiosError } from 'axios'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
+import Button from '@/components/ui/button/Button.vue'
 import FileDropZone from '@/components/ui/FileDropZone.vue'
 import { itemImageApiService } from '@/modules/gear/services/itemImageApiService'
 import { useHandleError } from '@/shared/composables/useHandleError'
 import ItemImageCard from './ItemImageCard.vue'
 import ItemImageGalleryEmptyState from './ItemImageGalleryEmptyState.vue'
+import ItemImageGalleryUrlForm from './ItemImageGalleryUrlForm.vue'
+import ItemImagePreviewOverlay from './ItemImagePreviewOverlay.vue'
 import type { IItemImage } from '@/modules/gear/types/itemImage.types'
 import type { TUUID } from '@/shared/types/base.type'
 
@@ -27,6 +30,13 @@ const draggedIndex = ref(-1)
 const dragOverIndex = ref<number | null>(null) // Track which index we're hovering over
 const imageLoadErrors = ref<Set<TUUID>>(new Set())
 
+// Local image preview state
+const isPreviewOpen = ref<boolean>(false)
+const previewIndex = ref<number>(0)
+
+// URL-based image adding state
+const showUrlInput = ref(false)
+
 const sortedImages = computed(() => {
   const source = isDragging.value ? draggedImages.value : images.value
   return [...source].sort((a, b) => a.order - b.order)
@@ -43,6 +53,10 @@ async function loadImages() {
   } finally {
     isLoading.value = false
   }
+}
+
+function toggleUrlInput() {
+  showUrlInput.value = !showUrlInput.value
 }
 
 async function handleFilesSelected(files: File[]) {
@@ -87,9 +101,11 @@ async function uploadImages(files: File[]) {
     // Show success/error messages
     if (uploadedImages.length > 0) {
       if (uploadedImages.length === 1) {
-        toast.success(t('fileUpload.imageGallery.messages.uploadSuccess'))
+        toast.success(t('gear.fileUpload.imageGallery.messages.uploadSuccess'))
       } else {
-        toast.success(t('fileUpload.imageGallery.messages.uploadSuccessMultiple', { count: uploadedImages.length }))
+        toast.success(
+          t('gear.fileUpload.imageGallery.messages.uploadSuccessMultiple', { count: uploadedImages.length }),
+        )
       }
     }
 
@@ -105,7 +121,7 @@ async function uploadImages(files: File[]) {
 }
 
 async function deleteImage(imageId: TUUID) {
-  if (!confirm(t('fileUpload.imageGallery.confirmDelete'))) {
+  if (!confirm(t('gear.fileUpload.imageGallery.confirmDelete'))) {
     return
   }
 
@@ -113,7 +129,7 @@ async function deleteImage(imageId: TUUID) {
     await itemImageApiService.deleteImage(imageId)
     images.value = images.value.filter(img => img.id !== imageId)
     imageLoadErrors.value.delete(imageId)
-    toast.success(t('fileUpload.imageGallery.messages.deleteSuccess'))
+    toast.success(t('gear.fileUpload.imageGallery.messages.deleteSuccess'))
   } catch (error: unknown) {
     console.error(error)
     handleError(error)
@@ -127,7 +143,7 @@ async function setPrimary(imageId: TUUID) {
       ...img,
       isPrimary: img.id === imageId,
     }))
-    toast.success(t('fileUpload.imageGallery.messages.primarySuccess'))
+    toast.success(t('gear.fileUpload.imageGallery.messages.primarySuccess'))
   } catch (error: unknown) {
     console.error(error)
     handleError(error)
@@ -240,7 +256,7 @@ async function handleDragEnd() {
       ...img,
       order: index,
     }))
-    toast.success(t('fileUpload.imageGallery.messages.reorderSuccess'))
+    toast.success(t('gear.fileUpload.imageGallery.messages.reorderSuccess'))
   } catch (error: unknown) {
     console.error(error)
     handleError(error)
@@ -257,6 +273,16 @@ function handleImageError(imageId: TUUID) {
   imageLoadErrors.value.add(imageId)
 }
 
+function handleImagePreview(imageId: TUUID) {
+  const index = sortedImages.value.findIndex(img => img.id === imageId)
+  if (index === -1) {
+    return
+  }
+
+  previewIndex.value = index
+  isPreviewOpen.value = true
+}
+
 onMounted(() => {
   loadImages()
 })
@@ -266,12 +292,29 @@ onMounted(() => {
   <div class="space-y-4">
     <div class="flex flex-row items-center justify-between gap-2">
       <h3 class="text-lg font-semibold">
-        {{ t('fileUpload.imageGallery.title') }}
+        {{ t('gear.fileUpload.imageGallery.title') }}
       </h3>
       <div class="flex flex-row gap-2 items-center justify-end">
         <slot name="header-actions" />
+        <Button
+          v-if="editable"
+          size="sm"
+          variant="outline"
+          :disabled="isLoading"
+          @click="toggleUrlInput"
+        >
+          {{ t('gear.fileUpload.imageGallery.addFromUrl') }}
+        </Button>
       </div>
     </div>
+
+    <ItemImageGalleryUrlForm
+      v-if="editable && showUrlInput"
+      v-model:images="images"
+      v-model:image-load-errors="imageLoadErrors"
+      :item-id
+      @hide="toggleUrlInput"
+    />
 
     <!-- Loading skeleton -->
     <div v-if="isLoading && images.length === 0" class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
@@ -302,6 +345,7 @@ onMounted(() => {
         @dragover="handleDragOver"
         @dragleave="handleDragLeave"
         @dragstart="handleDragStart"
+        @preview="handleImagePreview"
         @set-primary="setPrimary"
         @delete="deleteImage"
         @image-error="handleImageError"
@@ -317,5 +361,12 @@ onMounted(() => {
         @files-selected="handleFilesSelected"
       />
     </div>
+
+    <ItemImagePreviewOverlay
+      v-if="sortedImages.length > 0"
+      v-model:open="isPreviewOpen"
+      v-model:index="previewIndex"
+      :images="sortedImages"
+    />
   </div>
 </template>

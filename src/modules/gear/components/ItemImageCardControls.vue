@@ -28,8 +28,8 @@ function handleDelete() {
 <template>
   <div class="absolute inset-0 flex items-center justify-center gap-2 rounded-lg bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
     <Button
-      v-tooltip.bottom="t('fileUpload.imageGallery.tooltips.setPrimary')"
-      :aria-label="t('fileUpload.imageGallery.tooltips.setPrimary')"
+      v-tooltip.bottom="t('gear.fileUpload.imageGallery.tooltips.setPrimary')"
+      :aria-label="t('gear.fileUpload.imageGallery.tooltips.setPrimary')"
       class="text-white"
       size="icon"
       variant="ghost"
@@ -39,8 +39,8 @@ function handleDelete() {
     </Button>
 
     <Button
-      v-tooltip.bottom="t('fileUpload.imageGallery.tooltips.dragToReorder')"
-      :aria-label="t('fileUpload.imageGallery.tooltips.dragToReorder')"
+      v-tooltip.bottom="t('gear.fileUpload.imageGallery.tooltips.dragToReorder')"
+      :aria-label="t('gear.fileUpload.imageGallery.tooltips.dragToReorder')"
       class="cursor-move text-white"
       size="icon"
       variant="ghost"
@@ -49,8 +49,8 @@ function handleDelete() {
     </Button>
 
     <Button
-      v-tooltip.bottom="t('fileUpload.imageGallery.tooltips.deleteImage')"
-      :aria-label="t('fileUpload.imageGallery.tooltips.deleteImage')"
+      v-tooltip.bottom="t('gear.fileUpload.imageGallery.tooltips.deleteImage')"
+      :aria-label="t('gear.fileUpload.imageGallery.tooltips.deleteImage')"
       class="text-white"
       size="icon"
       variant="ghost"

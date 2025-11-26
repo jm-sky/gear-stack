@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.modules.auth.dependencies import AdminUser
 from app.modules.gear.image_upload_service import ImageUploadService
-from app.modules.gear.item_image_schemas import ImageOrdersUpdate, ItemImageResponse
+from app.modules.gear.item_image_schemas import ImageOrdersUpdate, ItemImageFromUrlRequest, ItemImageResponse
 
 router = APIRouter(prefix="/items", tags=["item-images"])
 
@@ -133,3 +133,27 @@ async def set_primary_image(
     service = ImageUploadService(db)
     await service.set_primary_image(item_id, image_id)
     return {"message": "Primary image set successfully"}
+
+
+@router.post("/{item_id}/images/from-url", response_model=dict)
+async def upload_item_image_from_url(
+    item_id: str,
+    current_user: AdminUser,
+    data: ItemImageFromUrlRequest,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """
+    Create image for item from external URL (admin only).
+
+    Args:
+        item_id: Item ID
+        data: URL payload
+        current_user: Current authenticated admin user
+        db: Database session
+
+    Returns:
+        Image metadata
+    """
+    service = ImageUploadService(db)
+    result = await service.upload_image_from_url(data.url, item_id, current_user.id, data.is_primary)
+    return result

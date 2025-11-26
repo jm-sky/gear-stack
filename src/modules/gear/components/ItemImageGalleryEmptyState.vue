@@ -9,7 +9,7 @@ const { t } = useI18n()
   <div class="w-full md:w-[calc(25%-1rem)] flex flex-col gap-2 items-center justify-center border-2 border-border rounded-lg p-4">
     <ImageIcon class="size-10 text-muted-foreground/50" />
     <div class="text-sm text-center text-muted-foreground">
-      {{ t('fileUpload.imageGallery.noImages') }}
+      {{ t('gear.fileUpload.imageGallery.noImages') }}
     </div>
   </div>
 </template>

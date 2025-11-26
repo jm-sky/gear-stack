@@ -19,6 +19,7 @@ const emit = defineEmits<{
   dragover: [event: DragEvent, index: number]
   dragleave: [event: DragEvent, index: number]
   dragend: []
+  preview: [imageId: TUUID]
   setPrimary: [imageId: TUUID]
   delete: [imageId: TUUID]
   imageError: [imageId: TUUID]
@@ -52,6 +53,10 @@ function handleDragEnd() {
   emit('dragend')
 }
 
+function handleClick() {
+  emit('preview', props.image.id)
+}
+
 function handleImageError() {
   emit('imageError', props.image.id)
 }
@@ -61,7 +66,7 @@ function handleImageError() {
   <div
     :draggable="editable"
     :class="[
-      'group relative rounded-lg transition-all',
+      'group relative rounded-lg transition-all overflow-hidden',
       isDragOver && 'outline-2 outline-dashed outline-offset-2 outline-primary',
       isDragging && 'opacity-50',
     ]"
@@ -71,6 +76,7 @@ function handleImageError() {
     @dragover="handleDragOver"
     @dragleave="handleDragLeave"
     @dragstart="handleDragStart"
+    @click="handleClick"
   >
     <!-- Image or error fallback -->
     <div
@@ -90,7 +96,7 @@ function handleImageError() {
       :alt="image.fileName"
       :src="image.url"
       :class="isDragging ? 'pointer-events-none' : ''"
-      class="size-full h-48 border border-border rounded-lg object-contain shadow-md/5"
+      class="size-full h-48 border border-border rounded-lg object-cover scale-100 group-hover:scale-105 transition-transform duration-300 shadow-md/5"
       @error="handleImageError"
     />
 
@@ -108,7 +114,7 @@ function handleImageError() {
       v-if="image.isPrimary"
       class="absolute left-2 top-2 rounded bg-yellow-400/80 px-2 py-1 text-xs font-semibold text-black backdrop-blur-sm"
     >
-      {{ t('fileUpload.imageGallery.primary') }}
+      {{ t('gear.fileUpload.imageGallery.primary') }}
     </div>
   </div>
 </template>

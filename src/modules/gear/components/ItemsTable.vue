@@ -19,6 +19,7 @@ import { formatCurrency, getCurrency } from '../utils/currencyFormatter'
 import { createItemsColumns } from '../utils/itemsColumns'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 import ItemsTableCategoryCell from './items-table/ItemsTableCategoryCell.vue'
+import ItemsTableImageCell from './items-table/ItemsTableImageCell.vue'
 import ItemsTableNameCell from './items-table/ItemsTableNameCell.vue'
 import ItemsTableWeightCell from './items-table/ItemsTableWeightCell.vue'
 import ItemsTableNestedContainerRow from './ItemsTableNestedContainerRow.vue'
@@ -76,6 +77,7 @@ function loadColumnVisibility(): Record<string, boolean> {
   }
   // Default: hide brand, color, wearable, and consumable by default
   return {
+    image: false,
     brand: false,
     color: false,
     wearable: false,
@@ -390,6 +392,14 @@ function canMoveDown(item: IGearItem): boolean {
         @navigate="navigateToItem(row.original)"
         @navigate-to-nested-container="navigateToNestedContainer(row.original)"
         @toggle-expand="toggleRowExpansion(row.original.id)"
+      />
+    </template>
+
+    <template #image="{ row }">
+      <ItemsTableImageCell
+        :item-id="row.original.id"
+        :container-id="containerId"
+        :public-mode="publicMode"
       />
     </template>
 

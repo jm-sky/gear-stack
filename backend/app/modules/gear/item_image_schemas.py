@@ -25,6 +25,15 @@ class ItemImageResponse(BaseModel):
     model_config = {"populate_by_name": True}
 
 
+class ItemImageFromUrlRequest(BaseModel):
+    """Request schema for creating image from external URL."""
+
+    url: str = Field(..., description="External image URL")
+    is_primary: bool = Field(False, alias="isPrimary")
+
+    model_config = {"populate_by_name": True}
+
+
 class ImageOrderUpdate(BaseModel):
     """Schema for updating image order."""
 

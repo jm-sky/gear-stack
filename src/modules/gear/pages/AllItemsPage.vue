@@ -11,6 +11,7 @@ import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { ALL_ITEMS_TABLE_COLUMN_VISIBILITY_KEY } from '@/shared/config/config'
 import type { IItemWithContainer } from '../utils/allItemsColumns'
 import CategoryIcon from '../components/CategoryIcon.vue'
+import ItemsTableImageCell from '../components/items-table/ItemsTableImageCell.vue'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
@@ -63,6 +64,7 @@ function loadColumnVisibility(): Record<string, boolean> {
     console.error('Error loading column visibility from storage:', error)
   }
   return {
+    image: false,
     brand: false,
     color: false,
     wearable: false,
@@ -147,6 +149,13 @@ function navigateToContainer(containerId: string) {
       >
         <template #toolbar-filters>
           <AllItemsFilters v-model:filter-type="filterType" />
+        </template>
+
+        <template #image="{ row }">
+          <ItemsTableImageCell
+            :item-id="row.original.id"
+            :container-id="row.original.containerId"
+          />
         </template>
 
         <template #category="{ row }">
