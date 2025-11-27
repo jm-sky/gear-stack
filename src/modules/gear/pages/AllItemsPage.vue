@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { Box, Package } from 'lucide-vue-next'
-import { computed, ref, watch } from 'vue'
+import { Box, Package, RefreshCcwIcon } from 'lucide-vue-next'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRouter } from 'vue-router'
 import DataTable from '@/components/data-table/DataTable.vue'
 import AllItemsFilters from '@/components/layout/AllItemsFilters.vue'
 import Badge from '@/components/ui/badge/Badge.vue'
+import Button from '@/components/ui/button/Button.vue'
 import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import { ALL_ITEMS_TABLE_COLUMN_VISIBILITY_KEY } from '@/shared/config/config'
+import { ALL_ITEMS_PAGE_FILTERS_KEY, ALL_ITEMS_TABLE_COLUMN_VISIBILITY_KEY } from '@/shared/config/config'
 import type { IItemWithContainer } from '../utils/allItemsColumns'
 import CategoryIcon from '../components/CategoryIcon.vue'
 import ItemsTableImageCell from '../components/items-table/ItemsTableImageCell.vue'
@@ -16,6 +17,7 @@ import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
 import { GearRoutePath } from '../routes'
+import { gearContainerService } from '../services/gearContainerService'
 import { createAllItemsColumns } from '../utils/allItemsColumns'
 import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 import { COLOR_DOT_CLASSES, COLOR_TEXT_CLASSES } from '../utils/containerColors'
@@ -31,13 +33,77 @@ const { settings: gearSettings } = useGearSettings()
 const { getContainerTypeLabel } = useContainerTypeLabel()
 const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
 
+// Loading state for refresh
+const loading = ref(false)
+
 // Filter type: 'all' | 'containers' | 'items'
 const filterType = ref<'all' | 'containers' | 'items'>('all')
+
+// Global filter (search) for DataTable
+const globalFilter = ref('')
+
+// Helper to load filters from localStorage
+interface FiltersState {
+  globalFilter: string
+  filterType: 'all' | 'containers' | 'items'
+}
+
+function loadFiltersFromStorage(): FiltersState | null {
+  const stored = localStorage.getItem(ALL_ITEMS_PAGE_FILTERS_KEY)
+  if (stored) {
+    try {
+      return JSON.parse(stored) as FiltersState
+    } catch (error) {
+      console.error('Error loading filters from storage:', error)
+    }
+  }
+  return null
+}
+
+// Helper to save filters to localStorage
+function saveFiltersToStorage(): void {
+  try {
+    const filters: FiltersState = {
+      globalFilter: globalFilter.value,
+      filterType: filterType.value,
+    }
+    localStorage.setItem(ALL_ITEMS_PAGE_FILTERS_KEY, JSON.stringify(filters))
+  } catch (error) {
+    console.error('Error saving filters to storage:', error)
+  }
+}
+
+// Load filters from storage on mount
+onMounted(() => {
+  const savedFilters = loadFiltersFromStorage()
+  if (savedFilters) {
+    globalFilter.value = savedFilters.globalFilter
+    filterType.value = savedFilters.filterType
+  }
+})
+
+// Watch filters and save to localStorage
+watch([globalFilter, filterType], () => {
+  saveFiltersToStorage()
+}, { deep: true })
 
 // Get all items from all containers (includes containers as items)
 const allItemsRaw = computed<IItemWithContainer[]>(() => {
   return getAllItems(containers.value)
 })
+
+// Refresh items from API/localStorage
+async function refreshItems() {
+  try {
+    loading.value = true
+    await gearContainerService().getContainers()
+    // Store will automatically update containers.value, which triggers allItemsRaw recomputation
+  } catch (error) {
+    console.error('Failed to refresh items:', error)
+  } finally {
+    loading.value = false
+  }
+}
 
 // Filter items based on filterType
 const allItems = computed<IItemWithContainer[]>(() => {
@@ -120,7 +186,7 @@ function navigateToContainer(containerId: string) {
 
 <template>
   <AuthenticatedLayout>
-    <div class="space-y-6 w-full max-w-full overflow-hidden">
+    <div class="space-y-6 w-full max-w-full">
       <!-- Header -->
       <div class="flex items-center justify-between">
         <div>
@@ -132,11 +198,21 @@ function navigateToContainer(containerId: string) {
             {{ t('gear.allItems.subtitle', 'View and manage all items from all containers') }}
           </p>
         </div>
+        <div class="flex flex-row items-center justify-end gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            @click="refreshItems"
+          >
+            <RefreshCcwIcon class="size-4" :class="{ 'animate-spin': loading }" />
+          </Button>
+        </div>
       </div>
 
       <!-- Table -->
       <DataTable
         v-model:column-visibility="columnVisibility"
+        v-model:global-filter="globalFilter"
         :columns="columns"
         :data="allItems"
         :search-placeholder="t('gear.filters.search')"
@@ -155,6 +231,7 @@ function navigateToContainer(containerId: string) {
           <ItemsTableImageCell
             :item-id="row.original.id"
             :container-id="row.original.containerId"
+            :primary-image-url="row.original.primaryImageUrl"
           />
         </template>
 

@@ -72,6 +72,7 @@ const page = defineModel<number>('page', { default: 1 })
 const pageSize = defineModel<number>('pageSize', { default: 10 })
 const rowSelection = defineModel<RowSelectionState>('rowSelection', { default: {} })
 const columnVisibilityModel = defineModel<VisibilityState>('columnVisibility', { default: () => ({}) })
+const globalFilterModel = defineModel<string>('globalFilter', { default: '' })
 
 // Emits for non-v-model events
 const emit = defineEmits<{
@@ -85,7 +86,7 @@ const emit = defineEmits<{
 
 // State
 const sorting = ref<SortingState>([])
-const globalFilter = ref('')
+const globalFilter = ref(globalFilterModel.value || '')
 // Use model value if provided, otherwise use internal ref
 const columnVisibility = ref<VisibilityState>({ ...(columnVisibilityModel.value || {}) })
 
@@ -158,6 +159,7 @@ const table = useVueTable({
   onGlobalFilterChange: props.enableFiltering
     ? (value) => {
         globalFilter.value = value
+        globalFilterModel.value = value
         emit('update:globalFilter', value)
       }
     : undefined,
@@ -207,7 +209,20 @@ const table = useVueTable({
     ...(props.enableColumnVisibility && Object.keys(columnVisibility.value).length > 0 ? {
       columnVisibility: columnVisibility.value,
     } : {}),
+    ...(props.enableFiltering && globalFilter.value ? {
+      globalFilter: globalFilter.value,
+    } : {}),
   },
+})
+
+// Sync globalFilterModel with internal ref (after table is created)
+watch(globalFilterModel, (newValue) => {
+  if (globalFilter.value !== newValue) {
+    globalFilter.value = newValue || ''
+    if (props.enableFiltering) {
+      table.setGlobalFilter(newValue || '')
+    }
+  }
 })
 
 // Computed values
@@ -234,7 +249,7 @@ const handlePageSizeChange = (newPageSize: number) => {
 </script>
 
 <template>
-  <div class="space-y-4 w-full max-w-full overflow-hidden">
+  <div class="space-y-4 w-full max-w-full">
     <!-- Toolbar Slot -->
     <slot
       name="toolbar"

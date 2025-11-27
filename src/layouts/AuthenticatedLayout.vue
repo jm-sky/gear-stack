@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BackpackIcon, Globe, Package, ShoppingCart } from 'lucide-vue-next'
+import { BackpackIcon, Globe, Package, SettingsIcon, ShieldIcon, ShoppingCart, UserIcon } from 'lucide-vue-next'
 import { type Component, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -8,26 +8,55 @@ import AppFooter from '@/components/layout/AppFooter.vue'
 import UserNav from '@/components/layout/UserNav.vue'
 import HoverLink from '@/components/ui/hover-link/HoverLink.vue'
 import LogoText from '@/components/ui/LogoText.vue'
+import { useAdmin } from '@/modules/admin/composables/useAdmin'
+import { AdminRoutePaths } from '@/modules/admin/routes'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { AuthRouteNames, AuthRoutePaths } from '@/modules/auth/config/routes'
 import { GearRoutePath } from '@/modules/gear/routes'
+import { SettingsRoutePaths } from '@/modules/settings/routes'
 import { useUser } from '@/modules/user/composables/useUser'
+import { UserRoutePaths } from '@/modules/user/routes'
 import DarkModeToggle from '@/shared/components/DarkModeToggle.vue'
 import LocaleToggle from '@/shared/i18n/components/LocaleToggle.vue'
 
 const { t } = useI18n()
 const router = useRouter()
 const { profile } = useUser()
+const { isAdmin } = useAdmin()
 const { logout, user: authUser } = useAuth()
 
 // Use auth user if backend is enabled, otherwise use profile from localStorage
-const user = computed(() => authUser.value || profile.value)
+const user = computed(() => authUser.value ?? profile.value)
 
 interface Link {
   to: string
   label: string
   icon?: Component
 }
+
+const coreLinks = computed<Link[]>(() => [
+{
+    to: UserRoutePaths.profile,
+    label: t('user.profile.title', 'Profile'),
+    icon: UserIcon,
+  },
+  {
+    to: SettingsRoutePaths.settings,
+    label: t('settings.page.title', 'Settings'),
+    icon: SettingsIcon,
+  },
+  {
+    to: GearRoutePath.Settings,
+    label: t('gear.settings.page.title', 'Gear settings'),
+    icon: BackpackIcon,
+  },
+  {
+    to: AdminRoutePaths.dashboard,
+    label: t('admin.dashboard.title', 'Admin Dashboard'),
+    icon: ShieldIcon,
+    hidden: !isAdmin,
+  }
+])
 
 // Navigation links - can be customized via props in the future
 const navLinks = computed<Link[]>(() => [
@@ -88,6 +117,7 @@ const handleLogout = async () => {
             <LocaleToggle />
             <DarkModeToggle />
             <UserNav
+              :core-links
               :user-name="user?.name ?? t('user.guest')"
               :user-email="user?.email"
               :user-avatar="user?.avatarUrl"

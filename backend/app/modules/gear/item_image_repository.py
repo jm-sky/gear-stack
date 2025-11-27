@@ -151,3 +151,20 @@ class ItemImageRepository:
         stmt = select(ItemImageDB).where(ItemImageDB.item_id == item_id, ItemImageDB.is_primary == True)  # noqa: E712
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
+
+    async def get_primary_images_by_items(self, item_ids: list[str]) -> dict[str, ItemImageDB]:
+        """
+        Get primary images for multiple items in a single query.
+
+        Args:
+            item_ids: List of item IDs
+
+        Returns:
+            Dictionary mapping item_id to primary image (only items with primary images are included)
+        """
+        if not item_ids:
+            return {}
+        stmt = select(ItemImageDB).where(ItemImageDB.item_id.in_(item_ids), ItemImageDB.is_primary == True)  # noqa: E712
+        result = await self.db.execute(stmt)
+        images = result.scalars().all()
+        return {img.item_id: img for img in images}

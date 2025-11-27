@@ -222,6 +222,10 @@ export const gearEn = {
         deleteSuccess: 'Image deleted successfully',
         confirmDelete: 'Are you sure you want to delete this image?',
         deleteImage: 'Delete image',
+        uploadFromFile: 'Upload from file',
+        uploadFromUrl: 'Upload from URL',
+        addImageFromUrl: 'Add image from URL',
+        addImageFromUrlDescription: 'Enter an image URL to download and add it to this item.',
       },
     },
     actions: {
@@ -244,6 +248,7 @@ export const gearEn = {
       exportToPromptSuccess: 'Markdown copied to clipboard',
       exportToPromptDescription: 'Copy the content below and paste it into ChatGPT or another AI',
       exportToCSV: 'Export to CSV',
+      aiAssistant: 'AI Assistant',
       moreActions: 'More actions',
       manageShareTokens: 'Manage Share Tokens',
     },
@@ -261,6 +266,9 @@ export const gearEn = {
         primary: 'Primary',
         addFromUrl: 'Add from URL',
         urlPlaceholder: 'Paste image URL (https://...)',
+        hostOption: 'Host',
+        hostLocally: 'Locally (download and store)',
+        hostExternally: 'Externally (save URL only)',
         confirmDelete: 'Are you sure you want to delete this image?',
         messages: {
           uploadSuccess: 'Image uploaded successfully',
@@ -623,6 +631,12 @@ export const gearEn = {
       errorRevoking: 'Failed to revoke share token',
       errorCopying: 'Failed to copy to clipboard',
     },
+    settings: {
+      page: {
+        title: 'Gear Settings',
+        subtitle: 'Manage your gear-specific preferences and settings',
+      },
+    },
   },
 }
 
@@ -852,6 +866,10 @@ export const gearPl = {
         deleteSuccess: 'Obrazek został usunięty',
         confirmDelete: 'Czy na pewno chcesz usunąć ten obrazek?',
         deleteImage: 'Usuń obrazek',
+        uploadFromFile: 'Prześlij z pliku',
+        uploadFromUrl: 'Prześlij z URL',
+        addImageFromUrl: 'Dodaj obrazek z URL',
+        addImageFromUrlDescription: 'Wprowadź adres URL obrazka, aby go pobrać i dodać do tego przedmiotu.',
       },
     },
     actions: {
@@ -874,6 +892,7 @@ export const gearPl = {
       exportToPromptSuccess: 'Markdown skopiowany do schowka',
       exportToPromptDescription: 'Skopiuj poniższą treść i wklej do ChatGPT lub innego AI',
       exportToCSV: 'Eksport do CSV',
+      aiAssistant: 'Asystent AI',
       moreActions: 'Więcej akcji',
       manageShareTokens: 'Zarządzaj Tokenami Udostępniania',
     },
@@ -891,6 +910,9 @@ export const gearPl = {
         primary: 'Główny',
         addFromUrl: 'Dodaj z URL',
         urlPlaceholder: 'Wklej adres URL obrazka (https://...)',
+        hostOption: 'Hostowanie',
+        hostLocally: 'Lokalnie (ściągnij i zapisz)',
+        hostExternally: 'Zewnętrznie (tylko zapisz URL)',
         confirmDelete: 'Czy na pewno chcesz usunąć ten obrazek?',
         messages: {
           uploadSuccess: 'Obrazek został dodany',
@@ -1252,6 +1274,12 @@ export const gearPl = {
       errorCreating: 'Nie udało się utworzyć tokenu udostępniania',
       errorRevoking: 'Nie udało się odwołać tokenu udostępniania',
       errorCopying: 'Nie udało się skopiować do schowka',
+    },
+    settings: {
+      page: {
+        title: 'Ustawienia sprzętu',
+        subtitle: 'Zarządzaj preferencjami i ustawieniami dotyczącymi sprzętu',
+      },
     },
   },
 }

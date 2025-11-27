@@ -90,6 +90,37 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 - ✅ Wyszukiwarka przedmiotów (globalne filtrowanie)
 - ✅ Zarządzanie widocznością kolumn z zapisem w localStorage
 
+### ✅ Zapisywanie wartości search/filtrów w localStorage
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Small
+
+**Koncepcja:**
+Na stronach z filtrami (np. AllItemsPage, ShoppingPlanningPage, ContainersListPage, PublicContainersBrowserPage), zapisywać wartości search i filtrów w localStorage, aby przy powrocie (przycisk "Wróć" lub nawigacja wstecz) użytkownik wracał dokładnie w to samo miejsce z zachowanymi filtrami.
+
+**Implementacja:**
+- Zapisywanie do localStorage:
+  - Wartość pola search/wyszukiwarki
+  - Wartości wszystkich aktywnych filtrów (kategorie, status, priorytet, typ kontenera, itp.)
+  - Opcjonalnie: sortowanie i widoczność kolumn (jeśli jeszcze nie są zapisywane)
+- Przywracanie stanu:
+  - Przy montowaniu komponentu (`onMounted`) sprawdzić localStorage
+  - Jeśli istnieją zapisane wartości → przywrócić je do stanu komponentu
+  - Opcjonalnie: wyczyścić localStorage po załadowaniu (jednorazowe przywrócenie) lub zachować dla następnej sesji
+- Klucze localStorage:
+  - Unikalne klucze per strona (np. `gear-stack:all-items:filters`, `gear-stack:shopping-planning:filters`)
+  - Struktura: obiekt z wartościami filtrów i search
+
+**Strony do zaktualizowania:**
+- `AllItemsPage.vue` - search, filterType, filtry kategorii/statusu/priorytetu
+- `ShoppingPlanningPage.vue` - search, filtry kategorii, budget, includeExpiringSoon
+- `ContainersListPage.vue` - search, filtry typu kontenera, showOnlyRootContainers
+- `PublicContainersBrowserPage.vue` - search, filtry
+- Inne strony z filtrami (jeśli istnieją)
+
+**Zalety:**
+- Lepsze UX - użytkownik nie traci ustawionych filtrów przy nawigacji
+- Szybsze wracanie do wcześniejszego stanu wyszukiwania
+- Spójność z innymi funkcjami zapisującymi stan w localStorage (np. column visibility)
+
 ### ✅ Strona planowania zakupów
 **Status:** ✅ Completed | **Priority:** High | **Complexity:** Medium
 
@@ -120,6 +151,28 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 - ✅ 10 dostępnych kolorów do wyboru (default, blue, green, red, yellow, purple, orange, pink, teal, indigo)
 - ✅ Wizualne rozróżnienie kontenerów na liście (kolorowa kropka i ramka)
 - ✅ Kolor wyświetlany w kartach kontenerów i rozwiniętych wierszach zagnieżdżonych kontenerów
+
+### 🔄 Obrazek kontenera jako okrągły avatar w liście kontenerów
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+
+**Koncepcja:**
+Jeżeli kontener będzie miał obrazek (primary image), wyświetlać go w nagłówku karty kontenera jako okrągły avatar zamiast ikonki `Package` i kropki koloru. Kolor kontenera powinien być wyświetlany jako border tego avatara.
+
+**Implementacja:**
+- W `ContainerCard.vue` (i `PublicContainerCard.vue`):
+  - Jeśli kontener ma `primaryImageUrl` → wyświetl okrągły avatar z obrazkiem
+  - Jeśli kontener nie ma obrazka → wyświetl obecną ikonkę `Package` i kropkę koloru
+  - Avatar powinien mieć border w kolorze kontenera (jeśli kolor jest ustawiony)
+  - Avatar powinien być okrągły (rounded-full)
+  - Rozmiar avatara: podobny do obecnej ikonki (np. size-8 lub size-10)
+- Fallback: Jeśli obrazek nie załaduje się, pokaż ikonkę `Package` z kropką koloru
+- Wsparcie dla kontenerów bez obrazka: zachować obecne zachowanie (ikona + kropka)
+
+**Zalety:**
+- Lepsza wizualna identyfikacja kontenerów
+- Wykorzystanie obrazków kontenerów (gdy będą zaimplementowane)
+- Zachowanie informacji o kolorze (jako border avatara)
+- Spójność z innymi miejscami, gdzie mogą być wyświetlane avatary
 
 ### Wybór primary color (brand color)
 **Status:** ⏸️ On Hold | **Priority:** Low | **Complexity:** Small
@@ -187,6 +240,52 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
   - Lista przedmiotów
   - Opis kontenera
 - Możliwość resetowania do domyślnej kolejności
+
+### ✅ Obsługa usuwania i gwiazdkowania obrazków przedmiotu na urządzeniach mobilnych
+**Status:** ✅ Completed | **Priority:** High | **Complexity:** Small
+
+**Problem:**
+Kontrolki obrazków (gwiazdkowanie, usuwanie) w `ItemImageCardControls.vue` są widoczne tylko przy hover (`group-hover:opacity-100`). Na urządzeniach mobilnych (telefony, tablety) nie ma hover, więc kontrolki są zawsze niewidoczne (`opacity-0`) i użytkownik nie może:
+- Ustawić obrazka jako primary (gwiazdkowanie)
+- Usunąć obrazka
+
+**Rozwiązania do rozważenia:**
+1. **Zawsze widoczne na mobile** (najprostsze)
+   - Użyć media query: `md:opacity-0 md:group-hover:opacity-100`
+   - Na mobile (`< md`) kontrolki zawsze widoczne
+   - Na desktop zachować obecne zachowanie (hover)
+
+2. **Long press / context menu**
+   - Long press na obrazku → pokaż menu z opcjami (Set Primary, Delete)
+   - Podobnie jak context menu na desktop
+
+3. **Osobny przycisk "More" na mobile**
+   - Mały przycisk w rogu obrazka (np. trzy kropki)
+   - Kliknięcie → pokaż menu z opcjami
+   - Widoczny tylko na mobile
+
+4. **Touch event zamiast hover**
+   - Wykrywanie touch device (`@touchstart`)
+   - Po dotknięciu obrazka → pokaż kontrolki na kilka sekund
+   - Automatyczne ukrycie po czasie
+
+**Rekomendacja:**
+Kombinacja opcji 1 i 2:
+- Na mobile kontrolki zawsze widoczne (opcja 1)
+- Dodatkowo long press → context menu z opcjami (opcja 2)
+- Na desktop zachować obecne zachowanie (hover)
+
+**Implementacja:**
+- `ItemImageCardControls.vue`: Zmienić klasy CSS na responsive
+  - `opacity-0 md:opacity-0 md:group-hover:opacity-100` (zawsze widoczne na mobile)
+- `ItemImageCard.vue`: Dodać obsługę long press na mobile
+  - `@touchstart` / `@touchend` → pokaż menu
+- Opcjonalnie: Dodać wizualny wskaźnik, że obrazek ma kontrolki (np. mała ikona w rogu)
+
+**Zalety:**
+- Pełna funkcjonalność na urządzeniach mobilnych
+- Zachowanie obecnego UX na desktop
+- Lepsza dostępność (touch-friendly)
 
 ---
 

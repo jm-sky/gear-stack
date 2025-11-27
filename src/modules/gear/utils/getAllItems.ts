@@ -18,6 +18,9 @@ export function getAllItems(containers: IGearContainer[], excludeContainerId?: T
       return
     }
 
+   // TODO: Move calculations to separate helper function or composable
+   // TODO: 'g' should come from defaults in config.ts
+
     // Add container itself as an item (containers are items too)
     // Calculate total weight (container weight + all items weight) in grams
     const containerTotalWeightGrams = calculateTotalWeightSync(container, containers)
@@ -74,6 +77,7 @@ export function getAllItems(containers: IGearContainer[], excludeContainerId?: T
         wearable: item.wearable ?? undefined,
         consumable: item.consumable ?? undefined,
         isContainer: false,
+        primaryImageUrl: item.primaryImageUrl ?? undefined,
       })
     })
   })

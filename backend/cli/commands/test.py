@@ -297,3 +297,128 @@ async def _test_email_async(to: str, template: str) -> None:
 
         console.print()
         raise typer.Exit(1)
+
+
+@test_app.command("ai")
+def test_ai(
+    prompt: str = typer.Option("Hello, can you help me?", "--prompt", "-p", help="Test prompt to send to AI"),
+    model: str = typer.Option("openai/gpt-4o-mini", "--model", "-m", help="AI model to test"),
+) -> None:
+    """Test AI module with OpenRouter integration.
+
+    Tests the OpenRouter API connection, model availability, and response generation.
+    Requires OPENROUTER_API_KEY and AI_TOKEN_ENCRYPTION_KEY to be configured.
+
+    Examples:
+        python -m cli test ai
+        python -m cli test ai --prompt "What is 2+2?"
+        python -m cli test ai --model "anthropic/claude-3.5-sonnet"
+    """
+    asyncio.run(_test_ai_async(prompt, model))
+
+
+async def _test_ai_async(prompt: str, model: str) -> None:
+    """Async implementation of AI test."""
+    console.print("\n[bold cyan]Testing AI Module (OpenRouter)[/bold cyan]")
+    console.print("=" * 50)
+
+    # Show config
+    console.print(f"[dim]AI Enabled:[/dim] {settings.ai.enabled}")
+    console.print(f"[dim]OpenRouter Base URL:[/dim] {settings.ai.openrouter_base_url}")
+    console.print(f"[dim]API Key:[/dim] {'✓ Configured' if settings.ai.openrouter_api_key else '✗ Missing'}")
+    console.print(f"[dim]Cache Enabled:[/dim] {settings.ai.cache_enabled}")
+    console.print(f"[dim]Model:[/dim] {model}")
+    console.print(f"[dim]Prompt:[/dim] {prompt[:80]}{'...' if len(prompt) > 80 else ''}")
+    console.print()
+
+    try:
+        # Check if AI is enabled
+        if not settings.ai.enabled:
+            console.print("[red]✗ AI module is disabled in configuration![/red]")
+            console.print("[dim]Set AI_ENABLED=true in .env[/dim]")
+            raise typer.Exit(1)
+
+        # Check API key
+        if not settings.ai.openrouter_api_key:
+            console.print("[red]✗ OpenRouter API key not configured![/red]")
+            console.print("[dim]Set OPENROUTER_API_KEY in .env[/dim]")
+            console.print("[dim]Get your key at: https://openrouter.ai/keys[/dim]")
+            raise typer.Exit(1)
+
+        # Import AI provider
+        console.print("[1/4] [cyan]Initializing OpenRouter provider...[/cyan]")
+        from app.modules.ai.providers.openrouter import OpenRouterProvider
+
+        provider = OpenRouterProvider()
+        console.print("    [green]✓ OpenRouter provider initialized[/green]")
+
+        # Check model availability
+        console.print("[2/4] [cyan]Checking model availability...[/cyan]")
+        from app.modules.ai.utils.models_config import get_model_by_id
+
+        model_config = get_model_by_id(model)
+        if model_config:
+            console.print(f"    [green]✓ Model found: {model_config['name']} ({model_config['provider']})[/green]")
+            console.print(f"    [dim]Context: {model_config['context_length']:,} tokens[/dim]")
+            console.print(f"    [dim]Cost: ${model_config['cost_per_1m_input']}/{model_config['cost_per_1m_output']} per 1M tokens (in/out)[/dim]")
+        else:
+            console.print(f"    [yellow]⚠ Model not in predefined list (will still try to use it)[/yellow]")
+
+        # Send test request
+        console.print("[3/4] [cyan]Sending test request to AI...[/cyan]")
+        messages = [{"role": "system", "content": "You are a helpful assistant. Keep responses concise."}, {"role": "user", "content": prompt}]
+
+        response = await provider.chat(messages=messages, model=model, max_tokens=100, temperature=0.7)
+
+        console.print("    [green]✓ Received response from AI[/green]")
+
+        # Display results
+        console.print("[4/4] [cyan]Response details...[/cyan]")
+        console.print()
+        console.print("[bold]AI Response:[/bold]")
+        console.print(f"[white]{response.message}[/white]")
+        console.print()
+        console.print("[dim]Token Usage:[/dim]")
+        console.print(f"  • Prompt tokens: {response.prompt_tokens}")
+        console.print(f"  • Completion tokens: {response.completion_tokens}")
+        console.print(f"  • Total tokens: {response.total_tokens}")
+
+        # Calculate cost if model config available
+        if model_config:
+            from app.modules.ai.utils.models_config import calculate_cost
+
+            cost = calculate_cost(model, response.prompt_tokens, response.completion_tokens)
+            console.print(f"  • Estimated cost: ${cost:.6f} USD")
+
+        console.print()
+
+        # Success summary
+        console.print("[bold green]✓ All AI tests passed successfully![/bold green]")
+        console.print()
+
+    except ImportError as e:
+        console.print()
+        console.print(f"[bold red]✗ AI module dependencies missing![/bold red]")
+        console.print(f"[dim]Error: {e}[/dim]")
+        console.print()
+        console.print("[yellow]Install AI dependencies:[/yellow]")
+        console.print("[cyan]  pip install openai aiocache[/cyan]")
+        console.print()
+        raise typer.Exit(1)
+
+    except Exception as e:
+        console.print()
+        console.print(f"[bold red]✗ AI test failed![/bold red]")
+        console.print(f"[dim]Error: {e}[/dim]")
+        console.print()
+
+        # Provide helpful troubleshooting tips
+        console.print("[yellow]Troubleshooting tips:[/yellow]")
+        console.print("  • Verify OPENROUTER_API_KEY is correct")
+        console.print("  • Check API key has sufficient credits")
+        console.print("  • Verify model ID is correct (e.g., 'openai/gpt-4o-mini')")
+        console.print("  • Check network connectivity to api.openrouter.ai")
+        console.print("  • View available models at: https://openrouter.ai/models")
+
+        console.print()
+        raise typer.Exit(1)

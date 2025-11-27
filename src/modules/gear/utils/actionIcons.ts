@@ -9,6 +9,7 @@ import {
   Image,
   MoreVertical,
   Plus,
+  Sparkles,
   SparklesIcon,
   Trash2,
   Upload,
@@ -52,6 +53,7 @@ export const ACTION_ICONS: Record<string, Component> = {
   exportToCSV: FileSpreadsheet, // CSV export action
 
   // AI/Automation
+  ai: Sparkles, // Main AI assistant button
   recognizeParameters: SparklesIcon,
   recognizeParametersAll: SparklesIcon,
 

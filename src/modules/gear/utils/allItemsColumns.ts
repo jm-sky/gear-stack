@@ -20,6 +20,7 @@ export interface IItemWithContainer {
   consumable?: boolean
   isContainer?: boolean // True if this is a container (not a regular item)
   containerType?: string // Container type (if isContainer is true)
+  primaryImageUrl?: string | null // URL of the primary image for the item
 }
 
 export function createAllItemsColumns(

@@ -8,7 +8,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import { config } from '@/shared/config/config'
+import { config, SHOPPING_PLANNING_PAGE_FILTERS_KEY } from '@/shared/config/config'
 import type { ICreateItemDto, IGearItem, TGearItemCategory, TGearItemPriority } from '../types/gear.types'
 import type { IItemWithContainerId } from '../types/shopping.types'
 import AddItemToShoppingDialog from '../components/shopping/AddItemToShoppingDialog.vue'
@@ -40,6 +40,52 @@ const itemsBeingPurchased = ref<Set<TUUID>>(new Set<TUUID>())
 // Storage keys
 const SHOPPING_LIST_STORAGE_KEY = `${config.app.id}:shopping-list`
 const DELETED_ITEMS_STORAGE_KEY = `${config.app.id}:shopping-deleted-items`
+
+// Helper to load filters from localStorage
+interface FiltersState {
+  selectedCategories: TGearItemCategory[]
+  budget: number | null
+  includeExpiringSoon: boolean
+}
+
+function loadFiltersFromStorage(): FiltersState | null {
+  const stored = localStorage.getItem(SHOPPING_PLANNING_PAGE_FILTERS_KEY)
+  if (stored) {
+    try {
+      return JSON.parse(stored) as FiltersState
+    } catch (error) {
+      console.error('Error loading filters from storage:', error)
+    }
+  }
+  return null
+}
+
+// Helper to save filters to localStorage
+function saveFiltersToStorage(): void {
+  try {
+    const filters: FiltersState = {
+      selectedCategories: selectedCategories.value,
+      budget: budget.value,
+      includeExpiringSoon: includeExpiringSoon.value,
+    }
+    localStorage.setItem(SHOPPING_PLANNING_PAGE_FILTERS_KEY, JSON.stringify(filters))
+  } catch (error) {
+    console.error('Error saving filters to storage:', error)
+  }
+}
+
+// Load filters from storage on mount
+const savedFilters = loadFiltersFromStorage()
+if (savedFilters) {
+  selectedCategories.value = savedFilters.selectedCategories
+  budget.value = savedFilters.budget
+  includeExpiringSoon.value = savedFilters.includeExpiringSoon
+}
+
+// Watch filters and save to localStorage
+watch([selectedCategories, budget, includeExpiringSoon], () => {
+  saveFiltersToStorage()
+}, { deep: true })
 
 // Helper to load shopping list from localStorage
 function loadShoppingListFromStorage(): IItemWithContainerId[] {
@@ -521,7 +567,7 @@ onMounted(() => {
 
 <template>
   <AuthenticatedLayout>
-    <div class="space-y-6 w-full max-w-full overflow-hidden">
+    <div class="space-y-6 w-full max-w-full">
       <!-- Header -->
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>

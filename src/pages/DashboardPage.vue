@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { BackpackIcon, FileInput, Globe, LogIn, Plus, UserPlus } from 'lucide-vue-next'
+import { BackpackIcon, Globe, LogIn, Plus, UserPlus } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import WelcomeQuickActions from '@/components/layout/WelcomeQuickActions.vue'
 import ButtonLink from '@/components/ui/button-link/ButtonLink.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
@@ -149,53 +150,9 @@ const readyContainersCount = computed(() => {
           <p class="text-muted-foreground mb-6">
             {{ t('gear.page.emptyDescription', 'Get started by creating your first gear container.') }}
           </p>
-          <div class="flex flex-col gap-4 items-center justify-center w-full">
-            <!-- Row 1: Create Container, Generate Sample Set -->
-            <div class="flex flex-col sm:flex-row gap-4 w-full">
-              <ButtonLink
-                size="lg"
-                class="flex-1"
-                :to="GearRoutePath.ContainerNew"
-              >
-                <Plus class="size-5" />
-                {{ t('gear.container.create.title', 'Create Container') }}
-              </ButtonLink>
-              <GenerateExampleGearButton class="flex-1" />
-            </div>
-            <div class="flex items-center gap-2 text-muted-foreground">
-              <span>{{ t('common.or', 'or') }}</span>
-            </div>
-            <ButtonLink
-              size="lg"
-              variant="outline"
-              class="w-full"
-              :to="GearRoutePath.Import"
-            >
-              <FileInput class="size-5" />
-              {{ t('gear.import.fromMarkdown', 'Import from Markdown') }}
-            </ButtonLink>
-            <!-- Row 2: Login, Register (only if not authenticated) -->
-            <div v-if="!isAuthenticated && config.backend.enabled" class="flex flex-col sm:flex-row gap-4 w-full mt-2">
-              <ButtonLink
-                size="lg"
-                variant="outline"
-                class="flex-1"
-                :to="AuthRoutePaths.login"
-              >
-                <LogIn class="size-5" />
-                {{ t('auth.login', 'Log In') }}
-              </ButtonLink>
-              <ButtonLink
-                size="lg"
-                variant="outline"
-                class="flex-1"
-                :to="AuthRoutePaths.register"
-              >
-                <UserPlus class="size-5" />
-                {{ t('auth.register', 'Sign Up') }}
-              </ButtonLink>
-            </div>
-          </div>
+
+          <!-- Create, Generate Sample Set, Import from Markdown, Login, Register -->
+          <WelcomeQuickActions />
         </div>
       </div>
     </div>

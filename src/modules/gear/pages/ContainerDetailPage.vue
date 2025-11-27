@@ -5,6 +5,8 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import AiChatDialog from '@/modules/ai/components/AiChatDialog.vue'
+import { useAi } from '@/modules/ai/composables/useAi'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { useBackend } from '@/shared/composables/useBackend'
 import type { IGearItem } from '../types/gear.types'
@@ -31,6 +33,7 @@ const { shouldUseAPI } = useBackend()
 const { container } = useContainer()
 const { deleteItem, updateItem, updateContainer, exportData, importData, createItem, getContainerById } = useGear()
 const { user, isAuthenticated } = useAuth()
+const { canUseAi } = useAi()
 
 const containerId = route.params.id as string
 
@@ -57,6 +60,7 @@ const canEditContainer = computed(() => {
 const isAddContainerDialogOpen = ref(false)
 const isExportToPromptDialogOpen = ref(false)
 const isExportToCSVDialogOpen = ref(false)
+const isAiDialogOpen = ref(false)
 
 // File operations handled in handleImport
 
@@ -381,6 +385,7 @@ if (!container.value) {
         @export-to-prompt="handleExportToPrompt"
         @export-to-csv="handleExportToCSV"
         @recognize-parameters-all="handleRecognizeParametersAll"
+        @ai-chat="isAiDialogOpen = true"
         @manage-share-tokens="handleManageShareTokens"
       />
 
@@ -434,6 +439,13 @@ if (!container.value) {
       <ExportToCSVDialog
         v-model:open="isExportToCSVDialogOpen"
         :container="container"
+      />
+
+      <!-- AI Chat Dialog -->
+      <AiChatDialog
+        v-if="canUseAi"
+        v-model:open="isAiDialogOpen"
+        :context="{ container_ids: [containerId] }"
       />
     </div>
   </AuthenticatedLayout>

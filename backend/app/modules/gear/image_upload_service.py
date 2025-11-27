@@ -23,7 +23,10 @@ from app.common.id_utils import generate_id
 from app.core.config import settings
 from app.core.storage.factory import get_storage_adapter
 from app.core.storage.image_processor import ImageProcessor
+from app.modules.auth.db_models import UserDB
 from app.modules.gear.item_image_repository import ItemImageRepository
+from app.modules.settings.db_models import UserSettingsDB
+from sqlalchemy import select
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +36,25 @@ MIME_TO_EXTENSION = {
     "image/png": ".png",
     "image/webp": ".webp",
     "image/gif": ".gif",
+}
+
+# Image processing mode configurations
+IMAGE_PROCESSING_MODES = {
+    "high_quality": {
+        "max_width": 2560,
+        "max_height": 2560,
+        "jpeg_quality": 95,
+    },
+    "balanced": {
+        "max_width": 1200,
+        "max_height": 1200,
+        "jpeg_quality": 90,
+    },
+    "storage_saver": {
+        "max_width": 800,
+        "max_height": 800,
+        "jpeg_quality": 80,
+    },
 }
 
 
@@ -48,36 +70,78 @@ class ImageUploadService:
         """
         self.db = db
         self.storage = get_storage_adapter()
-        self.processor = ImageProcessor(
-            max_width=settings.storage.max_width,
-            max_height=settings.storage.max_height,
-            jpeg_quality=settings.storage.jpeg_quality,
-            convert_to_webp=settings.storage.convert_to_webp,
-        )
+        # Processor will be created dynamically based on user settings
         self.max_file_size = settings.storage.max_file_size
+        self.max_file_size_admin = settings.storage.max_file_size_admin
         self.allowed_mime_types = settings.storage.allowed_mime_types
         self.repository = ItemImageRepository(db)
 
-    async def validate_upload(self, file: UploadFile, item_id: str) -> None:
+    async def _get_max_file_size_for_user(self, user_id: str) -> int:
+        """
+        Get maximum file size for user based on admin status.
+
+        Args:
+            user_id: User ID
+
+        Returns:
+            Maximum file size in bytes (admin limit if user is admin, regular limit otherwise)
+        """
+        result = await self.db.execute(select(UserDB).where(UserDB.id == user_id))
+        user = result.scalars().first()
+        if user and user.is_admin:
+            return self.max_file_size_admin
+        return self.max_file_size
+
+    async def _get_user_image_processor(self, user_id: str) -> ImageProcessor:
+        """
+        Get image processor configured for user's processing mode.
+
+        Args:
+            user_id: User ID
+
+        Returns:
+            ImageProcessor instance configured for user's mode
+        """
+        # Get user settings
+        result = await self.db.execute(select(UserSettingsDB).where(UserSettingsDB.user_id == user_id))
+        user_settings = result.scalars().first()
+
+        # Get processing mode (default to 'balanced' if not set)
+        processing_mode = (user_settings.image_processing_mode if user_settings else None) or "balanced"
+
+        # Get configuration for mode
+        mode_config = IMAGE_PROCESSING_MODES.get(processing_mode, IMAGE_PROCESSING_MODES["balanced"])
+
+        # Create processor with user's settings
+        return ImageProcessor(
+            max_width=mode_config["max_width"],
+            max_height=mode_config["max_height"],
+            jpeg_quality=mode_config["jpeg_quality"],
+            convert_to_webp=settings.storage.convert_to_webp,
+        )
+
+    async def validate_upload(self, file: UploadFile, item_id: str, user_id: str) -> None:
         """
         Validate file upload constraints.
 
         Args:
             file: Uploaded file
             item_id: Item ID to upload image for
+            user_id: User ID (to check admin status for file size limit)
 
         Raises:
             HTTPException: If validation fails
         """
-        # Check file size
+        # Check file size (use user-specific limit)
         file.file.seek(0, 2)  # Seek to end
         file_size = file.file.tell()
         file.file.seek(0)  # Reset
 
-        if file_size > self.max_file_size:
+        max_file_size = await self._get_max_file_size_for_user(user_id)
+        if file_size > max_file_size:
             raise HTTPException(
                 status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                detail=f"File size exceeds maximum allowed size of {self.max_file_size / 1024 / 1024:.1f} MB",
+                detail=f"File size exceeds maximum allowed size of {max_file_size / 1024 / 1024:.1f} MB",
             )
 
         # Check MIME type (preliminary check based on content-type header)
@@ -148,11 +212,12 @@ class ImageUploadService:
         if not image:
             return False
 
-        # Delete from storage (continue even if this fails)
-        try:
-            await self.storage.delete(image.file_path)
-        except Exception as e:
-            logger.error(f"Failed to delete file from storage: {e}")
+        # Delete from storage only if not external URL (continue even if this fails)
+        if image.storage_type != "external" and image.file_path:
+            try:
+                await self.storage.delete(image.file_path)
+            except Exception as e:
+                logger.error(f"Failed to delete file from storage: {e}")
 
         # Delete from database
         await self.repository.delete(image_id)
@@ -207,7 +272,11 @@ class ImageUploadService:
 
         result = []
         for img in images:
-            url = await self.storage.get_url(img.file_path)
+            # If external_url exists, use it. Otherwise, get URL from storage.
+            if img.external_url:
+                url = img.external_url
+            else:
+                url = await self.storage.get_url(img.file_path)
             result.append(
                 {
                     "id": img.id,
@@ -228,15 +297,16 @@ class ImageUploadService:
 
         return result
 
-    async def upload_image_from_url(self, image_url: str, item_id: str, user_id: str, is_primary: bool = False) -> dict:
+    async def upload_image_from_url(self, image_url: str, item_id: str, user_id: str, is_primary: bool = False, host_locally: bool = True) -> dict:
         """
-        Download image from external URL and create item image.
+        Create item image from external URL.
 
         Args:
             image_url: External image URL
             item_id: Item ID
             user_id: User ID (uploader)
             is_primary: Whether this should be the primary image
+            host_locally: If True, download and store image. If False, only save external URL.
 
         Returns:
             Image metadata dictionary
@@ -252,46 +322,111 @@ class ImageUploadService:
                 detail=f"Maximum {settings.storage.max_files_per_item} images per item",
             )
 
-        try:
-            async with httpx.AsyncClient(timeout=15.0) as client:
-                response = await client.get(image_url)
-                response.raise_for_status()
+        if host_locally:
+            # Download and store image (existing behavior)
+            try:
+                async with httpx.AsyncClient(timeout=15.0) as client:
+                    response = await client.get(image_url)
+                    response.raise_for_status()
 
-                content = response.content
-        except httpx.HTTPError as exc:
-            logger.error("Failed to download image from URL %s: %s", image_url, exc)
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Failed to download image from URL",
-            ) from exc
-
-        # Enforce max file size
-        file_size = len(content)
-        if file_size > self.max_file_size:
-            raise HTTPException(
-                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                detail=f"File size exceeds maximum allowed size of {self.max_file_size / 1024 / 1024:.1f} MB",
-            )
-
-        # Check available storage for local adapter
-        if settings.storage.type == "local":
-            available_space = await self.storage.get_available_space()
-            if available_space and available_space < file_size:
+                    content = response.content
+            except httpx.HTTPError as exc:
+                logger.error("Failed to download image from URL %s: %s", image_url, exc)
                 raise HTTPException(
-                    status_code=status.HTTP_507_INSUFFICIENT_STORAGE,
-                    detail="Insufficient storage space",
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Failed to download image from URL",
+                ) from exc
+
+            # Enforce max file size (use user-specific limit)
+            file_size = len(content)
+            max_file_size = await self._get_max_file_size_for_user(user_id)
+            if file_size > max_file_size:
+                raise HTTPException(
+                    status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                    detail=f"File size exceeds maximum allowed size of {max_file_size / 1024 / 1024:.1f} MB",
                 )
 
-        # Use last part of URL as original filename, if possible
-        original_filename = image_url.rsplit("/", 1)[-1] or "remote-image"
+            # Check available storage for local adapter
+            if settings.storage.type == "local":
+                available_space = await self.storage.get_available_space()
+                if available_space and available_space < file_size:
+                    raise HTTPException(
+                        status_code=status.HTTP_507_INSUFFICIENT_STORAGE,
+                        detail="Insufficient storage space",
+                    )
 
-        return await self._process_and_store_image(
-            content=content,
-            item_id=item_id,
-            user_id=user_id,
-            original_filename=original_filename,
-            is_primary=is_primary,
-        )
+            # Use last part of URL as original filename, if possible
+            original_filename = image_url.rsplit("/", 1)[-1] or "remote-image"
+
+            return await self._process_and_store_image(
+                content=content,
+                item_id=item_id,
+                user_id=user_id,
+                original_filename=original_filename,
+                is_primary=is_primary,
+            )
+        else:
+            # Only save external URL (new behavior)
+            # Validate URL format
+            try:
+                from urllib.parse import urlparse
+
+                parsed = urlparse(image_url)
+                if not parsed.scheme or not parsed.netloc:
+                    raise ValueError("Invalid URL format")
+            except Exception as exc:
+                logger.error("Invalid URL format: %s", image_url)
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid URL format",
+                ) from exc
+
+            # Use last part of URL as original filename, if possible
+            original_filename = image_url.rsplit("/", 1)[-1] or "remote-image"
+
+            # If this is primary or no primary exists, unset other primaries
+            if is_primary:
+                await self.repository.unset_primary_for_item(item_id)
+            else:
+                # Check if any primary exists
+                existing_primary = await self.repository.get_primary_image(item_id)
+                if not existing_primary:
+                    # First image should be primary
+                    is_primary = True
+
+            # Create database record with external URL
+            image_record = await self.repository.create(
+                {
+                    "item_id": item_id,
+                    "user_id": user_id,
+                    "storage_type": "external",  # Special storage type for external URLs
+                    "file_path": "",  # Empty for external URLs
+                    "file_name": original_filename,
+                    "file_size": 0,  # Unknown size for external URLs
+                    "mime_type": "image/*",  # Unknown MIME type for external URLs
+                    "width": None,
+                    "height": None,
+                    "is_primary": is_primary,
+                    "order": await self.repository.get_next_order(item_id),
+                    "is_processed": False,
+                    "original_file_size": None,
+                    "external_url": image_url,
+                }
+            )
+
+            return {
+                "id": image_record.id,
+                "url": image_url,  # Return external URL directly
+                "file_name": original_filename,
+                "file_size": 0,
+                "mime_type": "image/*",
+                "width": None,
+                "height": None,
+                "is_primary": is_primary,
+                "order": image_record.order,
+                "created_at": image_record.created_at.isoformat(),
+                "updated_at": image_record.updated_at.isoformat(),
+            }
 
     async def _process_and_store_image(
         self,
@@ -346,8 +481,11 @@ class ImageUploadService:
                 detail=f"Invalid file type. Detected: {detected_mime}",
             )
 
+        # Get user's image processor
+        processor = await self._get_user_image_processor(user_id)
+
         # Validate image integrity
-        if not await self.processor.validate_image(content):
+        if not await processor.validate_image(content):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid or corrupted image file",
@@ -357,7 +495,7 @@ class ImageUploadService:
 
         # Process image if enabled
         if settings.storage.enable_processing:
-            content, detected_mime, width, height = await self.processor.process_image(content, detected_mime)
+            content, detected_mime, width, height = await processor.process_image(content, detected_mime)
             processed_size = len(content)
         else:
             # Get dimensions without processing (run in thread pool)

@@ -76,6 +76,37 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 
 ---
 
+## 🔒 Bezpieczeństwo i walidacja treści
+
+### Zabezpieczenie przed obraźliwymi słowami i niebezpiecznymi URL
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+
+**Zakres implementacji:**
+- Walidacja i filtrowanie treści użytkownika w backendzie przed zapisaniem do bazy danych
+- Sprawdzanie nazw kontenerów i przedmiotów pod kątem wulgaryzmów i obraźliwych treści
+- Sprawdzanie opisów przedmiotów i kontenerów pod kątem nieodpowiednich treści
+- Walidacja URL-ów dodawanych do przedmiotów/kontenerów:
+  - Blokowanie linków do stron pornograficznych (XXX)
+  - Blokowanie linków do innych nieodpowiednich treści
+  - Sprawdzanie domen na czarnej liście
+- Komunikaty błędów informujące użytkownika o odrzuceniu treści (bez ujawniania szczegółów filtrowania)
+- Konfiguracja list słów zabronionych i domen na czarnej liście (możliwość aktualizacji przez admina)
+- Opcjonalnie: automatyczna moderacja treści publicznych kontenerów
+
+**Implementacja:**
+- Backend middleware/service do walidacji treści
+- Integracja z zewnętrznymi API/lista słów zabronionych (opcjonalnie)
+- Walidacja na poziomie endpointów API (przed zapisaniem do DB)
+- Frontend może opcjonalnie walidować po stronie klienta dla lepszego UX, ale główna walidacja w backendzie
+
+**Zalety:**
+- Ochrona przed nieodpowiednimi treściami w aplikacji
+- Zgodność z regulaminem i standardami społeczności
+- Lepsze doświadczenie użytkowników (brak obraźliwych treści)
+- Bezpieczeństwo (ochrona przed spamem i złośliwymi linkami)
+
+---
+
 ## 💾 Synchronizacja i przechowywanie danych
 
 ### Synchronizacja między urządzeniami (cloud storage)
@@ -402,6 +433,15 @@ Kontenery i przedmioty już mają UUID - to ich pole `id` (typu `TUUID`). UUID s
   - ✅ Walidacja URL i formatu obrazka
   - ✅ Pobieranie i przetwarzanie obrazka z URL
   - ✅ Alternatywa dla uploadu (szczególnie przydatne dla adminów)
+  - 🔄 **Do rozważenia:** Sprawdzić obecne zachowanie - czy dodawanie obrazka przez URL ściąga obrazek do storage, czy tylko zapisuje zewnętrzny URL
+    - **Obecne zachowanie:** Obrazek jest ściągany z URL i zapisywany w storage (podobnie jak upload pliku)
+    - **Cel pierwotny:** Zapis zewnętrznego URL (bez ściągania do storage)
+    - **Do rozważenia:** Które podejście jest lepsze?
+      - **Zapis URL (pros):** Oszczędność miejsca w storage, brak duplikacji danych
+      - **Zapis URL (cons):** Zależność od zewnętrznego serwera, możliwość utraty obrazka gdy URL przestanie działać
+      - **Ściąganie do storage (pros):** Niezależność od zewnętrznych serwerów, kontrola nad obrazkami
+      - **Ściąganie do storage (cons):** Zajmuje miejsce w storage, duplikacja danych
+    - **Opcja:** Możliwość wyboru przez użytkownika (ściągnij do storage vs zapisz tylko URL)
 - ✅ **Primary image w wierszu tabeli** - opcjonalne wyświetlanie miniaturki primary image w tabeli przedmiotów (v2.15.0)
   - ✅ Miniaturka primary image w tabeli (`ItemsTableImageCell`)
   - ✅ Lazy loading dla wydajności
@@ -409,6 +449,69 @@ Kontenery i przedmioty już mają UUID - to ich pole `id` (typu `TUUID`). UUID s
   - ✅ Dostępne w `ItemsTable` i `AllItemsPage`
 - 🔄 Limity przestrzeni per użytkownik (nie zaimplementowane - future enhancement)
 - **Wsparcie:** Local storage (development) + S3 (production ready)
+
+### Przetwarzanie obrazków z ustawieniami użytkownika (3 tryby)
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium | **Feature:** [FEATURE-025](./features/FEATURE-025-image-processing-modes.md)
+
+**Koncepcja:**
+Po uploadzie obrazków automatyczne przetwarzanie (zmiana rozmiaru, kompresja) w zależności od wybranego przez użytkownika trybu. Dotyczy zarówno obrazków **przedmiotów** (items) jak i **kontenerów** (containers).
+
+**Wymagania:**
+- ✅ Obrazki przedmiotów (items) - już zaimplementowane
+- 🔄 Obrazki kontenerów (containers) - do zaimplementowania
+  - Galeria obrazków dla kontenerów (podobnie jak dla przedmiotów)
+  - Primary image dla kontenera
+  - Upload, zarządzanie, usuwanie obrazków kontenerów
+  - Wyświetlanie w widoku listy kontenerów i szczegółach kontenera
+
+**3 tryby przetwarzania:**
+1. **Wysoka jakość** (High Quality)
+   - Maksymalny rozmiar: 2560x2560px
+   - JPEG quality: 95%
+   - Minimalna kompresja, zachowanie szczegółów
+   - Dla użytkowników, którzy potrzebują najlepszej jakości
+
+2. **Zbalansowany** (Balanced) - domyślny
+   - Maksymalny rozmiar: 1200x1200px
+   - JPEG quality: 90%
+   - Zbalansowana kompresja i jakość
+   - Dla większości użytkowników (optymalne dla miniatur)
+
+3. **Oszczędny** (Storage Saver)
+   - Maksymalny rozmiar: 800x800px
+   - JPEG quality: 80%
+   - Maksymalna kompresja, oszczędność miejsca
+   - Dla użytkowników z ograniczoną przestrzenią (optymalne dla miniatur)
+
+**Rozszerzenie parametrów (do rozważenia):**
+- Osobne ustawienia dla obrazków kontenerów vs przedmiotów
+- Konfiguracja formatu wyjściowego (JPEG, WebP, AVIF)
+- Zaawansowane opcje kompresji (progressive JPEG, lossless PNG)
+- **🔄 Generowanie thumbnails** - automatyczne tworzenie miniatur obrazków dla szybszego ładowania w galeriach i listach
+  - Thumbnails w różnych rozmiarach (np. 150x150px, 300x300px, 600x600px)
+  - Lazy loading z pełnym obrazkiem na żądanie
+  - Oszczędność transferu danych i czasu ładowania
+  - Automatyczne generowanie przy uploadzie obrazka
+- Różne parametry dla różnych typów obrazków (thumbnail vs full size)
+- Opcja zachowania oryginalnego formatu dla wybranych obrazków
+- Batch processing settings (przetwarzanie wielu obrazków jednocześnie)
+
+**Implementacja:**
+- ✅ Ustawienie użytkownika w profilu (zapisywane w DB)
+- ✅ Backend: `ImageProcessor` z konfiguracją per użytkownik
+- ✅ Frontend: UI do wyboru trybu w ustawieniach użytkownika (Gear Settings)
+- ✅ Automatyczne zastosowanie wybranego trybu przy każdym uploadzie
+- ✅ Możliwość zmiany trybu w dowolnym momencie (nie wpływa na już przetworzone obrazy)
+- ✅ Ograniczenie dostępu do trybu "Wysoka jakość" tylko dla administratorów
+- ✅ Limity rozmiaru plików: 20 MB dla zwykłych użytkowników, 50 MB dla administratorów
+- 🔄 Docelowo: Ograniczenie dostępu do trybu "Wysoka jakość" w zależności od planu subskrypcji
+- Wsparcie dla obrazków kontenerów (nowa tabela `ContainerImage` lub rozszerzenie istniejącej struktury)
+
+**Zalety:**
+- Użytkownik kontroluje balans między jakością a zużyciem przestrzeni
+- Oszczędność miejsca dla użytkowników, którzy nie potrzebują najwyższej jakości
+- Elastyczność - każdy użytkownik może wybrać odpowiedni tryb dla swoich potrzeb
+- Spójność - te same ustawienia przetwarzania dla przedmiotów i kontenerów
 
 ### Automatyczne wyszukiwanie obrazków dla przedmiotów
 **Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Large | **Feature:** [FEATURE-016](./features/FEATURE-016-automatic-item-image-fetching.md)

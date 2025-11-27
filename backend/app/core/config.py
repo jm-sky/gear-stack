@@ -439,9 +439,14 @@ class StorageSettings(BaseSettings):
 
     # Upload limits
     max_file_size: int = Field(
-        default=10 * 1024 * 1024,  # 10 MB
+        default=20 * 1024 * 1024,  # 20 MB (default for regular users)
         validation_alias="STORAGE_MAX_FILE_SIZE",
-        description="Maximum file size in bytes",
+        description="Maximum file size in bytes (default for regular users, admins have 50 MB)",
+    )
+    max_file_size_admin: int = Field(
+        default=50 * 1024 * 1024,  # 50 MB (for admins)
+        validation_alias="STORAGE_MAX_FILE_SIZE_ADMIN",
+        description="Maximum file size in bytes for administrators",
     )
     max_files_per_item: int = Field(
         default=10,
@@ -551,6 +556,34 @@ class SentrySettings(BaseSettings):
         return v
 
 
+class AISettings(BaseSettings):
+    """AI configuration for OpenRouter integration."""
+
+    model_config = _base_config
+
+    enabled: bool = Field(default=True, validation_alias="AI_ENABLED", description="Enable AI features")
+    openrouter_api_key: str = Field(default="", validation_alias="OPENROUTER_API_KEY", description="OpenRouter API key")
+    openrouter_base_url: str = Field(
+        default="https://openrouter.ai/api/v1",
+        validation_alias="OPENROUTER_BASE_URL",
+        description="OpenRouter base URL",
+    )
+    token_encryption_key: str = Field(default="", validation_alias="AI_TOKEN_ENCRYPTION_KEY", description="Fernet encryption key for API tokens")
+    cache_enabled: bool = Field(default=True, validation_alias="AI_CACHE_ENABLED", description="Enable PostgreSQL caching")
+    cache_ttl_classify: int = Field(default=7, validation_alias="AI_CACHE_TTL_CLASSIFY", description="Cache TTL for classification (days)")
+    cache_ttl_embed: int = Field(default=30, validation_alias="AI_CACHE_TTL_EMBED", description="Cache TTL for embeddings (days)")
+
+    @field_validator("enabled", "cache_enabled", mode="before")
+    @classmethod
+    def parse_bool_field(cls, v: str | bool) -> bool:
+        """Parse boolean field from string or bool."""
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, str):
+            return v.lower() in ("true", "1", "yes", "on")
+        return False
+
+
 class Settings(BaseSettings):
     """
     Main application settings composed of nested configuration classes.
@@ -573,6 +606,7 @@ class Settings(BaseSettings):
     email: EmailSettings = Field(default_factory=EmailSettings)
     storage: StorageSettings = Field(default_factory=StorageSettings)
     sentry: SentrySettings = Field(default_factory=SentrySettings)
+    ai: AISettings = Field(default_factory=AISettings)
 
     # Legacy compatibility - still accessible at root level
     frontend_url: str = Field(
