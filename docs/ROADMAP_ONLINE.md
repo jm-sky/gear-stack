@@ -385,55 +385,70 @@ Kontenery i przedmioty już mają UUID - to ich pole `id` (typu `TUUID`). UUID s
 ## 🤖 Funkcje AI (wymagające backend)
 
 ### Infrastruktura AI
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Large
+**Status:** 🚧 Partially Completed | **Priority:** Medium | **Complexity:** Large | **Version:** v2.17.3+
 
 **Integracja z OpenRouter:**
-- OpenRouter jako główny provider AI (dostęp do wielu modeli z różnych providerów)
-- Użytkownik wybiera jeden aktywny model z listy 5-15 modeli
-- Obsługa własnych tokenów użytkownika (opcjonalnie)
-- Billing dokładnie jak OpenRouter (tokeny wejściowe + wyjściowe)
-- Zero ukrytych limitów, przejrzyste statystyki
-- Brak fallbacku modeli - użytkownik sam wybiera inny model przy niedostępności
-- Krótka informacja ostrzegawcza przy pierwszym użyciu (AI działa na odpowiedzialność użytkownika)
+- ✅ OpenRouter jako główny provider AI (dostęp do wielu modeli z różnych providerów) - zaimplementowane
+- ✅ Użytkownik wybiera jeden aktywny model z listy dostępnych modeli - zaimplementowane (`AiModelSelector`)
+- ✅ Obsługa własnych tokenów użytkownika (opcjonalnie) - zaimplementowane
+- ✅ Billing dokładnie jak OpenRouter (tokeny wejściowe + wyjściowe) - zaimplementowane (`AiCostDisplay`)
+- ✅ Zero ukrytych limitów, przejrzyste statystyki - zaimplementowane
+- ✅ Brak fallbacku modeli - użytkownik sam wybiera inny model przy niedostępności - zaimplementowane
+- 🔄 Krótka informacja ostrzegawcza przy pierwszym użyciu (AI działa na odpowiedzialność użytkownika) - planowane
 
 **Zarządzanie tokenami:**
-- Klucze encrypt-at-rest (szyfrowane w bazie danych)
-- Możliwość podmiany lub usunięcia tokena przez użytkownika
-- Wsparcie dla tokenów systemowych (dla użytkowników bez własnych tokenów)
-- Limity dotyczą tylko użycia tokena systemowego
-- Walidacja tokena przy dodawaniu (test API call)
+- ✅ Klucze encrypt-at-rest (szyfrowane w bazie danych) - zaimplementowane (Fernet encryption)
+- ✅ Możliwość podmiany lub usunięcia tokena przez użytkownika - zaimplementowane (settings endpoint)
+- ✅ Wsparcie dla tokenów systemowych (dla użytkowników bez własnych tokenów) - zaimplementowane
+- 🔄 Limity dotyczą tylko użycia tokena systemowego - planowane
+- ✅ Walidacja tokena przy dodawaniu (test API call) - zaimplementowane
 
 **Konfiguracja kontekstu:**
-- Użytkownik wybiera, które pola idą do kontekstu (nazwy, opisy, wagi, kategorie, etc.)
-- Brak automatycznego skracania kontekstu
-- Komunikat gdy kontekst przekracza limity modelu
-- Brak ustawień typu temperature, max_tokens (standardowe parametry w pierwszej wersji)
+- ✅ Użytkownik wybiera, które pola idą do kontekstu (nazwy, opisy, wagi, kategorie, etc.) - zaimplementowane (`AiContextConfig`)
+- ✅ Opcja włączania/wyłączania danych kontenera w kontekście - zaimplementowane (checkbox w `AiChatWindow`)
+- ✅ Brak automatycznego skracania kontekstu - zaimplementowane
+- 🔄 Komunikat gdy kontekst przekracza limity modelu - planowane
+- ✅ Brak ustawień typu temperature, max_tokens (standardowe parametry w pierwszej wersji) - zaimplementowane
 
 **Historia AI:**
-- Zapisywanie pełnych danych: finalny prompt, modyfikacje, kontekst, odpowiedź
-- Metadane: model, provider, timestamp, liczba tokenów, koszt
-- Nie zapisujemy template'u promptu (tylko finalny prompt)
-- Mechanizm limitu historii (domyślnie 100 wpisów) + automatyczne usuwanie najstarszych
-- Użytkownik może przeglądać, filtrować i zarządzać historią
+- ✅ Zapisywanie pełnych danych: finalny prompt, modyfikacje, kontekst, odpowiedź - zaimplementowane
+- ✅ Metadane: model, provider, timestamp, liczba tokenów, koszt - zaimplementowane
+- ✅ Nie zapisujemy template'u promptu (tylko finalny prompt) - zaimplementowane
+- 🔄 Mechanizm limitu historii (domyślnie 100 wpisów) + automatyczne usuwanie najstarszych - planowane
+- ✅ Użytkownik może przeglądać, filtrować i zarządzać historią - zaimplementowane (history endpoint)
 
 **Cache:**
-- Cache dla powtarzalnych operacji (klasyfikacje, embeddingi)
-- Zmniejsza koszty oraz liczbę requestów
-- TTL: 7 dni dla klasyfikacji, 30 dni dla embedów
-- Storage: Redis lub PostgreSQL JSONB
+- ✅ Cache dla powtarzalnych operacji (klasyfikacje, embeddingi) - zaimplementowane (PostgreSQL cache)
+- ✅ Zmniejsza koszty oraz liczbę requestów - zaimplementowane
+- ✅ TTL: 7 dni dla klasyfikacji, 30 dni dla embedów - zaimplementowane
+- ✅ Storage: PostgreSQL JSONB - zaimplementowane
 
 **Logi i monitoring:**
-- Logowanie błędów, czasów odpowiedzi, zużycia tokenów
-- Podstawowy monitoring stabilności OpenRouter API
-- Health check per model (status, response times, success rate)
-- Jasne komunikaty przy awarii: "Usługa OpenRouter jest niedostępna - spróbuj ponownie później"
-- Integracja z Sentry dla alertów (opcjonalnie)
+- ✅ Logowanie błędów, czasów odpowiedzi, zużycia tokenów - zaimplementowane
+- 🔄 Podstawowy monitoring stabilności OpenRouter API - planowane
+- 🔄 Health check per model (status, response times, success rate) - planowane
+- 🔄 Jasne komunikaty przy awarii: "Usługa OpenRouter jest niedostępna - spróbuj ponownie później" - planowane
+- ✅ Integracja z Sentry dla alertów (opcjonalnie) - zaimplementowane (jeśli Sentry włączony)
 
 **Endpointy:**
-- `/ai/chat` - Chat completions (generowanie tekstu, sugestie)
-- `/ai/classify` - Klasyfikacje (kategorie, worn, consumable)
-- `/ai/embed` - Embeddingi (semantic search w przyszłości)
-- `/ai/vision` - Vision models (planowane na później)
+- ✅ `/ai/chat` - Chat completions (generowanie tekstu, sugestie) - zaimplementowane
+- ✅ `/ai/settings` - Zarządzanie ustawieniami użytkownika (token, model, kontekst) - zaimplementowane
+- ✅ `/ai/history` - Historia interakcji AI - zaimplementowane
+- ✅ `/ai/models` - Lista dostępnych modeli - zaimplementowane
+- 🔄 `/ai/classify` - Klasyfikacje (kategorie, worn, consumable) - planowane
+- 🔄 `/ai/embed` - Embeddingi (semantic search w przyszłości) - planowane
+- 🔄 `/ai/vision` - Vision models (planowane na później) - planowane
+
+**Frontend Components (v2.17.3):**
+- ✅ `AiChatDialog` - Główny dialog chatu z AI
+- ✅ `AiChatWindow` - Okno chatu z wiadomościami i inputem
+- ✅ `AiChatMessage` - Komponent wyświetlający wiadomości AI
+- ✅ `AiChatMessageDebugPrompt` - Debug prompt dla wiadomości asystenta
+- ✅ `AiChatTemplateMsgButton` - Przyciski z szablonami wiadomości
+- ✅ `AiContextConfig` - Konfiguracja pól kontekstu
+- ✅ `AiModelSelector` - Selektor modelu AI
+- ✅ `AiCostDisplay` - Wyświetlanie kosztów i tokenów
+- ✅ Pełne wsparcie i18n (PL/EN) dla modułu AI
 
 ### Sugestie sprzętu (na podstawie pogody, aktywności itp.)
 **Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Large

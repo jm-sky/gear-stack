@@ -45,7 +45,11 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
 5. **Funkcje AI**
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-funkcje-ai-wymagające-backend)
    - Infrastruktura AI (OpenRouter, zarządzanie tokenami, historia, cache)
-   - Status: 🔄 Planned | Priority: Medium | Complexity: Large
+   - Status: 🚧 Partially Completed (v2.17.3+) | Priority: Medium | Complexity: Large
+   - ✅ Chat interface z AI (Phase 1 & 2)
+   - ✅ Model selection, token management, context configuration
+   - ✅ History tracking, cost display, template messages
+   - 🔄 Classification, embeddings, vision models - planowane
 
 ### Obniżony priorytet (trudne zadania)
 
