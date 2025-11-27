@@ -1,8 +1,11 @@
 """Service for handling image uploads with proper error handling and transaction safety."""
 
+import ipaddress
 import logging
+import socket
 import uuid
 from io import BytesIO
+from urllib.parse import urlparse
 
 import httpx
 from fastapi import HTTPException, UploadFile, status
@@ -76,6 +79,131 @@ class ImageUploadService:
         self.allowed_mime_types = settings.storage.allowed_mime_types
         self.repository = ItemImageRepository(db)
 
+    def _validate_url_for_ssrf(self, url: str) -> None:
+        """
+        Validate URL to prevent SSRF (Server-Side Request Forgery) attacks.
+
+        Blocks:
+        - Private/internal IP addresses
+        - Localhost addresses
+        - Link-local addresses
+        - Non-HTTP/HTTPS schemes
+        - Invalid URLs
+
+        Args:
+            url: URL to validate
+
+        Raises:
+            HTTPException: If URL is unsafe or invalid
+        """
+        try:
+            parsed = urlparse(url)
+        except Exception as exc:
+            logger.error("Invalid URL format: %s", url)
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid URL format",
+            ) from exc
+
+        # Only allow HTTP and HTTPS schemes
+        if parsed.scheme not in ("http", "https"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Only HTTP and HTTPS URLs are allowed",
+            )
+
+        # Must have a hostname
+        if not parsed.netloc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid URL format: missing hostname",
+            )
+
+        # Extract hostname (remove port if present)
+        hostname = parsed.netloc.split(":")[0].lower()
+
+        # Block localhost and common localhost variants
+        blocked_hostnames = {
+            "localhost",
+            "127.0.0.1",
+            "0.0.0.0",
+            "::1",
+            "[::1]",
+        }
+        if hostname in blocked_hostnames:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Localhost URLs are not allowed",
+            )
+
+        # Resolve hostname to IP address and check if it's private
+        try:
+            # Use getaddrinfo to resolve hostname (handles both IPv4 and IPv6)
+            addr_info = socket.getaddrinfo(hostname, None, socket.AF_UNSPEC, socket.SOCK_STREAM)
+            if not addr_info:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Could not resolve hostname",
+                )
+
+            # Check all resolved IPs
+            for family, _, _, _, sockaddr in addr_info:
+                if family == socket.AF_INET:
+                    ip_str = sockaddr[0]
+                elif family == socket.AF_INET6:
+                    ip_str = sockaddr[0]
+                else:
+                    continue
+
+                try:
+                    ip = ipaddress.ip_address(ip_str)
+                except ValueError:
+                    continue
+
+                # Block private IP ranges
+                if ip.is_private:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Private IP addresses are not allowed",
+                    )
+
+                # Block link-local addresses
+                if ip.is_link_local:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Link-local addresses are not allowed",
+                    )
+
+                # Block loopback addresses
+                if ip.is_loopback:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Loopback addresses are not allowed",
+                    )
+
+                # Block reserved addresses (includes multicast, etc.)
+                if ip.is_reserved:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Reserved IP addresses are not allowed",
+                    )
+
+        except socket.gaierror as exc:
+            logger.error("Failed to resolve hostname %s: %s", hostname, exc)
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Could not resolve hostname",
+            ) from exc
+        except HTTPException:
+            # Re-raise HTTP exceptions (our validation failures)
+            raise
+        except Exception as exc:
+            logger.error("Unexpected error during URL validation: %s", exc)
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="URL validation failed",
+            ) from exc
+
     async def _get_max_file_size_for_user(self, user_id: str) -> int:
         """
         Get maximum file size for user based on admin status.
@@ -145,7 +273,7 @@ class ImageUploadService:
             )
 
         # Check MIME type (preliminary check based on content-type header)
-        if file.content_type not in self.allowed_mime_types:
+        if file.content_type and file.content_type not in self.allowed_mime_types:
             raise HTTPException(
                 status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
                 detail=f"File type {file.content_type} not allowed. Allowed types: {', '.join(self.allowed_mime_types)}",
@@ -323,6 +451,9 @@ class ImageUploadService:
             )
 
         if host_locally:
+            # Validate URL for SSRF protection before downloading
+            self._validate_url_for_ssrf(image_url)
+
             # Download and store image (existing behavior)
             try:
                 async with httpx.AsyncClient(timeout=15.0) as client:
@@ -367,19 +498,8 @@ class ImageUploadService:
             )
         else:
             # Only save external URL (new behavior)
-            # Validate URL format
-            try:
-                from urllib.parse import urlparse
-
-                parsed = urlparse(image_url)
-                if not parsed.scheme or not parsed.netloc:
-                    raise ValueError("Invalid URL format")
-            except Exception as exc:
-                logger.error("Invalid URL format: %s", image_url)
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Invalid URL format",
-                ) from exc
+            # Validate URL for SSRF protection
+            self._validate_url_for_ssrf(image_url)
 
             # Use last part of URL as original filename, if possible
             original_filename = image_url.rsplit("/", 1)[-1] or "remote-image"

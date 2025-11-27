@@ -21,6 +21,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.17.2] - 2025-11-27
+
+### Fixed
+- **Item Edit Currency Field**: Fixed currency field not being loaded when editing items
+  - Currency value now properly initialized in `ItemFormPage.vue` from existing item data
+  - Currency field now correctly populated in both `getInitialValues()` and `loadItem()` functions
+  - Previously currency was lost when editing items, now it's preserved correctly
+
+### Changed
+- **Item Detail URL Display**: Improved URL link display in item detail page
+  - Desktop view: Shows domain name (e.g., "example.com") instead of generic "Open Link" text
+  - Mobile view: Shows "Open Link" text for better touch target clarity
+  - Responsive design: Uses `sm:hidden` and `hidden sm:inline` classes for appropriate display per screen size
+  - Better user experience: Users can see the destination domain before clicking on desktop
+
+---
+
 ## [2.17.1] - 2025-11-26
 
 ### Fixed
