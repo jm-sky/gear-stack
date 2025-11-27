@@ -15,11 +15,10 @@ export function useAiChat() {
   const error = ref<string | null>(null)
 
   const sendMessage = async (
-    prompt: string,
-    context?: { container_ids?: string[]; fields?: string[] },
-    expectStructuredOutput = true,
+    message: string,
+    context?: Record<string, unknown>,
   ): Promise<IAiChatResponse | null> => {
-    if (!prompt.trim()) return null
+    if (!message.trim()) return null
 
     isLoading.value = true
     error.value = null
@@ -28,17 +27,16 @@ export function useAiChat() {
     const userMessage: IAiChatMessage = {
       id: `user-${Date.now()}`,
       role: 'user',
-      content: prompt,
+      content: message,
       created_at: new Date().toISOString(),
     }
     messages.value.push(userMessage)
 
     try {
       const request: IAiChatRequest = {
-        prompt,
+        message,
         context,
         model: aiStore.settings?.selected_model,
-        expect_structured_output: expectStructuredOutput,
       }
 
       const response = await aiApiService.chat(request)
@@ -48,8 +46,18 @@ export function useAiChat() {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
         content: response.message,
-        tokens: response.tokens,
-        cost: response.cost,
+        tokens: {
+          input: response.tokens.prompt,
+          output: response.tokens.completion,
+          total: response.tokens.total,
+        },
+        cost: response.cost !== null
+          ? {
+              input: 0,
+              output: 0,
+              total: response.cost,
+            }
+          : undefined,
         created_at: new Date().toISOString(),
       }
       messages.value.push(assistantMessage)

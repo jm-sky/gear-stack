@@ -11,13 +11,14 @@ import { Textarea } from '@/components/ui/textarea'
 import { useAiChat } from '../composables/useAiChat'
 import { useAiContext } from '../composables/useAiContext'
 import { useAiStore } from '../store/useAiStore'
+import AiChatTemplateMsgButton from './AiChatTemplateMsgButton.vue'
 import AiContextConfig from './AiContextConfig.vue'
 import AiCostDisplay from './AiCostDisplay.vue'
 import AiModelSelector from './AiModelSelector.vue'
 
 const aiStore = useAiStore()
 const { messages, isLoading, sendMessage, clearMessages, hasMessages } = useAiChat()
-const { buildContext } = useAiContext()
+const { selectedFields } = useAiContext()
 
 const userMessage = ref('')
 const showContextConfig = ref(false)
@@ -39,8 +40,10 @@ onMounted(async () => {
 const handleSend = async (): Promise<void> => {
   if (!userMessage.value.trim() || isLoading.value) return
 
-  const context = buildContext()
-  await sendMessage(userMessage.value, context, true)
+  const context: Record<string, unknown> = {
+    fields: selectedFields.value,
+  }
+  await sendMessage(userMessage.value, context)
   userMessage.value = ''
 }
 
@@ -49,6 +52,10 @@ const handleKeyDown = (event: KeyboardEvent): void => {
     event.preventDefault()
     handleSend()
   }
+}
+
+const onTemplatePrompt = (prompt: string) => {
+  userMessage.value = prompt
 }
 </script>
 
@@ -62,7 +69,7 @@ const handleKeyDown = (event: KeyboardEvent): void => {
       <div class="flex items-center gap-2 -my-1">
         <AiModelSelector />
         <Button
-          variant="outline"
+          :variant="showContextConfig ? 'default' : 'outline'"
           size="sm"
           @click="showContextConfig = !showContextConfig"
         >
@@ -82,7 +89,12 @@ const handleKeyDown = (event: KeyboardEvent): void => {
     <AiContextConfig v-if="showContextConfig" />
 
     <!-- Messages -->
-    <div class="flex-1 overflow-y-auto p-4 space-y-4">
+    <div class="relative flex-1 overflow-y-auto p-4 space-y-4">
+      <div v-if="!hasMessages" class="absolute bottom-0 left-0 w-full text-sm z-10 flex gap-4 px-4">
+        <AiChatTemplateMsgButton variant="whatsUnnecessary" @prompt="onTemplatePrompt" />
+        <AiChatTemplateMsgButton variant="whatsNeeded" @prompt="onTemplatePrompt" />
+      </div>
+
       <div v-if="!hasMessages" class="flex items-center justify-center h-full text-muted-foreground">
         <p class="text-sm">
           Start a conversation with AI...

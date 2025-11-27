@@ -52,22 +52,27 @@ export interface IAiStructuredItem {
 }
 
 export interface IAiChatRequest {
-  prompt: string
-  context?: {
-    container_ids?: string[]
-    fields?: string[]
-  }
+  message: string
+  context?: Record<string, unknown>
   model?: string
-  expect_structured_output?: boolean
+  max_tokens?: number
+  temperature?: number
+}
+
+export interface IAiStructuredOutput {
+  action: string | null
+  data: Record<string, unknown>
 }
 
 export interface IAiChatResponse {
   message: string
-  structured_data?: IAiStructuredData
+  structured_output: IAiStructuredOutput | null
+  tokens: {
+    prompt: number
+    completion: number
+    total: number
+  }
+  cost: number | null
   model: string
-  provider: string
-  tokens: IAiTokenUsage
-  cost: IAiCost
-  history_id: string
 }
 
