@@ -23,6 +23,8 @@ from .schemas import (
     ItemCreate,
     ItemResponse,
     ItemUpdate,
+    ShareTokenCreate,
+    ShareTokenResponse,
 )
 from .service import GearService
 from .item_image_router import router as item_image_router
@@ -520,3 +522,129 @@ async def get_public_container(
             detail="Public container not found",
         )
     return container
+
+
+# Shared container endpoints (no authentication required, token-based access)
+@router.get(
+    "/shared/containers/{token}",
+    response_model=ContainerResponse,
+    summary="Get a shared container by token",
+)
+async def get_shared_container(
+    token: str,
+    service: GearServiceDep,
+) -> ContainerResponse:
+    """Get a container by share token.
+
+    Args:
+        token: Share token
+        service: Gear service instance
+
+    Returns:
+        Shared container with author name
+
+    Raises:
+        HTTPException: If token is invalid, expired, or container not found
+    """
+    container = await service.get_container_by_share_token(token)
+    if not container:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Shared container not found or token expired",
+        )
+    return container
+
+
+# Share token management endpoints (requires authentication)
+@router.get(
+    "/containers/{container_id}/share-tokens",
+    response_model=list[ShareTokenResponse],
+    summary="Get share tokens for a container",
+)
+async def get_container_share_tokens(
+    container_id: str,
+    current_user: CurrentUser,
+    service: GearServiceDep,
+) -> list[ShareTokenResponse]:
+    """Get all share tokens for a container.
+
+    Args:
+        container_id: Container ID
+        current_user: Current authenticated user
+        service: Gear service instance
+
+    Returns:
+        List of share tokens for the container
+
+    Raises:
+        HTTPException: If container not found or user doesn't own it
+    """
+    tokens = await service.get_share_tokens(container_id, current_user.id)
+    return [ShareTokenResponse(**token) for token in tokens]
+
+
+@router.post(
+    "/containers/{container_id}/share-tokens",
+    response_model=ShareTokenResponse,
+    summary="Create a share token for a container",
+)
+async def create_container_share_token(
+    container_id: str,
+    current_user: CurrentUser,
+    data: ShareTokenCreate,
+    service: GearServiceDep,
+) -> ShareTokenResponse:
+    """Create a share token for a container.
+
+    Args:
+        container_id: Container ID
+        current_user: Current authenticated user
+        data: Share token creation data
+        service: Gear service instance
+
+    Returns:
+        Created share token with share URL
+
+    Raises:
+        HTTPException: If container not found or user doesn't own it
+    """
+    token = await service.create_share_token(container_id, current_user.id, data.expiresAt)
+    tokens = await service.get_share_tokens(container_id, current_user.id)
+    # Find the newly created token
+    token_data = next((t for t in tokens if t["token"] == token), None)
+    if not token_data:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve created token",
+        )
+    return ShareTokenResponse(**token_data)
+
+
+@router.delete(
+    "/containers/{container_id}/share-tokens/{token}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Revoke a share token",
+)
+async def revoke_container_share_token(
+    container_id: str,
+    token: str,
+    current_user: CurrentUser,
+    service: GearServiceDep,
+) -> None:
+    """Revoke a share token.
+
+    Args:
+        container_id: Container ID
+        token: Share token to revoke
+        current_user: Current authenticated user
+        service: Gear service instance
+
+    Raises:
+        HTTPException: If token not found or user doesn't own it
+    """
+    revoked = await service.revoke_share_token(token, current_user.id)
+    if not revoked:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Share token not found or access denied",
+        )

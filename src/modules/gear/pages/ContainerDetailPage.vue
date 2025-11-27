@@ -362,6 +362,10 @@ const handleRecognizeParametersAll = async () => {
   }
 }
 
+const handleManageShareTokens = () => {
+  router.push(GearRoutePath.ContainerShareTokensById(containerId))
+}
+
 // Redirect if container not found
 if (!container.value) {
   router.push(GearRoutePath.Containers)
@@ -380,6 +384,7 @@ if (!container.value) {
         @export-to-csv="handleExportToCSV"
         @recognize-parameters-all="handleRecognizeParametersAll"
         @ai-chat="isAiDialogOpen = true"
+        @manage-share-tokens="handleManageShareTokens"
       />
 
       <!-- Sort Confirmation Alert (always show when there are pending changes) -->

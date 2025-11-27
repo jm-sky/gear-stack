@@ -103,7 +103,7 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 ## 👥 Udostępnianie i współpraca
 
 ### Udostępnianie kontenerów
-**Status:** 🚧 Partially Completed | **Priority:** Medium | **Complexity:** Medium
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium
 
 - ✅ Publiczne kontenery (`isPublic` flag)
 - ✅ Publiczny link do kontenera (`/gear/public/:id`)
@@ -112,11 +112,17 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - ✅ Publiczna strona szczegółów przedmiotu (`PublicItemDetailPage`)
 - ✅ Pole `isPublic` w formularzu kontenera
 - ✅ Domyślna widoczność w ustawieniach użytkownika
-- 🔄 Udostępnianie nie-publicznych kontenerów przez token w query params - planowane
-  - Link w formacie: `/gear/public/:id?token=abc123`
-  - Token generowany przez właściciela kontenera
-  - Możliwość odwołania tokena
-  - Minimalny layout przy share (podobnie jak LighterPack) - uproszczony widok bez pełnego UI
+- ✅ **Udostępnianie kontenerów przez token** (v2.16.0+)
+  - ✅ Link w formacie: `/shared/container/:token` (read-only access)
+  - ✅ Token generowany przez właściciela kontenera (`ContainerShareTokensPage`)
+  - ✅ Opcjonalna data wygaśnięcia tokena
+  - ✅ Dostęp tylko przez token (nie wymaga container ID)
+  - ✅ Wspólny komponent nagłówka (`PublicContainerHeader`) dla publicznych i udostępnionych kontenerów
+  - ✅ Przycisk edycji widoczny tylko dla autora kontenera
+  - ✅ Strona szczegółów udostępnionego kontenera (`SharedContainerDetailPage`)
+  - ✅ Zarządzanie tokenami (tworzenie, wyświetlanie, anulowanie)
+  - ✅ Kopiowanie linku do schowka
+  - ✅ UI improvements for mobile (v2.17.0)
 - 🔄 Uprawnienia: tylko odczyt / edycja - planowane
 - 🔄 Lista osób, z którymi kontener jest udostępniony - planowane
 
@@ -231,6 +237,21 @@ Kontenery i przedmioty już mają UUID - to ich pole `id` (typu `TUUID`). UUID s
 - Porównywanie z innymi użytkownikami (opcjonalnie)
 - Raporty okresowe
 - Analiza trendów w czasie
+
+### Statystyki wyświetleń kontenerów
+**Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Medium
+
+- Licznik wyświetleń kontenera (ile razy ktoś obejrzał kontener)
+- Licznik unikalnych wyświetleń (tracking unikalnych użytkowników/sesji)
+- Historia wyświetleń z timestampami
+- Dashboard ze statystykami dla właściciela kontenera:
+  - Całkowita liczba wyświetleń per kontener
+  - Wyświetlenia w czasie (wykresy)
+  - Top 10 najczęściej oglądanych kontenerów
+  - Statystyki wyświetleń dla udostępnionych tokenów (które tokeny były najczęściej używane)
+- Prywatność: statystyki widoczne tylko dla właściciela kontenera
+- Tracking dla publicznych kontenerów i kontenerów udostępnionych przez token
+- Opcjonalne geolokalizacja (kraj/region) wyświetleń (anonimowe, zgodne z GDPR)
 
 ---
 
@@ -381,6 +402,15 @@ Kontenery i przedmioty już mają UUID - to ich pole `id` (typu `TUUID`). UUID s
   - ✅ Walidacja URL i formatu obrazka
   - ✅ Pobieranie i przetwarzanie obrazka z URL
   - ✅ Alternatywa dla uploadu (szczególnie przydatne dla adminów)
+  - 🔄 **Do rozważenia:** Sprawdzić obecne zachowanie - czy dodawanie obrazka przez URL ściąga obrazek do storage, czy tylko zapisuje zewnętrzny URL
+    - **Obecne zachowanie:** Obrazek jest ściągany z URL i zapisywany w storage (podobnie jak upload pliku)
+    - **Cel pierwotny:** Zapis zewnętrznego URL (bez ściągania do storage)
+    - **Do rozważenia:** Które podejście jest lepsze?
+      - **Zapis URL (pros):** Oszczędność miejsca w storage, brak duplikacji danych
+      - **Zapis URL (cons):** Zależność od zewnętrznego serwera, możliwość utraty obrazka gdy URL przestanie działać
+      - **Ściąganie do storage (pros):** Niezależność od zewnętrznych serwerów, kontrola nad obrazkami
+      - **Ściąganie do storage (cons):** Zajmuje miejsce w storage, duplikacja danych
+    - **Opcja:** Możliwość wyboru przez użytkownika (ściągnij do storage vs zapisz tylko URL)
 - ✅ **Primary image w wierszu tabeli** - opcjonalne wyświetlanie miniaturki primary image w tabeli przedmiotów (v2.15.0)
   - ✅ Miniaturka primary image w tabeli (`ItemsTableImageCell`)
   - ✅ Lazy loading dla wydajności
@@ -388,6 +418,62 @@ Kontenery i przedmioty już mają UUID - to ich pole `id` (typu `TUUID`). UUID s
   - ✅ Dostępne w `ItemsTable` i `AllItemsPage`
 - 🔄 Limity przestrzeni per użytkownik (nie zaimplementowane - future enhancement)
 - **Wsparcie:** Local storage (development) + S3 (production ready)
+
+### Przetwarzanie obrazków z ustawieniami użytkownika (3 tryby)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+
+**Koncepcja:**
+Po uploadzie obrazków automatyczne przetwarzanie (zmiana rozmiaru, kompresja) w zależności od wybranego przez użytkownika trybu. Dotyczy zarówno obrazków **przedmiotów** (items) jak i **kontenerów** (containers).
+
+**Wymagania:**
+- ✅ Obrazki przedmiotów (items) - już zaimplementowane
+- 🔄 Obrazki kontenerów (containers) - do zaimplementowania
+  - Galeria obrazków dla kontenerów (podobnie jak dla przedmiotów)
+  - Primary image dla kontenera
+  - Upload, zarządzanie, usuwanie obrazków kontenerów
+  - Wyświetlanie w widoku listy kontenerów i szczegółach kontenera
+
+**3 tryby przetwarzania:**
+1. **Wysoka jakość** (High Quality)
+   - Maksymalny rozmiar: 2560x2560px
+   - JPEG quality: 90-95%
+   - Minimalna kompresja, zachowanie szczegółów
+   - Dla użytkowników, którzy potrzebują najlepszej jakości
+
+2. **Zbalansowany** (Balanced) - domyślny
+   - Maksymalny rozmiar: 1920x1920px
+   - JPEG quality: 85%
+   - Zbalansowana kompresja i jakość
+   - Dla większości użytkowników
+
+3. **Oszczędny** (Storage Saver)
+   - Maksymalny rozmiar: 1280x1280px
+   - JPEG quality: 75-80%
+   - Maksymalna kompresja, oszczędność miejsca
+   - Dla użytkowników z ograniczoną przestrzenią
+
+**Rozszerzenie parametrów (do rozważenia):**
+- Osobne ustawienia dla obrazków kontenerów vs przedmiotów
+- Konfiguracja formatu wyjściowego (JPEG, WebP, AVIF)
+- Zaawansowane opcje kompresji (progressive JPEG, lossless PNG)
+- Różne parametry dla różnych typów obrazków (thumbnail vs full size)
+- Opcja zachowania oryginalnego formatu dla wybranych obrazków
+- Batch processing settings (przetwarzanie wielu obrazków jednocześnie)
+
+**Implementacja:**
+- Ustawienie użytkownika w profilu (zapisywane w DB)
+- Backend: `ImageProcessor` z konfiguracją per użytkownik
+- Frontend: UI do wyboru trybu w ustawieniach użytkownika
+- Automatyczne zastosowanie wybranego trybu przy każdym uploadzie
+- Możliwość zmiany trybu w dowolnym momencie (nie wpływa na już przetworzone obrazy)
+- Opcjonalnie: podgląd różnic między trybami przed zapisaniem
+- Wsparcie dla obrazków kontenerów (nowa tabela `ContainerImage` lub rozszerzenie istniejącej struktury)
+
+**Zalety:**
+- Użytkownik kontroluje balans między jakością a zużyciem przestrzeni
+- Oszczędność miejsca dla użytkowników, którzy nie potrzebują najwyższej jakości
+- Elastyczność - każdy użytkownik może wybrać odpowiedni tryb dla swoich potrzeb
+- Spójność - te same ustawienia przetwarzania dla przedmiotów i kontenerów
 
 ### Automatyczne wyszukiwanie obrazków dla przedmiotów
 **Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Large | **Feature:** [FEATURE-016](./features/FEATURE-016-automatic-item-image-fetching.md)

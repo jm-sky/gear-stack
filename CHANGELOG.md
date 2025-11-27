@@ -21,6 +21,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.17.1] - 2025-11-26
+
+### Fixed
+- **Share Token Deletion**: Fixed critical bug where share tokens were not actually deleted from database
+  - Added missing `await` to `self.db.delete()` call in `backend/app/modules/gear/repository.py:576`
+  - SQLAlchemy 2.0+ async sessions require `await` on delete operations
+  - Previous behavior: API returned 204 No Content but token remained in database
+  - Tokens now properly delete and disappear from the table immediately
+
+---
+
+## [2.17.0] - 2025-11-26
+
+### Added
+- **DataTable Loading State**: Comprehensive loading state support for DataTable component
+  - New `loading` prop for DataTable component
+  - `TableLoadingSkeleton` component with animated spinner
+  - Customizable loading state via `#loading` slot
+  - Loading state takes priority over empty state display
+  - Applied to all admin pages (Containers, Users, Items)
+  - Improved user feedback during data fetching operations
+
+- **Translations**: Added `create` translation to common translations
+  - Polish: `common.create: 'Utwórz'`
+  - English: `common.create: 'Create'`
+
+- **ROADMAP**: Added Container View Statistics feature to roadmap
+  - View count tracking (total and unique visitors)
+  - Dashboard for container owners with analytics
+  - Privacy-first design (stats visible only to owner)
+  - Planned for future implementation
+
+### Changed
+- **Share Token Management UI**: Improved responsive design for header
+  - Header buttons stack vertically on mobile, horizontal on desktop
+  - Equal-width buttons on mobile for better touch targets
+  - Better spacing and layout on small screens
+  - Empty state with full-width button on mobile
+
+### Fixed
+- **Share Token Page**: Removed complex table RWD that degraded mobile experience
+- **Translation**: Fixed missing Polish translation for create button
+
+---
+
+## [2.16.1] - 2025-11-26
+
+### Fixed
+- **Admin Repository SQL Error**: Fixed PostgreSQL GROUP BY error in `get_all_containers` query
+  - Changed `joinedload(GearContainerDB.user)` to `selectinload(GearContainerDB.user)` in `backend/app/modules/admin/repository.py:88`
+  - `joinedload` was adding user table columns to SELECT list without including them in GROUP BY clause
+  - `selectinload` issues a separate query for the relationship, avoiding GROUP BY conflicts
+  - Error: `column "users_1.id" must appear in the GROUP BY clause or be used in an aggregate function`
+
+---
+
 ## [2.16.0] - 2025-01-28
 
 ### Added

@@ -11,7 +11,7 @@ import ItemsTable from '../components/ItemsTable.vue'
 import PublicContainerHeader from '../components/PublicContainerHeader.vue'
 import { useGearSettings } from '../composables/useGearSettings'
 import { GearRoutePath } from '../routes'
-import { publicContainersService } from '../services/publicContainersService'
+import { sharedContainersService } from '../services/sharedContainersService'
 import { useGearStore } from '../store/useGearStore'
 import {
   calculateReadinessPercentageSync,
@@ -27,13 +27,13 @@ const { settings: gearSettings } = useGearSettings()
 
 const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
 
-const containerId = route.params.id as string
+const token = route.params.token as string
 const container = ref<IGearContainer | null>(null)
 const isLoading = ref(true)
 
 const loadContainer = async () => {
   try {
-    container.value = await publicContainersService.getPublicContainer(containerId)
+    container.value = await sharedContainersService.getSharedContainer(token)
     // Filter nested containers - only show items if nested container is public
     if (container.value) {
       container.value.items = container.value.items.filter(item => {
@@ -46,8 +46,8 @@ const loadContainer = async () => {
       })
     }
   } catch (error) {
-    console.error('Failed to load public container:', error)
-    toast.error(t('common.error'))
+    console.error('Failed to load shared container:', error)
+    toast.error(t('gear.sharedContainers.notFound'))
     router.push(GearRoutePath.PublicContainers)
   } finally {
     isLoading.value = false
@@ -127,7 +127,7 @@ const handleBack = () => {
       <ItemsTable
         :items="items"
         :public-mode="true"
-        :container-id="containerId"
+        :container-id="container.id"
       />
 
       <!-- Category Pie Chart -->

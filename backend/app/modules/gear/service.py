@@ -4,9 +4,15 @@ This module contains business logic for gear containers and items,
 including validation, calculations, and orchestration of repository operations.
 """
 
+import asyncio
 import logging
+import secrets
+from datetime import datetime
 from typing import Literal, Sequence, cast
 
+from app.core.storage.factory import get_storage_adapter
+
+from .item_image_repository import ItemImageRepository
 from .repository import GearRepository
 from .schemas import (
     BatchOrderUpdateRequest,
@@ -44,12 +50,15 @@ class GearService:
             repository: Gear repository instance
         """
         self.repository = repository
+        self._image_repository = ItemImageRepository(repository.db)
+        self._storage = get_storage_adapter()
 
-    def _map_item_to_response(self, item: GearItemDB) -> ItemResponse:
+    def _map_item_to_response(self, item: GearItemDB, primary_image_url: str | None = None) -> ItemResponse:
         """Map database item to response schema.
 
         Args:
             item: Database item model
+            primary_image_url: Optional primary image URL for the item
 
         Returns:
             Item response schema
@@ -77,11 +86,12 @@ class GearService:
             consumable=item.consumable,
             order=item.order,
             showOnContainer=item.show_on_container,
+            primaryImageUrl=primary_image_url,
             createdAt=item.created_at,
             updatedAt=item.updated_at,
         )
 
-    def _map_container_to_response(self, container: GearContainerDB) -> ContainerResponse:
+    async def _map_container_to_response(self, container: GearContainerDB) -> ContainerResponse:
         """Map database container to response schema.
 
         Args:
@@ -91,7 +101,21 @@ class GearService:
             Container response schema
         """
         # Access items through the relationship - mypy doesn't know about SQLAlchemy relationships
-        items = [self._map_item_to_response(item) for item in container.items]  # type: ignore[attr-defined]
+        container_items = container.items  # type: ignore[attr-defined]
+        
+        # Batch fetch primary images for all items
+        item_ids = [item.id for item in container_items]
+        primary_images = await self._image_repository.get_primary_images_by_items(item_ids)
+        
+        # Get URLs for all primary images
+        image_urls: dict[str, str] = {}
+        for item_id, image in primary_images.items():
+            url = await self._storage.get_url(image.file_path)
+            image_urls[item_id] = url
+        
+        # Map items to responses with primary image URLs
+        items = [self._map_item_to_response(item, image_urls.get(item.id)) for item in container_items]
+        
         # Cast database string fields to their Literal types
         return ContainerResponse(
             id=container.id,
@@ -117,7 +141,7 @@ class GearService:
             updatedAt=container.updated_at,
         )
 
-    def _map_container_to_response_with_author(self, container: GearContainerDB) -> ContainerResponse:
+    async def _map_container_to_response_with_author(self, container: GearContainerDB) -> ContainerResponse:
         """Map database container to response schema with author name.
 
         Args:
@@ -127,7 +151,21 @@ class GearService:
             Container response schema with author name
         """
         # Access items through the relationship - mypy doesn't know about SQLAlchemy relationships
-        items = [self._map_item_to_response(item) for item in container.items]  # type: ignore[attr-defined]
+        container_items = container.items  # type: ignore[attr-defined]
+        
+        # Batch fetch primary images for all items
+        item_ids = [item.id for item in container_items]
+        primary_images = await self._image_repository.get_primary_images_by_items(item_ids)
+        
+        # Get URLs for all primary images
+        image_urls: dict[str, str] = {}
+        for item_id, image in primary_images.items():
+            url = await self._storage.get_url(image.file_path)
+            image_urls[item_id] = url
+        
+        # Map items to responses with primary image URLs
+        items = [self._map_item_to_response(item, image_urls.get(item.id)) for item in container_items]
+        
         # Filter nested containers - only show items if nested container is public
         filtered_items = []
         for item in items:
@@ -184,7 +222,7 @@ class GearService:
         if data.isPublic is None:
             data.isPublic = default_public
         container = await self.repository.create_container(user_id, data)
-        return self._map_container_to_response(container)
+        return await self._map_container_to_response(container)
 
     async def get_container(self, container_id: str, user_id: str) -> ContainerResponse | None:
         """Get a container by ID.
@@ -199,7 +237,7 @@ class GearService:
         container = await self.repository.get_container(container_id, user_id)
         if not container:
             return None
-        return self._map_container_to_response(container)
+        return await self._map_container_to_response(container)
 
     async def get_containers(self, user_id: str, skip: int = 0, limit: int = 100) -> list[ContainerResponse]:
         """Get all containers for a user.
@@ -213,7 +251,7 @@ class GearService:
             List of container responses
         """
         containers = await self.repository.get_containers(user_id, skip, limit)
-        return [self._map_container_to_response(container) for container in containers]
+        return await asyncio.gather(*[self._map_container_to_response(container) for container in containers])
 
     async def get_public_containers(self, skip: int = 0, limit: int = 100) -> list[ContainerResponse]:
         """Get all public containers from all users.
@@ -226,7 +264,7 @@ class GearService:
             List of public container responses with author names
         """
         containers = await self.repository.get_public_containers(skip, limit)
-        return [self._map_container_to_response_with_author(container) for container in containers]
+        return await asyncio.gather(*[self._map_container_to_response_with_author(container) for container in containers])
 
     async def get_public_container(self, container_id: str) -> ContainerResponse | None:
         """Get a public container by ID.
@@ -240,7 +278,86 @@ class GearService:
         container = await self.repository.get_public_container(container_id)
         if not container:
             return None
+        return await self._map_container_to_response_with_author(container)
+
+    async def get_container_by_share_token(self, token: str) -> ContainerResponse | None:
+        """Get a container by share token.
+
+        Args:
+            token: Share token
+
+        Returns:
+            Container response with author name if token is valid and not expired, None otherwise
+        """
+        container = await self.repository.get_container_by_token(token)
+        if not container:
+            return None
         return self._map_container_to_response_with_author(container)
+
+    async def create_share_token(
+        self, container_id: str, user_id: str, expires_at: datetime | None = None
+    ) -> str:
+        """Create a share token for a container.
+
+        Args:
+            container_id: Container ID to share
+            user_id: Owner user ID
+            expires_at: Optional expiration timestamp
+
+        Returns:
+            Generated share token
+
+        Raises:
+            ValueError: If container not found or user doesn't own it
+        """
+        # Verify container ownership
+        container = await self.repository.get_container(container_id, user_id)
+        if not container:
+            raise ValueError("Container not found or access denied")
+
+        # Generate unique token
+        token = secrets.token_urlsafe(32)
+
+        # Create share token
+        await self.repository.create_share_token(container_id, user_id, token, expires_at)
+
+        return token
+
+    async def get_share_tokens(self, container_id: str, user_id: str) -> list[dict]:
+        """Get all share tokens for a container.
+
+        Args:
+            container_id: Container ID
+            user_id: Owner user ID
+
+        Returns:
+            List of share token dictionaries with share URLs
+        """
+        tokens = await self.repository.get_share_tokens_by_container(container_id, user_id)
+        result = []
+        for token_db in tokens:
+            # Construct share URL (frontend will handle the base URL)
+            share_url = f"/shared/container/{token_db.token}"
+            result.append({
+                "token": token_db.token,
+                "containerId": token_db.container_id,
+                "expiresAt": token_db.expires_at,
+                "createdAt": token_db.created_at,
+                "shareUrl": share_url,
+            })
+        return result
+
+    async def revoke_share_token(self, token: str, user_id: str) -> bool:
+        """Revoke a share token.
+
+        Args:
+            token: Share token to revoke
+            user_id: Owner user ID
+
+        Returns:
+            True if token was revoked, False otherwise
+        """
+        return await self.repository.revoke_share_token(token, user_id)
 
     async def update_container(self, container_id: str, user_id: str, data: ContainerUpdate) -> ContainerResponse | None:
         """Update a container.
@@ -256,7 +373,7 @@ class GearService:
         container = await self.repository.update_container(container_id, user_id, data)
         if not container:
             return None
-        return self._map_container_to_response(container)
+        return await self._map_container_to_response(container)
 
     async def delete_container(self, container_id: str, user_id: str) -> bool:
         """Delete a container and all its items.
@@ -284,7 +401,18 @@ class GearService:
         item = await self.repository.create_item(container_id, user_id, data)
         if not item:
             return None
-        return self._map_item_to_response(item)
+        
+        # Get primary image URL (if exists)
+        primary_image = await self._image_repository.get_primary_image(item.id)
+        primary_image_url = None
+        if primary_image:
+            # If external_url exists, use it. Otherwise, get URL from storage.
+            if primary_image.external_url:
+                primary_image_url = primary_image.external_url
+            else:
+                primary_image_url = await self._storage.get_url(primary_image.file_path)
+        
+        return self._map_item_to_response(item, primary_image_url)
 
     async def get_item(self, item_id: str, user_id: str) -> ItemResponse | None:
         """Get an item by ID.
@@ -299,7 +427,18 @@ class GearService:
         item = await self.repository.get_item(item_id, user_id)
         if not item:
             return None
-        return self._map_item_to_response(item)
+        
+        # Get primary image URL
+        primary_image = await self._image_repository.get_primary_image(item_id)
+        primary_image_url = None
+        if primary_image:
+            # If external_url exists, use it. Otherwise, get URL from storage.
+            if primary_image.external_url:
+                primary_image_url = primary_image.external_url
+            else:
+                primary_image_url = await self._storage.get_url(primary_image.file_path)
+        
+        return self._map_item_to_response(item, primary_image_url)
 
     async def get_items(self, container_id: str, user_id: str, skip: int = 0, limit: int = 100) -> list[ItemResponse]:
         """Get all items in a container.
@@ -311,10 +450,22 @@ class GearService:
             limit: Maximum number of records to return
 
         Returns:
-            List of item responses
+            List of item responses with primary image URLs
         """
         items = await self.repository.get_items(container_id, user_id, skip, limit)
-        return [self._map_item_to_response(item) for item in items]
+        
+        # Batch fetch primary images for all items
+        item_ids = [item.id for item in items]
+        primary_images = await self._image_repository.get_primary_images_by_items(item_ids)
+        
+        # Get URLs for all primary images
+        image_urls: dict[str, str] = {}
+        for item_id, image in primary_images.items():
+            url = await self._storage.get_url(image.file_path)
+            image_urls[item_id] = url
+        
+        # Map items to responses with primary image URLs
+        return [self._map_item_to_response(item, image_urls.get(item.id)) for item in items]
 
     async def update_item(self, item_id: str, user_id: str, data: ItemUpdate) -> ItemResponse | None:
         """Update a gear item.
@@ -330,7 +481,18 @@ class GearService:
         item = await self.repository.update_item(item_id, user_id, data)
         if not item:
             return None
-        return self._map_item_to_response(item)
+        
+        # Get primary image URL (if exists)
+        primary_image = await self._image_repository.get_primary_image(item_id)
+        primary_image_url = None
+        if primary_image:
+            # If external_url exists, use it. Otherwise, get URL from storage.
+            if primary_image.external_url:
+                primary_image_url = primary_image.external_url
+            else:
+                primary_image_url = await self._storage.get_url(primary_image.file_path)
+        
+        return self._map_item_to_response(item, primary_image_url)
 
     async def delete_item(self, item_id: str, user_id: str) -> bool:
         """Delete a gear item.

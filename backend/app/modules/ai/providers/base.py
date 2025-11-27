@@ -1,44 +1,73 @@
-"""Abstract base provider for AI integrations."""
+"""Abstract base class for AI providers."""
 
 from abc import ABC, abstractmethod
+from typing import Any
 
-from .types import ChatResponse, Message
+from pydantic import BaseModel
+
+
+class ChatMessage(BaseModel):
+    """Chat message model."""
+
+    role: str  # 'system', 'user', 'assistant'
+    content: str
+
+
+class ChatResponse(BaseModel):
+    """Chat response model."""
+
+    message: str
+    prompt_tokens: int
+    completion_tokens: int
+    total_tokens: int
+    model: str
+    finish_reason: str | None = None
+    raw_response: dict[str, Any] | None = None
 
 
 class AIProvider(ABC):
-    """Abstract base class for AI providers."""
+    """Abstract base class for AI providers.
+
+    All AI providers must implement these methods.
+    """
 
     @abstractmethod
     async def chat(
         self,
-        messages: list[Message],
+        messages: list[dict[str, str]],
         model: str,
         max_tokens: int | None = None,
         temperature: float = 1.0,
-        **kwargs,
+        **kwargs: Any,
     ) -> ChatResponse:
         """Send chat completion request.
 
         Args:
-            messages: List of messages in the conversation
+            messages: List of chat messages
             model: Model identifier
-            max_tokens: Maximum tokens to generate (None = model default)
-            temperature: Sampling temperature (0.0-2.0)
+            max_tokens: Maximum tokens to generate (optional)
+            temperature: Sampling temperature (0-2)
             **kwargs: Additional provider-specific parameters
 
         Returns:
-            ChatResponse: Response from the AI model
+            ChatResponse with message and token usage
+
+        Raises:
+            OpenRouterError: If API request fails
         """
         pass
 
     @abstractmethod
-    async def validate_token(self, api_key: str) -> bool:
-        """Validate API token.
+    async def validate_token(self, api_token: str) -> bool:
+        """Validate an API token.
 
         Args:
-            api_key: API key to validate
+            api_token: API token to validate
 
         Returns:
-            bool: True if token is valid
+            True if token is valid
+
+        Raises:
+            TokenValidationError: If token is invalid
         """
         pass

@@ -12,6 +12,7 @@ export default {
     success: 'Success',
     cancel: 'Cancel',
     save: 'Save',
+    create: 'Create',
     delete: 'Delete',
     edit: 'Edit',
     close: 'Close',

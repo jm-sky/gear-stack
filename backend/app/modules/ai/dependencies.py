@@ -4,17 +4,17 @@ from fastapi import Depends, HTTPException, status
 
 from app.modules.auth.dependencies import CurrentUser
 
-from .exceptions import AdminRequiredError
-
 
 async def require_admin(current_user: CurrentUser = Depends()) -> CurrentUser:
     """Require admin user for AI endpoints.
 
+    Phase 1: AI features are admin-only.
+
     Args:
-        current_user: Currently authenticated user from auth module
+        current_user: Current authenticated user from auth module
 
     Returns:
-        CurrentUser: The admin user
+        Current user if admin
 
     Raises:
         HTTPException: 403 Forbidden if user is not admin

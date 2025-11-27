@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CalendarPlus, CalendarSync, ExternalLink } from 'lucide-vue-next'
+import { CalendarPlus, CalendarSync, ExternalLink, Link2 } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -44,6 +44,7 @@ const emit = defineEmits<{
   exportToCsv: []
   recognizeParametersAll: []
   aiChat: []
+  manageShareTokens: []
 }>()
 
 const router = useRouter()
@@ -221,6 +222,11 @@ const handleBack = () => {
               <DropdownMenuItem @click="$emit('recognizeParametersAll')">
                 <RecognizeParametersAllIcon class="size-4" />
                 {{ t('gear.actions.recognizeParametersAll') }}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem @click="$emit('manageShareTokens')">
+                <Link2 class="size-4" />
+                {{ t('gear.actions.manageShareTokens') }}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

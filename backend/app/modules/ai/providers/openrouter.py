@@ -1,35 +1,30 @@
 """OpenRouter AI provider using OpenAI SDK.
 
-OpenRouter officially recommends using the OpenAI library with a custom base URL.
-This approach ensures compatibility and receives upstream updates automatically.
-
-References:
-- https://openrouter.ai/docs/quickstart
-- https://github.com/openai/openai-python
+This is the official recommended approach from OpenRouter documentation.
 """
 
-import logging
 from typing import Any
 
-from openai import AsyncOpenAI, OpenAIError
+from openai import AsyncOpenAI
 
 from app.core.config import settings
+from app.modules.ai.exceptions import OpenRouterError, TokenValidationError
 
-from ..exceptions import OpenRouterError
-from .base import AIProvider
-from .types import ChatResponse, CostInfo, Message, TokenUsage
-
-logger = logging.getLogger(__name__)
+from .base import AIProvider, ChatResponse
 
 
 class OpenRouterProvider(AIProvider):
-    """OpenRouter provider using OpenAI SDK."""
+    """OpenRouter provider using OpenAI SDK.
+
+    Uses the official OpenAI SDK with custom base URL for OpenRouter.
+    This is the recommended approach from OpenRouter documentation.
+    """
 
     def __init__(self, api_key: str | None = None):
         """Initialize OpenRouter provider.
 
         Args:
-            api_key: API key (defaults to system key from settings)
+            api_key: Optional API key (uses system key if not provided)
         """
         self.api_key = api_key or settings.ai.openrouter_api_key
         self.base_url = settings.ai.openrouter_base_url
@@ -37,119 +32,77 @@ class OpenRouterProvider(AIProvider):
         if not self.api_key:
             raise OpenRouterError("OpenRouter API key not configured")
 
-        # Initialize OpenAI client with OpenRouter base URL
-        self.client = AsyncOpenAI(
-            api_key=self.api_key,
-            base_url=self.base_url,
-        )
+        self.client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url)
 
     async def chat(
         self,
-        messages: list[Message],
+        messages: list[dict[str, str]],
         model: str,
         max_tokens: int | None = None,
         temperature: float = 1.0,
-        **kwargs,
+        **kwargs: Any,
     ) -> ChatResponse:
-        """Send chat completion request via OpenAI SDK.
+        """Send chat completion request to OpenRouter.
 
         Args:
-            messages: List of messages
-            model: Model identifier (e.g., 'anthropic/claude-3.5-sonnet')
+            messages: List of chat messages
+            model: Model identifier (e.g., "openai/gpt-4o-mini")
             max_tokens: Maximum tokens to generate
-            temperature: Sampling temperature
-            **kwargs: Additional parameters
+            temperature: Sampling temperature (0-2)
+            **kwargs: Additional OpenRouter parameters
 
         Returns:
-            ChatResponse: Response from OpenRouter
+            ChatResponse with message and token usage
 
         Raises:
             OpenRouterError: If API request fails
         """
         try:
-            # Prepare request parameters
-            params: dict[str, Any] = {
-                "model": model,
-                "messages": messages,
-                "temperature": temperature,
-            }
-
-            if max_tokens is not None:
-                params["max_tokens"] = max_tokens
-
-            # Add additional parameters
-            params.update(kwargs)
-
-            # Make request using OpenAI SDK
-            response = await self.client.chat.completions.create(**params)
+            response = await self.client.chat.completions.create(
+                model=model, messages=messages, temperature=temperature, max_tokens=max_tokens, **kwargs
+            )
 
             # Extract response data
-            content = response.choices[0].message.content or ""
-            usage_data = response.usage
-
-            tokens: TokenUsage = {
-                "input": usage_data.prompt_tokens if usage_data else 0,
-                "output": usage_data.completion_tokens if usage_data else 0,
-                "total": usage_data.total_tokens if usage_data else 0,
-            }
-
-            # OpenRouter may provide cost info in response metadata
-            # (check response._raw_response if available)
-            cost_info: CostInfo | None = None
-
-            # Extract provider from model string (e.g., "anthropic/claude-3.5-sonnet" -> "anthropic")
-            provider = model.split("/")[0] if "/" in model else "unknown"
+            choice = response.choices[0]
+            message_content = choice.message.content or ""
 
             return ChatResponse(
-                content=content,
+                message=message_content,
+                prompt_tokens=response.usage.prompt_tokens if response.usage else 0,
+                completion_tokens=response.usage.completion_tokens if response.usage else 0,
+                total_tokens=response.usage.total_tokens if response.usage else 0,
                 model=response.model,
-                provider=provider,
-                tokens=tokens,
-                cost=cost_info,
+                finish_reason=choice.finish_reason,
                 raw_response=response.model_dump(),
             )
 
-        except OpenAIError as e:
-            logger.error(f"OpenRouter API error (via OpenAI SDK): {e}")
-            raise OpenRouterError(f"OpenRouter API error: {str(e)}")
         except Exception as e:
-            logger.error(f"Unexpected error in OpenRouter provider: {e}")
-            raise OpenRouterError(f"Unexpected error: {str(e)}")
+            raise OpenRouterError(f"OpenRouter API request failed: {e}") from e
 
-    async def validate_token(self, api_key: str) -> bool:
-        """Validate OpenRouter API token.
+    async def validate_token(self, api_token: str) -> bool:
+        """Validate an OpenRouter API token.
 
         Args:
-            api_key: API key to validate
+            api_token: API token to validate
 
         Returns:
-            bool: True if valid
+            True if token is valid
 
         Raises:
-            OpenRouterError: If validation fails
+            TokenValidationError: If token is invalid
         """
         try:
-            # Create temporary client with provided key
-            test_client = AsyncOpenAI(
-                api_key=api_key,
-                base_url=self.base_url,
-            )
+            # Create temporary client with the token
+            test_client = AsyncOpenAI(api_key=api_token, base_url=self.base_url)
 
-            # Make minimal test request
+            # Try a minimal request to validate the token
             await test_client.chat.completions.create(
-                model="anthropic/claude-3-haiku",
+                model="openai/gpt-3.5-turbo",
                 messages=[{"role": "user", "content": "test"}],
                 max_tokens=1,
             )
 
             return True
 
-        except OpenAIError as e:
-            # Check if it's authentication error
-            if "401" in str(e) or "authentication" in str(e).lower():
-                return False
-            logger.error(f"Token validation error: {e}")
-            raise OpenRouterError(f"Failed to validate token: {str(e)}")
         except Exception as e:
-            logger.error(f"Token validation error: {e}")
-            raise OpenRouterError(f"Failed to validate token: {str(e)}")
+            raise TokenValidationError(f"Token validation failed: {e}") from e

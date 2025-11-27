@@ -36,12 +36,14 @@ class ItemImageApiService {
    * @param itemId - Item ID
    * @param url - External image URL
    * @param isPrimary - Whether this should be the primary image
+   * @param hostLocally - If true, download and store image. If false, only save external URL.
    * @returns Created image metadata
    */
-  async uploadImageFromUrl(itemId: TUUID, url: string, isPrimary: boolean = false): Promise<IItemImage> {
+  async uploadImageFromUrl(itemId: TUUID, url: string, isPrimary: boolean = false, hostLocally: boolean = true): Promise<IItemImage> {
     const response = await apiClient.post<IItemImage>(`/gear/items/${itemId}/images/from-url`, {
       url,
       isPrimary,
+      hostLocally,
     })
     return response.data
   }

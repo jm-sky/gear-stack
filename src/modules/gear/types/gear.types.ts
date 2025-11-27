@@ -82,6 +82,7 @@ export interface IGearItem {
   consumable?: boolean | null // Item is consumed/used up (e.g., food, medicine, fuel)
   order?: number | null // Manual order for items within container (lower numbers appear first)
   showOnContainer?: boolean | null // Show item image in container view gallery (Implementation postponed - use container.showItemImages instead)
+  primaryImageUrl?: string | null // URL of the primary image for the item
   createdAt: TDateTime
   updatedAt: TDateTime
 }
