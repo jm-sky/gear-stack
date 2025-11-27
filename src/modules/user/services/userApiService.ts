@@ -21,6 +21,20 @@ interface UserResponse {
 }
 
 /**
+ * Backend API response type for public user profile
+ */
+interface PublicUserResponse {
+  id: string
+  name: string
+  avatarUrl?: string
+  isAdmin: boolean
+  isOwner?: boolean
+  isPremium?: boolean
+  email?: string
+  emailPublic: boolean
+}
+
+/**
  * User API Service
  * Handles API calls for user data when backend is enabled and user is authenticated
  */
@@ -42,6 +56,14 @@ class UserApiService {
   }
 
   /**
+   * Get public user profile by user ID
+   */
+  async getPublicUser(userId: string): Promise<IUser> {
+    const response = await apiClient.get<PublicUserResponse>(`/users/${userId}/public`)
+    return this.mapPublicUserToIUser(response.data)
+  }
+
+  /**
    * Map backend UserResponse to frontend IUser
    */
   private mapToIUser(response: UserResponse): IUser {
@@ -55,6 +77,24 @@ class UserApiService {
       isPremium: response.isPremium ?? response.role === 'premium',
       createdAt: response.createdAt,
       updatedAt: response.updatedAt,
+    }
+  }
+
+  /**
+   * Map backend PublicUserResponse to frontend IUser
+   */
+  private mapPublicUserToIUser(response: PublicUserResponse): IUser {
+    return {
+      id: response.id,
+      name: response.name,
+      email: response.email || '',
+      avatarUrl: response.avatarUrl,
+      isAdmin: response.isAdmin,
+      isOwner: response.isOwner,
+      isPremium: response.isPremium,
+      emailPublic: response.emailPublic,
+      createdAt: '', // Not provided in public profile
+      updatedAt: '', // Not provided in public profile
     }
   }
 }

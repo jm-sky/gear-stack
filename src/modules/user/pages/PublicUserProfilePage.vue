@@ -11,22 +11,10 @@ import UserRoleBadge from '@/components/ui/UserRoleBadge.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import ColorDot from '@/modules/gear/components/ColorDot.vue'
 import { apiClient } from '@/shared/services/apiClient'
+import { getInitials } from '@/shared/utils/getInitials'
 import type { IUser } from '../types/user.types'
+import { userApiService } from '../services/userApiService'
 import type { IGearContainer } from '@/modules/gear/types/gear.types'
-
-/**
- * Backend API response type for public user profile
- */
-interface PublicUserResponse {
-  id: string
-  name: string
-  avatarUrl?: string
-  isAdmin: boolean
-  isOwner?: boolean
-  isPremium?: boolean
-  email?: string
-  emailPublic: boolean
-}
 
 const route = useRoute()
 const router = useRouter()
@@ -38,33 +26,10 @@ const containers = ref<IGearContainer[]>([])
 const isLoading = ref(true)
 const error = ref<string | null>(null)
 
-/**
- * Map backend PublicUserResponse to frontend IUser
- */
-function mapToIUser(response: PublicUserResponse): IUser {
-  return {
-    id: response.id,
-    name: response.name,
-    email: response.email || '',
-    avatarUrl: response.avatarUrl,
-    isAdmin: response.isAdmin,
-    isOwner: response.isOwner,
-    isPremium: response.isPremium,
-    emailPublic: response.emailPublic,
-    createdAt: '', // Not provided in public profile
-    updatedAt: '', // Not provided in public profile
-  }
-}
-
-// Generate initials from name or email
+// Generate initials from name or email using shared helper
 const initials = computed(() => {
   if (user.value?.name) {
-    return user.value.name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2)
+    return getInitials(user.value.name)
   }
   if (user.value?.email) {
     return user.value.email.substring(0, 2).toUpperCase()
@@ -74,9 +39,8 @@ const initials = computed(() => {
 
 onMounted(async () => {
   try {
-    // Fetch public user profile
-    const userResponse = await apiClient.get<PublicUserResponse>(`/users/${userId}/public`)
-    user.value = mapToIUser(userResponse.data)
+    // Fetch public user profile using service
+    user.value = await userApiService.getPublicUser(userId)
 
     // Fetch public containers for this user
     const containersResponse = await apiClient.get<IGearContainer[]>(`/gear/public/containers?authorId=${userId}`)

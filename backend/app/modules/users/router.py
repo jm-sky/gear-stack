@@ -7,6 +7,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.modules.auth.repositories import UserRepository as AuthUserRepository
+from app.modules.auth.repositories import get_user_repository as get_auth_user_repository
 from app.modules.settings.db_models import UserSettingsDB
 
 from .dependencies import AdminUser, CurrentUser
@@ -119,7 +121,7 @@ async def update_current_user_profile(
 )
 async def get_public_user_profile(
     user_id: str,
-    repo: Annotated[UserRepository, Depends(get_user_repository)],
+    auth_repo: Annotated[AuthUserRepository, Depends(get_auth_user_repository)],
     db: AsyncSession = Depends(get_db),
 ) -> PublicUserResponse:
     """Get public user profile.
@@ -132,9 +134,9 @@ async def get_public_user_profile(
     - Profile is public AND
     - User's emailPublic setting is True
     """
-    # Get user
-    user = await repo.get_user_by_id(user_id)
-    if not user:
+    # Get user directly from auth repository to access all role fields
+    auth_user = await auth_repo.get_user_by_id(user_id)
+    if not auth_user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User {user_id} not found")
 
     # Check if profile is public
@@ -148,15 +150,15 @@ async def get_public_user_profile(
             detail="This user profile is not public",
         )
 
-    # Build public response
+    # Build public response - AuthUser has all role fields (isAdmin, isOwner, isPremium)
     return PublicUserResponse(
-        id=user.id,
-        name=user.name,
-        avatarUrl=user.avatarUrl,
-        isAdmin=user.isAdmin if hasattr(user, 'isAdmin') else (user.role == "admin"),
-        isOwner=user.isOwner if hasattr(user, 'isOwner') else False,
-        isPremium=user.isPremium if hasattr(user, 'isPremium') else False,
-        email=user.email if settings.is_public_email else None,
+        id=auth_user.id,
+        name=auth_user.name,
+        avatarUrl=auth_user.avatarUrl,
+        isAdmin=auth_user.isAdmin,
+        isOwner=auth_user.isOwner,
+        isPremium=auth_user.isPremium,
+        email=auth_user.email if settings.is_public_email else None,
         emailPublic=settings.is_public_email,
     )
 

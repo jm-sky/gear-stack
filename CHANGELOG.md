@@ -21,6 +21,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.20.1] - 2025-01-27
+
+### Fixed
+- **Public Profile Owner Badge**: Fixed Owner role not displaying correctly on public profiles
+  - Backend now uses AuthUser directly in public profile endpoint to access all role fields
+  - Previously used adapted User model which lacked `isOwner` and `isPremium` attributes
+  - Owner users now correctly show Owner badge instead of Admin badge on public profiles
+
+### Changed
+- **Code Refactoring**: Improved code quality and maintainability
+  - Added `getPublicUser()` method to `userApiService` for public profile fetching
+  - PublicUserProfilePage now uses service layer instead of direct API calls
+  - Reused shared `getInitials()` helper from `@/shared/utils/getInitials`
+  - Removed duplicate interfaces and mapper functions from component
+
+---
+
 ## [2.20.0] - 2025-01-27
 
 ### Added
