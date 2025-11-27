@@ -1,5 +1,11 @@
 export const settingsEn = {
   settings: {
+    common: {
+      save: 'Save',
+      add: 'Add',
+      edit: 'Edit',
+      cancel: 'Cancel',
+    },
     page: {
       title: 'Settings',
       subtitle: 'Manage your preferences and custom categories',
@@ -96,6 +102,18 @@ export const settingsEn = {
         subtitle: 'Default currency for prices in items and containers',
         placeholder: 'Select a currency',
       },
+      imageProcessingMode: {
+        label: 'Image Processing Mode',
+        subtitle: 'Choose how uploaded images are processed (resized and compressed)',
+        options: {
+          highQuality: 'High Quality',
+          highQualityDescription: 'Maximum size: 2560x2560px, JPEG quality: 95%. Best quality, larger file size.',
+          balanced: 'Balanced',
+          balancedDescription: 'Maximum size: 1200x1200px, JPEG quality: 90%. Good balance between quality and file size.',
+          storageSaver: 'Storage Saver',
+          storageSaverDescription: 'Maximum size: 800x800px, JPEG quality: 80%. Smaller file size, lower quality.',
+        },
+      },
     },
     categories: {
       title: 'Custom Categories',
@@ -106,6 +124,7 @@ export const settingsEn = {
       cancel: 'Cancel',
       deleteConfirm: 'Are you sure you want to delete this category?',
       valuePlaceholder: 'Category name',
+      valueRequired: 'Category name is required',
       empty: 'No custom categories yet. Add your first one above.',
     },
     containerTypes: {
@@ -117,6 +136,7 @@ export const settingsEn = {
       cancel: 'Cancel',
       deleteConfirm: 'Are you sure you want to delete this container type?',
       valuePlaceholder: 'Container type name',
+      valueRequired: 'Container type name is required',
       empty: 'No custom container types yet. Add your first one above.',
     },
     brands: {
@@ -128,6 +148,7 @@ export const settingsEn = {
       cancel: 'Cancel',
       deleteConfirm: 'Are you sure you want to delete this brand?',
       valuePlaceholder: 'Brand name',
+      valueRequired: 'Brand name is required',
       empty: 'No custom brands yet. Add your first one above.',
     },
     delete_account: {

@@ -631,6 +631,12 @@ export const gearEn = {
       errorRevoking: 'Failed to revoke share token',
       errorCopying: 'Failed to copy to clipboard',
     },
+    settings: {
+      page: {
+        title: 'Gear Settings',
+        subtitle: 'Manage your gear-specific preferences and settings',
+      },
+    },
   },
 }
 
@@ -1268,6 +1274,12 @@ export const gearPl = {
       errorCreating: 'Nie udało się utworzyć tokenu udostępniania',
       errorRevoking: 'Nie udało się odwołać tokenu udostępniania',
       errorCopying: 'Nie udało się skopiować do schowka',
+    },
+    settings: {
+      page: {
+        title: 'Ustawienia sprzętu',
+        subtitle: 'Zarządzaj preferencjami i ustawieniami dotyczącymi sprzętu',
+      },
     },
   },
 }

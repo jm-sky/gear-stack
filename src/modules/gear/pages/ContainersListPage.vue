@@ -7,6 +7,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import { CONTAINERS_LIST_PAGE_FILTERS_KEY } from '@/shared/config/config'
 import { config } from '@/shared/config/config'
 import type { IGearContainer } from '../types/gear.types'
 import ContainerCard from '../components/ContainerCard.vue'
@@ -39,6 +40,49 @@ const loading = ref(false)
 const searchQueryRaw = ref('')
 const searchQuery = refDebounced(searchQueryRaw, 300)
 const showOnlyRootContainers = ref(false)
+
+// Helper to load filters from localStorage
+interface FiltersState {
+  searchQuery: string
+  showOnlyRootContainers: boolean
+}
+
+function loadFiltersFromStorage(): FiltersState | null {
+  const stored = localStorage.getItem(CONTAINERS_LIST_PAGE_FILTERS_KEY)
+  if (stored) {
+    try {
+      return JSON.parse(stored) as FiltersState
+    } catch (error) {
+      console.error('Error loading filters from storage:', error)
+    }
+  }
+  return null
+}
+
+// Helper to save filters to localStorage
+function saveFiltersToStorage(): void {
+  try {
+    const filters: FiltersState = {
+      searchQuery: searchQueryRaw.value,
+      showOnlyRootContainers: showOnlyRootContainers.value,
+    }
+    localStorage.setItem(CONTAINERS_LIST_PAGE_FILTERS_KEY, JSON.stringify(filters))
+  } catch (error) {
+    console.error('Error saving filters to storage:', error)
+  }
+}
+
+// Load filters from storage on mount
+const savedFilters = loadFiltersFromStorage()
+if (savedFilters) {
+  searchQueryRaw.value = savedFilters.searchQuery
+  showOnlyRootContainers.value = savedFilters.showOnlyRootContainers
+}
+
+// Watch filters and save to localStorage
+watch([searchQueryRaw, showOnlyRootContainers], () => {
+  saveFiltersToStorage()
+}, { deep: true })
 
 // Dialogs
 const importDialogOpen = ref(false)

@@ -71,6 +71,12 @@ export const config = {
   defaults: {
     preferredWeightUnit: 'g' as TGearWeightUnit,
   },
+  storage: {
+    // Maximum file size for regular users (20 MB)
+    maxFileSize: 20 * 1024 * 1024,
+    // Maximum file size for administrators (50 MB)
+    maxFileSizeAdmin: 50 * 1024 * 1024,
+  },
 }
 
 // osobna zmienna do użycia w localStorage / store
@@ -83,3 +89,7 @@ export const GEAR_SETTINGS_STORAGE_KEY = `${config.app.id}:gear-settings`
 export const USER_STORAGE_KEY = `${config.app.id}:user`
 export const ITEMS_TABLE_COLUMN_VISIBILITY_KEY = `${config.app.id}:items-table-column-visibility`
 export const ALL_ITEMS_TABLE_COLUMN_VISIBILITY_KEY = `${config.app.id}:all-items-table-column-visibility`
+export const ALL_ITEMS_PAGE_FILTERS_KEY = `${config.app.id}:all-items-page:filters`
+export const SHOPPING_PLANNING_PAGE_FILTERS_KEY = `${config.app.id}:shopping-planning-page:filters`
+export const CONTAINERS_LIST_PAGE_FILTERS_KEY = `${config.app.id}:containers-list-page:filters`
+export const PUBLIC_CONTAINERS_BROWSER_PAGE_FILTERS_KEY = `${config.app.id}:public-containers-browser-page:filters`

@@ -470,9 +470,7 @@ class GearRepository(SearchMixin):
         return list(items)
 
     # Share token operations
-    async def create_share_token(
-        self, container_id: str, user_id: str, token: str, expires_at: datetime | None = None
-    ) -> ContainerShareTokenDB:
+    async def create_share_token(self, container_id: str, user_id: str, token: str, expires_at: datetime | None = None) -> ContainerShareTokenDB:
         """Create a share token for a container.
 
         Args:
@@ -548,11 +546,7 @@ class GearRepository(SearchMixin):
         if not container:
             return []
 
-        stmt = (
-            select(ContainerShareTokenDB)
-            .where(ContainerShareTokenDB.container_id == container_id)
-            .order_by(ContainerShareTokenDB.created_at.desc())
-        )
+        stmt = select(ContainerShareTokenDB).where(ContainerShareTokenDB.container_id == container_id).order_by(ContainerShareTokenDB.created_at.desc())
         result = await self.db.execute(stmt)
         return result.scalars().all()
 

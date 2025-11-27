@@ -164,10 +164,7 @@ class ItemImageRepository:
         """
         if not item_ids:
             return {}
-        stmt = select(ItemImageDB).where(
-            ItemImageDB.item_id.in_(item_ids),
-            ItemImageDB.is_primary == True  # noqa: E712
-        )
+        stmt = select(ItemImageDB).where(ItemImageDB.item_id.in_(item_ids), ItemImageDB.is_primary == True)  # noqa: E712
         result = await self.db.execute(stmt)
         images = result.scalars().all()
         return {img.item_id: img for img in images}

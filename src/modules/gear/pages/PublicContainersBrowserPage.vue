@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { refDebounced } from '@vueuse/core'
 import { Package } from 'lucide-vue-next'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import { PUBLIC_CONTAINERS_BROWSER_PAGE_FILTERS_KEY } from '@/shared/config/config'
 import type { IGearContainer } from '../types/gear.types'
 import ContainersFilters from '../components/ContainersFilters.vue'
 import PublicContainerCard from '../components/PublicContainerCard.vue'
@@ -20,6 +21,46 @@ const loading = ref(true)
 // Search filter
 const searchQueryRaw = ref('')
 const searchQuery = refDebounced(searchQueryRaw, 300)
+
+// Helper to load filters from localStorage
+interface FiltersState {
+  searchQuery: string
+}
+
+function loadFiltersFromStorage(): FiltersState | null {
+  const stored = localStorage.getItem(PUBLIC_CONTAINERS_BROWSER_PAGE_FILTERS_KEY)
+  if (stored) {
+    try {
+      return JSON.parse(stored) as FiltersState
+    } catch (error) {
+      console.error('Error loading filters from storage:', error)
+    }
+  }
+  return null
+}
+
+// Helper to save filters to localStorage
+function saveFiltersToStorage(): void {
+  try {
+    const filters: FiltersState = {
+      searchQuery: searchQueryRaw.value,
+    }
+    localStorage.setItem(PUBLIC_CONTAINERS_BROWSER_PAGE_FILTERS_KEY, JSON.stringify(filters))
+  } catch (error) {
+    console.error('Error saving filters to storage:', error)
+  }
+}
+
+// Load filters from storage on mount
+const savedFilters = loadFiltersFromStorage()
+if (savedFilters) {
+  searchQueryRaw.value = savedFilters.searchQuery
+}
+
+// Watch filters and save to localStorage
+watch(searchQueryRaw, () => {
+  saveFiltersToStorage()
+})
 
 // Filtered containers
 const filteredContainers = computed<IGearContainer[]>(() => {

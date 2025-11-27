@@ -54,6 +54,7 @@ function handleDragEnd() {
 }
 
 function handleClick() {
+  console.log('[ItemImageCard] handleClick', props.image.id)
   emit('preview', props.image.id)
 }
 
@@ -66,7 +67,7 @@ function handleImageError() {
   <div
     :draggable="editable"
     :class="[
-      'group relative rounded-lg transition-all overflow-hidden',
+      'group relative rounded-lg transition-all overflow-hidden cursor-pointer',
       isDragOver && 'outline-2 outline-dashed outline-offset-2 outline-primary',
       isDragging && 'opacity-50',
     ]"

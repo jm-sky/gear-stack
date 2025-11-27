@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Label } from '@/components/ui/label'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import Select from '@/components/ui/select/Select.vue'
 import SelectContent from '@/components/ui/select/SelectContent.vue'
 import SelectGroup from '@/components/ui/select/SelectGroup.vue'
@@ -15,6 +17,8 @@ import SelectItem from '@/components/ui/select/SelectItem.vue'
 import SelectLabel from '@/components/ui/select/SelectLabel.vue'
 import SelectTrigger from '@/components/ui/select/SelectTrigger.vue'
 import SelectValue from '@/components/ui/select/SelectValue.vue'
+import Separator from '@/components/ui/separator/Separator.vue'
+import { useAdmin } from '@/modules/admin/composables/useAdmin'
 import { useSettings } from '@/modules/settings/composables/useSettings'
 import { settingsSchema } from '@/modules/settings/validation/settings.schema'
 import { useDarkMode } from '@/shared/composables/useDarkMode'
@@ -28,6 +32,7 @@ const props = defineProps<{
 const { t } = useI18n()
 const { currentLocale } = useLocale()
 const { isDark } = useDarkMode()
+const { isAdmin } = useAdmin()
 const { settingsQuery, settings, updateSettings, isLoading, isUpdating, isError } = useSettings(props.service)
 
 const getThemeValue = (darkMode: boolean | undefined) => {
@@ -39,20 +44,25 @@ const { handleSubmit, setValues } = useForm({
   initialValues: {
     darkMode: getThemeValue(settings.value?.darkMode),
     locale: settings.value?.locale ?? currentLocale.value,
-    defaultContainersPublic: settings.value?.defaultContainersPublic ?? false,
     profilePublic: settings.value?.profilePublic ?? false,
     emailPublic: settings.value?.emailPublic ?? false,
+    imageProcessingMode: settings.value?.imageProcessingMode ?? 'balanced',
   }
 })
 
 watch(() => settingsQuery.data.value, (val: SettingsType | undefined) => {
   if (val) {
+    // If user is not admin and has high_quality, reset to balanced
+    let imageMode = val.imageProcessingMode ?? 'balanced'
+    if (!isAdmin.value && imageMode === 'high_quality') {
+      imageMode = 'balanced'
+    }
     setValues({
       darkMode: getThemeValue(val.darkMode),
       locale: val.locale,
-      defaultContainersPublic: val.defaultContainersPublic ?? false,
       profilePublic: val.profilePublic ?? false,
       emailPublic: val.emailPublic ?? false,
+      imageProcessingMode: imageMode,
     })
   }
 })
@@ -69,13 +79,31 @@ watch(() => isDark.value, (val: boolean) => {
   immediate: true,
 })
 
+// Watch for admin status changes - if user loses admin, reset high_quality to balanced
+watch(() => isAdmin.value, (isAdminValue) => {
+  if (!isAdminValue) {
+    const currentMode = settings.value?.imageProcessingMode
+    if (currentMode === 'high_quality') {
+      setValues({
+        imageProcessingMode: 'balanced',
+      })
+    }
+  }
+})
+
 const onSubmit = handleSubmit(async (values) => {
+  // Prevent non-admins from setting high_quality
+  let imageMode = values.imageProcessingMode ?? null
+  if (!isAdmin.value && imageMode === 'high_quality') {
+    imageMode = 'balanced'
+  }
+
   await updateSettings({
     darkMode: values.darkMode === 'dark',
     locale: values.locale,
-    defaultContainersPublic: values.defaultContainersPublic,
     profilePublic: values.profilePublic,
     emailPublic: values.emailPublic,
+    imageProcessingMode: imageMode,
   })
 })
 </script>
@@ -114,7 +142,7 @@ const onSubmit = handleSubmit(async (values) => {
                 <FormControl>
                   <Select v-bind="componentField">
                     <SelectTrigger>
-                      <SelectValue :placeholder="t('settings.page.sections.theme.placeholder')" />
+                      <SelectValue :placeholder="t('settings.page.sections.theme.placeholder')" class="min-w-20" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
@@ -147,7 +175,7 @@ const onSubmit = handleSubmit(async (values) => {
                 <FormControl>
                   <Select v-bind="componentField">
                     <SelectTrigger>
-                      <SelectValue :placeholder="t('settings.page.sections.locale.placeholder')" />
+                      <SelectValue :placeholder="t('settings.page.sections.locale.placeholder')" class="min-w-20" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
@@ -167,24 +195,6 @@ const onSubmit = handleSubmit(async (values) => {
             </FormField>
           </div>
         </div>
-
-        <!-- Default Containers Public -->
-        <FormField v-slot="{ componentField, handleChange }" name="defaultContainersPublic">
-          <FormItem v-slot="{ id }" class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-            <Checkbox
-              :id="id"
-              :model-value="componentField.modelValue"
-              @update:model-value="handleChange"
-            />
-            <div class="flex-1 space-y-1">
-              <FormLabel :label="$t('settings.page.sections.defaultContainersPublic.label')" class="cursor-pointer" />
-              <p class="text-sm text-muted-foreground">
-                {{ $t('settings.page.sections.defaultContainersPublic.subtitle') }}
-              </p>
-            </div>
-            <FormMessage />
-          </FormItem>
-        </FormField>
 
         <!-- Profile Public -->
         <FormField v-slot="{ componentField, handleChange }" name="profilePublic">
@@ -221,6 +231,61 @@ const onSubmit = handleSubmit(async (values) => {
             <FormMessage />
           </FormItem>
         </FormField>
+
+        <Separator />
+
+        <!-- Image Processing Mode -->
+        <div class="space-y-3">
+          <FormField v-slot="{ componentField }" name="imageProcessingMode">
+            <FormItem>
+              <FormLabel required>
+                {{ t('settings.preferences.imageProcessingMode.label') }}
+              </FormLabel>
+              <p class="text-sm text-muted-foreground">
+                {{ t('settings.preferences.imageProcessingMode.subtitle') }}
+              </p>
+              <FormControl>
+                <!-- TODO: Extract to dedicated component -->
+                <RadioGroup v-bind="componentField" class="flex flex-col gap-4">
+                  <div v-if="isAdmin" class="flex items-center gap-2">
+                    <RadioGroupItem id="high-quality" value="high_quality" />
+                    <div class="flex-1">
+                      <Label for="high-quality" class="text-sm font-medium cursor-pointer">
+                        {{ t('settings.preferences.imageProcessingMode.options.highQuality') }}
+                      </Label>
+                      <p class="text-xs text-muted-foreground">
+                        {{ t('settings.preferences.imageProcessingMode.options.highQualityDescription') }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <RadioGroupItem id="balanced" value="balanced" />
+                    <div class="flex-1">
+                      <Label for="balanced" class="text-sm font-medium cursor-pointer">
+                        {{ t('settings.preferences.imageProcessingMode.options.balanced') }}
+                      </Label>
+                      <p class="text-xs text-muted-foreground">
+                        {{ t('settings.preferences.imageProcessingMode.options.balancedDescription') }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <RadioGroupItem id="storage-saver" value="storage_saver" />
+                    <div class="flex-1">
+                      <Label for="storage-saver" class="text-sm font-medium cursor-pointer">
+                        {{ t('settings.preferences.imageProcessingMode.options.storageSaver') }}
+                      </Label>
+                      <p class="text-xs text-muted-foreground">
+                        {{ t('settings.preferences.imageProcessingMode.options.storageSaverDescription') }}
+                      </p>
+                    </div>
+                  </div>
+                </RadioGroup>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+        </div>
 
         <div class="flex justify-end">
           <Button type="submit" :loading="isUpdating">

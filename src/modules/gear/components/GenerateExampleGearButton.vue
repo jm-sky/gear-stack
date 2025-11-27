@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ChevronDown } from 'lucide-vue-next'
+import { BookCopyIcon, ChevronDown } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -54,6 +54,7 @@ const handleGenerate = async (variant: SampleSetVariant) => {
         :variant="variant"
         :class="props.class"
       >
+        <BookCopyIcon class="size-4" />
         {{ t('gear.sampleSet.generateButton', 'Generate Sample Set') }}
         <ChevronDown class="size-4" />
       </Button>
