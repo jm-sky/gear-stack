@@ -26,14 +26,17 @@ function handleDelete() {
 </script>
 
 <template>
-  <div class="absolute inset-0 flex items-center justify-center gap-2 rounded-lg bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+  <div
+    class="absolute inset-0 flex items-center justify-center gap-2 rounded-lg bg-black/50 opacity-0 transition-opacity group-hover:opacity-100"
+    @click.stop
+  >
     <Button
       v-tooltip.bottom="t('gear.fileUpload.imageGallery.tooltips.setPrimary')"
       :aria-label="t('gear.fileUpload.imageGallery.tooltips.setPrimary')"
       class="text-white"
       size="icon"
       variant="ghost"
-      @click="handleSetPrimary"
+      @click.stop="handleSetPrimary"
     >
       <Star :class="{ 'fill-yellow-400': image.isPrimary }" class="size-4" />
     </Button>
@@ -44,6 +47,7 @@ function handleDelete() {
       class="cursor-move text-white"
       size="icon"
       variant="ghost"
+      @click.stop
     >
       <GripVertical class="size-4" />
     </Button>
@@ -54,7 +58,7 @@ function handleDelete() {
       class="text-white"
       size="icon"
       variant="ghost"
-      @click="handleDelete"
+      @click.stop="handleDelete"
     >
       <Trash2 class="size-4" />
     </Button>

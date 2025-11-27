@@ -1,6 +1,6 @@
 import type { TUUID } from '@/shared/types/base.type'
 
-export type TStorageType = 'local' | 's3'
+export type TStorageType = 'local' | 's3' | 'external'
 
 export interface IItemImage {
   id: TUUID

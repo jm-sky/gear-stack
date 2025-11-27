@@ -222,6 +222,10 @@ export const gearEn = {
         deleteSuccess: 'Image deleted successfully',
         confirmDelete: 'Are you sure you want to delete this image?',
         deleteImage: 'Delete image',
+        uploadFromFile: 'Upload from file',
+        uploadFromUrl: 'Upload from URL',
+        addImageFromUrl: 'Add image from URL',
+        addImageFromUrlDescription: 'Enter an image URL to download and add it to this item.',
       },
     },
     actions: {
@@ -261,6 +265,9 @@ export const gearEn = {
         primary: 'Primary',
         addFromUrl: 'Add from URL',
         urlPlaceholder: 'Paste image URL (https://...)',
+        hostOption: 'Host',
+        hostLocally: 'Locally (download and store)',
+        hostExternally: 'Externally (save URL only)',
         confirmDelete: 'Are you sure you want to delete this image?',
         messages: {
           uploadSuccess: 'Image uploaded successfully',
@@ -852,6 +859,10 @@ export const gearPl = {
         deleteSuccess: 'Obrazek został usunięty',
         confirmDelete: 'Czy na pewno chcesz usunąć ten obrazek?',
         deleteImage: 'Usuń obrazek',
+        uploadFromFile: 'Prześlij z pliku',
+        uploadFromUrl: 'Prześlij z URL',
+        addImageFromUrl: 'Dodaj obrazek z URL',
+        addImageFromUrlDescription: 'Wprowadź adres URL obrazka, aby go pobrać i dodać do tego przedmiotu.',
       },
     },
     actions: {
@@ -891,6 +902,9 @@ export const gearPl = {
         primary: 'Główny',
         addFromUrl: 'Dodaj z URL',
         urlPlaceholder: 'Wklej adres URL obrazka (https://...)',
+        hostOption: 'Hostowanie',
+        hostLocally: 'Lokalnie (ściągnij i zapisz)',
+        hostExternally: 'Zewnętrznie (tylko zapisz URL)',
         confirmDelete: 'Czy na pewno chcesz usunąć ten obrazek?',
         messages: {
           uploadSuccess: 'Obrazek został dodany',

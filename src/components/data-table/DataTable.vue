@@ -234,7 +234,7 @@ const handlePageSizeChange = (newPageSize: number) => {
 </script>
 
 <template>
-  <div class="space-y-4 w-full max-w-full overflow-hidden">
+  <div class="space-y-4 w-full max-w-full">
     <!-- Toolbar Slot -->
     <slot
       name="toolbar"

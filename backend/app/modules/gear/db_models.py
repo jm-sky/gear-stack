@@ -191,6 +191,7 @@ class ItemImageDB(Base):
     file_name: Mapped[str] = mapped_column(String(255), nullable=False)
     file_size: Mapped[int] = mapped_column(Integer, nullable=False)
     mime_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    external_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)  # External URL if not hosted locally
 
     # Image metadata
     width: Mapped[int | None] = mapped_column(Integer, nullable=True)

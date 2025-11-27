@@ -103,6 +103,7 @@ class ItemResponse(BaseModel):
     consumable: bool | None = None
     order: int | None = Field(None, ge=0)
     showOnContainer: bool | None = Field(None, alias="showOnContainer")
+    primaryImageUrl: str | None = Field(None, alias="primaryImageUrl")
     createdAt: datetime
     updatedAt: datetime
 

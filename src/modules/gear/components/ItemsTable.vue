@@ -398,6 +398,7 @@ function canMoveDown(item: IGearItem): boolean {
     <template #image="{ row }">
       <ItemsTableImageCell
         :item-id="row.original.id"
+        :primary-image-url="row.original.primaryImageUrl"
         :container-id="containerId"
         :public-mode="publicMode"
       />

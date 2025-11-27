@@ -241,6 +241,52 @@ Jeżeli kontener będzie miał obrazek (primary image), wyświetlać go w nagł�
   - Opis kontenera
 - Możliwość resetowania do domyślnej kolejności
 
+### 🔄 Obsługa usuwania i gwiazdkowania obrazków przedmiotu na urządzeniach mobilnych
+**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Small
+
+**Problem:**
+Kontrolki obrazków (gwiazdkowanie, usuwanie) w `ItemImageCardControls.vue` są widoczne tylko przy hover (`group-hover:opacity-100`). Na urządzeniach mobilnych (telefony, tablety) nie ma hover, więc kontrolki są zawsze niewidoczne (`opacity-0`) i użytkownik nie może:
+- Ustawić obrazka jako primary (gwiazdkowanie)
+- Usunąć obrazka
+
+**Rozwiązania do rozważenia:**
+1. **Zawsze widoczne na mobile** (najprostsze)
+   - Użyć media query: `md:opacity-0 md:group-hover:opacity-100`
+   - Na mobile (`< md`) kontrolki zawsze widoczne
+   - Na desktop zachować obecne zachowanie (hover)
+
+2. **Long press / context menu**
+   - Long press na obrazku → pokaż menu z opcjami (Set Primary, Delete)
+   - Podobnie jak context menu na desktop
+
+3. **Osobny przycisk "More" na mobile**
+   - Mały przycisk w rogu obrazka (np. trzy kropki)
+   - Kliknięcie → pokaż menu z opcjami
+   - Widoczny tylko na mobile
+
+4. **Touch event zamiast hover**
+   - Wykrywanie touch device (`@touchstart`)
+   - Po dotknięciu obrazka → pokaż kontrolki na kilka sekund
+   - Automatyczne ukrycie po czasie
+
+**Rekomendacja:**
+Kombinacja opcji 1 i 2:
+- Na mobile kontrolki zawsze widoczne (opcja 1)
+- Dodatkowo long press → context menu z opcjami (opcja 2)
+- Na desktop zachować obecne zachowanie (hover)
+
+**Implementacja:**
+- `ItemImageCardControls.vue`: Zmienić klasy CSS na responsive
+  - `opacity-0 md:opacity-0 md:group-hover:opacity-100` (zawsze widoczne na mobile)
+- `ItemImageCard.vue`: Dodać obsługę long press na mobile
+  - `@touchstart` / `@touchend` → pokaż menu
+- Opcjonalnie: Dodać wizualny wskaźnik, że obrazek ma kontrolki (np. mała ikona w rogu)
+
+**Zalety:**
+- Pełna funkcjonalność na urządzeniach mobilnych
+- Zachowanie obecnego UX na desktop
+- Lepsza dostępność (touch-friendly)
+
 ---
 
 ## ♿ Accessibility (Dostępność)

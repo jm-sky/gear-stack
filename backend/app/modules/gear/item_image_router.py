@@ -155,5 +155,7 @@ async def upload_item_image_from_url(
         Image metadata
     """
     service = ImageUploadService(db)
-    result = await service.upload_image_from_url(data.url, item_id, current_user.id, data.is_primary)
+    result = await service.upload_image_from_url(
+        data.url, item_id, current_user.id, data.is_primary, data.host_locally
+    )
     return result
