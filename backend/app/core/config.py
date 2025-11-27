@@ -183,6 +183,16 @@ class SecuritySettings(BaseSettings):
         validation_alias="EMAIL_VERIFICATION_TOKEN_EXPIRES_HOURS",
         description="Email verification token expiration in hours",
     )
+    superadmin_email: str | None = Field(
+        default=None,
+        validation_alias="SUPERADMIN_EMAIL",
+        description="Email address of the super admin user (owner) - cannot be deleted or demoted",
+    )
+    protected_user_email: str | None = Field(
+        default=None,
+        validation_alias="PROTECTED_USER_EMAIL",
+        description="Protected user email - this user cannot be deleted",
+    )
 
     @field_validator("secret_key")
     @classmethod

@@ -6,6 +6,7 @@ including user, container, and item management across the platform.
 
 import logging
 
+from app.core.config import get_settings
 from app.modules.auth.repositories import UserRepository as AuthUserRepository
 from app.modules.users.repositories import UserRepository
 from app.modules.users.schemas import UserUpdate
@@ -14,6 +15,7 @@ from .repository import AdminRepository
 from .schemas import AdminUserResponse, AdminContainerResponse, AdminItemResponse
 
 logger = logging.getLogger(__name__)
+settings = get_settings()
 
 
 class AdminService:
@@ -223,7 +225,7 @@ class AdminService:
             True if deleted, False if not found
 
         Raises:
-            HTTPException: If admin tries to delete Owner user
+            HTTPException: If trying to delete protected or Owner user
         """
         from fastapi import HTTPException, status
 
@@ -232,13 +234,28 @@ class AdminService:
         if not target_user:
             return False
 
-        # Protection: Admin cannot delete Owner users
+        # Protection 1: Cannot delete protected user email
+        if settings.security.protected_user_email:
+            if target_user.email.lower() == settings.security.protected_user_email.lower():
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Cannot delete protected user",
+                )
+
+        # Protection 2: Admin cannot delete Owner users
         if current_user.isAdmin and not current_user.isOwner:
             if target_user.is_owner:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="Administrators cannot delete Owner users",
                 )
+
+        # Protection 3: Admin users can only be deleted by Owners
+        if target_user.is_admin and not current_user.isOwner:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only Owners can delete admin users",
+            )
 
         return await self.user_repository.delete_user(user_id)
 

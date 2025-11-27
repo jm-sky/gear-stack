@@ -96,7 +96,7 @@ const columns = computed<ColumnDef<IAdminUser>[]>(() => [
   {
     id: 'isAdmin',
     accessorKey: 'isAdmin',
-    header: () => t('admin.users.columns.isAdmin', 'Admin'),
+    header: () => t('admin.users.columns.role', 'Role'),
     enableSorting: true,
   },
   {
@@ -188,10 +188,18 @@ onMounted(() => {
         </template>
 
         <template #isAdmin="{ row }">
-          <Badge v-if="row.original.isAdmin" variant="default">
+          <Badge v-if="row.original.isOwner" variant="default" class="bg-purple-600">
+            {{ t('admin.users.owner', 'Owner') }}
+          </Badge>
+          <Badge v-else-if="row.original.isPremium" variant="default" class="bg-yellow-600">
+            {{ t('admin.users.premium', 'Premium') }}
+          </Badge>
+          <Badge v-else-if="row.original.isAdmin" variant="default">
             {{ t('admin.users.admin', 'Admin') }}
           </Badge>
-          <span v-else class="text-muted-foreground">-</span>
+          <Badge v-else variant="secondary">
+            {{ t('admin.users.user', 'User') }}
+          </Badge>
         </template>
 
         <template #isActive="{ row }">
@@ -226,7 +234,11 @@ onMounted(() => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem @click="toggleAdmin(row.original)">
+              <!-- Toggle Admin - disabled for Owner users -->
+              <DropdownMenuItem
+                :disabled="row.original.isOwner"
+                @click="toggleAdmin(row.original)"
+              >
                 <Shield v-if="!row.original.isAdmin" class="size-4" />
                 <ShieldOff v-else class="size-4" />
                 <span>
@@ -238,7 +250,9 @@ onMounted(() => {
                 </span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
+              <!-- Delete - disabled for Owner and Admin users -->
               <DropdownMenuItem
+                :disabled="row.original.isOwner || row.original.isAdmin"
                 class="text-destructive focus:text-destructive"
                 @click="deleteUser(row.original.id)"
               >
