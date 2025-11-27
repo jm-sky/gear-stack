@@ -58,16 +58,18 @@ export function useAiContext() {
     return container?.items ?? []
   }
 
-  const buildContextData = (): Record<string, unknown> => {
+  const buildContextData = (containerIds?: string[]): Record<string, unknown> => {
     const data: Record<string, unknown> = {}
 
-    if (selectedContainerIds.value.length === 0) {
+    const ids = containerIds && containerIds.length > 0 ? containerIds : selectedContainerIds.value
+
+    if (ids.length === 0) {
       return data
     }
 
     const fields = selectedFields.value
 
-    for (const containerId of selectedContainerIds.value) {
+    for (const containerId of ids) {
       const container = getContainerData(containerId)
       if (!container) continue
 
@@ -76,25 +78,23 @@ export function useAiContext() {
         name: container.name,
       }
 
-      if (fields.includes('items')) {
-        const items = getItemsData(containerId)
-        containerData.items = items.map((item: IGearItem) => {
-          const itemData: Record<string, unknown> = { id: item.id }
+      // Always include items for context
+      const items = getItemsData(containerId)
+      containerData.items = items.map((item: IGearItem) => {
+        const itemData: Record<string, unknown> = { id: item.id }
 
-          if (fields.includes('name')) itemData.name = item.name
-          if (fields.includes('notes')) itemData.notes = item.notes
-          if (fields.includes('category')) itemData.category = item.category
-          if (fields.includes('weight')) itemData.weight = item.weight
-          if (fields.includes('quantity')) itemData.quantity = item.quantity
-          if (fields.includes('price')) itemData.price = item.price
-          if (fields.includes('url')) itemData.url = item.url
-          if (fields.includes('notes')) itemData.notes = item.notes
-          if (fields.includes('wearable')) itemData.wearable = item.wearable
-          if (fields.includes('consumable')) itemData.consumable = item.consumable
+        if (fields.includes('name')) itemData.name = item.name
+        if (fields.includes('notes') && item.notes) itemData.notes = item.notes
+        if (fields.includes('category')) itemData.category = item.category
+        if (fields.includes('weight') && item.weight) itemData.weight = item.weight
+        if (fields.includes('quantity') && item.quantity) itemData.quantity = item.quantity
+        if (fields.includes('price') && item.price) itemData.price = item.price
+        if (fields.includes('url') && item.url) itemData.url = item.url
+        if (fields.includes('wearable')) itemData.wearable = item.wearable
+        if (fields.includes('consumable')) itemData.consumable = item.consumable
 
-          return itemData
-        })
-      }
+        return itemData
+      })
 
       data[containerId] = containerData
     }

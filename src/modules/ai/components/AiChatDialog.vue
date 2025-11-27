@@ -35,7 +35,7 @@ const handleOpenChange = (value: boolean): void => {
       <DialogDescription class="sr-only">
         {{ t('ai.chat.description') }}
       </DialogDescription>
-      <AiChatWindow @close="handleOpenChange(false)" />
+      <AiChatWindow :container-ids="props.context?.container_ids" @close="handleOpenChange(false)" />
     </DialogContent>
   </Dialog>
 </template>

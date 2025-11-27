@@ -9,6 +9,10 @@ export const aiEn = {
       thinking: 'AI is thinking...',
       placeholder: 'Ask AI about your gear...',
       sendHint: 'Ctrl+Enter to send',
+      includeContainerData: {
+        tooltip: 'Include container items in context',
+        label: 'Include items'
+      },
       templateMessages: {
         whatsUnnecessary: {
           label: 'What is unnecessary?',
@@ -47,6 +51,10 @@ export const aiPl = {
       thinking: 'AI myśli...',
       placeholder: 'Zapytaj AI o swój sprzęt...',
       sendHint: 'Ctrl+Enter aby wysłać',
+      includeContainerData: {
+        tooltip: 'Dołącz przedmioty z kontenera do kontekstu',
+        label: 'Dołącz przedmioty'
+      },
       templateMessages: {
         whatsUnnecessary: {
           label: 'Co jest niepotrzebne?',

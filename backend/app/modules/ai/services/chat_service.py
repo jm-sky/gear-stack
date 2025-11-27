@@ -88,6 +88,9 @@ class ChatService:
         # Parse structured output if present
         structured = self._parse_structured_output(response.message)
 
+        # Clean message (remove JSON blocks)
+        cleaned_message = self._clean_message(response.message)
+
         # Calculate cost
         cost = calculate_cost(model, response.prompt_tokens, response.completion_tokens)
 
@@ -101,7 +104,7 @@ class ChatService:
             total_tokens=response.total_tokens,
             cost_usd=cost,
             input_data={"message": request.message, "context": request.context},
-            output_data={"message": response.message, "structured_output": structured.model_dump() if structured else None},
+            output_data={"message": cleaned_message, "structured_output": structured.model_dump() if structured else None},
         )
 
         # Cache result if enabled
@@ -109,7 +112,7 @@ class ChatService:
             cache_data = {
                 "operation_type": "chat",
                 "model": response.model,
-                "message": response.message,
+                "message": cleaned_message,
                 "structured_output": structured.model_dump() if structured else None,
                 "tokens": {
                     "prompt": response.prompt_tokens,
@@ -121,7 +124,7 @@ class ChatService:
             await self.cache_service.set(cache_key, cache_data, ttl_days=settings.ai.cache_ttl_classify)
 
         return AiChatResponse(
-            message=response.message,
+            message=cleaned_message,
             structured_output=structured,
             tokens={
                 "prompt": response.prompt_tokens,
@@ -154,10 +157,10 @@ respond in a conversational way AND include structured output in JSON format at 
 
 Format your structured output as:
 ```json
-{
+{{
   "action": "action_name",
-  "data": {...}
-}
+  "data": {{...}}
+}}
 ```
 
 Available actions:
@@ -202,3 +205,22 @@ Keep your responses concise and helpful."""
             return StructuredOutput(action=data.get("action"), data=data.get("data", {}))
         except (json.JSONDecodeError, ValueError):
             return None
+
+    def _clean_message(self, message: str) -> str:
+        """Remove structured output JSON from message.
+
+        Args:
+            message: AI message with potential JSON code blocks
+
+        Returns:
+            Cleaned message without JSON blocks
+        """
+        # Remove JSON code blocks
+        json_pattern = r"```json\s*\{.*?\}\s*```"
+        cleaned = re.sub(json_pattern, "", message, flags=re.DOTALL)
+
+        # Clean up extra whitespace
+        cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)  # Max 2 newlines
+        cleaned = cleaned.strip()
+
+        return cleaned

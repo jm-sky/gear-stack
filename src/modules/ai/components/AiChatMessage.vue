@@ -126,4 +126,18 @@ const messageClasses = computed<string>(() => {
 .prose :deep(h6:first-child) {
   margin-top: 0;
 }
+
+.prose :deep(ul) {
+  list-style-type: disc;
+  margin-left: 1rem;
+}
+
+.prose :deep(ol) {
+  list-style-type: decimal;
+  margin-left: 1rem;
+}
+
+.prose :deep(li) {
+  margin-bottom: 0.25rem;
+}
 </style>

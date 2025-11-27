@@ -3,15 +3,15 @@
   Main chat interface for AI interactions
 -->
 <script setup lang="ts">
-import { Loader2, Send, Settings, Trash2, X } from 'lucide-vue-next'
+import { Loader2, Settings, Trash2, X } from 'lucide-vue-next'
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import DialogTitle from '@/components/ui/dialog/DialogTitle.vue'
-import { Textarea } from '@/components/ui/textarea'
 import { useAiChat } from '../composables/useAiChat'
 import { useAiContext } from '../composables/useAiContext'
 import { useAiStore } from '../store/useAiStore'
+import AiChatInputSection from './AiChatInputSection.vue'
 import AiChatMessage from './AiChatMessage.vue'
 import AiChatTemplateMsgButton from './AiChatTemplateMsgButton.vue'
 import AiContextConfig from './AiContextConfig.vue'
@@ -55,13 +55,6 @@ const handleSend = async (): Promise<void> => {
 
   await sendMessage(userMessage.value, context)
   userMessage.value = ''
-}
-
-const handleKeyDown = (event: KeyboardEvent): void => {
-  if (event.ctrlKey && event.key === 'Enter') {
-    event.preventDefault()
-    handleSend()
-  }
 }
 
 const onTemplatePrompt = (prompt: string) => {
@@ -125,36 +118,13 @@ const onTemplatePrompt = (prompt: string) => {
     </div>
 
     <!-- Input -->
-    <div class="border-t p-4">
-      <!-- Context toggle (only show when containerIds are provided) -->
-      <div v-if="props.containerIds && props.containerIds.length > 0" class="flex items-center gap-2 mb-3">
-        <Checkbox :id="'include-container-data'" v-model="includeContainerData" />
-        <Label
-          :for="'include-container-data'"
-          class="text-sm font-normal cursor-pointer"
-        >
-          {{ t('ai.chat.includeContainerData') }}
-        </Label>
-      </div>
-
-      <div class="flex gap-2">
-        <Textarea
-          v-model="userMessage"
-          :placeholder="t('ai.chat.placeholder')"
-          :rows="3"
-          @keydown="handleKeyDown"
-        />
-        <Button
-          :disabled="!userMessage.trim() || isLoading"
-          @click="handleSend"
-        >
-          <Send class="size-4" />
-        </Button>
-      </div>
-      <p class="text-xs text-muted-foreground mt-2">
-        {{ t('ai.chat.sendHint') }}
-      </p>
-    </div>
+    <AiChatInputSection
+      v-model:user-message="userMessage"
+      :container-ids="props.containerIds"
+      :is-loading="isLoading"
+      :include-container-data="includeContainerData"
+      @send="handleSend"
+    />
   </div>
 </template>
 
