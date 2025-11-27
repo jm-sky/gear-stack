@@ -30,9 +30,11 @@ class UserUpdate(BaseModel):
 
 
 class UserProfileUpdate(BaseModel):
-    """Current user profile update schema."""
+    """Current user profile update schema.
 
-    email: Optional[EmailStr] = None
+    Note: Email cannot be updated through this endpoint for security reasons.
+    """
+
     name: Optional[str] = Field(None, min_length=1, max_length=100)
     avatarUrl: Optional[str] = Field(None, description="Avatar URL (only allowed providers like Gravatar)")
 

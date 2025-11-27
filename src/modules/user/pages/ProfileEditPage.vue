@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
-import { ArrowLeft, Shield, Sparkles } from 'lucide-vue-next'
+import { ArrowLeft, Sparkles } from 'lucide-vue-next'
 import { useField, useForm } from 'vee-validate'
 import { onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { z } from 'zod'
-import Badge from '@/components/ui/badge/Badge.vue'
 import { Button } from '@/components/ui/button'
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import UserRoleBadge from '@/components/ui/UserRoleBadge.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useBackend } from '@/shared/composables/useBackend'
 import { useHandleError } from '@/shared/composables/useHandleError'
@@ -27,7 +27,6 @@ const { handleError } = useHandleError()
 
 const profileSchema = z.object({
   name: z.string().min(1, t('user.edit.name_required')),
-  email: z.string().email(t('user.edit.email_invalid')),
   avatarUrl: z
     .string()
     .optional()
@@ -41,21 +40,17 @@ const { handleSubmit, setValues, setErrors } = useForm({
   validationSchema: toTypedSchema(profileSchema),
   initialValues: {
     name: '',
-    email: '',
     avatarUrl: '',
   },
 })
 
-const { value: emailValue } = useField('email')
 const { value: avatarUrlValue } = useField('avatarUrl')
-
 
 // Populate form with current profile data
 onMounted(() => {
   if (profile.value) {
     setValues({
       name: profile.value.name,
-      email: profile.value.email,
       avatarUrl: profile.value.avatarUrl || '',
     })
   }
@@ -66,7 +61,6 @@ watch(() => profile.value, (newProfile) => {
   if (newProfile) {
     setValues({
       name: newProfile.name,
-      email: newProfile.email,
       avatarUrl: newProfile.avatarUrl ?? '',
     })
   }
@@ -77,7 +71,6 @@ const onSubmit = handleSubmit(
     try {
       const updateData = {
         name: values.name,
-        email: values.email,
         avatarUrl: values.avatarUrl && values.avatarUrl.trim() ? values.avatarUrl.trim() : undefined,
       }
 
@@ -99,8 +92,8 @@ const handleCancel = () => {
 }
 
 const handleGenerateGravatar = () => {
-  const email = emailValue.value as string | undefined
-  if (!email || typeof email !== 'string' || !email.trim()) {
+  const email = profile.value?.email
+  if (!email || !email.trim()) {
     toast.error(t('user.edit.email_required_for_gravatar') || 'Email is required to generate Gravatar URL')
     return
   }
@@ -133,10 +126,11 @@ const handleGenerateGravatar = () => {
               <h1 class="text-3xl font-bold tracking-tight">
                 {{ t('user.edit.title') }}
               </h1>
-              <Badge v-if="profile?.isAdmin" variant="default" class="gap-1">
-                <Shield class="size-3" />
-                {{ t('user.profile.admin_badge', 'Admin') }}
-              </Badge>
+              <UserRoleBadge
+                :is-admin="profile?.isAdmin"
+                :is-owner="profile?.isOwner"
+                :is-premium="profile?.isPremium"
+              />
             </div>
             <p class="text-sm text-muted-foreground">
               {{ t('user.edit.subtitle') }}
@@ -163,21 +157,22 @@ const handleGenerateGravatar = () => {
             </FormItem>
           </FormField>
 
-          <FormField v-slot="{ componentField }" name="email">
-            <FormItem>
-              <FormLabel required>
-                {{ t('user.edit.email_label') }}
-              </FormLabel>
-              <FormControl>
-                <Input
-                  type="email"
-                  :placeholder="t('user.edit.email_placeholder')"
-                  v-bind="componentField"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          </FormField>
+          <FormItem>
+            <FormLabel>
+              {{ t('user.edit.email_label') }}
+            </FormLabel>
+            <FormControl>
+              <Input
+                type="email"
+                :value="profile.email"
+                disabled
+                class="bg-muted cursor-not-allowed"
+              />
+            </FormControl>
+            <FormDescription>
+              {{ t('user.edit.email_readonly_help', 'Email cannot be changed for security reasons') }}
+            </FormDescription>
+          </FormItem>
 
           <FormField v-slot="{ componentField }" name="avatarUrl">
             <FormItem>

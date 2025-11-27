@@ -11,6 +11,7 @@ import UserRoleBadge from '@/components/ui/UserRoleBadge.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { useSettings } from '@/modules/settings/composables/useSettings'
+import { getInitials } from '@/shared/utils/getInitials'
 import AuthenticationRequiredAlert from '../components/AuthenticationRequiredAlert.vue'
 import { useUser } from '../composables/useUser'
 import { UserRoutePaths } from '../routes'
@@ -33,15 +34,10 @@ const publicProfileUrl = computed(() => {
   return null
 })
 
-// Generate initials from name or email
+// Generate initials from name or email using shared helper
 const initials = computed(() => {
   if (profile.value?.name) {
-    return profile.value.name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2)
+    return getInitials(profile.value.name)
   }
   if (profile.value?.email) {
     return profile.value.email.substring(0, 2).toUpperCase()

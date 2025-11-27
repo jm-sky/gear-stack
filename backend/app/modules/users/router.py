@@ -101,10 +101,12 @@ async def update_current_user_profile(
     current_user: CurrentUser,
     repo: Annotated[UserRepository, Depends(get_user_repository)],
 ) -> UserResponse:
-    """Update current user's profile details."""
+    """Update current user's profile details.
+
+    Note: Email updates are not allowed for security reasons.
+    """
     updated_user = await repo.update_user(
         user_id=current_user.id,
-        email=user_data.email,
         name=user_data.name,
         avatar_url=user_data.avatarUrl,
     )
