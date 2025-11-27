@@ -176,6 +176,21 @@ const hasDetails = computed<boolean>(() => {
     || item.value.notes
   )
 })
+
+// Extract domain from URL
+const getUrlDomain = (url: string): string => {
+  try {
+    const urlObj = new URL(url)
+    return urlObj.hostname.replace(/^www\./, '')
+  } catch {
+    return url
+  }
+}
+
+const urlDomain = computed<string>(() => {
+  if (!item.value?.url) return ''
+  return getUrlDomain(item.value.url)
+})
 </script>
 
 <template>
@@ -316,7 +331,8 @@ const hasDetails = computed<boolean>(() => {
                   rel="noopener noreferrer"
                   class="font-medium text-primary hover:underline"
                 >
-                  {{ t('gear.item.openLink') }}
+                  <span class="sm:hidden">{{ t('gear.item.openLink') }}</span>
+                  <span class="hidden sm:inline">{{ urlDomain }}</span>
                 </a>
               </div>
             </div>
