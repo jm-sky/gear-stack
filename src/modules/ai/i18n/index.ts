@@ -37,6 +37,16 @@ export const aiEn = {
       in: 'in',
       out: 'out',
     },
+    actions: {
+      error: 'Failed to execute AI action',
+      noContainer: 'No container specified for this action',
+      containerNotFound: 'Container not found',
+      invalidData: 'Invalid data received from AI',
+      itemCreated: 'Item "{name}" created successfully',
+      itemUpdated: 'Item updated successfully',
+      itemDeleted: 'Item deleted successfully',
+      containerCreated: 'Container "{name}" created successfully',
+    },
   },
 }
 
@@ -78,6 +88,16 @@ export const aiPl = {
       cost: 'Koszt:',
       in: 'wejście',
       out: 'wyjście',
+    },
+    actions: {
+      error: 'Nie udało się wykonać akcji AI',
+      noContainer: 'Nie określono kontenera dla tej akcji',
+      containerNotFound: 'Nie znaleziono kontenera',
+      invalidData: 'Otrzymano nieprawidłowe dane od AI',
+      itemCreated: 'Przedmiot "{name}" został dodany',
+      itemUpdated: 'Przedmiot został zaktualizowany',
+      itemDeleted: 'Przedmiot został usunięty',
+      containerCreated: 'Kontener "{name}" został utworzony',
     },
   },
 }

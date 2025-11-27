@@ -8,6 +8,7 @@ import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import DialogTitle from '@/components/ui/dialog/DialogTitle.vue'
+import { useAiActions } from '../composables/useAiActions'
 import { useAiChat } from '../composables/useAiChat'
 import { useAiContext } from '../composables/useAiContext'
 import { useAiStore } from '../store/useAiStore'
@@ -26,6 +27,7 @@ const props = defineProps<{
 const aiStore = useAiStore()
 const { messages, isLoading, lastPrompt, sendMessage, clearMessages, hasMessages } = useAiChat()
 const { buildContextData } = useAiContext()
+const { executeAction } = useAiActions()
 
 const userMessage = ref('')
 const showContextConfig = ref(false)
@@ -53,8 +55,14 @@ const handleSend = async (): Promise<void> => {
     ? buildContextData(props.containerIds)
     : {}
 
-  await sendMessage(userMessage.value, context)
+  const response = await sendMessage(userMessage.value, context)
   userMessage.value = ''
+
+  // Execute structured output action if present
+  if (response?.structured_output) {
+    const containerId = props.containerIds?.[0]
+    await executeAction(response.structured_output, containerId)
+  }
 }
 
 const onTemplatePrompt = (prompt: string) => {
