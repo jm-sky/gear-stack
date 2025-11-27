@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import DropdownMenuSeparator from '@/components/ui/dropdown-menu/DropdownMenuSeparator.vue'
-import { useAuth } from '@/modules/auth/composables/useAuth'
+import { useAi } from '@/modules/ai/composables/useAi'
 import { smallDateTime } from '@/shared/utils/smallDateTime'
 import type { IGearContainer } from '../types/gear.types'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
@@ -49,10 +49,8 @@ const emit = defineEmits<{
 
 const router = useRouter()
 const { t } = useI18n()
-const { user } = useAuth()
 const { typeLabel } = useContainerTypeLabel(computed(() => props.container.type))
-
-const isAdmin = computed(() => user.value?.isAdmin ?? false)
+const { canUseAi } = useAi()
 
 const handleEdit = () => {
   router.push(GearRoutePath.ContainerEditById(props.container.id))
@@ -98,7 +96,7 @@ const handleBack = () => {
         </Button>
         <div class="flex items-center gap-2">
           <Button
-            v-if="isAdmin"
+            v-if="canUseAi"
             v-tooltip.bottom="t('gear.actions.aiAssistant')"
             variant="ghost"
             size="sm"

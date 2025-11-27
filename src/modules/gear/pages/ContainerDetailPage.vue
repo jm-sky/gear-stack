@@ -6,6 +6,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import AiChatDialog from '@/modules/ai/components/AiChatDialog.vue'
+import { useAi } from '@/modules/ai/composables/useAi'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { useBackend } from '@/shared/composables/useBackend'
 import type { IGearItem } from '../types/gear.types'
@@ -32,6 +33,7 @@ const { shouldUseAPI } = useBackend()
 const { container } = useContainer()
 const { deleteItem, updateItem, updateContainer, exportData, importData, createItem, getContainerById } = useGear()
 const { user, isAuthenticated } = useAuth()
+const { canUseAi } = useAi()
 
 const containerId = route.params.id as string
 
@@ -441,7 +443,7 @@ if (!container.value) {
 
       <!-- AI Chat Dialog -->
       <AiChatDialog
-        v-if="user?.isAdmin"
+        v-if="canUseAi"
         v-model:open="isAiDialogOpen"
         :context="{ container_ids: [containerId] }"
       />

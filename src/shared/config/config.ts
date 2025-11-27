@@ -54,6 +54,7 @@ export const config = {
       enabled: import.meta.env.VITE_ENABLE_IMAGE_SEARCH === 'true',
     },
     ai: {
+      enabled: import.meta.env.VITE_ENABLE_AI === 'true',
       defaultModels: [
         {
           'id': 'google/gemini-flash-1.5',
