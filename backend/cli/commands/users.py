@@ -732,3 +732,104 @@ async def _toggle_admin_in_db(user_id: str, is_admin: bool) -> None:
         # Update admin status
         user.isAdmin = is_admin
         await repo.update_user(user)
+        break  # Ensure we only process first iteration
+
+
+@users_app.command("toggle-owner")
+def users_toggle_owner(
+    identifier: str | None = typer.Argument(None, help="User email or ID"),
+    yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation prompt"),
+) -> None:
+    """Toggle owner flag for a user by email or ID.
+
+    Examples:
+        # Interactive mode (will prompt for email/ID)
+        python -m cli users toggle-owner
+
+        # Toggle owner by email
+        python -m cli users toggle-owner user@example.com
+
+        # Toggle owner by ID without confirmation
+        python -m cli users toggle-owner 01HQX... --yes
+    """
+    asyncio.run(_users_toggle_owner_async(identifier, yes))
+
+
+async def _users_toggle_owner_async(identifier: str | None, yes: bool) -> None:
+    """Async implementation of toggle owner."""
+    from rich.console import Console
+
+    console = Console()
+
+    try:
+        # Get identifier if not provided
+        if not identifier:
+            identifier = Prompt.ask("[cyan]Enter user email or ID[/cyan]")
+
+        # Find user
+        with console.status("[bold green]Finding user...", spinner="dots"):
+            user = await _find_user(identifier)
+
+        if not user:
+            console.print(f"\n[red]User not found:[/red] {identifier}\n")
+            return
+
+        # Determine new owner status
+        new_owner_status = not user.get("isOwner", False)
+        action = "promote to owner" if new_owner_status else "demote from owner"
+
+        # Show user info
+        console.print(f"\n[bold cyan]User to modify:[/bold cyan]\n")
+
+        current_role = "Owner" if user.get("isOwner") else ("Administrator" if user.get("isAdmin") else ("Premium" if user.get("isPremium") else "User"))
+        new_role = "Owner" if new_owner_status else ("Administrator" if user.get("isAdmin") else ("Premium" if user.get("isPremium") else "User"))
+
+        user_info = f"""[bold]ID:[/bold] {user['id']}
+[bold]Email:[/bold] {user['email']}
+[bold]Name:[/bold] {user['name']}
+[bold]Current Role:[/bold] {current_role}
+[bold]New Role:[/bold] {new_role}"""
+
+        panel = Panel(user_info, border_style="cyan")
+        console.print(panel)
+
+        # Confirm change
+        if not yes:
+            console.print()
+            if not Confirm.ask(f"Are you sure you want to {action}?", default=True):
+                console.print("[yellow]Cancelled[/yellow]")
+                return
+
+        # Toggle owner status
+        with console.status(f"[bold green]Updating user...", spinner="dots"):
+            await _toggle_owner_in_db(user["id"], new_owner_status)
+
+        console.print(f"\n[bold green]✓[/bold green] User {'promoted to owner' if new_owner_status else 'demoted from owner'} successfully\n")
+
+    except Exception as e:
+        console.print(f"\n[red]Error toggling owner status:[/red] {e}\n")
+        raise typer.Exit(1)
+
+
+async def _toggle_owner_in_db(user_id: str, is_owner: bool) -> None:
+    """Toggle owner status in database.
+
+    Args:
+        user_id: User ID to update
+        is_owner: New owner status
+    """
+    from app.core.database import get_db
+    from app.modules.auth.repositories import UserRepository
+
+    async for db in get_db():
+        repo = UserRepository(db)
+
+        # Get user
+        user = await repo.get_user_by_id(user_id)
+        if not user:
+            raise ValueError(f"User with id {user_id} not found")
+
+        # Update owner status
+        user.isOwner = is_owner
+        await repo.update_user(user)
+        break  # Ensure we only process first iteration

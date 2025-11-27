@@ -1,6 +1,5 @@
  
 import { AuthRouteNames } from '@/modules/auth/config/routes'
-import { useAuthStore } from '@/modules/auth/store/useAuthStore'
 import { usePermissions } from '@/shared/composables/usePermissions'
 import { config } from '@/shared/config/config'
 import type { NavigationGuardNext, RouteLocationNormalized, Router } from 'vue-router'
@@ -26,7 +25,6 @@ export async function adminGuard(
     return
   }
 
-  const authStore = useAuthStore()
   const { canAccessAdminPanel, isAuthenticated } = usePermissions()
 
   // Check if user is authenticated

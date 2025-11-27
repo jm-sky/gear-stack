@@ -21,6 +21,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.19.0] - 2025-01-27
+
+### Added
+- **CLI Command: Toggle Owner Role**: New `toggle-owner` command for managing owner role
+  - Interactive mode with user prompts for email/ID
+  - Support for `--yes` flag to skip confirmation
+  - Displays current and new role information before changes
+  - Usage: `python -m cli users toggle-owner <email-or-id> --yes`
+- **Owner and Premium Roles**: Full role hierarchy implementation
+  - Added `is_owner` and `is_premium` database columns via migration
+  - New role badges in admin UI (Owner: purple, Premium: yellow, Admin: blue, User: gray)
+  - Role column in admin users table now shows all role types
+- **Protected User System**: Comprehensive protection for critical users
+  - `SUPERADMIN_EMAIL` environment variable for owner designation
+  - `PROTECTED_USER_EMAIL` environment variable to prevent user deletion
+  - Admin users can only be deleted by Owners
+  - Owner users cannot be deleted or have roles changed by Admins
+  - UI disables delete/role change actions for protected users
+
+### Changed
+- **Admin Service Protection Logic**: Enhanced user management security
+  - Three-tier protection: protected email check, admin protection, owner protection
+  - `delete_user` method now checks protected status before deletion
+  - `update_user` method prevents unauthorized role changes
+- **Admin Users Page UI**: Improved role display and action controls
+  - Role badges with color coding for quick identification
+  - Disabled actions for Owner and Admin users (delete button)
+  - Disabled role toggle for Owner users
+  - Updated column header from "Admin" to "Role"
+
+### Fixed
+- **AI Item Creation**: Fixed undefined properties for AI-created items
+  - All required fields now have proper default values (category: 'other', weight: 0, quantity: 1, weightUnit: 'g', priority: 'medium', status: 'toBuy')
+  - Items created through AI actions now properly initialize
+- **Admin Guard**: Removed unused `useAuthStore` import to fix linter error
+
+---
+
 ## [2.18.0] - 2025-01-28
 
 ### Added
