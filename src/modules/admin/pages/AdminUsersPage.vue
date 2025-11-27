@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
+import UserRoleBadge from '@/components/ui/UserRoleBadge.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useHandleError } from '@/shared/composables/useHandleError'
 import type { IAdminUser } from '../types/admin.types'
@@ -188,16 +189,13 @@ onMounted(() => {
         </template>
 
         <template #isAdmin="{ row }">
-          <Badge v-if="row.original.isOwner" variant="default" class="bg-purple-600">
-            {{ t('admin.users.owner', 'Owner') }}
-          </Badge>
-          <Badge v-else-if="row.original.isPremium" variant="default" class="bg-yellow-600">
-            {{ t('admin.users.premium', 'Premium') }}
-          </Badge>
-          <Badge v-else-if="row.original.isAdmin" variant="default">
-            {{ t('admin.users.admin', 'Admin') }}
-          </Badge>
-          <Badge v-else variant="secondary">
+          <UserRoleBadge
+            :is-admin="row.original.isAdmin"
+            :is-owner="row.original.isOwner"
+            :is-premium="row.original.isPremium"
+            :show-icon="false"
+          />
+          <Badge v-if="!row.original.isAdmin && !row.original.isOwner && !row.original.isPremium" variant="secondary">
             {{ t('admin.users.user', 'User') }}
           </Badge>
         </template>

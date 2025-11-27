@@ -153,7 +153,9 @@ async def get_public_user_profile(
         id=user.id,
         name=user.name,
         avatarUrl=user.avatarUrl,
-        isAdmin=user.role == "admin",
+        isAdmin=user.isAdmin if hasattr(user, 'isAdmin') else (user.role == "admin"),
+        isOwner=user.isOwner if hasattr(user, 'isOwner') else False,
+        isPremium=user.isPremium if hasattr(user, 'isPremium') else False,
         email=user.email if settings.is_public_email else None,
         emailPublic=settings.is_public_email,
     )

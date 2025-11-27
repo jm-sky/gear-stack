@@ -78,7 +78,7 @@ class PublicUserResponse(BaseModel):
     """Public user profile response schema with camelCase.
 
     Only includes public information:
-    - id, name, avatarUrl, isAdmin (always public)
+    - id, name, avatarUrl, isAdmin, isOwner, isPremium (always public)
     - email (only if user has emailPublic setting enabled)
     """
 
@@ -86,6 +86,8 @@ class PublicUserResponse(BaseModel):
     name: str
     avatarUrl: Optional[str] = None
     isAdmin: bool = False
+    isOwner: bool = False
+    isPremium: bool = False
     email: Optional[EmailStr] = None  # Only included if emailPublic is True
     emailPublic: bool = False  # Indicates if email is included
 

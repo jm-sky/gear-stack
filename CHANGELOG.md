@@ -21,6 +21,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.20.0] - 2025-01-27
+
+### Added
+- **UserRoleBadge Component**: Reusable role badge component for consistent role display
+  - Single source of truth for role presentation across all pages
+  - Color-coded badges: Owner (purple with Crown icon), Premium (yellow with Gem icon), Admin (blue with Shield icon)
+  - Configurable icon display via `showIcon` prop
+  - Used in ProfileViewPage, PublicUserProfilePage, and AdminUsersPage
+  - i18n support for all role labels
+
+### Changed
+- **Profile Pages**: Updated to use new UserRoleBadge component
+  - ProfileViewPage now shows Owner, Premium, and Admin roles
+  - PublicUserProfilePage displays all role types with proper styling
+  - AdminUsersPage uses UserRoleBadge without icons for cleaner table view
+
+### Fixed
+- **Public Profile API**: Added missing role fields to backend response
+  - PublicUserResponse schema now includes `isOwner` and `isPremium` fields
+  - Public profile endpoint properly returns all role information
+  - Role badges now display correctly on public user profiles
+
+---
+
 ## [2.19.0] - 2025-01-27
 
 ### Added

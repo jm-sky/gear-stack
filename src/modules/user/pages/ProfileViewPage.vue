@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { Edit, ExternalLink, Mail, Shield } from 'lucide-vue-next'
+import { Edit, ExternalLink, Mail } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import Avatar from '@/components/ui/avatar/Avatar.vue'
 import AvatarFallback from '@/components/ui/avatar/AvatarFallback.vue'
 import AvatarImage from '@/components/ui/avatar/AvatarImage.vue'
-import Badge from '@/components/ui/badge/Badge.vue'
 import { Button } from '@/components/ui/button'
+import UserRoleBadge from '@/components/ui/UserRoleBadge.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { useSettings } from '@/modules/settings/composables/useSettings'
@@ -59,10 +59,11 @@ const initials = computed(() => {
             <h1 class="text-3xl font-bold tracking-tight">
               {{ t('user.profile.title') }}
             </h1>
-            <Badge v-if="profile?.isAdmin" variant="default" class="gap-1">
-              <Shield class="size-3" />
-              {{ t('user.profile.admin_badge', 'Admin') }}
-            </Badge>
+            <UserRoleBadge
+              :is-admin="profile?.isAdmin"
+              :is-owner="profile?.isOwner"
+              :is-premium="profile?.isPremium"
+            />
           </div>
           <p class="text-sm text-muted-foreground">
             {{ t('user.profile.subtitle') }}
@@ -103,10 +104,11 @@ const initials = computed(() => {
               <h2 class="text-2xl font-semibold">
                 {{ profile.name }}
               </h2>
-              <Badge v-if="profile.isAdmin" variant="default" class="gap-1">
-                <Shield class="size-3" />
-                {{ t('user.profile.admin_badge', 'Admin') }}
-              </Badge>
+              <UserRoleBadge
+                :is-admin="profile.isAdmin"
+                :is-owner="profile.isOwner"
+                :is-premium="profile.isPremium"
+              />
             </div>
             <div class="flex items-center mt-2 text-muted-foreground">
               <Mail class="size-4 mr-2 shrink-0" />
