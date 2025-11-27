@@ -1,5 +1,18 @@
 # Cursor Rules for Gear Stack
 
+## Project Architecture
+
+**Hybrid Architecture:**
+- Client-side: localStorage (gear data, settings, AI history)
+- Server-side: Backend API (auth, user profiles, admin, AI models)
+- API proxy: `/api/*` → backend (configured in vite.config.ts)
+
+**Modules:** gear, user, settings, auth, ai, admin, stats
+
+**State Management:**
+- Pinia → client-side state (gear, settings)
+- TanStack Query → server state (auth, AI, admin)
+
 ## Question vs. Action Protocol
 
 **CRITICAL:** When user asks a question, answer first, then ask for confirmation before making code changes.
@@ -74,6 +87,32 @@ import { MessageSquare, Sparkles } from 'lucide-vue-next'
 - Ensures consistency (e.g., `exportToPrompt` always uses `Sparkles`, not `MessageSquare`)
 - Available keys: `back`, `moreActions`, `create`, `addItem`, `addContainer`, `edit`, `delete`, `deleteAll`, `export`, `import`, `importFromMarkdown`, `exportToPrompt`, `exportAllToPrompt`, `recognizeParameters`, `recognizeParametersAll`
 - Similar pattern for category icons in `categoryIcons.ts`
+
+## TypeScript Conventions
+
+**Union Types:**
+- ✅ Create dedicated union types instead of inline definitions
+- ✅ Use: `type Status = 'pending' | 'active' | 'completed'`
+- ❌ Avoid: `status: 'pending' | 'active' | 'completed'` (inline)
+
+**Import Alias:**
+- Always use `@/` alias for absolute imports from `src/`
+- ✅ Use: `import { useGearStore } from '@/modules/gear/store'`
+- ❌ Avoid: `import { useGearStore } from '../../modules/gear/store'`
+
+**Type Definitions:**
+- All types in module-specific `types/` directories
+- Prefer interfaces for object shapes, types for unions/primitives
+
+## Code Style & ESLint
+
+**ESLint Configuration:**
+- No semicolons (`;` at end of lines)
+- Single quotes (`'` not `"`)
+- Import sorting: alphabetical with groups (external → internal)
+- Self-closing tags required: `<Component />`
+- Max 3 attributes per line (single-line), 1 per line (multi-line)
+- Unused variables starting with `_` are allowed
 
 ## General Guidelines
 
@@ -174,6 +213,71 @@ else {
 - Add desktop variants using Tailwind breakpoint prefixes (eg. `sm:`)
 - Example: `text-sm sm:text-base lg:text-lg` (small on mobile, base on tablet, large on desktop)
 - Consider spacing, typography, layout, and visibility across breakpoints
+
+## Testing
+
+**Commands:**
+```bash
+pnpm test              # Watch mode
+pnpm test:ui           # Vitest UI
+pnpm test:run          # CI mode
+pnpm test:coverage     # Coverage report
+```
+
+**Test Framework:** vitest + happy-dom
+**E2E:** @playwright/test
+
+## API Integration
+
+**Axios Client:**
+- Use `apiClient` from `@/shared/services/apiClient`
+- Auth interceptor handles JWT tokens automatically
+- Error interceptor handles global error handling
+
+**TanStack Query Pattern:**
+```typescript
+const { data, isLoading } = useQuery({
+  queryKey: ['resource', id],
+  queryFn: () => apiClient.get(`/resource/${id}`),
+  staleTime: 5 * 60 * 1000, // 5 minutes
+})
+```
+
+**Authentication:**
+- WebAuthn/passkeys via @simplewebauthn/browser
+- JWT tokens with auto-refresh (useTokenRefreshStore)
+- Route guards: auth guard, admin guard
+
+## Service Layer Pattern
+
+**Business Logic Separation:**
+- Stores: CRUD + persistence (simple operations)
+- Services: Business logic, validation, calculations
+
+✅ **Correct:**
+```typescript
+// Service handles calculation
+const totalWeight = gearService.calculateTotalWeight(containerId)
+// Store persists data
+gearStore.updateContainer(container)
+```
+
+❌ **Avoid:**
+```typescript
+// Don't put business logic in stores or components
+gearStore.calculateAndUpdateWeight(containerId)
+```
+
+## Internationalization (i18n)
+
+**Translation Keys:**
+- Use `t()` from `useI18n()` composable
+- Keys: `moduleName.section.key` (e.g., `gear.containers.title`)
+- Module translations in `src/modules/{module}/i18n/locales/{lang}.ts`
+
+**Locale Management:**
+- Persisted in localStorage
+- Use `useLocale()` composable for switching
 
 ## FastAPI Dependencies (Backend)
 
