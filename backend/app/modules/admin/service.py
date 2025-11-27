@@ -78,6 +78,8 @@ class AdminService:
                     avatarUrl=user.avatar_url,
                     isActive=user.is_active,
                     isAdmin=user.is_admin,
+                    isOwner=user.is_owner,
+                    isPremium=user.is_premium,
                     isEmailVerified=user.is_email_verified,
                     emailVerifiedAt=self._serialize_datetime(user.email_verified_at) or "",
                     createdAt=self._serialize_datetime(user.created_at) or "",
@@ -108,22 +110,76 @@ class AdminService:
             avatarUrl=user.avatar_url,
             isActive=user.is_active,
             isAdmin=user.is_admin,
+            isOwner=user.is_owner,
+            isPremium=user.is_premium,
             isEmailVerified=user.is_email_verified,
             emailVerifiedAt=self._serialize_datetime(user.email_verified_at) or "",
             createdAt=self._serialize_datetime(user.created_at) or "",
             updatedAt=self._serialize_datetime(user.created_at) or "",  # UserDB doesn't have updated_at
         )
 
-    async def update_user(self, user_id: str, user_data: UserUpdate) -> AdminUserResponse | None:
+    async def update_user(
+        self, user_id: str, user_data: UserUpdate, current_user: "User"
+    ) -> AdminUserResponse | None:
         """Update user information.
 
         Args:
             user_id: User ID
             user_data: User update data
+            current_user: Current user performing the update
 
         Returns:
             Updated admin user response or None if not found
+
+        Raises:
+            HTTPException: If admin tries to assign Owner role or delete Owner user
         """
+        from fastapi import HTTPException, status
+
+        # Get target user to check their current role
+        target_user, _ = await self.repository.get_user_by_id(user_id)
+        if not target_user:
+            return None
+
+        # Protection: Admin cannot assign Owner role
+        if current_user.isAdmin and not current_user.isOwner:
+            # Check if trying to set isOwner to True
+            if user_data.isOwner is True or (user_data.role and user_data.role == "owner"):
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Administrators cannot assign Owner role",
+                )
+            # Check if target user is Owner and trying to change their Owner status
+            if target_user.is_owner and (user_data.isOwner is False or (user_data.role and user_data.role != "owner")):
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Administrators cannot modify Owner users",
+                )
+
+        # Determine role flags from user_data
+        is_admin = user_data.isAdmin
+        is_owner = user_data.isOwner
+        is_premium = user_data.isPremium
+
+        # Support legacy 'role' field
+        if user_data.role:
+            if user_data.role == "admin":
+                is_admin = True
+                is_owner = False
+                is_premium = False
+            elif user_data.role == "owner":
+                is_owner = True
+                is_admin = False  # Owner is separate from admin
+                is_premium = False
+            elif user_data.role == "premium":
+                is_premium = True
+                is_admin = False
+                is_owner = False
+            elif user_data.role == "user":
+                is_admin = False
+                is_owner = False
+                is_premium = False
+
         # Update user via repository
         user_model = await self.user_repository.update_user(
             user_id=user_id,
@@ -131,6 +187,9 @@ class AdminService:
             name=user_data.name,
             is_active=user_data.isActive,
             role=user_data.role,
+            is_admin=is_admin,
+            is_owner=is_owner,
+            is_premium=is_premium,
         )
         if not user_model:
             return None
@@ -153,15 +212,34 @@ class AdminService:
             updatedAt=self._serialize_datetime(updated_user.created_at) or "",  # UserDB doesn't have updated_at
         )
 
-    async def delete_user(self, user_id: str) -> bool:
+    async def delete_user(self, user_id: str, current_user: "User") -> bool:
         """Delete user (soft delete).
 
         Args:
             user_id: User ID
+            current_user: Current user performing the deletion
 
         Returns:
             True if deleted, False if not found
+
+        Raises:
+            HTTPException: If admin tries to delete Owner user
         """
+        from fastapi import HTTPException, status
+
+        # Get target user to check their role
+        target_user, _ = await self.repository.get_user_by_id(user_id)
+        if not target_user:
+            return False
+
+        # Protection: Admin cannot delete Owner users
+        if current_user.isAdmin and not current_user.isOwner:
+            if target_user.is_owner:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Administrators cannot delete Owner users",
+                )
+
         return await self.user_repository.delete_user(user_id)
 
     # Container operations

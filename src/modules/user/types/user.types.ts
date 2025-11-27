@@ -6,6 +6,8 @@ export interface IUser {
   email: string
   avatarUrl?: string
   isAdmin?: boolean
+  isOwner?: boolean
+  isPremium?: boolean
   emailPublic?: boolean // Whether email is public (for public profiles)
   createdAt: string
   updatedAt: string
