@@ -4,7 +4,7 @@
  */
 
 import { computed, ref } from 'vue'
-import type { IAiChatMessage, IAiChatRequest, IAiChatResponse, IAiStructuredData } from '../types'
+import type { IAiChatMessage, IAiChatRequest, IAiChatResponse } from '../types'
 import { aiApiService } from '../services/aiApiService'
 import { useAiStore } from '../store/useAiStore'
 

@@ -6,10 +6,8 @@
 import { computed, onMounted } from 'vue'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useAiModels } from '../composables/useAiModels'
-import { useAiStore } from '../store/useAiStore'
 
 const { models, selectedModel, loadModels, selectModel } = useAiModels()
-const aiStore = useAiStore()
 
 const selectFirstModel = async () => {
   if (models.value.length > 0) {

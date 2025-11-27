@@ -29,9 +29,7 @@ def get_chat_service(db: AsyncSession = Depends(get_db)) -> ChatService:
 
     cache_service = PostgresCacheService(db)
 
-    return ChatService(
-        settings_service=settings_service, history_repo=history_repo, cache_service=cache_service
-    )
+    return ChatService(settings_service=settings_service, history_repo=history_repo, cache_service=cache_service)
 
 
 @router.post("", response_model=AiChatResponse)

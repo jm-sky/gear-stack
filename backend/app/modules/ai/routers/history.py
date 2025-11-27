@@ -47,9 +47,7 @@ async def get_history(
     Returns:
         Paginated history list
     """
-    return await service.get_history_list(
-        user_id=current_user.id, limit=limit, offset=offset, operation_type=operation_type
-    )
+    return await service.get_history_list(user_id=current_user.id, limit=limit, offset=offset, operation_type=operation_type)
 
 
 @router.get("/{history_id}", response_model=AiHistoryDetail)

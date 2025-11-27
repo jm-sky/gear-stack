@@ -43,8 +43,10 @@ export interface IAiStructuredItem {
   price?: number
   url?: string
   notes?: string
-  description?: string
-  worn?: boolean
+  brand?: string
+  color?: string
+  quality?: string
+  wearable?: boolean
   consumable?: boolean
   updates?: Record<string, unknown> // For update_items
 }

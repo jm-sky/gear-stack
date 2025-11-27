@@ -24,14 +24,16 @@ export function useAiContext() {
     // Common fields that can be sent to AI
     return [
       'name',
-      'description',
+      'notes',
       'category',
       'weight',
       'quantity',
       'price',
       'url',
-      'notes',
-      'worn',
+      'brand',
+      'color',
+      'quality',
+      'wearable',
       'consumable',
     ]
   })
@@ -76,18 +78,18 @@ export function useAiContext() {
 
       if (fields.includes('items')) {
         const items = getItemsData(containerId)
-        containerData.items = items.map(item => {
+        containerData.items = items.map((item: IGearItem) => {
           const itemData: Record<string, unknown> = { id: item.id }
 
           if (fields.includes('name')) itemData.name = item.name
-          if (fields.includes('description')) itemData.description = item.description
+          if (fields.includes('notes')) itemData.notes = item.notes
           if (fields.includes('category')) itemData.category = item.category
           if (fields.includes('weight')) itemData.weight = item.weight
           if (fields.includes('quantity')) itemData.quantity = item.quantity
           if (fields.includes('price')) itemData.price = item.price
           if (fields.includes('url')) itemData.url = item.url
           if (fields.includes('notes')) itemData.notes = item.notes
-          if (fields.includes('worn')) itemData.worn = item.worn
+          if (fields.includes('wearable')) itemData.wearable = item.wearable
           if (fields.includes('consumable')) itemData.consumable = item.consumable
 
           return itemData

@@ -366,17 +366,9 @@ async def _test_ai_async(prompt: str, model: str) -> None:
 
         # Send test request
         console.print("[3/4] [cyan]Sending test request to AI...[/cyan]")
-        messages = [
-            {"role": "system", "content": "You are a helpful assistant. Keep responses concise."},
-            {"role": "user", "content": prompt}
-        ]
+        messages = [{"role": "system", "content": "You are a helpful assistant. Keep responses concise."}, {"role": "user", "content": prompt}]
 
-        response = await provider.chat(
-            messages=messages,
-            model=model,
-            max_tokens=100,
-            temperature=0.7
-        )
+        response = await provider.chat(messages=messages, model=model, max_tokens=100, temperature=0.7)
 
         console.print("    [green]✓ Received response from AI[/green]")
 
@@ -394,6 +386,7 @@ async def _test_ai_async(prompt: str, model: str) -> None:
         # Calculate cost if model config available
         if model_config:
             from app.modules.ai.utils.models_config import calculate_cost
+
             cost = calculate_cost(model, response.prompt_tokens, response.completion_tokens)
             console.print(f"  • Estimated cost: ${cost:.6f} USD")
 

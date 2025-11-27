@@ -76,9 +76,7 @@ async def upgrade() -> None:
             print("✓ Created ai_user_settings table")
 
             # Create index on user_id
-            await conn.execute(
-                text("CREATE INDEX idx_ai_user_settings_user_id ON ai_user_settings(user_id);")
-            )
+            await conn.execute(text("CREATE INDEX idx_ai_user_settings_user_id ON ai_user_settings(user_id);"))
             print("✓ Created index on ai_user_settings.user_id")
 
         # Create ai_history table
@@ -107,19 +105,13 @@ async def upgrade() -> None:
             print("✓ Created ai_history table")
 
             # Create indexes
-            await conn.execute(
-                text("CREATE INDEX idx_ai_history_user_id ON ai_history(user_id);")
-            )
+            await conn.execute(text("CREATE INDEX idx_ai_history_user_id ON ai_history(user_id);"))
             print("✓ Created index on ai_history.user_id")
 
-            await conn.execute(
-                text("CREATE INDEX idx_ai_history_created_at ON ai_history(created_at);")
-            )
+            await conn.execute(text("CREATE INDEX idx_ai_history_created_at ON ai_history(created_at);"))
             print("✓ Created index on ai_history.created_at")
 
-            await conn.execute(
-                text("CREATE INDEX idx_ai_history_operation_type ON ai_history(operation_type);")
-            )
+            await conn.execute(text("CREATE INDEX idx_ai_history_operation_type ON ai_history(operation_type);"))
             print("✓ Created index on ai_history.operation_type")
 
         # Create ai_cache table
@@ -143,14 +135,10 @@ async def upgrade() -> None:
             print("✓ Created ai_cache table")
 
             # Create indexes
-            await conn.execute(
-                text("CREATE INDEX idx_ai_cache_expires_at ON ai_cache(expires_at);")
-            )
+            await conn.execute(text("CREATE INDEX idx_ai_cache_expires_at ON ai_cache(expires_at);"))
             print("✓ Created index on ai_cache.expires_at")
 
-            await conn.execute(
-                text("CREATE INDEX idx_ai_cache_operation_type ON ai_cache(operation_type);")
-            )
+            await conn.execute(text("CREATE INDEX idx_ai_cache_operation_type ON ai_cache(operation_type);"))
             print("✓ Created index on ai_cache.operation_type")
 
     print("✓ Migration completed successfully")

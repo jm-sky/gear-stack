@@ -10,7 +10,6 @@ import type {
   IAiHistoryDetail,
   IAiHistoryListResponse,
   IAiHistoryQuery,
-  IAiModel,
   IAiModelsResponse,
   IAiSettings,
   IAiSetTokenRequest,

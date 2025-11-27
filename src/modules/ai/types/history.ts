@@ -7,16 +7,16 @@ import type { IAiCost, IAiTokenUsage } from './chat'
 
 export interface IAiHistoryItem {
   id: string
-  operation_type: AiOperationType
-  final_prompt: string
-  context_data?: Record<string, unknown>
-  response_data: Record<string, unknown>
+  operationType: AiOperationType
+  finalPrompt: string
+  contextData?: Record<string, unknown>
+  responseData: Record<string, unknown>
   model: string
   provider: string
   tokens: IAiTokenUsage
   cost: IAiCost
-  duration_ms?: number
-  used_own_token: boolean
+  durationMs?: number
+  usedOwnToken: boolean
   created_at: string
 }
 
@@ -28,7 +28,7 @@ export interface IAiHistoryListResponse {
 }
 
 export interface IAiHistoryDetail extends IAiHistoryItem {
-  response_preview?: string
+  responsePreview?: string
 }
 
 export interface IAiHistoryQuery {
@@ -37,3 +37,8 @@ export interface IAiHistoryQuery {
   operationType?: AiOperationType
 }
 
+export interface LoadHistoryParams {
+  limit?: number
+  offset?: number
+  operationType?: AiOperationType
+}

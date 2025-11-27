@@ -11,6 +11,7 @@ import type {
   IAiModel,
   IAiSettings,
   IAiUpdateSettings,
+  LoadHistoryParams,
 } from '../types'
 import { aiApiService } from '../services/aiApiService'
 
@@ -74,11 +75,7 @@ export const useAiStore = defineStore('ai', () => {
     await loadSettings()
   }
 
-  const loadHistory = async (params?: {
-    limit?: number
-    offset?: number
-    operationType?: string
-  }): Promise<void> => {
+  const loadHistory = async (params?: LoadHistoryParams): Promise<void> => {
     isLoading.value = true
     try {
       const response = await aiApiService.getHistory(params)
