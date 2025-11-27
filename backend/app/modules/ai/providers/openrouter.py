@@ -58,9 +58,7 @@ class OpenRouterProvider(AIProvider):
             OpenRouterError: If API request fails
         """
         try:
-            response = await self.client.chat.completions.create(
-                model=model, messages=messages, temperature=temperature, max_tokens=max_tokens, **kwargs
-            )
+            response = await self.client.chat.completions.create(model=model, messages=messages, temperature=temperature, max_tokens=max_tokens, **kwargs)
 
             # Extract response data
             choice = response.choices[0]
