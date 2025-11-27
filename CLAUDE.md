@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Gear Stack is a lightweight front-end Vue 3 application for managing survival gear and bug-out bag equipment. The app runs fully client-side using `localStorage` for persistence.
+Gear Stack is a Vue 3 application for managing survival gear and bug-out bag equipment. The app uses a hybrid architecture with both client-side localStorage and backend API integration for features like authentication, AI assistance, and admin functionality.
 
 ## Commands
 
@@ -20,6 +20,14 @@ pnpm preview          # Preview production build
 ```bash
 pnpm type-check       # Run TypeScript compiler check
 pnpm lint             # Run ESLint with auto-fix and cache
+```
+
+### Testing
+```bash
+pnpm test             # Run tests in watch mode
+pnpm test:ui          # Run tests with Vitest UI
+pnpm test:run         # Run tests once (CI mode)
+pnpm test:coverage    # Run tests with coverage report
 ```
 
 ### Package Manager
@@ -44,7 +52,10 @@ Current modules:
 - `gear` - Core gear/container management
 - `user` - User profile management
 - `settings` - Application settings
-- `dashboard` - Dashboard views
+- `auth` - Authentication with WebAuthn/passkeys support
+- `ai` - AI assistance with chat, history, and context management
+- `admin` - Admin dashboard for managing users and containers
+- `stats` - Statistics and analytics
 
 ### Core Directories
 
@@ -52,17 +63,27 @@ Current modules:
   - `ui/` - shadcn-vue components
   - `data-table/` - Table components
   - `layout/` - Layout-related components
+- `src/pages/` - Top-level/shared pages (Landing, Privacy, Cookies, Contact, NotFound, Dashboard, Settings)
 - `src/layouts/` - Layout wrappers (authenticated, guest, public)
-- `src/shared/` - Shared utilities, types, composables, and i18n infrastructure
+- `src/shared/` - Shared utilities, types, composables, and infrastructure
+  - `components/` - Shared components
+  - `composables/` - Shared composables
+  - `config/` - Shared configuration
+  - `i18n/` - i18n infrastructure
+  - `services/` - API client, interceptors (auth, error)
+  - `store/` - Shared stores (e.g., token refresh)
+  - `types/` - Shared TypeScript types
+  - `utils/` - Shared utility functions
 - `src/router/` - Vue Router configuration
 - `src/i18n/` - Application i18n instance (merges module translations)
 
 ### State Management Pattern
 
-**Pinia stores** handle state persistence, while **service classes** contain business logic:
+The app uses a dual state management approach:
 
-- **Store** (`src/modules/gear/store/useGearStore.ts`): Simple CRUD operations + localStorage sync
-- **Service** (`src/modules/gear/services/gearService.ts`): Business logic, validation, calculations
+**1. Client-Side State (Pinia)**
+- **Pinia stores** handle client-side state persistence with localStorage sync
+- **Service classes** contain business logic, validation, and calculations
 
 Example:
 ```typescript
@@ -72,12 +93,36 @@ const container = gearService.createContainer(data)
 const totalWeight = gearService.calculateTotalWeight(containerId)
 ```
 
+**2. Server State (TanStack Query)**
+- **@tanstack/vue-query** manages server state with caching and invalidation
+- Used for authentication, AI features, admin operations
+- Provides automatic background refetching, optimistic updates, and error handling
+
+Example:
+```typescript
+const { data, isLoading, error } = useQuery({
+  queryKey: ['user'],
+  queryFn: fetchUser,
+  staleTime: 5 * 60 * 1000,
+})
+```
+
 ### Data Persistence
 
-All data is stored in `localStorage` with automatic sync:
+The app uses a hybrid persistence model:
+
+**Client-Side (localStorage)**
 - Gear containers: `gear-stack:containers`
 - Settings: `gear-stack:settings`
-- The stores handle load/save operations automatically
+- AI chat history and context
+- Stores handle load/save operations automatically
+
+**Server-Side (Backend API)**
+- User authentication and session tokens
+- User profiles and preferences
+- Admin data and analytics
+- AI model interactions
+- Communication via axios with `/api` proxy to backend
 
 ### Routing & Layouts
 
@@ -92,6 +137,11 @@ Routes are defined per-module and merged in `src/router/routes.ts`. Each route s
 ```
 
 Available layouts: `authenticated`, `guest`, `public`
+
+**Route Guards:**
+- Authentication guard checks user session before accessing protected routes
+- Admin guard restricts access to admin-only pages (e.g., `src/modules/admin/guards/adminGuard.ts`)
+- Guards are applied per-module and can be composed
 
 ### Internationalization (i18n)
 
@@ -109,7 +159,8 @@ Locale is persisted in localStorage and synced via `useLocale()` composable.
 ### Core Technologies
 - **Vue 3.5+** with `<script setup>` and Composition API
 - **TypeScript** (strict mode)
-- **Pinia** for state management
+- **Pinia** for client-side state management
+- **TanStack Query** (@tanstack/vue-query) for server state management
 - **Vue Router** for navigation
 - **Vite** as build tool
 
@@ -120,14 +171,42 @@ Locale is persisted in localStorage and synced via `useLocale()` composable.
 - **vue-sonner** for toast notifications
 - **floating-vue** for tooltips (registered as `v-tooltip` directive)
 
+### Data & Visualization
+- **@tanstack/vue-table** for advanced table features
+- **@unovis/ts & @unovis/vue** for data visualization and charts
+
 ### Form Handling
 - **vee-validate** + **@vee-validate/zod** for form validation
 - **zod** for schema validation
+
+### Backend & API
+- **axios** for HTTP client
+- **@simplewebauthn/browser** for WebAuthn/passkeys authentication
+- **jwt-decode** for JWT token parsing
+- API client with auth and error interceptors (`src/shared/services/`)
+
+### Utilities
+- **@vueuse/core** for Vue composition utilities
+- **date-fns** for date manipulation
+- **markdown-it** for Markdown parsing
+- **qrcode** for QR code generation
+- **md5** for hashing
+
+### PWA
+- **vite-plugin-pwa** for Progressive Web App support
+- **workbox-window** for service worker management
+- Configuration in `pwa.config.ts`
 
 ### Development Tools
 - **ESLint** with Vue, TypeScript, and Perfectionist plugins
 - **vue-tsc** for TypeScript type checking
 - **vite-plugin-vue-devtools** for Vue DevTools
+
+### Testing
+- **vitest** for unit testing with happy-dom environment
+- **@vitest/ui** for test UI
+- **@playwright/test** for end-to-end testing
+- Test coverage with v8 provider
 
 ## Code Style & Conventions
 
@@ -204,21 +283,49 @@ The Vite config proxies `/api` requests to the configured backend URL.
 
 ## Key Features
 
-1. **Gear Container Management** - Create/edit multiple gear lists (bug-out bags, EDC, etc.)
+### Gear Management
+1. **Container Management** - Create/edit multiple gear lists (bug-out bags, EDC, etc.)
 2. **Item Tracking** - Track items with status (owned/missing/toBuy), priority, weight, expiration
 3. **Weight Calculations** - Automatic total pack weight calculation (supports g/kg units)
 4. **Readiness Indicators** - Kit completeness tracking
-5. **Data Import/Export** - JSON import/export for backup/restore
-6. **Dark Mode** - Synced via settings store and `useDarkMode` composable
-7. **Multi-language** - English and Polish (extensible)
+5. **Data Import/Export** - JSON and Markdown import/export for backup/restore
+6. **Category Organization** - Organize items by categories with custom icons
+
+### Authentication & Security
+7. **WebAuthn/Passkeys** - Modern passwordless authentication
+8. **JWT Tokens** - Secure token-based authentication with auto-refresh
+9. **Route Guards** - Protected routes for authenticated and admin users
+10. **Session Management** - Automatic token refresh and logout on expiration
+
+### AI Assistance
+11. **AI Chat** - Conversational AI for gear recommendations and advice
+12. **Context Management** - AI maintains context of your gear setup
+13. **History Tracking** - Chat history persistence
+14. **Multiple AI Models** - Support for different AI models
+
+### Admin Features
+15. **User Management** - Admin dashboard for managing users
+16. **Container Management** - Admin oversight of all containers
+17. **Analytics** - Statistics and usage analytics
+
+### User Experience
+18. **Progressive Web App** - Installable as native app with offline support
+19. **Dark Mode** - System-synced theme via settings store
+20. **Multi-language** - English and Polish (extensible via i18n registry)
+21. **Responsive Design** - Mobile-first design with tablet/desktop optimization
+22. **Advanced Tables** - Sortable, filterable tables with TanStack Table
 
 ## Important Notes
 
-- **No backend** - This is a fully client-side application
-- **Data persistence** - All data in localStorage; clearing browser data = data loss
-- **Module independence** - Modules should be self-contained and reusable
-- **Service layer** - Business logic belongs in service classes, not in stores or components
-- **Type safety** - All data structures have TypeScript interfaces in `types/` directories
+- **Hybrid Architecture** - App uses both client-side localStorage (gear data) and backend API (auth, AI, admin)
+- **Data Persistence** - Client-side data stored in localStorage; server-side data via API
+- **API Integration** - Backend API proxied at `/api/*` (configured in vite.config.ts)
+- **Authentication Required** - Many features require backend authentication (WebAuthn/passkeys)
+- **Module Independence** - Modules should be self-contained and reusable
+- **Service Layer** - Business logic belongs in service classes, not in stores or components
+- **Type Safety** - All data structures have TypeScript interfaces in `types/` directories
+- **Guard Composition** - Route guards can be composed for complex authorization logic
+- **PWA Offline Support** - Service workers cache assets for offline functionality
 
 ## UI Component Notes
 
