@@ -14,6 +14,8 @@ class AdminUserResponse(BaseModel):
     avatarUrl: str | None = None
     isActive: bool
     isAdmin: bool
+    isOwner: bool = False
+    isPremium: bool = False
     isEmailVerified: bool
     emailVerifiedAt: str | None = None
     createdAt: str

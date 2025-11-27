@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.modules.auth.dependencies import AdminUser
+from app.modules.auth.dependencies import PremiumOrHigherUser
 from app.modules.gear.image_upload_service import ImageUploadService
 from app.modules.gear.item_image_schemas import ImageOrdersUpdate, ItemImageFromUrlRequest, ItemImageResponse
 
@@ -14,7 +14,7 @@ router = APIRouter(prefix="/items", tags=["item-images"])
 @router.post("/{item_id}/images", response_model=dict)
 async def upload_item_image(
     item_id: str,
-    current_user: AdminUser,
+    current_user: PremiumOrHigherUser,
     file: UploadFile = File(...),
     is_primary: bool = Query(False, description="Whether this should be the primary image"),
     db: AsyncSession = Depends(get_db),
@@ -63,7 +63,7 @@ async def get_item_images(item_id: str, db: AsyncSession = Depends(get_db)) -> l
 @router.delete("/images/{image_id}")
 async def delete_item_image(
     image_id: str,
-    current_user: AdminUser,
+    current_user: PremiumOrHigherUser,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """
@@ -90,7 +90,7 @@ async def delete_item_image(
 async def reorder_item_images(
     item_id: str,
     data: ImageOrdersUpdate,
-    current_user: AdminUser,
+    current_user: PremiumOrHigherUser,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """
@@ -115,7 +115,7 @@ async def reorder_item_images(
 async def set_primary_image(
     item_id: str,
     image_id: str,
-    current_user: AdminUser,
+    current_user: PremiumOrHigherUser,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """
@@ -138,7 +138,7 @@ async def set_primary_image(
 @router.post("/{item_id}/images/from-url", response_model=dict)
 async def upload_item_image_from_url(
     item_id: str,
-    current_user: AdminUser,
+    current_user: PremiumOrHigherUser,
     data: ItemImageFromUrlRequest,
     db: AsyncSession = Depends(get_db),
 ) -> dict:

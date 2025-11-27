@@ -93,6 +93,8 @@ class UserResponse(BaseModel):
     name: str
     isActive: bool
     isAdmin: bool
+    isOwner: bool = False
+    isPremium: bool = False
     isEmailVerified: bool
     emailVerifiedAt: datetime | None = None
     avatarUrl: str | None = None

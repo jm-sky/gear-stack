@@ -1,26 +1,20 @@
-import { computed } from 'vue'
-import { useAuthStore } from '@/modules/auth/store/useAuthStore'
-import { useUserStore } from '@/modules/user/store/useUserStore'
+import { usePermissions } from '@/shared/composables/usePermissions'
 
 /**
  * Composable for admin functionality
  * Provides admin access checks and utilities
+ * 
+ * @deprecated Use usePermissions() instead for centralized permission logic
+ * This is kept for backward compatibility
  */
 export function useAdmin() {
-  const authStore = useAuthStore()
-  const userStore = useUserStore()
-
-  const isAdmin = computed(() => {
-    // Check authStore first (in-memory, most up-to-date)
-    // Fall back to userStore (persisted in localStorage)
-    return authStore.user?.isAdmin ?? userStore.user?.isAdmin ?? false
-  })
+  const { isAdmin, canAccessAdminPanel, isAuthenticated } = usePermissions()
 
   const checkAdminAccess = (): boolean => {
-    if (!authStore.isAuthenticated) {
+    if (!isAuthenticated.value) {
       return false
     }
-    return isAdmin.value
+    return canAccessAdminPanel.value
   }
 
   return {

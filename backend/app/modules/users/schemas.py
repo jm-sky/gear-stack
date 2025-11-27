@@ -22,8 +22,11 @@ class UserUpdate(BaseModel):
 
     email: Optional[EmailStr] = None
     name: Optional[str] = Field(None, min_length=1, max_length=100)
-    role: Optional[str] = Field(None, pattern="^(user|admin|moderator)$")
+    role: Optional[str] = Field(None, pattern="^(user|admin|moderator|owner|premium)$")
     isActive: Optional[bool] = None
+    isAdmin: Optional[bool] = None
+    isOwner: Optional[bool] = None
+    isPremium: Optional[bool] = None
 
 
 class UserProfileUpdate(BaseModel):

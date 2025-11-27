@@ -1,11 +1,12 @@
  
 import { AuthRouteNames } from '@/modules/auth/config/routes'
 import { useAuthStore } from '@/modules/auth/store/useAuthStore'
+import { usePermissions } from '@/shared/composables/usePermissions'
 import { config } from '@/shared/config/config'
 import type { NavigationGuardNext, RouteLocationNormalized, Router } from 'vue-router'
 
 /**
- * Admin guard that checks if user has admin access
+ * Admin guard that checks if user has admin or owner access
  * Should be called after authGuard
  */
 export async function adminGuard(
@@ -26,17 +27,18 @@ export async function adminGuard(
   }
 
   const authStore = useAuthStore()
+  const { canAccessAdminPanel, isAuthenticated } = usePermissions()
 
   // Check if user is authenticated
-  if (!authStore.isAuthenticated) {
+  if (!isAuthenticated.value) {
     next({ name: AuthRouteNames.login, query: { redirectTo: to.fullPath } })
     return
   }
 
-  // Check if user is admin
+  // Check if user has admin or owner access
   // authGuard runs before this and ensures user data is loaded
-  if (!authStore.user?.isAdmin) {
-    // Redirect to dashboard or home if not admin
+  if (!canAccessAdminPanel.value) {
+    // Redirect to dashboard or home if not admin/owner
     next({ name: 'home' })
     return
   }

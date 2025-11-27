@@ -203,7 +203,64 @@ async def require_admin(
     return current_user
 
 
+async def require_owner(
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> User:
+    """
+    Dependency to require owner privileges.
+
+    Raises:
+        HTTPException: If user is not an owner
+    """
+    if not current_user.isOwner:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Owner privileges required",
+        )
+    return current_user
+
+
+async def require_admin_or_owner(
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> User:
+    """
+    Dependency to require admin or owner privileges.
+
+    Raises:
+        HTTPException: If user is neither admin nor owner
+    """
+    if not (current_user.isAdmin or current_user.isOwner):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin or Owner privileges required",
+        )
+    return current_user
+
+
+async def require_premium_or_higher(
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> User:
+    """
+    Dependency to require premium user or higher privileges.
+    
+    Premium or higher means: Premium User, Administrator, or Owner.
+    Regular User role does not have access.
+
+    Raises:
+        HTTPException: If user is a regular user (not premium/admin/owner)
+    """
+    if not (current_user.isPremium or current_user.isAdmin or current_user.isOwner):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Premium, Admin, or Owner privileges required",
+        )
+    return current_user
+
+
 # Type alias for dependency injection
 CurrentUser = Annotated[User, Depends(get_current_user)]
 AdminUser = Annotated[User, Depends(require_admin)]
+OwnerUser = Annotated[User, Depends(require_owner)]
+AdminOrOwnerUser = Annotated[User, Depends(require_admin_or_owner)]
+PremiumOrHigherUser = Annotated[User, Depends(require_premium_or_higher)]
 AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]

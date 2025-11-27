@@ -39,6 +39,8 @@ def users_create(
         help="User password (not recommended, will prompt if not provided)",
     ),
     admin: bool = typer.Option(False, "--admin", "-a", help="Create as administrator"),
+    owner: bool = typer.Option(False, "--owner", "-o", help="Create as owner"),
+    premium: bool = typer.Option(False, "--premium", "-p", help="Create as premium user"),
     no_input: bool = typer.Option(False, "--no-input", help="Skip interactive prompts (requires all options)"),
 ) -> None:
     """Create a new user interactively with rich prompts and validation.
@@ -50,6 +52,12 @@ def users_create(
         # Create admin user
         python -m cli users create --admin
 
+        # Create owner user
+        python -m cli users create --owner
+
+        # Create premium user
+        python -m cli users create --premium
+
         # Non-interactive mode (for scripts)
         python -m cli users create --no-input \\
             --email admin@example.com \\
@@ -57,7 +65,7 @@ def users_create(
             --password "SecurePass123!" \\
             --admin
     """
-    asyncio.run(_users_create_async(email, name, password, admin, no_input))
+    asyncio.run(_users_create_async(email, name, password, admin, owner, premium, no_input))
 
 
 async def _users_create_async(
@@ -65,6 +73,8 @@ async def _users_create_async(
     name: str | None,
     password: str | None,
     admin: bool,
+    owner: bool,
+    premium: bool,
     no_input: bool,
 ) -> None:
     """Async implementation of user creation."""
@@ -78,9 +88,11 @@ async def _users_create_async(
     name_value = await _get_name(console, name, no_input)
     password_value = await _get_password(console, password, no_input)
     is_admin = await _get_admin_status(console, admin, no_input)
+    is_owner = owner  # Owner role is typically set via CLI flag only
+    is_premium = premium  # Premium role is typically set via CLI flag only
 
     # Show summary
-    _show_user_summary(console, email_value, name_value, is_admin)
+    _show_user_summary(console, email_value, name_value, is_admin, is_owner, is_premium)
 
     # Confirm creation
     if not no_input:
@@ -91,15 +103,16 @@ async def _users_create_async(
     # Create user with spinner
     try:
         with console.status("[bold green]Creating user...", spinner="dots"):
-            user = await _create_user_in_db(email_value, name_value, password_value, is_admin)
+            user = await _create_user_in_db(email_value, name_value, password_value, is_admin, is_owner, is_premium)
 
         # Show success message
         console.print("\n[bold green]✓[/bold green] User created successfully!\n")
 
         # Show user info panel
+        role_str = "Owner" if user.get('isOwner') else ("Administrator" if user.get('isAdmin') else ("Premium" if user.get('isPremium') else "User"))
         user_info = f"""[bold]Email:[/bold] {user['email']}
 [bold]Name:[/bold] {user['name']}
-[bold]Role:[/bold] {'Administrator' if user['isAdmin'] else 'User'}
+[bold]Role:[/bold] {role_str}
 [bold]Status:[/bold] {'Active' if user['isActive'] else 'Inactive'}
 [bold]ID:[/bold] {user['id']}
 [bold]Created:[/bold] {user['createdAt']}"""
@@ -200,17 +213,18 @@ async def _get_admin_status(console: Any, admin: bool, no_input: bool) -> bool:
     return Confirm.ask("[cyan]Create as administrator?[/cyan]", default=admin)
 
 
-def _show_user_summary(console: Any, email: str, name: str, is_admin: bool) -> None:
+def _show_user_summary(console: Any, email: str, name: str, is_admin: bool, is_owner: bool = False, is_premium: bool = False) -> None:
     """Show user creation summary."""
+    role_str = "Owner" if is_owner else ("Administrator" if is_admin else ("Premium" if is_premium else "User"))
     summary = f"""[bold]Email:[/bold] {email}
 [bold]Name:[/bold] {name}
-[bold]Role:[/bold] {'Administrator' if is_admin else 'User'}"""
+[bold]Role:[/bold] {role_str}"""
 
     panel = Panel(summary, title="[bold]User Summary[/bold]", border_style="cyan")
     console.print(panel)
 
 
-async def _create_user_in_db(email: str, name: str, password: str, is_admin: bool) -> dict[str, Any]:
+async def _create_user_in_db(email: str, name: str, password: str, is_admin: bool, is_owner: bool = False, is_premium: bool = False) -> dict[str, Any]:
     """Create user in database.
 
     Args:
@@ -218,6 +232,8 @@ async def _create_user_in_db(email: str, name: str, password: str, is_admin: boo
         name: User name
         password: User password (will be hashed)
         is_admin: Whether user is admin
+        is_owner: Whether user is owner
+        is_premium: Whether user is premium
 
     Returns:
         dict: Created user data
@@ -232,8 +248,14 @@ async def _create_user_in_db(email: str, name: str, password: str, is_admin: boo
         repo = UserRepository(db)
 
         try:
-            # Create user
+            # Create user (create_user only supports is_admin, so we'll update flags after)
             user = await repo.create_user(email=email, password=password, full_name=name, is_admin=is_admin)
+
+            # Update role flags if needed
+            if is_owner or is_premium:
+                user.isOwner = is_owner
+                user.isPremium = is_premium
+                user = await repo.update_user(user)
 
             user.isEmailVerified = True
             user.emailVerifiedAt = datetime.now(UTC)
@@ -246,6 +268,8 @@ async def _create_user_in_db(email: str, name: str, password: str, is_admin: boo
                 "name": user.name,
                 "isActive": user.isActive,
                 "isAdmin": user.isAdmin,
+                "isOwner": user.isOwner,
+                "isPremium": user.isPremium,
                 "createdAt": user.createdAt,
             }
 
@@ -392,7 +416,11 @@ async def _users_list_async(
                 truncate_id(user["id"]),
                 user["email"],
                 user["name"],
-                format_user_role(user["isAdmin"]),
+                format_user_role(
+                    is_admin=user.get("isAdmin", False),
+                    is_owner=user.get("isOwner", False),
+                    is_premium=user.get("isPremium", False),
+                ),
                 format_user_status(user["isActive"]),
             ]
             if detailed:
@@ -439,6 +467,8 @@ async def _get_users_from_db(detailed: bool = False) -> list[dict[str, Any]]:
                 "name": user.name,
                 "isActive": user.isActive,
                 "isAdmin": user.isAdmin,
+                "isOwner": user.isOwner,
+                "isPremium": user.isPremium,
                 "createdAt": user.createdAt,
             }
 

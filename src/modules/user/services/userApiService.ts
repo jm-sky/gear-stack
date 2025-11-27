@@ -11,6 +11,8 @@ interface UserResponse {
   name: string
   role?: string
   isAdmin?: boolean
+  isOwner?: boolean
+  isPremium?: boolean
   isActive?: boolean
   isEmailVerified?: boolean
   avatarUrl?: string
@@ -49,6 +51,8 @@ class UserApiService {
       email: response.email,
       avatarUrl: response.avatarUrl,
       isAdmin: response.isAdmin ?? response.role === 'admin',
+      isOwner: response.isOwner ?? response.role === 'owner',
+      isPremium: response.isPremium ?? response.role === 'premium',
       createdAt: response.createdAt,
       updatedAt: response.updatedAt,
     }

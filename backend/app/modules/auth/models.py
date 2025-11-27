@@ -68,6 +68,8 @@ class User(BaseModel):
     hashedPassword: str | None = None  # Nullable for OAuth users
     isActive: bool = True
     isAdmin: bool = False
+    isOwner: bool = False
+    isPremium: bool = False
     isEmailVerified: bool = False
     createdAt: datetime
     resetToken: str | None = None
@@ -193,6 +195,8 @@ class User(BaseModel):
             "name": self.name,
             "isActive": self.isActive,
             "isAdmin": self.isAdmin,
+            "isOwner": self.isOwner,
+            "isPremium": self.isPremium,
             "createdAt": self.createdAt,
             "isEmailVerified": self.isEmailVerified,
             "emailVerifiedAt": self.emailVerifiedAt,

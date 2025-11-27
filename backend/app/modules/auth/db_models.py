@@ -48,6 +48,8 @@ class UserDB(Base):
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=True)  # Nullable for OAuth users
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_owner: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_premium: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_email_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
     reset_token: Mapped[str | None] = mapped_column(Text, nullable=True)

@@ -14,7 +14,7 @@ from app.modules.auth.repositories import (
     UserRepository as AuthUserRepository,
     get_user_repository as get_auth_user_repository,
 )
-from app.modules.users.dependencies import AdminUser
+from app.modules.auth.dependencies import AdminOrOwnerUser
 from app.modules.users.repositories import UserRepository, get_user_repository
 from app.modules.users.schemas import UserUpdate
 
@@ -47,7 +47,7 @@ def get_admin_service(
     description="Get list of all users with pagination",
 )
 async def get_all_users(
-    _: AdminUser,
+    _: AdminOrOwnerUser,
     service: Annotated[AdminService, Depends(get_admin_service)],
     skip: int = Query(default=0, ge=0, description="Number of records to skip"),
     limit: int = Query(default=100, ge=1, le=1000, description="Max records to return"),
@@ -64,7 +64,7 @@ async def get_all_users(
 )
 async def get_user_by_id(
     user_id: str,
-    _: AdminUser,
+    _: AdminOrOwnerUser,
     service: Annotated[AdminService, Depends(get_admin_service)],
 ) -> AdminUserResponse:
     """Get user by ID (admin only)."""
@@ -83,11 +83,11 @@ async def get_user_by_id(
 async def update_user(
     user_id: str,
     user_data: UserUpdate,
-    _: AdminUser,
+    current_user: AdminOrOwnerUser,
     service: Annotated[AdminService, Depends(get_admin_service)],
 ) -> AdminUserResponse:
-    """Update user (admin only)."""
-    user = await service.update_user(user_id, user_data)
+    """Update user (admin or owner only)."""
+    user = await service.update_user(user_id, user_data, current_user)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User {user_id} not found")
     return user
@@ -101,11 +101,11 @@ async def update_user(
 )
 async def delete_user(
     user_id: str,
-    _: AdminUser,
+    current_user: AdminOrOwnerUser,
     service: Annotated[AdminService, Depends(get_admin_service)],
 ) -> None:
-    """Delete user (admin only)."""
-    success = await service.delete_user(user_id)
+    """Delete user (admin or owner only)."""
+    success = await service.delete_user(user_id, current_user)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User {user_id} not found")
 
@@ -118,7 +118,7 @@ async def delete_user(
     description="Get list of all containers from all users",
 )
 async def get_all_containers(
-    _: AdminUser,
+    _: AdminOrOwnerUser,
     service: Annotated[AdminService, Depends(get_admin_service)],
     skip: int = Query(default=0, ge=0, description="Number of records to skip"),
     limit: int = Query(default=100, ge=1, le=1000, description="Max records to return"),
@@ -135,7 +135,7 @@ async def get_all_containers(
 )
 async def get_container_by_id(
     container_id: str,
-    _: AdminUser,
+    _: AdminOrOwnerUser,
     service: Annotated[AdminService, Depends(get_admin_service)],
 ) -> AdminContainerResponse:
     """Get container by ID (admin only)."""
@@ -156,7 +156,7 @@ async def get_container_by_id(
 )
 async def delete_container(
     container_id: str,
-    _: AdminUser,
+    _: AdminOrOwnerUser,
     service: Annotated[AdminService, Depends(get_admin_service)],
 ) -> None:
     """Delete container (admin only)."""
@@ -176,7 +176,7 @@ async def delete_container(
     description="Get list of all items from all containers",
 )
 async def get_all_items(
-    _: AdminUser,
+    _: AdminOrOwnerUser,
     service: Annotated[AdminService, Depends(get_admin_service)],
     skip: int = Query(default=0, ge=0, description="Number of records to skip"),
     limit: int = Query(default=100, ge=1, le=1000, description="Max records to return"),
@@ -193,7 +193,7 @@ async def get_all_items(
 )
 async def get_item_by_id(
     item_id: str,
-    _: AdminUser,
+    _: AdminOrOwnerUser,
     service: Annotated[AdminService, Depends(get_admin_service)],
 ) -> AdminItemResponse:
     """Get item by ID (admin only)."""
@@ -214,7 +214,7 @@ async def get_item_by_id(
 )
 async def delete_item(
     item_id: str,
-    _: AdminUser,
+    _: AdminOrOwnerUser,
     service: Annotated[AdminService, Depends(get_admin_service)],
 ) -> None:
     """Delete item (admin only)."""

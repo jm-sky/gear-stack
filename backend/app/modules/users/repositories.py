@@ -128,6 +128,9 @@ class UserRepository:
         role: str | None = None,
         is_active: bool | None = None,
         avatar_url: str | None = None,
+        is_admin: bool | None = None,
+        is_owner: bool | None = None,
+        is_premium: bool | None = None,
     ) -> User | None:
         """Update user fields in database.
 
@@ -135,8 +138,12 @@ class UserRepository:
             user_id: User ID to update
             email: New email (optional)
             name: New name (optional)
-            role: New role - 'admin' or 'user' (optional)
+            role: New role - 'admin', 'user', 'owner', 'premium' (optional, deprecated - use flags instead)
             is_active: Active status (optional)
+            avatar_url: Avatar URL (optional)
+            is_admin: Admin flag (optional)
+            is_owner: Owner flag (optional)
+            is_premium: Premium flag (optional)
 
         Returns:
             Updated User or None if not found
@@ -162,8 +169,20 @@ class UserRepository:
         if name is not None:
             auth_user.name = name
 
+        # Handle role updates - support both old 'role' field and new flags
         if role is not None:
+            # Legacy support: map role string to flags
             auth_user.isAdmin = role == "admin"
+            auth_user.isOwner = role == "owner"
+            auth_user.isPremium = role == "premium" or role == "admin" or role == "owner"
+        else:
+            # Use explicit flags if provided
+            if is_admin is not None:
+                auth_user.isAdmin = is_admin
+            if is_owner is not None:
+                auth_user.isOwner = is_owner
+            if is_premium is not None:
+                auth_user.isPremium = is_premium
 
         if is_active is not None:
             auth_user.isActive = is_active

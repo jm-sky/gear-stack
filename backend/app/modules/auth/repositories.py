@@ -66,6 +66,8 @@ class UserRepository(SearchMixin, UserRepositoryInterface):
             hashedPassword=user_db.hashed_password or "",  # OAuth users may not have password
             isActive=user_db.is_active,
             isAdmin=user_db.is_admin,
+            isOwner=user_db.is_owner,
+            isPremium=user_db.is_premium,
             isEmailVerified=user_db.is_email_verified,
             createdAt=user_db.created_at,
             resetToken=user_db.reset_token,
@@ -218,6 +220,8 @@ class UserRepository(SearchMixin, UserRepositoryInterface):
         user_db.hashed_password = user.hashedPassword  # type: ignore[assignment]
         user_db.is_active = user.isActive
         user_db.is_admin = user.isAdmin
+        user_db.is_owner = user.isOwner
+        user_db.is_premium = user.isPremium
         user_db.reset_token = user.resetToken
         user_db.reset_token_expiry = user.resetTokenExpiry
         user_db.is_email_verified = user.isEmailVerified
