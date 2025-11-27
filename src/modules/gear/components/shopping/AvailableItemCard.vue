@@ -1,18 +1,16 @@
 <script setup lang="ts">
 import { CheckCircle2, Plus, Trash2 } from 'lucide-vue-next'
-import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import Badge from '@/components/ui/badge/Badge.vue'
 import { Button } from '@/components/ui/button'
 import type { IItemWithContainerId } from '../../types/shopping.types'
 import { useCategoryLabel } from '../../composables/useCategoryLabel'
-import { useGearSettings } from '../../composables/useGearSettings'
+import { useFormattedItemPrice } from '../../composables/useFormattedItemPrice'
+import { useFormattedItemWeight } from '../../composables/useFormattedItemWeight'
 import { GearRoutePath } from '../../routes'
 import { getPriorityVariant } from '../../utils/badgeVariants'
 import { EXPIRATION_WARNING_DAYS, MILLISECONDS_PER_DAY } from '../../utils/constants'
-import { formatCurrency, getCurrency } from '../../utils/currencyFormatter'
-import { formatWeightWithPreferredUnit } from '../../utils/formatWeight'
 import CategoryIcon from '../CategoryIcon.vue'
 
 const { t } = useI18n()
@@ -28,9 +26,9 @@ const emit = defineEmits<{
   purchase: []
 }>()
 
-const { settings: gearSettings, defaultCurrency } = useGearSettings()
 const { getCategoryLabel } = useCategoryLabel()
-const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
+const { formattedWeight } = useFormattedItemWeight(item, undefined, true)
+const { formattedPrice } = useFormattedItemPrice(item, undefined, true)
 
 // Helper to check if item is expired
 function isExpired(): boolean {
@@ -107,10 +105,10 @@ function isExpiringSoon(days: number = EXPIRATION_WARNING_DAYS): boolean {
         <span v-if="item.brand">{{ item.brand }}</span>
         <span>{{ t('gear.item.quantity') }}: {{ item.quantity }}</span>
         <span>
-          {{ formatWeightWithPreferredUnit(item.weight * item.quantity, item.weightUnit, settings.preferredWeightUnit) }}
+          {{ formattedWeight }}
         </span>
         <span v-if="item.price">
-          {{ formatCurrency(item.price * item.quantity, getCurrency(item.currency, defaultCurrency)) }}
+          {{ formattedPrice }}
         </span>
         <span v-if="item.expirationDate" :class="isExpired() ? 'text-red-600' : 'text-yellow-600'">
           {{ isExpired() ? t('gear.item.expiration.expired') : t('gear.item.expiration.expiringSoon') }}: {{ new Date(item.expirationDate).toLocaleDateString() }}

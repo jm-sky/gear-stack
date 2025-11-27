@@ -17,10 +17,10 @@ import Textarea from '@/components/ui/textarea/Textarea.vue'
 import WeightInputWithUnitPicker from '@/components/ui/weight-input/WeightInputWithUnitPicker.vue'
 import type { IGearItem } from '../types/gear.types'
 import { useGearSettings } from '../composables/useGearSettings'
-import { SUPPORTED_CURRENCIES } from '../utils/currencyFormatter'
 import { getBrandOptions } from '../utils/suggestedValues'
 import CategorySelect from './CategorySelect.vue'
 import ColorAutocomplete from './ColorAutocomplete.vue'
+import CurrencySelect from './CurrencySelect.vue'
 
 defineProps<{
   item?: IGearItem
@@ -214,20 +214,7 @@ const handleCancel = () => {
         <FormField v-slot="{ value, handleChange }" name="currency">
           <FormItem>
             <FormLabel :label="$t('gear.item.currency')" />
-            <Select :model-value="value || defaultCurrency" @update:model-value="handleChange">
-              <SelectTrigger class="w-full">
-                <SelectValue :placeholder="$t('gear.item.currency')" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  v-for="curr in SUPPORTED_CURRENCIES"
-                  :key="curr.value"
-                  :value="curr.value"
-                >
-                  {{ curr.label }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
+            <CurrencySelect :model-value="value || defaultCurrency" @update:model-value="handleChange" />
             <FormMessage />
           </FormItem>
         </FormField>

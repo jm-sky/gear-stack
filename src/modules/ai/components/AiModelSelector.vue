@@ -4,8 +4,11 @@
 -->
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useAiModels } from '../composables/useAiModels'
+
+const { t } = useI18n()
 
 const { models, selectedModel, loadModels, selectModel } = useAiModels()
 
@@ -37,8 +40,11 @@ const selectedModelId = computed({
 
 <template>
   <Select v-model="selectedModelId">
-    <SelectTrigger class="w-[200px]">
-      <SelectValue placeholder="Select model" />
+    <SelectTrigger class="w-56">
+      <SelectValue :placeholder="t('ai.model.selectPlaceholder')" class="w-full flex items-center gap-2">
+        <span class="font-medium">{{ selectedModel?.name }}</span>
+        <span class="text-xs text-muted-foreground uppercase ml-auto">{{ selectedModel?.provider }}</span>
+      </SelectValue>
     </SelectTrigger>
     <SelectContent>
       <SelectItem
@@ -46,7 +52,7 @@ const selectedModelId = computed({
         :key="model.id"
         :value="model.id"
       >
-        <div class="flex flex-col">
+        <div class="flex flex-col gap-0.5">
           <span class="font-medium">{{ model.name }}</span>
           <span class="text-xs text-muted-foreground">{{ model.provider }}</span>
         </div>

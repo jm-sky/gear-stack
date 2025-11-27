@@ -9,24 +9,19 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import Separator from '@/components/ui/separator/Separator.vue'
 import { useGearSettings } from '@/modules/gear/composables/useGearSettings'
-import { SUPPORTED_CURRENCIES } from '@/modules/gear/utils/currencyFormatter'
+import { weightUnitEnum } from '@/modules/gear/utils/weightUnits'
 import { useSettings } from '@/modules/settings/composables/useSettings'
 import { config } from '@/shared/config/config'
+import CurrencySelect from './CurrencySelect.vue'
+import WeightUnitSelect from './WeightUnitSelect.vue'
 import type { TGearWeightUnit } from '@/modules/gear/types/gear.types'
 
 const { t } = useI18n()
 
 const settingsSchema = z.object({
-  preferredWeightUnit: z.enum(['g', 'kg', 'oz', 'lb']), // TODO: Extract to file for one source of truth
+  preferredWeightUnit: weightUnitEnum,
   defaultCurrency: z.string().optional(),
   defaultContainersPublic: z.boolean().optional(),
 })
@@ -100,26 +95,7 @@ const onSubmit = handleSubmit(async (values) => {
                   {{ t('settings.preferences.preferredWeightUnit.subtitle') }}
                 </p>
                 <FormControl>
-                  <!-- TODO: Extract to dedicated component -->
-                  <Select v-bind="componentField">
-                    <SelectTrigger>
-                      <SelectValue :placeholder="t('settings.preferences.preferredWeightUnit.placeholder')" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="g">
-                        {{ t('settings.preferences.preferredWeightUnit.options.g') }}
-                      </SelectItem>
-                      <SelectItem value="kg">
-                        {{ t('settings.preferences.preferredWeightUnit.options.kg') }}
-                      </SelectItem>
-                      <SelectItem value="oz">
-                        {{ t('settings.preferences.preferredWeightUnit.options.oz') }}
-                      </SelectItem>
-                      <SelectItem value="lb">
-                        {{ t('settings.preferences.preferredWeightUnit.options.lb') }}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <WeightUnitSelect v-bind="componentField" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -137,21 +113,7 @@ const onSubmit = handleSubmit(async (values) => {
                   {{ t('settings.preferences.defaultCurrency.subtitle') }}
                 </p>
                 <FormControl>
-                  <!-- TODO: Extract to dedicated component -->
-                  <Select v-bind="componentField">
-                    <SelectTrigger>
-                      <SelectValue :placeholder="t('settings.preferences.defaultCurrency.placeholder')" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem
-                        v-for="curr in SUPPORTED_CURRENCIES"
-                        :key="curr.value"
-                        :value="curr.value"
-                      >
-                        {{ curr.label }}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <CurrencySelect v-bind="componentField" />
                 </FormControl>
                 <FormMessage />
               </FormItem>

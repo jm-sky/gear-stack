@@ -9,6 +9,7 @@ import AiChatDialog from '@/modules/ai/components/AiChatDialog.vue'
 import { useAi } from '@/modules/ai/composables/useAi'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { useBackend } from '@/shared/composables/useBackend'
+import { config } from '@/shared/config/config'
 import type { IGearItem } from '../types/gear.types'
 import AddNestedContainerDialog from '../components/AddNestedContainerDialog.vue'
 import CategoryPieChart from '../components/CategoryPieChart.vue'
@@ -273,7 +274,7 @@ const handleAddNestedContainer = async (nestedContainerId: string) => {
       category: 'other',
       quantity: 1,
       weight: 0,
-      weightUnit: 'g',
+      weightUnit: config.defaults.preferredWeightUnit,
       priority: 'medium',
       status: 'owned',
       containerId: nestedContainerId,

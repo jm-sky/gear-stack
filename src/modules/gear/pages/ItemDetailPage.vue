@@ -15,6 +15,8 @@ import type { IGearContainer, IGearItem } from '../types/gear.types'
 import CategoryIcon from '../components/CategoryIcon.vue'
 import ItemImageGallery from '../components/ItemImageGallery.vue'
 import SearchImagesButton from '../components/SearchImagesButton.vue'
+import { useFormattedItemPrice } from '../composables/useFormattedItemPrice'
+import { useFormattedItemWeight } from '../composables/useFormattedItemWeight'
 import { useGearSettings } from '../composables/useGearSettings'
 import { GearRoutePath } from '../routes'
 import { gearContainerService } from '../services/gearContainerService'
@@ -22,8 +24,6 @@ import { gearItemService } from '../services/gearItemService'
 import { useGearStore } from '../store/useGearStore'
 import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 import { EXPIRATION_WARNING_DAYS } from '../utils/constants'
-import { formatCurrency, getCurrency } from '../utils/currencyFormatter'
-import { formatWeightWithPreferredUnit } from '../utils/formatWeight'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 
 const route = useRoute()
@@ -31,10 +31,8 @@ const router = useRouter()
 const { t } = useI18n()
 const store = useGearStore()
 const { shouldUseAPI } = useBackend()
-const { settings: gearSettings, defaultCurrency, customCategories } = useGearSettings()
+const { customCategories } = useGearSettings()
 const { user, isAuthenticated } = useAuth()
-
-const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
 
 const containerId = route.params.containerId as string
 const itemId = route.params.itemId as string
@@ -151,19 +149,8 @@ const handleEdit = () => {
   })
 }
 
-const formattedWeight = computed<string>(() => {
-  if (!item.value) return '-'
-  return formatWeightWithPreferredUnit(
-    item.value.weight * item.value.quantity,
-    item.value.weightUnit ?? 'g',
-    settings.value.preferredWeightUnit,
-  )
-})
-
-const formattedPrice = computed<string>(() => {
-  if (!item.value?.price) return '-'
-  return formatCurrency(item.value.price, getCurrency(item.value.currency, defaultCurrency.value))
-})
+const { formattedWeight } = useFormattedItemWeight(item)
+const { formattedPrice } = useFormattedItemPrice(item)
 
 // Check if there are any details to display
 const hasDetails = computed<boolean>(() => {

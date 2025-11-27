@@ -62,7 +62,7 @@ MODELS: list[dict[str, Any]] = [
     },
     # Google Models
     {
-        "id": "google/gemini-pro-1.5",
+        "id": "google/gemini-pro-1.5-exp",
         "name": "Gemini Pro 1.5",
         "provider": "Google",
         "description": "Google's most capable model with large context",
@@ -72,8 +72,8 @@ MODELS: list[dict[str, Any]] = [
         "recommended": False,
     },
     {
-        "id": "google/gemini-flash-1.5",
-        "name": "Gemini Flash 1.5",
+        "id": "google/gemini-flash-1.5-8b",
+        "name": "Gemini Flash 1.5 8B",
         "provider": "Google",
         "description": "Fast and affordable Google model",
         "context_length": 1000000,

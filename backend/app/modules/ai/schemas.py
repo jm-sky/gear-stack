@@ -37,6 +37,7 @@ class AiChatResponse(BaseModel):
     tokens: dict[str, int] = Field(..., description="Token usage (prompt, completion, total)")
     cost: float | None = Field(None, description="Estimated cost in USD")
     model: str = Field(..., description="Model used")
+    prompt: str | None = Field(None, description="Full prompt sent to AI (for debugging, admin only)")
 
 
 # ============================================================================

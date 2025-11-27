@@ -74,5 +74,6 @@ export interface IAiChatResponse {
   }
   cost: number | null
   model: string
+  prompt?: string | null
 }
 

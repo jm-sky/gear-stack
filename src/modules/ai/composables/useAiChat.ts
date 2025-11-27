@@ -13,6 +13,7 @@ export function useAiChat() {
   const messages = ref<IAiChatMessage[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
+  const lastPrompt = ref<string | null>(null)
 
   const sendMessage = async (
     message: string,
@@ -40,6 +41,9 @@ export function useAiChat() {
       }
 
       const response = await aiApiService.chat(request)
+
+      // Save prompt for debug
+      lastPrompt.value = response.prompt ?? null
 
       // Add assistant message
       const assistantMessage: IAiChatMessage = {
@@ -85,6 +89,7 @@ export function useAiChat() {
   const clearMessages = (): void => {
     messages.value = []
     error.value = null
+    lastPrompt.value = null
   }
 
   const hasMessages = computed<boolean>(() => messages.value.length > 0)
@@ -93,6 +98,7 @@ export function useAiChat() {
     messages,
     isLoading,
     error,
+    lastPrompt,
     sendMessage,
     clearMessages,
     hasMessages,

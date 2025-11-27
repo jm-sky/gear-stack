@@ -3,9 +3,12 @@
   Allows user to configure which fields to send to AI
 -->
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { useAiContext } from '../composables/useAiContext'
+
+const { t } = useI18n()
 
 const { selectedFields, availableFields, toggleField } = useAiContext()
 
@@ -21,9 +24,9 @@ const handleFieldToggle = (field: string): void => {
 <template>
   <div class="border-t p-4 space-y-3">
     <div class="space-y-2">
-      <Label class="text-sm font-medium">Context Fields</Label>
+      <Label class="text-sm font-medium">{{ t('ai.context.fields') }}</Label>
       <p class="text-xs text-muted-foreground">
-        Select which fields to include when sending data to AI
+        {{ t('ai.context.description') }}
       </p>
       <div class="grid grid-cols-2 gap-2 mt-2">
         <div

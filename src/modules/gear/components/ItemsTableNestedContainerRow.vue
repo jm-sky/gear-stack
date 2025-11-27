@@ -6,19 +6,19 @@ import { useRouter } from 'vue-router'
 import { Badge } from '@/components/ui/badge'
 import { TableCell, TableRow } from '@/components/ui/table'
 import type { IGearContainer, IGearItem, TContainerColor } from '../types/gear.types'
+import { formatItemWeight } from '../composables/useFormattedItemWeight'
 import { useGearSettings } from '../composables/useGearSettings'
 import { GearRoutePath } from '../routes'
 import { useGearStore } from '../store/useGearStore'
 import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 import { COLOR_BORDER_CLASSES, COLOR_TEXT_CLASSES } from '../utils/containerColors'
-import { formatWeightWithPreferredUnit } from '../utils/formatWeight'
 import CategoryIcon from './CategoryIcon.vue'
 
 const { t } = useI18n()
 const router = useRouter()
 const store = useGearStore()
 const { settings: gearSettings } = useGearSettings()
-const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
+const preferredWeightUnit = computed(() => gearSettings.value.preferredWeightUnit)
 
 const props = defineProps<{
   nestedItems: IGearItem[]
@@ -91,7 +91,7 @@ function navigateToNestedContainer(item: IGearItem) {
               {{ nestedItem.quantity }}
             </div>
             <div class="text-muted-foreground text-end px-4 min-w-0 md:min-w-[80px]">
-              {{ formatWeightWithPreferredUnit(nestedItem.weight * nestedItem.quantity, nestedItem.weightUnit ?? 'g', settings.preferredWeightUnit) }}
+              {{ formatItemWeight(nestedItem, true, preferredWeightUnit) }}
             </div>
             <div class="min-w-0 md:min-w-26">
               <Badge :variant="getPriorityVariant(nestedItem.priority)">

@@ -74,6 +74,48 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - ✅ Enhanced error handling on frontend (v2.2.1)
 - 📝 **Status**: Fully functional end-to-end with Google OAuth
 
+### 🔐 Zarządzanie tokenami i sesjami
+**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium
+
+- 🔄 **Unieważnienie tokena przy wylogowaniu**
+  - Plik: `backend/app/modules/auth/router.py`
+  - Linia: 204
+  - Opis: Dodanie funkcjonalności unieważniania tokena JWT przy wylogowaniu użytkownika
+  - Implementacja: Blacklist tokenów w Redis lub bazie danych, weryfikacja przy każdym żądaniu
+
+- 🔄 **Unieważnienie wszystkich sesji/tokenów przy usunięciu konta**
+  - Plik: `backend/app/modules/auth/service.py`
+  - Linia: 452
+  - Opis: Unieważnienie wszystkich sesji i tokenów użytkownika podczas usuwania konta
+  - Implementacja: Masowe unieważnienie wszystkich tokenów użytkownika w systemie
+
+- 🔄 **Usunięcie powiązanych danych przy usuwaniu konta**
+  - Plik: `backend/app/modules/auth/service.py`
+  - Linia: 453
+  - Opis: Usunięcie danych 2FA, passkeys i innych powiązanych danych przy usuwaniu konta
+  - Implementacja: Cascade delete dla wszystkich powiązanych danych użytkownika (2FA, passkeys, sesje, tokeny)
+
+### 🔐 Ulepszenia WebAuthn / Passkeys
+**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium
+
+- 🔄 **Przechowywanie challenge_token w Redis**
+  - Plik: `backend/app/modules/two_factor/webauthn_service.py`
+  - Linia: 252
+  - Opis: Przechowywanie challenge_token wraz z challenge i user_id w Redis zamiast kodowania w odpowiedzi (NIEBEZPIECZNE w produkcji)
+  - Implementacja: Bezpieczne przechowywanie challenge w Redis z TTL
+
+- 🔄 **Pobieranie challenge_data z Redis**
+  - Plik: `backend/app/modules/two_factor/webauthn_service.py`
+  - Linia: 304
+  - Opis: Pobieranie challenge_data z Redis używając challenge_token
+  - Implementacja: Walidacja challenge_token i pobieranie danych z Redis
+
+- 🔄 **Pełna weryfikacja WebAuthn używając biblioteki webauthn**
+  - Plik: `backend/app/modules/two_factor/webauthn_service.py`
+  - Linia: 335
+  - Opis: Implementacja pełnej weryfikacji WebAuthn używając biblioteki webauthn zamiast podstawowej walidacji
+  - Implementacja: Pełna integracja z biblioteką webauthn dla bezpiecznej weryfikacji
+
 ---
 
 ## 🔒 Bezpieczeństwo i walidacja treści
@@ -169,6 +211,40 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - 🔄 Ocenianie (gwiazdki) kontenerów - planowane
 - 🔄 Komentarze pod kontenerami - planowane
 - 🔄 Możliwość skopiowania publicznego kontenera do własnych - planowane
+
+### System zaproszeń
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Large
+
+**Zaproszenia ogólne do aplikacji:**
+- Wysyłka zaproszeń na e-mail
+- Generowanie unikalnego linku akceptacji dla każdego zaproszenia
+- Akceptacja zaproszenia z linku (rejestracja nowego użytkownika lub dodanie do istniejącego konta)
+- Lista wysłanych zaproszeń dla każdego użytkownika
+- Oznaczenie statusu zaproszenia (wysłane, zaakceptowane, wygasłe)
+- Możliwość anulowania zaproszenia przed akceptacją
+- Opcjonalnie: limit zaproszeń per użytkownik (np. dla planów premium)
+
+**Później: Zaproszenia do współdzielenia kontenerów**
+- Wysyłka zaproszeń do współdzielenia konkretnego kontenera
+- Różne poziomy uprawnień (tylko odczyt, edycja)
+- Lista zaproszeń do współdzielenia kontenerów
+- Zarządzanie uprawnieniami współdzielonych kontenerów
+- Powiadomienia o zaproszeniach do współdzielenia
+
+**Implementacja:**
+- Backend: Tabela `invitations` w bazie danych (email, token, status, created_by, expires_at, itp.)
+- Backend: Endpointy API do tworzenia, wysyłania, akceptacji i anulowania zaproszeń
+- Backend: Integracja z systemem email (SMTP lub serwis zewnętrzny)
+- Frontend: UI do wysyłania zaproszeń (formularz z emailem)
+- Frontend: Strona akceptacji zaproszenia (landing page z linku)
+- Frontend: Lista wysłanych zaproszeń w ustawieniach użytkownika
+- Frontend: Zarządzanie zaproszeniami do współdzielenia kontenerów (w przyszłości)
+
+**Zalety:**
+- Kontrolowany wzrost bazy użytkowników
+- Możliwość zapraszania znajomych do aplikacji
+- Lepsze zarządzanie współdzieleniem kontenerów (w przyszłości)
+- Historia zaproszeń i akceptacji
 
 ---
 
@@ -652,9 +728,10 @@ W `ItemFormPage.vue` (np. linie 325–328) oraz innych miejscach ręcznie używa
 ### Medium Priority
 1. **Synchronizacja między urządzeniami** - Medium priority, Large complexity
 2. **Udostępnianie kontenerów** - Medium priority, Medium complexity
-3. **Szablony kontenerów** - Medium priority, Medium complexity
-4. ✅ **PWA** - Medium priority, Medium complexity (Completed)
-5. ✅ **Galeria publiczna kontenerów** - Medium priority, Medium complexity (Completed)
+3. **System zaproszeń** - Medium priority, Large complexity
+4. **Szablony kontenerów** - Medium priority, Medium complexity
+5. ✅ **PWA** - Medium priority, Medium complexity (Completed)
+6. ✅ **Galeria publiczna kontenerów** - Medium priority, Medium complexity (Completed)
 
 ### Low Priority
 1. ✅ **Profil użytkownika - link do Gravatara** - Low priority, Small complexity (Completed)

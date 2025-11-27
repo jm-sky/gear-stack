@@ -36,7 +36,7 @@ const handleSearchImages = async () => {
     }
 
     // For now, just download and add the first result
-    // TODO: In future, show dialog to select image
+    // TODO: In future, show dialog to select image (check, it should be done already)
     const firstResult = response.results[0]
     await imageSearchApiService.downloadAndAddImage({
       itemId: itemId,

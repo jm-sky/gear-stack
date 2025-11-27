@@ -12,6 +12,7 @@ import TabsTrigger from '@/components/ui/tabs/TabsTrigger.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useBackend } from '@/shared/composables/useBackend'
 import { useHandleError } from '@/shared/composables/useHandleError'
+import { config } from '@/shared/config/config'
 import type { ICreateItemDto, IGearItem, IUpdateItemDto } from '../types/gear.types'
 import type { IItemWithContainer } from '../utils/allItemsColumns'
 import ItemCatalogSelector from '../components/ItemCatalogSelector.vue'
@@ -60,7 +61,7 @@ const getInitialValues = (): ItemFormData => {
       category: item.value.category,
       quantity: item.value.quantity,
       weight: item.value.weight,
-      weightUnit: item.value.weightUnit ?? 'g',
+      weightUnit: item.value.weightUnit ?? config.defaults.preferredWeightUnit,
       notes: item.value.notes ?? '',
       expirationDate: item.value.expirationDate ?? '',
       priority: item.value.priority,

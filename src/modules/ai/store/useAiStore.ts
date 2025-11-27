@@ -5,7 +5,6 @@
 
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import { config } from '@/shared/config/config'
 import type {
   IAiHistoryItem,
   IAiModel,
@@ -18,7 +17,7 @@ import { aiApiService } from '../services/aiApiService'
 export const useAiStore = defineStore('ai', () => {
   // State
   const settings = ref<IAiSettings | null>(null)
-  const availableModels = ref<IAiModel[]>([...config.features.ai.defaultModels])
+  const availableModels = ref<IAiModel[]>([])
   const history = ref<IAiHistoryItem[]>([])
   const isLoading = ref(false)
 

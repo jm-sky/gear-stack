@@ -45,7 +45,7 @@ const handleUnitChange = (value: unknown) => {
 }
 
 const currentWeight = computed(() => props.modelValue)
-const currentUnit = computed(() => props.unit ?? 'g')
+const currentUnit = computed(() => props.unit ?? config.defaults.preferredWeightUnit)
 </script>
 
 <template>

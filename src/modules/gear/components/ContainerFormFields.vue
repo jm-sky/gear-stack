@@ -6,21 +6,14 @@ import { Checkbox } from '@/components/ui/checkbox'
 import ComboBox from '@/components/ui/combo-box/ComboBox.vue'
 import { FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import Textarea from '@/components/ui/textarea/Textarea.vue'
 import WeightInputWithUnitPicker from '@/components/ui/weight-input/WeightInputWithUnitPicker.vue'
 import type { IGearContainer } from '../types/gear.types'
 import { useGearSettings } from '../composables/useGearSettings'
 import { COLOR_DOT_CLASSES, CONTAINER_COLORS } from '../utils/containerColors'
-import { SUPPORTED_CURRENCIES } from '../utils/currencyFormatter'
 import { getBrandOptions } from '../utils/suggestedValues'
 import ContainerTypeSelect from './ContainerTypeSelect.vue'
+import CurrencySelect from './CurrencySelect.vue'
 
 const _props = defineProps<{
   container?: IGearContainer
@@ -206,20 +199,7 @@ const handleCancel = () => {
         <FormField v-slot="{ value, handleChange }" name="currency">
           <FormItem>
             <FormLabel :label="$t('gear.container.currency')" />
-            <Select :model-value="value || defaultCurrency" @update:model-value="handleChange">
-              <SelectTrigger class="w-full">
-                <SelectValue :placeholder="$t('gear.container.currency')" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  v-for="curr in SUPPORTED_CURRENCIES"
-                  :key="curr.value"
-                  :value="curr.value"
-                >
-                  {{ curr.label }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
+            <CurrencySelect :model-value="value || defaultCurrency" @update:model-value="handleChange" />
             <FormMessage />
           </FormItem>
         </FormField>

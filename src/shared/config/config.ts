@@ -55,17 +55,6 @@ export const config = {
     },
     ai: {
       enabled: import.meta.env.VITE_ENABLE_AI === 'true',
-      defaultModels: [
-        {
-          'id': 'google/gemini-flash-1.5',
-          'name': 'Gemini Flash 1.5',
-          'provider': 'google',
-          'context_window': 1000000,
-          'pricing': {'input': 0.075, 'output': 0.30},
-          'recommended_for': ['classify', 'chat'],
-          'description': 'Very fast with huge context',
-        } as IAiModel
-      ]
     }
   },
   defaults: {

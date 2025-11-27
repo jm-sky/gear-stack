@@ -5,19 +5,22 @@
 <script setup lang="ts">
 import { Loader2, Send, Settings, Trash2, X } from 'lucide-vue-next'
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import DialogTitle from '@/components/ui/dialog/DialogTitle.vue'
 import { Textarea } from '@/components/ui/textarea'
 import { useAiChat } from '../composables/useAiChat'
 import { useAiContext } from '../composables/useAiContext'
 import { useAiStore } from '../store/useAiStore'
+import AiChatMessage from './AiChatMessage.vue'
 import AiChatTemplateMsgButton from './AiChatTemplateMsgButton.vue'
 import AiContextConfig from './AiContextConfig.vue'
-import AiCostDisplay from './AiCostDisplay.vue'
 import AiModelSelector from './AiModelSelector.vue'
 
+const { t } = useI18n()
+
 const aiStore = useAiStore()
-const { messages, isLoading, sendMessage, clearMessages, hasMessages } = useAiChat()
+const { messages, isLoading, lastPrompt, sendMessage, clearMessages, hasMessages } = useAiChat()
 const { selectedFields } = useAiContext()
 
 const userMessage = ref('')
@@ -64,7 +67,7 @@ const onTemplatePrompt = (prompt: string) => {
     <!-- Header with model selector -->
     <DialogTitle class="flex items-center justify-between border-b p-4">
       <h2 class="text-lg font-semibold">
-        AI Assistant
+        {{ t('ai.chat.title') }}
       </h2>
       <div class="flex items-center gap-2 -my-1">
         <AiModelSelector />
@@ -74,7 +77,7 @@ const onTemplatePrompt = (prompt: string) => {
           @click="showContextConfig = !showContextConfig"
         >
           <Settings class="size-4" />
-          Context
+          {{ t('ai.chat.context') }}
         </Button>
         <Button variant="ghost" size="sm" @click="clearMessages">
           <Trash2 class="size-4" />
@@ -97,33 +100,20 @@ const onTemplatePrompt = (prompt: string) => {
 
       <div v-if="!hasMessages" class="flex items-center justify-center h-full text-muted-foreground">
         <p class="text-sm">
-          Start a conversation with AI...
+          {{ t('ai.chat.startConversation') }}
         </p>
       </div>
 
-      <div
-        v-for="message in messages"
+      <AiChatMessage
+        v-for="(message, index) in messages"
         :key="message.id"
-        :class="[
-          'p-3 rounded-lg',
-          message.role === 'user'
-            ? 'bg-primary text-primary-foreground ml-auto max-w-[80%]'
-            : 'bg-muted max-w-[80%]',
-        ]"
-      >
-        <!-- eslint-disable-next-line vue/no-v-html -->
-        <div class="text-sm whitespace-pre-wrap" v-html="message.content" />
-        <AiCostDisplay
-          v-if="message.role === 'assistant' && (message.tokens || message.cost)"
-          :tokens="message.tokens"
-          :cost="message.cost"
-          class="mt-2"
-        />
-      </div>
+        :message
+        :debug-prompt="message.role === 'assistant' && index === messages.length - 1 ? lastPrompt : null"
+      />
 
       <div v-if="isLoading" class="flex items-center gap-2">
         <Loader2 class="size-4 animate-spin" />
-        <span class="text-sm text-muted-foreground">AI is thinking...</span>
+        <span class="text-sm text-muted-foreground">{{ t('ai.chat.thinking') }}</span>
       </div>
     </div>
 
@@ -132,7 +122,7 @@ const onTemplatePrompt = (prompt: string) => {
       <div class="flex gap-2">
         <Textarea
           v-model="userMessage"
-          placeholder="Ask AI about your gear..."
+          :placeholder="t('ai.chat.placeholder')"
           :rows="3"
           @keydown="handleKeyDown"
         />
@@ -144,7 +134,7 @@ const onTemplatePrompt = (prompt: string) => {
         </Button>
       </div>
       <p class="text-xs text-muted-foreground mt-2">
-        Ctrl+Enter to send
+        {{ t('ai.chat.sendHint') }}
       </p>
     </div>
   </div>

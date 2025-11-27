@@ -55,6 +55,10 @@ class ChatService:
         if user_settings.use_own_token:
             api_token = await self.settings_service.get_api_token(user_id)
 
+        # Build messages (needed for cache key and debug)
+        messages = self._build_messages(request.message, request.context)
+        full_prompt = "\n\n".join([f"{msg['role']}: {msg['content']}" for msg in messages])
+
         # Check cache if enabled
         if settings.ai.cache_enabled and self.cache_service:
             cache_key = PostgresCacheService.generate_cache_key(
@@ -72,13 +76,11 @@ class ChatService:
                     tokens=cached["tokens"],
                     cost=cached.get("cost"),
                     model=cached["model"],
+                    prompt=full_prompt,
                 )
 
         # Initialize provider
         provider = OpenRouterProvider(api_key=api_token)
-
-        # Build messages
-        messages = self._build_messages(request.message, request.context)
 
         # Call AI
         response = await provider.chat(messages=messages, model=model, max_tokens=max_tokens, temperature=temperature)
@@ -128,6 +130,7 @@ class ChatService:
             },
             cost=cost,
             model=response.model,
+            prompt=full_prompt,
         )
 
     def _build_messages(self, user_message: str, context: dict) -> list[dict[str, str]]:
@@ -143,7 +146,7 @@ class ChatService:
         messages = []
 
         # System message with instructions
-        system_prompt = """You are a helpful AI assistant for a gear management application.
+        system_prompt = f"""You are a helpful AI assistant for a gear management application {settings.app.name}.
 You help users manage their survival gear, bug-out bags, and equipment.
 
 When the user asks you to perform actions (like adding items, updating quantities, etc.),

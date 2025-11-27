@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { weightUnitEnum } from './weightUnits'
 
 // Schema dla kontenera
 // Type can be a default type or any string (for custom container types)
@@ -14,9 +15,9 @@ export const containerSchema = z.object({
   price: z.number().min(0, 'Cena nie może być ujemna').optional(),
   currency: z.string().optional(),
   weight: z.number().min(0, 'Waga nie może być ujemna').optional(),
-  weightUnit: z.enum(['g', 'kg', 'oz', 'lb']).optional(),
+  weightUnit: weightUnitEnum.optional(),
   maxWeight: z.number().min(0, 'Maksymalna waga nie może być ujemna').optional(),
-  maxWeightUnit: z.enum(['g', 'kg', 'oz', 'lb']).optional(),
+  maxWeightUnit: weightUnitEnum.optional(),
   url: z.string().url('Nieprawidłowy URL').optional().or(z.literal('')),
   showItemImages: z.boolean().optional(),
 })
@@ -28,7 +29,7 @@ export const itemSchema = z.object({
   category: z.string().min(1, 'Kategoria jest wymagana'), // Allow any string for custom categories
   quantity: z.number().int().min(1, 'Ilość musi być większa od 0'),
   weight: z.number().min(0, 'Waga nie może być ujemna'),
-  weightUnit: z.enum(['g', 'kg', 'oz', 'lb']),
+  weightUnit: weightUnitEnum,
   notes: z.string().optional(),
   expirationDate: z.string().optional(),
   priority: z.enum(['critical', 'high', 'medium', 'low']),

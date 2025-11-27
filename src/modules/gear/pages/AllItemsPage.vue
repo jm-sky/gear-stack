@@ -9,11 +9,12 @@ import Badge from '@/components/ui/badge/Badge.vue'
 import Button from '@/components/ui/button/Button.vue'
 import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import { ALL_ITEMS_PAGE_FILTERS_KEY, ALL_ITEMS_TABLE_COLUMN_VISIBILITY_KEY } from '@/shared/config/config'
+import { ALL_ITEMS_PAGE_FILTERS_KEY, ALL_ITEMS_TABLE_COLUMN_VISIBILITY_KEY, config } from '@/shared/config/config'
 import type { IItemWithContainer } from '../utils/allItemsColumns'
 import CategoryIcon from '../components/CategoryIcon.vue'
 import ItemsTableImageCell from '../components/items-table/ItemsTableImageCell.vue'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
+import { formatItemWeight } from '../composables/useFormattedItemWeight'
 import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
 import { GearRoutePath } from '../routes'
@@ -21,7 +22,6 @@ import { gearContainerService } from '../services/gearContainerService'
 import { createAllItemsColumns } from '../utils/allItemsColumns'
 import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 import { COLOR_DOT_CLASSES, COLOR_TEXT_CLASSES } from '../utils/containerColors'
-import { formatWeightWithPreferredUnit } from '../utils/formatWeight'
 import { getAllItems } from '../utils/getAllItems'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 
@@ -282,7 +282,7 @@ function navigateToContainer(containerId: string) {
         </template>
 
         <template #weight="{ row }">
-          {{ formatWeightWithPreferredUnit(row.original.weight * row.original.quantity, row.original.weightUnit, settings.preferredWeightUnit ?? 'g') }}
+          {{ formatItemWeight(row.original, true, settings.preferredWeightUnit ?? config.defaults.preferredWeightUnit) }}
         </template>
 
         <template #status="{ row }">

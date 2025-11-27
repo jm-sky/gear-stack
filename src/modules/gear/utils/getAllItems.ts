@@ -1,6 +1,8 @@
+import { config } from '@/shared/config/config'
 import type { IGearContainer } from '../types/gear.types'
 import type { IItemWithContainer } from './allItemsColumns'
 import { calculateTotalWeightSync } from './containerCalculations'
+import { convertFromGrams } from './formatWeight'
 import type { TUUID } from '@/shared/types/base.type'
 
 /**
@@ -18,23 +20,13 @@ export function getAllItems(containers: IGearContainer[], excludeContainerId?: T
       return
     }
 
-   // TODO: Move calculations to separate helper function or composable
-   // TODO: 'g' should come from defaults in config.ts
-
     // Add container itself as an item (containers are items too)
     // Calculate total weight (container weight + all items weight) in grams
     const containerTotalWeightGrams = calculateTotalWeightSync(container, containers)
-    // Use container's weight unit if set, otherwise use grams
-    const displayWeightUnit = container.weightUnit ?? 'g'
+    // Use container's weight unit if set, otherwise use default from config
+    const displayWeightUnit = container.weightUnit ?? config.defaults.preferredWeightUnit
     // Convert total weight from grams to display unit
-    let displayWeight = containerTotalWeightGrams
-    if (displayWeightUnit === 'kg') {
-      displayWeight = containerTotalWeightGrams / 1000
-    } else if (displayWeightUnit === 'oz') {
-      displayWeight = containerTotalWeightGrams / 28.3495
-    } else if (displayWeightUnit === 'lb') {
-      displayWeight = containerTotalWeightGrams / 453.592
-    }
+    const displayWeight = convertFromGrams(containerTotalWeightGrams, displayWeightUnit)
 
     allItems.push({
       id: container.id,
@@ -68,7 +60,7 @@ export function getAllItems(containers: IGearContainer[], excludeContainerId?: T
         containerColor: container.color ?? 'default',
         quantity: item.quantity,
         weight: item.weight,
-        weightUnit: item.weightUnit ?? 'g',
+        weightUnit: item.weightUnit ?? config.defaults.preferredWeightUnit,
         status: item.status,
         priority: item.priority,
         brand: item.brand ?? undefined,

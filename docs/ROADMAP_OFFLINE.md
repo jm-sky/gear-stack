@@ -63,6 +63,13 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 - ✅ Aktualizacja walidacji (zod schemas) - dodanie oz i lb do enum
 - ✅ Wszystkie wyświetlane wagi będą konwertowane do preferowanej jednostki (w tym oz/lb)
 
+### 🔄 Przeniesienie ustawiania atrybutu lang do inicjalizacji aplikacji
+**Status:** 🔄 Do weryfikacji | **Priority:** Low | **Complexity:** Small
+
+- Przeniesienie ustawiania `document.documentElement.setAttribute('lang', ...)` z `main.ts` do bardziej odpowiedniego miejsca w inicjalizacji aplikacji
+- Obecna lokalizacja: `src/main.ts` (linia 47) - TODO w komentarzu
+- **Do weryfikcji:** Czy obecne miejsce jest wystarczające, czy powinno być przeniesione do dedykowanego composable/helper inicjalizacyjnego
+
 ---
 
 ## 🎨 UI/UX Ulepszenia

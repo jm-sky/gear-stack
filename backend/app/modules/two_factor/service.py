@@ -12,6 +12,10 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from sqlalchemy import select
+
+from app.modules.settings.db_models import UserSettingsDB
+
 from .totp_service import TotpService
 from .webauthn_service import WebAuthnService
 from .types.repository import TwoFactorRepositoryInterface
@@ -36,6 +40,25 @@ class TwoFactorService:
         # Composition: create specialized services
         self.totp = TotpService(repository)
         self.webauthn = WebAuthnService(repository)
+
+    async def _get_or_create_user_settings(self, user_id: str) -> UserSettingsDB:
+        """Get or create user settings.
+
+        Args:
+            user_id: User ID
+
+        Returns:
+            User settings entity
+        """
+        db = self.repository.db
+        result = await db.execute(select(UserSettingsDB).where(UserSettingsDB.user_id == user_id))
+        settings = result.scalars().first()
+        if settings is None:
+            settings = UserSettingsDB(user_id=user_id)
+            db.add(settings)
+            await db.commit()
+            await db.refresh(settings)
+        return settings
 
     # ==================================================================
     # TOTP Methods - delegate to TotpService
@@ -191,14 +214,23 @@ class TwoFactorService:
     async def get_preferred_method(self, user_id: str) -> str | None:
         """Get preferred 2FA method.
 
-        Returns first available method (TOTP priority).
-        TODO: Store and retrieve actual preference from user settings.
+        Returns user's preferred method from user_settings, or first available method if no preference set.
         """
+        # Get user's preferred method from settings
+        settings = await self._get_or_create_user_settings(user_id)
+        preferred_method = settings.preferred_2fa_method
+
+        # Get available methods
         methods = await self.get_available_methods(user_id)
+
+        # If user has a preferred method and it's available, return it
+        if preferred_method and preferred_method in methods:
+            return preferred_method
+
+        # Otherwise, return first available method (TOTP priority)
         if methods:
-            # For now, return first method (TOTP priority)
-            # In future, check user_settings table for preference
             return methods[0]
+
         return None
 
     async def get_two_factor_status(self, user_id: str) -> dict[str, Any]:
@@ -219,16 +251,25 @@ class TwoFactorService:
             "required": False,  # Global setting - can be added later
         }
 
-    async def update_preferred_method(self, user_id: str, method: str) -> None:
+    async def update_preferred_method(self, user_id: str, method: str | None) -> None:
         """Update user's preferred 2FA method.
 
         Args:
             user_id: User ID
-            method: Preferred method ('totp' or 'webauthn')
+            method: Preferred method ('totp' or 'webauthn'), or None to clear preference
 
         Raises:
             ValueError: If method is invalid or not enabled
         """
+        # If method is None, just clear the preference
+        if method is None:
+            settings = await self._get_or_create_user_settings(user_id)
+            settings.preferred_2fa_method = None
+            await self.repository.db.commit()
+            await self.repository.db.refresh(settings)
+            logger.info(f"Cleared preferred 2FA method for user {user_id}")
+            return
+
         valid_methods = ["totp", "webauthn"]
         if method not in valid_methods:
             raise ValueError(f"Invalid method. Must be one of: {valid_methods}")
@@ -243,9 +284,10 @@ class TwoFactorService:
             if not status.get("enabled"):
                 raise ValueError("WebAuthn is not enabled for this user")
 
-        # TODO: Store preferred method in user_settings table
-        # For now, just validate and log
-        logger.info(f"Updated preferred 2FA method for user {user_id} to {method}")
+        # Store preferred method in user_settings table
+        settings = await self._get_or_create_user_settings(user_id)
+        settings.preferred_2fa_method = method
+        await self.repository.db.commit()
+        await self.repository.db.refresh(settings)
 
-        # Placeholder for actual storage:
-        # await self.repository.update_user_preferred_2fa_method(user_id, method)
+        logger.info(f"Updated preferred 2FA method for user {user_id} to {method}")

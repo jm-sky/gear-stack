@@ -3,8 +3,11 @@
   Dialog wrapper for AI chat interface
 -->
 <script setup lang="ts">
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { useI18n } from 'vue-i18n'
+import { Dialog, DialogContent, DialogDescription } from '@/components/ui/dialog'
 import AiChatWindow from './AiChatWindow.vue'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   open: boolean
@@ -28,9 +31,10 @@ const handleOpenChange = (value: boolean): void => {
     <DialogContent
       class="sm:max-w-4xl h-[80vh] flex flex-col p-0"
       :show-close-button="false"
-      aria-describedby="ai-chat-dialog-description"
     >
-      <!-- installHook.js:1 Warning: Missing `Description` or `aria-describedby="undefined"` for DialogContent. -->
+      <DialogDescription class="sr-only">
+        {{ t('ai.chat.description') }}
+      </DialogDescription>
       <AiChatWindow @close="handleOpenChange(false)" />
     </DialogContent>
   </Dialog>

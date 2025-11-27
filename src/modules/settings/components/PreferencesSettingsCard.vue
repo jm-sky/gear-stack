@@ -8,8 +8,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Label } from '@/components/ui/label'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import Select from '@/components/ui/select/Select.vue'
 import SelectContent from '@/components/ui/select/SelectContent.vue'
 import SelectGroup from '@/components/ui/select/SelectGroup.vue'
@@ -18,11 +16,11 @@ import SelectLabel from '@/components/ui/select/SelectLabel.vue'
 import SelectTrigger from '@/components/ui/select/SelectTrigger.vue'
 import SelectValue from '@/components/ui/select/SelectValue.vue'
 import Separator from '@/components/ui/separator/Separator.vue'
-import { useAdmin } from '@/modules/admin/composables/useAdmin'
 import { useSettings } from '@/modules/settings/composables/useSettings'
 import { settingsSchema } from '@/modules/settings/validation/settings.schema'
 import { useDarkMode } from '@/shared/composables/useDarkMode'
 import { type SupportedLocale, useLocale } from '@/shared/i18n'
+import ImageProcessingModeRadioGroup from './ImageProcessingModeRadioGroup.vue'
 import type { ISettingsService, Settings as SettingsType } from '@/modules/settings/types/settings.type'
 
 const props = defineProps<{
@@ -32,7 +30,6 @@ const props = defineProps<{
 const { t } = useI18n()
 const { currentLocale } = useLocale()
 const { isDark } = useDarkMode()
-const { isAdmin } = useAdmin()
 const { settingsQuery, settings, updateSettings, isLoading, isUpdating, isError } = useSettings(props.service)
 
 const getThemeValue = (darkMode: boolean | undefined) => {
@@ -52,17 +49,12 @@ const { handleSubmit, setValues } = useForm({
 
 watch(() => settingsQuery.data.value, (val: SettingsType | undefined) => {
   if (val) {
-    // If user is not admin and has high_quality, reset to balanced
-    let imageMode = val.imageProcessingMode ?? 'balanced'
-    if (!isAdmin.value && imageMode === 'high_quality') {
-      imageMode = 'balanced'
-    }
     setValues({
       darkMode: getThemeValue(val.darkMode),
       locale: val.locale,
       profilePublic: val.profilePublic ?? false,
       emailPublic: val.emailPublic ?? false,
-      imageProcessingMode: imageMode,
+      imageProcessingMode: val.imageProcessingMode ?? 'balanced',
     })
   }
 })
@@ -79,31 +71,14 @@ watch(() => isDark.value, (val: boolean) => {
   immediate: true,
 })
 
-// Watch for admin status changes - if user loses admin, reset high_quality to balanced
-watch(() => isAdmin.value, (isAdminValue) => {
-  if (!isAdminValue) {
-    const currentMode = settings.value?.imageProcessingMode
-    if (currentMode === 'high_quality') {
-      setValues({
-        imageProcessingMode: 'balanced',
-      })
-    }
-  }
-})
 
 const onSubmit = handleSubmit(async (values) => {
-  // Prevent non-admins from setting high_quality
-  let imageMode = values.imageProcessingMode ?? null
-  if (!isAdmin.value && imageMode === 'high_quality') {
-    imageMode = 'balanced'
-  }
-
   await updateSettings({
     darkMode: values.darkMode === 'dark',
     locale: values.locale,
     profilePublic: values.profilePublic,
     emailPublic: values.emailPublic,
-    imageProcessingMode: imageMode,
+    imageProcessingMode: values.imageProcessingMode ?? null,
   })
 })
 </script>
@@ -245,42 +220,7 @@ const onSubmit = handleSubmit(async (values) => {
                 {{ t('settings.preferences.imageProcessingMode.subtitle') }}
               </p>
               <FormControl>
-                <!-- TODO: Extract to dedicated component -->
-                <RadioGroup v-bind="componentField" class="flex flex-col gap-4">
-                  <div v-if="isAdmin" class="flex items-center gap-2">
-                    <RadioGroupItem id="high-quality" value="high_quality" />
-                    <div class="flex-1">
-                      <Label for="high-quality" class="text-sm font-medium cursor-pointer">
-                        {{ t('settings.preferences.imageProcessingMode.options.highQuality') }}
-                      </Label>
-                      <p class="text-xs text-muted-foreground">
-                        {{ t('settings.preferences.imageProcessingMode.options.highQualityDescription') }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <RadioGroupItem id="balanced" value="balanced" />
-                    <div class="flex-1">
-                      <Label for="balanced" class="text-sm font-medium cursor-pointer">
-                        {{ t('settings.preferences.imageProcessingMode.options.balanced') }}
-                      </Label>
-                      <p class="text-xs text-muted-foreground">
-                        {{ t('settings.preferences.imageProcessingMode.options.balancedDescription') }}
-                      </p>
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <RadioGroupItem id="storage-saver" value="storage_saver" />
-                    <div class="flex-1">
-                      <Label for="storage-saver" class="text-sm font-medium cursor-pointer">
-                        {{ t('settings.preferences.imageProcessingMode.options.storageSaver') }}
-                      </Label>
-                      <p class="text-xs text-muted-foreground">
-                        {{ t('settings.preferences.imageProcessingMode.options.storageSaverDescription') }}
-                      </p>
-                    </div>
-                  </div>
-                </RadioGroup>
+                <ImageProcessingModeRadioGroup v-bind="componentField" />
               </FormControl>
               <FormMessage />
             </FormItem>

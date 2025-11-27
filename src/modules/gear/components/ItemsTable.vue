@@ -9,13 +9,13 @@ import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
 import { ITEMS_TABLE_COLUMN_VISIBILITY_KEY } from '@/shared/config/config'
 import type { IGearItem } from '../types/gear.types'
 import { useCategoryLabel } from '../composables/useCategoryLabel'
+import { formatItemPrice } from '../composables/useFormattedItemPrice'
 import { useGearSettings } from '../composables/useGearSettings'
 import { GearRoutePath } from '../routes'
 import { useGearStore } from '../store/useGearStore'
 import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 import { EXPIRATION_WARNING_DAYS } from '../utils/constants'
 import { calculateTotalWeightSync } from '../utils/containerCalculations'
-import { formatCurrency, getCurrency } from '../utils/currencyFormatter'
 import { createItemsColumns } from '../utils/itemsColumns'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 import ItemsTableCategoryCell from './items-table/ItemsTableCategoryCell.vue'
@@ -435,7 +435,7 @@ function canMoveDown(item: IGearItem): boolean {
 
     <template #price="{ row }">
       <div v-if="row.original.price != null" class="text-end px-4">
-        {{ formatCurrency(row.original.price, getCurrency(row.original.currency, defaultCurrency)) }}
+        {{ formatItemPrice(row.original, false, defaultCurrency) }}
       </div>
       <span v-else class="text-muted-foreground">-</span>
     </template>

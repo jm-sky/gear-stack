@@ -23,6 +23,7 @@ from .schemas import (
     TotpStatusResponse,
     TwoFactorStatusResponse,
     TwoFactorVerifyResponse,
+    UpdatePreferredMethodRequest,
     VerifyTotpLoginRequest,
     VerifyTotpSetupRequest,
     VerifyTotpSetupResponse,
@@ -328,15 +329,20 @@ async def complete_passkey_authentication(
 @rate_limit("10/minute")
 async def update_preferred_method(
     request: Request,
-    body: dict[str, str],  # UpdatePreferredMethodRequest
+    body: UpdatePreferredMethodRequest,
     current_user: CurrentUser,
     service: TwoFactorService = Depends(get_service),
 ) -> dict[str, str]:
     """Update user's preferred 2FA method."""
     _ = request  # required by slowapi rate limiting
     try:
-        method = body.get("method", "")
-        await service.update_preferred_method(user_id=current_user.id, method=method)
-        return {"message": f"Preferred 2FA method updated to {method}"}
+        method = body.preferredMethod
+        if method is not None:
+            await service.update_preferred_method(user_id=current_user.id, method=method)
+            return {"message": f"Preferred 2FA method updated to {method}"}
+        else:
+            # Clear preference (set to None)
+            await service.update_preferred_method(user_id=current_user.id, method=None)
+            return {"message": "Preferred 2FA method cleared"}
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

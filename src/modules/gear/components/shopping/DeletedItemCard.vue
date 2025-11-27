@@ -4,9 +4,9 @@ import Badge from '@/components/ui/badge/Badge.vue'
 import { Button } from '@/components/ui/button'
 import type { IItemWithContainerId } from '../../types/shopping.types'
 import { useCategoryLabel } from '../../composables/useCategoryLabel'
+import { formatItemPrice } from '../../composables/useFormattedItemPrice'
 import { useGearSettings } from '../../composables/useGearSettings'
 import { getPriorityVariant } from '../../utils/badgeVariants'
-import { formatCurrency, getCurrency } from '../../utils/currencyFormatter'
 import CategoryIcon from '../CategoryIcon.vue'
 
 const { t } = useI18n()
@@ -44,7 +44,7 @@ const { getCategoryLabel } = useCategoryLabel()
         <span v-if="item.brand">{{ item.brand }}</span>
         <span>{{ t('gear.item.quantity') }}: {{ item.quantity }}</span>
         <span v-if="item.price">
-          {{ formatCurrency(item.price * item.quantity, getCurrency(item.currency, defaultCurrency)) }}
+          {{ formatItemPrice(item, true, defaultCurrency) }}
         </span>
       </div>
     </div>

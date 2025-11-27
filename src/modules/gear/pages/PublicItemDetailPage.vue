@@ -9,21 +9,19 @@ import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import type { IGearItem } from '../types/gear.types'
 import CategoryIcon from '../components/CategoryIcon.vue'
+import { useFormattedItemPrice } from '../composables/useFormattedItemPrice'
+import { useFormattedItemWeight } from '../composables/useFormattedItemWeight'
 import { useGearSettings } from '../composables/useGearSettings'
 import { GearRoutePath } from '../routes'
 import { publicContainersService } from '../services/publicContainersService'
 import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 import { EXPIRATION_WARNING_DAYS } from '../utils/constants'
-import { formatCurrency, getCurrency } from '../utils/currencyFormatter'
-import { formatWeightWithPreferredUnit } from '../utils/formatWeight'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
-const { settings: gearSettings, defaultCurrency, customCategories } = useGearSettings()
-
-const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
+const { customCategories } = useGearSettings()
 
 const containerId = route.params.containerId as string
 const itemId = route.params.itemId as string
@@ -85,19 +83,8 @@ const handleBack = () => {
   router.push(GearRoutePath.PublicContainerDetailById(containerId))
 }
 
-const formattedWeight = computed<string>(() => {
-  if (!item.value) return '-'
-  return formatWeightWithPreferredUnit(
-    item.value.weight * item.value.quantity,
-    item.value.weightUnit ?? 'g',
-    settings.value.preferredWeightUnit
-  )
-})
-
-const formattedPrice = computed<string>(() => {
-  if (!item.value?.price) return '-'
-  return formatCurrency(item.value.price, getCurrency(item.value.currency, defaultCurrency.value))
-})
+const { formattedWeight } = useFormattedItemWeight(item)
+const { formattedPrice } = useFormattedItemPrice(item)
 
 // Check if there are any details to display
 const hasDetails = computed<boolean>(() => {
