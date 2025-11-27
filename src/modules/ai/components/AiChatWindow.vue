@@ -19,12 +19,17 @@ import AiModelSelector from './AiModelSelector.vue'
 
 const { t } = useI18n()
 
+const props = defineProps<{
+  containerIds?: string[]
+}>()
+
 const aiStore = useAiStore()
 const { messages, isLoading, lastPrompt, sendMessage, clearMessages, hasMessages } = useAiChat()
-const { selectedFields } = useAiContext()
+const { buildContextData } = useAiContext()
 
 const userMessage = ref('')
 const showContextConfig = ref(false)
+const includeContainerData = ref(true)
 
 const emit = defineEmits<{
   close: []
@@ -43,9 +48,11 @@ onMounted(async () => {
 const handleSend = async (): Promise<void> => {
   if (!userMessage.value.trim() || isLoading.value) return
 
-  const context: Record<string, unknown> = {
-    fields: selectedFields.value,
-  }
+  // Build context with actual container data if enabled
+  const context: Record<string, unknown> = includeContainerData.value && props.containerIds
+    ? buildContextData(props.containerIds)
+    : {}
+
   await sendMessage(userMessage.value, context)
   userMessage.value = ''
 }
@@ -119,6 +126,17 @@ const onTemplatePrompt = (prompt: string) => {
 
     <!-- Input -->
     <div class="border-t p-4">
+      <!-- Context toggle (only show when containerIds are provided) -->
+      <div v-if="props.containerIds && props.containerIds.length > 0" class="flex items-center gap-2 mb-3">
+        <Checkbox :id="'include-container-data'" v-model="includeContainerData" />
+        <Label
+          :for="'include-container-data'"
+          class="text-sm font-normal cursor-pointer"
+        >
+          {{ t('ai.chat.includeContainerData') }}
+        </Label>
+      </div>
+
       <div class="flex gap-2">
         <Textarea
           v-model="userMessage"

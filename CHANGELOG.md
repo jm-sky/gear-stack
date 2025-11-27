@@ -21,6 +21,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.17.3] - 2025-11-27
+
+### Added
+- **AI Chat Module Enhancements**: Enhanced AI chat interface with new components and improved formatting
+  - New `AiChatMessage` component for displaying chat messages with proper formatting
+  - New `AiChatMessageDebugPrompt` component for debugging full prompts sent to AI
+  - New `AiChatTemplateMsgButton` component for quick template message buttons
+  - New formatting utilities: `useFormattedItemPrice` and `useFormattedItemWeight` for consistent display
+  - New `CurrencySelect` and `WeightUnitSelect` components for better form UX
+  - New `ImageProcessingModeRadioGroup` component for user preferences
+  - Comprehensive i18n structure for AI-related translations (`src/modules/ai/i18n/index.ts`)
+  - New `weightUnits.ts` utility for weight unit management
+
+### Changed
+- **AI Chat API Schema**: Synchronized frontend-backend API schema for AI chat
+  - Changed `IAiChatRequest.prompt` to `.message` to match backend schema
+  - Updated `IAiChatResponse` to match backend `AiChatResponse` structure
+  - Replaced `structured_data` with `structured_output` (backend naming)
+  - Updated token fields: `prompt/completion/total` (backend format)
+  - Simplified context to `Record<string, unknown>` for flexibility
+- **AI Chat Components**: Improved chat interface and user experience
+  - Enhanced `AiChatDialog` with descriptions and improved accessibility
+  - Updated `AiChatWindow` to send correct request format
+  - Refactored components to utilize new formatting functions
+- **Gear Components**: Improved form components and display consistency
+  - Updated `ItemFormFields` and `ContainerFormFields` to use new select components
+  - Enhanced price and weight display across all pages using new formatting utilities
+  - Improved `GearPreferencesCard` with better structure
+- **Backend AI Service**: Enhanced chat service with improved system prompt and model configuration
+- **2FA Module**: Added preferred 2FA method to user settings (database migration)
+
+### Fixed
+- **AI Chat API Synchronization**: Fixed 422 validation error when sending chat requests
+  - Frontend now correctly matches backend API schema
+  - Proper field mapping between frontend and backend
+- **Linting**: Fixed unused variable in `AiChatWindow.vue` (`selectedFields`)
+
+---
+
 ## [2.17.2] - 2025-11-27
 
 ### Fixed
