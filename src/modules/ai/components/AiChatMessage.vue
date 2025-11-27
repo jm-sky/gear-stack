@@ -4,14 +4,16 @@
 -->
 <script setup lang="ts">
 import MarkdownIt from 'markdown-it'
-import { computed, } from 'vue'
-import type { IAiChatMessage } from '../types'
+import { computed, ref, } from 'vue'
+import type { IAiChatMessage, IAiStructuredOutput } from '../types'
 import AiChatMessageDebugPrompt from './AiChatMessageDebugPrompt.vue'
-import AiCostDisplay from './AiCostDisplay.vue'
+import AiChatMessageDebugStructuredOutput from './AiChatMessageDebugStructuredOutput.vue'
+import AiChatMessageFooter from './AiChatMessageFooter.vue'
 
-const { message, debugPrompt } = defineProps<{
+const { message, debugPrompt, debugStructuredOutput } = defineProps<{
   message: IAiChatMessage
   debugPrompt?: string | null
+  debugStructuredOutput?: IAiStructuredOutput | null
 }>()
 
 const md = new MarkdownIt({
@@ -20,6 +22,9 @@ const md = new MarkdownIt({
   typographer: true, // Enable smart quotes and other typographic replacements
   breaks: true, // Convert line breaks to <br>
 })
+
+const debugPromptMessage = ref(false)
+const debugStructuredOutputMessage = ref(false)
 
 const renderedContent = computed<string>(() => {
   return md.render(message.content)
@@ -38,15 +43,21 @@ const messageClasses = computed<string>(() => {
     <div class="prose prose-sm dark:prose-invert max-w-none" v-html="renderedContent" />
 
     <AiChatMessageDebugPrompt
+      v-model:show="debugPromptMessage"
       :message="message"
       :debug-prompt="debugPrompt"
     />
 
-    <AiCostDisplay
-      v-if="message.role === 'assistant' && (message.tokens || message.cost)"
-      :tokens="message.tokens"
-      :cost="message.cost"
-      class="mt-3 border-t pt-2"
+    <AiChatMessageDebugStructuredOutput
+      v-model:show="debugStructuredOutputMessage"
+      :message="message"
+      :debug-structured-output="debugStructuredOutput"
+    />
+
+    <AiChatMessageFooter
+      :message="message"
+      :debug-prompt="debugPrompt"
+      :debug-structured-output="debugStructuredOutput"
     />
   </div>
 </template>

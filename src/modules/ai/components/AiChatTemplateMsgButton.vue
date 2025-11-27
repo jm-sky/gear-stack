@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-export type TemplateMsgVariant = 'whatsUnnecessary' | 'whatsNeeded'
+export type TemplateMsgVariant = 'whatsUnnecessary' | 'whatsNeeded' | 'addRandomItem'
 
 const { variant } = defineProps<{
   variant: TemplateMsgVariant

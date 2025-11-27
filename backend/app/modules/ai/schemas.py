@@ -12,10 +12,18 @@ from pydantic import BaseModel, Field
 # ============================================================================
 
 
+class AiChatMessage(BaseModel):
+    """Single chat message."""
+
+    role: str = Field(..., description="Message role (user or assistant)")
+    content: str = Field(..., description="Message content")
+
+
 class AiChatRequest(BaseModel):
     """Request for AI chat."""
 
     message: str = Field(..., min_length=1, max_length=10000, description="User message")
+    history: list[AiChatMessage] = Field(default_factory=list, description="Previous messages in conversation")
     context: dict[str, Any] = Field(default_factory=dict, description="Optional context data")
     model: str | None = Field(None, description="Override default model")
     max_tokens: int | None = Field(None, ge=1, le=4000, description="Max tokens for response")

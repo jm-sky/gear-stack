@@ -40,7 +40,7 @@ const selectedModelId = computed({
 
 <template>
   <Select v-model="selectedModelId">
-    <SelectTrigger class="w-56">
+    <SelectTrigger size="sm" class="w-56 cursor-pointer hover:bg-accent hover:border-accent-foreground/50">
       <SelectValue :placeholder="t('ai.model.selectPlaceholder')" class="w-full flex items-center gap-2">
         <span class="font-medium">{{ selectedModel?.name }}</span>
         <span class="text-xs text-muted-foreground uppercase ml-auto">{{ selectedModel?.provider }}</span>

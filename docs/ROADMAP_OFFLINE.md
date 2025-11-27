@@ -664,7 +664,7 @@ Kombinacja opcji 1 i 2:
 ## ✏️ Szybka edycja
 
 ### Edycja bezpośrednio na liście (Inline Editing)
-**Status:** 🔄 Planned | **Priority:** Medium | **Feature:** FEATURE-007 | **Complexity:** Large
+**Status:** 🔄 Planned | **Priority:** High | **Feature:** FEATURE-007 | **Complexity:** Large
 
 - Możliwość szybkiej edycji listy - dodawanie i zmienianie przedmiotów bezpośrednio na liście
 - Bez wchodzenia w formularz
@@ -955,6 +955,7 @@ Kombinacja opcji 1 i 2:
 3. ✅ **Dodawanie własnych marek (brand)** - High priority, Medium complexity (Completed)
 4. ✅ **Error handler dla chunk loading errors** - High priority, Medium complexity (Completed)
 5. ✅ **Wyświetlanie kontenerów na liście wszystkich przedmiotów** - High priority, Small complexity (Completed)
+6. **Edycja bezpośrednio na liście (Inline Editing)** - High priority, Large complexity
 
 ### Medium Priority
 1. ✅ **Kopiowanie/klonowanie kontenerów** - Medium priority, Small complexity (Completed in v0.21.0)
@@ -962,7 +963,6 @@ Kombinacja opcji 1 i 2:
 3. ✅ **Zintegrowany input wagi z wyborem jednostki** - Medium priority, Small complexity (Completed)
 4. ✅ **Obsługa waluty (currency)** - Medium priority, Medium complexity (Completed)
 5. ✅ **Kolejność przedmiotów w kontenerze** - Medium priority, Medium complexity (Completed)
-6. **Edycja bezpośrednio na liście** - Medium priority, Large complexity
 7. **Oznaczanie kontenerów jako fragmentów rodzica** - Medium priority, Medium complexity
 8. **Obsługa Markdown w notatkach** - Medium priority, Medium complexity
 9. ✅ **Rozszerzone pola** - Medium priority, Medium complexity (Completed in v0.8.0)

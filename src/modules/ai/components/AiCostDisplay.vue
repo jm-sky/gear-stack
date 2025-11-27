@@ -8,15 +8,16 @@ import type { IAiCost, IAiTokenUsage } from '../types'
 
 const { t } = useI18n()
 
-const props = defineProps<{
+const { tokens, cost, class: className, precision = 4 } = defineProps<{
   tokens?: IAiTokenUsage
   cost?: IAiCost
   class?: string
+  precision?: number
 }>()
 </script>
 
 <template>
-  <div v-if="tokens || cost" :class="props.class" class="flex flex-col gap-1 text-xs text-muted-foreground">
+  <div v-if="tokens || cost" :class="className" class="flex flex-col gap-1 text-xs text-muted-foreground">
     <div v-if="tokens" class="flex items-center gap-2">
       <span>{{ t('ai.cost.tokens') }}</span>
       <span>{{ tokens.total.toLocaleString() }}</span>
@@ -26,9 +27,9 @@ const props = defineProps<{
     </div>
     <div v-if="cost" class="flex items-center gap-2">
       <span>{{ t('ai.cost.cost') }}</span>
-      <span>${{ cost.total.toFixed(6) }}</span>
+      <span>${{ cost.total.toFixed(precision) }}</span>
       <span class="text-muted-foreground/70">
-        (${{ cost.input.toFixed(6) }} {{ t('ai.cost.in') }} / ${{ cost.output.toFixed(6) }} {{ t('ai.cost.out') }})
+        (${{ cost.input.toFixed(precision) }} {{ t('ai.cost.in') }} / ${{ cost.output.toFixed(precision) }} {{ t('ai.cost.out') }})
       </span>
     </div>
   </div>

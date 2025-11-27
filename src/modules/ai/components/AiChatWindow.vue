@@ -25,7 +25,7 @@ const props = defineProps<{
 }>()
 
 const aiStore = useAiStore()
-const { messages, isLoading, lastPrompt, sendMessage, clearMessages, hasMessages } = useAiChat()
+const { messages, isLoading, lastPrompt, lastStructuredOutput, sendMessage, clearMessages, hasMessages } = useAiChat()
 const { buildContextData } = useAiContext()
 const { executeAction } = useAiActions()
 
@@ -104,6 +104,7 @@ const onTemplatePrompt = (prompt: string) => {
       <div v-if="!hasMessages" class="absolute bottom-0 left-0 w-full text-sm z-10 flex gap-4 px-4">
         <AiChatTemplateMsgButton variant="whatsUnnecessary" @prompt="onTemplatePrompt" />
         <AiChatTemplateMsgButton variant="whatsNeeded" @prompt="onTemplatePrompt" />
+        <AiChatTemplateMsgButton variant="addRandomItem" @prompt="onTemplatePrompt" />
       </div>
 
       <div v-if="!hasMessages" class="flex items-center justify-center h-full text-muted-foreground">
@@ -117,6 +118,7 @@ const onTemplatePrompt = (prompt: string) => {
         :key="message.id"
         :message
         :debug-prompt="message.role === 'assistant' && index === messages.length - 1 ? lastPrompt : null"
+        :debug-structured-output="message.role === 'assistant' && index === messages.length - 1 ? lastStructuredOutput : null"
       />
 
       <div v-if="isLoading" class="flex items-center gap-2">

@@ -56,7 +56,7 @@ class ChatService:
             api_token = await self.settings_service.get_api_token(user_id)
 
         # Build messages (needed for cache key and debug)
-        messages = self._build_messages(request.message, request.context)
+        messages = self._build_messages(request.message, request.history, request.context)
         full_prompt = "\n\n".join([f"{msg['role']}: {msg['content']}" for msg in messages])
 
         # Check cache if enabled
@@ -136,11 +136,12 @@ class ChatService:
             prompt=full_prompt,
         )
 
-    def _build_messages(self, user_message: str, context: dict) -> list[dict[str, str]]:
+    def _build_messages(self, user_message: str, history: list, context: dict) -> list[dict[str, str]]:
         """Build messages array for AI.
 
         Args:
             user_message: User's message
+            history: Previous messages in conversation
             context: Context data
 
         Returns:
@@ -179,7 +180,11 @@ Keep your responses concise and helpful."""
             context_str = f"\n\nContext:\n{json.dumps(context, indent=2)}"
             messages.append({"role": "system", "content": context_str})
 
-        # Add user message
+        # Add conversation history
+        for hist_msg in history:
+            messages.append({"role": hist_msg.role, "content": hist_msg.content})
+
+        # Add current user message
         messages.append({"role": "user", "content": user_message})
 
         return messages
@@ -215,9 +220,16 @@ Keep your responses concise and helpful."""
         Returns:
             Cleaned message without JSON blocks
         """
-        # Remove JSON code blocks
-        json_pattern = r"```json\s*\{.*?\}\s*```"
-        cleaned = re.sub(json_pattern, "", message, flags=re.DOTALL)
+        # Remove JSON code blocks (both with and without 'json' language identifier)
+        # Match ```json...``` or ```{...}```
+        patterns = [
+            r"```json\s*\{[^`]*?\}\s*```",  # ```json { ... } ```
+            r"```\s*\{[^`]*?\}\s*```",  # ``` { ... } ```
+        ]
+
+        cleaned = message
+        for pattern in patterns:
+            cleaned = re.sub(pattern, "", cleaned, flags=re.DOTALL)
 
         # Clean up extra whitespace
         cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)  # Max 2 newlines

@@ -4,7 +4,7 @@
  */
 
 import { computed, ref } from 'vue'
-import type { IAiChatMessage, IAiChatRequest, IAiChatResponse } from '../types'
+import type { IAiChatHistoryMessage, IAiChatMessage, IAiChatRequest, IAiChatResponse, IAiStructuredOutput } from '../types'
 import { aiApiService } from '../services/aiApiService'
 import { useAiStore } from '../store/useAiStore'
 
@@ -14,6 +14,7 @@ export function useAiChat() {
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   const lastPrompt = ref<string | null>(null)
+  const lastStructuredOutput = ref<IAiStructuredOutput | null>(null)
 
   const sendMessage = async (
     message: string,
@@ -34,16 +35,24 @@ export function useAiChat() {
     messages.value.push(userMessage)
 
     try {
+      // Build history from current messages (exclude the just-added user message)
+      const history: IAiChatHistoryMessage[] = messages.value.slice(0, -1).map(msg => ({
+        role: msg.role,
+        content: msg.content,
+      }))
+
       const request: IAiChatRequest = {
         message,
+        history,
         context,
         model: aiStore.settings?.selected_model,
       }
 
       const response = await aiApiService.chat(request)
 
-      // Save prompt for debug
+      // Save prompt and structured output for debug
       lastPrompt.value = response.prompt ?? null
+      lastStructuredOutput.value = response.structured_output ?? null
 
       // Add assistant message
       const assistantMessage: IAiChatMessage = {
@@ -90,6 +99,7 @@ export function useAiChat() {
     messages.value = []
     error.value = null
     lastPrompt.value = null
+    lastStructuredOutput.value = null
   }
 
   const hasMessages = computed<boolean>(() => messages.value.length > 0)
@@ -99,6 +109,7 @@ export function useAiChat() {
     isLoading,
     error,
     lastPrompt,
+    lastStructuredOutput,
     sendMessage,
     clearMessages,
     hasMessages,

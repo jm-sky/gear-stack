@@ -3,20 +3,25 @@ import { ChevronDown, ChevronUp } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { Button } from '@/components/ui/button'
 import { useAdmin } from '@/modules/admin/composables/useAdmin'
-import type { IAiChatMessage } from '../types'
+import type { IAiChatMessage, IAiStructuredOutput } from '../types'
 
 const { isAdmin } = useAdmin()
 
 const show = defineModel<boolean>('show', { default: false })
 
-const { message, debugPrompt } = defineProps<{
+const { message, debugStructuredOutput } = defineProps<{
   message: IAiChatMessage
-  debugPrompt?: string | null
+  debugStructuredOutput?: IAiStructuredOutput | null
   withButton?: boolean
 }>()
 
 const shouldShowDebug = computed<boolean>(() => {
-  return message.role === 'assistant' && isAdmin.value && debugPrompt !== null && debugPrompt !== undefined
+  return message.role === 'assistant' && isAdmin.value && debugStructuredOutput !== null && debugStructuredOutput !== undefined
+})
+
+const formattedOutput = computed<string>(() => {
+  if (!debugStructuredOutput) return ''
+  return JSON.stringify(debugStructuredOutput, null, 2)
 })
 </script>
 
@@ -29,13 +34,13 @@ const shouldShowDebug = computed<boolean>(() => {
       class="text-xs h-auto py-1"
       @click="show = !show"
     >
-      Debug: Full Prompt
+      Debug: Structured Output
       <ChevronDown v-if="!show" class="size-3" />
       <ChevronUp v-if="show" class="size-3" />
     </Button>
 
     <div v-if="show" class="border mt-2 px-2 py-1 bg-foreground/5 rounded text-xs font-mono whitespace-pre-wrap overflow-x-auto">
-      {{ debugPrompt }}
+      {{ formattedOutput }}
     </div>
   </div>
 </template>

@@ -36,11 +36,11 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
 
 4. **Rozszerzone ustawienia użytkownika (waluta, widoczność, kategorie, marki w DB)**
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-ustawienia-użytkownika-wymagające-db)
-   - Domyślna waluta użytkownika (zapisywana w DB)
+   - **Domyślna waluta użytkownika** (zapisywana w DB) - High priority
    - Domyślna widoczność nowych kontenerów
-   - Dodawanie nowych kategorii (zapisywane w DB)
-   - Dodawanie firm/marek (brand) — zapisywane w DB
-   - Status: 🔄 Planned | Priority: Medium | Complexity: Small
+   - **Dodawanie nowych kategorii** (zapisywane w DB) - High priority
+   - **Dodawanie firm/marek (brand)** — zapisywane w DB - High priority
+   - Status: 🔄 Planned | Priority: High | Complexity: Small
 
 5. **Funkcje AI**
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-funkcje-ai-wymagające-backend)

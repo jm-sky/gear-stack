@@ -21,6 +21,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.18.0] - 2025-01-28
+
+### Added
+- **AI Chat Conversation History**: Added conversation history support for AI chat
+  - New `history` field in `AiChatRequest` schema for maintaining conversation context
+  - Backend now accepts and processes conversation history in chat requests
+  - History messages are included in the prompt sent to AI models
+  - Enables multi-turn conversations with context preservation
+- **AI Chat Structured Output Debugging**: New component for debugging structured outputs
+  - New `AiChatMessageDebugStructuredOutput` component for viewing structured output data
+  - Displays structured output in a formatted, readable way
+  - Helps developers and users understand AI responses with structured data
+- **AI Chat Message Footer**: Enhanced message display with footer component
+  - New `AiChatMessageFooter` component for displaying message metadata
+  - Shows additional information and actions for chat messages
+  - Improved message organization and user experience
+- **Button Size Variant**: Added extra-small button size
+  - New `xs` size variant for Button component (`h-7 text-xs rounded-md gap-1 px-2`)
+  - Provides more compact button option for dense UIs
+
+### Changed
+- **AI Chat Backend**: Enhanced message processing and JSON cleaning
+  - Improved JSON block removal in chat responses (handles both ````json` and plain ```` blocks)
+  - Better whitespace cleanup for cleaner AI responses
+  - Enhanced message building to include conversation history
+- **AI Chat Frontend**: Improved message display and debugging
+  - Enhanced `AiChatMessage` component with structured output debugging support
+  - Better integration of debug components for prompt and structured output inspection
+  - Improved message footer integration
+
+### Fixed
+- **AI Chat JSON Cleaning**: Fixed JSON block removal to handle various formats
+  - Now correctly removes both ````json { ... } ``` and ```` { ... } ``` patterns
+  - Improved regex patterns for better code block detection
+  - Better handling of nested JSON structures in AI responses
+
+---
+
 ## [2.17.3] - 2025-11-27
 
 ### Added

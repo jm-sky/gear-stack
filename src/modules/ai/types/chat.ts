@@ -51,8 +51,14 @@ export interface IAiStructuredItem {
   updates?: Record<string, unknown> // For update_items
 }
 
+export interface IAiChatHistoryMessage {
+  role: 'user' | 'assistant'
+  content: string
+}
+
 export interface IAiChatRequest {
   message: string
+  history?: IAiChatHistoryMessage[]
   context?: Record<string, unknown>
   model?: string
   max_tokens?: number

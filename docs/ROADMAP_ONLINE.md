@@ -282,13 +282,13 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 ## ⚙️ Ustawienia użytkownika (wymagające DB)
 
 ### Rozszerzone ustawienia użytkownika
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Small
 
-- Domyślna waluta użytkownika (per kontener + domyślna waluta użytkownika)
+- **Domyślna waluta użytkownika** (zapisywana w DB) - High priority
 - Domyślna widoczność nowych kontenerów
 - Preferowana jednostka wagi (zapisywana w DB, nie tylko localStorage)
-- Dodawanie nowych kategorii (zapisywane w DB)
-- Dodawanie firm / marek (brand) - zapisywane w DB
+- **Dodawanie nowych kategorii** (zapisywane w DB) - High priority
+- **Dodawanie firm / marek (brand)** - zapisywane w DB - High priority
 - Uczenie się na podstawie wcześniejszych wyborów użytkownika (dla kategorii)
 
 ### ✅ Profil użytkownika - link do Gravatara
@@ -738,7 +738,8 @@ W `ItemFormPage.vue` (np. linie 325–328) oraz innych miejscach ręcznie używa
 ### High Priority (Następne do zrobienia)
 1. ✅ **Autoryzacja i konta użytkowników** - High priority, Large complexity (Completed)
 2. **Globalny katalog itemów** - High priority, Medium complexity
-3. **Linkowanie przedmiotów** - High priority, Large complexity
+3. ✅ **Linkowanie przedmiotów** - High priority, Large complexity (Completed)
+4. **Rozszerzone ustawienia użytkownika** (waluta, kategorie, marki w DB) - High priority, Small complexity
 
 ### Medium Priority
 1. **Synchronizacja między urządzeniami** - Medium priority, Large complexity

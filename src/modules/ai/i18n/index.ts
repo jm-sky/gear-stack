@@ -14,6 +14,10 @@ export const aiEn = {
         label: 'Include items'
       },
       templateMessages: {
+        addRandomItem: {
+          label: 'Add a random item',
+          prompt: 'Add a random item to my bag (lighter 5g, multitool, etc.). Don\'t ask, just add.',
+        },
         whatsUnnecessary: {
           label: 'What is unnecessary?',
           prompt: 'What is unnecessary in my bag?',
@@ -66,6 +70,10 @@ export const aiPl = {
         label: 'Dołącz przedmioty'
       },
       templateMessages: {
+        addRandomItem: {
+          label: 'Dodaj losowy przedmiot',
+          prompt: 'Dodaj losowy przedmiot do mojego bagu (lighter 5g, multitool, etc.). Nie pytaj, po prostu dodaj.',
+        },
         whatsUnnecessary: {
           label: 'Co jest niepotrzebne?',
           prompt: 'Co jest niepotrzebne w moim bagu?',
