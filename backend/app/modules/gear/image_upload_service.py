@@ -23,7 +23,10 @@ from app.common.id_utils import generate_id
 from app.core.config import settings
 from app.core.storage.factory import get_storage_adapter
 from app.core.storage.image_processor import ImageProcessor
+from app.modules.auth.db_models import UserDB
 from app.modules.gear.item_image_repository import ItemImageRepository
+from app.modules.settings.db_models import UserSettingsDB
+from sqlalchemy import select
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +36,25 @@ MIME_TO_EXTENSION = {
     "image/png": ".png",
     "image/webp": ".webp",
     "image/gif": ".gif",
+}
+
+# Image processing mode configurations
+IMAGE_PROCESSING_MODES = {
+    "high_quality": {
+        "max_width": 2560,
+        "max_height": 2560,
+        "jpeg_quality": 95,
+    },
+    "balanced": {
+        "max_width": 1200,
+        "max_height": 1200,
+        "jpeg_quality": 90,
+    },
+    "storage_saver": {
+        "max_width": 800,
+        "max_height": 800,
+        "jpeg_quality": 80,
+    },
 }
 
 
@@ -48,36 +70,78 @@ class ImageUploadService:
         """
         self.db = db
         self.storage = get_storage_adapter()
-        self.processor = ImageProcessor(
-            max_width=settings.storage.max_width,
-            max_height=settings.storage.max_height,
-            jpeg_quality=settings.storage.jpeg_quality,
-            convert_to_webp=settings.storage.convert_to_webp,
-        )
+        # Processor will be created dynamically based on user settings
         self.max_file_size = settings.storage.max_file_size
+        self.max_file_size_admin = settings.storage.max_file_size_admin
         self.allowed_mime_types = settings.storage.allowed_mime_types
         self.repository = ItemImageRepository(db)
 
-    async def validate_upload(self, file: UploadFile, item_id: str) -> None:
+    async def _get_max_file_size_for_user(self, user_id: str) -> int:
+        """
+        Get maximum file size for user based on admin status.
+
+        Args:
+            user_id: User ID
+
+        Returns:
+            Maximum file size in bytes (admin limit if user is admin, regular limit otherwise)
+        """
+        result = await self.db.execute(select(UserDB).where(UserDB.id == user_id))
+        user = result.scalars().first()
+        if user and user.is_admin:
+            return self.max_file_size_admin
+        return self.max_file_size
+
+    async def _get_user_image_processor(self, user_id: str) -> ImageProcessor:
+        """
+        Get image processor configured for user's processing mode.
+
+        Args:
+            user_id: User ID
+
+        Returns:
+            ImageProcessor instance configured for user's mode
+        """
+        # Get user settings
+        result = await self.db.execute(select(UserSettingsDB).where(UserSettingsDB.user_id == user_id))
+        user_settings = result.scalars().first()
+
+        # Get processing mode (default to 'balanced' if not set)
+        processing_mode = (user_settings.image_processing_mode if user_settings else None) or "balanced"
+
+        # Get configuration for mode
+        mode_config = IMAGE_PROCESSING_MODES.get(processing_mode, IMAGE_PROCESSING_MODES["balanced"])
+
+        # Create processor with user's settings
+        return ImageProcessor(
+            max_width=mode_config["max_width"],
+            max_height=mode_config["max_height"],
+            jpeg_quality=mode_config["jpeg_quality"],
+            convert_to_webp=settings.storage.convert_to_webp,
+        )
+
+    async def validate_upload(self, file: UploadFile, item_id: str, user_id: str) -> None:
         """
         Validate file upload constraints.
 
         Args:
             file: Uploaded file
             item_id: Item ID to upload image for
+            user_id: User ID (to check admin status for file size limit)
 
         Raises:
             HTTPException: If validation fails
         """
-        # Check file size
+        # Check file size (use user-specific limit)
         file.file.seek(0, 2)  # Seek to end
         file_size = file.file.tell()
         file.file.seek(0)  # Reset
 
-        if file_size > self.max_file_size:
+        max_file_size = await self._get_max_file_size_for_user(user_id)
+        if file_size > max_file_size:
             raise HTTPException(
                 status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                detail=f"File size exceeds maximum allowed size of {self.max_file_size / 1024 / 1024:.1f} MB",
+                detail=f"File size exceeds maximum allowed size of {max_file_size / 1024 / 1024:.1f} MB",
             )
 
         # Check MIME type (preliminary check based on content-type header)
@@ -233,9 +297,7 @@ class ImageUploadService:
 
         return result
 
-    async def upload_image_from_url(
-        self, image_url: str, item_id: str, user_id: str, is_primary: bool = False, host_locally: bool = True
-    ) -> dict:
+    async def upload_image_from_url(self, image_url: str, item_id: str, user_id: str, is_primary: bool = False, host_locally: bool = True) -> dict:
         """
         Create item image from external URL.
 
@@ -275,12 +337,13 @@ class ImageUploadService:
                     detail="Failed to download image from URL",
                 ) from exc
 
-            # Enforce max file size
+            # Enforce max file size (use user-specific limit)
             file_size = len(content)
-            if file_size > self.max_file_size:
+            max_file_size = await self._get_max_file_size_for_user(user_id)
+            if file_size > max_file_size:
                 raise HTTPException(
                     status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                    detail=f"File size exceeds maximum allowed size of {self.max_file_size / 1024 / 1024:.1f} MB",
+                    detail=f"File size exceeds maximum allowed size of {max_file_size / 1024 / 1024:.1f} MB",
                 )
 
             # Check available storage for local adapter
@@ -307,6 +370,7 @@ class ImageUploadService:
             # Validate URL format
             try:
                 from urllib.parse import urlparse
+
                 parsed = urlparse(image_url)
                 if not parsed.scheme or not parsed.netloc:
                     raise ValueError("Invalid URL format")
@@ -417,8 +481,11 @@ class ImageUploadService:
                 detail=f"Invalid file type. Detected: {detected_mime}",
             )
 
+        # Get user's image processor
+        processor = await self._get_user_image_processor(user_id)
+
         # Validate image integrity
-        if not await self.processor.validate_image(content):
+        if not await processor.validate_image(content):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid or corrupted image file",
@@ -428,7 +495,7 @@ class ImageUploadService:
 
         # Process image if enabled
         if settings.storage.enable_processing:
-            content, detected_mime, width, height = await self.processor.process_image(content, detected_mime)
+            content, detected_mime, width, height = await processor.process_image(content, detected_mime)
             processed_size = len(content)
         else:
             # Get dimensions without processing (run in thread pool)

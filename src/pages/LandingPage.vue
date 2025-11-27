@@ -1,22 +1,19 @@
 <script setup lang="ts">
-import { BackpackIcon, LogIn, Plus, UserPlus } from 'lucide-vue-next'
+import { BackpackIcon } from 'lucide-vue-next'
 import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import LocalContainersStats from '@/components/layout/LocalContainersStats.vue'
 import TotalsStats from '@/components/layout/TotalsStats.vue'
-import ButtonLink from '@/components/ui/button-link/ButtonLink.vue'
+import WelcomeQuickActions from '@/components/layout/WelcomeQuickActions.vue'
 import LandingLayout from '@/layouts/LandingLayout.vue'
-import { AuthRoutePaths } from '@/modules/auth/config/routes'
 import { useAuthStore } from '@/modules/auth/store/useAuthStore'
-import GenerateExampleGearButton from '@/modules/gear/components/GenerateExampleGearButton.vue'
-import { GearRoutePath } from '@/modules/gear/routes'
 import { hasLocalData } from '@/modules/gear/services/dataMigrationService'
 import { useGearStore } from '@/modules/gear/store/useGearStore'
 import { config } from '@/shared/config/config'
 
-const router = useRouter()
 const { t } = useI18n()
+const router = useRouter()
 const authStore = useAuthStore()
 const gearStore = useGearStore()
 
@@ -97,39 +94,7 @@ if (!config.backend.enabled) {
       </div>
 
       <!-- CTA Buttons (shown when no local containers) -->
-      <div v-if="!hasLocalContainers" class="flex flex-col gap-4 md:gap-8 justify-center items-center">
-        <div class="flex flex-col md:flex-row gap-4">
-          <ButtonLink
-            size="lg"
-            class="w-full sm:w-auto"
-            :to="GearRoutePath.ContainerNew"
-          >
-            <Plus class="size-5" />
-            {{ t('gear.container.create.title', 'Add Container') }}
-          </ButtonLink>
-          <GenerateExampleGearButton class="flex-1" />
-        </div>
-        <div class="flex flex-col md:flex-row gap-4">
-          <ButtonLink
-            size="lg"
-            variant="outline"
-            class="w-full sm:w-auto"
-            :to="AuthRoutePaths.login"
-          >
-            <LogIn class="size-5" />
-            {{ t('landing.login', 'Log In') }}
-          </ButtonLink>
-          <ButtonLink
-            size="lg"
-            variant="outline"
-            class="w-full sm:w-auto"
-            :to="AuthRoutePaths.register"
-          >
-            <UserPlus class="size-5" />
-            {{ t('landing.register', 'Sign Up') }}
-          </ButtonLink>
-        </div>
-      </div>
+      <WelcomeQuickActions class="max-w-md mx-auto" />
 
       <!-- Footer text -->
       <p class="text-sm text-muted-foreground py-8">

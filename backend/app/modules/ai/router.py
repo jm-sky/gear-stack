@@ -3,6 +3,7 @@
 from fastapi import APIRouter
 
 from app.modules.ai.dependencies import require_admin
+from app.modules.ai.routers import chat_router, history_router, models_router, settings_router
 
 router = APIRouter(prefix="/ai", tags=["ai"])
 
@@ -31,7 +32,8 @@ async def get_ai_status() -> dict[str, bool]:
     return {"enabled": settings.ai.enabled, "cache_enabled": settings.ai.cache_enabled}
 
 
-# Sub-routers will be added in Phase 2:
-# - router.include_router(chat_router, prefix="/chat")
-# - router.include_router(settings_router, prefix="/settings")
-# - router.include_router(history_router, prefix="/history")
+# Register sub-routers
+router.include_router(chat_router)
+router.include_router(models_router)
+router.include_router(settings_router)
+router.include_router(history_router)

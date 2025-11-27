@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { LogIn, LogOut, Shield, User, UserPlus } from 'lucide-vue-next'
+import { LogIn, LogOut, SettingsIcon, ShieldIcon, UserIcon, UserPlusIcon } from 'lucide-vue-next'
 import { type Component, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
@@ -17,6 +17,7 @@ import { useAuth } from '@/modules/auth/composables/useAuth'
 import { AuthRoutePaths } from '@/modules/auth/config/routes'
 import { SettingsRoutePaths } from '@/modules/settings/routes'
 import { UserRoutePaths } from '@/modules/user/routes'
+import { getInitials } from '@/shared/utils/getInitials'
 import Avatar from '../ui/avatar/Avatar.vue'
 import AvatarFallback from '../ui/avatar/AvatarFallback.vue'
 import AvatarImage from '../ui/avatar/AvatarImage.vue'
@@ -26,12 +27,15 @@ export interface Link {
   to: string
   label: string
   icon?: Component
+  disabled?: boolean
+  hidden?: boolean
 }
 
 export interface UserNavProps {
   userName?: string
   userEmail?: string
   userAvatar?: string
+  coreLinks?: Link[]
   navLinks?: Link[]
 }
 
@@ -45,21 +49,27 @@ const emit = defineEmits<{
   logout: []
 }>()
 
-// Generate initials from name or email
-const initials = computed(() => {
-  if (props.userName) {
-    return props.userName
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2)
+const defaultCoreLinks = computed<Link[]>(() => [
+  {
+    to: UserRoutePaths.profile,
+    label: t('user.profile.title', 'Profile'),
+    icon: UserIcon,
+  },
+  {
+    to: SettingsRoutePaths.settings,
+    label: t('settings.page.title', 'Settings'),
+    icon: SettingsIcon,
+  },
+  {
+    to: AdminRoutePaths.dashboard,
+    label: t('admin.dashboard.title', 'Admin Dashboard'),
+    icon: ShieldIcon,
+    hidden: !isAdmin,
   }
-  if (props.userEmail) {
-    return props.userEmail.substring(0, 2).toUpperCase()
-  }
-  return 'U'
-})
+])
+
+const coreLinksList = computed<Link[]>(() => props.coreLinks ?? defaultCoreLinks.value.filter((link) => !link.hidden))
+const initials = computed<string>(() => getInitials(props.userName ?? props.userEmail ?? 'U'))
 
 const handleLogout = () => {
   emit('logout')
@@ -75,7 +85,7 @@ const handleLogout = () => {
       >
         <AvatarImage :src="userAvatar ?? ''" />
         <AvatarFallback :class="isAuthenticated ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'">
-          <User v-if="!isAuthenticated" class="size-4" />
+          <UserIcon v-if="!isAuthenticated" class="size-4" />
           <template v-else>
             {{ initials }}
           </template>
@@ -115,19 +125,9 @@ const handleLogout = () => {
 
       <!-- Profile/Settings slot -->
       <slot name="menu-items">
-        <DropdownMenuItemLink :to="UserRoutePaths.profile">
-          <User class="size-4 mr-2" />
-          {{ t('user.profile.title', 'Profile') }}
-        </DropdownMenuItemLink>
-
-        <DropdownMenuItemLink :to="SettingsRoutePaths.settings">
-          <User class="size-4 mr-2" />
-          {{ t('settings.page.title', 'Settings') }}
-        </DropdownMenuItemLink>
-
-        <DropdownMenuItemLink v-if="isAdmin" :to="AdminRoutePaths.dashboard">
-          <Shield class="size-4 mr-2" />
-          {{ t('admin.dashboard.title', 'Admin Dashboard') }}
+        <DropdownMenuItemLink v-for="link in coreLinksList" :key="link.to" :to="link.to">
+          <component :is="link.icon" v-if="link.icon" class="size-4 mr-2" />
+          {{ link.label }}
         </DropdownMenuItemLink>
       </slot>
 
@@ -144,7 +144,7 @@ const handleLogout = () => {
           {{ t('auth.login', 'Login') }}
         </DropdownMenuItemLink>
         <DropdownMenuItemLink :to="AuthRoutePaths.register">
-          <UserPlus class="size-4 mr-2" />
+          <UserPlusIcon class="size-4 mr-2" />
           {{ t('auth.register', 'Register') }}
         </DropdownMenuItemLink>
       </template>

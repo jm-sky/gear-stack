@@ -248,6 +248,7 @@ export const gearEn = {
       exportToPromptSuccess: 'Markdown copied to clipboard',
       exportToPromptDescription: 'Copy the content below and paste it into ChatGPT or another AI',
       exportToCSV: 'Export to CSV',
+      aiAssistant: 'AI Assistant',
       moreActions: 'More actions',
       manageShareTokens: 'Manage Share Tokens',
     },
@@ -630,6 +631,12 @@ export const gearEn = {
       errorRevoking: 'Failed to revoke share token',
       errorCopying: 'Failed to copy to clipboard',
     },
+    settings: {
+      page: {
+        title: 'Gear Settings',
+        subtitle: 'Manage your gear-specific preferences and settings',
+      },
+    },
   },
 }
 
@@ -885,6 +892,7 @@ export const gearPl = {
       exportToPromptSuccess: 'Markdown skopiowany do schowka',
       exportToPromptDescription: 'Skopiuj poniższą treść i wklej do ChatGPT lub innego AI',
       exportToCSV: 'Eksport do CSV',
+      aiAssistant: 'Asystent AI',
       moreActions: 'Więcej akcji',
       manageShareTokens: 'Zarządzaj Tokenami Udostępniania',
     },
@@ -1266,6 +1274,12 @@ export const gearPl = {
       errorCreating: 'Nie udało się utworzyć tokenu udostępniania',
       errorRevoking: 'Nie udało się odwołać tokenu udostępniania',
       errorCopying: 'Nie udało się skopiować do schowka',
+    },
+    settings: {
+      page: {
+        title: 'Ustawienia sprzętu',
+        subtitle: 'Zarządzaj preferencjami i ustawieniami dotyczącymi sprzętu',
+      },
     },
   },
 }

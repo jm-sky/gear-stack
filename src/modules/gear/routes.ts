@@ -15,6 +15,7 @@ export const GearRouteName = {
   SharedContainerDetail: 'gear-shared-container-detail',
   PublicItemDetail: 'gear-public-item-detail',
   ContainerShareTokens: 'gear-container-share-tokens',
+  Settings: 'gear-settings',
 }
 
 export const GearRoutePath = {
@@ -41,6 +42,7 @@ export const GearRoutePath = {
   SharedContainerDetailByToken: (token: string) => `/shared/container/${token}`,
   ContainerShareTokens: '/gear/:id/share-tokens',
   ContainerShareTokensById: (id: string) => `/gear/${id}/share-tokens`,
+  Settings: '/gear/settings',
 }
 
 export const gearRoutes: RouteRecordRaw[] = [
@@ -126,6 +128,12 @@ export const gearRoutes: RouteRecordRaw[] = [
     path: GearRoutePath.ContainerShareTokens,
     name: GearRouteName.ContainerShareTokens,
     component: () => import('@/modules/gear/pages/ContainerShareTokensPage.vue'),
+    meta: { layout: 'authenticated' },
+  },
+  {
+    path: GearRoutePath.Settings,
+    name: GearRouteName.Settings,
+    component: () => import('@/modules/gear/pages/GearSettingsPage.vue'),
     meta: { layout: 'authenticated' },
   },
 ]

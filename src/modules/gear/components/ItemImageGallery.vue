@@ -137,6 +137,13 @@ async function deleteImage(imageId: TUUID) {
 }
 
 async function setPrimary(imageId: TUUID) {
+  // Check if image is already primary - if so, do nothing
+  const image = images.value.find(img => img.id === imageId)
+  if (image?.isPrimary) {
+    // Already primary, no need to do anything
+    return
+  }
+
   try {
     await itemImageApiService.setPrimaryImage(props.itemId, imageId)
     images.value = images.value.map(img => ({

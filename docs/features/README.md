@@ -31,6 +31,8 @@ This directory contains detailed implementation plans for features from the [ROA
 | [FEATURE-021](./FEATURE-021-csv-export.md) | CSV Export | ✅ Completed | Medium | 🚀 Import/Export |
 | [FEATURE-022](./FEATURE-022-accessibility.md) | Accessibility (Dostępność) | 🔄 Planned | Medium | ♿ Accessibility / 🎨 UI/UX |
 | [FEATURE-023](./FEATURE-023-rating-system.md) | Rating System (System Ocen) | 🔄 Planned | Medium | 📊 User Feedback / ⭐ Ratings |
+| [FEATURE-024](./FEATURE-024-container-images-and-unification.md) | Container Images and Unification | 🔄 Planned | Medium | 📷 Media & Resources |
+| [FEATURE-025](./FEATURE-025-image-processing-modes.md) | Image Processing Modes | ✅ Completed | Medium | 📷 Media & Resources |
 
 ---
 

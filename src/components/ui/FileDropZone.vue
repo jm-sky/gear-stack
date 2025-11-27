@@ -4,11 +4,13 @@ import { Upload } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { cn } from '@/lib/utils'
+import { useAdmin } from '@/modules/admin/composables/useAdmin'
+import { config } from '@/shared/config/config'
 
 
 interface FileDropZoneProps {
   accept?: string
-  maxSize?: number // in bytes
+  maxSize?: number // in bytes (if not provided, uses config based on user permissions)
   maxFiles?: number
   disabled?: boolean
   class?: string
@@ -16,9 +18,20 @@ interface FileDropZoneProps {
 
 const props = withDefaults(defineProps<FileDropZoneProps>(), {
   accept: 'image/*',
-  maxSize: 10 * 1024 * 1024, // 10 MB
+  maxSize: undefined, // Will be computed from config based on user permissions
   maxFiles: 1,
   disabled: false,
+})
+
+const { isAdmin } = useAdmin()
+
+// Compute maxSize from config if not provided as prop
+const effectiveMaxSize = computed(() => {
+  if (props.maxSize !== undefined) {
+    return props.maxSize
+  }
+  // Use config values based on user permissions
+  return isAdmin.value ? config.storage.maxFileSizeAdmin : config.storage.maxFileSize
 })
 
 const emit = defineEmits<{
@@ -79,10 +92,10 @@ function validateAndEmitFiles(files: File[]) {
 
   for (const file of files) {
     // Check file size
-    if (file.size > props.maxSize) {
+    if (file.size > effectiveMaxSize.value) {
       errors.push(t('fileUpload.errors.fileTooLarge', {
         name: file.name,
-        size: (props.maxSize / 1024 / 1024).toFixed(1),
+        size: (effectiveMaxSize.value / 1024 / 1024).toFixed(1),
       }))
       continue
     }
@@ -143,7 +156,7 @@ const formattedAcceptTypes = computed(() => {
 })
 
 const formattedMaxSize = computed(() => {
-  return t('fileUpload.limits.maxSize', { size: (props.maxSize / 1024 / 1024).toFixed(0) })
+  return t('fileUpload.limits.maxSize', { size: (effectiveMaxSize.value / 1024 / 1024).toFixed(0) })
 })
 
 const formattedMaxFiles = computed(() => {

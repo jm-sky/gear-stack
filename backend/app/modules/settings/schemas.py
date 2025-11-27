@@ -14,6 +14,7 @@ class SettingsResponse(BaseModel):
     defaultContainersPublic: bool = Field(default=False)
     profilePublic: bool = Field(default=False)
     emailPublic: bool = Field(default=False)
+    imageProcessingMode: str | None = Field(default="balanced")
 
 
 class UpdateSettingsRequest(BaseModel):
@@ -22,3 +23,4 @@ class UpdateSettingsRequest(BaseModel):
     defaultContainersPublic: bool | None = Field(default=None)
     profilePublic: bool | None = Field(default=None)
     emailPublic: bool | None = Field(default=None)
+    imageProcessingMode: str | None = Field(default=None)

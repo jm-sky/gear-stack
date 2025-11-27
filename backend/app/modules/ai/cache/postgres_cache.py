@@ -159,9 +159,7 @@ class PostgresCacheService:
             total_entries = len(total_result.all())
 
             # Expired entries
-            expired_result = await self.db.execute(
-                select(AICacheDB).where(AICacheDB.expires_at < datetime.now(UTC))
-            )
+            expired_result = await self.db.execute(select(AICacheDB).where(AICacheDB.expires_at < datetime.now(UTC)))
             expired_entries = len(expired_result.all())
 
             # Total hits

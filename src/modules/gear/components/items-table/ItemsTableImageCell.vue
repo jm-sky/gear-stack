@@ -17,6 +17,7 @@ import { GearRoutePath } from '@/modules/gear/routes'
 import { itemImageApiService } from '@/modules/gear/services/itemImageApiService'
 import { useGearStore } from '@/modules/gear/store/useGearStore'
 import { useHandleError } from '@/shared/composables/useHandleError'
+import { config } from '@/shared/config/config'
 
 const props = defineProps<{
   itemId: string
@@ -88,6 +89,20 @@ async function handleFileSelect(event: Event) {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
   if (!file) return
+
+  // Validate file size (from config: 20 MB for regular users, 50 MB for admins)
+  const maxFileSize = isAdmin.value ? config.storage.maxFileSizeAdmin : config.storage.maxFileSize
+  if (file.size > maxFileSize) {
+    toast.error(t('fileUpload.errors.fileTooLarge', {
+      name: file.name,
+      size: (maxFileSize / 1024 / 1024).toFixed(1),
+    }))
+    // Reset input
+    if (fileInput.value) {
+      fileInput.value.value = ''
+    }
+    return
+  }
 
   // Reset input
   if (fileInput.value) {

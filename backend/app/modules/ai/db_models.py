@@ -20,9 +20,7 @@ class AIUserSettingsDB(Base):
     __tablename__ = "ai_user_settings"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    user_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False
-    )
+    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False)
 
     # Token Management
     use_own_token: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
@@ -37,12 +35,8 @@ class AIUserSettingsDB(Base):
     context_fields: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict, nullable=False)
 
     # Metadata
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC), nullable=False
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC), nullable=False)
 
 
 class AIHistoryDB(Base):
@@ -54,9 +48,7 @@ class AIHistoryDB(Base):
     __tablename__ = "ai_history"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    user_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
-    )
+    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
 
     # Operation Details
     operation_type: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
@@ -71,12 +63,10 @@ class AIHistoryDB(Base):
     # Data
     input_data: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
     output_data: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
-    metadata: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
+    metadata_: Mapped[dict[str, Any] | None] = mapped_column("metadata", JSONB, nullable=True)
 
-    # Metadata
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False, index=True
-    )
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False, index=True)
 
 
 class AICacheDB(Base):
@@ -100,7 +90,5 @@ class AICacheDB(Base):
     hit_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
     # Metadata
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)

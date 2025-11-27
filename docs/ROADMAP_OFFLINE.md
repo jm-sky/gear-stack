@@ -90,8 +90,8 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 - ✅ Wyszukiwarka przedmiotów (globalne filtrowanie)
 - ✅ Zarządzanie widocznością kolumn z zapisem w localStorage
 
-### 🔄 Zapisywanie wartości search/filtrów w localStorage
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+### ✅ Zapisywanie wartości search/filtrów w localStorage
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Small
 
 **Koncepcja:**
 Na stronach z filtrami (np. AllItemsPage, ShoppingPlanningPage, ContainersListPage, PublicContainersBrowserPage), zapisywać wartości search i filtrów w localStorage, aby przy powrocie (przycisk "Wróć" lub nawigacja wstecz) użytkownik wracał dokładnie w to samo miejsce z zachowanymi filtrami.
@@ -241,8 +241,8 @@ Jeżeli kontener będzie miał obrazek (primary image), wyświetlać go w nagł�
   - Opis kontenera
 - Możliwość resetowania do domyślnej kolejności
 
-### 🔄 Obsługa usuwania i gwiazdkowania obrazków przedmiotu na urządzeniach mobilnych
-**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Small
+### ✅ Obsługa usuwania i gwiazdkowania obrazków przedmiotu na urządzeniach mobilnych
+**Status:** ✅ Completed | **Priority:** High | **Complexity:** Small
 
 **Problem:**
 Kontrolki obrazków (gwiazdkowanie, usuwanie) w `ItemImageCardControls.vue` są widoczne tylko przy hover (`group-hover:opacity-100`). Na urządzeniach mobilnych (telefony, tablety) nie ma hover, więc kontrolki są zawsze niewidoczne (`opacity-0`) i użytkownik nie może:

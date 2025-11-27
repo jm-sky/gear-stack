@@ -35,7 +35,7 @@ async def upload_item_image(
     service = ImageUploadService(db)
 
     # Validate upload
-    await service.validate_upload(file, item_id)
+    await service.validate_upload(file, item_id, current_user.id)
 
     # Upload and process
     result = await service.upload_image(file, item_id, current_user.id, is_primary)
@@ -155,7 +155,5 @@ async def upload_item_image_from_url(
         Image metadata
     """
     service = ImageUploadService(db)
-    result = await service.upload_image_from_url(
-        data.url, item_id, current_user.id, data.is_primary, data.host_locally
-    )
+    result = await service.upload_image_from_url(data.url, item_id, current_user.id, data.is_primary, data.host_locally)
     return result

@@ -72,6 +72,7 @@ class SettingsLocalService implements ISettingsService {
       defaultContainersPublic: settings.defaultContainersPublic ?? false,
       profilePublic: settings.profilePublic ?? false,
       emailPublic: settings.emailPublic ?? false,
+      imageProcessingMode: settings.imageProcessingMode ?? 'balanced',
     })
   }
 
@@ -87,6 +88,7 @@ class SettingsLocalService implements ISettingsService {
       darkMode: data.darkMode ?? current.darkMode,
       defaultContainersPublic: data.defaultContainersPublic ?? current.defaultContainersPublic,
       profilePublic: data.profilePublic ?? current.profilePublic,
+      imageProcessingMode: data.imageProcessingMode !== undefined ? data.imageProcessingMode : current.imageProcessingMode,
       emailPublic: data.emailPublic ?? current.emailPublic,
     }
 
@@ -111,6 +113,7 @@ class SettingsLocalService implements ISettingsService {
           defaultContainersPublic: settings.defaultContainersPublic ?? false,
           profilePublic: settings.profilePublic ?? false,
           emailPublic: settings.emailPublic ?? false,
+          imageProcessingMode: settings.imageProcessingMode ?? 'balanced',
         }))
       return Promise.resolve()
     } catch (error) {

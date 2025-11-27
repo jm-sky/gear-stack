@@ -19,6 +19,7 @@ class UserSettingsDB(Base):
     default_containers_public: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_public_profile: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_public_email: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    image_processing_mode: Mapped[str | None] = mapped_column(String(20), nullable=True, default="balanced")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
