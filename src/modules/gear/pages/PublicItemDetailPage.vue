@@ -9,13 +9,14 @@ import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import type { IGearItem } from '../types/gear.types'
 import CategoryIcon from '../components/CategoryIcon.vue'
+import ItemPriorityBadge from '../components/ItemPriorityBadge.vue'
+import ItemStatusBadge from '../components/ItemStatusBadge.vue'
 import { useCategoryLabel } from '../composables/useCategoryLabel'
 import { useExpiration } from '../composables/useExpiration'
 import { useFormattedItemPrice } from '../composables/useFormattedItemPrice'
 import { useFormattedItemWeight } from '../composables/useFormattedItemWeight'
 import { GearRoutePath } from '../routes'
 import { publicContainersService } from '../services/publicContainersService'
-import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 
 const route = useRoute()
@@ -100,12 +101,8 @@ const hasDetails = computed<boolean>(() => {
               <CategoryIcon :category="item.category" :size="14" />
               {{ getCategoryLabel(item.category) }}
             </Badge>
-            <Badge :variant="getPriorityVariant(item.priority)">
-              {{ t(`gear.item.priorities.${item.priority}`) }}
-            </Badge>
-            <Badge :variant="getStatusVariant(item.status)">
-              {{ t(`gear.item.statuses.${item.status}`) }}
-            </Badge>
+            <ItemPriorityBadge :priority="item.priority" />
+            <ItemStatusBadge :status="item.status" />
             <Badge v-if="isExpired" variant="destructive" class="text-xs">
               {{ t('gear.item.expiration.expired') }}
             </Badge>

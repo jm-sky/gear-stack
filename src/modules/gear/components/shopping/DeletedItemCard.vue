@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import Badge from '@/components/ui/badge/Badge.vue'
 import { Button } from '@/components/ui/button'
 import type { IItemWithContainerId } from '../../types/shopping.types'
 import { useCategoryLabel } from '../../composables/useCategoryLabel'
 import { formatItemPrice } from '../../composables/useFormattedItemPrice'
 import { useGearSettings } from '../../composables/useGearSettings'
-import { getPriorityVariant } from '../../utils/badgeVariants'
 import CategoryIcon from '../CategoryIcon.vue'
+import ItemPriorityBadge from '../ItemPriorityBadge.vue'
 
 const { t } = useI18n()
 
@@ -32,12 +31,7 @@ const { getCategoryLabel } = useCategoryLabel()
     <div class="flex-1 min-w-0">
       <div class="flex items-center gap-2 flex-wrap">
         <span class="font-medium">{{ item.name }}</span>
-        <Badge
-          :variant="getPriorityVariant(item.priority)"
-          class="text-xs"
-        >
-          {{ t(`gear.item.priorities.${item.priority}`) }}
-        </Badge>
+        <ItemPriorityBadge :priority="item.priority" class="text-xs" />
       </div>
       <div class="flex items-center gap-4 mt-1 text-sm text-muted-foreground flex-wrap">
         <span>{{ getCategoryLabel(item.category) }}</span>

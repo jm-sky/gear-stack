@@ -9,10 +9,11 @@ import ButtonLink from '@/components/ui/button-link/ButtonLink.vue'
 import type { IGearItem } from '../types/gear.types'
 import CategoryIcon from '../components/CategoryIcon.vue'
 import ItemHeaderName from '../components/ItemHeaderName.vue'
+import ItemPriorityBadge from '../components/ItemPriorityBadge.vue'
+import ItemStatusBadge from '../components/ItemStatusBadge.vue'
 import { useCategoryLabel } from '../composables/useCategoryLabel'
 import { useExpiration } from '../composables/useExpiration'
 import { GearRoutePath } from '../routes'
-import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 
 const route = useRoute()
 const router = useRouter()
@@ -67,12 +68,8 @@ const handleEdit = () => {
           <CategoryIcon :category="item.category" :size="14" />
           {{ getCategoryLabel(item.category) }}
         </Badge>
-        <Badge :variant="getPriorityVariant(item.priority)">
-          {{ t(`gear.item.priorities.${item.priority}`) }}
-        </Badge>
-        <Badge :variant="getStatusVariant(item.status)">
-          {{ t(`gear.item.statuses.${item.status}`) }}
-        </Badge>
+        <ItemPriorityBadge :priority="item.priority" />
+        <ItemStatusBadge :status="item.status" />
         <Badge v-if="isExpired" variant="destructive" class="text-xs">
           {{ t('gear.item.expiration.expired') }}
         </Badge>

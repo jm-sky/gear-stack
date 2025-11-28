@@ -13,17 +13,18 @@ import { formatItemPrice } from '../composables/useFormattedItemPrice'
 import { useGearSettings } from '../composables/useGearSettings'
 import { GearRoutePath } from '../routes'
 import { useGearStore } from '../store/useGearStore'
-import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 import { calculateTotalWeightSync } from '../utils/containerCalculations'
 import { isExpiringSoon } from '../utils/isExpiringSoon'
 import { createItemsColumns } from '../utils/itemsColumns'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
+import ItemPriorityBadge from './ItemPriorityBadge.vue'
 import ItemsTableCategoryCell from './items-table/ItemsTableCategoryCell.vue'
 import ItemsTableImageCell from './items-table/ItemsTableImageCell.vue'
 import ItemsTableNameCell from './items-table/ItemsTableNameCell.vue'
 import ItemsTableWeightCell from './items-table/ItemsTableWeightCell.vue'
 import ItemsTableNestedContainerRow from './ItemsTableNestedContainerRow.vue'
 import ItemsTableRowActions from './ItemsTableRowActions.vue'
+import ItemStatusBadge from './ItemStatusBadge.vue'
 import type { SortingState } from '@tanstack/vue-table'
 
 const props = withDefaults(
@@ -412,15 +413,11 @@ function canMoveDown(item: IGearItem): boolean {
     </template>
 
     <template #priority="{ row }">
-      <Badge :variant="getPriorityVariant(row.original.priority)">
-        {{ t(`gear.item.priorities.${row.original.priority}`) }}
-      </Badge>
+      <ItemPriorityBadge :priority="row.original.priority" />
     </template>
 
     <template #status="{ row }">
-      <Badge :variant="getStatusVariant(row.original.status)">
-        {{ t(`gear.item.statuses.${row.original.status}`) }}
-      </Badge>
+      <ItemStatusBadge :status="row.original.status" />
     </template>
 
     <template #price="{ row }">

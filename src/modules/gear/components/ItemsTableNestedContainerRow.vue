@@ -3,16 +3,16 @@ import { Box } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { Badge } from '@/components/ui/badge'
 import { TableCell, TableRow } from '@/components/ui/table'
 import type { IGearContainer, IGearItem, TContainerColor } from '../types/gear.types'
 import { formatItemWeight } from '../composables/useFormattedItemWeight'
 import { useGearSettings } from '../composables/useGearSettings'
 import { GearRoutePath } from '../routes'
 import { useGearStore } from '../store/useGearStore'
-import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 import { COLOR_BORDER_CLASSES, COLOR_TEXT_CLASSES } from '../utils/containerColors'
 import CategoryIcon from './CategoryIcon.vue'
+import ItemPriorityBadge from './ItemPriorityBadge.vue'
+import ItemStatusBadge from './ItemStatusBadge.vue'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -94,13 +94,9 @@ function navigateToNestedContainer(item: IGearItem) {
               {{ formatItemWeight(nestedItem, true, preferredWeightUnit) }}
             </div>
             <div class="min-w-0 md:min-w-26">
-              <Badge :variant="getPriorityVariant(nestedItem.priority)">
-                {{ t(`gear.item.priorities.${nestedItem.priority}`) }}
-              </Badge>
+              <ItemPriorityBadge :priority="nestedItem.priority" />
             </div>
-            <Badge :variant="getStatusVariant(nestedItem.status)" class="text-xs">
-              {{ t(`gear.item.statuses.${nestedItem.status}`) }}
-            </Badge>
+            <ItemStatusBadge :status="nestedItem.status" class="text-xs" />
           </div>
         </template>
       </div>

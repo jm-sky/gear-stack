@@ -12,7 +12,9 @@ import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { ALL_ITEMS_PAGE_FILTERS_KEY, ALL_ITEMS_TABLE_COLUMN_VISIBILITY_KEY, config } from '@/shared/config/config'
 import type { IItemWithContainer } from '../utils/allItemsColumns'
 import CategoryIcon from '../components/CategoryIcon.vue'
+import ItemPriorityBadge from '../components/ItemPriorityBadge.vue'
 import ItemsTableImageCell from '../components/items-table/ItemsTableImageCell.vue'
+import ItemStatusBadge from '../components/ItemStatusBadge.vue'
 import { useCategoryLabel } from '../composables/useCategoryLabel'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { formatItemWeight } from '../composables/useFormattedItemWeight'
@@ -21,7 +23,6 @@ import { useGearSettings } from '../composables/useGearSettings'
 import { GearRoutePath } from '../routes'
 import { gearContainerService } from '../services/gearContainerService'
 import { createAllItemsColumns } from '../utils/allItemsColumns'
-import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
 import { COLOR_DOT_CLASSES, COLOR_TEXT_CLASSES } from '../utils/containerColors'
 import { getAllItems } from '../utils/getAllItems'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
@@ -278,15 +279,11 @@ function navigateToContainer(containerId: string) {
         </template>
 
         <template #status="{ row }">
-          <Badge :variant="getStatusVariant(row.original.status)">
-            {{ t(`gear.item.statuses.${row.original.status}`) }}
-          </Badge>
+          <ItemStatusBadge :status="row.original.status" />
         </template>
 
         <template #priority="{ row }">
-          <Badge :variant="getPriorityVariant(row.original.priority)">
-            {{ t(`gear.item.priorities.${row.original.priority}`) }}
-          </Badge>
+          <ItemPriorityBadge :priority="row.original.priority" />
         </template>
 
         <template #brand="{ row }">

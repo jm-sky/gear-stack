@@ -10,8 +10,8 @@ import { useExpiration } from '../../composables/useExpiration'
 import { useFormattedItemPrice } from '../../composables/useFormattedItemPrice'
 import { useFormattedItemWeight } from '../../composables/useFormattedItemWeight'
 import { GearRoutePath } from '../../routes'
-import { getPriorityVariant } from '../../utils/badgeVariants'
 import CategoryIcon from '../CategoryIcon.vue'
+import ItemPriorityBadge from '../ItemPriorityBadge.vue'
 
 const { t } = useI18n()
 
@@ -51,12 +51,7 @@ const { isExpired, isExpiringSoon } = useExpiration(item)
         >
           {{ item.name }}
         </RouterLink>
-        <Badge
-          :variant="getPriorityVariant(item.priority)"
-          class="text-xs"
-        >
-          {{ t(`gear.item.priorities.${item.priority}`) }}
-        </Badge>
+        <ItemPriorityBadge :priority="item.priority" class="text-xs" />
         <Badge
           v-if="item.status === 'toBuy'"
           variant="outline"
