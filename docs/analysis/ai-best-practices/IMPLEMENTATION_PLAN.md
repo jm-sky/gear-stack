@@ -1,431 +1,161 @@
-# Plan implementacji AI Best Practices
+# Plan implementacji AI Best Practices - Proces Iteracyjny
 
-Plan implementacji wskazówek z analizy AI best practices w projekcie Gear Stack.
+> **Status dokumentu:** Proces iteracyjny - faza przygotowania
+> **Data utworzenia:** 2025-11-28
+> **Ostatnia aktualizacja:** 2025-11-28
 
-## Status implementacji
+## Cel procesu
 
-- ⏳ **Not Started** - Nie rozpoczęte
-- 🚧 **In Progress** - W trakcie
-- ✅ **Completed** - Zakończone
-- ⏸️ **Paused** - Wstrzymane
-- 🔄 **Review** - Do przeglądu
-
-## Priorytety
-
-### P0 - Krytyczne (Foundation)
-Podstawowe elementy wymagane do działania systemu AI.
-
-### P1 - Wysokie (Core Features)
-Kluczowe funkcjonalności dla stabilnego działania.
-
-### P2 - Średnie (Enhancements)
-Ulepszenia wydajności i jakości.
-
-### P3 - Niskie (Nice to Have)
-Opcjonalne funkcjonalności i optymalizacje.
+Systematyczna analiza i implementacja AI best practices w projekcie Gear Stack z wykorzystaniem iteracyjnego podejścia, które pozwoli uniknąć przytłoczenia ilością materiału i zapewni właściwe priorytety.
 
 ---
 
-## 01. Clean Architecture & Service Boundaries
+## Proces iteracyjny (4 fazy)
 
-**Status:** ⏳ Not Started  
-**Priorytet:** P0
+### **Iteracja 1: Skanowanie i kategoryzacja** 📋
 
-### Zadania
+**Cel:** Przeczytać całą analizę, wyodrębnić główne kategorie i wstępnie ocenić relevancję dla projektu.
 
-- [ ] Utworzyć strukturę modułów zgodnie z Clean Architecture
-  - [ ] Domain layer (entities, rules)
-  - [ ] Application/Service layer (orchestration)
-  - [ ] Infrastructure layer (AIService, repositories)
-  - [ ] Presentation/API layer (FastAPI endpoints)
+**Działania:**
+1. Przeczytać wszystkie dokumenty z katalogu `ai-best-practices/`
+2. Dla każdego tematu oznaczyć status:
+   - ✅ **Już zaimplementowane** - Elementy, które już działają w projekcie
+   - 🎯 **Warto zaimplementować (high priority)** - Kluczowe dla jakości i stabilności
+   - 🤔 **Do rozważenia (medium priority)** - Użyteczne, ale nie krytyczne
+   - ❌ **Nie dotyczy / niski priorytet** - Zbyt zaawansowane, niepotrzebne lub przedwczesne
+3. Stworzyć zwięzłe podsumowanie kategoryzacji
+4. Zadać pytania doprecyzowujące potrzeby i oczekiwania użytkownika
 
-- [ ] Zaimplementować AIService w Infrastructure
-  - [ ] Encapsulacja wszystkich wywołań LLM (OpenRouter)
-  - [ ] Dependency injection przez FastAPI
-  - [ ] Stateless design
-
-- [ ] Zdefiniować interfejsy/repository patterns
-  - [ ] IGearRepository
-  - [ ] IUserRepository
-  - [ ] Abstrakcje dla danych
-
-- [ ] Skonfigurować dependency injection w FastAPI
-  - [ ] Thin routes z wstrzykiwanymi zależnościami
-  - [ ] PromptFactory jako dependency
-
-**Notatki:**
-- Rozważyć opcję mikroserwisu w przyszłości
-- Zapewnić możliwość ekstrakcji AI logic do osobnego serwisu
+**Wynik:** Dokument `ITERATION_1_CATEGORIZATION.md` z oznaczonymi priorytetami
 
 ---
 
-## 02. Prompt Engineering Best Practices
+### **Iteracja 2: Szczegółowa analiza wybranych obszarów** 🔍
 
-**Status:** ⏳ Not Started  
-**Priorytet:** P0
+**Cel:** Skupić się tylko na elementach 🎯 i 🤔, przeanalizować szczegóły i zaproponować konkretne podejścia implementacyjne.
 
-### Zadania
+**Działania:**
+1. Dla każdego wybranego obszaru:
+   - Przeczytać szczegółowo zawartość
+   - Porównać z aktualną implementacją w projekcie
+   - Zidentyfikować luki (gap analysis)
+   - Zaproponować konkretne podejście z przykładami kodu
+2. Omówić trade-offy i koszty każdego rozwiązania
+3. Ustalić priorytety implementacji (P0, P1, P2, P3)
+4. Odpowiedzieć na pytania i wątpliwości użytkownika
 
-- [ ] Utworzyć PromptFactory module
-  - [ ] Szablony promptów dla różnych endpointów
-  - [ ] Parametryzacja (user_profile, context, etc.)
-  - [ ] System messages
-
-- [ ] Zaprojektować system prompt
-  - [ ] Role definition ("expert survival gear recommender")
-  - [ ] Format odpowiedzi (JSON)
-  - [ ] Safety rules
-
-- [ ] Zaprojektować user prompts
-  - [ ] Explicit instructions
-  - [ ] Context inclusion (climate, terrain, user profile)
-  - [ ] Few-shot examples (jeśli potrzebne)
-
-- [ ] Skonfigurować parametry modelu
-  - [ ] Temperature (~0 dla faktów)
-  - [ ] Max tokens
-  - [ ] Model selection
-
-- [ ] Iteracyjne testowanie i refaktoryzacja promptów
-
-**Notatki:**
-- Zachować zwięzłość promptów
-- Zdefiniować domain-specific terms
-- Dokumentować zmiany w promptach
+**Wynik:** Dokument `ITERATION_2_DETAILED_ANALYSIS.md` z propozycjami implementacji
 
 ---
 
-## 03. Enforcing Structured (JSON) Responses
+### **Iteracja 3: Plan implementacji** 📝
 
-**Status:** ⏳ Not Started  
-**Priorytet:** P0
+**Cel:** Stworzyć uporządkowany, wykonalny plan wdrożenia z podziałem na małe zadania.
 
-### Zadania
+**Działania:**
+1. Podzielić wybrane obszary na konkretne, wykonalne zadania
+2. Określić zależności między zadaniami
+3. Zaproponować kolejność implementacji (co najpierw da największą wartość)
+4. Oszacować złożoność każdego zadania (S/M/L/XL)
+5. Zgrupować zadania w logiczne fazy/sprinty
+6. Zdefiniować definicję "done" dla każdego zadania
 
-- [ ] Zdefiniować JSON schema dla odpowiedzi
-  - [ ] Pydantic models dla response structure
-  - [ ] Przykłady w promptach
-
-- [ ] Skonfigurować JSON mode w OpenRouter
-  - [ ] `response_format={"type":"json_object"}` dla OpenAI
-  - [ ] Structured outputs dla innych modeli
-
-- [ ] Zaimplementować ResponseParser/Validator
-  - [ ] Parsing JSON z odpowiedzi
-  - [ ] Walidacja wymaganych pól
-  - [ ] Error handling dla nieprawidłowego JSON
-
-- [ ] Dodać fallback logic
-  - [ ] Retry z prostszym promptem
-  - [ ] Strip extra text i próba parsowania
-  - [ ] Graceful degradation
-
-**Notatki:**
-- Używać Pydantic do walidacji
-- Logować parsing errors dla debugowania
+**Wynik:** Dokument `ITERATION_3_IMPLEMENTATION_ROADMAP.md` z konkretnym planem
 
 ---
 
-## 04. Safety, Hallucination Checks & Fallbacks
+### **Iteracja 4: Przegląd i finalizacja** ✅
 
-**Status:** ⏳ Not Started  
-**Priorytet:** P1
+**Cel:** Zweryfikować czy wszystko jest jasne, doprecyzować niejasne punkty i zatwierdzić ostateczny plan.
 
-### Zadania
+**Działania:**
+1. Przejrzeć plan z Iteracji 3
+2. Zweryfikować czy:
+   - Wszystkie zależności są jasne
+   - Kolejność zadań ma sens
+   - Złożoność jest realistyczna
+   - Definicje "done" są konkretne
+3. Doprecyzować niejasne punkty
+4. Zatwierdzić ostateczny plan do implementacji
+5. Stworzyć tracking board (może być w tym pliku lub osobny)
 
-- [ ] Dodać guardy w promptach
-  - [ ] "If unsure, return empty list"
-  - [ ] "Answer only based on input data"
-  - [ ] Low temperature dla safety
-
-- [ ] Zaimplementować output validation
-  - [ ] Sprawdzanie czy itemy istnieją w bazie
-  - [ ] Business rules (weight limits, duplications)
-  - [ ] Confidence scoring (opcjonalnie)
-
-- [ ] Dodać error handling
-  - [ ] Try/except dla LLM calls
-  - [ ] Exponential backoff retry
-  - [ ] Model/provider failover
-
-- [ ] Zaimplementować fallback responses
-  - [ ] Safe defaults (empty list z warningiem)
-  - [ ] Human review flag (dla krytycznych przypadków)
-  - [ ] Graceful error messages
-
-- [ ] Przygotować RAG foundation (dla P2)
-  - [ ] Embedding store setup
-  - [ ] Retrieval logic
-
-**Notatki:**
-- Priorytet: incomplete answer > hallucination
-- Logować wszystkie validation failures
+**Wynik:** Zatwierdzony plan gotowy do wdrożenia + tracking board
 
 ---
 
-## 05. Data Handling, Privacy & Logging
+## Aktualne zasoby
 
-**Status:** ⏳ Not Started  
-**Priorytet:** P1
+### Dostępne dokumenty analizy
 
-### Zadania
+1. `00-index.md` - Spis treści i przegląd
+2. `01-clean-architecture.md` - Architektura i separacja warstw
+3. `02-prompt-engineering.md` - Projektowanie promptów
+4. `03-structured-responses.md` - Strukturalne odpowiedzi JSON
+5. `04-safety-fallbacks.md` - Bezpieczeństwo i fallbacki
+6. `05-data-privacy.md` - Prywatność i logowanie
+7. `06-performance-scaling.md` - Wydajność i skalowanie
+8. `07-external-data.md` - Integracja z danymi zewnętrznymi
+9. `08-quality-feedback.md` - Jakość i feedback loops
+10. `09-examples.md` - Przykłady open-source
+11. `10-proposed-architecture.md` - Proponowana architektura
 
-- [ ] Zaimplementować privacy filters
-  - [ ] Strip PII z prompts
-  - [ ] Anonymization przed LLM calls
-  - [ ] Token-level redaction
+### Aktualny stan projektu (kontekst)
 
-- [ ] Skonfigurować secure storage
-  - [ ] Encryption at rest
-  - [ ] Encryption in transit
-  - [ ] Secure credential storage (API keys)
+**Backend:**
+- FastAPI z modułową strukturą (`backend/app/modules/ai/`)
+- Istniejące endpointy AI (chat, context, history)
+- OpenRouter integration
+- SQLAlchemy + PostgreSQL
+- Pydantic models
 
-- [ ] Zaimplementować logging practices
-  - [ ] Structured logs (JSON)
-  - [ ] Context IDs
-  - [ ] Redaction sensitive fields
-  - [ ] Metadata logging (user ID hash, timestamp, model)
+**Frontend:**
+- Vue 3 + TypeScript
+- TanStack Query dla server state
+- Pinia dla client state
+- Moduł AI z chat UI i context management
 
-- [ ] Dodać data governance
-  - [ ] Role-based access
-  - [ ] Audit logs
-  - [ ] Retention policies
-
-- [ ] Przygotować privacy policy
-  - [ ] Consent information
-  - [ ] Data usage disclosure
-
-**Notatki:**
-- Zgodność z GDPR/CCPA
-- Regularne audyty logów
-
----
-
-## 06. Performance & Scaling
-
-**Status:** ⏳ Not Started  
-**Priorytet:** P2
-
-### Zadania
-
-- [ ] Zaimplementować caching
-  - [ ] LRU cache lub Redis
-  - [ ] Cache key strategy (user_id, prompt_hash)
-  - [ ] Cache hit/miss logging
-  - [ ] Semantic caching (opcjonalnie)
-
-- [ ] Optymalizacja asynchroniczności
-  - [ ] Async HTTP client dla OpenRouter
-  - [ ] Parallel requests (z rate limit awareness)
-  - [ ] Thread pools dla multi-core
-
-- [ ] Dodać rate limiting
-  - [ ] Per-user limits
-  - [ ] Per-IP limits
-  - [ ] FastAPI middleware (slowapi)
-
-- [ ] Skonfigurować monitoring
-  - [ ] Latency metrics
-  - [ ] Error rates
-  - [ ] Cache hit rates
-  - [ ] Integration z Prometheus/Grafana
-
-- [ ] Model/provider failover
-  - [ ] Primary/secondary model logic
-  - [ ] Automatic switching na rate limits/latency
-
-- [ ] Versioning system
-  - [ ] Model version tracking
-  - [ ] Prompt template versioning
-  - [ ] A/B testing framework
-
-**Notatki:**
-- Rozważyć serverless/auto-scaling deployment
-- Monitorować tail latencies
+**Istniejące funkcjonalności AI:**
+- Chat z AI
+- Context management (wybór kontenerów)
+- Historia konwersacji
+- Integracja z OpenRouter
 
 ---
 
-## 07. External Data Integration
+## Zasady procesu
 
-**Status:** ⏳ Not Started  
-**Priorytet:** P2
+### ✅ DO:
+- Czytać uważnie i notować obserwacje
+- Zadawać pytania gdy coś jest niejasne
+- Priorytetyzować rzeczywistą wartość biznesową
+- Rozważać koszty (czas, złożoność, utrzymanie)
+- Pamiętać o istniejącej implementacji
+- Myśleć o małych, incremental changes
 
-### Zadania
-
-- [ ] Zaimplementować GearRepository
-  - [ ] Database abstraction
-  - [ ] Methods: get_equipment_by_category(), list_all_gear()
-  - [ ] Validation logic
-
-- [ ] Setup RAG/Embeddings (Phase 1)
-  - [ ] Embedding store (Pinecone/Weaviate/Redis)
-  - [ ] Document indexing
-  - [ ] Retrieval logic (top-k context)
-
-- [ ] Integracja RAG z PromptFactory
-  - [ ] Enrich prompts z retrieved context
-  - [ ] Vector DB querying
-
-- [ ] Knowledge Graph (opcjonalnie, P3)
-  - [ ] Graph structure design
-  - [ ] Integration z LLM (Cypher/GraphQL queries)
-
-- [ ] User uploads handling (jeśli potrzebne)
-  - [ ] OCR/vision models dla images
-  - [ ] Document parsing
-  - [ ] Security sanitization
-
-- [ ] External APIs integration
-  - [ ] Weather API dla climate data
-  - [ ] Terrain classification API
-  - [ ] Context enrichment
-
-**Notatki:**
-- RAG może być dodany w późniejszej fazie
-- Knowledge Graph to nice-to-have
+### ❌ DON'T:
+- Implementować wszystkiego naraz
+- Dodawać funkcji "na wyrost"
+- Ignorować istniejącego kodu
+- Przeskakiwać przez iteracje
+- Zakładać że wszystko z analizy jest potrzebne
+- Wprowadzać breaking changes bez potrzeby
 
 ---
 
-## 08. Quality Evaluation & Feedback Loops
+## Następne kroki
 
-**Status:** ⏳ Not Started  
-**Priorytet:** P2
+**Bieżący status:** ⏸️ Czekamy na rozpoczęcie Iteracji 1
 
-### Zadania
+**Akcja:** Rozpocząć Iterację 1 - Skanowanie i kategoryzacja
 
-- [ ] Zaimplementować prompt/response logging
-  - [ ] Sanitized logging
-  - [ ] Metadata (timestamp, user ID hash, model version)
-  - [ ] JSON parsing errors logging
-
-- [ ] Dodać automated testing
-  - [ ] Test scenarios dla typowych przypadków
-  - [ ] Validators dla output structure
-  - [ ] Alerting dla deviations
-
-- [ ] Zdefiniować evaluation metrics
-  - [ ] Valid JSON rate
-  - [ ] Schema adherence rate
-  - [ ] User satisfaction metrics (proxy)
-
-- [ ] Zaimplementować A/B testing framework
-  - [ ] Version comparison
-  - [ ] Traffic splitting
-  - [ ] Results analysis
-
-- [ ] Dodać user feedback mechanism
-  - [ ] Thumbs up/down
-  - [ ] Feedback collection
-  - [ ] Integration z prompt improvement
-
-- [ ] Version control dla promptów
-  - [ ] Git tracking
-  - [ ] Change documentation
-  - [ ] Rollback capability
-
-**Notatki:**
-- Start z podstawowym loggingiem i testami
-- A/B testing może być dodany później
+**Pytanie do użytkownika:**
+Czy jesteś gotowy rozpocząć Iterację 1? Przeczytam wszystkie dokumenty analizy i przygotuję kategoryzację z oznaczeniem priorytetów.
 
 ---
 
-## 09. Open-Source Examples
+## Historia zmian
 
-**Status:** ⏳ Not Started  
-**Priorytet:** P3
-
-### Zadania
-
-- [ ] Przejrzeć przykłady open-source
-  - [ ] Azure OpenAI FastAPI Chat
-  - [ ] Assistant API Streaming
-  - [ ] Simple FastAPI/OpenAI Example
-  - [ ] Neo4j GraphRAG
-
-- [ ] Wyciągnąć best practices
-  - [ ] Stream handling patterns
-  - [ ] Dependency injection examples
-  - [ ] Typed Pydantic models
-
-- [ ] Zastosować odpowiednie wzorce w projekcie
-
-**Notatki:**
-- Referencyjne źródło, nie priorytet implementacji
-
----
-
-## 10. Proposed AI Integration Architecture
-
-**Status:** ⏳ Not Started  
-**Priorytet:** P0
-
-### Zadania
-
-- [ ] Zaimplementować wszystkie moduły z architektury:
-  - [x] API Layer (FastAPI endpoints) - istnieje
-  - [ ] PromptFactory Module
-  - [ ] AIService Module
-  - [ ] ResponseParser/Validator
-  - [ ] CacheLayer
-  - [ ] Embedding/RAG Module (P2)
-  - [ ] GearRepository
-  - [ ] RecommendationEngine (Business Logic)
-  - [ ] Logger & Metrics
-  - [ ] Security/Config
-
-- [ ] Zaimplementować system flow:
-  ```
-  Request → PromptFactory → (Cache?) → RAG retrieval → 
-  Enhanced Prompt → AIService → ResponseParser → 
-  RecommendationEngine → Response
-  ```
-
-**Notatki:**
-- To jest roadmapa dla całej implementacji
-- Moduły powinny być implementowane zgodnie z priorytetami
-
----
-
-## Roadmap implementacji
-
-### Faza 1: Foundation (P0)
-1. Clean Architecture setup
-2. Prompt Engineering basics
-3. Structured JSON responses
-4. Proposed Architecture core modules
-
-### Faza 2: Safety & Privacy (P1)
-1. Safety checks & fallbacks
-2. Data privacy & logging
-
-### Faza 3: Performance & Quality (P2)
-1. Performance & scaling
-2. External data integration (RAG)
-3. Quality evaluation & feedback
-
-### Faza 4: Enhancements (P3)
-1. Advanced features
-2. Open-source patterns adoption
-
----
-
-## Metryki sukcesu
-
-- ✅ Wszystkie moduły P0 zaimplementowane i działające
-- ✅ JSON responses są zawsze walidowane
-- ✅ Safety checks działają (brak halucynacji)
-- ✅ Privacy compliance (GDPR/CCPA)
-- ✅ Caching redukuje koszty API o >50%
-- ✅ Latency < 2s dla 95% requestów
-- ✅ Error rate < 1%
-- ✅ User satisfaction > 4/5
-
----
-
-## Notatki i uwagi
-
-- Regularne przeglądy postępów
-- Aktualizacja statusów po każdej fazie
-- Dokumentacja decyzji architektonicznych
-- Testy dla każdego modułu przed integracją
+| Data | Iteracja | Opis |
+|------|----------|------|
+| 2025-11-28 | Przygotowanie | Utworzenie procesu iteracyjnego |
 
