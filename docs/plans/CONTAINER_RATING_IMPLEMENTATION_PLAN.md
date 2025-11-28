@@ -1243,3 +1243,294 @@ errors: {
 - Historia zmian ocen
 - Weryfikacja ocen (tylko użytkownicy, którzy skopiowali kontener mogą ocenić)
 
+---
+
+## ⚠️ Dodatkowe Uwagi Implementacyjne
+
+### **1. Performance - Optymalizacja N+1 Query Problem**
+
+Przy wyświetlaniu listy kontenerów, unikaj N+1 problemu poprzez eager loading ratingów:
+
+```python
+# W backend/app/modules/gear/repository.py
+from sqlalchemy.orm import selectinload
+
+async def get_public_containers_with_ratings(
+    self,
+    limit: int = 50,
+    offset: int = 0
+) -> list[GearContainerDB]:
+    """Get public containers with preloaded ratings."""
+    result = await self.db.execute(
+        select(GearContainerDB)
+        .options(selectinload(GearContainerDB.ratings))
+        .where(GearContainerDB.is_public == True)
+        .order_by(GearContainerDB.created_at.desc())
+        .limit(limit)
+        .offset(offset)
+    )
+    containers = result.scalars().all()
+
+    # Calculate aggregates in Python (or use SQL aggregation with subqueries)
+    for container in containers:
+        owner_ratings = [r for r in container.ratings if r.rating_type == 'owner']
+        user_ratings = [r for r in container.ratings if r.rating_type == 'user']
+
+        # Store as regular attributes (not prefixed with _)
+        container.owner_rating_value = owner_ratings[0].rating if owner_ratings else None
+        container.avg_user_rating = sum(r.rating for r in user_ratings) / len(user_ratings) if user_ratings else None
+        container.user_rating_count = len(user_ratings)
+
+    return containers
+```
+
+**Alternatywnie:** Użyj SQL subqueries do obliczania agregacji w bazie danych (bardziej wydajne):
+
+```python
+from sqlalchemy import func, case
+
+async def get_public_containers_with_rating_stats(self):
+    """Get public containers with rating statistics computed in SQL."""
+    owner_rating_subq = (
+        select(ContainerRatingDB.rating)
+        .where(ContainerRatingDB.container_id == GearContainerDB.id)
+        .where(ContainerRatingDB.rating_type == 'owner')
+        .limit(1)
+        .scalar_subquery()
+    )
+
+    avg_user_rating_subq = (
+        select(func.avg(ContainerRatingDB.rating))
+        .where(ContainerRatingDB.container_id == GearContainerDB.id)
+        .where(ContainerRatingDB.rating_type == 'user')
+        .scalar_subquery()
+    )
+
+    user_rating_count_subq = (
+        select(func.count(ContainerRatingDB.id))
+        .where(ContainerRatingDB.container_id == GearContainerDB.id)
+        .where(ContainerRatingDB.rating_type == 'user')
+        .scalar_subquery()
+    )
+
+    result = await self.db.execute(
+        select(
+            GearContainerDB,
+            owner_rating_subq.label('owner_rating'),
+            avg_user_rating_subq.label('avg_user_rating'),
+            user_rating_count_subq.label('user_rating_count')
+        )
+        .where(GearContainerDB.is_public == True)
+    )
+
+    return result.all()  # Returns tuples: (container, owner_rating, avg, count)
+```
+
+### **2. Security - Rate Limiting**
+
+Dodaj rate limiting do endpointu oceniania, aby zapobiec spamowaniu:
+
+**Opcja A: Używając slowapi (recommended)**
+
+```python
+# W backend/app/core/rate_limit.py (nowy plik)
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+
+limiter = Limiter(key_func=get_remote_address)
+
+# W backend/app/modules/gear/router.py
+from app.core.rate_limit import limiter
+
+@router.post("/containers/{container_id}/rating")
+@limiter.limit("10/minute")  # Max 10 ratingów na minutę
+async def rate_container(...):
+    ...
+```
+
+**Opcja B: Custom middleware z Redis**
+
+```python
+# Używając Redis do tracking rate limits per user
+from datetime import timedelta
+import redis
+
+async def check_rate_limit(user_id: str, action: str, max_requests: int, window: timedelta):
+    """Check if user exceeded rate limit."""
+    redis_client = get_redis_client()
+    key = f"rate_limit:{user_id}:{action}"
+    count = await redis_client.incr(key)
+
+    if count == 1:
+        await redis_client.expire(key, int(window.total_seconds()))
+
+    if count > max_requests:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Rate limit exceeded. Max {max_requests} requests per {window.total_seconds()}s"
+        )
+```
+
+### **3. Testing - Przykładowe Testy**
+
+Dodaj do `backend/tests/modules/gear/test_container_ratings.py`:
+
+```python
+import pytest
+from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
+
+@pytest.mark.asyncio
+async def test_owner_can_rate_own_container(
+    client: AsyncClient,
+    auth_headers: dict,
+    test_container_id: str
+):
+    """Test that owner can rate their own container."""
+    response = await client.post(
+        f"/gear/containers/{test_container_id}/rating",
+        json={"rating": 5, "ratingType": "owner"},
+        headers=auth_headers
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["ownerRating"] == 5
+
+@pytest.mark.asyncio
+async def test_user_cannot_rate_private_container(
+    client: AsyncClient,
+    user2_headers: dict,
+    private_container_id: str
+):
+    """Test that users cannot rate private containers."""
+    response = await client.post(
+        f"/gear/containers/{private_container_id}/rating",
+        json={"rating": 5, "ratingType": "user"},
+        headers=user2_headers
+    )
+    assert response.status_code == 403
+
+@pytest.mark.asyncio
+async def test_rating_validation(
+    client: AsyncClient,
+    auth_headers: dict,
+    test_container_id: str
+):
+    """Test that rating must be between 1-5."""
+    # Test rating too low
+    response = await client.post(
+        f"/gear/containers/{test_container_id}/rating",
+        json={"rating": 0, "ratingType": "owner"},
+        headers=auth_headers
+    )
+    assert response.status_code == 422  # Validation error
+
+    # Test rating too high
+    response = await client.post(
+        f"/gear/containers/{test_container_id}/rating",
+        json={"rating": 6, "ratingType": "owner"},
+        headers=auth_headers
+    )
+    assert response.status_code == 422
+
+@pytest.mark.asyncio
+async def test_average_rating_calculation(
+    client: AsyncClient,
+    public_container_id: str,
+    multiple_user_headers: list[dict]
+):
+    """Test that average rating is calculated correctly."""
+    # Three users rate: 5, 4, 3
+    ratings = [5, 4, 3]
+    for headers, rating in zip(multiple_user_headers, ratings):
+        await client.post(
+            f"/gear/containers/{public_container_id}/rating",
+            json={"rating": rating, "ratingType": "user"},
+            headers=headers
+        )
+
+    # Get container and check average
+    response = await client.get(
+        f"/gear/public/containers/{public_container_id}",
+        headers=multiple_user_headers[0]
+    )
+    data = response.json()
+    assert data["averageUserRating"] == 4.0  # (5+4+3)/3 = 4.0
+    assert data["userRatingCount"] == 3
+```
+
+### **4. Frontend - Loading States i UX**
+
+Dodaj loading states do `ContainerRatingCard.vue`:
+
+```vue
+<script setup lang="ts">
+const isLoading = ref(false)
+
+async function handleOwnerRatingChange(rating: TRatingValue | null) {
+  isLoading.value = true
+  try {
+    if (rating === null) {
+      emit('delete-rating', 'owner')
+    } else {
+      emit('rate', rating, 'owner')
+    }
+  } finally {
+    // Keep loading true - parent will set to false after refresh
+  }
+}
+</script>
+
+<template>
+  <div class="space-y-4">
+    <div v-if="isOwner" class="space-y-2">
+      <RatingStars
+        :rating="ownerRating"
+        :interactive="true"
+        :disabled="loading"
+        @update:rating="handleOwnerRatingChange"
+      />
+      <p v-if="loading" class="text-xs text-muted-foreground animate-pulse">
+        {{ t('gear.container.updatingRating') }}
+      </p>
+    </div>
+  </div>
+</template>
+```
+
+### **5. Database - Indexy dla Wydajności**
+
+Upewnij się, że migracja tworzy wszystkie potrzebne indeksy:
+
+```python
+# W migracji - już masz te indeksy w planie:
+op.create_index('ix_container_ratings_container_id', 'container_ratings', ['container_id'])
+op.create_index('ix_container_ratings_user_id', 'container_ratings', ['user_id'])
+op.create_index('ix_container_ratings_rating_type', 'container_ratings', ['rating_type'])
+
+# DODATKOWY composite index dla szybszych zapytań:
+op.create_index(
+    'ix_container_ratings_container_type',
+    'container_ratings',
+    ['container_id', 'rating_type']
+)
+```
+
+---
+
+## 📊 Szacowany Czas Implementacji
+
+| Faza | Czas | Uwagi |
+|------|------|-------|
+| **Faza 1: Backend Model** | 1-2h | Model + migracja + testy migracji |
+| **Faza 2: Backend Schemas** | 30min | Schemas + walidacja |
+| **Faza 3: Backend Repository** | 2-3h | Repository methods + agregacje |
+| **Faza 4: Backend API** | 2-3h | Endpointy + walidacja + rate limiting |
+| **Faza 5: Frontend Types** | 30min | TypeScript types |
+| **Faza 6: Frontend Components** | 3-4h | RatingStars + ContainerRatingCard + integracja |
+| **Faza 7: Frontend Services** | 1h | API client methods |
+| **Faza 8: Frontend i18n** | 30min | Tłumaczenia PL/EN |
+| **Faza 9: Testing** | 3-4h | Unit tests + integration tests |
+| **Faza 10: QA i poprawki** | 2-3h | Testy manualne + bugfixy |
+| **RAZEM** | **16-23h** | ~2-3 dni robocze |
+
