@@ -63,8 +63,8 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 - ✅ Aktualizacja walidacji (zod schemas) - dodanie oz i lb do enum
 - ✅ Wszystkie wyświetlane wagi będą konwertowane do preferowanej jednostki (w tym oz/lb)
 
-### 🔄 Przeniesienie ustawiania atrybutu lang do inicjalizacji aplikacji
-**Status:** 🔄 Do weryfikacji | **Priority:** Low | **Complexity:** Small
+### Przeniesienie ustawiania atrybutu lang do inicjalizacji aplikacji
+**Status:** ✅ Completed | **Priority:** Low | **Complexity:** Small
 
 - Przeniesienie ustawiania `document.documentElement.setAttribute('lang', ...)` z `main.ts` do bardziej odpowiedniego miejsca w inicjalizacji aplikacji
 - Obecna lokalizacja: `src/main.ts` (linia 47) - TODO w komentarzu
@@ -683,8 +683,8 @@ Kombinacja opcji 1 i 2:
   - Zmiana priorytetu
 - Wzorzec: LighterPack - wszystkie akcje dostępne bezpośrednio z wiersza tabeli
 
-### 🔄 Szybka edycja nazwy kontenera (Inline Editing)
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+### Szybka edycja nazwy kontenera (Inline Editing)
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Small
 
 - Możliwość szybkiej edycji nazwy kontenera bezpośrednio na stronie Container Details
 - Inline editing nazwy kontenera (podobnie jak inline editing przedmiotów)

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
-import { nextTick, onMounted, ref, watch } from 'vue'
+import { nextTick, onMounted, ref, watch, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -13,6 +13,7 @@ import TabsTrigger from '@/components/ui/tabs/TabsTrigger.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useBackend } from '@/shared/composables/useBackend'
 import { useHandleError } from '@/shared/composables/useHandleError'
+import { usePageTitle } from '@/shared/composables/usePageTitle'
 import { config } from '@/shared/config/config'
 import type { ICreateItemDto, IGearItem, IUpdateItemDto } from '../types/gear.types'
 import type { IItemWithContainer } from '../utils/allItemsColumns'
@@ -35,12 +36,22 @@ const { t } = useI18n()
 const { createItem, updateItem } = useGear()
 const { shouldUseAPI } = useBackend()
 const { handleError } = useHandleError()
+const { setTitle } = usePageTitle()
 
 const containerId = route.params.containerId as string
 const itemId = route.params.itemId as string | undefined
 const isEditMode: boolean = !!itemId
 
 const { container } = useContainer(containerId)
+
+// Set dynamic page title
+watchEffect(() => {
+  if (isEditMode && item.value?.name) {
+    setTitle('gear.item.edit', { name: item.value.name })
+  } else if (!isEditMode && container.value?.name) {
+    setTitle('gear.item.create', { name: container.value.name })
+  }
+})
 
 // Local state for item (loaded explicitly, not from computed)
 const item = ref<IGearItem | null>(null)

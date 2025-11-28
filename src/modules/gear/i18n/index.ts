@@ -631,6 +631,16 @@ export const gearEn = {
       errorRevoking: 'Failed to revoke share token',
       errorCopying: 'Failed to copy to clipboard',
     },
+    pages: {
+      allItems: 'All Items',
+      shoppingPlanning: 'Shopping Planning',
+      containerDetail: 'Container Details',
+      itemDetail: 'Item Details',
+      publicContainers: 'Public Containers',
+      publicContainerDetail: 'Public Container',
+      publicItemDetail: 'Public Item',
+      sharedContainerDetail: 'Shared Container',
+    },
     settings: {
       page: {
         title: 'Gear Settings',
@@ -699,7 +709,7 @@ export const gearPl = {
       hideWhenNested: 'Ukryj na liście gdy zagnieżdżony',
       hideWhenNestedDescription: 'Ukryj ten kontener z głównej listy, gdy jest zagnieżdżony w innym kontenerze',
       isPublic: 'Kontener Publiczny',
-      isPublicDescription: 'Udostępnij ten kontener innym użytkownikom. Publiczne kontenery mogą być przeglądane przez każdego.',
+      isPublicDescription: 'Udostępnij ten kontener innym użytkownikom. Kontenery publiczne mogą być przeglądane przez każdego.',
       favorite: 'Ulubiony',
       addFavorite: 'Dodaj do ulubionych',
       removeFavorite: 'Usuń z ulubionych',
@@ -1240,7 +1250,7 @@ export const gearPl = {
       error: 'Nie udało się zmigrować danych. Spróbuj ponownie.',
     },
     publicContainers: {
-      title: 'Publiczne Kontenery',
+      title: 'Kontenery publiczne',
       navTitle: 'Kontenery publiczne',
       description: 'Przeglądaj kontenery udostępnione przez innych użytkowników',
       by: 'autor',
@@ -1274,6 +1284,16 @@ export const gearPl = {
       errorCreating: 'Nie udało się utworzyć tokenu udostępniania',
       errorRevoking: 'Nie udało się odwołać tokenu udostępniania',
       errorCopying: 'Nie udało się skopiować do schowka',
+    },
+    pages: {
+      allItems: 'Wszystkie przedmioty',
+      shoppingPlanning: 'Planowanie zakupów',
+      containerDetail: 'Szczegóły kontenera',
+      itemDetail: 'Szczegóły przedmiotu',
+      publicContainers: 'Kontenery publiczne',
+      publicContainerDetail: 'Publiczny kontener',
+      publicItemDetail: 'Publiczny przedmiot',
+      sharedContainerDetail: 'Udostępniony kontener',
     },
     settings: {
       page: {

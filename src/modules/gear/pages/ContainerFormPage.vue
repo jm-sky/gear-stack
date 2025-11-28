@@ -2,13 +2,14 @@
 import { toTypedSchema } from '@vee-validate/zod'
 import { useDebounceFn } from '@vueuse/core'
 import { useForm } from 'vee-validate'
-import { watch } from 'vue'
+import { watch, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useSettings } from '@/modules/settings/composables/useSettings'
 import { useHandleError } from '@/shared/composables/useHandleError'
+import { usePageTitle } from '@/shared/composables/usePageTitle'
 import type { ICreateContainerDto, IUpdateContainerDto, TContainerColor } from '../types/gear.types'
 import ContainerFormFields from '../components/ContainerFormFields.vue'
 import { useContainer } from '../composables/useContainer'
@@ -27,11 +28,19 @@ const { createContainer, updateContainer } = useGear()
 const { customBrands } = useGearSettings()
 const { settings } = useSettings()
 const { handleError } = useHandleError()
+const { setTitle } = usePageTitle()
 
 const containerId = route.params.id as string | undefined
 const isEditMode: boolean = !!containerId
 
 const { container } = useContainer(containerId)
+
+// Set dynamic page title
+watchEffect(() => {
+  if (isEditMode && container.value?.name) {
+    setTitle('gear.container.edit.title', { name: container.value.name })
+  }
+})
 
 const getInitialValues = (): ContainerFormData => {
   if (container.value) {

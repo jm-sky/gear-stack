@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // File operations handled via native input element
-import { computed, ref } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -9,6 +9,7 @@ import AiChatDialog from '@/modules/ai/components/AiChatDialog.vue'
 import { useAi } from '@/modules/ai/composables/useAi'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { useBackend } from '@/shared/composables/useBackend'
+import { usePageTitle } from '@/shared/composables/usePageTitle'
 import { config } from '@/shared/config/config'
 import type { IGearItem } from '../types/gear.types'
 import AddNestedContainerDialog from '../components/AddNestedContainerDialog.vue'
@@ -35,8 +36,16 @@ const { container } = useContainer()
 const { deleteItem, updateItem, updateContainer, exportData, importData, createItem, getContainerById } = useGear()
 const { user, isAuthenticated } = useAuth()
 const { canUseAi } = useAi()
+const { setTitle } = usePageTitle()
 
 const containerId = route.params.id as string
+
+// Set dynamic page title
+watchEffect(() => {
+  if (container.value?.name) {
+    setTitle('gear.pages.containerDetail', { name: container.value.name })
+  }
+})
 
 // Check if user can edit container (admin AND owner)
 const canEditContainer = computed(() => {

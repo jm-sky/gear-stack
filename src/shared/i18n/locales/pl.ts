@@ -48,6 +48,13 @@ export default {
       goToNextPage: 'Przejdź do następnej strony',
       goToLastPage: 'Przejdź do ostatniej strony',
     },
+    pages: {
+      landing: 'Strona główna',
+      cookies: 'Cookies',
+      privacy: 'Polityka prywatności',
+      contact: 'Kontakt',
+      notFound: 'Strona nie znaleziona',
+    },
   },
   validation: {
     required: 'To pole jest wymagane',

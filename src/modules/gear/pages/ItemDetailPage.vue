@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { useBackend } from '@/shared/composables/useBackend'
+import { usePageTitle } from '@/shared/composables/usePageTitle'
 import { config } from '@/shared/config/config'
 import type { IGearContainer, IGearItem } from '../types/gear.types'
 import ItemHeader from '../components/ItemHeader.vue'
@@ -26,12 +27,20 @@ const { t } = useI18n()
 const store = useGearStore()
 const { shouldUseAPI } = useBackend()
 const { user, isAuthenticated } = useAuth()
+const { setTitle } = usePageTitle()
 
 const containerId = route.params.containerId as string
 const itemId = route.params.itemId as string
 const item = ref<IGearItem | null>(null)
 const container = ref<IGearContainer | null>(null)
 const isLoading = ref(true)
+
+// Set dynamic page title
+watchEffect(() => {
+  if (item.value?.name) {
+    setTitle('gear.pages.itemDetail', { name: item.value.name })
+  }
+})
 
 const { isExpired, isExpiringSoon } = useExpiration(item)
 

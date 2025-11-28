@@ -38,7 +38,7 @@ export const userPl = {
       not_public: 'Ten profil użytkownika nie jest publiczny',
       error: 'Nie udało się załadować profilu użytkownika',
       error_title: 'Profil Niedostępny',
-      public_containers: 'Publiczne Kontenery',
+      public_containers: 'Kontenery publiczne',
       no_containers: 'Brak publicznych kontenerów',
       no_containers_description: 'Ten użytkownik nie udostępnił jeszcze żadnych publicznych kontenerów',
     },

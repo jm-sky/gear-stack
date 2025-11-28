@@ -85,6 +85,12 @@ export const authPl = {
       verification_success: 'Weryfikacja pomyślna',
       verify_button: 'Zweryfikuj',
       no_methods_configured: 'Brak skonfigurowanych metod 2FA',
+      setup: {
+        title: 'Konfiguracja uwierzytelniania dwuskładnikowego',
+      },
+      verify: {
+        title: 'Uwierzytelnianie dwuskładnikowe',
+      },
       totp: {
         title: 'Aplikacja uwierzytelniająca (TOTP)',
         description: 'Użyj aplikacji uwierzytelniającej takiej jak Google Authenticator lub Authy',
@@ -161,6 +167,12 @@ export const authPl = {
       email_required: 'Adres email jest wymagany, aby ponownie wysłać link.',
       invalid_or_expired: 'Link weryfikacyjny jest nieprawidłowy lub wygasł. Poproś o nowy poniżej.',
       success: 'Adres email został pomyślnie zweryfikowany.',
+    },
+    pages: {
+      login: 'Logowanie',
+      register: 'Rejestracja',
+      verifyEmail: 'Weryfikacja email',
+      oauthCallback: 'OAuth Callback',
     },
     oauth: {
       button: {

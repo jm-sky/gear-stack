@@ -178,7 +178,7 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 ### Udostępnianie kontenerów
 **Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium
 
-- ✅ Publiczne kontenery (`isPublic` flag)
+- ✅ Kontenery publiczne (`isPublic` flag)
 - ✅ Publiczny link do kontenera (`/gear/public/:id`)
 - ✅ Przeglądarka publicznych kontenerów (`PublicContainersBrowserPage`)
 - ✅ Strona szczegółów publicznego kontenera (`PublicContainerDetailPage`)
