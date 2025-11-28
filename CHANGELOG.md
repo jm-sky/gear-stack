@@ -21,6 +21,75 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.22.0] - 2025-11-28
+
+### Added
+- **Backend Middleware: ConvertEmptyStringsToNone**: Automatic conversion of empty strings to None in request body
+  - Processes POST, PUT, PATCH requests with JSON content type
+  - Recursively handles nested objects and arrays
+  - Ensures consistent handling of optional fields across all API endpoints
+  - Similar to Laravel's ConvertEmptyStringsToNull middleware
+  - Comprehensive unit tests (266 lines) for middleware functionality
+
+- **Backend Weight Unit Support**: Extended weight unit support to include imperial units
+  - Backend now supports `oz` (ounces) and `lb` (pounds) in addition to `g` and `kg`
+  - Updated database models, schemas, and service calculations
+  - Weight calculations properly convert oz (28.3495g) and lb (453.592g) to grams
+
+- **Inline Item Name Editing**: Quick edit functionality for item names directly on Item Detail page
+  - Click on item name or edit icon to start editing
+  - Save with Enter key, cancel with Escape key or X button
+  - Implemented in dedicated `ItemHeaderName.vue` component
+  - Visual feedback with hover states and edit icon
+
+- **Item Header Component**: New reusable `ItemHeader.vue` component
+  - Consolidates item header display logic (back button, edit button, badges)
+  - Displays category, priority, status, expiration badges
+  - Used in ItemDetailPage for consistent header display
+
+- **Expiration Handling Composable**: New `useExpiration` composable for centralized expiration logic
+  - Reusable expiration checking across components
+  - Provides `isExpired` and `isExpiringSoon` computed properties
+  - Replaces duplicate expiration logic in multiple components
+
+- **Expiration Utility Functions**: New utility functions for expiration handling
+  - `isExpired()` - Checks if item is expired
+  - `isExpiringSoon()` - Checks if item is expiring within warning days
+  - Centralized expiration logic for better maintainability
+
+### Changed
+- **AI Actions Refactoring**: Refactored AI actions to use centralized services
+  - AI actions now use `gearItemService()` and `gearContainerService()` instead of direct local services
+  - Ensures consistent handling whether using API or localStorage based on backend status
+  - Updated `AiActionType` to reflect new action names (`create_item`, `update_item`, `delete_item`, etc.)
+  - Improved structured output types for better type safety
+
+- **API Service Simplification**: Simplified API service methods
+  - Removed manual data cleaning logic from `gearItemApiService` and `gearContainerApiService`
+  - Services now rely on backend middleware for empty string to null conversion
+  - Axios automatically omits undefined values, middleware handles empty strings
+  - Removed duplicate `cleanItemUpdateData` and `cleanContainerUpdateData` methods
+  - Backend now handles all weight units (g, kg, oz, lb) consistently
+
+- **Expiration Logic Refactoring**: Centralized expiration handling across components
+  - Replaced duplicate expiration functions in `ItemDetailPage`, `PublicItemDetailPage`, `ShoppingPlanningPage`
+  - All components now use `useExpiration` composable for consistent behavior
+  - Improved code maintainability and consistency
+
+- **Container Header Name Editing**: Enhanced inline editing UX
+  - Added X button for canceling edit mode
+  - Improved keyboard handling (Enter to save, Escape to cancel)
+  - Better visual feedback during editing
+
+- **Item Detail Page**: Refactored to use new `ItemHeader` component
+  - Simplified component structure
+  - Consistent header display across item detail views
+  - Better separation of concerns
+
+### Fixed
+
+---
+
 ## [2.21.0] - 2025-01-28
 
 ### Added
