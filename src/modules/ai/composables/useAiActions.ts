@@ -5,8 +5,8 @@
 
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
-import { gearContainerLocalService } from '@/modules/gear/services/gearContainerLocalService'
-import { gearItemLocalService } from '@/modules/gear/services/gearItemLocalService'
+import { gearContainerService } from '@/modules/gear/services/gearContainerService'
+import { gearItemService } from '@/modules/gear/services/gearItemService'
 import { useGearStore } from '@/modules/gear/store/useGearStore'
 import type { IAiStructuredOutput } from '../types'
 import type { ICreateContainerDto, ICreateItemDto, IGearItem, IUpdateItemDto } from '@/modules/gear/types/gear.types'
@@ -87,8 +87,8 @@ export function useAiActions() {
       return false
     }
 
-    // Create item using API service
-    await gearItemLocalService.createItem(containerId, newItem as ICreateItemDto)
+    // Create item using service (API or localStorage based on backend status)
+    await gearItemService().createItem(containerId, newItem as ICreateItemDto)
     toast.success(t('ai.actions.itemCreated', { name: newItem.name }))
 
     return true
@@ -118,8 +118,8 @@ export function useAiActions() {
       return false
     }
 
-    // Update item using API service
-    await gearItemLocalService.updateItem(itemId, updates as IUpdateItemDto)
+    // Update item using service (API or localStorage based on backend status)
+    await gearItemService().updateItem(itemId, updates as IUpdateItemDto)
     toast.success(t('ai.actions.itemUpdated'))
 
     return true
@@ -148,8 +148,8 @@ export function useAiActions() {
       return false
     }
 
-    // Delete item using API service
-    await gearItemLocalService.deleteItem(itemId)
+    // Delete item using service (API or localStorage based on backend status)
+    await gearItemService().deleteItem(itemId)
     toast.success(t('ai.actions.itemDeleted'))
 
     return true
@@ -163,14 +163,14 @@ export function useAiActions() {
       return false
     }
 
-    // Create container using service
-    const newContainer = await gearContainerLocalService.createContainer({
+    // Create container using service (API or localStorage based on backend status)
+    // Note: gearContainerService().createContainer() already handles store updates
+    await gearContainerService().createContainer({
       name,
       description: data.description as string,
       type: (data.container_type as string) ?? 'backpack',
     } as ICreateContainerDto)
 
-    gearStore.addContainer(newContainer)
     toast.success(t('ai.actions.containerCreated', { name }))
 
     return true

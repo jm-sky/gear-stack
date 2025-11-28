@@ -4,7 +4,7 @@
 
 export type AiOperationType = 'chat' | 'classify' | 'analyze' | 'generate'
 
-export type AiActionType = 'update_items' | 'create_items' | 'update_container' | 'create_container'
+export type AiActionType = 'create_item' | 'update_item' | 'delete_item' | 'create_container' | 'update_container' | 'None'
 
 export interface IAiChatMessage {
   id: string
@@ -35,8 +35,8 @@ export interface IAiStructuredData {
 }
 
 export interface IAiStructuredItem {
-  id?: string // For update_items
-  name?: string // For create_items
+  id?: string // For update_item
+  name?: string // For create_item
   category?: string
   weight?: number
   quantity?: number
@@ -48,7 +48,7 @@ export interface IAiStructuredItem {
   quality?: string
   wearable?: boolean
   consumable?: boolean
-  updates?: Record<string, unknown> // For update_items
+  updates?: Record<string, unknown> // For update_item
 }
 
 export interface IAiChatHistoryMessage {
@@ -66,7 +66,7 @@ export interface IAiChatRequest {
 }
 
 export interface IAiStructuredOutput {
-  action: string | null
+  action: AiActionType | null
   data: Record<string, unknown>
 }
 
