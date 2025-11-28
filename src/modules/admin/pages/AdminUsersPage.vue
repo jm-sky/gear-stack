@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MoreHorizontal, Shield, ShieldOff, Trash2, Users } from 'lucide-vue-next'
+import { MoreHorizontal, Shield, Sparkles, Trash2, User, Users } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
@@ -18,6 +18,7 @@ import UserRoleBadge from '@/components/ui/UserRoleBadge.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useHandleError } from '@/shared/composables/useHandleError'
 import type { IAdminUser } from '../types/admin.types'
+import type { TUserRole } from '../types/admin.types'
 import { adminApiService } from '../services/adminApiService'
 import type { ColumnDef } from '@tanstack/vue-table'
 
@@ -39,28 +40,24 @@ async function loadUsers() {
   }
 }
 
-// Toggle admin status
-async function toggleAdmin(user: IAdminUser) {
-  const newRole = user.isAdmin ? 'user' : 'admin'
-  const action = user.isAdmin
-    ? t('admin.users.toggleAdmin.demote', 'remove admin privileges')
-    : t('admin.users.toggleAdmin.promote', 'grant admin privileges')
+// Change user role
+async function changeUserRole(user: IAdminUser, newRole: TUserRole) {
+  const roleName = t(`admin.users.roles.${newRole}`, newRole)
+  const action = t('admin.users.changeRole.action', { role: roleName }, `change role to ${roleName}`)
 
-  if (!confirm(t('admin.users.toggleAdmin.confirm', { action }, `Are you sure you want to ${action}?`))) {
+  if (!confirm(t('admin.users.changeRole.confirm', { action }, `Are you sure you want to ${action}?`))) {
     return
   }
 
   try {
     await adminApiService.updateUser(user.id, { role: newRole })
     toast.success(
-      user.isAdmin
-        ? t('admin.users.toggleAdmin.demoteSuccess', 'User demoted from administrator')
-        : t('admin.users.toggleAdmin.promoteSuccess', 'User promoted to administrator'),
+      t('admin.users.changeRole.success', { role: roleName }, `User role changed to ${roleName}`),
     )
     await loadUsers()
   } catch (error) {
-    console.error('Failed to toggle admin status:', error)
-    handleError(error, { fallbackMessage: t('admin.users.toggleAdmin.error', 'Failed to update user admin status') })
+    console.error('Failed to change user role:', error)
+    handleError(error, { fallbackMessage: t('admin.users.changeRole.error', 'Failed to change user role') })
   }
 }
 
@@ -232,20 +229,29 @@ onMounted(() => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <!-- Toggle Admin - disabled for Owner users -->
+              <!-- Make User - disabled for Owner users or if already a regular user -->
               <DropdownMenuItem
-                :disabled="row.original.isOwner"
-                @click="toggleAdmin(row.original)"
+                :disabled="row.original.isOwner || (!row.original.isAdmin && !row.original.isPremium)"
+                @click="changeUserRole(row.original, 'user')"
               >
-                <Shield v-if="!row.original.isAdmin" class="size-4" />
-                <ShieldOff v-else class="size-4" />
-                <span>
-                  {{
-                    row.original.isAdmin
-                      ? t('admin.users.toggleAdmin.demote', 'Remove Admin')
-                      : t('admin.users.toggleAdmin.promote', 'Make Admin')
-                  }}
-                </span>
+                <User class="size-4" />
+                <span>{{ t('admin.users.makeUser', 'Make User') }}</span>
+              </DropdownMenuItem>
+              <!-- Make Premium User - disabled for Owner users or if already premium -->
+              <DropdownMenuItem
+                :disabled="row.original.isOwner || row.original.isPremium"
+                @click="changeUserRole(row.original, 'premium')"
+              >
+                <Sparkles class="size-4" />
+                <span>{{ t('admin.users.makePremium', 'Make Premium User') }}</span>
+              </DropdownMenuItem>
+              <!-- Make Admin - disabled for Owner users or if already admin -->
+              <DropdownMenuItem
+                :disabled="row.original.isOwner || row.original.isAdmin"
+                @click="changeUserRole(row.original, 'admin')"
+              >
+                <Shield class="size-4" />
+                <span>{{ t('admin.users.makeAdmin', 'Make Admin') }}</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <!-- Delete - disabled for Owner and Admin users -->

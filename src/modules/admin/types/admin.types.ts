@@ -1,5 +1,7 @@
 import type { TDateTime, TUUID } from '@/shared/types/base.type'
 
+export type TUserRole = 'user' | 'admin' | 'premium'
+
 export interface IAdminUser {
   id: TUUID
   name: string
