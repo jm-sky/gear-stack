@@ -21,8 +21,8 @@ import ShoppingListSummary from '../components/shopping/ShoppingListSummary.vue'
 import { useCategoryLabel } from '../composables/useCategoryLabel'
 import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
-import { EXPIRATION_WARNING_DAYS, MILLISECONDS_PER_DAY } from '../utils/constants'
 import { getDefaultItemValues } from '../utils/defaultValues'
+import { isExpiringSoon } from '../utils/isExpiringSoon'
 import { type ItemFormData, itemSchema } from '../utils/validation'
 import type { TUUID } from '@/shared/types/base.type'
 
@@ -148,16 +148,6 @@ watch(shoppingList, (newList) => {
 watch(deletedItems, (newItems) => {
   saveDeletedItemsToStorage(newItems)
 }, { deep: true })
-
-// Helper to check if item is expiring soon (includes expired items)
-function isExpiringSoon(item: IGearItem, days: number = EXPIRATION_WARNING_DAYS): boolean {
-  if (!item.expirationDate) return false
-  const expirationDate = new Date(item.expirationDate)
-  const now = new Date()
-  const daysUntilExpiration = Math.ceil((expirationDate.getTime() - now.getTime()) / MILLISECONDS_PER_DAY)
-  // Include expired items (daysUntilExpiration <= 0) and items expiring soon
-  return daysUntilExpiration <= days
-}
 
 // Get available items (toBuy + optionally expiring soon/expired) with container IDs
 const availableItems = computed<IItemWithContainerId[]>(() => {

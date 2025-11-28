@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
 from app.core.config import settings
+from app.core.convert_empty_strings_middleware import ConvertEmptyStringsToNoneMiddleware
 
 
 def setup_middleware(app: FastAPI) -> None:
@@ -39,5 +40,10 @@ def setup_middleware(app: FastAPI) -> None:
             allowed_hosts=settings.server.allowed_hosts,
         )
 
-    # Add custom middleware here
+    # Convert Empty Strings to None Middleware
+    # Automatically converts empty strings ('') to None (null in JSON) before Pydantic validation
+    # Similar to Laravel's ConvertEmptyStringsToNull middleware
+    app.add_middleware(ConvertEmptyStringsToNoneMiddleware)
+
+    # Add other custom middleware here
     # Example: Request logging, rate limiting, etc.

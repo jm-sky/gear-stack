@@ -14,8 +14,8 @@ import { useGearSettings } from '../composables/useGearSettings'
 import { GearRoutePath } from '../routes'
 import { useGearStore } from '../store/useGearStore'
 import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
-import { EXPIRATION_WARNING_DAYS } from '../utils/constants'
 import { calculateTotalWeightSync } from '../utils/containerCalculations'
+import { isExpiringSoon } from '../utils/isExpiringSoon'
 import { createItemsColumns } from '../utils/itemsColumns'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 import ItemsTableCategoryCell from './items-table/ItemsTableCategoryCell.vue'
@@ -123,16 +123,6 @@ const globalFilterFn = (row: IGearItem, filterValue: string) => {
 function isExpired(item: IGearItem): boolean {
   if (!item.expirationDate) return false
   return new Date(item.expirationDate) < new Date()
-}
-
-// Helper do sprawdzania czy przedmiot wygasa wkrótce
-function isExpiringSoon(item: IGearItem, days: number = EXPIRATION_WARNING_DAYS): boolean {
-  if (!item.expirationDate) return false
-  const expirationDate = new Date(item.expirationDate)
-  const now = new Date()
-  const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24
-  const daysUntilExpiration = Math.ceil((expirationDate.getTime() - now.getTime()) / MILLISECONDS_PER_DAY)
-  return daysUntilExpiration > 0 && daysUntilExpiration <= days
 }
 
 // Helper to check if item is a nested container

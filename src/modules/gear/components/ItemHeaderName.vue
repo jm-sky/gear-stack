@@ -4,16 +4,18 @@ import { nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
 import Button from '@/components/ui/button/Button.vue'
-import type { IGearContainer } from '../types/gear.types'
+import type { IGearItem } from '../types/gear.types'
+import { useExpiration } from '../composables/useExpiration'
 import { useGear } from '../composables/useGear'
 import ContainerNameInput from './inputs/ContainerNameInput.vue'
 
 const props = defineProps<{
-  container: IGearContainer
+  item: IGearItem
 }>()
 
-const { updateContainer } = useGear()
+const { updateItem } = useGear()
 const { t } = useI18n()
+const { isExpired, isExpiringSoon } = useExpiration(props.item)
 
 // Inline editing state
 const isEditingName = ref<boolean>(false)
@@ -24,7 +26,7 @@ const isSavingName = ref<boolean>(false)
 // Inline editing handlers
 const startEditingName = () => {
   isEditingName.value = true
-  editingName.value = props.container.name
+  editingName.value = props.item.name
   nextTick(() => {
     nameInputRef.value?.focus()
     nameInputRef.value?.select()
@@ -33,32 +35,32 @@ const startEditingName = () => {
 
 const saveName = async () => {
   if (!editingName.value.trim()) {
-    editingName.value = props.container.name
+    editingName.value = props.item.name
     isEditingName.value = false
     return
   }
 
-  if (editingName.value === props.container.name) {
+  if (editingName.value === props.item.name) {
     isEditingName.value = false
     return
   }
 
   try {
     isSavingName.value = true
-    await updateContainer(props.container.id, { name: editingName.value.trim() })
+    await updateItem(props.item.id, { name: editingName.value.trim() })
     toast.success(t('common.success'))
     isEditingName.value = false
   } catch (error) {
-    console.error('Failed to update container name:', error)
+    console.error('Failed to update item name:', error)
     toast.error(t('common.error'))
-    editingName.value = props.container.name
+    editingName.value = props.item.name
   } finally {
     isSavingName.value = false
   }
 }
 
 const cancelEditingName = () => {
-  editingName.value = props.container.name
+  editingName.value = props.item.name
   isEditingName.value = false
 }
 
@@ -70,8 +72,8 @@ const handleEnter = (event: KeyboardEvent) => {
 
 <template>
   <div v-if="!isEditingName" class="flex items-center gap-2 group">
-    <h1 class="text-3xl font-bold mb-2 cursor-pointer hover:text-primary transition-colors delay-200" @click="startEditingName">
-      {{ container.name }}
+    <h1 class="wrap-break-word mb-2 text-2xl font-bold sm:text-3xl cursor-pointer hover:text-primary transition-colors delay-200" :class="{ 'text-destructive': isExpired, 'text-yellow-600': isExpiringSoon }" @click="startEditingName">
+      {{ item.name }}
     </h1>
     <Button
       variant="ghost"
@@ -96,3 +98,4 @@ const handleEnter = (event: KeyboardEvent) => {
     <XIcon v-else class="cursor-pointer absolute right-6 top-0 size-4 translate-y-1/2" @click="cancelEditingName" />
   </div>
 </template>
+

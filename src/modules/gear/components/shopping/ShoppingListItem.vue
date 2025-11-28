@@ -6,11 +6,11 @@ import Badge from '@/components/ui/badge/Badge.vue'
 import { Button } from '@/components/ui/button'
 import type { IItemWithContainerId } from '../../types/shopping.types'
 import { useCategoryLabel } from '../../composables/useCategoryLabel'
+import { useExpiration } from '../../composables/useExpiration'
 import { useFormattedItemPrice } from '../../composables/useFormattedItemPrice'
 import { useFormattedItemWeight } from '../../composables/useFormattedItemWeight'
 import { GearRoutePath } from '../../routes'
 import { getPriorityVariant } from '../../utils/badgeVariants'
-import { EXPIRATION_WARNING_DAYS, MILLISECONDS_PER_DAY } from '../../utils/constants'
 import CategoryIcon from '../CategoryIcon.vue'
 
 const { t } = useI18n()
@@ -31,23 +31,7 @@ const { getCategoryLabel } = useCategoryLabel()
 const { formattedWeight } = useFormattedItemWeight(item, undefined, true)
 const { formattedPrice } = useFormattedItemPrice(item, undefined, true)
 
-// Helper to check if item is expired
-function isExpired(): boolean {
-  if (!item.expirationDate) return false
-  const expirationDate = new Date(item.expirationDate)
-  const now = new Date()
-  return expirationDate < now
-}
-
-// Helper to check if item is expiring soon (includes expired items)
-function isExpiringSoon(days: number = EXPIRATION_WARNING_DAYS): boolean {
-  if (!item.expirationDate) return false
-  const expirationDate = new Date(item.expirationDate)
-  const now = new Date()
-  const daysUntilExpiration = Math.ceil((expirationDate.getTime() - now.getTime()) / MILLISECONDS_PER_DAY)
-  // Include expired items (daysUntilExpiration <= 0) and items expiring soon
-  return daysUntilExpiration <= days
-}
+const { isExpired, isExpiringSoon } = useExpiration(item)
 </script>
 
 <template>
@@ -81,14 +65,14 @@ function isExpiringSoon(days: number = EXPIRATION_WARNING_DAYS): boolean {
           {{ t('gear.item.statuses.toBuy') }}
         </Badge>
         <Badge
-          v-else-if="isExpiringSoon()"
+          v-else-if="isExpiringSoon"
           variant="outline"
           :class="[
             'text-xs',
-            isExpired() ? 'text-red-600 border-red-600' : 'text-yellow-600 border-yellow-600'
+            isExpired ? 'text-red-600 border-red-600' : 'text-yellow-600 border-yellow-600'
           ]"
         >
-          {{ isExpired() ? t('gear.item.expiration.expired') : t('gear.item.expiration.expiringSoon') }}
+          {{ isExpired ? t('gear.item.expiration.expired') : t('gear.item.expiration.expiringSoon') }}
         </Badge>
       </div>
       <div class="flex items-center gap-4 mt-1 text-sm text-muted-foreground flex-wrap">
@@ -101,8 +85,8 @@ function isExpiringSoon(days: number = EXPIRATION_WARNING_DAYS): boolean {
         <span v-if="item.price">
           {{ formattedPrice }}
         </span>
-        <span v-if="item.expirationDate" :class="isExpired() ? 'text-red-600' : 'text-yellow-600'">
-          {{ isExpired() ? t('gear.item.expiration.expired') : t('gear.item.expiration.expiringSoon') }}: {{ new Date(item.expirationDate).toLocaleDateString() }}
+        <span v-if="item.expirationDate" :class="isExpired ? 'text-red-600' : 'text-yellow-600'">
+          {{ isExpired ? t('gear.item.expiration.expired') : t('gear.item.expiration.expiringSoon') }}: {{ new Date(item.expirationDate).toLocaleDateString() }}
         </span>
       </div>
     </div>

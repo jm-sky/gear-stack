@@ -15,7 +15,7 @@ GearContainerType = str  # Allows custom types: 'backpack', 'bag', 'pouch', etc.
 GearItemStatus = Literal["owned", "missing", "toBuy"]
 GearItemPriority = Literal["critical", "high", "medium", "low"]
 GearItemQuality = Literal["low", "medium", "high"]
-GearWeightUnit = Literal["g", "kg"]
+GearWeightUnit = Literal["g", "kg", "oz", "lb"]
 ContainerColor = Literal[
     "default",
     "blue",

@@ -10,12 +10,12 @@ import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import type { IGearItem } from '../types/gear.types'
 import CategoryIcon from '../components/CategoryIcon.vue'
 import { useCategoryLabel } from '../composables/useCategoryLabel'
+import { useExpiration } from '../composables/useExpiration'
 import { useFormattedItemPrice } from '../composables/useFormattedItemPrice'
 import { useFormattedItemWeight } from '../composables/useFormattedItemWeight'
 import { GearRoutePath } from '../routes'
 import { publicContainersService } from '../services/publicContainersService'
 import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
-import { EXPIRATION_WARNING_DAYS } from '../utils/constants'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 
 const route = useRoute()
@@ -28,21 +28,7 @@ const itemId = route.params.itemId as string
 const item = ref<IGearItem | null>(null)
 const isLoading = ref(true)
 
-// Helper to check if item is expired
-function isExpired(item: IGearItem): boolean {
-  if (!item.expirationDate) return false
-  return new Date(item.expirationDate) < new Date()
-}
-
-// Helper to check if item is expiring soon
-function isExpiringSoon(item: IGearItem, days: number = EXPIRATION_WARNING_DAYS): boolean {
-  if (!item.expirationDate) return false
-  const expirationDate = new Date(item.expirationDate)
-  const now = new Date()
-  const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24
-  const daysUntilExpiration = Math.ceil((expirationDate.getTime() - now.getTime()) / MILLISECONDS_PER_DAY)
-  return daysUntilExpiration > 0 && daysUntilExpiration <= days
-}
+const { isExpired, isExpiringSoon } = useExpiration(item)
 
 const loadItem = async () => {
   try {
@@ -106,7 +92,7 @@ const hasDetails = computed<boolean>(() => {
         </Button>
 
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold mb-2 wrap-break-word" :class="{ 'text-destructive': isExpired(item), 'text-yellow-600': isExpiringSoon(item) }">
+          <h1 class="text-2xl sm:text-3xl font-bold mb-2 wrap-break-word" :class="{ 'text-destructive': isExpired, 'text-yellow-600': isExpiringSoon }">
             {{ item.name }}
           </h1>
           <div class="flex items-center gap-2 flex-wrap">
@@ -120,10 +106,10 @@ const hasDetails = computed<boolean>(() => {
             <Badge :variant="getStatusVariant(item.status)">
               {{ t(`gear.item.statuses.${item.status}`) }}
             </Badge>
-            <Badge v-if="isExpired(item)" variant="destructive" class="text-xs">
+            <Badge v-if="isExpired" variant="destructive" class="text-xs">
               {{ t('gear.item.expiration.expired') }}
             </Badge>
-            <Badge v-if="isExpiringSoon(item)" variant="outline" class="text-xs text-yellow-600 border-yellow-600">
+            <Badge v-if="isExpiringSoon" variant="outline" class="text-xs text-yellow-600 border-yellow-600">
               {{ t('gear.item.expiration.expiringSoon') }}
             </Badge>
             <Badge v-if="item.wearable" variant="outline" class="text-xs">
@@ -206,7 +192,7 @@ const hasDetails = computed<boolean>(() => {
               <div class="text-sm text-muted-foreground mb-1">
                 {{ t('gear.item.expirationDate') }}
               </div>
-              <div class="font-medium" :class="{ 'text-destructive': isExpired(item), 'text-yellow-600': isExpiringSoon(item) }">
+              <div class="font-medium" :class="{ 'text-destructive': isExpired, 'text-yellow-600': isExpiringSoon }">
                 {{ new Date(item.expirationDate).toLocaleDateString() }}
               </div>
             </div>

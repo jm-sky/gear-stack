@@ -16,9 +16,9 @@ import type { TUUID } from '@/shared/types/base.type'
 class GearItemApiService {
   /**
    * Clean data before sending to API:
-   * - Remove undefined values
-   * - Convert empty strings to null
-   * - Filter out unsupported weight units (only 'g' and 'kg' are supported)
+   * - Remove undefined values (for optional fields)
+   * - Empty strings are converted to null by backend middleware
+   * - Backend handles all weight units (g, kg, oz, lb)
    */
   private cleanItemData(data: ICreateItemDto): ICreateItemDto {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -26,7 +26,7 @@ class GearItemApiService {
 
     // Optional UUID field (for import/update workflow)
     if (isSet(data.id)) {
-      cleaned.id = data.id || null
+      cleaned.id = data.id
     }
 
     // Required fields
@@ -34,36 +34,36 @@ class GearItemApiService {
     cleaned.category = data.category
     cleaned.quantity = data.quantity
     cleaned.weight = data.weight
+    // Backend handles all weight units (g, kg, oz, lb)
     cleaned.weightUnit = data.weightUnit
     cleaned.priority = data.priority
     cleaned.status = data.status
 
     // Optional fields - only include if set (not undefined and not null)
-    // Convert empty strings to null for string fields
+    // Middleware handles empty string to null conversion
     if (isSet(data.linkedItemId)) {
-      cleaned.linkedItemId = data.linkedItemId || null
+      cleaned.linkedItemId = data.linkedItemId
     }
     if (isSet(data.notes)) {
-      cleaned.notes = data.notes || null
+      cleaned.notes = data.notes
     }
     if (isSet(data.expirationDate)) {
-      // Convert empty string to null for date fields
-      cleaned.expirationDate = data.expirationDate && data.expirationDate.trim() !== '' ? data.expirationDate : null
+      cleaned.expirationDate = data.expirationDate
     }
     if (isSet(data.containerId)) {
-      cleaned.containerId = data.containerId || null
+      cleaned.containerId = data.containerId
     }
     if (isSet(data.price)) {
       cleaned.price = data.price
     }
     if (isSet(data.url)) {
-      cleaned.url = data.url || null
+      cleaned.url = data.url
     }
     if (isSet(data.brand)) {
-      cleaned.brand = data.brand || null
+      cleaned.brand = data.brand
     }
     if (isSet(data.color)) {
-      cleaned.color = data.color || null
+      cleaned.color = data.color
     }
     if (isSet(data.quality)) {
       cleaned.quality = data.quality
@@ -77,80 +77,13 @@ class GearItemApiService {
     if (isSet(data.order)) {
       cleaned.order = data.order
     }
-
-    return cleaned
-  }
-
-  /**
-   * Clean update data before sending to API
-   */
-  private cleanItemUpdateData(data: IUpdateItemDto): IUpdateItemDto {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const cleaned: any = {}
-
-    // Only include set fields (not undefined and not null)
-    if (isSet(data.name)) {
-      cleaned.name = data.name
-    }
-    if (isSet(data.category)) {
-      cleaned.category = data.category
-    }
-    if (isSet(data.quantity)) {
-      cleaned.quantity = data.quantity
-    }
-    if (isSet(data.weight)) {
-      cleaned.weight = data.weight
-    }
-    // Only include weightUnit if it's 'g' or 'kg' (backend doesn't support 'oz' or 'lb')
-    if (isSet(data.weightUnit) && (data.weightUnit === 'g' || data.weightUnit === 'kg')) {
-      cleaned.weightUnit = data.weightUnit
-    }
-    if (isSet(data.notes)) {
-      cleaned.notes = data.notes || null
-    }
-    if (isSet(data.expirationDate)) {
-      // Convert empty string to null for date fields
-      cleaned.expirationDate = data.expirationDate && data.expirationDate.trim() !== '' ? data.expirationDate : null
-    }
-    if (isSet(data.priority)) {
-      cleaned.priority = data.priority
-    }
-    if (isSet(data.status)) {
-      cleaned.status = data.status
-    }
-    if (isSet(data.containerId)) {
-      cleaned.containerId = data.containerId || null
-    }
-    if (isSet(data.price)) {
-      cleaned.price = data.price
-    }
-    if (isSet(data.currency)) {
-      cleaned.currency = data.currency
-    }
-    if (isSet(data.url)) {
-      cleaned.url = data.url || null
-    }
-    if (isSet(data.brand)) {
-      cleaned.brand = data.brand || null
-    }
-    if (isSet(data.color)) {
-      cleaned.color = data.color || null
-    }
-    if (isSet(data.quality)) {
-      cleaned.quality = data.quality
-    }
-    if (isSet(data.wearable)) {
-      cleaned.wearable = data.wearable
-    }
-    if (isSet(data.consumable)) {
-      cleaned.consumable = data.consumable
-    }
-    if (isSet(data.order)) {
-      cleaned.order = data.order
+    if (isSet(data.showOnContainer)) {
+      cleaned.showOnContainer = data.showOnContainer
     }
 
     return cleaned
   }
+
 
   // Item operations
   async createItem(containerId: string, data: ICreateItemDto): Promise<IGearItem> {
@@ -172,8 +105,9 @@ class GearItemApiService {
   }
 
   async updateItem(itemId: TUUID, data: IUpdateItemDto): Promise<IGearItem> {
-    const cleanedData = this.cleanItemUpdateData(data)
-    const response = await apiClient.patch<IGearItem>(`/gear/items/${itemId}`, cleanedData)
+    // Axios automatically omits undefined, middleware converts empty strings to null
+    // Backend handles all weight units (g, kg, oz, lb)
+    const response = await apiClient.patch<IGearItem>(`/gear/items/${itemId}`, data)
     return response.data
   }
 

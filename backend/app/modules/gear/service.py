@@ -29,7 +29,7 @@ from .db_models import GearContainerDB, GearItemDB
 logger = logging.getLogger(__name__)
 
 # Type aliases for Literal types
-WeightUnit = Literal["g", "kg"]
+WeightUnit = Literal["g", "kg", "oz", "lb"]
 Priority = Literal["critical", "high", "medium", "low"]
 ItemStatus = Literal["owned", "missing", "toBuy"]
 Quality = Literal["low", "medium", "high"]
@@ -536,7 +536,13 @@ class GearService:
         for item in container.items:
             if item.weightUnit == "kg":
                 total_grams += item.weight * 1000 * item.quantity
-            else:  # g
+            elif item.weightUnit == "oz":
+                # 1 oz = 28.3495 g
+                total_grams += item.weight * 28.3495 * item.quantity
+            elif item.weightUnit == "lb":
+                # 1 lb = 453.592 g
+                total_grams += item.weight * 453.592 * item.quantity
+            else:  # g (default)
                 total_grams += item.weight * item.quantity
 
         return {

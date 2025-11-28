@@ -79,7 +79,7 @@ class GearItemDB(Base):
         category: Item category (water, food, shelter, etc.)
         quantity: Item quantity
         weight: Item weight value
-        weight_unit: Weight unit (g or kg)
+        weight_unit: Weight unit (g, kg, oz, or lb)
         notes: Optional notes
         expiration_date: Optional expiration date
         priority: Item priority (critical, high, medium, low)

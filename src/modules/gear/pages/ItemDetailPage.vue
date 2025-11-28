@@ -1,29 +1,23 @@
 <script setup lang="ts">
-import { ArrowLeft, Pencil } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import ButtonLink from '@/components/ui/button-link/ButtonLink.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { useBackend } from '@/shared/composables/useBackend'
 import { config } from '@/shared/config/config'
 import type { IGearContainer, IGearItem } from '../types/gear.types'
-import CategoryIcon from '../components/CategoryIcon.vue'
+import ItemHeader from '../components/ItemHeader.vue'
 import ItemImageGallery from '../components/ItemImageGallery.vue'
 import SearchImagesButton from '../components/SearchImagesButton.vue'
-import { useCategoryLabel } from '../composables/useCategoryLabel'
+import { useExpiration } from '../composables/useExpiration'
 import { useFormattedItemPrice } from '../composables/useFormattedItemPrice'
 import { useFormattedItemWeight } from '../composables/useFormattedItemWeight'
 import { GearRoutePath } from '../routes'
 import { gearContainerService } from '../services/gearContainerService'
 import { gearItemService } from '../services/gearItemService'
 import { useGearStore } from '../store/useGearStore'
-import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
-import { EXPIRATION_WARNING_DAYS } from '../utils/constants'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 
 const route = useRoute()
@@ -31,7 +25,6 @@ const router = useRouter()
 const { t } = useI18n()
 const store = useGearStore()
 const { shouldUseAPI } = useBackend()
-const { getCategoryLabel } = useCategoryLabel()
 const { user, isAuthenticated } = useAuth()
 
 const containerId = route.params.containerId as string
@@ -40,10 +33,10 @@ const item = ref<IGearItem | null>(null)
 const container = ref<IGearContainer | null>(null)
 const isLoading = ref(true)
 
+const { isExpired, isExpiringSoon } = useExpiration(item)
+
 // Check if user is admin
-const isAdmin = computed(() => {
-  return user.value?.isAdmin ?? false
-})
+const isAdmin = computed(() => user.value?.isAdmin ?? false)
 
 // Check if user is owner of the container
 const isOwner = computed(() => {
@@ -64,24 +57,6 @@ const isOwner = computed(() => {
 const canManageImages = computed(() => {
   return isAdmin.value && isOwner.value
 })
-
-// Helper to check if item is expired
-function isExpired(item: IGearItem): boolean {
-  if (!item.expirationDate)
-    return false
-  return new Date(item.expirationDate) < new Date()
-}
-
-// Helper to check if item is expiring soon
-function isExpiringSoon(item: IGearItem, days: number = EXPIRATION_WARNING_DAYS): boolean {
-  if (!item.expirationDate)
-    return false
-  const expirationDate = new Date(item.expirationDate)
-  const now = new Date()
-  const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24
-  const daysUntilExpiration = Math.ceil((expirationDate.getTime() - now.getTime()) / MILLISECONDS_PER_DAY)
-  return daysUntilExpiration > 0 && daysUntilExpiration <= days
-}
 
 const loadItem = async () => {
   try {
@@ -121,25 +96,6 @@ onMounted(async () => {
   await loadItem()
 })
 
-// Determine back navigation target based on query parameter
-const backTo = computed<string>(() => {
-  if ((route.query.from as string | undefined) === 'all-items') {
-    return GearRoutePath.AllItems
-  }
-  return GearRoutePath.ContainerDetailById(containerId)
-})
-
-const handleEdit = () => {
-  const from = route.query.from as string | undefined
-  router.push({
-    path: GearRoutePath.ItemEditById(containerId, itemId),
-    query: {
-      returnTo: 'detail',
-      ...(from && { from }),
-    },
-  })
-}
-
 const { formattedWeight } = useFormattedItemWeight(item)
 const { formattedPrice } = useFormattedItemPrice(item)
 
@@ -178,51 +134,9 @@ const urlDomain = computed<string>(() => {
       <div class="h-64 animate-pulse rounded bg-muted" />
     </div>
 
-    <div v-else-if="item" class="w-full max-w-full space-y-6 overflow-hidden">
+    <div v-else-if="item" class="w-full max-w-full space-y-6">
       <!-- Header -->
-      <div class="space-y-4">
-        <div class="flex items-center justify-between gap-4">
-          <ButtonLink :to="backTo" variant="ghost" size="sm">
-            <ArrowLeft class="size-4" />
-            {{ t('common.back') }}
-          </ButtonLink>
-
-          <Button size="sm" @click="handleEdit">
-            <Pencil class="size-4" />
-            {{ t('common.edit') }}
-          </Button>
-        </div>
-
-        <div class="flex flex-col gap-2">
-          <h1 class="wrap-break-word mb-2 text-2xl font-bold sm:text-3xl" :class="{ 'text-destructive': isExpired(item), 'text-yellow-600': isExpiringSoon(item) }">
-            {{ item.name }}
-          </h1>
-          <div class="flex flex-wrap items-center gap-2">
-            <Badge variant="outline" class="flex items-center gap-2">
-              <CategoryIcon :category="item.category" :size="14" />
-              {{ getCategoryLabel(item.category) }}
-            </Badge>
-            <Badge :variant="getPriorityVariant(item.priority)">
-              {{ t(`gear.item.priorities.${item.priority}`) }}
-            </Badge>
-            <Badge :variant="getStatusVariant(item.status)">
-              {{ t(`gear.item.statuses.${item.status}`) }}
-            </Badge>
-            <Badge v-if="isExpired(item)" variant="destructive" class="text-xs">
-              {{ t('gear.item.expiration.expired') }}
-            </Badge>
-            <Badge v-if="isExpiringSoon(item)" variant="outline" class="text-xs border-yellow-600 text-yellow-600">
-              {{ t('gear.item.expiration.expiringSoon') }}
-            </Badge>
-            <Badge v-if="item.wearable" variant="outline" class="text-xs">
-              {{ t('gear.item.wearable') }}
-            </Badge>
-            <Badge v-if="item.consumable" variant="outline" class="text-xs">
-              {{ t('gear.item.consumable') }}
-            </Badge>
-          </div>
-        </div>
-      </div>
+      <ItemHeader :container-id :item-id :item />
 
       <!-- Main Info -->
       <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
@@ -294,7 +208,7 @@ const urlDomain = computed<string>(() => {
               <div class="mb-1 text-sm text-muted-foreground">
                 {{ t('gear.item.expirationDate') }}
               </div>
-              <div class="font-medium" :class="{ 'text-destructive': isExpired(item), 'text-yellow-600': isExpiringSoon(item) }">
+              <div class="font-medium" :class="{ 'text-destructive': isExpired, 'text-yellow-600': isExpiringSoon }">
                 {{ new Date(item.expirationDate).toLocaleDateString() }}
               </div>
             </div>
@@ -327,7 +241,7 @@ const urlDomain = computed<string>(() => {
         </template>
 
         <template v-else>
-          <div class="py-8 text-center text-muted-foreground">
+          <div class="py-4 text-center text-muted-foreground">
             <p class="text-sm">
               {{ t('gear.item.noDetails') }}
             </p>
