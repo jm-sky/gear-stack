@@ -58,7 +58,7 @@ describe('gearContainerLocalService - UUID support', () => {
         name: 'Full Container',
         type: 'backpack',
         description: 'Test description',
-        color: 'blue',
+        color: 'jeans' as const,
         brand: 'Test Brand',
         price: 100,
         weight: 2000,
@@ -71,7 +71,7 @@ describe('gearContainerLocalService - UUID support', () => {
       expect(container.id).toBe(customUuid)
       expect(container.name).toBe('Full Container')
       expect(container.description).toBe('Test description')
-      expect(container.color).toBe('blue')
+      expect(container.color).toBe('jeans')
       expect(container.brand).toBe('Test Brand')
       expect(container.price).toBe(100)
       expect(container.weight).toBe(2000)

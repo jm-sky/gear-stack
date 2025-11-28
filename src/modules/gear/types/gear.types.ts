@@ -30,15 +30,17 @@ export type TGearWeightUnit = 'g' | 'kg' | 'oz' | 'lb'
 // Container color options
 export type TContainerColor =
   | 'default'  // No color (gray/neutral)
-  | 'blue'
-  | 'green'
-  | 'red'
-  | 'yellow'
-  | 'purple'
+  | 'coyote'
+  | 'khaki'
+  | 'olive'
+  | 'forestGreen'
+  | 'tan'
+  | 'brown'
+  | 'black'
+  | 'navy'
+  | 'jeans'
+  | 'gray'
   | 'orange'
-  | 'pink'
-  | 'teal'
-  | 'indigo'
 
 // Kategoria przedmiotu - może być domyślna lub własna (custom)
 export type TGearItemCategory =

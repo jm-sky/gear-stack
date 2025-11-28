@@ -3,6 +3,7 @@ import { BackpackIcon, Globe, Package, ShoppingCart } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
+import SidebarMenuContainerItem from '@/components/layout/SidebarMenuContainerItem.vue'
 import {
   Sidebar,
   SidebarContent,
@@ -68,10 +69,6 @@ const isLinkActive = (path: string): boolean => {
   return route.path === path || route.path.startsWith(path + '/')
 }
 
-// Sprawdzanie czy kontener jest aktywny
-const isContainerActive = (containerId: string): boolean => {
-  return route.params.id === containerId || route.params.containerId === containerId
-}
 </script>
 
 <template>
@@ -102,14 +99,11 @@ const isContainerActive = (containerId: string): boolean => {
         <SidebarGroupLabel>{{ t('gear.page.containers', 'Containers') }}</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu v-if="rootContainers.length > 0">
-            <SidebarMenuItem v-for="container in rootContainers" :key="container.id">
-              <SidebarMenuButton :is-active="isContainerActive(container.id)" as-child>
-                <RouterLink :to="GearRoutePath.ContainerDetailById(container.id)">
-                  <BackpackIcon />
-                  <span>{{ container.name }}</span>
-                </RouterLink>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+            <SidebarMenuContainerItem
+              v-for="container in rootContainers"
+              :key="container.id"
+              :container="container"
+            />
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>

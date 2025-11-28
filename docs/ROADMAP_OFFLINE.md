@@ -159,6 +159,35 @@ Na stronach z filtrami (np. AllItemsPage, ShoppingPlanningPage, ContainersListPa
 - ✅ Wizualne rozróżnienie kontenerów na liście (kolorowa kropka i ramka)
 - ✅ Kolor wyświetlany w kartach kontenerów i rozwiniętych wierszach zagnieżdżonych kontenerów
 
+### 🔄 Ulepszenie wyboru koloru kontenera (wyszukiwarka i etykiety)
+**Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Small
+
+**Koncepcja:**
+W komponencie `ContainerColorPicker.vue` dodać funkcjonalności ułatwiające wybór koloru, szczególnie gdy jest wiele dostępnych kolorów (obecnie 12 kolorów).
+
+**Proponowane ulepszenia:**
+1. **Wyszukiwarka po nazwie koloru** - pole wyszukiwania pozwalające szybko znaleźć kolor po nazwie (np. "olive", "khaki", "coyote")
+   - Filtrowanie kolorów w czasie rzeczywistym podczas wpisywania
+   - Wyszukiwanie po tłumaczonej nazwie koloru (PL/EN)
+   - Ukrywanie niepasujących kolorów
+2. **Etykiety pod kolorami** - wyświetlanie nazw kolorów bezpośrednio pod kropkami (opcjonalnie, zamiast tylko tooltip)
+   - Opcja w ustawieniach: "Pokaż nazwy kolorów" (checkbox)
+   - Domyślnie: tylko tooltip (obecne zachowanie)
+   - Po włączeniu: małe etykiety tekstowe pod każdą kropką
+
+**Implementacja:**
+- W `ContainerColorPicker.vue`:
+  - Dodanie pola wyszukiwania nad siatką kolorów
+  - Filtrowanie `CONTAINER_COLORS` na podstawie wyszukiwanej frazy
+  - Opcjonalne wyświetlanie etykiet pod kropkami (zależnie od ustawienia)
+- W ustawieniach (opcjonalnie):
+  - Checkbox "Pokaż nazwy kolorów w selektorze" (zapis w localStorage)
+
+**Zalety:**
+- Szybsze znajdowanie konkretnego koloru (szczególnie przy większej liczbie kolorów)
+- Lepsza dostępność (nazwy widoczne bez hover)
+- Lepsze UX dla użytkowników, którzy nie pamiętają, jak wygląda dany kolor
+
 ### 🔄 Obrazek kontenera jako okrągły avatar w liście kontenerów
 **Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
 

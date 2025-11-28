@@ -7,7 +7,7 @@ export const containerSchema = z.object({
   name: z.string().min(1, 'Nazwa jest wymagana'),
   description: z.string().optional(),
   type: z.string().min(1, 'Typ jest wymagany'), // Allow any string for custom container types
-  color: z.enum(['default', 'blue', 'green', 'red', 'yellow', 'purple', 'orange', 'pink', 'teal', 'indigo']).optional(),
+  color: z.enum(['default', 'coyote', 'khaki', 'olive', 'forestGreen', 'tan', 'brown', 'black', 'navy', 'jeans', 'gray', 'orange']).optional(),
   parentContainerId: z.string().uuid().optional().nullable(),
   hideWhenNested: z.boolean().optional(),
   isPublic: z.boolean().optional(),

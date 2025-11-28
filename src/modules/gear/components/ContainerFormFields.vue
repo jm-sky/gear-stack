@@ -85,8 +85,8 @@ const handleCancel = () => {
       <FormItem>
         <FormLabel :label="t('gear.container.color')" />
         <ContainerColorPicker
-          :model-value="value"
-          @update:model-value="handleChange"
+          :value="value"
+          @update:value="handleChange"
         />
         <FormMessage />
       </FormItem>

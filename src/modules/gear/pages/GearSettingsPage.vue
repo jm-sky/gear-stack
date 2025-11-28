@@ -4,6 +4,7 @@ import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import BrandsSettingsCard from '@/modules/settings/components/BrandsSettingsCard.vue'
 import CategoriesSettingsCard from '@/modules/settings/components/CategoriesSettingsCard.vue'
 import ContainerTypesSettingsCard from '@/modules/settings/components/ContainerTypesSettingsCard.vue'
+import AiSettingsCard from '../components/AiSettingsCard.vue'
 import GearPreferencesCard from '../components/GearPreferencesCard.vue'
 
 const { t } = useI18n()
@@ -11,7 +12,7 @@ const { t } = useI18n()
 
 <template>
   <AuthenticatedLayout>
-    <div class="max-w-4xl mx-auto space-y-6">
+    <div class="mx-auto space-y-6">
       <div class="space-y-1">
         <h1 class="text-3xl font-bold tracking-tight">
           {{ t('gear.settings.page.title') }}
@@ -25,14 +26,19 @@ const { t } = useI18n()
         <!-- Gear Preferences -->
         <GearPreferencesCard />
 
-        <!-- Custom Container Types -->
-        <ContainerTypesSettingsCard />
+        <!-- AI Settings -->
+        <AiSettingsCard />
 
-        <!-- Custom Categories -->
-        <CategoriesSettingsCard />
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Custom Container Types -->
+          <ContainerTypesSettingsCard />
 
-        <!-- Custom Brands -->
-        <BrandsSettingsCard />
+          <!-- Custom Categories -->
+          <CategoriesSettingsCard />
+
+          <!-- Custom Brands -->
+          <BrandsSettingsCard />
+        </div>
       </div>
     </div>
   </AuthenticatedLayout>

@@ -11,6 +11,7 @@ import type { IGearItem } from '../types/gear.types'
 import { useCategoryLabel } from '../composables/useCategoryLabel'
 import { formatItemPrice } from '../composables/useFormattedItemPrice'
 import { useGearSettings } from '../composables/useGearSettings'
+import { useItemsTableEditMode } from '../composables/useItemsTableEditMode'
 import { GearRoutePath } from '../routes'
 import { useGearStore } from '../store/useGearStore'
 import { calculateTotalWeightSync } from '../utils/containerCalculations'
@@ -20,6 +21,7 @@ import { createNavigationQuery } from '../utils/navigationParams'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 import ItemPriorityBadge from './ItemPriorityBadge.vue'
 import ItemsTableCategoryCell from './items-table/ItemsTableCategoryCell.vue'
+import ItemsTableEditableNameCell from './items-table/ItemsTableEditableNameCell.vue'
 import ItemsTableImageCell from './items-table/ItemsTableImageCell.vue'
 import ItemsTableNameCell from './items-table/ItemsTableNameCell.vue'
 import ItemsTableWeightCell from './items-table/ItemsTableWeightCell.vue'
@@ -49,6 +51,7 @@ const emit = defineEmits<{
   recognizeParameters: [item: IGearItem]
   reorder: [items: IGearItem[]]
   sortingChange: [items: IGearItem[]]
+  update: [item: IGearItem]
 }>()
 
 const { t } = useI18n()
@@ -57,6 +60,7 @@ const store = useGearStore()
 
 const { settings: gearSettings, defaultCurrency } = useGearSettings()
 const { getCategoryLabel } = useCategoryLabel()
+const { editMode } = useItemsTableEditMode()
 
 const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
 
@@ -352,6 +356,11 @@ function canMoveDown(item: IGearItem): boolean {
   const currentIndex = sortedItems.value.findIndex(i => i.id === item.id)
   return currentIndex >= 0 && currentIndex < sortedItems.value.length - 1
 }
+
+// Handle item update from inline editing
+function handleItemUpdate(updatedItem: IGearItem) {
+  emit('update', updatedItem)
+}
 </script>
 
 <template>
@@ -369,7 +378,15 @@ function canMoveDown(item: IGearItem): boolean {
     :initial-page-size="10"
   >
     <template #name="{ row }">
+      <ItemsTableEditableNameCell
+        v-if="editMode && !publicMode"
+        :item="row.original"
+        :is-expired="isExpired(row.original)"
+        :is-expiring-soon="isExpiringSoon(row.original)"
+        @update="handleItemUpdate"
+      />
       <ItemsTableNameCell
+        v-else
         :item="row.original"
         :public-mode="publicMode"
         :is-expired="isExpired(row.original)"

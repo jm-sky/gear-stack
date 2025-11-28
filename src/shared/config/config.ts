@@ -55,7 +55,10 @@ export const config = {
     },
     ai: {
       enabled: import.meta.env.VITE_ENABLE_AI === 'true',
-    }
+    },
+    inlineEditing: {
+      enabled: import.meta.env.VITE_ENABLE_INLINE_EDITING === 'true',
+    },
   },
   defaults: {
     preferredWeightUnit: 'g' as TGearWeightUnit,
@@ -77,6 +80,7 @@ export const CORE_SETTINGS_STORAGE_KEY = `${config.app.id}:core-settings`
 export const GEAR_SETTINGS_STORAGE_KEY = `${config.app.id}:gear-settings`
 export const USER_STORAGE_KEY = `${config.app.id}:user`
 export const ITEMS_TABLE_COLUMN_VISIBILITY_KEY = `${config.app.id}:items-table-column-visibility`
+export const ITEMS_TABLE_EDIT_MODE_KEY = `${config.app.id}:items-table-edit-mode`
 export const ALL_ITEMS_TABLE_COLUMN_VISIBILITY_KEY = `${config.app.id}:all-items-table-column-visibility`
 export const ALL_ITEMS_PAGE_FILTERS_KEY = `${config.app.id}:all-items-page:filters`
 export const SHOPPING_PLANNING_PAGE_FILTERS_KEY = `${config.app.id}:shopping-planning-page:filters`

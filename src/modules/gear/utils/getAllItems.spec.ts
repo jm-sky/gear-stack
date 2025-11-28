@@ -47,7 +47,7 @@ describe('getAllItems', () => {
       createMockItem('item-1', 'Water Bottle'),
     ])
     container.type = 'backpack'
-    container.color = 'blue'
+    container.color = 'jeans'
     container.brand = 'Osprey'
 
     const result = getAllItems([container])
@@ -56,7 +56,7 @@ describe('getAllItems', () => {
     expect(containerItem).toBeDefined()
     expect(containerItem?.name).toBe('Backpack')
     expect(containerItem?.containerType).toBe('backpack')
-    expect(containerItem?.containerColor).toBe('blue')
+    expect(containerItem?.containerColor).toBe('jeans')
     expect(containerItem?.brand).toBe('Osprey')
     expect(containerItem?.isContainer).toBe(true)
   })

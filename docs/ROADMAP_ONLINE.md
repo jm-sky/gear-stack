@@ -163,7 +163,7 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - ✅ Offline-first approach z synchronizacją przy połączeniu (podstawowa implementacja)
 
 ### Wersjonowanie danych (historia zmian)
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Large
+**Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Large
 
 - Historia zmian kontenerów i przedmiotów
 - Możliwość cofnięcia zmian (undo/redo)
@@ -208,7 +208,16 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - ✅ Strona szczegółów publicznego kontenera (`PublicContainerDetailPage`)
 - ✅ Publiczna strona szczegółów przedmiotu (`PublicItemDetailPage`)
 - ✅ Backend endpoint `/gear/public/containers` dla pobierania publicznych kontenerów
-- 🔄 Ocenianie (gwiazdki) kontenerów - planowane
+- 🔄 **Ocenianie (gwiazdki) kontenerów** - planowane (HIGH PRIORITY)
+  - **Owner rating**: Właściciel kontenera może ocenić swój kontener (1-5 gwiazdek)
+  - **User rating**: Inni użytkownicy mogą ocenić publiczne kontenera (1-5 gwiazdek)
+  - Backend: Tabela `container_ratings` (container_id, user_id, rating, rating_type: 'owner' | 'user')
+  - Backend: Endpointy do dodawania/aktualizacji/usuwa oceny
+  - Backend: Obliczanie średniej oceny per kontener
+  - Frontend: Komponent gwiazdek do oceniania (w szczegółach kontenera)
+  - Frontend: Wyświetlanie średniej oceny w galerii i szczegółach kontenera
+  - Frontend: Rozróżnienie między owner rating a user rating w UI
+  - Frontend: Możliwość zmiany własnej oceny
 - 🔄 Komentarze pod kontenerami - planowane
 - 🔄 Możliwość skopiowania publicznego kontenera do własnych - planowane
 
@@ -277,6 +286,38 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - ⏸️ "Odlinkowanie" przedmiotu (tworzenie kopii) - na razie nie implementowane (usuwanie = usunięcie z kontenera)
 - ⏸️ Zarządzanie referencjami - nie wymagane (uproszczona wersja)
 
+### 🔄 Przenoszenie przedmiotów między kontenerami
+**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium
+
+**Koncepcja:**
+Umożliwienie przenoszenia przedmiotów z jednego kontenera do drugiego bez konieczności usuwania i ponownego dodawania.
+
+**Zakres implementacji:**
+- **Backend:**
+  - Endpoint `PATCH /gear/containers/{container_id}/items/{item_id}/move` do przenoszenia przedmiotu
+  - Walidacja: sprawdzanie czy kontener docelowy istnieje i użytkownik ma do niego dostęp
+  - Aktualizacja relacji `container_items` (zmiana `container_id`)
+  - Zachowanie UUID przedmiotu przy przenoszeniu
+  - Aktualizacja wag kontenerów (źródłowego i docelowego)
+  - Historia zmian (opcjonalnie: logowanie operacji przenoszenia)
+
+- **Frontend:**
+  - Akcja "Przenieś do..." w menu akcji przedmiotu (ItemsTableActions lub ItemDetailPage)
+  - Dialog wyboru kontenera docelowego (autocomplete z listą dostępnych kontenerów)
+  - Wizualne potwierdzenie przenoszenia (toast notification)
+  - Aktualizacja UI po przenoszeniu (odświeżenie list przedmiotów w obu kontenerach)
+  - Obsługa błędów (np. kontener docelowy nie istnieje, brak uprawnień)
+
+- **Edge cases:**
+  - Przenoszenie przedmiotu linkowanego (czy przenosić wszystkie referencje, czy tylko jedną?)
+  - Przenoszenie przedmiotu z obrazkami (zachowanie obrazków)
+  - Przenoszenie przedmiotu z historią (zachowanie historii)
+
+**Zalety:**
+- Szybsze zarządzanie przedmiotami między kontenerami
+- Lepsze UX (nie trzeba usuwać i dodawać ponownie)
+- Zachowanie danych przedmiotu (UUID, historia, obrazki)
+
 ---
 
 ## ⚙️ Ustawienia użytkownika (wymagające DB)
@@ -285,7 +326,13 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 **Status:** ✅ Completed | **Priority:** High | **Complexity:** Small
 
 - ✅ **Domyślna waluta użytkownika** (zapisywana w DB) - zaimplementowane
-- 🔄 Domyślna widoczność nowych kontenerów - planowane (już częściowo w `UserSettingsDB.default_containers_public`)
+- ✅ **Domyślna widoczność nowych kontenerów** - zaimplementowane
+  - ✅ **Backend:** Pole `default_containers_public` w `UserSettingsDB` - zaimplementowane
+  - ✅ **Backend:** Endpoint `/me/settings` do aktualizacji ustawienia - zaimplementowane
+  - ✅ **Frontend:** Checkbox w Gear Settings (`GearPreferencesCard.vue`) - zaimplementowane
+  - ✅ **Frontend:** Automatyczne ustawienie `isPublic` przy tworzeniu nowego kontenera na podstawie ustawienia użytkownika - zaimplementowane (w `ContainerFormPage.vue` i backend `create_container`)
+  - ✅ **Frontend:** Możliwość nadpisania domyślnego ustawienia w formularzu kontenera - zaimplementowane
+  - ✅ **Zachowanie:** Jeśli użytkownik nie ma ustawienia, domyślnie `false` (prywatne) - zaimplementowane
 - ✅ Preferowana jednostka wagi (zapisywana w DB, nie tylko localStorage) - zaimplementowane
 - ✅ **Dodawanie nowych kategorii** (zapisywane w DB) - zaimplementowane
 - ✅ **Dodawanie firm / marek (brand)** - zapisywane w DB - zaimplementowane
@@ -307,6 +354,56 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - ✅ Integracja z Gravatar (automatyczne pobieranie awatara na podstawie email)
 - ✅ Pole `avatar_url` w profilu użytkownika (już istnieje w DB)
 - ✅ Możliwość podania własnego URL do awatara
+
+### 🚧 Sekcja AI w Gear Settings
+**Status:** 🚧 Partially Completed | **Priority:** High | **Complexity:** Medium
+
+**Koncepcja:**
+Dodanie sekcji ustawień AI w Gear Settings, umożliwiającej zarządzanie konfiguracją AI bezpośrednio z poziomu ustawień aplikacji.
+
+**Zakres implementacji:**
+- **Backend:**
+  - ✅ Endpointy AI settings już istnieją (`/ai/settings`) - zaimplementowane
+  - 🔄 Endpoint do pobierania zużycia credits/tokenów: `GET /ai/usage` lub `GET /ai/stats` - planowane
+  - 🔄 Obliczanie limitu credits (jeśli używany token systemowy) - planowane
+  - 🔄 Śledzenie zużycia credits per użytkownik (dla tokenów systemowych) - planowane
+
+- **Frontend:**
+  - ✅ Nowa sekcja "AI Settings" w Gear Settings (`GearSettingsPage.vue`) - zaimplementowane (`AiSettingsCard.vue`)
+  - ✅ **Domyślny model:** Selektor modelu AI - zaimplementowane (używa `useAiModels` i `Select`)
+  - ✅ **Własny token:** 
+    - ✅ Pole do wprowadzenia własnego tokena OpenRouter - zaimplementowane
+    - ✅ Przycisk "Zapisz token" / "Usuń token" - zaimplementowane
+    - ✅ Walidacja tokena przy zapisie (test API call) - zaimplementowane (backend)
+    - ✅ Informacja o szyfrowaniu tokena (encrypt-at-rest) - zaimplementowane (wyświetlana w UI)
+  - ✅ **Limit credits:** 
+    - ✅ Wyświetlanie limitu credits (tylko dla tokenów systemowych) - zaimplementowane (z `monthlyUsage` z store)
+    - ✅ Informacja o braku limitu dla własnych tokenów - zaimplementowane
+    - 🔄 Możliwość ustawienia limitu (opcjonalnie, dla adminów) - planowane
+  - ✅ **Progress bar zużycia:**
+    - ✅ Progress bar pokazujący zużycie credits w stosunku do limitu - zaimplementowane
+    - ✅ Wyświetlanie: "X / Y credits użyto" lub "X credits użyto (bez limitu)" - zaimplementowane
+    - ✅ Wizualne oznaczenie (zielony/żółty/czerwony) w zależności od poziomu zużycia - zaimplementowane
+    - 🔄 Reset limitu (opcjonalnie, dla adminów lub przy odnowieniu subskrypcji) - planowane
+  - ✅ Integracja z istniejącym `useAiStore` - zaimplementowane
+  - ✅ Komunikaty błędów i sukcesu (toast notifications) - zaimplementowane (używa `useHandleError`)
+
+- **UI/UX:**
+  - Sekcja AI Settings jako osobna karta/sekcja w Gear Settings
+  - Spójny design z resztą ustawień
+  - Tooltips z wyjaśnieniami (np. "Własny token pozwala na nieograniczone użycie AI")
+  - Responsywny design dla urządzeń mobilnych
+
+**Zalety:**
+- Centralne miejsce do zarządzania ustawieniami AI
+- Lepsza widoczność zużycia credits
+- Łatwiejsze zarządzanie tokenami
+- Spójność z resztą ustawień aplikacji
+
+**Uwagi:**
+- Backend endpointy AI settings już istnieją (`/ai/settings`)
+- Możliwe wykorzystanie istniejących komponentów AI (np. `AiModelSelector`)
+- Integracja z istniejącym systemem śledzenia zużycia tokenów
 
 ---
 
@@ -355,19 +452,46 @@ Kontenery i przedmioty już mają UUID - to ich pole `id` (typu `TUUID`). UUID s
 - Analiza trendów w czasie
 
 ### Statystyki wyświetleń kontenerów
-**Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Medium
+**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium
 
-- Licznik wyświetleń kontenera (ile razy ktoś obejrzał kontener)
-- Licznik unikalnych wyświetleń (tracking unikalnych użytkowników/sesji)
-- Historia wyświetleń z timestampami
-- Dashboard ze statystykami dla właściciela kontenera:
-  - Całkowita liczba wyświetleń per kontener
-  - Wyświetlenia w czasie (wykresy)
-  - Top 10 najczęściej oglądanych kontenerów
-  - Statystyki wyświetleń dla udostępnionych tokenów (które tokeny były najczęściej używane)
-- Prywatność: statystyki widoczne tylko dla właściciela kontenera
-- Tracking dla publicznych kontenerów i kontenerów udostępnionych przez token
-- Opcjonalne geolokalizacja (kraj/region) wyświetleń (anonimowe, zgodne z GDPR)
+**Koncepcja:**
+System śledzenia wyświetleń kontenerów (publicznych i udostępnionych) z dashboardem statystyk dla właściciela.
+
+**Zakres implementacji:**
+- **Backend:**
+  - Tabela `container_views` (container_id, user_id, session_id, viewed_at, ip_address, user_agent, country)
+  - Endpoint `POST /gear/containers/{container_id}/view` do rejestrowania wyświetleń
+  - Endpoint `GET /gear/containers/{container_id}/stats` do pobierania statystyk (tylko dla właściciela)
+  - Endpoint `GET /me/containers/stats` do pobierania statystyk wszystkich kontenerów użytkownika
+  - Licznik wyświetleń kontenera (ile razy ktoś obejrzał kontener)
+  - Licznik unikalnych wyświetleń (tracking unikalnych użytkowników/sesji)
+  - Historia wyświetleń z timestampami
+  - Agregacja danych (dzienne, tygodniowe, miesięczne statystyki)
+  - Opcjonalne geolokalizacja (kraj/region) wyświetleń (anonimowe, zgodne z GDPR)
+
+- **Frontend:**
+  - Automatyczne rejestrowanie wyświetleń przy otwarciu publicznego/udostępnionego kontenera
+  - Dashboard ze statystykami dla właściciela kontenera:
+    - Całkowita liczba wyświetleń per kontener
+    - Wyświetlenia w czasie (wykresy liniowe/słupkowe)
+    - Top 10 najczęściej oglądanych kontenerów
+    - Statystyki wyświetleń dla udostępnionych tokenów (które tokeny były najczęściej używane)
+    - Unikalne vs całkowite wyświetlenia
+    - Statystyki geograficzne (opcjonalnie)
+  - Strona statystyk kontenera (`ContainerStatsPage`) dostępna tylko dla właściciela
+  - Link do statystyk w menu akcji kontenera (tylko dla właściciela)
+  - Prywatność: statystyki widoczne tylko dla właściciela kontenera
+
+- **Tracking:**
+  - Tracking dla publicznych kontenerów (`/gear/public/:id`)
+  - Tracking dla kontenerów udostępnionych przez token (`/shared/container/:token`)
+  - Unikanie podwójnego liczenia (sprawdzanie sesji/cookies)
+  - Opcjonalnie: tracking dla prywatnych kontenerów (tylko dla właściciela)
+
+**Zalety:**
+- Właściciel kontenera widzi popularność swoich kontenerów
+- Możliwość analizy, które kontenery są najczęściej oglądane
+- Lepsze zrozumienie użycia funkcji udostępniania
 
 ---
 
@@ -768,6 +892,11 @@ W wielu komponentach używane jest `$t()` zamiast `t()` z `useI18n()`. Zgodnie z
 2. **Globalny katalog itemów** - High priority, Medium complexity
 3. ✅ **Linkowanie przedmiotów** - High priority, Large complexity (Completed)
 4. ✅ **Rozszerzone ustawienia użytkownika** (waluta, kategorie, marki w DB) - High priority, Small complexity (Completed)
+5. 🔄 **Ocenianie (gwiazdki) kontenerów** - High priority, Medium complexity (Planned)
+6. 🔄 **Przenoszenie przedmiotów między kontenerami** - High priority, Medium complexity (Planned)
+7. ✅ **Domyślna widoczność nowych kontenerów** - High priority, Small complexity (Completed)
+8. 🔄 **Statystyki wyświetleń kontenerów** - High priority, Medium complexity (Planned)
+9. 🚧 **Sekcja AI w Gear Settings** - High priority, Medium complexity (Partially Completed)
 
 ### Medium Priority
 1. **Synchronizacja między urządzeniami** - Medium priority, Large complexity

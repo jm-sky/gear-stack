@@ -104,25 +104,33 @@ watch(() => settings.value?.defaultContainersPublic, (newValue) => {
 const mapItemColorToContainerColor = (itemColor: string): TContainerColor | null => {
   const normalized = itemColor.toLowerCase().trim()
 
-  // Direct matches
+  // Map item colors to available container colors
   const colorMap: Record<string, TContainerColor> = {
-    'green': 'green',
-    'blue': 'blue',
-    'red': 'red',
-    'yellow': 'yellow',
-    'purple': 'purple',
+    // Direct matches (colors that exist in TContainerColor)
     'orange': 'orange',
-    'pink': 'pink',
-    'teal': 'teal',
-    'indigo': 'indigo',
-    // Additional mappings
-    'navy': 'blue',
-    'olive': 'green',
-    'gray': 'default',
-    'grey': 'default',
-    'black': 'default',
-    'tan': 'yellow',
-    'brown': 'orange',
+    'olive': 'olive',
+    'tan': 'tan',
+    'brown': 'brown',
+    'black': 'black',
+    'navy': 'navy',
+    'jeans': 'jeans',
+    'gray': 'gray',
+    'grey': 'gray',
+    'coyote': 'coyote',
+    'khaki': 'khaki',
+    'forestgreen': 'forestGreen',
+    'forest-green': 'forestGreen',
+    // Mappings from old colors to new colors
+    'green': 'forestGreen',
+    'blue': 'jeans',
+    'red': 'orange',
+    'yellow': 'tan',
+    'purple': 'navy',
+    'pink': 'orange',
+    'teal': 'jeans',
+    'indigo': 'navy',
+    // Default fallback
+    'default': 'default',
   }
 
   // Check direct match

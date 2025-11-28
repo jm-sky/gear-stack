@@ -8,7 +8,7 @@ const modelValue = defineModel<string>('value', { default: '' })
 </script>
 
 <template>
-  <div class="grid grid-cols-5 sm:grid-cols-10 gap-2">
+  <div class="grid grid-cols-4 sm:grid-cols-6 gap-2">
     <button
       v-for="color in CONTAINER_COLORS"
       :key="color"
@@ -17,7 +17,7 @@ const modelValue = defineModel<string>('value', { default: '' })
       :class="[
         'cursor-pointer size-10 rounded-full border-2 transition-all',
         COLOR_DOT_CLASSES[color],
-        value === color || (!value && color === 'default') ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : 'opacity-50 hover:opacity-75',
+        modelValue === color || (!modelValue && color === 'default') ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : 'opacity-50 hover:opacity-75',
       ]"
       :aria-label="t(`gear.container.colors.${color}`)"
       @click="modelValue = color"

@@ -18,15 +18,17 @@ GearItemQuality = Literal["low", "medium", "high"]
 GearWeightUnit = Literal["g", "kg", "oz", "lb"]
 ContainerColor = Literal[
     "default",
-    "blue",
-    "green",
-    "red",
-    "yellow",
-    "purple",
+    "coyote",
+    "khaki",
+    "olive",
+    "forestGreen",
+    "tan",
+    "brown",
+    "black",
+    "navy",
+    "jeans",
+    "gray",
     "orange",
-    "pink",
-    "teal",
-    "indigo",
 ]
 GearItemCategory = str  # Allows custom categories: 'water', 'food', 'shelter', etc.
 

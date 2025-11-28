@@ -18,6 +18,7 @@ import { isSet } from '../utils/helpers'
 import ContainerHeaderName from './ContainerHeaderName.vue'
 import ContainerHeaderStats from './ContainerHeaderStats.vue'
 import FavoriteContainerButton from './FavoriteContainerButton.vue'
+import ItemsTableEditModeToggle from './ItemsTableEditModeToggle.vue'
 import WeightLimitBadge from './WeightLimitBadge.vue'
 
 // Action icons
@@ -163,6 +164,7 @@ const handleBack = () => {
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
+          <ItemsTableEditModeToggle />
           <Button
             variant="outline"
             size="sm"
