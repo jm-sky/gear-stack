@@ -9,7 +9,7 @@ import { useCategoryLabel } from '../../composables/useCategoryLabel'
 import { useExpiration } from '../../composables/useExpiration'
 import { useFormattedItemPrice } from '../../composables/useFormattedItemPrice'
 import { useFormattedItemWeight } from '../../composables/useFormattedItemWeight'
-import { GearRoutePath } from '../../routes'
+import { createItemEditPath } from '../../utils/navigationParams'
 import CategoryIcon from '../CategoryIcon.vue'
 import ItemPriorityBadge from '../ItemPriorityBadge.vue'
 
@@ -46,7 +46,7 @@ const { isExpired, isExpiringSoon } = useExpiration(item)
     <div class="flex-1 min-w-0">
       <div class="flex items-center gap-2 flex-wrap">
         <RouterLink
-          :to="`${GearRoutePath.ItemEditById(item._containerId, item.id)}?returnTo=shopping`"
+          :to="createItemEditPath(item._containerId, item.id, 'shopping')"
           class="font-medium hover:text-primary hover:underline transition-colors"
         >
           {{ item.name }}

@@ -25,6 +25,7 @@ import { gearContainerService } from '../services/gearContainerService'
 import { createAllItemsColumns } from '../utils/allItemsColumns'
 import { COLOR_DOT_CLASSES, COLOR_TEXT_CLASSES } from '../utils/containerColors'
 import { getAllItems } from '../utils/getAllItems'
+import { createNavigationQuery } from '../utils/navigationParams'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 
 const router = useRouter()
@@ -244,7 +245,7 @@ function navigateToContainer(containerId: string) {
         <template #name="{ row }">
           <div class="flex items-center gap-2">
             <RouterLink
-              :to="row.original.isContainer ? GearRoutePath.ContainerDetailById(row.original.id) : { path: GearRoutePath.ItemDetailById(row.original.containerId, row.original.id), query: { from: 'all-items' } }"
+              :to="row.original.isContainer ? GearRoutePath.ContainerDetailById(row.original.id) : { path: GearRoutePath.ItemDetailById(row.original.containerId, row.original.id), query: createNavigationQuery(undefined, 'all-items') }"
               class="font-medium hover:text-primary hover:underline transition-colors"
             >
               {{ row.original.name }}

@@ -23,6 +23,7 @@ import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
 import { getDefaultItemValues } from '../utils/defaultValues'
 import { isExpiringSoon } from '../utils/isExpiringSoon'
+import { getReturnTo } from '../utils/navigationParams'
 import { type ItemFormData, itemSchema } from '../utils/validation'
 import type { TUUID } from '@/shared/types/base.type'
 
@@ -536,7 +537,7 @@ watch(containers, () => {
 
 // Handle redirect from edit page
 onMounted(() => {
-  const returnTo = route.query.returnTo as string | undefined
+  const returnTo = getReturnTo(route)
   if (returnTo === 'shopping') {
     // Clear the query param
     router.replace({ query: {} })

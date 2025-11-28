@@ -16,6 +16,7 @@ import { useGearStore } from '../store/useGearStore'
 import { calculateTotalWeightSync } from '../utils/containerCalculations'
 import { isExpiringSoon } from '../utils/isExpiringSoon'
 import { createItemsColumns } from '../utils/itemsColumns'
+import { createNavigationQuery } from '../utils/navigationParams'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 import ItemPriorityBadge from './ItemPriorityBadge.vue'
 import ItemsTableCategoryCell from './items-table/ItemsTableCategoryCell.vue'
@@ -149,7 +150,7 @@ function navigateToItem(item: IGearItem) {
   } else if (props.containerId) {
     router.push({
       path: GearRoutePath.ItemDetailById(props.containerId, item.id),
-      query: { from: 'container' },
+      query: createNavigationQuery(undefined, 'container'),
     })
   } else {
     // Fallback: emit edit event if containerId is not available

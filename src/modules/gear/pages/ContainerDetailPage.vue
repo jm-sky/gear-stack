@@ -25,6 +25,7 @@ import { useGear } from '../composables/useGear'
 import { GearRoutePath } from '../routes'
 import { gearItemService } from '../services/gearItemService'
 import { useGearStore } from '../store/useGearStore'
+import { createNavigationQuery } from '../utils/navigationParams'
 import { recognizeParameters, recognizeParametersForItems } from '../utils/parameterRecognition'
 
 const route = useRoute()
@@ -119,7 +120,7 @@ const isSavingSorting = ref(false)
 const handleEditItem = (item: IGearItem) => {
   router.push({
     path: GearRoutePath.ItemEditById(containerId, item.id),
-    query: { returnTo: 'container' },
+    query: createNavigationQuery('container'),
   })
 }
 

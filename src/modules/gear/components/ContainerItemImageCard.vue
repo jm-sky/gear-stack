@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import type { IGearItem } from '../types/gear.types'
 import type { IItemImage } from '../types/itemImage.types'
 import { GearRoutePath } from '../routes'
+import { createNavigationQuery } from '../utils/navigationParams'
 
 const props = defineProps<{
   item: IGearItem
@@ -18,7 +19,7 @@ const router = useRouter()
 function handleImageClick() {
   router.push({
     path: GearRoutePath.ItemDetailById(props.containerId, props.item.id),
-    query: { from: 'container' },
+    query: createNavigationQuery(undefined, 'container'),
   })
 }
 </script>

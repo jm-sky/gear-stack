@@ -854,8 +854,8 @@ Kombinacja opcji 1 i 2:
 - Stara chunk jest usunięta → ChunkLoadError
 - Dialog informuje użytkownika o nowej wersji i oferuje odświeżenie strony
 
-### 🔄 Refaktoryzacja systemu query parametrów (`returnTo` i `from`)
-**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium | **Analysis:** [query-params-analysis.md](../analysis/query-params-analysis.md)
+### ✅ Refaktoryzacja systemu query parametrów (`returnTo` i `from`)
+**Status:** ✅ Completed | **Priority:** High | **Complexity:** Medium | **Analysis:** [query-params-analysis.md](../analysis/query-params-analysis.md) | **Implementation:** [FEATURE-026-query-params-refactoring.md](../features/FEATURE-026-query-params-refactoring.md)
 
 **Problem:**
 - Niespójne użycie query parametrów `returnTo` i `from` w całej aplikacji
@@ -864,27 +864,19 @@ Kombinacja opcji 1 i 2:
 - Rozproszona logika obsługi parametrów
 - Brak automatycznego czyszczenia parametrów po użyciu
 
-**Zakres refaktoryzacji:**
-
-1. **Stworzenie typów i helper functions** (Wysoki priorytet)
-   - Utworzenie `src/modules/gear/utils/navigationParams.ts`
-   - Typy: `ReturnToValue`, `FromValue`
-   - Helper functions: `createNavigationQuery()`, `getReturnTo()`, `getFrom()`, `createItemEditPath()`
-   - Funkcje walidacji: `isValidReturnTo()`, `isValidFrom()`
-
-2. **Zastąpienie hardcoded stringów** (Wysoki priorytet)
-   - `ShoppingListItem.vue` - użycie `createItemEditPath()` zamiast hardcoded URL
-   - `AvailableItemCard.vue` - użycie `createItemEditPath()` zamiast hardcoded URL
-   - Wszystkie miejsca przekazujące query parametry
-
-3. **Centralizacja logiki nawigacji** (Średni priorytet)
-   - Composable `useNavigationReturn()` do obsługi `returnTo`
-   - Composable `useNavigationFrom()` do obsługi `from`
-   - Refaktoryzacja `ItemFormPage`, `ItemDetailPage`, `ShoppingPlanningPage`
-
-4. **Automatyczne czyszczenie parametrów** (Średni priorytet)
-   - Usuwanie query parametrów z URL po ich obsłużeniu
-   - Implementacja w composables lub guardach
+**Implementacja:**
+- ✅ Utworzenie `src/modules/gear/utils/navigationParams.ts` z typami i helper functions
+  - Typy: `ReturnToValue`, `FromValue`
+  - Helper functions: `createNavigationQuery()`, `getReturnTo()`, `getFrom()`, `createItemEditPath()`
+  - Funkcje walidacji: `isValidReturnTo()`, `isValidFrom()`
+- ✅ Zastąpienie hardcoded stringów w `ShoppingListItem.vue` i `AvailableItemCard.vue`
+- ✅ Refaktoryzacja `ItemFormPage.vue` do użycia helper functions
+- ✅ Utworzenie composable `useNavigationReturn()` w `src/modules/gear/composables/useNavigationReturn.ts`
+- ✅ Refaktoryzacja wszystkich komponentów używających query parametrów:
+  - `ItemHeader.vue`, `ContainerDetailPage.vue`, `ShoppingPlanningPage.vue`
+  - `AllItemsPage.vue`, `ItemsTable.vue`, `ItemsTableImageCell.vue`, `ContainerItemImageCard.vue`
+- ✅ Implementacja automatycznego czyszczenia parametrów z URL po nawigacji
+- ✅ Wszystkie hardcoded stringi zastąpione funkcjami z `navigationParams.ts`
 
 **Korzyści:**
 - ✅ Type safety i autocompletion w IDE
@@ -893,14 +885,7 @@ Kombinacja opcji 1 i 2:
 - ✅ Mniej duplikacji kodu
 - ✅ Czyste URL-e w historii przeglądarki
 
-**Plan implementacji:**
-1. Faza 1: Stworzenie `navigationParams.ts` z typami i helper functions
-2. Faza 2: Zastąpienie hardcoded stringów w `ShoppingListItem` i `AvailableItemCard`
-3. Faza 3: Refaktoryzacja `ItemFormPage` do użycia helper functions
-4. Faza 4: Stworzenie composable `useNavigationReturn`
-5. Faza 5: Dodanie automatycznego czyszczenia parametrów
-
-**Szczegóły:** Zobacz [query-params-analysis.md](../analysis/query-params-analysis.md)
+**Szczegóły:** Zobacz [query-params-analysis.md](../analysis/query-params-analysis.md) i [FEATURE-026-query-params-refactoring.md](../features/FEATURE-026-query-params-refactoring.md)
 
 ---
 

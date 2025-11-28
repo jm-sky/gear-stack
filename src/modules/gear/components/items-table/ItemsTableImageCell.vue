@@ -16,6 +16,7 @@ import { useAuth } from '@/modules/auth/composables/useAuth'
 import { GearRoutePath } from '@/modules/gear/routes'
 import { itemImageApiService } from '@/modules/gear/services/itemImageApiService'
 import { useGearStore } from '@/modules/gear/store/useGearStore'
+import { createNavigationQuery } from '@/modules/gear/utils/navigationParams'
 import { useHandleError } from '@/shared/composables/useHandleError'
 import { config } from '@/shared/config/config'
 
@@ -81,7 +82,7 @@ const routeTo = computed<RouteLocationRaw | undefined>(() => {
   }
   return {
     path: GearRoutePath.ItemDetailById(props.containerId, props.itemId),
-    query: { from: 'container' },
+    query: createNavigationQuery(undefined, 'container'),
   }
 })
 

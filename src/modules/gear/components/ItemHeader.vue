@@ -14,6 +14,7 @@ import ItemStatusBadge from '../components/ItemStatusBadge.vue'
 import { useCategoryLabel } from '../composables/useCategoryLabel'
 import { useExpiration } from '../composables/useExpiration'
 import { GearRoutePath } from '../routes'
+import { createNavigationQuery, getFrom } from '../utils/navigationParams'
 
 const route = useRoute()
 const router = useRouter()
@@ -29,20 +30,18 @@ const { containerId, itemId, item } = defineProps<{
 const { isExpired, isExpiringSoon } = useExpiration(item)
 
 const backTo = computed<string>(() => {
-  if ((route.query.from as string | undefined) === 'all-items') {
+  const from = getFrom(route)
+  if (from === 'all-items') {
     return GearRoutePath.AllItems
   }
   return GearRoutePath.ContainerDetailById(containerId)
 })
 
 const handleEdit = () => {
-  const from = route.query.from as string | undefined
+  const from = getFrom(route)
   router.push({
     path: GearRoutePath.ItemEditById(containerId, itemId),
-    query: {
-      returnTo: 'detail',
-      ...(from && { from }),
-    },
+    query: createNavigationQuery('detail', from),
   })
 }
 </script>

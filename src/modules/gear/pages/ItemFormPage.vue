@@ -21,6 +21,7 @@ import ItemCatalogSelector from '../components/ItemCatalogSelector.vue'
 import ItemFormFields from '../components/ItemFormFields.vue'
 import { useContainer } from '../composables/useContainer'
 import { useGear } from '../composables/useGear'
+import { useNavigationReturn } from '../composables/useNavigationReturn'
 import { GearRoutePath } from '../routes'
 import { gearItemService } from '../services/gearItemService'
 import { useGearStore } from '../store/useGearStore'
@@ -43,6 +44,7 @@ const itemId = route.params.itemId as string | undefined
 const isEditMode: boolean = !!itemId
 
 const { container } = useContainer(containerId)
+const { navigateBackAndClean } = useNavigationReturn(containerId, itemId)
 
 // Set dynamic page title
 watchEffect(() => {
@@ -203,26 +205,10 @@ const handleCatalogItemSelect = (selectedItem: IItemWithContainer) => {
 // Submit handler
 const onSubmit = handleSubmit(async (data: ICreateItemDto | IUpdateItemDto) => {
   try {
-    const returnTo = route.query.returnTo as string | undefined
-
     if (isEditMode && itemId) {
       await updateItem(itemId, data as IUpdateItemDto)
       toast.success(t('common.success'))
-
-      // Redirect based on returnTo query param
-      if (returnTo === 'detail') {
-        // Preserve 'from' query param if it exists
-        const from = route.query.from as string | undefined
-        router.push({
-          path: GearRoutePath.ItemDetailById(containerId, itemId),
-          ...(from && { query: { from } }),
-        })
-      } else if (returnTo === 'shopping') {
-        router.push(GearRoutePath.ShoppingPlanning)
-      } else {
-        // Default: return to container (returnTo === 'container' or undefined)
-        router.push(GearRoutePath.ContainerDetailById(containerId))
-      }
+      navigateBackAndClean()
     } else {
       // Add linkedItemId if selecting from catalog
       const createData: ICreateItemDto = {
@@ -231,14 +217,7 @@ const onSubmit = handleSubmit(async (data: ICreateItemDto | IUpdateItemDto) => {
       }
       await createItem(containerId, createData)
       toast.success(t('common.success'))
-
-      // Redirect based on returnTo query param
-      if (returnTo === 'shopping') {
-        router.push(GearRoutePath.ShoppingPlanning)
-      } else {
-        // Default: return to container (returnTo === 'container' or undefined)
-        router.push(GearRoutePath.ContainerDetailById(containerId))
-      }
+      navigateBackAndClean()
     }
   } catch (error) {
     console.error(error)
@@ -248,20 +227,7 @@ const onSubmit = handleSubmit(async (data: ICreateItemDto | IUpdateItemDto) => {
 
 // Cancel handler
 const handleCancel = () => {
-  const returnTo = route.query.returnTo as string | undefined
-  if (returnTo === 'detail' && itemId) {
-    // Preserve 'from' query param if it exists
-    const from = route.query.from as string | undefined
-    router.push({
-      path: GearRoutePath.ItemDetailById(containerId, itemId),
-      ...(from && { query: { from } }),
-    })
-  } else if (returnTo === 'shopping') {
-    router.push(GearRoutePath.ShoppingPlanning)
-  } else {
-    // Default: return to container (returnTo === 'container' or undefined)
-    router.push(GearRoutePath.ContainerDetailById(containerId))
-  }
+  navigateBackAndClean()
 }
 
 // Recognize parameters handler
