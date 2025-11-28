@@ -73,7 +73,7 @@ const isLinkActive = (path: string): boolean => {
 
 <template>
   <Sidebar collapsible="icon">
-    <SidebarContent>
+    <SidebarContent class="overflow-x-hidden">
       <!-- Sekcja: Główne linki nawigacyjne -->
       <SidebarGroup>
         <SidebarGroupLabel>{{ t('navigation.main', 'Navigation') }}</SidebarGroupLabel>
