@@ -51,13 +51,50 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - ✅ History tracking, cost display, template messages
    - 🔄 Classification, embeddings, vision models - planowane
 
+6. **AI settings - Premium feature**
+   - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md)
+   - Ustawienia AI powinny być wyłączone (disabled inputs) dla zwykłych użytkowników
+   - Informacja "Only for premium users" lub "Premium feature"
+   - Status: 🔄 Planned | Priority: High | Complexity: Small
+
+7. **Wskaźnik użycia S3 storage**
+   - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md)
+   - Wyświetlanie w Profile lub Settings
+   - Limit: 50 MB (zwykli użytkownicy), 1 GB (owner) - konfigurowalny
+   - Status: 🔄 Planned | Priority: High | Complexity: Medium
+
+### Średni priorytet
+
+1. **Przenoszenie przedmiotów między kontenerami**
+   - 📍 Lokalizacja: [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md)
+   - Funkcja drag & drop lub modal do przenoszenia itemów
+   - Status: 🔄 Planned | Priority: Medium | Complexity: Medium
+
+2. **Kasowanie obrazków z S3**
+   - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md)
+   - Automatyczne usuwanie z S3 po usunięciu przedmiotu
+   - Automatyczne usuwanie z S3 po usunięciu kontenera
+   - Automatyczne usuwanie z S3 po usunięciu wszystkich kontenerów
+   - Automatyczne usuwanie z S3 po usunięciu konta użytkownika
+   - Status: 🔄 Planned | Priority: Medium | Complexity: Medium
+
 ### Obniżony priorytet (trudne zadania)
 
-1. **Automatyczne wyszukiwanie obrazków dla przedmiotów**
+1. **Warianty kontenera**
+   - 📍 Lokalizacja: [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md)
+   - Ten sam kontener, różna zawartość
+   - Status: 🔄 Planned | Priority: Low | Complexity: Medium
+
+2. **Porównywarka kontenerów**
+   - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md)
+   - Porównywanie kontenerów osobistych i publicznych
+   - Status: 🔄 Planned | Priority: Low | Complexity: Large
+
+3. **Automatyczne wyszukiwanie obrazków dla przedmiotów**
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#automatyczne-wyszukiwanie-obrazków-dla-przedmiotów)
    - Status: 🔄 Planned | Priority: Medium | Complexity: Large
 
-2. **Generowanie SVG z obrazków**
+4. **Generowanie SVG z obrazków**
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#generowanie-svg-z-obrazków)
    - Status: 🔄 Planned | Priority: Low | Complexity: Large
 
@@ -149,5 +186,5 @@ Uwaga: Większość funkcji jest w ROADMAP_OFFLINE.md (offline-first approach)
 
 ---
 
-**Ostatnia aktualizacja:** 2025-01-28
+**Ostatnia aktualizacja:** 2025-11-28
 
