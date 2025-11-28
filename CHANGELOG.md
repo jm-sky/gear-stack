@@ -21,6 +21,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.25.0] - 2025-11-28
+
+### Added
+- **Inline Item Name Editing**: Quick edit functionality for item names directly in the items table
+  - New `ItemsTableEditModeToggle` component to enable/disable inline editing mode
+  - New `ItemsTableEditableNameCell` component for editable name cells
+  - Edit mode toggle persists in localStorage
+  - Click on item name to edit, save with Enter key or blur, cancel with Escape key or X button
+  - Visual feedback with loading states and reset functionality
+  - New composables: `useInlineItemEditing` and `useItemsTableEditMode` for shared edit logic
+  - Feature flag support via `config.features.inlineEditing.enabled`
+
+- **Switch UI Component**: New Switch component for toggle controls
+  - Reusable switch component following design system patterns
+  - Used in edit mode toggle and other settings
+
+- **AI Settings Card**: New settings card for AI-related preferences
+  - Centralized AI configuration interface
+  - Improved organization of AI settings
+
+### Changed
+- **Container Color Options**: Refactored container color options in backend and frontend
+  - Updated color names for better consistency
+  - Refactored `ContainerColorPicker` component to use updated color model
+  - Enhanced color utilities in `containerColors.ts`
+
+- **Container Form**: Updated to use new color options
+  - Improved color selection UX
+  - Better color validation
+
+### Fixed
+
+---
+
 ## [2.24.0] - 2025-01-XX
 
 ### Added

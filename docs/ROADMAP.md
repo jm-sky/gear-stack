@@ -74,7 +74,7 @@ Funkcjonalności działające z **localStorage**, bez potrzeby backendu (offline
 - ✅ Wykresy i analityka
 - ✅ Kolorowanie kontenerów
 - ✅ Rozpoznawanie kategorii i parametrów
-- 🔄 Inline editing (planowane)
+- ✅ Inline editing (częściowo zakończone - v2.25.0: edycja nazwy przedmiotu)
 - 🔄 Custom brand management (planowane)
 
 **Kiedy sprawdzać:** Gdy implementujesz funkcje działające offline lub z localStorage.

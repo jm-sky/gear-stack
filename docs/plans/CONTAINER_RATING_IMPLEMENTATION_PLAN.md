@@ -56,16 +56,22 @@ Plan implementacji systemu oceniania kontenerów (rating system) zgodnie z wymag
 
 **File:** `backend/app/modules/gear/db_models.py`
 
-Dodaj nowy model:
+**Krok 1a: Dodaj import `UniqueConstraint` i `CheckConstraint`:**
+
+```python
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint, CheckConstraint
+```
+
+**Krok 1b: Dodaj nowy model (przed końcem pliku):**
 
 ```python
 class ContainerRatingDB(Base):
     """SQLAlchemy model for container ratings.
-    
+
     Supports two types of ratings:
     - 'owner': Rating given by container owner
     - 'user': Rating given by other users (for public containers)
-    
+
     Attributes:
         id: Unique identifier (ULID format, 36 chars)
         container_id: Rated container ID
@@ -75,9 +81,9 @@ class ContainerRatingDB(Base):
         created_at: Rating timestamp
         updated_at: Last update timestamp
     """
-    
+
     __tablename__ = "container_ratings"
-    
+
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     container_id: Mapped[str] = mapped_column(
         String(36),
@@ -108,15 +114,9 @@ class ContainerRatingDB(Base):
         onupdate=lambda: datetime.now(UTC),
         nullable=False
     )
-    
-    # Relationships
-    container: Mapped["GearContainerDB"] = relationship(
-        "GearContainerDB",
-        back_populates="ratings"
-    )
-    user: Mapped["UserDB"] = relationship("UserDB", foreign_keys=[user_id])
-    
+
     # Unique constraint: one rating per user per container per type
+    # CHECK constraints for validation
     __table_args__ = (
         UniqueConstraint(
             'container_id',
@@ -124,18 +124,25 @@ class ContainerRatingDB(Base):
             'rating_type',
             name='uq_container_rating_user_type'
         ),
+        CheckConstraint('rating >= 1 AND rating <= 5', name='check_rating_range'),
+        CheckConstraint("rating_type IN ('owner', 'user')", name='check_rating_type'),
     )
 ```
 
-Dodaj relację do `GearContainerDB`:
+**Krok 1c: Dodaj relationships na końcu pliku (po importach UserDB):**
 
 ```python
-# W GearContainerDB
-ratings: Mapped[list["ContainerRatingDB"]] = relationship(
+# Add relationships for container ratings (after existing relationships)
+GearContainerDB.ratings = relationship(
     "ContainerRatingDB",
     back_populates="container",
-    cascade="all, delete-orphan"
+    cascade="all, delete-orphan",
 )
+ContainerRatingDB.container = relationship(
+    "GearContainerDB",
+    back_populates="ratings",
+)
+ContainerRatingDB.user = relationship("UserDB", foreign_keys=[ContainerRatingDB.user_id])
 ```
 
 #### Step 1.2: Utworzenie migracji
@@ -184,7 +191,10 @@ def upgrade():
             'user_id',
             'rating_type',
             name='uq_container_rating_user_type'
-        )
+        ),
+        # Add CHECK constraints for validation
+        sa.CheckConstraint('rating >= 1 AND rating <= 5', name='check_rating_range'),
+        sa.CheckConstraint("rating_type IN ('owner', 'user')", name='check_rating_type'),
     )
     op.create_index(
         op.f('ix_container_ratings_container_id'),
@@ -374,92 +384,98 @@ async def get_container_owner_rating(
     return rating if rating else None
 ```
 
-#### Step 3.2: Aktualizacja metody `get_container` i `get_public_container`
+#### Step 3.2: Dodanie metody pomocniczej dla ratingów
 
 **File:** `backend/app/modules/gear/repository.py`
 
-Zaktualizuj metody, aby uwzględniały ratingi:
+Dodaj metodę pomocniczą zwracającą dane ratingów jako dictionary (unikamy przypisywania atrybutów do instancji DB):
 
 ```python
-async def get_container(
+from typing import TypedDict
+
+class ContainerRatingsData(TypedDict):
+    """Type for container ratings aggregated data."""
+    owner_rating: int | None
+    user_rating: int | None
+    average_user_rating: float | None
+    user_rating_count: int
+
+async def get_container_ratings_data(
     self,
     container_id: str,
-    user_id: str
-) -> GearContainerDB | None:
-    """Get container with ratings if user_id provided."""
-    container = await self.db.get(GearContainerDB, container_id)
-    if not container:
-        return None
-    
+    requesting_user_id: str | None = None,
+    is_owner: bool = False
+) -> ContainerRatingsData:
+    """Get all ratings data for a container.
+
+    Args:
+        container_id: Container ID
+        requesting_user_id: ID of user requesting the data (for user_rating)
+        is_owner: Whether requesting user is the owner
+
+    Returns:
+        Dictionary with all rating fields
+    """
     # Load owner rating
     owner_rating = await self.get_container_owner_rating(container_id)
-    
-    # Load user rating (if current user is not owner)
+
+    # Load user rating (only if not owner and user_id provided)
     user_rating = None
-    if container.user_id != user_id:
+    if requesting_user_id and not is_owner:
         user_rating_obj = await self.get_container_rating(
             container_id,
-            user_id,
+            requesting_user_id,
             rating_type="user"
         )
         user_rating = user_rating_obj.rating if user_rating_obj else None
-    
-    # Calculate average user rating
-    avg_user_rating = await self.get_container_average_user_rating(container_id)
-    user_rating_count = await self.get_container_user_rating_count(container_id)
-    
-    # Attach as attributes (will be serialized in response)
-    container._owner_rating = owner_rating
-    container._user_rating = user_rating
-    container._average_user_rating = avg_user_rating
-    container._user_rating_count = user_rating_count
-    
-    return container
 
-async def get_public_container(
-    self,
-    container_id: str
-) -> GearContainerDB | None:
-    """Get public container with ratings."""
-    container = await self.get_public_container_base(container_id)  # Existing method
-    if not container:
-        return None
-    
-    # Load owner rating
-    owner_rating = await self.get_container_owner_rating(container_id)
-    
-    # Calculate average user rating
+    # Calculate average user rating and count
     avg_user_rating = await self.get_container_average_user_rating(container_id)
     user_rating_count = await self.get_container_user_rating_count(container_id)
-    
-    # Attach as attributes
-    container._owner_rating = owner_rating
-    container._average_user_rating = avg_user_rating
-    container._user_rating_count = user_rating_count
-    
-    return container
+
+    return {
+        'owner_rating': owner_rating,
+        'user_rating': user_rating,
+        'average_user_rating': avg_user_rating,
+        'user_rating_count': user_rating_count,
+    }
 ```
 
 #### Step 3.3: Aktualizacja service
 
 **File:** `backend/app/modules/gear/service.py`
 
-Zaktualizuj metodę `_map_container_to_response`:
+Zaktualizuj metodę `_map_container_to_response` aby przyjmowała dane ratingów:
 
 ```python
 async def _map_container_to_response(
     self,
-    container: GearContainerDB
+    container: GearContainerDB,
+    ratings_data: dict | None = None
 ) -> ContainerResponse:
-    """Map container DB model to response schema."""
-    # ... istniejące mapowanie ...
-    
-    # Map rating fields
-    owner_rating = getattr(container, '_owner_rating', None)
-    user_rating = getattr(container, '_user_rating', None)
-    average_user_rating = getattr(container, '_average_user_rating', None)
-    user_rating_count = getattr(container, '_user_rating_count', 0)
-    
+    """Map container DB model to response schema.
+
+    Args:
+        container: Container DB model
+        ratings_data: Optional ratings data from repository
+
+    Returns:
+        Container response schema
+    """
+    # ... istniejące mapowanie pól ...
+
+    # Map rating fields if provided
+    owner_rating = None
+    user_rating = None
+    average_user_rating = None
+    user_rating_count = 0
+
+    if ratings_data:
+        owner_rating = ratings_data.get('owner_rating')
+        user_rating = ratings_data.get('user_rating')
+        average_user_rating = ratings_data.get('average_user_rating')
+        user_rating_count = ratings_data.get('user_rating_count', 0)
+
     return ContainerResponse(
         # ... istniejące pola ...
         ownerRating=owner_rating,
@@ -469,6 +485,29 @@ async def _map_container_to_response(
     )
 ```
 
+Zaktualizuj metody service używające `_map_container_to_response`:
+
+```python
+async def get_container(
+    self,
+    container_id: str,
+    user_id: str
+) -> ContainerResponse:
+    """Get container with ratings data."""
+    container = await self.repository.get_container(container_id, user_id)
+    if not container:
+        return None
+
+    is_owner = container.user_id == user_id
+    ratings_data = await self.repository.get_container_ratings_data(
+        container_id,
+        requesting_user_id=user_id,
+        is_owner=is_owner
+    )
+
+    return await self._map_container_to_response(container, ratings_data)
+```
+
 ---
 
 ### Faza 4: Backend - API Endpoints
@@ -476,6 +515,15 @@ async def _map_container_to_response(
 #### Step 4.1: Dodanie endpointów dla ratingów
 
 **File:** `backend/app/modules/gear/router.py`
+
+Upewnij się, że masz wszystkie potrzebne importy:
+
+```python
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.database import get_db
+from app.modules.auth.dependencies import CurrentUser
+```
 
 Dodaj nowe endpointy:
 
@@ -570,8 +618,8 @@ async def delete_container_rating(
         default="user",
         description="Type of rating to delete: 'owner' or 'user'"
     ),
-    current_user: CurrentUser = Depends(get_current_user),
-    service: GearServiceDep = Depends(get_gear_service),
+    current_user: CurrentUser,
+    service: GearServiceDep,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """Delete user's rating for a container."""
@@ -664,7 +712,7 @@ Komponent do wyświetlania i oceniania (gwiazdki):
 
 ```vue
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { Star } from 'lucide-vue-next'
 import type { TRatingValue } from '../types/gear.types'
 
@@ -776,8 +824,7 @@ Komponent do wyświetlania i zarządzania ocenami kontenera:
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RatingStars } from './RatingStars'
-import { Button } from '@/components/ui/button'
+import RatingStars from './RatingStars.vue'
 import type { IGearContainer, TRatingValue, TRatingType } from '../types/gear.types'
 
 interface Props {
@@ -887,10 +934,14 @@ Dodaj sekcję z ocenami:
 <script setup lang="ts">
 // ... istniejący kod ...
 
-import { ContainerRatingCard } from '../components/ContainerRatingCard'
+import { toast } from 'vue-sonner'
+import { useI18n } from 'vue-i18n'
+import ContainerRatingCard from '../components/ContainerRatingCard.vue'
 import { useGearStore } from '../store'
 import { useAuthStore } from '@/modules/auth/store'
+import type { TRatingValue, TRatingType } from '../types/gear.types'
 
+const { t } = useI18n()
 const gearStore = useGearStore()
 const authStore = useAuthStore()
 
@@ -904,7 +955,7 @@ const isPublic = computed(() => {
 
 async function handleRate(rating: TRatingValue, type: TRatingType) {
   if (!container.value) return
-  
+
   try {
     await gearContainerApiService.rateContainer(
       container.value.id,
@@ -913,14 +964,16 @@ async function handleRate(rating: TRatingValue, type: TRatingType) {
     )
     // Refresh container data
     await loadContainer()
+    toast.success(t('gear.container.ratingUpdated'))
   } catch (error) {
-    // Handle error
+    console.error('Failed to rate container:', error)
+    toast.error(t('gear.errors.ratingFailed'))
   }
 }
 
 async function handleDeleteRating(type: TRatingType) {
   if (!container.value) return
-  
+
   try {
     await gearContainerApiService.deleteContainerRating(
       container.value.id,
@@ -928,8 +981,10 @@ async function handleDeleteRating(type: TRatingType) {
     )
     // Refresh container data
     await loadContainer()
+    toast.success(t('gear.container.ratingDeleted'))
   } catch (error) {
-    // Handle error
+    console.error('Failed to delete rating:', error)
+    toast.error(t('gear.errors.deleteRatingFailed'))
   }
 }
 </script>
@@ -1060,9 +1115,16 @@ container: {
   ownerRatingDescription: 'Oceń swój kontener od 1 do 5 gwiazdek',
   yourRating: 'Twoja ocena',
   averageUserRating: 'Średnia ocena użytkowników',
-  ratings: 'ocen',
+  ratingsCount: 'ocen',  // Liczba ocen (np. "10 ocen")
   rateContainer: 'Oceń kontener',
   deleteRating: 'Usuń ocenę',
+  ratingUpdated: 'Ocena została zaktualizowana',
+  ratingDeleted: 'Ocena została usunięta',
+},
+errors: {
+  // ... istniejące ...
+  ratingFailed: 'Nie udało się ocenić kontenera',
+  deleteRatingFailed: 'Nie udało się usunąć oceny',
 }
 
 // EN
@@ -1073,9 +1135,16 @@ container: {
   ownerRatingDescription: 'Rate your container from 1 to 5 stars',
   yourRating: 'Your Rating',
   averageUserRating: 'Average User Rating',
-  ratings: 'ratings',
+  ratingsCount: 'ratings',  // Number of ratings (e.g. "10 ratings")
   rateContainer: 'Rate Container',
   deleteRating: 'Delete Rating',
+  ratingUpdated: 'Rating updated successfully',
+  ratingDeleted: 'Rating deleted successfully',
+},
+errors: {
+  // ... existing ...
+  ratingFailed: 'Failed to rate container',
+  deleteRatingFailed: 'Failed to delete rating',
 }
 ```
 

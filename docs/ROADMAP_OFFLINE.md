@@ -694,12 +694,17 @@ Kombinacja opcji 1 i 2:
 ## ✏️ Szybka edycja
 
 ### Edycja bezpośrednio na liście (Inline Editing)
-**Status:** 🔄 Planned | **Priority:** High | **Feature:** FEATURE-007 | **Complexity:** Large
+**Status:** ✅ Partially Completed (v2.25.0) | **Priority:** High | **Feature:** FEATURE-007 | **Complexity:** Large
 
+- ✅ **Phase 1 Completed (v2.25.0)**: Inline editing dla nazwy przedmiotu
+  - Edit mode toggle z persystencją w localStorage
+  - Edytowalne pole nazwy w wierszu tabeli
+  - Zapis z Enter lub blur, anulowanie z Escape lub X
+  - Wizualne feedback i stany ładowania
 - Możliwość szybkiej edycji listy - dodawanie i zmienianie przedmiotów bezpośrednio na liście
 - Bez wchodzenia w formularz
 - Inline editing dla podstawowych pól:
-  - Zmiana nazwy przedmiotu (edytowalne pole w wierszu)
+  - ✅ Zmiana nazwy przedmiotu (edytowalne pole w wierszu) - Completed
   - Zmiana opisu/notatek (edytowalne pole w wierszu)
   - Zmiana innych kolumn (ilość, waga, cena, itp.)
 - Szybkie akcje bezpośrednio z wiersza:
