@@ -41,6 +41,12 @@ export const aiEn = {
       in: 'in',
       out: 'out',
     },
+    premium: {
+      title: 'Premium Feature',
+      description: 'AI settings are available for Premium users',
+      modelSelectorDisabled: 'Model selection requires Premium',
+      contextConfigDisabled: 'Context configuration requires Premium',
+    },
     actions: {
       error: 'Failed to execute AI action',
       noContainer: 'No container specified for this action',
@@ -96,6 +102,12 @@ export const aiPl = {
       cost: 'Koszt:',
       in: 'wejście',
       out: 'wyjście',
+    },
+    premium: {
+      title: 'Funkcja Premium',
+      description: 'Ustawienia AI są dostępne dla użytkowników Premium',
+      modelSelectorDisabled: 'Wybór modelu wymaga Premium',
+      contextConfigDisabled: 'Konfiguracja kontekstu wymaga Premium',
     },
     actions: {
       error: 'Nie udało się wykonać akcji AI',
