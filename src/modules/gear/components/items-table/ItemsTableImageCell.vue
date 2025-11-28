@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ImageIcon, Link, Trash2 } from 'lucide-vue-next'
+import { ImageIcon, Link, LoaderCircle, Trash2 } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { type RouteLocationRaw, RouterLink } from 'vue-router'
@@ -39,6 +39,7 @@ const store = useGearStore()
 const { uploadImage: uploadImageWithUpdate, uploadImageFromUrl: uploadImageFromUrlWithUpdate, deleteImage: deleteImageWithUpdate } = useItemImage()
 
 const isUploading = ref(false)
+const isDeleting = ref(false)
 const fileInput = ref<HTMLInputElement>()
 const contextMenuOpen = ref(false)
 const urlDialogOpen = ref(false)
@@ -145,6 +146,7 @@ async function handleDeleteImage() {
   }
 
   try {
+    isDeleting.value = true
     // Get images to find the primary one
     const images = await itemImageApiService.getImages(props.itemId)
     const primaryImage = images.find(img => img.isPrimary)
@@ -157,6 +159,8 @@ async function handleDeleteImage() {
   } catch (error: unknown) {
     console.error('Failed to delete image', error)
     handleError(error)
+  } finally {
+    isDeleting.value = false
   }
 }
 
@@ -234,7 +238,10 @@ async function handleAddFromUrl() {
               :src="primaryImageUrl"
               :alt="`Image for item ${itemId}`"
               loading="lazy"
-              class="size-12 rounded-md object-cover border border-border group-hover:border-primary/50 transition-colors"
+              :class="[
+                'size-12 rounded-md object-cover border border-border group-hover:border-primary/50 transition-colors',
+                { 'animate-pulse': isDeleting }
+              ]"
             />
           </component>
         </DropdownMenuTrigger>
@@ -261,7 +268,10 @@ async function handleAddFromUrl() {
         :src="primaryImageUrl"
         :alt="`Image for item ${itemId}`"
         loading="lazy"
-        class="size-12 rounded-md object-cover border border-border group-hover:border-primary/50 transition-colors"
+        :class="[
+          'size-12 rounded-md object-cover border border-border group-hover:border-primary/50 transition-colors',
+          { 'animate-pulse': isDeleting }
+        ]"
       />
     </component>
 
@@ -273,7 +283,8 @@ async function handleAddFromUrl() {
           class="flex items-center justify-center size-10 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
           @contextmenu="handleContextMenu"
         >
-          <ImageIcon class="size-4" />
+          <LoaderCircle v-if="isUploading || isSubmittingUrl" class="size-4 animate-spin" />
+          <ImageIcon v-else class="size-4" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
