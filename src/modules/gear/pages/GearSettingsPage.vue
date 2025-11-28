@@ -4,7 +4,6 @@ import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import BrandsSettingsCard from '@/modules/settings/components/BrandsSettingsCard.vue'
 import CategoriesSettingsCard from '@/modules/settings/components/CategoriesSettingsCard.vue'
 import ContainerTypesSettingsCard from '@/modules/settings/components/ContainerTypesSettingsCard.vue'
-import AiSettingsCard from '../components/AiSettingsCard.vue'
 import GearPreferencesCard from '../components/GearPreferencesCard.vue'
 
 const { t } = useI18n()
@@ -26,8 +25,8 @@ const { t } = useI18n()
         <!-- Gear Preferences -->
         <GearPreferencesCard />
 
-        <!-- AI Settings -->
-        <AiSettingsCard />
+        <!-- Additional Settings from other modules (via slot) -->
+        <slot name="after-preferences" />
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- Custom Container Types -->

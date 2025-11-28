@@ -133,7 +133,7 @@ export const gearRoutes: RouteRecordRaw[] = [
   {
     path: GearRoutePath.Settings,
     name: GearRouteName.Settings,
-    component: () => import('@/modules/gear/pages/GearSettingsPage.vue'),
+    component: () => import('@/pages/gear/GearSettingsPage.vue'),
     meta: { layout: 'authenticated', title: 'gear.settings.page.title' },
   },
 ]
