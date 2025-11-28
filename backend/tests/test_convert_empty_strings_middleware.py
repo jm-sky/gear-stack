@@ -8,7 +8,10 @@ from fastapi import FastAPI, Request, status
 from fastapi.testclient import TestClient
 from starlette.responses import JSONResponse
 
-from app.core.convert_empty_strings_middleware import ConvertEmptyStringsToNoneMiddleware
+from app.core.convert_empty_strings_middleware import (
+    ConvertEmptyStringsToNoneMiddleware,
+    _convert_empty_strings_to_none,
+)
 
 
 @pytest.fixture
@@ -227,40 +230,35 @@ class TestConvertEmptyStringsToNoneMiddleware:
         assert result["received"]["container"]["metadata"]["tags"] == ["tag1", None, "tag3"]
         assert result["received"]["container"]["metadata"]["url"] is None
 
-    def test_convert_empty_strings_to_none_method(self) -> None:
-        """Test the _convert_empty_strings_to_none method directly."""
-        middleware = ConvertEmptyStringsToNoneMiddleware(None)  # type: ignore[arg-type]
-
+    def test_convert_empty_strings_to_none_function(self) -> None:
+        """Test the _convert_empty_strings_to_none function directly."""
         # Test simple dict
-        assert middleware._convert_empty_strings_to_none({"a": "", "b": "value"}) == {"a": None, "b": "value"}
+        assert _convert_empty_strings_to_none({"a": "", "b": "value"}) == {"a": None, "b": "value"}
 
         # Test nested dict
-        assert middleware._convert_empty_strings_to_none({"a": {"b": "", "c": "value"}}) == {
-            "a": {"b": None, "c": "value"}
-        }
+        assert _convert_empty_strings_to_none({"a": {"b": "", "c": "value"}}) == {"a": {"b": None, "c": "value"}}
 
         # Test list
-        assert middleware._convert_empty_strings_to_none(["", "value", ""]) == [None, "value", None]
+        assert _convert_empty_strings_to_none(["", "value", ""]) == [None, "value", None]
 
         # Test nested list
-        assert middleware._convert_empty_strings_to_none([{"a": ""}, {"b": "value"}]) == [
+        assert _convert_empty_strings_to_none([{"a": ""}, {"b": "value"}]) == [
             {"a": None},
             {"b": "value"},
         ]
 
         # Test non-string values
-        assert middleware._convert_empty_strings_to_none({"a": 1, "b": True, "c": None}) == {
+        assert _convert_empty_strings_to_none({"a": 1, "b": True, "c": None}) == {
             "a": 1,
             "b": True,
             "c": None,
         }
 
         # Test empty string
-        assert middleware._convert_empty_strings_to_none("") is None
+        assert _convert_empty_strings_to_none("") is None
 
         # Test non-empty string
-        assert middleware._convert_empty_strings_to_none("value") == "value"
+        assert _convert_empty_strings_to_none("value") == "value"
 
         # Test number
-        assert middleware._convert_empty_strings_to_none(42) == 42
-
+        assert _convert_empty_strings_to_none(42) == 42

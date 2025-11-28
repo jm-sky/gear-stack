@@ -33,6 +33,14 @@ pnpm test:coverage    # Run tests with coverage report
 ### Package Manager
 This project uses **pnpm** (version 10.18.3+). Always use `pnpm` instead of `npm` or `yarn`.
 
+### Backend Development
+```bash
+docker-compose -f backend/docker-compose.dev.yml up    # Start backend in development mode
+docker-compose -f backend/docker-compose.dev.yml down  # Stop backend
+```
+
+**Important:** In development, the backend typically runs in a Docker container via `docker-compose.dev.yml`. This ensures consistent environment and dependencies. The backend is accessible at `http://localhost:8000` (or the port specified in `VITE_API_PROXY_URL`).
+
 ## Architecture
 
 ### Module-Based Structure

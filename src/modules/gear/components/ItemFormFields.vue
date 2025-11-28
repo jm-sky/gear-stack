@@ -226,8 +226,8 @@ const handleCancel = () => {
         <FormItem>
           <FormLabel :label="t('gear.item.brand')" />
           <BrandAutocomplete
-            :model-value="value"
-            @update:model-value="handleChange"
+            :value="value"
+            @update:value="handleChange"
           />
           <FormMessage />
         </FormItem>
