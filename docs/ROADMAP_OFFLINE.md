@@ -225,14 +225,15 @@ Jeżeli kontener będzie miał obrazek (primary image), wyświetlać go w nagł�
 - Wizualne oznaczenie aktywnego kontenera/strony
 - Responsywność - na mobile może być ukryty lub przekształcony w drawer
 
-### 🔄 Szybka edycja nazwy kontenera na stronie Container Details
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+### ✅ Szybka edycja nazwy kontenera na stronie Container Details
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Small
 
-- Możliwość szybkiej edycji nazwy kontenera bezpośrednio na stronie Container Details
-- Inline editing nazwy kontenera (podobnie jak inline editing przedmiotów)
-- Kliknięcie w nazwę kontenera → przejście w tryb edycji
-- Zapisywanie zmian po zatwierdzeniu (Enter) lub anulowanie (Escape)
-- Wizualne oznaczenie trybu edycji (input field, ikona edycji)
+- ✅ Możliwość szybkiej edycji nazwy kontenera bezpośrednio na stronie Container Details
+- ✅ Inline editing nazwy kontenera (podobnie jak inline editing przedmiotów)
+- ✅ Kliknięcie w nazwę kontenera → przejście w tryb edycji
+- ✅ Zapisywanie zmian po zatwierdzeniu (Enter) lub anulowanie (Escape)
+- ✅ Wizualne oznaczenie trybu edycji (input field, ikona edycji)
+- ✅ Implementacja w komponencie `ContainerHeaderName.vue`
 
 ### 🔄 Zwijanie sekcji statystyk i konfigurowalna kolejność sekcji na Container Details
 **Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Medium

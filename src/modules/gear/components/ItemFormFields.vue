@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useFocus } from '@vueuse/core'
 import { nextTick, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
@@ -33,6 +34,7 @@ const emit = defineEmits<{
   recognizeParameters: []
 }>()
 
+const { t } = useI18n()
 const { defaultCurrency } = useGearSettings()
 
 // Auto-focus na pierwszym polu
@@ -56,11 +58,11 @@ const handleCancel = () => {
       name="name"
     >
       <FormItem>
-        <FormLabel :label="$t('gear.item.name')" required />
+        <FormLabel :label="t('gear.item.name')" required />
         <Input
           ref="nameInputRef"
           v-bind="componentField"
-          :placeholder="$t('gear.item.name')"
+          :placeholder="t('gear.item.name')"
           @blur="emit('nameBlur')"
         />
         <FormMessage />
@@ -70,7 +72,7 @@ const handleCancel = () => {
     <!-- Category -->
     <FormField v-slot="{ value, handleChange }" name="category">
       <FormItem>
-        <FormLabel :label="$t('gear.item.category')" required />
+        <FormLabel :label="t('gear.item.category')" required />
         <CategorySelect :model-value="value" @update:model-value="handleChange" />
         <FormMessage />
       </FormItem>
@@ -80,11 +82,11 @@ const handleCancel = () => {
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <FormField v-slot="{ componentField }" name="quantity">
         <FormItem>
-          <FormLabel :label="$t('gear.item.quantity')" required />
+          <FormLabel :label="t('gear.item.quantity')" required />
           <Input
             v-bind="componentField"
             type="number"
-            :placeholder="$t('gear.item.quantity')"
+            :placeholder="t('gear.item.quantity')"
             min="1"
           />
           <FormMessage />
@@ -94,11 +96,11 @@ const handleCancel = () => {
       <FormField v-slot="{ value: weightValue, handleChange: handleWeightChange }" name="weight">
         <FormField v-slot="{ value: unitValue, handleChange: handleUnitChange }" name="weightUnit">
           <FormItem>
-            <FormLabel :label="$t('gear.item.weight')" required />
+            <FormLabel :label="t('gear.item.weight')" required />
             <WeightInputWithUnitPicker
               :model-value="weightValue"
               :unit="unitValue"
-              :placeholder="$t('gear.item.weight')"
+              :placeholder="t('gear.item.weight')"
               :required="true"
               @update:model-value="handleWeightChange"
               @update:unit="handleUnitChange"
@@ -113,23 +115,23 @@ const handleCancel = () => {
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <FormField v-slot="{ value, handleChange }" name="priority">
         <FormItem>
-          <FormLabel :label="$t('gear.item.priority')" required />
+          <FormLabel :label="t('gear.item.priority')" required />
           <Select :model-value="value" @update:model-value="handleChange">
             <SelectTrigger class="min-w-36">
-              <SelectValue :placeholder="$t('gear.item.priority')" />
+              <SelectValue :placeholder="t('gear.item.priority')" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="critical">
-                {{ $t('gear.item.priorities.critical') }}
+                {{ t('gear.item.priorities.critical') }}
               </SelectItem>
               <SelectItem value="high">
-                {{ $t('gear.item.priorities.high') }}
+                {{ t('gear.item.priorities.high') }}
               </SelectItem>
               <SelectItem value="medium">
-                {{ $t('gear.item.priorities.medium') }}
+                {{ t('gear.item.priorities.medium') }}
               </SelectItem>
               <SelectItem value="low">
-                {{ $t('gear.item.priorities.low') }}
+                {{ t('gear.item.priorities.low') }}
               </SelectItem>
             </SelectContent>
           </Select>
@@ -139,20 +141,20 @@ const handleCancel = () => {
 
       <FormField v-slot="{ value, handleChange }" name="status">
         <FormItem>
-          <FormLabel :label="$t('gear.item.status')" required />
+          <FormLabel :label="t('gear.item.status')" required />
           <Select :model-value="value" @update:model-value="handleChange">
             <SelectTrigger class="min-w-36">
-              <SelectValue :placeholder="$t('gear.item.status')" />
+              <SelectValue :placeholder="t('gear.item.status')" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="owned">
-                {{ $t('gear.item.statuses.owned') }}
+                {{ t('gear.item.statuses.owned') }}
               </SelectItem>
               <SelectItem value="missing">
-                {{ $t('gear.item.statuses.missing') }}
+                {{ t('gear.item.statuses.missing') }}
               </SelectItem>
               <SelectItem value="toBuy">
-                {{ $t('gear.item.statuses.toBuy') }}
+                {{ t('gear.item.statuses.toBuy') }}
               </SelectItem>
             </SelectContent>
           </Select>
@@ -164,11 +166,11 @@ const handleCancel = () => {
     <!-- Expiration Date -->
     <FormField v-slot="{ componentField }" name="expirationDate">
       <FormItem>
-        <FormLabel :label="$t('gear.item.expirationDate')" />
+        <FormLabel :label="t('gear.item.expirationDate')" />
         <Input
           v-bind="componentField"
           type="date"
-          :placeholder="$t('gear.item.expirationDate')"
+          :placeholder="t('gear.item.expirationDate')"
         />
         <FormMessage />
       </FormItem>
@@ -177,10 +179,10 @@ const handleCancel = () => {
     <!-- Notes -->
     <FormField v-slot="{ componentField }" name="notes">
       <FormItem>
-        <FormLabel :label="$t('gear.item.notes')" />
+        <FormLabel :label="t('gear.item.notes')" />
         <Textarea
           v-bind="componentField"
-          :placeholder="$t('gear.item.notes')"
+          :placeholder="t('gear.item.notes')"
           rows="3"
           class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         />
@@ -191,18 +193,18 @@ const handleCancel = () => {
     <!-- Extended Fields Section -->
     <div class="border-t pt-6 space-y-6">
       <h3 class="text-lg font-semibold text-muted-foreground">
-        {{ $t('gear.item.extendedFields') }}
+        {{ t('gear.item.extendedFields') }}
       </h3>
 
       <!-- Price and Currency -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormField v-slot="{ componentField }" name="price">
           <FormItem>
-            <FormLabel :label="$t('gear.item.price')" />
+            <FormLabel :label="t('gear.item.price')" />
             <Input
               v-bind="componentField"
               type="number"
-              :placeholder="$t('gear.item.price')"
+              :placeholder="t('gear.item.price')"
               min="0"
               step="0.01"
             />
@@ -212,7 +214,7 @@ const handleCancel = () => {
 
         <FormField v-slot="{ value, handleChange }" name="currency">
           <FormItem>
-            <FormLabel :label="$t('gear.item.currency')" />
+            <FormLabel :label="t('gear.item.currency')" />
             <CurrencySelect :model-value="value || defaultCurrency" @update:model-value="handleChange" />
             <FormMessage />
           </FormItem>
@@ -222,7 +224,7 @@ const handleCancel = () => {
       <!-- Brand -->
       <FormField v-slot="{ value, handleChange }" name="brand">
         <FormItem>
-          <FormLabel :label="$t('gear.item.brand')" />
+          <FormLabel :label="t('gear.item.brand')" />
           <BrandAutocomplete
             :model-value="value"
             @update:model-value="handleChange"
@@ -234,11 +236,11 @@ const handleCancel = () => {
       <!-- URL -->
       <FormField v-slot="{ componentField }" name="url">
         <FormItem>
-          <FormLabel :label="$t('gear.item.url')" />
+          <FormLabel :label="t('gear.item.url')" />
           <Input
             v-bind="componentField"
             type="url"
-            :placeholder="$t('gear.item.url')"
+            :placeholder="t('gear.item.url')"
           />
           <FormMessage />
         </FormItem>
@@ -248,7 +250,7 @@ const handleCancel = () => {
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormField v-slot="{ value, handleChange }" name="color">
           <FormItem>
-            <FormLabel :label="$t('gear.item.color')" />
+            <FormLabel :label="t('gear.item.color')" />
             <ColorAutocomplete
               :value="value"
               class="w-full"
@@ -260,20 +262,20 @@ const handleCancel = () => {
 
         <FormField v-slot="{ value, handleChange }" name="quality">
           <FormItem>
-            <FormLabel :label="$t('gear.item.quality')" />
+            <FormLabel :label="t('gear.item.quality')" />
             <Select :model-value="value" @update:model-value="handleChange">
               <SelectTrigger class="w-full min-w-36">
-                <SelectValue :placeholder="$t('gear.item.quality')" />
+                <SelectValue :placeholder="t('gear.item.quality')" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="low">
-                  {{ $t('gear.item.qualities.low') }}
+                  {{ t('gear.item.qualities.low') }}
                 </SelectItem>
                 <SelectItem value="medium">
-                  {{ $t('gear.item.qualities.medium') }}
+                  {{ t('gear.item.qualities.medium') }}
                 </SelectItem>
                 <SelectItem value="high">
-                  {{ $t('gear.item.qualities.high') }}
+                  {{ t('gear.item.qualities.high') }}
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -287,9 +289,9 @@ const handleCancel = () => {
         <FormField v-slot="{ componentField, handleChange }" name="wearable">
           <FormItem v-slot="{ id }" class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
             <div class="flex-1 space-y-1">
-              <FormLabel :label="$t('gear.item.wearable')" class="cursor-pointer" />
+              <FormLabel :label="t('gear.item.wearable')" class="cursor-pointer" />
               <p class="text-sm text-muted-foreground">
-                {{ $t('gear.item.wearableDescription') }}
+                {{ t('gear.item.wearableDescription') }}
               </p>
             </div>
             <Checkbox
@@ -304,9 +306,9 @@ const handleCancel = () => {
         <FormField v-slot="{ componentField, handleChange }" name="consumable">
           <FormItem v-slot="{ id }" class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
             <div class="flex-1 space-y-1">
-              <FormLabel :label="$t('gear.item.consumable')" class="cursor-pointer" />
+              <FormLabel :label="t('gear.item.consumable')" class="cursor-pointer" />
               <p class="text-sm text-muted-foreground">
-                {{ $t('gear.item.consumableDescription') }}
+                {{ t('gear.item.consumableDescription') }}
               </p>
             </div>
             <Checkbox
@@ -323,9 +325,9 @@ const handleCancel = () => {
       <FormField v-slot="{ componentField, handleChange }" name="showOnContainer">
         <FormItem v-slot="{ id }" class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 opacity-50">
           <div class="flex-1 space-y-1">
-            <FormLabel :label="$t('gear.item.showOnContainer')" class="cursor-not-allowed" />
+            <FormLabel :label="t('gear.item.showOnContainer')" class="cursor-not-allowed" />
             <p class="text-sm text-muted-foreground">
-              {{ $t('gear.item.showOnContainerDescription') }}
+              {{ t('gear.item.showOnContainerDescription') }}
               <span class="text-xs italic"> (Implementation postponed)</span>
             </p>
           </div>
@@ -349,7 +351,7 @@ const handleCancel = () => {
         variant="outline"
         @click="$emit('recognizeParameters')"
       >
-        {{ $t('gear.actions.recognizeParameters') }}
+        {{ t('gear.actions.recognizeParameters') }}
       </Button>
       <div class="flex gap-3">
         <Button
@@ -358,10 +360,10 @@ const handleCancel = () => {
           class="flex-1"
           @click="handleCancel"
         >
-          {{ $t('gear.actions.cancel') }}
+          {{ t('gear.actions.cancel') }}
         </Button>
         <Button type="submit" class="flex-1" :loading>
-          {{ $t('gear.actions.save') }}
+          {{ t('gear.actions.save') }}
         </Button>
       </div>
     </div>

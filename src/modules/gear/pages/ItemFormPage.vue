@@ -5,6 +5,7 @@ import { nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
+import { Label } from '@/components/ui/label'
 import Tabs from '@/components/ui/tabs/Tabs.vue'
 import TabsContent from '@/components/ui/tabs/TabsContent.vue'
 import TabsList from '@/components/ui/tabs/TabsList.vue'
@@ -322,10 +323,9 @@ const handleRecognizeParameters = () => {
               class="mt-0 mb-6"
             >
               <div class="space-y-2">
-                <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                <Label required>
                   {{ t('gear.item.catalog.selectItem') }}
-                  <span class="text-destructive">*</span>
-                </label>
+                </Label>
                 <ItemCatalogSelector
                   :container-id="containerId"
                   :model-value="selectedCatalogItemId"

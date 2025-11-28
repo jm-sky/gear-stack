@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import ComboBox from '@/components/ui/combo-box/ComboBox.vue'
 import { getColorOptions } from '@/modules/gear/utils/suggestedValues'
 
+const { t } = useI18n()
 const modelValue = defineModel<string>('value', { default: '' })
 </script>
 
@@ -10,7 +12,7 @@ const modelValue = defineModel<string>('value', { default: '' })
     v-model:value="modelValue"
     :options="getColorOptions()"
     :placeholder="''"
-    :create-label="$t('gear.comboBox.add')"
+    :create-label="t('gear.comboBox.add')"
     class="w-full"
     clearable
     creatable

@@ -705,8 +705,8 @@ W `ItemFormFields.vue` występuje niespójność w nazewnictwie komponentów aut
 - Refaktoring `ItemFormFields.vue` do użycia dedykowanych komponentów
 - Zapewnienie spójności w całej aplikacji
 
-### Uporządkowanie labeli formularzy (`<Label>` vs ręczne `<label>`)
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+### ✅ Uporządkowanie labeli formularzy (`<Label>` vs ręczne `<label>`)
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Small
 
 **Problem:**
 W `ItemFormPage.vue` (np. linie 325–328) oraz innych miejscach ręcznie używane są tagi `<label>` z klasami i gwiazdką wymaganego pola, zamiast spójnego komponentu `Label` z propem `required`.
@@ -718,10 +718,29 @@ W `ItemFormPage.vue` (np. linie 325–328) oraz innych miejscach ręcznie używa
   - Użycie komponentu `Label` z API typu `<Label required>…</Label>`
 
 **Zadanie:**
-- Przejrzenie formularzy itemów/kontenerów (m.in. `ItemFormPage.vue`, `ItemFormFields.vue`)
-- Zamiana ręcznych `<label>` na komponent `Label` tam, gdzie to ma sens
-- Ustalenie i udokumentowanie wzorca: kiedy używać `FormLabel`, a kiedy `Label`
-- Zapewnienie spójności wyglądu i oznaczeń pól wymaganych w całej aplikacji
+- ✅ Przejrzenie formularzy itemów/kontenerów (m.in. `ItemFormPage.vue`, `ItemFormFields.vue`)
+- ✅ Zamiana ręcznych `<label>` na komponent `Label` tam, gdzie to ma sens
+- ✅ Ustalenie i udokumentowanie wzorca: kiedy używać `FormLabel`, a kiedy `Label`
+- ✅ Zapewnienie spójności wyglądu i oznaczeń pól wymaganych w całej aplikacji
+
+### ✅ Uporządkowanie użycia translacji (`$t` → `t` + `useI18n`)
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Small
+
+**Problem:**
+W wielu komponentach używane jest `$t()` zamiast `t()` z `useI18n()`. Zgodnie z konwencjami Vue 3 Composition API, powinniśmy używać composable `useI18n()` zamiast globalnego `$t`.
+
+**Zaimplementowane zmiany:**
+- ✅ Zamiana wszystkich `$t()` na `t()` z `useI18n()` w `ItemFormFields.vue` (44 wystąpienia)
+- ✅ Zamiana wszystkich `$t()` na `t()` z `useI18n()` w `ContainerFormFields.vue` (28 wystąpień)
+- ✅ Zamiana wszystkich `$t()` na `t()` z `useI18n()` w `ContainerHeader.vue` (3 wystąpienia)
+- ✅ Zamiana wszystkich `$t()` na `t()` z `useI18n()` w `ColorAutocomplete.vue` (1 wystąpienie)
+- ✅ Dodanie `const { t } = useI18n()` w komponentach, które tego wymagały
+
+**Korzyści:**
+- ✅ Spójność z Vue 3 Composition API
+- ✅ Lepsze TypeScript support
+- ✅ Łatwiejsze testowanie (możliwość mockowania `useI18n`)
+- ✅ Zgodność z best practices Vue 3
 
 ---
 

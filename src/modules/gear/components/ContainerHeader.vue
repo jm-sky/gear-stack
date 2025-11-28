@@ -15,6 +15,7 @@ import { GearRoutePath } from '../routes'
 import { getActionIcon } from '../utils/actionIcons'
 import { formatWeight } from '../utils/formatWeight'
 import { isSet } from '../utils/helpers'
+import ContainerHeaderName from './ContainerHeaderName.vue'
 import ContainerHeaderStats from './ContainerHeaderStats.vue'
 import FavoriteContainerButton from './FavoriteContainerButton.vue'
 import WeightLimitBadge from './WeightLimitBadge.vue'
@@ -100,7 +101,7 @@ const handleBack = () => {
             v-tooltip.bottom="t('gear.actions.aiAssistant')"
             variant="ghost"
             size="sm"
-            :aria-label="$t('gear.actions.aiAssistant')"
+            :aria-label="t('gear.actions.aiAssistant')"
             @click="$emit('aiChat')"
           >
             <AiIcon class="size-4" />
@@ -109,7 +110,7 @@ const handleBack = () => {
             v-tooltip.bottom="t('gear.actions.exportToPrompt')"
             variant="ghost"
             size="sm"
-            :aria-label="$t('gear.actions.exportToPrompt')"
+            :aria-label="t('gear.actions.exportToPrompt')"
             @click="handleExportToPrompt"
           >
             <ExportToPromptIcon class="size-4" />
@@ -120,9 +121,7 @@ const handleBack = () => {
 
       <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
         <div class="flex-1">
-          <h1 class="text-3xl font-bold mb-2">
-            {{ container.name }}
-          </h1>
+          <ContainerHeaderName :container />
           <p v-if="container.description" class="text-muted-foreground mb-3">
             {{ container.description }}
           </p>
@@ -192,7 +191,7 @@ const handleBack = () => {
                 variant="outline"
                 size="sm"
                 class="shrink-0"
-                :aria-label="$t('gear.actions.moreActions')"
+                :aria-label="t('gear.actions.moreActions')"
               >
                 <MoreActionsIcon class="size-4" />
               </Button>
