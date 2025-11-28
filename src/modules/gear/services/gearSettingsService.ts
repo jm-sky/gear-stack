@@ -1,3 +1,4 @@
+import { useBackend } from '@/shared/composables/useBackend'
 import { GEAR_SETTINGS_STORAGE_KEY, SETTINGS_STORAGE_KEY } from '@/shared/config/config'
 import type {
   IGearSettings,
@@ -7,6 +8,7 @@ import type {
   IUserCategory,
   IUserContainerType,
 } from '../types/gearSettings.types'
+import { gearSettingsApiService } from './gearSettingsApiService'
 
 /**
  * Gear Settings Service (LocalStorage implementation)
@@ -278,4 +280,122 @@ class GearSettingsService implements IGearSettingsService {
 }
 
 export { GearSettingsService }
-export const gearSettingsService = new GearSettingsService()
+
+/**
+ * Gear Settings Service Factory
+ *
+ * Returns appropriate service based on backend status and authentication.
+ * When backend is enabled AND user is authenticated, uses API service with localStorage backup.
+ * Otherwise, uses localStorage service.
+ */
+export const gearSettingsService = () => {
+  const { shouldUseAPI } = useBackend()
+
+  if (shouldUseAPI.value) {
+    // Wrap API service to sync localStorage as backup
+    const localService = new GearSettingsService()
+    return {
+      async loadFromStorage(): Promise<IGearSettings> {
+        try {
+          const settings = await gearSettingsApiService.getSettings()
+          // Save to localStorage as backup
+          await localService.saveToStorage(settings)
+          return settings
+        } catch (error) {
+          // Fallback to localStorage on API error
+          console.warn('API failed, falling back to localStorage', error)
+          return localService.loadFromStorage()
+        }
+      },
+      async saveToStorage(settings: IGearSettings): Promise<void> {
+        try {
+          await gearSettingsApiService.updateSettings(settings)
+          // Also save to localStorage as backup
+          await localService.saveToStorage(settings)
+        } catch (error) {
+          // Fallback to localStorage on API error
+          console.warn('API failed, falling back to localStorage', error)
+          await localService.saveToStorage(settings)
+        }
+      },
+      async updateSettings(current: IGearSettings, updates: IUpdateGearSettingsDto): Promise<IGearSettings> {
+        try {
+          const updated = await gearSettingsApiService.updateSettings(updates)
+          // Also save to localStorage as backup
+          await localService.saveToStorage(updated)
+          return updated
+        } catch (error) {
+          // Fallback to localStorage on API error
+          console.warn('API failed, falling back to localStorage', error)
+          return localService.updateSettings(current, updates)
+        }
+      },
+      async addCategory(settings: IGearSettings, category: IUserCategory): Promise<IGearSettings> {
+        const updated = {
+          ...settings,
+          customCategories: [...settings.customCategories, category],
+        }
+        return this.updateSettings(settings, { customCategories: updated.customCategories })
+      },
+      async updateCategory(settings: IGearSettings, category: IUserCategory): Promise<IGearSettings> {
+        const updated = {
+          ...settings,
+          customCategories: settings.customCategories.map(c => c.id === category.id ? category : c),
+        }
+        return this.updateSettings(settings, { customCategories: updated.customCategories })
+      },
+      async removeCategory(settings: IGearSettings, categoryId: string): Promise<IGearSettings> {
+        const updated = {
+          ...settings,
+          customCategories: settings.customCategories.filter(c => c.id !== categoryId),
+        }
+        return this.updateSettings(settings, { customCategories: updated.customCategories })
+      },
+      async addContainerType(settings: IGearSettings, containerType: IUserContainerType): Promise<IGearSettings> {
+        const updated = {
+          ...settings,
+          customContainerTypes: [...settings.customContainerTypes, containerType],
+        }
+        return this.updateSettings(settings, { customContainerTypes: updated.customContainerTypes })
+      },
+      async updateContainerType(settings: IGearSettings, containerType: IUserContainerType): Promise<IGearSettings> {
+        const updated = {
+          ...settings,
+          customContainerTypes: settings.customContainerTypes.map(t => t.id === containerType.id ? containerType : t),
+        }
+        return this.updateSettings(settings, { customContainerTypes: updated.customContainerTypes })
+      },
+      async removeContainerType(settings: IGearSettings, containerTypeId: string): Promise<IGearSettings> {
+        const updated = {
+          ...settings,
+          customContainerTypes: settings.customContainerTypes.filter(t => t.id !== containerTypeId),
+        }
+        return this.updateSettings(settings, { customContainerTypes: updated.customContainerTypes })
+      },
+      async addBrand(settings: IGearSettings, brand: IUserBrand): Promise<IGearSettings> {
+        const updated = {
+          ...settings,
+          customBrands: [...settings.customBrands, brand],
+        }
+        return this.updateSettings(settings, { customBrands: updated.customBrands })
+      },
+      async updateBrand(settings: IGearSettings, brand: IUserBrand): Promise<IGearSettings> {
+        const updated = {
+          ...settings,
+          customBrands: settings.customBrands.map(b => b.id === brand.id ? brand : b),
+        }
+        return this.updateSettings(settings, { customBrands: updated.customBrands })
+      },
+      async removeBrand(settings: IGearSettings, brandId: string): Promise<IGearSettings> {
+        const updated = {
+          ...settings,
+          customBrands: settings.customBrands.filter(b => b.id !== brandId),
+        }
+        return this.updateSettings(settings, { customBrands: updated.customBrands })
+      },
+    }
+  }
+
+  // Use localStorage service when backend is not available
+  return new GearSettingsService()
+}

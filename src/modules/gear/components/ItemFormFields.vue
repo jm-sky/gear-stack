@@ -3,7 +3,6 @@ import { useFocus } from '@vueuse/core'
 import { nextTick, ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import ComboBox from '@/components/ui/combo-box/ComboBox.vue'
 import { FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import {
@@ -17,10 +16,10 @@ import Textarea from '@/components/ui/textarea/Textarea.vue'
 import WeightInputWithUnitPicker from '@/components/ui/weight-input/WeightInputWithUnitPicker.vue'
 import type { IGearItem } from '../types/gear.types'
 import { useGearSettings } from '../composables/useGearSettings'
-import { getBrandOptions } from '../utils/suggestedValues'
-import CategorySelect from './CategorySelect.vue'
-import ColorAutocomplete from './ColorAutocomplete.vue'
-import CurrencySelect from './CurrencySelect.vue'
+import BrandAutocomplete from './inputs/BrandAutocomplete.vue'
+import CategorySelect from './inputs/CategorySelect.vue'
+import ColorAutocomplete from './inputs/ColorAutocomplete.vue'
+import CurrencySelect from './inputs/CurrencySelect.vue'
 
 defineProps<{
   item?: IGearItem
@@ -34,7 +33,7 @@ const emit = defineEmits<{
   recognizeParameters: []
 }>()
 
-const { customBrands, defaultCurrency } = useGearSettings()
+const { defaultCurrency } = useGearSettings()
 
 // Auto-focus na pierwszym polu
 const nameInputRef = ref<HTMLInputElement | undefined>(undefined)
@@ -224,14 +223,9 @@ const handleCancel = () => {
       <FormField v-slot="{ value, handleChange }" name="brand">
         <FormItem>
           <FormLabel :label="$t('gear.item.brand')" />
-          <ComboBox
-            :value="value"
-            :options="getBrandOptions(customBrands)"
-            :placeholder="''"
-            :creatable="true"
-            :create-label="$t('gear.comboBox.add')"
-            class="w-full"
-            @update:value="handleChange"
+          <BrandAutocomplete
+            :model-value="value"
+            @update:model-value="handleChange"
           />
           <FormMessage />
         </FormItem>

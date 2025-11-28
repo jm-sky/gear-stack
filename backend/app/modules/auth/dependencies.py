@@ -242,7 +242,7 @@ async def require_premium_or_higher(
 ) -> User:
     """
     Dependency to require premium user or higher privileges.
-    
+
     Premium or higher means: Premium User, Administrator, or Owner.
     Regular User role does not have access.
 

@@ -11,7 +11,6 @@ export const userPl = {
       auth_required_message: 'Zaloguj się aby korzystać z wszystkich funkcji aplikacji',
       login_button: 'Zaloguj się',
       register_button: 'Załóż konto',
-      admin_badge: 'Administrator',
     },
     edit: {
       title: 'Edytuj Profil',
@@ -42,6 +41,11 @@ export const userPl = {
       public_containers: 'Publiczne Kontenery',
       no_containers: 'Brak publicznych kontenerów',
       no_containers_description: 'Ten użytkownik nie udostępnił jeszcze żadnych publicznych kontenerów',
+    },
+    roles: {
+      admin: 'Administrator',
+      owner: 'Właściciel',
+      premium: 'Premium',
     },
   },
 }

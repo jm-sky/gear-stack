@@ -281,15 +281,24 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 
 ## ⚙️ Ustawienia użytkownika (wymagające DB)
 
-### Rozszerzone ustawienia użytkownika
-**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Small
+### ✅ Rozszerzone ustawienia użytkownika
+**Status:** ✅ Completed | **Priority:** High | **Complexity:** Small
 
-- **Domyślna waluta użytkownika** (zapisywana w DB) - High priority
-- Domyślna widoczność nowych kontenerów
-- Preferowana jednostka wagi (zapisywana w DB, nie tylko localStorage)
-- **Dodawanie nowych kategorii** (zapisywane w DB) - High priority
-- **Dodawanie firm / marek (brand)** - zapisywane w DB - High priority
-- Uczenie się na podstawie wcześniejszych wyborów użytkownika (dla kategorii)
+- ✅ **Domyślna waluta użytkownika** (zapisywana w DB) - zaimplementowane
+- 🔄 Domyślna widoczność nowych kontenerów - planowane (już częściowo w `UserSettingsDB.default_containers_public`)
+- ✅ Preferowana jednostka wagi (zapisywana w DB, nie tylko localStorage) - zaimplementowane
+- ✅ **Dodawanie nowych kategorii** (zapisywane w DB) - zaimplementowane
+- ✅ **Dodawanie firm / marek (brand)** - zapisywane w DB - zaimplementowane
+- 🔄 Uczenie się na podstawie wcześniejszych wyborów użytkownika (dla kategorii) - planowane
+
+**Zaimplementowane funkcjonalności:**
+- ✅ Backend: Model `GearSettingsDB` z polem `default_currency`
+- ✅ Backend: Schemas z `defaultCurrency` w response i update
+- ✅ Backend: Repository i Service dla gear_settings
+- ✅ Backend: Router z endpointami `GET /me/gear-settings` i `PATCH /me/gear-settings`
+- ✅ Frontend: API service (`gearSettingsApiService.ts`)
+- ✅ Frontend: Factory pattern w `gearSettingsService.ts` (API/localStorage)
+- ✅ Frontend: Store zaktualizowany do używania factory pattern
 
 ### ✅ Profil użytkownika - link do Gravatara
 **Status:** ✅ Completed | **Priority:** Low | **Complexity:** Small
@@ -739,7 +748,7 @@ W `ItemFormPage.vue` (np. linie 325–328) oraz innych miejscach ręcznie używa
 1. ✅ **Autoryzacja i konta użytkowników** - High priority, Large complexity (Completed)
 2. **Globalny katalog itemów** - High priority, Medium complexity
 3. ✅ **Linkowanie przedmiotów** - High priority, Large complexity (Completed)
-4. **Rozszerzone ustawienia użytkownika** (waluta, kategorie, marki w DB) - High priority, Small complexity
+4. ✅ **Rozszerzone ustawienia użytkownika** (waluta, kategorie, marki w DB) - High priority, Small complexity (Completed)
 
 ### Medium Priority
 1. **Synchronizacja między urządzeniami** - Medium priority, Large complexity

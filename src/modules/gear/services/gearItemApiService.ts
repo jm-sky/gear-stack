@@ -124,6 +124,9 @@ class GearItemApiService {
     if (isSet(data.price)) {
       cleaned.price = data.price
     }
+    if (isSet(data.currency)) {
+      cleaned.currency = data.currency
+    }
     if (isSet(data.url)) {
       cleaned.url = data.url || null
     }

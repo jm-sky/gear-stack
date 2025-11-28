@@ -29,10 +29,10 @@ import { type ItemFormData, itemSchema } from '../utils/validation'
 
 const router = useRouter()
 const route = useRoute()
+const store = useGearStore()
 const { t } = useI18n()
 const { createItem, updateItem } = useGear()
 const { shouldUseAPI } = useBackend()
-const store = useGearStore()
 const { handleError } = useHandleError()
 
 const containerId = route.params.containerId as string

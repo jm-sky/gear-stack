@@ -94,6 +94,7 @@ class ItemResponse(BaseModel):
     status: GearItemStatus
     containerId: str | None = Field(None, alias="containerId")
     price: float | None = None
+    currency: str | None = None
     url: str | None = None
     brand: str | None = None
     color: str | None = None
@@ -154,6 +155,7 @@ class ItemCreate(BaseModel):
     status: GearItemStatus = Field(default="owned")
     containerId: str | None = Field(None, alias="containerId")
     price: float | None = Field(None, ge=0)
+    currency: str | None = Field(None, max_length=10)
     url: str | None = None
     brand: str | None = Field(None, max_length=255)
     color: str | None = Field(None, max_length=50)
@@ -181,6 +183,7 @@ class ItemUpdate(BaseModel):
     status: GearItemStatus | None = None
     containerId: str | None = Field(None, alias="containerId")
     price: float | None = Field(None, ge=0)
+    currency: str | None = Field(None, max_length=10)
     url: str | None = None
     brand: str | None = Field(None, max_length=255)
     color: str | None = Field(None, max_length=50)

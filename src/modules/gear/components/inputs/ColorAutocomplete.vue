@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ComboBox from '@/components/ui/combo-box/ComboBox.vue'
-import { getColorOptions } from '../utils/suggestedValues'
+import { getColorOptions } from '@/modules/gear/utils/suggestedValues'
 
 const modelValue = defineModel<string>('value', { default: '' })
 </script>
@@ -10,9 +10,10 @@ const modelValue = defineModel<string>('value', { default: '' })
     v-model:value="modelValue"
     :options="getColorOptions()"
     :placeholder="''"
-    :creatable="true"
     :create-label="$t('gear.comboBox.add')"
     class="w-full"
+    clearable
+    creatable
   >
     <template #value>
       <div class="flex items-center gap-2">

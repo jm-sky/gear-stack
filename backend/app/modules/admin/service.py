@@ -120,9 +120,7 @@ class AdminService:
             updatedAt=self._serialize_datetime(user.created_at) or "",  # UserDB doesn't have updated_at
         )
 
-    async def update_user(
-        self, user_id: str, user_data: UserUpdate, current_user: "User"
-    ) -> AdminUserResponse | None:
+    async def update_user(self, user_id: str, user_data: UserUpdate, current_user: "User") -> AdminUserResponse | None:
         """Update user information.
 
         Args:

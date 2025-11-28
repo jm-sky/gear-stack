@@ -164,7 +164,7 @@ const handleGenerateGravatar = () => {
             <FormControl>
               <Input
                 type="email"
-                :value="profile.email"
+                :model-value="profile.email"
                 disabled
                 class="bg-muted cursor-not-allowed"
               />

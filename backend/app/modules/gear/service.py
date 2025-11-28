@@ -77,6 +77,7 @@ class GearService:
             status=cast(ItemStatus, item.status),
             containerId=item.nested_container_id,
             price=item.price,
+            currency=item.currency,
             url=item.url,
             brand=item.brand,
             color=item.color,

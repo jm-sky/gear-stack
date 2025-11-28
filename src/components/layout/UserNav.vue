@@ -81,7 +81,7 @@ const handleLogout = () => {
     <DropdownMenuTrigger as-child>
       <Avatar
         aria-label="User menu"
-        :class="cn('cursor-pointer hover:brightness-95 transition-all duration-300', !isAuthenticated && 'ring-2 ring-muted-foreground/30', isAdmin && 'ring-2 ring-primary ring-offset-2 ring-offset-background')"
+        :class="cn('cursor-pointer hover:brightness-95 transition-all duration-300', !isAuthenticated && 'ring-2 ring-muted-foreground/30', isAuthenticated && isAdmin && 'ring-2 ring-primary ring-offset-2 ring-offset-background')"
       >
         <AvatarImage :src="userAvatar ?? ''" />
         <AvatarFallback :class="isAuthenticated ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'">
@@ -95,13 +95,20 @@ const handleLogout = () => {
 
     <DropdownMenuContent class="w-64" align="end">
       <!-- User info -->
-      <DropdownMenuLabel>
+      <DropdownMenuLabel v-if="isAuthenticated">
         <div class="flex flex-col space-y-1">
           <p class="text-sm font-medium leading-none">
             {{ userName ?? 'N/A' }}
           </p>
           <p class="text-xs leading-none text-muted-foreground">
             {{ userEmail ?? '-' }}
+          </p>
+        </div>
+      </DropdownMenuLabel>
+      <DropdownMenuLabel v-else>
+        <div class="flex flex-col space-y-1">
+          <p class="text-sm font-medium leading-none">
+            {{ t('user.guest', 'Guest') }}
           </p>
         </div>
       </DropdownMenuLabel>

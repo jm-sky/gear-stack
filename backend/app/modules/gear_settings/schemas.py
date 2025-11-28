@@ -54,6 +54,7 @@ class GearSettingsResponse(BaseModel):
     customContainerTypes: list[UserContainerType] = Field(default_factory=list, alias="customContainerTypes")
     customBrands: list[UserBrand] = Field(default_factory=list, alias="customBrands")
     preferredWeightUnit: GearWeightUnit | None = Field(None, alias="preferredWeightUnit")
+    defaultCurrency: str | None = Field(None, alias="defaultCurrency")
 
     model_config = {"from_attributes": True, "populate_by_name": True}
 
@@ -65,5 +66,6 @@ class GearSettingsUpdate(BaseModel):
     customContainerTypes: list[UserContainerType] | None = Field(None, alias="customContainerTypes")
     customBrands: list[UserBrand] | None = Field(None, alias="customBrands")
     preferredWeightUnit: GearWeightUnit | None = Field(None, alias="preferredWeightUnit")
+    defaultCurrency: str | None = Field(None, alias="defaultCurrency")
 
     model_config = {"populate_by_name": True}

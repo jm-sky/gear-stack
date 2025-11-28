@@ -2,11 +2,10 @@
 import { Edit, ExternalLink, Mail } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
 import Avatar from '@/components/ui/avatar/Avatar.vue'
 import AvatarFallback from '@/components/ui/avatar/AvatarFallback.vue'
 import AvatarImage from '@/components/ui/avatar/AvatarImage.vue'
-import { Button } from '@/components/ui/button'
+import ButtonLink from '@/components/ui/button-link/ButtonLink.vue'
 import UserRoleBadge from '@/components/ui/UserRoleBadge.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
@@ -16,15 +15,10 @@ import AuthenticationRequiredAlert from '../components/AuthenticationRequiredAle
 import { useUser } from '../composables/useUser'
 import { UserRoutePaths } from '../routes'
 
-const router = useRouter()
 const { t } = useI18n()
 const { profile } = useUser()
 const { settings } = useSettings()
 const { isAuthenticated } = useAuth()
-
-const handleEdit = () => {
-  router.push(UserRoutePaths.profileEdit)
-}
 
 const isProfilePublic = computed(() => settings.value?.profilePublic ?? false)
 const publicProfileUrl = computed(() => {
@@ -55,40 +49,35 @@ const initials = computed(() => {
             <h1 class="text-3xl font-bold tracking-tight">
               {{ t('user.profile.title') }}
             </h1>
-            <UserRoleBadge
-              :is-admin="profile?.isAdmin"
-              :is-owner="profile?.isOwner"
-              :is-premium="profile?.isPremium"
-            />
           </div>
           <p class="text-sm text-muted-foreground">
             {{ t('user.profile.subtitle') }}
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-          <Button
+          <ButtonLink
             v-if="publicProfileUrl"
             variant="outline"
             class="flex-1 sm:flex-none"
-            @click="router.push(publicProfileUrl)"
+            :to="publicProfileUrl"
           >
-            <ExternalLink class="size-4 mr-2" />
+            <ExternalLink class="size-4" />
             {{ t('user.edit.show_public_profile') }}
-          </Button>
-          <Button
+          </ButtonLink>
+          <ButtonLink
             v-if="isAuthenticated"
             variant="outline"
             class="flex-1 sm:flex-none"
-            @click="handleEdit"
+            :to="UserRoutePaths.profileEdit"
           >
-            <Edit class="size-4 mr-2" />
+            <Edit class="size-4" />
             {{ t('user.profile.edit_button') }}
-          </Button>
+          </ButtonLink>
         </div>
       </div>
 
       <div v-if="profile" class="bg-card border rounded-lg p-6 space-y-6">
-        <div class="flex items-center space-x-6">
+        <div class="flex flex-col sm:flex-row items-center gap-x-6 gap-y-4">
           <Avatar class="size-24 ring-1 ring-border">
             <AvatarImage :src="profile.avatarUrl ?? ''" :alt="profile.name" />
             <AvatarFallback class="bg-muted text-muted-foreground text-2xl font-semibold">

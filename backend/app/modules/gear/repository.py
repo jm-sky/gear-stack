@@ -276,6 +276,7 @@ class GearRepository(SearchMixin):
             status=data.status,
             nested_container_id=data.containerId,
             price=data.price,
+            currency=data.currency,
             url=data.url,
             brand=data.brand,
             color=data.color,

@@ -86,6 +86,7 @@ class GearItemDB(Base):
         status: Item status (owned, missing, toBuy)
         nested_container_id: Optional reference to a nested container
         price: Item price
+        currency: Currency code (PLN, USD, EUR, GBP, etc.)
         url: Product URL
         brand: Manufacturer/brand
         color: Item color
@@ -113,6 +114,7 @@ class GearItemDB(Base):
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="owned")
     nested_container_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("gear_containers.id"), nullable=True)
     price: Mapped[float | None] = mapped_column(Float, nullable=True)
+    currency: Mapped[str | None] = mapped_column(String(10), nullable=True)
     url: Mapped[str | None] = mapped_column(Text, nullable=True)
     brand: Mapped[str | None] = mapped_column(String(255), nullable=True)
     color: Mapped[str | None] = mapped_column(String(50), nullable=True)

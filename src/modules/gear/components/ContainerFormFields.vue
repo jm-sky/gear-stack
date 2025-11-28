@@ -3,17 +3,16 @@ import { useFocus } from '@vueuse/core'
 import { nextTick, ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import ComboBox from '@/components/ui/combo-box/ComboBox.vue'
 import { FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import Textarea from '@/components/ui/textarea/Textarea.vue'
 import WeightInputWithUnitPicker from '@/components/ui/weight-input/WeightInputWithUnitPicker.vue'
 import type { IGearContainer } from '../types/gear.types'
 import { useGearSettings } from '../composables/useGearSettings'
-import { COLOR_DOT_CLASSES, CONTAINER_COLORS } from '../utils/containerColors'
-import { getBrandOptions } from '../utils/suggestedValues'
-import ContainerTypeSelect from './ContainerTypeSelect.vue'
-import CurrencySelect from './CurrencySelect.vue'
+import BrandAutocomplete from './inputs/BrandAutocomplete.vue'
+import ContainerColorPicker from './inputs/ContainerColorPicker.vue'
+import ContainerTypeSelect from './inputs/ContainerTypeSelect.vue'
+import CurrencySelect from './inputs/CurrencySelect.vue'
 
 const _props = defineProps<{
   container?: IGearContainer
@@ -26,14 +25,13 @@ const emit = defineEmits<{
   recognizeParameters: []
 }>()
 
-const { customBrands, defaultCurrency } = useGearSettings()
+const { defaultCurrency } = useGearSettings()
 
 // Auto-focus na pierwszym polu
 const nameInputRef = ref<HTMLInputElement | undefined>(undefined)
 nextTick(() => {
   useFocus(nameInputRef)
 })
-
 
 // Cancel handler
 const handleCancel = () => {
@@ -84,21 +82,10 @@ const handleCancel = () => {
     <FormField v-slot="{ value, handleChange }" name="color">
       <FormItem>
         <FormLabel :label="$t('gear.container.color')" />
-        <div class="grid grid-cols-5 sm:grid-cols-10 gap-2">
-          <button
-            v-for="color in CONTAINER_COLORS"
-            :key="color"
-            type="button"
-            :class="[
-              'size-10 rounded-full border-2 transition-all',
-              COLOR_DOT_CLASSES[color],
-              value === color || (!value && color === 'default') ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : 'opacity-50 hover:opacity-75',
-            ]"
-            :aria-label="$t(`gear.container.colors.${color}`)"
-            :title="$t(`gear.container.colors.${color}`)"
-            @click="handleChange(color)"
-          />
-        </div>
+        <ContainerColorPicker
+          :model-value="value"
+          @update:model-value="handleChange"
+        />
         <FormMessage />
       </FormItem>
     </FormField>
@@ -167,13 +154,9 @@ const handleCancel = () => {
       <FormField v-slot="{ value, handleChange }" name="brand">
         <FormItem>
           <FormLabel :label="$t('gear.container.brand')" />
-          <ComboBox
+          <BrandAutocomplete
             :value="value"
-            :options="getBrandOptions(customBrands)"
             :placeholder="$t('gear.container.brand')"
-            :creatable="true"
-            :create-label="$t('gear.comboBox.add')"
-            class="w-full"
             @update:value="handleChange"
           />
           <FormMessage />

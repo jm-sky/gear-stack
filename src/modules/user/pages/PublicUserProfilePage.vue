@@ -6,19 +6,23 @@ import { useRoute, useRouter } from 'vue-router'
 import Avatar from '@/components/ui/avatar/Avatar.vue'
 import AvatarFallback from '@/components/ui/avatar/AvatarFallback.vue'
 import AvatarImage from '@/components/ui/avatar/AvatarImage.vue'
+import ButtonLink from '@/components/ui/button-link/ButtonLink.vue'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import UserRoleBadge from '@/components/ui/UserRoleBadge.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import { useAuth } from '@/modules/auth/composables/useAuth'
 import ColorDot from '@/modules/gear/components/ColorDot.vue'
 import { apiClient } from '@/shared/services/apiClient'
 import { getInitials } from '@/shared/utils/getInitials'
 import type { IUser } from '../types/user.types'
+import { UserRoutePaths } from '../routes'
 import { userApiService } from '../services/userApiService'
 import type { IGearContainer } from '@/modules/gear/types/gear.types'
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
+const { user: currentUser } = useAuth()
 
 const userId = route.params.userId as string
 const user = ref<IUser | null>(null)
@@ -26,7 +30,8 @@ const containers = ref<IGearContainer[]>([])
 const isLoading = ref(true)
 const error = ref<string | null>(null)
 
-// Generate initials from name or email using shared helper
+const isCurrentUser = computed(() => user.value?.id === currentUser.value?.id)
+
 const initials = computed(() => {
   if (user.value?.name) {
     return getInitials(user.value.name)
@@ -87,15 +92,15 @@ const handleContainerClick = (containerId: string) => {
     <div v-else-if="user" class="space-y-6 w-full max-w-full">
       <!-- User Profile Header -->
       <Card>
-        <CardContent class="pt-6">
-          <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
+        <CardContent>
+          <div class="flex flex-col sm:flex-row items-center sm:items-stretch gap-4 sm:gap-6">
             <Avatar class="size-20 sm:size-24 ring-1 ring-border shrink-0">
               <AvatarImage :src="user.avatarUrl ?? ''" :alt="user.name" />
               <AvatarFallback class="bg-muted text-muted-foreground text-xl sm:text-2xl font-semibold">
                 {{ initials }}
               </AvatarFallback>
             </Avatar>
-            <div class="text-center sm:text-left flex-1">
+            <div class="flex flex-col items-start text-center sm:text-left flex-1">
               <div class="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
                 <h1 class="text-2xl sm:text-3xl font-bold">
                   {{ user.name }}
@@ -106,9 +111,14 @@ const handleContainerClick = (containerId: string) => {
                   :is-premium="user.isPremium"
                 />
               </div>
-              <p v-if="user.emailPublic && user.email" class="text-muted-foreground text-sm sm:text-base break-all mt-2">
+              <p v-if="user.emailPublic && user.email" class="flex items-center justify-center sm:justify-start w-full text-muted-foreground text-sm sm:text-base break-all mt-2">
                 {{ user.email }}
               </p>
+            </div>
+            <div v-if="isCurrentUser">
+              <ButtonLink :to="UserRoutePaths.profileEdit">
+                {{ t('common.edit') }}
+              </ButtonLink>
             </div>
           </div>
         </CardContent>

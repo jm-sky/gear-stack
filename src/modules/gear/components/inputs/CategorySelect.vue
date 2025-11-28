@@ -6,9 +6,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useCategoryLabel } from '../composables/useCategoryLabel'
-import { useGearSettings } from '../composables/useGearSettings'
-import CategoryIcon from './CategoryIcon.vue'
+import { useCategoryLabel } from '../../composables/useCategoryLabel'
+import { useGearSettings } from '../../composables/useGearSettings'
+import CategoryIcon from '../CategoryIcon.vue'
 
 const modelValue = defineModel<string>()
 

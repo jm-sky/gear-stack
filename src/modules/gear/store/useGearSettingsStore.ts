@@ -38,7 +38,8 @@ export const useGearSettingsStore = defineStore('gearSettings', () => {
 
   // Actions
   async function updateSettings(updates: IUpdateGearSettingsDto): Promise<void> {
-    const updated = await gearSettingsService.updateSettings(state, updates)
+    const service = gearSettingsService()
+    const updated = await service.updateSettings(state, updates)
     state.customCategories = updated.customCategories
     state.customContainerTypes = updated.customContainerTypes
     state.customBrands = updated.customBrands
@@ -47,52 +48,62 @@ export const useGearSettingsStore = defineStore('gearSettings', () => {
   }
 
   async function addCategory(category: IUserCategory): Promise<void> {
-    const updated = await gearSettingsService.addCategory(state, category)
+    const service = gearSettingsService()
+    const updated = await service.addCategory(state, category)
     state.customCategories = updated.customCategories
   }
 
   async function updateCategory(category: IUserCategory): Promise<void> {
-    const updated = await gearSettingsService.updateCategory(state, category)
+    const service = gearSettingsService()
+    const updated = await service.updateCategory(state, category)
     state.customCategories = updated.customCategories
   }
 
   async function removeCategory(categoryId: string): Promise<void> {
-    const updated = await gearSettingsService.removeCategory(state, categoryId)
+    const service = gearSettingsService()
+    const updated = await service.removeCategory(state, categoryId)
     state.customCategories = updated.customCategories
   }
 
   async function addContainerType(containerType: IUserContainerType): Promise<void> {
-    const updated = await gearSettingsService.addContainerType(state, containerType)
+    const service = gearSettingsService()
+    const updated = await service.addContainerType(state, containerType)
     state.customContainerTypes = updated.customContainerTypes
   }
 
   async function updateContainerType(containerType: IUserContainerType): Promise<void> {
-    const updated = await gearSettingsService.updateContainerType(state, containerType)
+    const service = gearSettingsService()
+    const updated = await service.updateContainerType(state, containerType)
     state.customContainerTypes = updated.customContainerTypes
   }
 
   async function removeContainerType(containerTypeId: string): Promise<void> {
-    const updated = await gearSettingsService.removeContainerType(state, containerTypeId)
+    const service = gearSettingsService()
+    const updated = await service.removeContainerType(state, containerTypeId)
     state.customContainerTypes = updated.customContainerTypes
   }
 
   async function addBrand(brand: IUserBrand): Promise<void> {
-    const updated = await gearSettingsService.addBrand(state, brand)
+    const service = gearSettingsService()
+    const updated = await service.addBrand(state, brand)
     state.customBrands = updated.customBrands
   }
 
   async function updateBrand(brand: IUserBrand): Promise<void> {
-    const updated = await gearSettingsService.updateBrand(state, brand)
+    const service = gearSettingsService()
+    const updated = await service.updateBrand(state, brand)
     state.customBrands = updated.customBrands
   }
 
   async function removeBrand(brandId: string): Promise<void> {
-    const updated = await gearSettingsService.removeBrand(state, brandId)
+    const service = gearSettingsService()
+    const updated = await service.removeBrand(state, brandId)
     state.customBrands = updated.customBrands
   }
 
   async function loadFromStorageAction(): Promise<void> {
-    const loaded = await gearSettingsService.loadFromStorage()
+    const service = gearSettingsService()
+    const loaded = await service.loadFromStorage()
     state.customCategories = loaded.customCategories
     state.customContainerTypes = loaded.customContainerTypes
     state.customBrands = loaded.customBrands

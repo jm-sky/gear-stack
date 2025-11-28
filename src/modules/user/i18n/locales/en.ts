@@ -11,7 +11,6 @@ export const userEn = {
       auth_required_message: 'Log in to use all app features',
       login_button: 'Log In',
       register_button: 'Sign Up',
-      admin_badge: 'Admin',
     },
     edit: {
       title: 'Edit Profile',
@@ -42,6 +41,11 @@ export const userEn = {
       public_containers: 'Public Containers',
       no_containers: 'No public containers',
       no_containers_description: 'This user has not shared any public containers yet',
+    },
+    roles: {
+      admin: 'Admin',
+      owner: 'Owner',
+      premium: 'Premium',
     },
   },
 }

@@ -109,7 +109,7 @@ async def _users_create_async(
         console.print("\n[bold green]✓[/bold green] User created successfully!\n")
 
         # Show user info panel
-        role_str = "Owner" if user.get('isOwner') else ("Administrator" if user.get('isAdmin') else ("Premium" if user.get('isPremium') else "User"))
+        role_str = "Owner" if user.get("isOwner") else ("Administrator" if user.get("isAdmin") else ("Premium" if user.get("isPremium") else "User"))
         user_info = f"""[bold]Email:[/bold] {user['email']}
 [bold]Name:[/bold] {user['name']}
 [bold]Role:[/bold] {role_str}

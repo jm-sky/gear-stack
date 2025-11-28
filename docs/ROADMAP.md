@@ -34,13 +34,13 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - ✅ **Linkowanie przedmiotów** — High priority, Large complexity (Completed)
    - Status: ✅ Linkowanie completed | 🔄 Katalog planned
 
-4. **Rozszerzone ustawienia użytkownika (waluta, widoczność, kategorie, marki w DB)**
+4. ✅ **Rozszerzone ustawienia użytkownika (waluta, widoczność, kategorie, marki w DB)** - Zakończone
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-ustawienia-użytkownika-wymagające-db)
-   - **Domyślna waluta użytkownika** (zapisywana w DB) - High priority
-   - Domyślna widoczność nowych kontenerów
-   - **Dodawanie nowych kategorii** (zapisywane w DB) - High priority
-   - **Dodawanie firm/marek (brand)** — zapisywane w DB - High priority
-   - Status: 🔄 Planned | Priority: High | Complexity: Small
+   - ✅ **Domyślna waluta użytkownika** (zapisywana w DB) - Completed
+   - 🔄 Domyślna widoczność nowych kontenerów - częściowo (w `UserSettingsDB`)
+   - ✅ **Dodawanie nowych kategorii** (zapisywane w DB) - Completed
+   - ✅ **Dodawanie firm/marek (brand)** — zapisywane w DB - Completed
+   - Status: ✅ Completed | Priority: High | Complexity: Small
 
 5. **Funkcje AI**
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-funkcje-ai-wymagające-backend)

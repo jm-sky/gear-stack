@@ -6,8 +6,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
-import { useGearSettings } from '../composables/useGearSettings'
+import { useContainerTypeLabel } from '@/modules/gear/composables/useContainerTypeLabel'
+import { useGearSettings } from '@/modules/gear/composables/useGearSettings'
 
 const modelValue = defineModel<string>()
 

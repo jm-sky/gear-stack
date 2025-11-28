@@ -14,8 +14,8 @@ import { useGearSettings } from '@/modules/gear/composables/useGearSettings'
 import { weightUnitEnum } from '@/modules/gear/utils/weightUnits'
 import { useSettings } from '@/modules/settings/composables/useSettings'
 import { config } from '@/shared/config/config'
-import CurrencySelect from './CurrencySelect.vue'
-import WeightUnitSelect from './WeightUnitSelect.vue'
+import CurrencySelect from './inputs/CurrencySelect.vue'
+import WeightUnitSelect from './inputs/WeightUnitSelect.vue'
 import type { TGearWeightUnit } from '@/modules/gear/types/gear.types'
 
 const { t } = useI18n()

@@ -832,19 +832,17 @@ Kombinacja opcji 1 i 2:
 
 - ✅ Ujednolicenie obsługi błędów w całej aplikacji poprzez użycie helpera `useHandleError`
 
-### 🔄 Poprawa przekierowania z formularza edycji przedmiotu
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+### ✅ Poprawa przekierowania z formularza edycji przedmiotu
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Small
 
-- Problem: Przekierowanie z formularza edycji przedmiotu (`ItemFormPage`) jest niespójne
-- Obecnie: Czasem przekierowuje do kontenera, czasem do podglądu przedmiotu
-- Rozwiązanie: Przekierowanie powinno zależeć od tego, skąd użytkownik wszedł w edycję:
-  - Jeśli z `ItemDetailPage` (podgląd przedmiotu) → po zapisaniu wróć do `ItemDetailPage`
-  - Jeśli z `ContainerDetailPage` (lista przedmiotów) → po zapisaniu wróć do `ContainerDetailPage`
-  - Jeśli bezpośrednio (np. z linku) → wróć do kontenera (domyślnie)
-- Implementacja:
-  - Przechowywanie `returnTo` w route query params lub state
-  - Sprawdzanie `returnTo` przed przekierowaniem po zapisaniu
-  - Fallback do kontenera, jeśli brak `returnTo`
+- ✅ Problem rozwiązany: Przekierowanie z formularza edycji przedmiotu (`ItemFormPage`) jest spójne
+- ✅ Implementacja:
+  - ✅ Przechowywanie `returnTo` w route query params
+  - ✅ Sprawdzanie `returnTo` przed przekierowaniem po zapisaniu
+  - ✅ Fallback do kontenera, jeśli brak `returnTo`
+  - ✅ `ContainerDetailPage` przekazuje `returnTo: 'container'` przy edycji przedmiotu
+  - ✅ `ItemDetailPage` przekazuje `returnTo: 'detail'` przy edycji przedmiotu
+  - ✅ `ShoppingPlanningPage` przekazuje `returnTo: 'shopping'` przy edycji przedmiotu
 - ✅ Dedykowany composable `useChunkLoadErrorHandler.ts` (opcjonalny)
 - ✅ Auto-refresh po potwierdzeniu użytkownika
 
@@ -963,6 +961,7 @@ Kombinacja opcji 1 i 2:
 3. ✅ **Zintegrowany input wagi z wyborem jednostki** - Medium priority, Small complexity (Completed)
 4. ✅ **Obsługa waluty (currency)** - Medium priority, Medium complexity (Completed)
 5. ✅ **Kolejność przedmiotów w kontenerze** - Medium priority, Medium complexity (Completed)
+6. ✅ **Poprawa przekierowania z formularza edycji przedmiotu** - Medium priority, Small complexity (Completed)
 7. **Oznaczanie kontenerów jako fragmentów rodzica** - Medium priority, Medium complexity
 8. **Obsługa Markdown w notatkach** - Medium priority, Medium complexity
 9. ✅ **Rozszerzone pola** - Medium priority, Medium complexity (Completed in v0.8.0)
