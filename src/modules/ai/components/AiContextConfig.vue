@@ -8,7 +8,6 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { usePermissions } from '@/shared/composables/usePermissions'
 import { useAiContext } from '../composables/useAiContext'
-import AiPremiumFeatureAlert from './AiPremiumFeatureAlert.vue'
 
 const { t } = useI18n()
 
@@ -26,8 +25,6 @@ const handleFieldToggle = (field: string): void => {
 
 <template>
   <div class="border-t p-4 space-y-3">
-    <AiPremiumFeatureAlert v-if="!canUsePremiumFeatures" />
-
     <div class="space-y-2" :class="{ 'opacity-50 pointer-events-none': !canUsePremiumFeatures }">
       <Label class="text-sm font-medium">{{ t('ai.context.fields') }}</Label>
       <p class="text-xs text-muted-foreground">

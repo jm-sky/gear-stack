@@ -9,12 +9,15 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import Separator from '@/components/ui/separator/Separator.vue'
+import AiPremiumFeatureAlert from '@/modules/ai/components/AiPremiumFeatureAlert.vue'
 import { useAiModels } from '@/modules/ai/composables/useAiModels'
 import { useAiStore } from '@/modules/ai/store/useAiStore'
 import { useHandleError } from '@/shared/composables/useHandleError'
+import { usePermissions } from '@/shared/composables/usePermissions'
 
 const { t } = useI18n()
 const { handleError } = useHandleError()
+const { canUsePremiumFeatures } = usePermissions()
 
 const aiStore = useAiStore()
 const { models, selectedModel, loadModels, selectModel } = useAiModels()
@@ -110,6 +113,8 @@ onMounted(async () => {
       </CardDescription>
     </CardHeader>
     <CardContent class="space-y-6">
+      <AiPremiumFeatureAlert v-if="!canUsePremiumFeatures" />
+
       <!-- Default Model -->
       <div class="space-y-3">
         <Label>

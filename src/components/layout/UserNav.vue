@@ -132,7 +132,12 @@ const handleLogout = () => {
 
       <!-- Profile/Settings slot -->
       <slot name="menu-items">
-        <DropdownMenuItemLink v-for="link in coreLinksList" :key="link.to" :to="link.to">
+        <DropdownMenuItemLink
+          v-for="link in coreLinksList"
+          v-show="!link.hidden"
+          :key="link.to"
+          :to="link.to"
+        >
           <component :is="link.icon" v-if="link.icon" class="size-4 mr-2" />
           {{ link.label }}
         </DropdownMenuItemLink>
