@@ -474,8 +474,3 @@ Implementacja podstawowych oznaczeń ARIA i poprawa dostępności aplikacji, szc
 ---
 
 **Ostatnia aktualizacja:** 2025-01-21
-
-
-
-
-

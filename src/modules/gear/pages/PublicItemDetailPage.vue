@@ -9,9 +9,9 @@ import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import type { IGearItem } from '../types/gear.types'
 import CategoryIcon from '../components/CategoryIcon.vue'
+import { useCategoryLabel } from '../composables/useCategoryLabel'
 import { useFormattedItemPrice } from '../composables/useFormattedItemPrice'
 import { useFormattedItemWeight } from '../composables/useFormattedItemWeight'
-import { useGearSettings } from '../composables/useGearSettings'
 import { GearRoutePath } from '../routes'
 import { publicContainersService } from '../services/publicContainersService'
 import { getPriorityVariant, getStatusVariant } from '../utils/badgeVariants'
@@ -21,21 +21,12 @@ import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
-const { customCategories } = useGearSettings()
+const { getCategoryLabel } = useCategoryLabel()
 
 const containerId = route.params.containerId as string
 const itemId = route.params.itemId as string
 const item = ref<IGearItem | null>(null)
 const isLoading = ref(true)
-
-// Helper to get category label
-const getCategoryLabel = (categoryValue: string): string => {
-  const customCategory = customCategories.value.find(c => c.value === categoryValue)
-  if (customCategory) {
-    return customCategory.value
-  }
-  return t(`gear.item.categories.${categoryValue}`)
-}
 
 // Helper to check if item is expired
 function isExpired(item: IGearItem): boolean {
@@ -58,13 +49,13 @@ const loadItem = async () => {
     // Load container to get the item
     const container = await publicContainersService.getPublicContainer(containerId)
     const foundItem = container.items.find(i => i.id === itemId)
-    
+
     if (!foundItem) {
       toast.error(t('common.error'))
       router.push(GearRoutePath.PublicContainerDetailById(containerId))
       return
     }
-    
+
     item.value = foundItem
   } catch (error) {
     console.error('Failed to load public item:', error)

@@ -13,6 +13,7 @@ import { ALL_ITEMS_PAGE_FILTERS_KEY, ALL_ITEMS_TABLE_COLUMN_VISIBILITY_KEY, conf
 import type { IItemWithContainer } from '../utils/allItemsColumns'
 import CategoryIcon from '../components/CategoryIcon.vue'
 import ItemsTableImageCell from '../components/items-table/ItemsTableImageCell.vue'
+import { useCategoryLabel } from '../composables/useCategoryLabel'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { formatItemWeight } from '../composables/useFormattedItemWeight'
 import { useGear } from '../composables/useGear'
@@ -28,7 +29,7 @@ import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 const router = useRouter()
 const { t } = useI18n()
 const { containers } = useGear()
-const { customCategories } = useGearSettings()
+const { getCategoryLabel } = useCategoryLabel()
 const { settings: gearSettings } = useGearSettings()
 const { getContainerTypeLabel } = useContainerTypeLabel()
 const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
@@ -155,15 +156,6 @@ watch(
 
 // Columns
 const columns = computed(() => createAllItemsColumns(t))
-
-// Helper to get category label
-const getCategoryLabel = (categoryValue: string): string => {
-  const customCategory = customCategories.value.find(c => c.value === categoryValue)
-  if (customCategory) {
-    return customCategory.value
-  }
-  return t(`gear.item.categories.${categoryValue}`)
-}
 
 // Global filter function
 const globalFilterFn = (row: IItemWithContainer, filterValue: string) => {

@@ -15,9 +15,9 @@ import type { IGearContainer, IGearItem } from '../types/gear.types'
 import CategoryIcon from '../components/CategoryIcon.vue'
 import ItemImageGallery from '../components/ItemImageGallery.vue'
 import SearchImagesButton from '../components/SearchImagesButton.vue'
+import { useCategoryLabel } from '../composables/useCategoryLabel'
 import { useFormattedItemPrice } from '../composables/useFormattedItemPrice'
 import { useFormattedItemWeight } from '../composables/useFormattedItemWeight'
-import { useGearSettings } from '../composables/useGearSettings'
 import { GearRoutePath } from '../routes'
 import { gearContainerService } from '../services/gearContainerService'
 import { gearItemService } from '../services/gearItemService'
@@ -31,7 +31,7 @@ const router = useRouter()
 const { t } = useI18n()
 const store = useGearStore()
 const { shouldUseAPI } = useBackend()
-const { customCategories } = useGearSettings()
+const { getCategoryLabel } = useCategoryLabel()
 const { user, isAuthenticated } = useAuth()
 
 const containerId = route.params.containerId as string
@@ -64,15 +64,6 @@ const isOwner = computed(() => {
 const canManageImages = computed(() => {
   return isAdmin.value && isOwner.value
 })
-
-// Helper to get category label
-const getCategoryLabel = (categoryValue: string): string => {
-  const customCategory = customCategories.value.find(c => c.value === categoryValue)
-  if (customCategory) {
-    return customCategory.value
-  }
-  return t(`gear.item.categories.${categoryValue}`)
-}
 
 // Helper to check if item is expired
 function isExpired(item: IGearItem): boolean {

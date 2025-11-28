@@ -47,8 +47,3 @@ const badgeText = computed<string>(() => {
     {{ badgeText }}
   </Badge>
 </template>
-
-
-
-
-

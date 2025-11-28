@@ -18,6 +18,7 @@ import ShoppingExportDialog from '../components/shopping/ShoppingExportDialog.vu
 import ShoppingListFilters from '../components/shopping/ShoppingListFilters.vue'
 import ShoppingListItem from '../components/shopping/ShoppingListItem.vue'
 import ShoppingListSummary from '../components/shopping/ShoppingListSummary.vue'
+import { useCategoryLabel } from '../composables/useCategoryLabel'
 import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
 import { EXPIRATION_WARNING_DAYS, MILLISECONDS_PER_DAY } from '../utils/constants'
@@ -29,7 +30,8 @@ const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
 const { containers, createItem, updateItem } = useGear()
-const { customCategories, defaultCurrency } = useGearSettings()
+const { defaultCurrency } = useGearSettings()
+const { getCategoryLabel } = useCategoryLabel()
 
 // Filters
 const selectedCategories = ref<TGearItemCategory[]>([])
@@ -185,15 +187,6 @@ const allCategories = computed<TGearItemCategory[]>(() => {
   })
   return Array.from(categories).sort()
 })
-
-// Helper to get category label
-const getCategoryLabel = (categoryValue: string): string => {
-  const customCategory = customCategories.value.find(c => c.value === categoryValue)
-  if (customCategory) {
-    return customCategory.value
-  }
-  return t(`gear.item.categories.${categoryValue}`)
-}
 
 // Priority order for sorting
 const priorityOrder: Record<TGearItemPriority, number> = {

@@ -76,9 +76,3 @@ export function getColorOptions(): Array<{ value: string; label: string; data: s
     data: getColorHex(color) ?? color,
   }))
 }
-
-
-
-
-
-

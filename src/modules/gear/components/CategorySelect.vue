@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n'
 import {
   Select,
   SelectContent,
@@ -7,6 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useCategoryLabel } from '../composables/useCategoryLabel'
 import { useGearSettings } from '../composables/useGearSettings'
 import CategoryIcon from './CategoryIcon.vue'
 
@@ -16,16 +16,8 @@ defineProps<{
   placeholder?: string
 }>()
 
-const { t } = useI18n()
 const { customCategories } = useGearSettings()
-
-const getCategoryLabel = (categoryValue: string): string => {
-  const customCategory = customCategories.value.find(c => c.value === categoryValue)
-  if (customCategory) {
-    return customCategory.value
-  }
-  return t(`gear.item.categories.${categoryValue}`)
-}
+const { getCategoryLabel } = useCategoryLabel()
 
 const defaultCategories = [
   'blades',
@@ -81,8 +73,3 @@ const defaultCategories = [
     </SelectContent>
   </Select>
 </template>
-
-
-
-
-
