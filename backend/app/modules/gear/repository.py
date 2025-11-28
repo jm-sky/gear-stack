@@ -236,6 +236,25 @@ class GearRepository(SearchMixin):
         await self.db.commit()
         return True
 
+    async def delete_all_containers(self, user_id: str) -> int:
+        """Delete all containers for a user.
+
+        Args:
+            user_id: Owner user ID
+
+        Returns:
+            Number of deleted containers
+        """
+        stmt = select(GearContainerDB).where(GearContainerDB.user_id == user_id)
+        result = await self.db.execute(stmt)
+        containers = result.scalars().all()
+
+        for container in containers:
+            await self.db.delete(container)
+
+        await self.db.commit()
+        return len(containers)
+
     # Item operations
     async def create_item(self, container_id: str, user_id: str, data: ItemCreate) -> GearItemDB | None:
         """Create a new gear item in a container.

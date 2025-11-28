@@ -204,7 +204,7 @@ Jeżeli kontener będzie miał obrazek (primary image), wyświetlać go w nagł�
 - ✅ Obsługa wszystkich jednostek: g, kg, oz, lb
 
 ### Przycisk "Importuj z Markdown" w empty state Container List
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Small
 
 - Na stronie Container List (`ContainersListPage.vue`), gdy nie ma żadnych kontenerów (empty state), powinien być dostępny przycisk "Importuj z Markdown"
 - Obecnie w empty state są tylko przyciski:
@@ -213,8 +213,8 @@ Jeżeli kontener będzie miał obrazek (primary image), wyświetlać go w nagł�
 - Dodanie przycisku "Importuj z Markdown" w empty state ułatwi użytkownikom szybkie rozpoczęcie pracy z aplikacją poprzez import istniejących danych
 - Przycisk powinien otwierać dialog importu markdown (już istniejący `ImportMarkdownDialog`)
 
-### 🔄 Sidebar menu kompatybilny z LighterPack
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+### ✅ Sidebar menu kompatybilny z LighterPack
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium
 
 - Dodanie sidebar menu (bocznego menu) kompatybilnego z LighterPack
 - Sidebar powinien wyświetlać:
@@ -997,22 +997,23 @@ Wszystkie funkcjonalności wymagające backendu, bazy danych lub autoryzacji zos
 
 ---
 
-### 🔄 Usuwanie wszystkich kontenerów - rozjazd między backend a localStorage
-**Status:** 🔄 Open | **Priority:** High | **Complexity:** Medium
+### ✅ Usuwanie wszystkich kontenerów - rozjazd między backend a localStorage
+**Status:** ✅ Completed | **Priority:** High | **Complexity:** Medium
 
-- Po użyciu funkcji "Usuń wszystkie kontenery" wszystkie kontenery znikają ze strony
-- Po odświeżeniu strony pokazuje się jeszcze kilka kontenerów, które trzeba usunąć ponownie
-- **Przyczyna (hipoteza):** Rozjazd między synchronizacją backendu i localStorage - niektóre kontenery są usuwane tylko z jednego źródła
-- **Kroki do reprodukcji:**
-  1. Użyj funkcji "Usuń wszystkie kontenery"
-  2. Wszystkie kontenery znikają z widoku
-  3. Odśwież stronę (F5)
-  4. Kilka kontenerów nadal się pojawia
+- ✅ Problem rozwiązany: Dodano dedykowany endpoint backendu `DELETE /gear/containers` do usuwania wszystkich kontenerów w jednej transakcji
+- ✅ localStorage jest czyszczone tylko po potwierdzonym sukcesie operacji na backendzie
+- ✅ Eliminacja rozjazdu między backendem a localStorage
+
+**Rozwiązanie:**
+- Backend: Dodano endpoint `DELETE /gear/containers` w `router.py`, metodę `delete_all_containers()` w `service.py` i `repository.py`
+- Frontend: Zaktualizowano `gearContainerApiService.ts` i `gearContainerService.ts` do użycia nowego endpointu zamiast usuwania pojedynczo
 
 **Powiązane pliki:**
-- `src/modules/gear/services/gearContainerService.ts` (metoda `deleteAllContainers`)
-- `src/modules/gear/services/gearContainerLocalService.ts`
-- `src/modules/gear/store/useGearStore.ts`
+- `backend/app/modules/gear/router.py` - endpoint `DELETE /gear/containers`
+- `backend/app/modules/gear/service.py` - metoda `delete_all_containers(user_id)`
+- `backend/app/modules/gear/repository.py` - implementacja usuwania wszystkich kontenerów
+- `src/modules/gear/services/gearContainerApiService.ts` - metoda `deleteAllContainers()`
+- `src/modules/gear/services/gearContainerService.ts` - zaktualizowana metoda `deleteAllContainers()`
 
 ---
 

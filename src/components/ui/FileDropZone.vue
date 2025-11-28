@@ -4,7 +4,7 @@ import { Upload } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { cn } from '@/lib/utils'
-import { useAdmin } from '@/modules/admin/composables/useAdmin'
+import { usePermissions } from '@/shared/composables/usePermissions'
 import { config } from '@/shared/config/config'
 
 
@@ -23,7 +23,7 @@ const props = withDefaults(defineProps<FileDropZoneProps>(), {
   disabled: false,
 })
 
-const { isAdmin } = useAdmin()
+const { isAdmin } = usePermissions()
 
 // Compute maxSize from config if not provided as prop
 const effectiveMaxSize = computed(() => {

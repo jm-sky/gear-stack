@@ -2,10 +2,10 @@
 import { useI18n } from 'vue-i18n'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { useAdmin } from '@/modules/admin/composables/useAdmin'
+import { usePermissions } from '@/shared/composables/usePermissions'
 
 const { t } = useI18n()
-const { isAdmin } = useAdmin()
+const { isAdmin } = usePermissions()
 
 defineProps<{
   modelValue?: string

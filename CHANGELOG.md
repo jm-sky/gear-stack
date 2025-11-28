@@ -21,6 +21,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.24.0] - 2025-01-XX
+
+### Added
+- **Sidebar Navigation**: New sidebar menu compatible with LighterPack design
+  - Collapsible sidebar with container list and navigation links
+  - Responsive design with mobile drawer support
+  - Sidebar state persisted in cookies
+  - New UI components: Sidebar, SidebarProvider, SidebarInset, and related components
+  - AppHeader and AppSidebar components for new layout structure
+  - Skeleton and Tooltip UI components
+
+- **Import Button in Empty State**: Added "Import from Markdown" button in empty state on Containers List page
+  - Quick access to import functionality when no containers exist
+  - Improved UX for new users starting with the application
+
+- **Backend Endpoint for Delete All Containers**: New `DELETE /gear/containers` endpoint
+  - Atomic deletion of all user containers in single transaction
+  - More efficient than deleting containers one by one
+  - Ensures data consistency between backend and localStorage
+
+### Changed
+- **Layout Refactoring**: Restructured AuthenticatedLayout to use sidebar pattern
+  - Moved navigation from top bar to sidebar
+  - Header now contains logo, sidebar trigger, and user menu
+  - Improved navigation structure and organization
+
+- **Admin Composable Refactoring**: Replaced `useAdmin()` composable with `usePermissions()`
+  - Centralized permission logic in shared composable
+  - Better code organization and maintainability
+  - All admin checks now use `usePermissions()` composable
+
+- **Import Markdown Dialog**: Enhanced preview and import button states
+  - Preview button disabled when markdown content is too short
+  - Visual feedback for button states (default/outline variants)
+  - Improved UX for import workflow
+
+### Fixed
+- **Delete All Containers Bug**: Fixed desynchronization between backend and localStorage
+  - localStorage now cleared only after successful backend deletion
+  - Eliminates issue where containers reappeared after page refresh
+  - Uses new dedicated backend endpoint for atomic deletion
+
+---
+
 ## [2.23.0] - 2025-11-28
 
 ### Added

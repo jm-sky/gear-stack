@@ -2,10 +2,10 @@
 import { ChevronDown, ChevronUp } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { Button } from '@/components/ui/button'
-import { useAdmin } from '@/modules/admin/composables/useAdmin'
+import { usePermissions } from '@/shared/composables/usePermissions'
 import type { IAiChatMessage } from '../types'
 
-const { isAdmin } = useAdmin()
+const { isAdmin } = usePermissions()
 
 const show = defineModel<boolean>('show', { default: false })
 

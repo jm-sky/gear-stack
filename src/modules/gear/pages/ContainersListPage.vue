@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { refDebounced } from '@vueuse/core'
-import { Package } from 'lucide-vue-next'
+import { FileInput, Package } from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
+import ButtonLink from '@/components/ui/button-link/ButtonLink.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { CONTAINERS_LIST_PAGE_FILTERS_KEY } from '@/shared/config/config'
 import { config } from '@/shared/config/config'
@@ -250,7 +251,7 @@ const handleExportAllToCSV = () => {
       />
 
       <!-- Containers Grid -->
-      <div v-if="filteredContainers.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div v-if="filteredContainers.length > 0" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
         <ContainerCard
           v-for="container in filteredContainers"
           :key="container.id"
@@ -270,12 +271,25 @@ const handleExportAllToCSV = () => {
         <p class="text-muted-foreground mb-6 max-w-md">
           {{ t('gear.container.emptyDescription') }}
         </p>
-        <div class="flex flex-col md:flex-row flex-wrap gap-2">
+        <div class="flex flex-col items-center justify-center flex-wrap gap-2">
           <Button @click="handleCreate">
             <CreateIcon class="size-4" />
             {{ t('gear.container.create.title') }}
           </Button>
+
+          <div class="flex items-center gap-2 text-muted-foreground">
+            <span>{{ t('common.or', 'or') }}</span>
+          </div>
+
           <GenerateExampleGearButton size="default" :redirect="false" />
+
+          <ButtonLink
+            variant="outline"
+            :to="GearRoutePath.Import"
+          >
+            <FileInput class="size-4" />
+            {{ t('gear.import.fromMarkdown', 'Import from Markdown') }}
+          </ButtonLink>
         </div>
       </div>
     </div>

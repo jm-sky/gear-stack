@@ -81,6 +81,7 @@ export default {
     },
   },
   navigation: {
+    main: 'Nawigacja',
     dashboard: 'Panel',
     profile: 'Profil',
     settings: 'Ustawienia',

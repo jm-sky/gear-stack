@@ -113,6 +113,10 @@ class GearContainerApiService {
     await apiClient.delete(`/gear/containers/${id}`)
   }
 
+  async deleteAllContainers(): Promise<void> {
+    await apiClient.delete('/gear/containers')
+  }
+
   // Statistics operations
   async getContainerWeight(containerId: TUUID): Promise<{ grams: number; kilograms: number }> {
     const response = await apiClient.get<{ grams: number; kilograms: number }>(

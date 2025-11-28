@@ -6,11 +6,11 @@
 import { CheckIcon, XIcon } from 'lucide-vue-next'
 import { computed, ref, } from 'vue'
 import Button from '@/components/ui/button/Button.vue'
-import { useAdmin } from '@/modules/admin/composables/useAdmin'
+import { usePermissions } from '@/shared/composables/usePermissions'
 import type { IAiChatMessage, IAiStructuredOutput } from '../types'
 import AiCostDisplay from './AiCostDisplay.vue'
 
-const { isAdmin } = useAdmin()
+const { isAdmin } = usePermissions()
 
 const { message, debugPrompt } = defineProps<{
   message: IAiChatMessage

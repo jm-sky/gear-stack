@@ -388,6 +388,17 @@ class GearService:
         """
         return await self.repository.delete_container(container_id, user_id)
 
+    async def delete_all_containers(self, user_id: str) -> int:
+        """Delete all containers for a user.
+
+        Args:
+            user_id: Owner user ID
+
+        Returns:
+            Number of deleted containers
+        """
+        return await self.repository.delete_all_containers(user_id)
+
     async def create_item(self, container_id: str, user_id: str, data: ItemCreate) -> ItemResponse | None:
         """Create a new gear item in a container.
 

@@ -156,6 +156,7 @@ const handleImport = async () => {
       if (containerData.id) {
         containerIdMap.set(containerData.id, container.id)
       }
+
       // Also map UUID if available (for update mode)
       if (containerData.uuid) {
         containerIdMap.set(containerData.uuid, container.id)
@@ -348,12 +349,18 @@ const handleImport = async () => {
           <Button type="button" variant="outline" @click="handleClose">
             {{ t('gear.actions.cancel') }}
           </Button>
-          <Button type="button" variant="outline" @click="handlePreview">
+          <Button
+            type="button"
+            :variant="previewResult ? 'outline' : 'default'"
+            :disabled="markdownContent.trim().length < 4"
+            @click="handlePreview"
+          >
             <FileText class="size-4" />
             {{ t('gear.import.preview') }}
           </Button>
           <Button
             type="button"
+            :variant="previewResult ? 'default' : 'outline'"
             :disabled="!previewResult || previewResult.containers.length === 0 || importing"
             :loading="importing"
             @click="handleImport"

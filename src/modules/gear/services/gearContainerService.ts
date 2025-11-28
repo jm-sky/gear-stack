@@ -91,20 +91,12 @@ export const gearContainerService = () => {
       // Add methods from local service that are not in API service
       async deleteAllContainers() {
         const store = useGearStore()
-        const containers = store.getAllContainers
         
         try {
-          // Delete all containers via API one by one
-          await Promise.all(
-            containers.map(container => 
-              gearContainerApiService.deleteContainer(container.id).catch(err => {
-                console.warn(`Failed to delete container ${container.id} from API:`, err)
-                // Continue with other deletions even if one fails
-              })
-            )
-          )
+          // Delete all containers via API using dedicated endpoint
+          await gearContainerApiService.deleteAllContainers()
           
-          // Clear store and localStorage after successful API deletions
+          // Clear store and localStorage after successful API deletion
           store.clearAllContainers()
         } catch (error) {
           // Fallback to localStorage on API error

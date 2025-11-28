@@ -5,11 +5,11 @@ import { RouterLink } from 'vue-router'
 import Button from '@/components/ui/button/Button.vue'
 import Card from '@/components/ui/card/Card.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import { useAdmin } from '../composables/useAdmin'
+import { usePermissions } from '@/shared/composables/usePermissions'
 import { AdminRoutePaths } from '../routes'
 
 const { t } = useI18n()
-const { isAdmin } = useAdmin()
+const { isAdmin } = usePermissions()
 
 if (!isAdmin.value) {
   // Redirect will be handled by router guard

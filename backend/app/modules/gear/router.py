@@ -191,6 +191,24 @@ async def update_container(
 
 
 @router.delete(
+    "/containers",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete all containers",
+)
+async def delete_all_containers(
+    current_user: CurrentUser,
+    service: GearServiceDep,
+) -> None:
+    """Delete all gear containers for the current user.
+
+    Args:
+        current_user: Authenticated user
+        service: Gear service instance
+    """
+    await service.delete_all_containers(current_user.id)
+
+
+@router.delete(
     "/containers/{container_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a container",

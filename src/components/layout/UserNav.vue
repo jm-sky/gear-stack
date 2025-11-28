@@ -11,12 +11,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
-import { useAdmin } from '@/modules/admin/composables/useAdmin'
 import { AdminRoutePaths } from '@/modules/admin/routes'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { AuthRoutePaths } from '@/modules/auth/config/routes'
 import { SettingsRoutePaths } from '@/modules/settings/routes'
 import { UserRoutePaths } from '@/modules/user/routes'
+import { usePermissions } from '@/shared/composables/usePermissions'
 import { getInitials } from '@/shared/utils/getInitials'
 import Avatar from '../ui/avatar/Avatar.vue'
 import AvatarFallback from '../ui/avatar/AvatarFallback.vue'
@@ -41,7 +41,7 @@ export interface UserNavProps {
 
 const { t } = useI18n()
 const { isAuthenticated } = useAuth()
-const { isAdmin } = useAdmin()
+const { isAdmin } = usePermissions()
 
 const props = defineProps<UserNavProps>()
 
