@@ -21,6 +21,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.23.0] - 2025-11-28
+
+### Added
+- **Dynamic Page Titles**: Automatic document title management for all routes
+  - Router guard automatically sets page titles based on route metadata
+  - Format: `{Page Title} | {App Name}` (e.g., "Dashboard | Gear Stack")
+  - Support for static titles via `meta.title` i18n keys
+  - Support for dynamic titles with object names (e.g., container/item names)
+  - New `usePageTitle()` composable for manual title management in components
+  - All routes now have proper i18n translation keys for page titles
+  - Dynamic titles update automatically when data loads (containers, items, etc.)
+
+### Changed
+- Router now automatically sets document title on navigation
+- Page titles are internationalized using existing i18n infrastructure
+
+---
+
 ## [2.22.0] - 2025-11-28
 
 ### Added
