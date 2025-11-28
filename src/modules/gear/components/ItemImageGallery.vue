@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
 import Button from '@/components/ui/button/Button.vue'
 import FileDropZone from '@/components/ui/FileDropZone.vue'
+import { useItemImage } from '@/modules/gear/composables/useItemImage'
 import { itemImageApiService } from '@/modules/gear/services/itemImageApiService'
 import { useHandleError } from '@/shared/composables/useHandleError'
 import ItemImageCard from './ItemImageCard.vue'
@@ -21,6 +22,7 @@ const props = defineProps<{
 
 const { t } = useI18n()
 const { handleError } = useHandleError()
+const { deleteImage: deleteImageWithUpdate, setPrimaryImage: setPrimaryImageWithUpdate, uploadImage: uploadImageWithUpdate } = useItemImage()
 
 const images = ref<IItemImage[]>([])
 const draggedImages = ref<IItemImage[]>([]) // Separate state for drag operations
@@ -87,7 +89,8 @@ async function uploadImages(files: File[]) {
       try {
         // First image should be primary if there's no primary yet
         const isPrimary = !hasPrimary && i === 0
-        const newImage = await itemImageApiService.uploadImage(props.itemId, file, isPrimary)
+        // Use composable that updates both API and Pinia store
+        const newImage = await uploadImageWithUpdate(props.itemId, file, isPrimary)
         uploadedImages.push(newImage)
         images.value.push(newImage)
       } catch (error: unknown) {
@@ -126,7 +129,8 @@ async function deleteImage(imageId: TUUID) {
   }
 
   try {
-    await itemImageApiService.deleteImage(imageId)
+    // Use composable that updates both API and Pinia store
+    await deleteImageWithUpdate(props.itemId, imageId)
     images.value = images.value.filter(img => img.id !== imageId)
     imageLoadErrors.value.delete(imageId)
     toast.success(t('gear.fileUpload.imageGallery.messages.deleteSuccess'))
@@ -145,7 +149,8 @@ async function setPrimary(imageId: TUUID) {
   }
 
   try {
-    await itemImageApiService.setPrimaryImage(props.itemId, imageId)
+    // Use composable that updates both API and Pinia store
+    await setPrimaryImageWithUpdate(props.itemId, imageId)
     images.value = images.value.map(img => ({
       ...img,
       isPrimary: img.id === imageId,

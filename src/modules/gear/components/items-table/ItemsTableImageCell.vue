@@ -13,6 +13,7 @@ import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue
 import DropdownMenuTrigger from '@/components/ui/dropdown-menu/DropdownMenuTrigger.vue'
 import { Input } from '@/components/ui/input'
 import { useAuth } from '@/modules/auth/composables/useAuth'
+import { useItemImage } from '@/modules/gear/composables/useItemImage'
 import { GearRoutePath } from '@/modules/gear/routes'
 import { itemImageApiService } from '@/modules/gear/services/itemImageApiService'
 import { useGearStore } from '@/modules/gear/store/useGearStore'
@@ -35,6 +36,7 @@ const { t } = useI18n()
 const { handleError } = useHandleError()
 const { user, isAuthenticated } = useAuth()
 const store = useGearStore()
+const { uploadImage: uploadImageWithUpdate, uploadImageFromUrl: uploadImageFromUrlWithUpdate, deleteImage: deleteImageWithUpdate } = useItemImage()
 
 const isUploading = ref(false)
 const fileInput = ref<HTMLInputElement>()
@@ -118,7 +120,8 @@ async function uploadImage(file: File) {
 
   try {
     isUploading.value = true
-    await itemImageApiService.uploadImage(props.itemId, file, true)
+    // Use composable that updates both API and Pinia store
+    await uploadImageWithUpdate(props.itemId, file, true)
     toast.success(t('gear.itemsTable.imageCell.uploadSuccess'))
     emit('imageUpdated')
   } catch (error: unknown) {
@@ -146,7 +149,8 @@ async function handleDeleteImage() {
     const images = await itemImageApiService.getImages(props.itemId)
     const primaryImage = images.find(img => img.isPrimary)
     if (primaryImage) {
-      await itemImageApiService.deleteImage(primaryImage.id)
+      // Use composable that updates both API and Pinia store
+      await deleteImageWithUpdate(props.itemId, primaryImage.id)
       toast.success(t('gear.itemsTable.imageCell.deleteSuccess'))
       emit('imageUpdated')
     }
@@ -188,7 +192,8 @@ async function handleAddFromUrl() {
     // Check if there's already a primary image
     const images = await itemImageApiService.getImages(props.itemId)
     const hasPrimary = images.some(img => img.isPrimary)
-    await itemImageApiService.uploadImageFromUrl(props.itemId, url, !hasPrimary)
+    // Use composable that updates both API and Pinia store
+    await uploadImageFromUrlWithUpdate(props.itemId, url, !hasPrimary)
     toast.success(t('gear.fileUpload.imageGallery.messages.uploadSuccess'))
     urlDialogOpen.value = false
     imageUrl.value = ''

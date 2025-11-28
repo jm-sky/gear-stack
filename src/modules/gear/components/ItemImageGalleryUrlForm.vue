@@ -6,13 +6,14 @@ import Button from '@/components/ui/button/Button.vue'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { itemImageApiService } from '@/modules/gear/services/itemImageApiService'
+import { useItemImage } from '@/modules/gear/composables/useItemImage'
 import { useHandleError } from '@/shared/composables/useHandleError'
 import type { IItemImage } from '../types/itemImage.types'
 import type { TUUID } from '@/shared/types/base.type'
 
 const { t } = useI18n()
 const { handleError } = useHandleError()
+const { uploadImageFromUrl: uploadImageFromUrlWithUpdate } = useItemImage()
 
 const images = defineModel<IItemImage[]>('images', { required: true })
 const imageLoadErrors = defineModel<Set<TUUID>>('imageLoadErrors', { required: true })
@@ -59,7 +60,8 @@ async function handleAddFromUrl() {
     isSubmittingUrl.value = true
     const hasPrimary = images.value.some(img => img.isPrimary)
     const hostLocally = hostOption.value === 'local'
-    const newImage = await itemImageApiService.uploadImageFromUrl(itemId, url, !hasPrimary, hostLocally)
+    // Use composable that updates both API and Pinia store
+    const newImage = await uploadImageFromUrlWithUpdate(itemId, url, !hasPrimary, hostLocally)
     images.value.push(newImage)
     imageLoadErrors.value.delete(newImage.id)
     toast.success(t('gear.fileUpload.imageGallery.messages.uploadSuccess'))

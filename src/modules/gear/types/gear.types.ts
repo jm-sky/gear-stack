@@ -208,6 +208,7 @@ export interface IUpdateItemDto {
   consumable?: boolean | null
   order?: number | null
   showOnContainer?: boolean | null
+  primaryImageUrl?: string | null // URL of the primary image for the item
 }
 
 // Service interface for gear operations
