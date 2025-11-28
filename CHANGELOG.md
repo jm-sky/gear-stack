@@ -21,6 +21,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.21.0] - 2025-01-28
+
+### Added
+- **Inline Container Name Editing**: Quick edit functionality for container names directly on Container Details page
+  - Click on container name or edit icon to start editing
+  - Save with Enter key, cancel with Escape key
+  - Implemented in dedicated `ContainerHeaderName.vue` component
+  - Visual feedback with hover states and edit icon
+
+### Changed
+- **Translation Refactoring**: Migrated from `$t` to `t` from `useI18n()` composable
+  - Updated `ItemFormFields.vue` (44 occurrences)
+  - Updated `ContainerFormFields.vue` (28 occurrences)
+  - Updated `ContainerHeader.vue` (3 occurrences)
+  - Updated `ColorAutocomplete.vue` (1 occurrence)
+  - Improves consistency with Vue 3 Composition API best practices
+  - Better TypeScript support and testability
+
+- **Form Labels Standardization**: Replaced manual `<label>` tags with `Label` component
+  - Updated `ItemFormPage.vue` to use `Label` component with `required` prop
+  - Ensures consistent styling and required field indicators across forms
+
+### Fixed
+
+---
+
 ## [2.20.1] - 2025-01-27
 
 ### Fixed
