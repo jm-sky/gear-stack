@@ -12,11 +12,13 @@ from sqlalchemy import select, and_, or_, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload, joinedload
 
+from typing import TypedDict
+
 from app.common.id_utils import generate_id
 from app.common.search import SearchMixin
 from app.modules.auth.db_models import UserDB
 
-from .db_models import GearContainerDB, GearItemDB, ContainerShareTokenDB
+from .db_models import GearContainerDB, GearItemDB, ContainerShareTokenDB, ContainerRatingDB
 from .schemas import (
     BatchOrderUpdateRequest,
     ContainerCreate,
@@ -590,3 +592,196 @@ class GearRepository(SearchMixin):
         await self.db.delete(share_token)
         await self.db.commit()
         return True
+
+    # Rating operations
+    async def get_container_rating(
+        self,
+        container_id: str,
+        user_id: str,
+        rating_type: str = "user"
+    ) -> ContainerRatingDB | None:
+        """Get user's rating for a container by type.
+
+        Args:
+            container_id: Container ID
+            user_id: User ID
+            rating_type: Rating type ('owner' or 'user')
+
+        Returns:
+            Rating if found, None otherwise
+        """
+        result = await self.db.execute(
+            select(ContainerRatingDB)
+            .where(ContainerRatingDB.container_id == container_id)
+            .where(ContainerRatingDB.user_id == user_id)
+            .where(ContainerRatingDB.rating_type == rating_type)
+        )
+        return result.scalar_one_or_none()
+
+    async def upsert_container_rating(
+        self,
+        container_id: str,
+        user_id: str,
+        rating: int,
+        rating_type: str = "user"
+    ) -> ContainerRatingDB:
+        """Create or update user's rating for a container.
+
+        Args:
+            container_id: Container ID
+            user_id: User ID
+            rating: Rating value (1-5)
+            rating_type: Rating type ('owner' or 'user')
+
+        Returns:
+            Created or updated rating
+        """
+        existing = await self.get_container_rating(container_id, user_id, rating_type)
+
+        if existing:
+            existing.rating = rating
+            existing.updated_at = datetime.now(UTC)
+            await self.db.flush()
+            return existing
+
+        new_rating = ContainerRatingDB(
+            id=generate_id(),
+            container_id=container_id,
+            user_id=user_id,
+            rating=rating,
+            rating_type=rating_type,
+        )
+        self.db.add(new_rating)
+        await self.db.flush()
+        return new_rating
+
+    async def delete_container_rating(
+        self,
+        container_id: str,
+        user_id: str,
+        rating_type: str = "user"
+    ) -> bool:
+        """Delete user's rating for a container.
+
+        Args:
+            container_id: Container ID
+            user_id: User ID
+            rating_type: Rating type ('owner' or 'user')
+
+        Returns:
+            True if deleted, False if not found
+        """
+        rating = await self.get_container_rating(container_id, user_id, rating_type)
+        if rating:
+            await self.db.delete(rating)
+            await self.db.flush()
+            return True
+        return False
+
+    async def get_container_average_user_rating(
+        self,
+        container_id: str
+    ) -> float | None:
+        """Calculate average user rating for a container (excluding owner ratings).
+
+        Args:
+            container_id: Container ID
+
+        Returns:
+            Average rating or None if no ratings
+        """
+        result = await self.db.execute(
+            select(func.avg(ContainerRatingDB.rating))
+            .where(ContainerRatingDB.container_id == container_id)
+            .where(ContainerRatingDB.rating_type == "user")
+        )
+        avg = result.scalar()
+        return float(avg) if avg is not None else None
+
+    async def get_container_user_rating_count(
+        self,
+        container_id: str
+    ) -> int:
+        """Get number of user ratings for a container (excluding owner ratings).
+
+        Args:
+            container_id: Container ID
+
+        Returns:
+            Number of user ratings
+        """
+        result = await self.db.execute(
+            select(func.count(ContainerRatingDB.id))
+            .where(ContainerRatingDB.container_id == container_id)
+            .where(ContainerRatingDB.rating_type == "user")
+        )
+        return result.scalar() or 0
+
+    async def get_container_owner_rating(
+        self,
+        container_id: str
+    ) -> int | None:
+        """Get owner's rating for a container.
+
+        Args:
+            container_id: Container ID
+
+        Returns:
+            Owner rating (1-5) or None if not set
+        """
+        result = await self.db.execute(
+            select(ContainerRatingDB.rating)
+            .where(ContainerRatingDB.container_id == container_id)
+            .where(ContainerRatingDB.rating_type == "owner")
+            .limit(1)
+        )
+        rating = result.scalar_one_or_none()
+        return rating if rating else None
+
+    class ContainerRatingsData(TypedDict):
+        """Type for container ratings aggregated data."""
+
+        owner_rating: int | None
+        user_rating: int | None
+        average_user_rating: float | None
+        user_rating_count: int
+
+    async def get_container_ratings_data(
+        self,
+        container_id: str,
+        requesting_user_id: str | None = None,
+        is_owner: bool = False
+    ) -> ContainerRatingsData:
+        """Get all ratings data for a container.
+
+        Args:
+            container_id: Container ID
+            requesting_user_id: ID of user requesting the data (for user_rating)
+            is_owner: Whether requesting user is the owner
+
+        Returns:
+            Dictionary with all rating fields
+        """
+        # Load owner rating
+        owner_rating = await self.get_container_owner_rating(container_id)
+
+        # Load user rating (only if not owner and user_id provided)
+        user_rating = None
+        if requesting_user_id and not is_owner:
+            user_rating_obj = await self.get_container_rating(
+                container_id,
+                requesting_user_id,
+                rating_type="user"
+            )
+            user_rating = user_rating_obj.rating if user_rating_obj else None
+
+        # Calculate average user rating and count
+        avg_user_rating = await self.get_container_average_user_rating(container_id)
+        user_rating_count = await self.get_container_user_rating_count(container_id)
+
+        return {
+            'owner_rating': owner_rating,
+            'user_rating': user_rating,
+            'average_user_rating': avg_user_rating,
+            'user_rating_count': user_rating_count,
+        }

@@ -27,6 +27,12 @@ export type TGearItemQuality = 'low' | 'medium' | 'high'
 // Jednostka wagi
 export type TGearWeightUnit = 'g' | 'kg' | 'oz' | 'lb'
 
+// Rating type (1-5)
+export type TRatingValue = 1 | 2 | 3 | 4 | 5
+
+// Rating type enum
+export type TRatingType = 'owner' | 'user'
+
 // Container color options
 export type TContainerColor =
   | 'default'  // No color (gray/neutral)
@@ -112,6 +118,11 @@ export interface IGearContainer {
   maxWeightUnit?: TGearWeightUnit | null // Maximum weight unit (g or kg)
   url?: string | null // Link to product, review, etc.
   showItemImages?: boolean | null // Show item images in container view (only items with primary image)
+  // Rating fields
+  ownerRating?: TRatingValue | null // Owner's rating (1-5)
+  userRating?: TRatingValue | null // Current user's rating (if logged in)
+  averageUserRating?: number | null // Average of all user ratings
+  userRatingCount?: number // Number of user ratings
   items: IGearItem[]
   createdAt: TDateTime
   updatedAt: TDateTime
