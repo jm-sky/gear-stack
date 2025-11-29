@@ -4,6 +4,8 @@ import type {
   ICreateContainerDto,
   IGearContainer,
   IUpdateContainerDto,
+  TRatingType,
+  TRatingValue,
 } from '@/modules/gear/types/gear.types'
 import type { TUUID } from '@/shared/types/base.type'
 
@@ -139,6 +141,46 @@ class GearContainerApiService {
       toBuyItems: number
       readinessPercentage: number
     }>(`/gear/containers/${containerId}/stats/readiness`)
+    return response.data
+  }
+
+  // Rating operations
+  async rateContainer(
+    containerId: string,
+    rating: TRatingValue,
+    ratingType: TRatingType = 'user'
+  ): Promise<{
+    rating: TRatingValue
+    ratingType: TRatingType
+    ownerRating: TRatingValue | null
+    averageUserRating: number | null
+    userRatingCount: number
+  }> {
+    const response = await apiClient.post(
+      `/gear/containers/${containerId}/rating`,
+      {
+        rating,
+        ratingType
+      }
+    )
+    return response.data
+  }
+
+  async deleteContainerRating(
+    containerId: string,
+    ratingType: TRatingType = 'user'
+  ): Promise<{
+    message: string
+    ownerRating: TRatingValue | null
+    averageUserRating: number | null
+    userRatingCount: number
+  }> {
+    const response = await apiClient.delete(
+      `/gear/containers/${containerId}/rating`,
+      {
+        params: { rating_type: ratingType }
+      }
+    )
     return response.data
   }
 }

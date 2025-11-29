@@ -30,10 +30,36 @@ export function useOAuth() {
     }
   }
 
+  const initiateFacebookLogin = async () => {
+    if (!config.oauth.facebook.enabled) {
+      error.value = new Error('Facebook OAuth not configured')
+      return
+    }
+
+    isPending.value = true
+    error.value = null
+
+    try {
+      const response = await authService.getOAuthAuthUrl('facebook')
+
+      // Store state for CSRF verification
+      localStorage.setItem('oauth_state', response.state)
+
+      // Redirect to Facebook
+      window.location.href = response.authUrl
+    }
+    catch (err) {
+      error.value = err instanceof Error ? err : new Error('Failed to initiate login')
+      isPending.value = false
+    }
+  }
+
   return {
     error,
+    initiateFacebookLogin,
     initiateGoogleLogin,
     isEnabled: config.oauth.google.enabled,
+    isFacebookEnabled: config.oauth.facebook.enabled,
     isPending,
   }
 }

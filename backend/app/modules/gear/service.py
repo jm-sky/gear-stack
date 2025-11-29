@@ -92,11 +92,12 @@ class GearService:
             updatedAt=item.updated_at,
         )
 
-    async def _map_container_to_response(self, container: GearContainerDB) -> ContainerResponse:
+    async def _map_container_to_response(self, container: GearContainerDB, ratings_data: dict | None = None) -> ContainerResponse:
         """Map database container to response schema.
 
         Args:
             container: Database container model
+            ratings_data: Optional ratings data from repository
 
         Returns:
             Container response schema
@@ -116,6 +117,18 @@ class GearService:
 
         # Map items to responses with primary image URLs
         items = [self._map_item_to_response(item, image_urls.get(item.id)) for item in container_items]
+
+        # Map rating fields if provided
+        owner_rating = None
+        user_rating = None
+        average_user_rating = None
+        user_rating_count = 0
+
+        if ratings_data:
+            owner_rating = ratings_data.get("owner_rating")
+            user_rating = ratings_data.get("user_rating")
+            average_user_rating = ratings_data.get("average_user_rating")
+            user_rating_count = ratings_data.get("user_rating_count", 0)
 
         # Cast database string fields to their Literal types
         return ContainerResponse(
@@ -138,15 +151,20 @@ class GearService:
             showItemImages=container.show_item_images,
             authorName=None,  # Will be populated for public containers
             items=items,
+            ownerRating=owner_rating,
+            userRating=user_rating,
+            averageUserRating=float(average_user_rating) if average_user_rating else None,
+            userRatingCount=user_rating_count,
             createdAt=container.created_at,
             updatedAt=container.updated_at,
         )
 
-    async def _map_container_to_response_with_author(self, container: GearContainerDB) -> ContainerResponse:
+    async def _map_container_to_response_with_author(self, container: GearContainerDB, ratings_data: dict | None = None) -> ContainerResponse:
         """Map database container to response schema with author name.
 
         Args:
             container: Database container model (must have user relationship loaded)
+            ratings_data: Optional ratings data from repository
 
         Returns:
             Container response schema with author name
@@ -183,6 +201,18 @@ class GearService:
         if hasattr(container, "user") and container.user:
             author_name = container.user.name
 
+        # Map rating fields if provided
+        owner_rating = None
+        user_rating = None
+        average_user_rating = None
+        user_rating_count = 0
+
+        if ratings_data:
+            owner_rating = ratings_data.get("owner_rating")
+            user_rating = ratings_data.get("user_rating")
+            average_user_rating = ratings_data.get("average_user_rating")
+            user_rating_count = ratings_data.get("user_rating_count", 0)
+
         # Cast database string fields to their Literal types
         return ContainerResponse(
             id=container.id,
@@ -204,6 +234,10 @@ class GearService:
             showItemImages=container.show_item_images,
             authorName=author_name,
             items=filtered_items,
+            ownerRating=owner_rating,
+            userRating=user_rating,
+            averageUserRating=float(average_user_rating) if average_user_rating else None,
+            userRatingCount=user_rating_count,
             createdAt=container.created_at,
             updatedAt=container.updated_at,
         )
@@ -223,7 +257,16 @@ class GearService:
         if data.isPublic is None:
             data.isPublic = default_public
         container = await self.repository.create_container(user_id, data)
-        return await self._map_container_to_response(container)
+
+        # New container has no ratings yet
+        ratings_data = {
+            "owner_rating": None,
+            "user_rating": None,
+            "average_user_rating": None,
+            "user_rating_count": 0,
+        }
+
+        return await self._map_container_to_response(container, ratings_data)
 
     async def get_container(self, container_id: str, user_id: str) -> ContainerResponse | None:
         """Get a container by ID.
@@ -238,7 +281,11 @@ class GearService:
         container = await self.repository.get_container(container_id, user_id)
         if not container:
             return None
-        return await self._map_container_to_response(container)
+
+        is_owner = container.user_id == user_id
+        ratings_data = await self.repository.get_container_ratings_data(container_id, requesting_user_id=user_id, is_owner=is_owner)
+
+        return await self._map_container_to_response(container, ratings_data)
 
     async def get_containers(self, user_id: str, skip: int = 0, limit: int = 100) -> list[ContainerResponse]:
         """Get all containers for a user.
@@ -252,26 +299,36 @@ class GearService:
             List of container responses
         """
         containers = await self.repository.get_containers(user_id, skip, limit)
-        return await asyncio.gather(*[self._map_container_to_response(container) for container in containers])
+        results = []
+        for container in containers:
+            ratings_data = await self.repository.get_container_ratings_data(container.id, requesting_user_id=user_id, is_owner=True)
+            results.append(await self._map_container_to_response(container, ratings_data))
+        return results
 
-    async def get_public_containers(self, skip: int = 0, limit: int = 100) -> list[ContainerResponse]:
+    async def get_public_containers(self, skip: int = 0, limit: int = 100, requesting_user_id: str | None = None) -> list[ContainerResponse]:
         """Get all public containers from all users.
 
         Args:
             skip: Number of records to skip
             limit: Maximum number of records to return
+            requesting_user_id: Optional user ID for user rating data
 
         Returns:
             List of public container responses with author names
         """
         containers = await self.repository.get_public_containers(skip, limit)
-        return await asyncio.gather(*[self._map_container_to_response_with_author(container) for container in containers])
+        results = []
+        for container in containers:
+            ratings_data = await self.repository.get_container_ratings_data(container.id, requesting_user_id=requesting_user_id, is_owner=False)
+            results.append(await self._map_container_to_response_with_author(container, ratings_data))
+        return results
 
-    async def get_public_container(self, container_id: str) -> ContainerResponse | None:
+    async def get_public_container(self, container_id: str, requesting_user_id: str | None = None) -> ContainerResponse | None:
         """Get a public container by ID.
 
         Args:
             container_id: Container ID
+            requesting_user_id: Optional user ID for user rating data
 
         Returns:
             Container response with author name if found and public, None otherwise
@@ -279,13 +336,17 @@ class GearService:
         container = await self.repository.get_public_container(container_id)
         if not container:
             return None
-        return await self._map_container_to_response_with_author(container)
 
-    async def get_container_by_share_token(self, token: str) -> ContainerResponse | None:
+        ratings_data = await self.repository.get_container_ratings_data(container_id, requesting_user_id=requesting_user_id, is_owner=False)
+
+        return await self._map_container_to_response_with_author(container, ratings_data)
+
+    async def get_container_by_share_token(self, token: str, requesting_user_id: str | None = None) -> ContainerResponse | None:
         """Get a container by share token.
 
         Args:
             token: Share token
+            requesting_user_id: Optional user ID for user rating data
 
         Returns:
             Container response with author name if token is valid and not expired, None otherwise
@@ -293,7 +354,10 @@ class GearService:
         container = await self.repository.get_container_by_token(token)
         if not container:
             return None
-        return self._map_container_to_response_with_author(container)
+
+        ratings_data = await self.repository.get_container_ratings_data(container.id, requesting_user_id=requesting_user_id, is_owner=False)
+
+        return await self._map_container_to_response_with_author(container, ratings_data)
 
     async def create_share_token(self, container_id: str, user_id: str, expires_at: datetime | None = None) -> str:
         """Create a share token for a container.
@@ -374,7 +438,10 @@ class GearService:
         container = await self.repository.update_container(container_id, user_id, data)
         if not container:
             return None
-        return await self._map_container_to_response(container)
+
+        ratings_data = await self.repository.get_container_ratings_data(container_id, requesting_user_id=user_id, is_owner=True)
+
+        return await self._map_container_to_response(container, ratings_data)
 
     async def delete_container(self, container_id: str, user_id: str) -> bool:
         """Delete a container and all its items.

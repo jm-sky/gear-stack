@@ -340,6 +340,23 @@ class OAuthSettings(BaseSettings):
         description="Google OAuth redirect URI",
     )
 
+    # Facebook OAuth
+    facebook_client_id: str = Field(
+        default="",
+        validation_alias="FACEBOOK_OAUTH_CLIENT_ID",
+        description="Facebook OAuth client ID (App ID)",
+    )
+    facebook_client_secret: str = Field(
+        default="",
+        validation_alias="FACEBOOK_OAUTH_CLIENT_SECRET",
+        description="Facebook OAuth client secret (App Secret)",
+    )
+    facebook_redirect_uri: str = Field(
+        default="",
+        validation_alias="FACEBOOK_OAUTH_REDIRECT_URI",
+        description="Facebook OAuth redirect URI",
+    )
+
 
 class EmailSettings(BaseSettings):
     """Email service configuration."""

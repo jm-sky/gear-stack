@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint, CheckConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -265,3 +265,55 @@ ItemImageDB.user = relationship("UserDB", foreign_keys=[ItemImageDB.user_id])
 # Add relationships for share tokens
 ContainerShareTokenDB.container = relationship("GearContainerDB", foreign_keys=[ContainerShareTokenDB.container_id])
 ContainerShareTokenDB.user = relationship("UserDB", foreign_keys=[ContainerShareTokenDB.user_id])
+
+
+class ContainerRatingDB(Base):
+    """SQLAlchemy model for container ratings.
+
+    Supports two types of ratings:
+    - 'owner': Rating given by container owner
+    - 'user': Rating given by other users (for public containers)
+
+    Attributes:
+        id: Unique identifier (ULID format, 36 chars)
+        container_id: Rated container ID
+        user_id: User who gave the rating
+        rating: Rating value (1-5)
+        rating_type: Type of rating ('owner' or 'user')
+        created_at: Rating timestamp
+        updated_at: Last update timestamp
+    """
+
+    __tablename__ = "container_ratings"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    container_id: Mapped[str] = mapped_column(String(36), ForeignKey("gear_containers.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    rating: Mapped[int] = mapped_column(Integer, nullable=False)  # 1-5
+    rating_type: Mapped[str] = mapped_column(String(10), nullable=False, default="user")  # 'owner' or 'user'
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC), nullable=False)
+
+    # Unique constraint: one rating per user per container per type
+    # CHECK constraints for validation
+    __table_args__ = (
+        UniqueConstraint("container_id", "user_id", "rating_type", name="uq_container_rating_user_type"),
+        CheckConstraint("rating >= 1 AND rating <= 5", name="check_rating_range"),
+        CheckConstraint("rating_type IN ('owner', 'user')", name="check_rating_type"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<ContainerRatingDB(id={self.id}, container_id={self.container_id}, rating={self.rating}, rating_type={self.rating_type})>"
+
+
+# Add relationships for container ratings
+GearContainerDB.ratings = relationship(
+    "ContainerRatingDB",
+    back_populates="container",
+    cascade="all, delete-orphan",
+)
+ContainerRatingDB.container = relationship(
+    "GearContainerDB",
+    back_populates="ratings",
+)
+ContainerRatingDB.user = relationship("UserDB", foreign_keys=[ContainerRatingDB.user_id])

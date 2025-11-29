@@ -3,14 +3,18 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import type { IGearContainer } from '../types/gear.types'
+import { useAuth } from '@/modules/auth/composables/useAuth'
+import type { IGearContainer, TRatingType, TRatingValue } from '../types/gear.types'
 import CategoryPieChart from '../components/CategoryPieChart.vue'
+import ContainerRatingCard from '../components/ContainerRatingCard.vue'
 import ContainerReadinessProgressBar from '../components/ContainerReadinessProgressBar.vue'
 import ItemsTable from '../components/ItemsTable.vue'
 import PublicContainerHeader from '../components/PublicContainerHeader.vue'
 import { useGearSettings } from '../composables/useGearSettings'
 import { GearRoutePath } from '../routes'
+import { gearContainerApiService } from '../services/gearContainerApiService'
 import { publicContainersService } from '../services/publicContainersService'
 import { useGearStore } from '../store/useGearStore'
 import {
@@ -24,12 +28,21 @@ const router = useRouter()
 const { t } = useI18n()
 const store = useGearStore()
 const { settings: gearSettings } = useGearSettings()
+const { user } = useAuth()
 
 const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
 
 const containerId = route.params.id as string
 const container = ref<IGearContainer | null>(null)
 const isLoading = ref(true)
+const isRatingLoading = ref(false)
+
+const isOwner = computed(() => {
+  return container.value?.userId === user.value?.id
+})
+const isPublic = computed(() => {
+  return container.value?.isPublic ?? false
+})
 
 const loadContainer = async () => {
   try {
@@ -74,6 +87,47 @@ const formattedWeight = computed<string>(() => formatWeightToPreferredUnit(total
 
 const handleBack = () => {
   router.push(GearRoutePath.PublicContainers)
+}
+
+const handleRate = async (rating: TRatingValue, type: TRatingType) => {
+  if (!container.value) return
+
+  isRatingLoading.value = true
+  try {
+    await gearContainerApiService.rateContainer(
+      container.value.id,
+      rating,
+      type
+    )
+    // Refresh container data
+    await loadContainer()
+    toast.success(t('gear.container.ratingUpdated'))
+  } catch (error) {
+    console.error('Failed to rate container:', error)
+    toast.error(t('gear.errors.ratingFailed'))
+  } finally {
+    isRatingLoading.value = false
+  }
+}
+
+const handleDeleteRating = async (type: TRatingType) => {
+  if (!container.value) return
+
+  isRatingLoading.value = true
+  try {
+    await gearContainerApiService.deleteContainerRating(
+      container.value.id,
+      type
+    )
+    // Refresh container data
+    await loadContainer()
+    toast.success(t('gear.container.ratingDeleted'))
+  } catch (error) {
+    console.error('Failed to delete rating:', error)
+    toast.error(t('gear.errors.deleteRatingFailed'))
+  } finally {
+    isRatingLoading.value = false
+  }
 }
 </script>
 
@@ -129,6 +183,23 @@ const handleBack = () => {
         :public-mode="true"
         :container-id="containerId"
       />
+
+      <!-- Rating Section -->
+      <Card>
+        <CardHeader>
+          <CardTitle>{{ t('gear.container.ratings') }}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ContainerRatingCard
+            :container="container"
+            :is-owner="isOwner"
+            :is-public="isPublic"
+            :loading="isRatingLoading"
+            @rate="handleRate"
+            @delete-rating="handleDeleteRating"
+          />
+        </CardContent>
+      </Card>
 
       <!-- Category Pie Chart -->
       <CategoryPieChart :container="container" />

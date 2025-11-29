@@ -7,7 +7,8 @@ import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import OAuthButton from '@/modules/auth/components/OAuthButton.vue'
+import OAuthFacebookButton from '@/modules/auth/components/OAuthFacebookButton.vue'
+import OAuthGoogleButton from '@/modules/auth/components/OAuthGoogleButton.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { AuthRouteNames, AuthRoutePaths } from '@/modules/auth/config/routes'
 import { loginSchema } from '@/modules/auth/validation/login.schema'
@@ -121,7 +122,8 @@ const onSubmit = handleSubmit(async (values: LoginCredentials) => {
         </div>
       </div>
 
-      <OAuthButton />
+      <OAuthGoogleButton />
+      <OAuthFacebookButton />
     </template>
   </form>
 </template>

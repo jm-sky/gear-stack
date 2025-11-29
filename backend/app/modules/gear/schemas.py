@@ -16,6 +16,7 @@ GearItemStatus = Literal["owned", "missing", "toBuy"]
 GearItemPriority = Literal["critical", "high", "medium", "low"]
 GearItemQuality = Literal["low", "medium", "high"]
 GearWeightUnit = Literal["g", "kg", "oz", "lb"]
+RatingType = Literal["owner", "user"]
 ContainerColor = Literal[
     # Current colors
     "default",
@@ -145,6 +146,11 @@ class ContainerResponse(BaseModel):
     showItemImages: bool | None = Field(None, alias="showItemImages")
     authorName: str | None = None  # Only populated for public containers
     items: list[ItemResponse] = []
+    # Rating fields
+    ownerRating: int | None = Field(None, alias="ownerRating")  # Owner's rating (1-5)
+    userRating: int | None = Field(None, alias="userRating")  # Current user's rating (if logged in)
+    averageUserRating: float | None = Field(None, alias="averageUserRating")  # Average of all user ratings
+    userRatingCount: int = Field(default=0, alias="userRatingCount")  # Number of user ratings
     createdAt: datetime
     updatedAt: datetime
 
@@ -243,3 +249,27 @@ class ShareTokenResponse(BaseModel):
     shareUrl: str = Field(..., alias="shareUrl", description="Full share URL")
 
     model_config = {"populate_by_name": True}
+
+
+# Rating schemas
+class ContainerRatingCreate(BaseModel):
+    """Schema for creating/updating container rating."""
+
+    rating: int = Field(..., ge=1, le=5, description="Rating value from 1 to 5")
+    ratingType: RatingType = Field(default="user", alias="ratingType", description="Type of rating: 'owner' for owner rating, 'user' for user rating")
+
+    model_config = {"populate_by_name": True}
+
+
+class ContainerRatingResponse(BaseModel):
+    """Schema for container rating response."""
+
+    id: str
+    containerId: str = Field(alias="containerId")
+    userId: str = Field(alias="userId")
+    rating: int
+    ratingType: RatingType = Field(alias="ratingType")
+    createdAt: datetime = Field(alias="createdAt")
+    updatedAt: datetime = Field(alias="updatedAt")
+
+    model_config = {"from_attributes": True, "populate_by_name": True}
