@@ -256,11 +256,7 @@ class ContainerRatingCreate(BaseModel):
     """Schema for creating/updating container rating."""
 
     rating: int = Field(..., ge=1, le=5, description="Rating value from 1 to 5")
-    ratingType: RatingType = Field(
-        default="user",
-        alias="ratingType",
-        description="Type of rating: 'owner' for owner rating, 'user' for user rating"
-    )
+    ratingType: RatingType = Field(default="user", alias="ratingType", description="Type of rating: 'owner' for owner rating, 'user' for user rating")
 
     model_config = {"populate_by_name": True}
 

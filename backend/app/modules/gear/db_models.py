@@ -287,47 +287,19 @@ class ContainerRatingDB(Base):
     __tablename__ = "container_ratings"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
-    container_id: Mapped[str] = mapped_column(
-        String(36),
-        ForeignKey("gear_containers.id", ondelete="CASCADE"),
-        nullable=False,
-        index=True
-    )
-    user_id: Mapped[str] = mapped_column(
-        String(36),
-        ForeignKey("users.id", ondelete="CASCADE"),
-        nullable=False,
-        index=True
-    )
+    container_id: Mapped[str] = mapped_column(String(36), ForeignKey("gear_containers.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     rating: Mapped[int] = mapped_column(Integer, nullable=False)  # 1-5
-    rating_type: Mapped[str] = mapped_column(
-        String(10),
-        nullable=False,
-        default="user"
-    )  # 'owner' or 'user'
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        nullable=False
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        onupdate=lambda: datetime.now(UTC),
-        nullable=False
-    )
+    rating_type: Mapped[str] = mapped_column(String(10), nullable=False, default="user")  # 'owner' or 'user'
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC), nullable=False)
 
     # Unique constraint: one rating per user per container per type
     # CHECK constraints for validation
     __table_args__ = (
-        UniqueConstraint(
-            'container_id',
-            'user_id',
-            'rating_type',
-            name='uq_container_rating_user_type'
-        ),
-        CheckConstraint('rating >= 1 AND rating <= 5', name='check_rating_range'),
-        CheckConstraint("rating_type IN ('owner', 'user')", name='check_rating_type'),
+        UniqueConstraint("container_id", "user_id", "rating_type", name="uq_container_rating_user_type"),
+        CheckConstraint("rating >= 1 AND rating <= 5", name="check_rating_range"),
+        CheckConstraint("rating_type IN ('owner', 'user')", name="check_rating_type"),
     )
 
     def __repr__(self) -> str:
