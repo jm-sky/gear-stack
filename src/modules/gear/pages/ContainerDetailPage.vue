@@ -13,6 +13,7 @@ import { useBackend } from '@/shared/composables/useBackend'
 import { usePageTitle } from '@/shared/composables/usePageTitle'
 import { config } from '@/shared/config/config'
 import type { IGearItem } from '../types/gear.types'
+import type { TRatingType, TRatingValue } from '../types/gear.types'
 import AddNestedContainerDialog from '../components/AddNestedContainerDialog.vue'
 import CategoryPieChart from '../components/CategoryPieChart.vue'
 import ContainerHeader from '../components/ContainerHeader.vue'
@@ -30,7 +31,6 @@ import { gearItemService } from '../services/gearItemService'
 import { useGearStore } from '../store/useGearStore'
 import { createNavigationQuery } from '../utils/navigationParams'
 import { recognizeParameters, recognizeParametersForItems } from '../utils/parameterRecognition'
-import type { TRatingValue, TRatingType } from '../types/gear.types'
 
 const route = useRoute()
 const router = useRouter()

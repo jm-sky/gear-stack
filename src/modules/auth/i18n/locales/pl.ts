@@ -177,6 +177,7 @@ export const authPl = {
     oauth: {
       button: {
         continue_with_google: 'Google',
+        continue_with_facebook: 'Facebook',
         redirecting: 'Przekierowywanie...',
       },
       or_continue_with: 'Lub kontynuuj z',

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
 import { Star } from 'lucide-vue-next'
+import { computed, ref } from 'vue'
 import type { TRatingValue } from '../types/gear.types'
 
 interface Props {
@@ -37,9 +37,9 @@ const displayRating = computed(() => {
 
 const starSize = computed(() => {
   switch (props.size) {
-    case 'sm': return 'size-4'
-    case 'md': return 'size-5'
     case 'lg': return 'size-6'
+    case 'md': return 'size-5'
+    case 'sm': return 'size-4'
     default: return 'size-5'
   }
 })

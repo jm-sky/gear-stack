@@ -4,8 +4,8 @@ import type {
   ICreateContainerDto,
   IGearContainer,
   IUpdateContainerDto,
-  TRatingValue,
   TRatingType,
+  TRatingValue,
 } from '@/modules/gear/types/gear.types'
 import type { TUUID } from '@/shared/types/base.type'
 

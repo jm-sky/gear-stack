@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import type { IGearContainer, TRatingType, TRatingValue } from '../types/gear.types'
 import RatingStars from './RatingStars.vue'
-import type { IGearContainer, TRatingValue, TRatingType } from '../types/gear.types'
 
 interface Props {
   container: IGearContainer

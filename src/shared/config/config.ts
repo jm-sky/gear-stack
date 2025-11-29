@@ -48,6 +48,10 @@ export const config = {
       clientId: import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID ?? '',
       enabled: !!import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID,
     },
+    facebook: {
+      clientId: import.meta.env.VITE_FACEBOOK_OAUTH_CLIENT_ID ?? '',
+      enabled: !!import.meta.env.VITE_FACEBOOK_OAUTH_CLIENT_ID,
+    },
   },
   features: {
     imageSearch: {
