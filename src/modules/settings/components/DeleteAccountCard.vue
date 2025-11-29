@@ -64,7 +64,7 @@ const resetDeleteModal = () => {
             <Trash2 class="size-4 text-destructive" />
           </div>
           <div class="flex-1 space-y-1">
-            <h2 class="text-lg font-semibold text-destructive">
+            <h2 id="delete-account" class="text-lg font-semibold text-destructive">
               {{ t('settings.delete_account.title') }}
             </h2>
             <p class="text-sm text-muted-foreground">
