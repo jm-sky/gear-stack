@@ -84,6 +84,8 @@ async def get_optional_user(
     try:
         from app.modules.auth.dependencies import _verify_user_token
         token = credentials.credentials
+        if user_repository is None:
+            return None
         return await _verify_user_token(token, user_repository, None)
     except Exception:
         # If authentication fails, return None (endpoint is public)

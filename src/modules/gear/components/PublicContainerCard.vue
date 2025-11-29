@@ -8,6 +8,7 @@ import ColorDot from '../components/ColorDot.vue'
 import { GearRoutePath } from '../routes'
 import ContainerCardBadges from './ContainerCardBadges.vue'
 import ContainerCardCreatedDate from './ContainerCardCreatedDate.vue'
+import RatingStars from './RatingStars.vue'
 
 const { t } = useI18n()
 
@@ -41,6 +42,19 @@ defineProps<{
 
         <div class="text-sm text-muted-foreground">
           {{ t('gear.container.itemsCount', { count: container.items.length }) }}
+        </div>
+
+        <!-- Rating Display -->
+        <div v-if="container.averageUserRating != null" class="flex items-center gap-2">
+          <RatingStars
+            :rating="container.averageUserRating"
+            :show-number="true"
+            size="sm"
+            :interactive="false"
+          />
+          <span class="text-xs text-muted-foreground">
+            ({{ container.userRatingCount }})
+          </span>
         </div>
 
         <div class="-mb-6 mt-2 flex items-center justify-end">

@@ -72,6 +72,7 @@ export const gearEn = {
       deleteRating: 'Delete Rating',
       ratingUpdated: 'Rating updated successfully',
       ratingDeleted: 'Rating deleted successfully',
+      updatingRating: 'Updating rating...',
       updated: 'Updated',
       nested: 'Nested',
       parentContainer: 'Parent',
@@ -646,6 +647,10 @@ export const gearEn = {
       errorRevoking: 'Failed to revoke share token',
       errorCopying: 'Failed to copy to clipboard',
     },
+    errors: {
+      ratingFailed: 'Failed to rate container',
+      deleteRatingFailed: 'Failed to delete rating',
+    },
     pages: {
       allItems: 'All Items',
       shoppingPlanning: 'Shopping Planning',
@@ -763,6 +768,18 @@ export const gearPl = {
       removeFavorite: 'Usuń z ulubionych',
       favoriteAdded: 'Kontener dodany do ulubionych',
       favoriteRemoved: 'Kontener usunięty z ulubionych',
+      // Rating fields
+      ratings: 'Oceny',
+      ownerRating: 'Twoja ocena (jako właściciel)',
+      ownerRatingDescription: 'Oceń swój kontener od 1 do 5 gwiazdek',
+      yourRating: 'Twoja ocena',
+      averageUserRating: 'Średnia ocena użytkowników',
+      ratingsCount: 'ocen',
+      rateContainer: 'Oceń kontener',
+      deleteRating: 'Usuń ocenę',
+      ratingUpdated: 'Ocena została zaktualizowana',
+      ratingDeleted: 'Ocena została usunięta',
+      updatingRating: 'Aktualizowanie oceny...',
       updated: 'Zaktualizowano',
       nested: 'Zagnieżdżony',
       parentContainer: 'Rodzic',
@@ -1336,6 +1353,10 @@ export const gearPl = {
       errorCreating: 'Nie udało się utworzyć tokenu udostępniania',
       errorRevoking: 'Nie udało się odwołać tokenu udostępniania',
       errorCopying: 'Nie udało się skopiować do schowka',
+    },
+    errors: {
+      ratingFailed: 'Nie udało się ocenić kontenera',
+      deleteRatingFailed: 'Nie udało się usunąć oceny',
     },
     pages: {
       allItems: 'Wszystkie przedmioty',
