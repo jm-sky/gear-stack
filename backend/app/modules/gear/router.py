@@ -83,6 +83,7 @@ async def get_optional_user(
         return None
     try:
         from app.modules.auth.dependencies import _verify_user_token
+
         token = credentials.credentials
         if user_repository is None:
             return None
@@ -706,11 +707,7 @@ async def revoke_container_share_token(
 
 
 # Rating endpoints
-@router.post(
-    "/containers/{container_id}/rating",
-    response_model=dict,
-    summary="Rate a container"
-)
+@router.post("/containers/{container_id}/rating", response_model=dict, summary="Rate a container")
 async def rate_container(
     container_id: str,
     rating_data: ContainerRatingCreate,
@@ -732,39 +729,22 @@ async def rate_container(
         # Try public container
         container = await repository.get_public_container(container_id)
         if not container:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Container not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Container not found")
 
     # Validate rating type
     is_owner = container.user_id == current_user.id
 
     if rating_data.ratingType == "owner" and not is_owner:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only container owner can set owner rating"
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only container owner can set owner rating")
 
     if rating_data.ratingType == "user" and is_owner:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Container owner should use 'owner' rating type"
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Container owner should use 'owner' rating type")
 
     if rating_data.ratingType == "user" and not container.is_public:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User ratings are only allowed for public containers"
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User ratings are only allowed for public containers")
 
     # Upsert rating
-    rating = await repository.upsert_container_rating(
-        container_id=container_id,
-        user_id=current_user.id,
-        rating=rating_data.rating,
-        rating_type=rating_data.ratingType
-    )
+    rating = await repository.upsert_container_rating(container_id=container_id, user_id=current_user.id, rating=rating_data.rating, rating_type=rating_data.ratingType)
     await db.commit()
 
     # Get updated stats
@@ -777,27 +757,15 @@ async def rate_container(
         avg_user_rating = await repository.get_container_average_user_rating(container_id)
         user_rating_count = await repository.get_container_user_rating_count(container_id)
 
-    return {
-        "rating": rating.rating,
-        "ratingType": rating.rating_type,
-        "ownerRating": owner_rating,
-        "averageUserRating": float(avg_user_rating) if avg_user_rating else None,
-        "userRatingCount": user_rating_count
-    }
+    return {"rating": rating.rating, "ratingType": rating.rating_type, "ownerRating": owner_rating, "averageUserRating": float(avg_user_rating) if avg_user_rating else None, "userRatingCount": user_rating_count}
 
 
-@router.delete(
-    "/containers/{container_id}/rating",
-    summary="Delete container rating"
-)
+@router.delete("/containers/{container_id}/rating", summary="Delete container rating")
 async def delete_container_rating(
     container_id: str,
-    rating_type: str = Query(
-        default="user",
-        description="Type of rating to delete: 'owner' or 'user'"
-    ),
     current_user: CurrentUser,
     service: GearServiceDep,
+    rating_type: str = Query(default="user", description="Type of rating to delete: 'owner' or 'user'"),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """Delete user's rating for a container."""
@@ -808,42 +776,24 @@ async def delete_container_rating(
     if not container:
         container = await repository.get_public_container(container_id)
         if not container:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Container not found"
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Container not found")
 
     # Validate rating type
     is_owner = container.user_id == current_user.id
 
     if rating_type == "owner" and not is_owner:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only container owner can delete owner rating"
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only container owner can delete owner rating")
 
     # Delete rating
-    deleted = await repository.delete_container_rating(
-        container_id,
-        current_user.id,
-        rating_type
-    )
+    deleted = await repository.delete_container_rating(container_id, current_user.id, rating_type)
     await db.commit()
 
     if not deleted:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Rating not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Rating not found")
 
     # Get updated stats
     owner_rating = await repository.get_container_owner_rating(container_id)
     avg_user_rating = await repository.get_container_average_user_rating(container_id)
     user_rating_count = await repository.get_container_user_rating_count(container_id)
 
-    return {
-        "message": "Rating deleted",
-        "ownerRating": owner_rating,
-        "averageUserRating": float(avg_user_rating) if avg_user_rating else None,
-        "userRatingCount": user_rating_count
-    }
+    return {"message": "Rating deleted", "ownerRating": owner_rating, "averageUserRating": float(avg_user_rating) if avg_user_rating else None, "userRatingCount": user_rating_count}

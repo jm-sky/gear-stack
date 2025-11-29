@@ -38,7 +38,15 @@ const isLoading = ref(true)
 const isRatingLoading = ref(false)
 
 const isOwner = computed(() => {
-  return container.value?.userId === user.value?.id
+  if (!user.value || !container.value) {
+    return false
+  }
+  // For public containers, check authorId
+  if (container.value.authorId) {
+    return container.value.authorId === user.value.id
+  }
+  // If no authorId, user is not the owner (public container from another user)
+  return false
 })
 const isPublic = computed(() => {
   return container.value?.isPublic ?? false

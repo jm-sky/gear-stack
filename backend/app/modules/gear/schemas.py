@@ -145,6 +145,7 @@ class ContainerResponse(BaseModel):
     favorite: bool
     showItemImages: bool | None = Field(None, alias="showItemImages")
     authorName: str | None = None  # Only populated for public containers
+    authorId: str | None = Field(None, alias="authorId")  # Author user ID (only for public containers)
     items: list[ItemResponse] = []
     # Rating fields
     ownerRating: int | None = Field(None, alias="ownerRating")  # Owner's rating (1-5)

@@ -80,7 +80,17 @@ const isAiDialogOpen = ref(false)
 // Rating state
 const isRatingLoading = ref(false)
 const isOwner = computed(() => {
-  return container.value?.userId === user.value?.id
+  if (!isAuthenticated.value || !user.value || !container.value) {
+    return false
+  }
+  // For public containers, check authorId
+  if (container.value.authorId) {
+    return container.value.authorId === user.value.id
+  }
+  // For private containers (no authorId), if we can access the container,
+  // it means we own it (backend handles authorization)
+  // For localStorage, all containers are considered owned by current user
+  return true
 })
 const isPublic = computed(() => {
   return container.value?.isPublic ?? false

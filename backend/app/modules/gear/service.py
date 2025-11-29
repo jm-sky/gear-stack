@@ -149,7 +149,8 @@ class GearService:
             isPublic=container.is_public,
             favorite=container.favorite,
             showItemImages=container.show_item_images,
-            authorName=None,  # Will be populated for public containers
+            authorName=None,  # Not populated for private containers
+            authorId=None,  # Not populated for private containers (user already knows they own it)
             items=items,
             ownerRating=owner_rating,
             userRating=user_rating,
@@ -196,10 +197,13 @@ class GearService:
             else:
                 filtered_items.append(item)
 
-        # Get author name from user relationship if available
+        # Get author name and ID from user relationship
+        # For public containers, user relationship is always loaded via joinedload
         author_name = None
+        author_id = None
         if hasattr(container, "user") and container.user:
             author_name = container.user.name
+            author_id = container.user.id
 
         # Map rating fields if provided
         owner_rating = None
@@ -233,6 +237,7 @@ class GearService:
             favorite=container.favorite,
             showItemImages=container.show_item_images,
             authorName=author_name,
+            authorId=author_id,
             items=filtered_items,
             ownerRating=owner_rating,
             userRating=user_rating,
