@@ -21,6 +21,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.25.2] - 2025-11-30
+
+### Changed
+- **Code Formatting**: Improved code formatting and import organization
+  - Fixed import sorting in ProfileEditPage and PrivacyPage for better consistency
+  - Enhanced GravatarIcon component formatting for better readability
+
+---
+
 ## [2.25.1] - 2025-11-30
 
 ### Changed

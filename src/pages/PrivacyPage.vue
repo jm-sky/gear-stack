@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import HoverLink from '@/components/ui/hover-link/HoverLink.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { config } from '@/shared/config/config'
-import HoverLink from '@/components/ui/hover-link/HoverLink.vue'
 
 const { t } = useI18n()
 </script>
