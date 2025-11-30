@@ -387,12 +387,15 @@ Dodanie sekcji ustawień AI w Gear Settings, umożliwiającej zarządzanie konfi
     - 🔄 Reset limitu (opcjonalnie, dla adminów lub przy odnowieniu subskrypcji) - planowane
   - ✅ Integracja z istniejącym `useAiStore` - zaimplementowane
   - ✅ Komunikaty błędów i sukcesu (toast notifications) - zaimplementowane (używa `useHandleError`)
+  - ✅ **Premium feature:** Ustawienia AI wyłączone (disabled inputs) dla zwykłych użytkowników - zaimplementowane
+  - ✅ **Premium feature:** Informacja "Only for premium users" lub "Premium feature" (`AiPremiumFeatureAlert`) - zaimplementowane
 
 - **UI/UX:**
-  - Sekcja AI Settings jako osobna karta/sekcja w Gear Settings
-  - Spójny design z resztą ustawień
-  - Tooltips z wyjaśnieniami (np. "Własny token pozwala na nieograniczone użycie AI")
-  - Responsywny design dla urządzeń mobilnych
+  - ✅ Sekcja AI Settings jako osobna karta/sekcja w Gear Settings - zaimplementowane
+  - ✅ Spójny design z resztą ustawień - zaimplementowane
+  - ✅ Tooltips z wyjaśnieniami (np. "Własny token pozwala na nieograniczone użycie AI") - zaimplementowane
+  - ✅ Responsywny design dla urządzeń mobilnych - zaimplementowane
+  - ✅ Premium feature alert i disabled inputs dla zwykłych użytkowników - zaimplementowane
 
 **Zalety:**
 - Centralne miejsce do zarządzania ustawieniami AI

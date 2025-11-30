@@ -51,11 +51,11 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - ✅ History tracking, cost display, template messages
    - 🔄 Classification, embeddings, vision models - planowane
 
-6. **AI settings - Premium feature**
+6. ✅ **AI settings - Premium feature** - Zakończone
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md)
-   - Ustawienia AI powinny być wyłączone (disabled inputs) dla zwykłych użytkowników
-   - Informacja "Only for premium users" lub "Premium feature"
-   - Status: 🔄 Planned | Priority: High | Complexity: Small
+   - ✅ Ustawienia AI powinny być wyłączone (disabled inputs) dla zwykłych użytkowników - Completed
+   - ✅ Informacja "Only for premium users" lub "Premium feature" - Completed
+   - Status: ✅ Completed | Priority: High | Complexity: Small
 
 7. **Wskaźnik użycia S3 storage**
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md)
