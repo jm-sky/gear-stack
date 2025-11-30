@@ -31,6 +31,12 @@ export const routes: RouteRecordRaw[] = [
     meta: { layout: 'authenticated', title: 'common.pages.privacy' },
   },
   {
+    path: '/terms',
+    name: 'terms',
+    component: () => import('@/pages/TermsPage.vue'),
+    meta: { layout: 'authenticated', title: 'common.pages.terms' },
+  },
+  {
     path: '/contact',
     name: 'contact',
     component: () => import('@/pages/ContactPage.vue'),

@@ -52,6 +52,7 @@ export default {
       landing: 'Strona główna',
       cookies: 'Cookies',
       privacy: 'Polityka prywatności',
+      terms: 'Regulamin',
       contact: 'Kontakt',
       notFound: 'Strona nie znaleziona',
     },
@@ -149,53 +150,195 @@ export default {
   footer: {
     cookies: 'Informacja o ciasteczkach',
     privacy: 'Polityka prywatności',
+    terms: 'Regulamin',
     contact: 'Kontakt',
     github: 'GitHub',
   },
   cookies: {
     title: 'Informacja o ciasteczkach',
     subtitle: 'Informacje o wykorzystaniu danych w aplikacji',
+    whatAre: {
+      title: 'Czym są pliki cookie',
+      description: 'Pliki cookie to małe pliki tekstowe, które są przechowywane na Twoim urządzeniu podczas przeglądania strony internetowej. Pomagają one aplikacji zapamiętać Twoje preferencje i zapewniają podstawowe funkcje.',
+    },
+    types: {
+      title: 'Rodzaje plików cookie używanych przez nas',
+      essential: {
+        title: 'Niezbędne pliki cookie',
+        description: 'Te pliki cookie są niezbędne do działania aplikacji i nie można ich wyłączyć. Używamy ich do:',
+        items: {
+          session: 'Utrzymania sesji użytkownika po zalogowaniu (token JWT)',
+          security: 'Zapewnienia bezpieczeństwa (ochrona przed atakami CSRF)',
+          preferences: 'Zapamiętania podstawowych preferencji (język, tryb ciemny)',
+        },
+      },
+      functional: {
+        title: 'Funkcjonalne pliki cookie',
+        description: 'Te pliki cookie pomagają aplikacji lepiej funkcjonować i zapamiętywać Twoje wybory:',
+        items: {
+          settings: 'Ustawienia aplikacji przechowywane lokalnie (localStorage)',
+          preferences: 'Preferencje wyświetlania i układu interfejsu',
+        },
+      },
+    },
     localStorage: {
       title: 'LocalStorage',
-      description: 'Aplikacja Gear Stack wykorzystuje localStorage przeglądarki do przechowywania danych użytkownika. Wszystkie dane są przechowywane lokalnie na Twoim urządzeniu i nie są przesyłane na żadne zewnętrzne serwery.',
+      description: 'Oprócz plików cookie, aplikacja wykorzystuje również localStorage przeglądarki do przechowywania niektórych danych lokalnie na Twoim urządzeniu, takich jak:',
+      items: {
+        settings: 'Ustawienia aplikacji (preferencje językowe, jednostki wagowe)',
+        cache: 'Tymczasowe dane cache do poprawy wydajności',
+        offline: 'Dane offline do pracy bez połączenia z internetem',
+      },
     },
-    whatWeStore: {
-      title: 'Co przechowujemy',
-      items: 'Dane kontenerów i przedmiotów (nazwy, opisy, wagi, statusy)',
-      profile: 'Dane profilu użytkownika (nazwa, email)',
-      settings: 'Ustawienia aplikacji (język, preferencje)',
+    management: {
+      title: 'Zarządzanie plikami cookie',
+      description: 'Możesz zarządzać plikami cookie na kilka sposobów:',
+      items: {
+        browser: 'Za pomocą ustawień przeglądarki - większość przeglądarek pozwala na wyświetlanie i usuwanie plików cookie',
+        block: 'Blokowanie niektórych typów plików cookie (może to wpłynąć na funkcjonalność aplikacji)',
+        delete: 'Usuwanie plików cookie - możesz je usunąć w każdej chwili, jednak wymaga to ponownego logowania',
+      },
+      note: 'Uwaga: Wyłączenie niezbędnych plików cookie może spowodować, że niektóre funkcje aplikacji przestaną działać poprawnie.',
+    },
+    thirdParty: {
+      title: 'Pliki cookie osób trzecich',
+      description: 'Aplikacja może wykorzystywać usługi zewnętrzne (np. Google Analytics, reCAPTCHA), które mogą umieszczać własne pliki cookie. Zgodnie z naszą polityką prywatności, informujemy o wykorzystaniu takich usług i zapewniamy odpowiednie zabezpieczenia danych.',
     },
     privacy: {
       title: 'Prywatność',
-      description: 'Wszystkie dane są przechowywane wyłącznie w Twojej przeglądarce. Nie zbieramy, nie przetwarzamy ani nie udostępniamy Twoich danych osobom trzecim. Aplikacja działa w pełni po stronie klienta (client-side).',
-    },
-    future: {
-      title: 'Przyszłość',
-      description: 'W przyszłości aplikacja może wykorzystywać cookies do dodatkowych funkcji (np. synchronizacja między urządzeniami). W takim przypadku ta strona zostanie zaktualizowana o szczegółowe informacje.',
+      description: 'Wszystkie pliki cookie używane przez aplikację służą wyłącznie do zapewnienia funkcjonalności serwisu. Nie używamy plików cookie do śledzenia użytkowników w celach marketingowych ani do przekazywania danych osobowych osobom trzecim bez Twojej zgody.',
     },
     rodo: {
       title: 'RODO',
-      description: 'Zgodnie z Rozporządzeniem Ogólnym o Ochronie Danych (RODO), informujemy, że aplikacja nie przetwarza danych osobowych w sposób wymagający zgody użytkownika, ponieważ wszystkie dane są przechowywane lokalnie na urządzeniu użytkownika.',
+      description: 'Zgodnie z Rozporządzeniem Ogólnym o Ochronie Danych (RODO), niezbędne pliki cookie nie wymagają Twojej zgody, ponieważ są niezbędne do świadczenia usługi. W przypadku innych plików cookie będziemy prosić o Twoją zgodę, jeśli będzie to wymagane.',
     },
   },
   privacy: {
     title: 'Polityka prywatności',
     subtitle: 'Jak chronimy Twoje dane',
+    dataCollection: {
+      title: 'Zbieranie danych',
+      description: 'Aplikacja Gear Stack zbiera następujące dane:',
+      items: {
+        account: 'Dane konta: email, imię i nazwisko (wymagane do utworzenia konta)',
+        gear: 'Dane dotyczące sprzętu: kontenery, przedmioty, wagi, statusy (przechowywane w bazie danych)',
+        settings: 'Ustawienia aplikacji: preferencje językowe, jednostki wagowe, inne ustawienia',
+        usage: 'Dane użytkowania: logi dostępu, akcje podejmowane w aplikacji (w celu zapewnienia bezpieczeństwa i poprawy usługi)',
+      },
+    },
     dataStorage: {
       title: 'Przechowywanie danych',
-      description: 'Aplikacja Gear Stack przechowuje wszystkie dane lokalnie w przeglądarce użytkownika za pomocą localStorage. Dane nie są przesyłane na żadne zewnętrzne serwery ani do osób trzecich.',
+      description: 'Wszystkie dane są przechowywane bezpiecznie na naszych serwerach w szyfrowanych bazach danych. Wykorzystujemy standardowe praktyki bezpieczeństwa, w tym hashowanie haseł, szyfrowanie połączeń (HTTPS) oraz regularne kopie zapasowe danych.',
     },
     dataAccess: {
       title: 'Dostęp do danych',
-      description: 'Tylko Ty masz dostęp do swoich danych. Aplikacja nie wymaga rejestracji ani logowania, więc nie ma możliwości, aby ktokolwiek inny uzyskał dostęp do Twoich danych.',
+      description: 'Twoje dane są dostępne tylko dla Ciebie i są chronione hasłem. Nasi administratorzy mają dostęp techniczny do danych wyłącznie w celach utrzymania i poprawy usługi, zgodnie z najlepszymi praktykami bezpieczeństwa.',
+      thirdParties: 'Nie udostępniamy Twoich danych osobowych osobom trzecim, z wyjątkiem przypadków wymaganych przez prawo lub z Twoją wyraźną zgodą.',
+    },
+    oauth: {
+      title: 'Uwierzytelnianie OAuth',
+      description: 'Oferujemy możliwość logowania się za pomocą zewnętrznych dostawców OAuth (Google, Facebook). Podczas korzystania z tej funkcji:',
+      items: {
+        receive: 'Otrzymujemy podstawowe informacje z Twojego konta (email, imię, zdjęcie profilowe)',
+        store: 'Przechowujemy tylko niezbędne dane do świadczenia usługi',
+        share: 'Nie udostępniamy Twoich danych z powrotem dostawcom OAuth bez Twojej zgody',
+        revoke: 'Możesz w każdej chwili odwołać dostęp do swojego konta w ustawieniach dostawcy OAuth',
+      },
+      policies: 'Korzystając z OAuth, akceptujesz również politykę prywatności odpowiedniego dostawcy (Google lub Facebook).',
     },
     dataDeletion: {
       title: 'Usuwanie danych',
-      description: 'Możesz w każdej chwili usunąć wszystkie dane z aplikacji poprzez wyczyszczenie localStorage w ustawieniach przeglądarki lub użycie funkcji eksportu/usuwania danych w aplikacji.',
+      description: 'Masz pełną kontrolę nad swoimi danymi i możesz w każdej chwili je usunąć. Aby usunąć konto i wszystkie powiązane dane:',
+      steps: {
+        settings: 'Przejdź do ustawień aplikacji',
+        delete: 'Znajdź sekcję "Usuń konto"',
+        confirm: 'Wpisz "DELETE" w polu potwierdzenia i potwierdź usunięcie',
+      },
+      alternative: 'Alternatywnie, możesz skontaktować się z nami pod adresem',
+      request: 'i poprosić o usunięcie konta.',
+      retention: 'Po usunięciu konta, Twoje dane są usuwane z naszych systemów w ciągu 30 dni. Niektóre dane mogą być przechowywane dłużej, jeśli jest to wymagane przez prawo lub w celu rozwiązania sporów.',
+      oauth: 'Jeśli używasz logowania OAuth, musisz również odwołać dostęp do aplikacji w ustawieniach swojego konta u dostawcy OAuth (Google/Facebook).',
+    },
+    userRights: {
+      title: 'Twoje prawa',
+      description: 'Zgodnie z RODO, masz prawo do:',
+      access: 'Dostępu do swoich danych osobowych',
+      rectification: 'Sprawdzenia i poprawienia swoich danych',
+      erasure: 'Usunięcia swoich danych ("prawo do bycia zapomnianym")',
+      portability: 'Przeniesienia swoich danych do innej usługi',
+      object: 'Sprzeciwu wobec przetwarzania danych',
+      contact: 'Aby skorzystać z któregokolwiek z tych praw, skontaktuj się z nami pod adresem',
+    },
+    cookies: {
+      title: 'Pliki cookie',
+      description: 'Aplikacja wykorzystuje pliki cookie do utrzymania sesji użytkownika i poprawy funkcjonalności. Więcej informacji na temat wykorzystania plików cookie można znaleźć na stronie',
+      link: 'Informacja o ciasteczkach',
     },
     changes: {
       title: 'Zmiany w polityce',
-      description: 'W przypadku wprowadzenia zmian w sposobie przetwarzania danych, ta strona zostanie zaktualizowana, a użytkownicy zostaną poinformowani o istotnych zmianach.',
+      description: 'W przypadku wprowadzenia istotnych zmian w sposobie przetwarzania danych, ta strona zostanie zaktualizowana, a użytkownicy zostaną poinformowani o zmianach za pośrednictwem emaila lub powiadomienia w aplikacji. Kontynuowanie korzystania z aplikacji po wprowadzeniu zmian oznacza akceptację zaktualizowanej polityki prywatności.',
+    },
+    contact: {
+      title: 'Kontakt',
+      description: 'W przypadku pytań dotyczących polityki prywatności lub przetwarzania danych, prosimy o kontakt:',
+    },
+  },
+  terms: {
+    title: 'Regulamin',
+    subtitle: 'Warunki korzystania z serwisu',
+    acceptance: {
+      title: 'Akceptacja warunków',
+      description: 'Korzystając z aplikacji Gear Stack, akceptujesz niniejsze warunki korzystania. Jeśli nie zgadzasz się z którymkolwiek z poniższych warunków, nie powinieneś korzystać z serwisu.',
+    },
+    account: {
+      title: 'Konto użytkownika',
+      description: 'Aby korzystać z niektórych funkcji aplikacji, musisz utworzyć konto. Zobowiązujesz się do:',
+      responsibilities: {
+        provide: 'Podawania prawdziwych i aktualnych informacji podczas rejestracji',
+        maintain: 'Utrzymywania bezpieczeństwa swojego konta i hasła',
+        notify: 'Niezwłocznego powiadamiania nas o każdym nieuprawnionym użyciu Twojego konta',
+        responsible: 'Odpowiedzialności za wszystkie działania podejmowane przy użyciu Twojego konta',
+      },
+    },
+    oauth: {
+      title: 'Uwierzytelnianie OAuth',
+      description: 'Aplikacja umożliwia logowanie się za pomocą zewnętrznych dostawców OAuth (np. Google, Facebook). Korzystając z tej funkcji:',
+      rules: {
+        provider: 'Akceptujesz warunki użytkowania i politykę prywatności dostawcy OAuth',
+        data: 'Wyrażasz zgodę na udostępnienie nam podstawowych informacji z Twojego konta (email, imię, zdjęcie profilowe)',
+        revoke: 'Możesz w każdej chwili odwołać dostęp do swojego konta w ustawieniach dostawcy OAuth',
+      },
+    },
+    content: {
+      title: 'Zawartość użytkownika',
+      description: 'Użytkownik zachowuje pełne prawa do treści, które tworzy i przechowuje w aplikacji. Użytkownik przyznaje nam jedynie niezbędną licencję do przechowywania, wyświetlania i przetwarzania tych danych w celu świadczenia usługi.',
+    },
+    prohibited: {
+      title: 'Zakazane działania',
+      description: 'Zabrania się:',
+      items: {
+        illegal: 'Używania aplikacji do celów niezgodnych z prawem',
+        harmful: 'Przesyłania treści szkodliwych, obraźliwych lub niezgodnych z prawem',
+        access: 'Próby nieuprawnionego dostępu do systemu lub innych kont użytkowników',
+        disrupt: 'Zakłócania działania aplikacji lub serwerów',
+        impersonate: 'Udawania innej osoby lub podawania się za kogoś innego',
+      },
+    },
+    termination: {
+      title: 'Zakończenie konta',
+      description: 'Zastrzegamy sobie prawo do zawieszenia lub usunięcia Twojego konta w przypadku naruszenia niniejszych warunków lub z innych ważnych przyczyn. Możesz również w każdej chwili usunąć swoje konto w ustawieniach aplikacji.',
+    },
+    disclaimer: {
+      title: 'Wyłączenie odpowiedzialności',
+      description: 'Aplikacja jest świadczona "tak, jak jest", bez jakichkolwiek gwarancji. Nie ponosimy odpowiedzialności za jakiekolwiek szkody wynikające z korzystania z aplikacji.',
+    },
+    changes: {
+      title: 'Zmiany w regulaminie',
+      description: 'Zastrzegamy sobie prawo do wprowadzania zmian w niniejszym regulaminie. O istotnych zmianach poinformujemy użytkowników. Kontynuowanie korzystania z aplikacji po wprowadzeniu zmian oznacza akceptację nowych warunków.',
+    },
+    contact: {
+      title: 'Kontakt',
+      description: 'W przypadku pytań dotyczących niniejszego regulaminu, prosimy o kontakt za pomocą formularza kontaktowego dostępnego w aplikacji.',
     },
   },
   contact: {

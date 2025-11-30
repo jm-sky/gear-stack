@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
-import { ArrowLeft, Sparkles } from 'lucide-vue-next'
+import { ArrowLeft } from 'lucide-vue-next'
 import { useField, useForm } from 'vee-validate'
 import { onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -10,6 +10,7 @@ import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import GravatarIcon from '@/components/ui/icons/GravatarIcon.vue'
 import UserRoleBadge from '@/components/ui/UserRoleBadge.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useBackend } from '@/shared/composables/useBackend'
@@ -194,7 +195,7 @@ const handleGenerateGravatar = () => {
                     :title="t('user.edit.generate_gravatar') || 'Generate Gravatar URL from email'"
                     @click="handleGenerateGravatar"
                   >
-                    <Sparkles class="size-4" />
+                    <GravatarIcon class="size-4" />
                   </Button>
                 </div>
               </FormControl>

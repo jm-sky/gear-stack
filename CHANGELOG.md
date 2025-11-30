@@ -21,6 +21,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.25.1] - 2025-11-30
+
+### Changed
+- **Profile Edit Gravatar Icon**: Updated Gravatar generation button to use custom Gravatar icon instead of generic Sparkles icon
+  - New `GravatarIcon.vue` component created with official Gravatar logo design
+  - Icon follows Lucide icon styling pattern for consistency
+  - Better visual recognition for Gravatar-related functionality
+
+---
+
 ## [2.25.0] - 2025-11-28
 
 ### Added

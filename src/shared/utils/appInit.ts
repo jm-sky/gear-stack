@@ -33,3 +33,4 @@ export function setHtmlLangAttribute(i18n: I18n): void {
   const currentLocale = getCurrentLocale(i18n)
   document.documentElement.setAttribute('lang', currentLocale)
 }
+

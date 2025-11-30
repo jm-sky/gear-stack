@@ -52,6 +52,7 @@ export default {
       landing: 'Home',
       cookies: 'Cookies',
       privacy: 'Privacy Policy',
+      terms: 'Terms of Use',
       contact: 'Contact',
       notFound: 'Page Not Found',
     },
@@ -149,53 +150,195 @@ export default {
   footer: {
     cookies: 'Cookie Information',
     privacy: 'Privacy Policy',
+    terms: 'Terms of Use',
     contact: 'Contact',
     github: 'GitHub',
   },
   cookies: {
     title: 'Cookie Information',
     subtitle: 'Information about data usage in the application',
+    whatAre: {
+      title: 'What are cookies',
+      description: 'Cookies are small text files that are stored on your device when browsing a website. They help the application remember your preferences and provide basic functionality.',
+    },
+    types: {
+      title: 'Types of cookies we use',
+      essential: {
+        title: 'Essential cookies',
+        description: 'These cookies are essential for the application to function and cannot be disabled. We use them for:',
+        items: {
+          session: 'Maintaining user session after login (JWT token)',
+          security: 'Security purposes (protection against CSRF attacks)',
+          preferences: 'Remembering basic preferences (language, dark mode)',
+        },
+      },
+      functional: {
+        title: 'Functional cookies',
+        description: 'These cookies help the application function better and remember your choices:',
+        items: {
+          settings: 'Application settings stored locally (localStorage)',
+          preferences: 'Display preferences and interface layout',
+        },
+      },
+    },
     localStorage: {
       title: 'LocalStorage',
-      description: 'Gear Stack application uses browser localStorage to store user data. All data is stored locally on your device and is not sent to any external servers.',
+      description: 'In addition to cookies, the application also uses browser localStorage to store some data locally on your device, such as:',
+      items: {
+        settings: 'Application settings (language preferences, weight units)',
+        cache: 'Temporary cache data to improve performance',
+        offline: 'Offline data for operation without internet connection',
+      },
     },
-    whatWeStore: {
-      title: 'What we store',
-      items: 'Container and item data (names, descriptions, weights, statuses)',
-      profile: 'User profile data (name, email)',
-      settings: 'Application settings (language, preferences)',
+    management: {
+      title: 'Cookie management',
+      description: 'You can manage cookies in several ways:',
+      items: {
+        browser: 'Through browser settings - most browsers allow viewing and deleting cookies',
+        block: 'Blocking certain types of cookies (may affect application functionality)',
+        delete: 'Deleting cookies - you can delete them at any time, but this requires logging in again',
+      },
+      note: 'Note: Disabling essential cookies may cause some application features to stop working properly.',
+    },
+    thirdParty: {
+      title: 'Third-party cookies',
+      description: 'The application may use external services (e.g., Google Analytics, reCAPTCHA) that may place their own cookies. In accordance with our privacy policy, we inform about the use of such services and provide appropriate data protection.',
     },
     privacy: {
       title: 'Privacy',
-      description: 'All data is stored exclusively in your browser. We do not collect, process, or share your data with third parties. The application runs fully client-side.',
-    },
-    future: {
-      title: 'Future',
-      description: 'In the future, the application may use cookies for additional features (e.g., synchronization between devices). In such case, this page will be updated with detailed information.',
+      description: 'All cookies used by the application serve solely to provide service functionality. We do not use cookies to track users for marketing purposes or to share personal data with third parties without your consent.',
     },
     rodo: {
       title: 'GDPR',
-      description: 'In accordance with the General Data Protection Regulation (GDPR), we inform that the application does not process personal data in a way that requires user consent, as all data is stored locally on the user\'s device.',
+      description: 'In accordance with the General Data Protection Regulation (GDPR), essential cookies do not require your consent as they are necessary for the service. For other cookies, we will ask for your consent if required.',
     },
   },
   privacy: {
     title: 'Privacy Policy',
     subtitle: 'How we protect your data',
+    dataCollection: {
+      title: 'Data Collection',
+      description: 'Gear Stack application collects the following data:',
+      items: {
+        account: 'Account data: email, full name (required to create an account)',
+        gear: 'Gear data: containers, items, weights, statuses (stored in database)',
+        settings: 'Application settings: language preferences, weight units, other settings',
+        usage: 'Usage data: access logs, actions taken in the application (for security and service improvement purposes)',
+      },
+    },
     dataStorage: {
       title: 'Data Storage',
-      description: 'Gear Stack application stores all data locally in the user\'s browser using localStorage. Data is not sent to any external servers or third parties.',
+      description: 'All data is stored securely on our servers in encrypted databases. We use standard security practices, including password hashing, connection encryption (HTTPS), and regular data backups.',
     },
     dataAccess: {
       title: 'Data Access',
-      description: 'Only you have access to your data. The application does not require registration or login, so there is no way for anyone else to access your data.',
+      description: 'Your data is accessible only to you and is password-protected. Our administrators have technical access to data solely for maintenance and service improvement purposes, in accordance with security best practices.',
+      thirdParties: 'We do not share your personal data with third parties, except as required by law or with your explicit consent.',
+    },
+    oauth: {
+      title: 'OAuth Authentication',
+      description: 'We offer the ability to log in using external OAuth providers (Google, Facebook). When using this feature:',
+      items: {
+        receive: 'We receive basic information from your account (email, name, profile picture)',
+        store: 'We store only the necessary data to provide the service',
+        share: 'We do not share your data back to OAuth providers without your consent',
+        revoke: 'You can revoke access to your account at any time in your OAuth provider settings',
+      },
+      policies: 'By using OAuth, you also accept the privacy policy of the respective provider (Google or Facebook).',
     },
     dataDeletion: {
       title: 'Data Deletion',
-      description: 'You can delete all data from the application at any time by clearing localStorage in your browser settings or using the export/delete data function in the application.',
+      description: 'You have full control over your data and can delete it at any time. To delete your account and all associated data:',
+      steps: {
+        settings: 'Go to application settings',
+        delete: 'Find the "Delete Account" section',
+        confirm: 'Type "DELETE" in the confirmation field and confirm deletion',
+      },
+      alternative: 'Alternatively, you can contact us at',
+      request: 'and request account deletion.',
+      retention: 'After account deletion, your data is removed from our systems within 30 days. Some data may be retained longer if required by law or to resolve disputes.',
+      oauth: 'If you use OAuth login, you must also revoke access to the application in your OAuth provider account settings (Google/Facebook).',
+    },
+    userRights: {
+      title: 'Your Rights',
+      description: 'In accordance with GDPR, you have the right to:',
+      access: 'Access your personal data',
+      rectification: 'Verify and correct your data',
+      erasure: 'Delete your data ("right to be forgotten")',
+      portability: 'Transfer your data to another service',
+      object: 'Object to data processing',
+      contact: 'To exercise any of these rights, please contact us at',
+    },
+    cookies: {
+      title: 'Cookies',
+      description: 'The application uses cookies to maintain user sessions and improve functionality. More information about cookie usage can be found on the',
+      link: 'Cookie Information',
     },
     changes: {
       title: 'Policy Changes',
-      description: 'In case of changes in the way data is processed, this page will be updated, and users will be informed about significant changes.',
+      description: 'In case of significant changes in the way data is processed, this page will be updated, and users will be notified of changes via email or notification in the application. Continued use of the application after changes means acceptance of the updated privacy policy.',
+    },
+    contact: {
+      title: 'Contact',
+      description: 'For questions about the privacy policy or data processing, please contact:',
+    },
+  },
+  terms: {
+    title: 'Terms of Use',
+    subtitle: 'Terms and conditions for using the service',
+    acceptance: {
+      title: 'Acceptance of Terms',
+      description: 'By using the Gear Stack application, you accept these terms of use. If you do not agree with any of the following terms, you should not use the service.',
+    },
+    account: {
+      title: 'User Account',
+      description: 'To use some features of the application, you must create an account. You agree to:',
+      responsibilities: {
+        provide: 'Provide true and current information during registration',
+        maintain: 'Maintain the security of your account and password',
+        notify: 'Immediately notify us of any unauthorized use of your account',
+        responsible: 'Be responsible for all actions taken using your account',
+      },
+    },
+    oauth: {
+      title: 'OAuth Authentication',
+      description: 'The application allows logging in using external OAuth providers (e.g., Google, Facebook). When using this feature:',
+      rules: {
+        provider: 'You accept the terms of use and privacy policy of the OAuth provider',
+        data: 'You consent to sharing basic information from your account with us (email, name, profile picture)',
+        revoke: 'You can revoke access to your account at any time in your OAuth provider settings',
+      },
+    },
+    content: {
+      title: 'User Content',
+      description: 'The user retains full rights to content they create and store in the application. The user grants us only the necessary license to store, display, and process this data to provide the service.',
+    },
+    prohibited: {
+      title: 'Prohibited Activities',
+      description: 'The following are prohibited:',
+      items: {
+        illegal: 'Using the application for illegal purposes',
+        harmful: 'Transmitting harmful, offensive, or illegal content',
+        access: 'Attempting unauthorized access to the system or other user accounts',
+        disrupt: 'Disrupting the operation of the application or servers',
+        impersonate: 'Impersonating another person or pretending to be someone else',
+      },
+    },
+    termination: {
+      title: 'Account Termination',
+      description: 'We reserve the right to suspend or delete your account in case of violation of these terms or for other important reasons. You can also delete your account at any time in the application settings.',
+    },
+    disclaimer: {
+      title: 'Disclaimer',
+      description: 'The application is provided "as is" without any warranties. We are not liable for any damages resulting from the use of the application.',
+    },
+    changes: {
+      title: 'Changes to Terms',
+      description: 'We reserve the right to make changes to these terms. Users will be notified of significant changes. Continued use of the application after changes means acceptance of the new terms.',
+    },
+    contact: {
+      title: 'Contact',
+      description: 'For questions about these terms, please contact us using the contact form available in the application.',
     },
   },
   contact: {
