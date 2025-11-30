@@ -3,9 +3,10 @@
 This is the official recommended approach from OpenRouter documentation.
 """
 
-from typing import Any
+from typing import Any, cast
 
 from openai import AsyncOpenAI
+from openai.types.chat import ChatCompletionMessageParam
 
 from app.core.config import settings
 from app.modules.ai.exceptions import OpenRouterError, TokenValidationError
@@ -58,7 +59,9 @@ class OpenRouterProvider(AIProvider):
             OpenRouterError: If API request fails
         """
         try:
-            response = await self.client.chat.completions.create(model=model, messages=messages, temperature=temperature, max_tokens=max_tokens, **kwargs)
+            # Cast messages to the expected type for OpenAI SDK
+            typed_messages = cast(list[ChatCompletionMessageParam], messages)
+            response = await self.client.chat.completions.create(model=model, messages=typed_messages, temperature=temperature, max_tokens=max_tokens, **kwargs)
 
             # Extract response data
             choice = response.choices[0]

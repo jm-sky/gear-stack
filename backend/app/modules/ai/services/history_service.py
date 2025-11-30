@@ -58,7 +58,7 @@ class HistoryService:
             cost_usd=cost_usd,
             input_data=input_data,
             output_data=output_data,
-            metadata_=metadata,
+            metadata=metadata,
         )
 
     async def get_history_list(self, user_id: str, limit: int = 50, offset: int = 0, operation_type: str | None = None) -> AiHistoryListResponse:

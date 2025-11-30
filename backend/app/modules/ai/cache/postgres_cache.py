@@ -141,7 +141,7 @@ class PostgresCacheService:
         try:
             result = await self.db.execute(delete(AICacheDB).where(AICacheDB.expires_at < datetime.now(UTC)))
             await self.db.commit()
-            return result.rowcount
+            return result.rowcount or 0  # type: ignore[attr-defined]
 
         except Exception as e:
             await self.db.rollback()

@@ -9,6 +9,7 @@ Uses pure ASGI middleware pattern for reliable body modification.
 """
 
 import json
+from collections.abc import Awaitable, Callable
 from typing import Any
 
 
@@ -38,11 +39,11 @@ class ConvertEmptyStringsToNoneMiddleware:
         Output: {"name": "John", "email": None, "age": 25}
     """
 
-    def __init__(self, app):
+    def __init__(self, app: Callable[[dict[str, Any], Callable, Callable], Awaitable[None]]) -> None:
         """Initialize middleware with ASGI app."""
         self.app = app
 
-    async def __call__(self, scope, receive, send):
+    async def __call__(self, scope: dict[str, Any], receive: Callable[[], Awaitable[dict[str, Any]]], send: Callable[[dict[str, Any]], Awaitable[None]]) -> None:
         """
         Process ASGI request and convert empty strings to None.
 
@@ -69,7 +70,7 @@ class ConvertEmptyStringsToNoneMiddleware:
             return
 
         # Modify body
-        async def modify_body():
+        async def modify_body() -> dict[str, Any]:
             message = await receive()
             assert message["type"] == "http.request"
 

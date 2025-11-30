@@ -121,7 +121,7 @@ class HistoryRepository:
         """
         result = await self.db.execute(delete(AIHistoryDB).where(AIHistoryDB.id == history_id, AIHistoryDB.user_id == user_id))
         await self.db.commit()
-        return result.rowcount > 0
+        return (result.rowcount or 0) > 0  # type: ignore[attr-defined]
 
     async def delete_all_by_user(self, user_id: str) -> int:
         """Delete all history entries for user.
@@ -134,4 +134,4 @@ class HistoryRepository:
         """
         result = await self.db.execute(delete(AIHistoryDB).where(AIHistoryDB.user_id == user_id))
         await self.db.commit()
-        return result.rowcount
+        return result.rowcount or 0  # type: ignore[attr-defined]

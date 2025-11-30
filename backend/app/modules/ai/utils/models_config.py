@@ -155,4 +155,4 @@ def calculate_cost(model_id: str, prompt_tokens: int, completion_tokens: int) ->
     input_cost = (prompt_tokens / 1_000_000) * model["cost_per_1m_input"]
     output_cost = (completion_tokens / 1_000_000) * model["cost_per_1m_output"]
 
-    return round(input_cost + output_cost, 6)
+    return float(round(input_cost + output_cost, 6))

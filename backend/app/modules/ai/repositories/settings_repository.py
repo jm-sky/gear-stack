@@ -1,5 +1,6 @@
 """Repository for AI user settings."""
 
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import select
@@ -31,7 +32,7 @@ class SettingsRepository:
         result = await self.db.execute(select(AIUserSettingsDB).where(AIUserSettingsDB.user_id == user_id))
         return result.scalar_one_or_none()
 
-    async def create(self, user_id: str, **kwargs) -> AIUserSettingsDB:
+    async def create(self, user_id: str, **kwargs: Any) -> AIUserSettingsDB:
         """Create new settings.
 
         Args:
@@ -47,7 +48,7 @@ class SettingsRepository:
         await self.db.refresh(settings)
         return settings
 
-    async def update(self, settings: AIUserSettingsDB, **kwargs) -> AIUserSettingsDB:
+    async def update(self, settings: AIUserSettingsDB, **kwargs: Any) -> AIUserSettingsDB:
         """Update existing settings.
 
         Args:

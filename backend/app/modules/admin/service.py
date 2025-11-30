@@ -7,6 +7,7 @@ including user, container, and item management across the platform.
 import logging
 
 from app.core.config import get_settings
+from app.modules.auth.models import User
 from app.modules.auth.repositories import UserRepository as AuthUserRepository
 from app.modules.users.repositories import UserRepository
 from app.modules.users.schemas import UserUpdate

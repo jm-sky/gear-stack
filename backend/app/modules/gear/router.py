@@ -76,7 +76,7 @@ optional_security = HTTPBearer(auto_error=False)
 
 async def get_optional_user(
     credentials: HTTPAuthorizationCredentials | None = Security(optional_security),
-    user_repository: Annotated[UserRepositoryInterface, Depends(get_user_repository)] = None,
+    user_repository: Annotated[UserRepositoryInterface | None, Depends(get_user_repository)] = None,
 ) -> User | None:
     """Get current user if authenticated, None otherwise."""
     if credentials is None:
@@ -749,7 +749,7 @@ async def rate_container(
 
     # Get updated stats
     if rating_data.ratingType == "owner":
-        owner_rating = rating.rating
+        owner_rating: int | None = rating.rating
         avg_user_rating = await repository.get_container_average_user_rating(container_id)
         user_rating_count = await repository.get_container_user_rating_count(container_id)
     else:

@@ -1,8 +1,12 @@
 """Business logic service for gear settings."""
 
+from typing import Any, cast
+
+from app.modules.gear.schemas import GearWeightUnit
+
 from .db_models import GearSettingsDB
 from .repository import GearSettingsRepository
-from .schemas import GearSettingsResponse, GearSettingsUpdate
+from .schemas import GearSettingsResponse, GearSettingsUpdate, UserBrand, UserCategory, UserContainerType
 
 
 class GearSettingsService:
@@ -25,11 +29,21 @@ class GearSettingsService:
         Returns:
             Settings response schema
         """
+        # Convert dict lists to Pydantic models
+        custom_categories = [UserCategory(**item) for item in settings.custom_categories]
+        custom_container_types = [UserContainerType(**item) for item in settings.custom_container_types]
+        custom_brands = [UserBrand(**item) for item in settings.custom_brands]
+
+        # Convert preferred_weight_unit to GearWeightUnit if not None
+        preferred_weight_unit: GearWeightUnit | None = None
+        if settings.preferred_weight_unit is not None:
+            preferred_weight_unit = cast(GearWeightUnit, settings.preferred_weight_unit)
+
         return GearSettingsResponse(
-            customCategories=settings.custom_categories,
-            customContainerTypes=settings.custom_container_types,
-            customBrands=settings.custom_brands,
-            preferredWeightUnit=settings.preferred_weight_unit,
+            customCategories=custom_categories,
+            customContainerTypes=custom_container_types,
+            customBrands=custom_brands,
+            preferredWeightUnit=preferred_weight_unit,
             defaultCurrency=settings.default_currency,
         )
 
@@ -58,11 +72,11 @@ class GearSettingsService:
         settings = await self.repository.get_or_create(user_id)
 
         if updates.customCategories is not None:
-            settings.custom_categories = updates.customCategories
+            settings.custom_categories = [item.model_dump() for item in updates.customCategories]
         if updates.customContainerTypes is not None:
-            settings.custom_container_types = updates.customContainerTypes
+            settings.custom_container_types = [item.model_dump() for item in updates.customContainerTypes]
         if updates.customBrands is not None:
-            settings.custom_brands = updates.customBrands
+            settings.custom_brands = [item.model_dump() for item in updates.customBrands]
         if updates.preferredWeightUnit is not None:
             settings.preferred_weight_unit = updates.preferredWeightUnit
         if updates.defaultCurrency is not None:
