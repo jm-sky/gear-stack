@@ -210,4 +210,3 @@ class TestTokenOptions:
         # Tenant info should NOT be in refresh token
         assert "tid" not in payload or payload.get("tid") is None
         assert "trol" not in payload or payload.get("trol") is None
-

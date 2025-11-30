@@ -238,3 +238,4 @@ const isAdmin = computed(() => authStore.user?.isAdmin ?? false)
 **Completed:** 2025-01-25
 **Status:** ✅ Fully functional and ready for testing
 
+

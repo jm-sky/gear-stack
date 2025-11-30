@@ -126,4 +126,3 @@ const { t } = useI18n()
     </div>
   </AuthenticatedLayout>
 </template>
-
