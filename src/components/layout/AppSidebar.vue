@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BackpackIcon, Globe, Package, ShoppingCart } from 'lucide-vue-next'
+import { BackpackIcon, Globe, Info, Package, ShoppingCart, Sparkles } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
@@ -7,6 +7,7 @@ import SidebarMenuContainerItem from '@/components/layout/SidebarMenuContainerIt
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -19,6 +20,7 @@ import {
 import { useGear } from '@/modules/gear/composables/useGear'
 import { GearRoutePath } from '@/modules/gear/routes'
 import { getRootContainers } from '@/modules/gear/utils/containerNesting'
+import { PublicRouteNames, PublicRoutePaths } from '@/router/publicRoutes'
 import type { IGearContainer } from '@/modules/gear/types/gear.types'
 
 const { t } = useI18n()
@@ -108,6 +110,27 @@ const isLinkActive = (path: string): boolean => {
         </SidebarGroupContent>
       </SidebarGroup>
     </SidebarContent>
+
+    <SidebarFooter>
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton :is-active="isLinkActive(PublicRoutePaths.about)" as-child>
+            <RouterLink :to="{ name: PublicRouteNames.about }">
+              <Info class="size-4" />
+              <span>{{ t('common.pages.about', 'About') }}</span>
+            </RouterLink>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+        <SidebarMenuItem>
+          <SidebarMenuButton :is-active="isLinkActive(PublicRoutePaths.aiContext)" as-child>
+            <RouterLink :to="{ name: PublicRouteNames.aiContext }">
+              <Sparkles class="size-4" />
+              <span>{{ t('common.pages.aiContext', 'AI Context') }}</span>
+            </RouterLink>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </SidebarFooter>
 
     <SidebarRail />
   </Sidebar>

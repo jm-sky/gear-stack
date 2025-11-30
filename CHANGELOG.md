@@ -21,6 +21,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.26.0] - 2025-01-30
+
+### Added
+- **About Page**: New comprehensive About page (`/about`) with full application description and feature list
+  - Overview section explaining Gear Stack's purpose and capabilities
+  - Detailed core features documentation (containers, items, analytics, search, import/export)
+  - Business features documentation (security, user profile, i18n, theming)
+  - Technical stack information (frontend and backend technologies)
+  - Fully internationalized (EN/PL)
+
+- **AI Context Page**: New AI Context page (`/ai-context`) with Markdown-formatted description for AI assistants
+  - Short, concise application description in Markdown format
+  - One-click copy to clipboard functionality
+  - Designed for quick context sharing with ChatGPT and other AI assistants
+  - Includes all key features, capabilities, and technical details
+  - Fully internationalized (EN/PL)
+
+- **Public Routes Configuration**: New centralized route configuration system
+  - Created `publicRoutes.ts` with `PublicRoutePaths` and `PublicRouteNames` constants
+  - Similar pattern to `auth/config/routes.ts` for consistency
+  - All public pages now use named routes instead of hardcoded paths
+  - Better maintainability and easier route management
+
+### Changed
+- **Route Configuration Refactoring**: Replaced all hardcoded route paths with named routes
+  - Updated `AppSidebar.vue` to use `PublicRouteNames` instead of hardcoded `/about` and `/ai-context`
+  - Updated `AppFooter.vue` to use `PublicRouteNames` for all footer links
+  - Updated `LandingPage.vue` to use `PublicRouteNames` for info links
+  - Updated `PrivacyPage.vue` to use `PublicRouteNames` for cookies link
+  - Updated all layout components (`PublicLayout`, `GuestLayoutCentered`, `GuestLayoutCenteredGlass`, `GuestLayoutTwoColumns`) to use `PublicRouteNames.landing`
+  - Improved code consistency and maintainability
+
+- **Routes Structure**: Refactored `routes.ts` to use `publicRoutes` array
+  - Cleaner route definitions
+  - Better organization of public vs. module routes
+  - Consistent route management pattern
+
+### Technical Details
+- New pages: `AboutPage.vue` (211 lines), `AiContextPage.vue` (169 lines)
+- New route configuration: `publicRoutes.ts` (78 lines)
+- Updated translations: Added comprehensive `about` and `aiContext` sections (EN/PL)
+- All components now use `:to="{ name: PublicRouteNames.xxx }"` instead of `to="/xxx"`
+- Improved type safety with centralized route constants
+
+---
+
 ## [2.25.2] - 2025-11-30
 
 ### Changed

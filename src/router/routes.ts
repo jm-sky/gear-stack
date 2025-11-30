@@ -3,55 +3,27 @@ import { AuthRouteNames, AuthRoutePaths, authRoutes } from '@/modules/auth/confi
 import { gearRoutes } from '@/modules/gear/routes'
 import { settingsRoutes } from '@/modules/settings/routes'
 import { userRoutes } from '@/modules/user/routes'
+import { publicRoutes } from '@/router/publicRoutes'
 import type { RouteRecordRaw } from 'vue-router'
 
 export const routes: RouteRecordRaw[] = [
-  {
-    path: '/',
-    name: 'landing',
-    component: () => import('@/pages/LandingPage.vue'),
-    meta: { title: 'common.pages.landing' },
-  },
+  // Landing page (public)
+  ...publicRoutes.filter(route => route.name === 'landing'),
+  // Dashboard
   {
     path: AuthRoutePaths.dashboard,
     name: AuthRouteNames.dashboard,
     component: () => import('@/pages/DashboardPage.vue'),
     meta: { layout: 'authenticated', title: 'navigation.dashboard' },
   },
-  {
-    path: '/cookies',
-    name: 'cookies',
-    component: () => import('@/pages/CookiesPage.vue'),
-    meta: { layout: 'authenticated', title: 'common.pages.cookies' },
-  },
-  {
-    path: '/privacy',
-    name: 'privacy',
-    component: () => import('@/pages/PrivacyPage.vue'),
-    meta: { layout: 'authenticated', title: 'common.pages.privacy' },
-  },
-  {
-    path: '/terms',
-    name: 'terms',
-    component: () => import('@/pages/TermsPage.vue'),
-    meta: { layout: 'authenticated', title: 'common.pages.terms' },
-  },
-  {
-    path: '/contact',
-    name: 'contact',
-    component: () => import('@/pages/ContactPage.vue'),
-    meta: { layout: 'authenticated', title: 'common.pages.contact' },
-  },
+  // Other public pages (about, ai-context, cookies, privacy, terms, contact)
+  ...publicRoutes.filter(route => route.name !== 'landing' && route.name !== 'not-found'),
+  // Module routes
   ...authRoutes,
   ...adminRoutes,
   ...gearRoutes,
   ...settingsRoutes,
   ...userRoutes,
   // 404 catch-all route - must be last
-  {
-    path: '/:pathMatch(.*)*',
-    name: 'not-found',
-    component: () => import('@/pages/NotFoundPage.vue'),
-    meta: { layout: 'public', title: 'common.pages.notFound' },
-  },
+  ...publicRoutes.filter(route => route.name === 'not-found'),
 ]

@@ -2,6 +2,7 @@
 import { useI18n } from 'vue-i18n'
 import HoverLink from '@/components/ui/hover-link/HoverLink.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import { PublicRouteNames } from '@/router/publicRoutes'
 import { config } from '@/shared/config/config'
 
 const { t } = useI18n()
@@ -139,7 +140,7 @@ const { t } = useI18n()
           </h2>
           <p class="text-muted-foreground">
             {{ t('privacy.cookies.description', 'Aplikacja wykorzystuje pliki cookie do utrzymania sesji użytkownika i poprawy funkcjonalności. Więcej informacji na temat wykorzystania plików cookie można znaleźć na stronie') }}
-            <HoverLink to="/cookies">
+            <HoverLink :to="{ name: PublicRouteNames.cookies }">
               {{ t('privacy.cookies.link', 'Informacja o ciasteczkach') }}
             </HoverLink>.
           </p>

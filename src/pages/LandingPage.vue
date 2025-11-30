@@ -2,7 +2,7 @@
 import { BackpackIcon } from 'lucide-vue-next'
 import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import LocalContainersStats from '@/components/layout/LocalContainersStats.vue'
 import TotalsStats from '@/components/layout/TotalsStats.vue'
 import WelcomeQuickActions from '@/components/layout/WelcomeQuickActions.vue'
@@ -10,6 +10,7 @@ import LandingLayout from '@/layouts/LandingLayout.vue'
 import { useAuthStore } from '@/modules/auth/store/useAuthStore'
 import { hasLocalData } from '@/modules/gear/services/dataMigrationService'
 import { useGearStore } from '@/modules/gear/store/useGearStore'
+import { PublicRouteNames } from '@/router/publicRoutes'
 import { config } from '@/shared/config/config'
 
 const { t } = useI18n()
@@ -95,6 +96,16 @@ if (!config.backend.enabled) {
 
       <!-- CTA Buttons (shown when no local containers) -->
       <WelcomeQuickActions class="max-w-md mx-auto" />
+
+      <!-- Info Links -->
+      <div v-if="authStore.isAuthenticated" class="flex flex-wrap justify-center gap-4 text-sm">
+        <RouterLink :to="{ name: PublicRouteNames.about }" class="text-muted-foreground hover:text-primary transition-colors">
+          {{ t('common.pages.about', 'About') }}
+        </RouterLink>
+        <RouterLink :to="{ name: PublicRouteNames.aiContext }" class="text-muted-foreground hover:text-primary transition-colors">
+          {{ t('common.pages.aiContext', 'AI Context') }}
+        </RouterLink>
+      </div>
 
       <!-- Footer text -->
       <p class="text-sm text-muted-foreground py-8">
