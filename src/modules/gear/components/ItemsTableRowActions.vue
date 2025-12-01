@@ -2,10 +2,8 @@
 import {
   AlertCircle,
   CheckCircle2,
-  Edit,
   Eye,
   MoreHorizontal,
-  Scan,
   ShoppingCart,
   Trash2,
 } from 'lucide-vue-next'
@@ -14,7 +12,8 @@ import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import DropdownMenuSeparator from '@/components/ui/dropdown-menu/DropdownMenuSeparator.vue'
-import type { IGearItem, TGearItemStatus } from '../types/gear.types'
+import type { IGearItem, TGearItemPriority, TGearItemStatus } from '../types/gear.types'
+import { getActionIcon } from '../utils/actionIcons'
 
 const { t } = useI18n()
 
@@ -28,7 +27,14 @@ const emit = defineEmits<{
   statusChange: [status: TGearItemStatus]
   viewContainer: [item: IGearItem]
   recognizeParameters: [item: IGearItem]
+  uploadPhoto: [item: IGearItem]
+  starItem: [item: IGearItem, priority: TGearItemPriority]
 }>()
+
+const EditIcon = getActionIcon('edit')
+const UploadPhotoIcon = getActionIcon('uploadPhoto')
+const StarItemIcon = getActionIcon('starItem')
+const RecognizeParametersIcon = getActionIcon('recognizeParameters')
 
 // Check if item is a nested container
 const isNestedContainer = computed(() => {
@@ -67,12 +73,21 @@ const isNestedContainer = computed(() => {
       <!-- For regular items: standard actions -->
       <template v-else>
         <DropdownMenuItem @click="emit('edit', row)">
-          <Edit class="size-4 mr-2" />
+          <EditIcon class="size-4 mr-2" />
           {{ t('gear.actions.edit') }}
         </DropdownMenuItem>
         <DropdownMenuItem @click="emit('recognizeParameters', row)">
-          <Scan class="size-4 mr-2" />
+          <RecognizeParametersIcon class="size-4 mr-2" />
           {{ t('gear.actions.recognizeParameters') }}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem @click="emit('uploadPhoto', row)">
+          <UploadPhotoIcon class="size-4 mr-2" />
+          {{ t('gear.actions.uploadPhoto') }}
+        </DropdownMenuItem>
+        <DropdownMenuItem @click="emit('starItem', row, row.priority === 'critical' ? 'medium' : 'critical')">
+          <StarItemIcon :class="['size-4 mr-2', { 'fill-yellow-400': row.priority === 'critical' }]" />
+          {{ t('gear.actions.starItem') }}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem

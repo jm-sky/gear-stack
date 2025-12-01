@@ -1,15 +1,17 @@
 <script setup lang="ts">
-import { Package } from 'lucide-vue-next'
+import { Check, Package } from 'lucide-vue-next'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import DataTable from '@/components/data-table/DataTable.vue'
 import Badge from '@/components/ui/badge/Badge.vue'
+import { Button } from '@/components/ui/button'
 import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
 import { ITEMS_TABLE_COLUMN_VISIBILITY_KEY } from '@/shared/config/config'
-import type { IGearItem } from '../types/gear.types'
+import type { IGearItem, IUpdateItemDto, TGearItemPriority } from '../types/gear.types'
 import { useCategoryLabel } from '../composables/useCategoryLabel'
 import { formatItemPrice } from '../composables/useFormattedItemPrice'
+import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
 import { useItemsTableEditMode } from '../composables/useItemsTableEditMode'
 import { GearRoutePath } from '../routes'
@@ -21,7 +23,13 @@ import { createNavigationQuery } from '../utils/navigationParams'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 import ItemPriorityBadge from './ItemPriorityBadge.vue'
 import ItemsTableCategoryCell from './items-table/ItemsTableCategoryCell.vue'
+import ItemsTableEditableCategoryCell from './items-table/ItemsTableEditableCategoryCell.vue'
 import ItemsTableEditableNameCell from './items-table/ItemsTableEditableNameCell.vue'
+import ItemsTableEditablePriceCell from './items-table/ItemsTableEditablePriceCell.vue'
+import ItemsTableEditablePriorityCell from './items-table/ItemsTableEditablePriorityCell.vue'
+import ItemsTableEditableQuantityCell from './items-table/ItemsTableEditableQuantityCell.vue'
+import ItemsTableEditableStatusCell from './items-table/ItemsTableEditableStatusCell.vue'
+import ItemsTableEditableWeightCell from './items-table/ItemsTableEditableWeightCell.vue'
 import ItemsTableImageCell from './items-table/ItemsTableImageCell.vue'
 import ItemsTableNameCell from './items-table/ItemsTableNameCell.vue'
 import ItemsTableWeightCell from './items-table/ItemsTableWeightCell.vue'
@@ -357,9 +365,69 @@ function canMoveDown(item: IGearItem): boolean {
   return currentIndex >= 0 && currentIndex < sortedItems.value.length - 1
 }
 
-// Handle item update from inline editing
-function handleItemUpdate(updatedItem: IGearItem) {
-  emit('update', updatedItem)
+// Track dirty state per row - Map<itemId, IUpdateItemDto>
+const dirtyChanges = ref<Map<string, IUpdateItemDto>>(new Map())
+
+// Handle cell change - accumulate changes per row
+function handleCellChange(itemId: string, updates: IUpdateItemDto) {
+  const currentChanges = dirtyChanges.value.get(itemId) || {}
+
+  // Merge updates with existing changes
+  const mergedChanges: IUpdateItemDto = { ...currentChanges, ...updates }
+
+  // Remove empty updates (no actual changes)
+  const hasChanges = Object.keys(mergedChanges).some(key => {
+    const value = mergedChanges[key as keyof IUpdateItemDto]
+    return value !== undefined && value !== null
+  })
+
+  if (hasChanges) {
+    dirtyChanges.value.set(itemId, mergedChanges)
+  } else {
+    dirtyChanges.value.delete(itemId)
+  }
+}
+
+// Check if row has dirty changes
+function hasDirtyChanges(itemId: string): boolean {
+  return dirtyChanges.value.has(itemId)
+}
+
+// Save all changes for a row
+async function handleSaveRow(item: IGearItem) {
+  const changes = dirtyChanges.value.get(item.id)
+  if (!changes || Object.keys(changes).length === 0) return
+
+  const { updateItem } = useGear()
+  try {
+    const updated = await updateItem(item.id, changes)
+    // Clear dirty state for this row
+    dirtyChanges.value.delete(item.id)
+    emit('update', updated)
+  } catch (error) {
+    console.error('Failed to save row changes:', error)
+  }
+}
+
+
+// Handle upload photo - navigate to item detail page with image upload
+function handleUploadPhoto(item: IGearItem) {
+  if (!props.containerId) return
+  router.push({
+    path: GearRoutePath.ItemDetailById(props.containerId, item.id),
+    query: createNavigationQuery(undefined, 'container'),
+  })
+}
+
+// Handle star item - toggle priority between critical and medium
+async function handleStarItem(item: IGearItem, newPriority: TGearItemPriority) {
+  const { updateItem } = useGear()
+  try {
+    const updated = await updateItem(item.id, { priority: newPriority })
+    emit('update', updated)
+  } catch (error) {
+    console.error('Failed to update item priority:', error)
+  }
 }
 </script>
 
@@ -383,7 +451,7 @@ function handleItemUpdate(updatedItem: IGearItem) {
         :item="row.original"
         :is-expired="isExpired(row.original)"
         :is-expiring-soon="isExpiringSoon(row.original)"
-        @update="handleItemUpdate"
+        @change="(updates) => handleCellChange(row.original.id, updates)"
       />
       <ItemsTableNameCell
         v-else
@@ -414,15 +482,34 @@ function handleItemUpdate(updatedItem: IGearItem) {
     </template>
 
     <template #category="{ row }">
-      <ItemsTableCategoryCell :category="row.original.category" />
+      <ItemsTableEditableCategoryCell
+        v-if="editMode && !publicMode"
+        :item="row.original"
+        @change="(updates) => handleCellChange(row.original.id, updates)"
+      />
+      <ItemsTableCategoryCell
+        v-else
+        :category="row.original.category"
+      />
     </template>
 
     <template #quantity="{ row }">
-      {{ row.original.quantity }}
+      <ItemsTableEditableQuantityCell
+        v-if="editMode && !publicMode"
+        :item="row.original"
+        @change="(updates) => handleCellChange(row.original.id, updates)"
+      />
+      <span v-else>{{ row.original.quantity }}</span>
     </template>
 
     <template #weight="{ row }">
+      <ItemsTableEditableWeightCell
+        v-if="editMode && !publicMode && !isNestedContainer(row.original)"
+        :item="row.original"
+        @change="(updates) => handleCellChange(row.original.id, updates)"
+      />
       <ItemsTableWeightCell
+        v-else
         :item="row.original"
         :is-nested-container="isNestedContainer(row.original)"
         :total-weight="isNestedContainer(row.original) ? calculateTotalWeight(row.original.containerId!) : undefined"
@@ -431,15 +518,36 @@ function handleItemUpdate(updatedItem: IGearItem) {
     </template>
 
     <template #priority="{ row }">
-      <ItemPriorityBadge :priority="row.original.priority" />
+      <ItemsTableEditablePriorityCell
+        v-if="editMode && !publicMode"
+        :item="row.original"
+        @change="(updates) => handleCellChange(row.original.id, updates)"
+      />
+      <ItemPriorityBadge
+        v-else
+        :priority="row.original.priority"
+      />
     </template>
 
     <template #status="{ row }">
-      <ItemStatusBadge :status="row.original.status" />
+      <ItemsTableEditableStatusCell
+        v-if="editMode && !publicMode"
+        :item="row.original"
+        @change="(updates) => handleCellChange(row.original.id, updates)"
+      />
+      <ItemStatusBadge
+        v-else
+        :status="row.original.status"
+      />
     </template>
 
     <template #price="{ row }">
-      <div v-if="row.original.price != null" class="text-end px-4">
+      <ItemsTableEditablePriceCell
+        v-if="editMode && !publicMode"
+        :item="row.original"
+        @change="(updates) => handleCellChange(row.original.id, updates)"
+      />
+      <div v-else-if="row.original.price != null" class="text-end px-4">
         {{ formatItemPrice(row.original, false, defaultCurrency) }}
       </div>
       <span v-else class="text-muted-foreground">-</span>
@@ -477,15 +585,30 @@ function handleItemUpdate(updatedItem: IGearItem) {
     </template>
 
     <template #actions="{ row }">
-      <ItemsTableRowActions
-        v-if="!publicMode"
-        :row="row.original"
-        @edit="emit('edit', row.original)"
-        @delete="emit('delete', row.original)"
-        @status-change="(status) => emit('statusChange', row.original, status)"
-        @view-container="navigateToNestedContainer"
-        @recognize-parameters="emit('recognizeParameters', row.original)"
-      />
+      <div v-if="!publicMode" class="flex items-center gap-2">
+        <Button
+          v-if="editMode"
+          v-tooltip="t('gear.actions.save')"
+          size="sm"
+          :disabled="!hasDirtyChanges(row.original.id)"
+          variant="ghost"
+          class="size-8 p-0"
+          :aria-label="t('gear.actions.save')"
+          @click="handleSaveRow(row.original)"
+        >
+          <Check class="size-4" />
+        </Button>
+        <ItemsTableRowActions
+          :row="row.original"
+          @edit="emit('edit', row.original)"
+          @delete="emit('delete', row.original)"
+          @status-change="(status) => emit('statusChange', row.original, status)"
+          @view-container="navigateToNestedContainer"
+          @recognize-parameters="emit('recognizeParameters', row.original)"
+          @upload-photo="handleUploadPhoto"
+          @star-item="handleStarItem"
+        />
+      </div>
     </template>
 
     <!-- Expanded content for nested containers (rendered after each row) -->

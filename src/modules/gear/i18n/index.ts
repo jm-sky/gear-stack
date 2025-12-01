@@ -271,6 +271,9 @@ export const gearEn = {
       manageShareTokens: 'Manage Share Tokens',
       enableInlineEditing: 'Enable Inline Editing',
       disableInlineEditing: 'Disable Inline Editing',
+      uploadPhoto: 'Upload Photo',
+      starItem: 'Star Item',
+      saving: 'Saving...',
     },
     imageSearch: {
       searchImages: 'Search Images',
@@ -982,6 +985,9 @@ export const gearPl = {
       manageShareTokens: 'Zarządzaj Tokenami Udostępniania',
       enableInlineEditing: 'Włącz edycję inline',
       disableInlineEditing: 'Wyłącz edycję inline',
+      uploadPhoto: 'Dodaj zdjęcie',
+      starItem: 'Oznacz jako ulubiony',
+      saving: 'Zapisywanie...',
     },
     imageSearch: {
       searchImages: 'Wyszukaj obrazki',

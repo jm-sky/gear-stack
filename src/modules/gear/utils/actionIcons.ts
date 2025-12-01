@@ -11,6 +11,7 @@ import {
   Plus,
   Sparkles,
   SparklesIcon,
+  Star,
   Trash2,
   Upload,
 } from 'lucide-vue-next'
@@ -59,6 +60,10 @@ export const ACTION_ICONS: Record<string, Component> = {
 
   // Display
   toggleItemImages: Image,
+  
+  // Item Actions
+  uploadPhoto: Upload,
+  starItem: Star,
 }
 
 /**
