@@ -54,6 +54,8 @@ from .schemas import (
     OAuthAuthUrlRequest,
     OAuthAuthUrlResponse,
     OAuthCallbackRequest,
+    OAuthConnectionResponse,
+    OAuthConnectionsListResponse,
     ResendEmailVerificationRequest,
     ResetPasswordRequest,
     TokenRefresh,
@@ -533,3 +535,54 @@ async def oauth_callback(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"OAuth authentication failed: {str(e)}",
         )
+
+
+@router.get(
+    "/oauth/connections",
+    response_model=OAuthConnectionsListResponse,
+    summary="Get OAuth connections",
+    description="Get all OAuth providers linked to the current user's account",
+    tags=["Authentication", "OAuth"],
+)
+async def get_oauth_connections(
+    current_user: CurrentUser,
+    auth_service: AuthServiceDep,
+) -> OAuthConnectionsListResponse:
+    """
+    Get all OAuth connections for the current user.
+
+    Security features:
+    - ✅ Authentication required (JWT token via CurrentUser)
+    """
+    connections = await auth_service.user_repository.get_oauth_connections(current_user.id)
+    return OAuthConnectionsListResponse(connections=[OAuthConnectionResponse(**conn) for conn in connections])
+
+
+@router.delete(
+    "/oauth/connections/{provider}",
+    response_model=MessageResponse,
+    summary="Delete OAuth connection",
+    description="Remove an OAuth provider from the current user's account",
+    tags=["Authentication", "OAuth"],
+)
+@rate_limit("10/minute")
+async def delete_oauth_connection(
+    provider: str,
+    current_user: CurrentUser,
+    auth_service: AuthServiceDep,
+    request: Request,
+) -> MessageResponse:
+    """
+    Delete an OAuth connection for the current user.
+
+    Security features:
+    - ✅ Authentication required (JWT token)
+    - ✅ Rate limiting: 10 requests/minute
+    """
+    deleted = await auth_service.user_repository.delete_oauth_connection(current_user.id, provider)
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"OAuth connection for provider '{provider}' not found",
+        )
+    return MessageResponse(message=f"OAuth connection for {provider} has been removed successfully")

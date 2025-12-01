@@ -196,3 +196,53 @@ class UserRepositoryInterface(ABC):
             User object if found, None otherwise
         """
         ...
+
+    @abstractmethod
+    async def get_oauth_connections(self, user_id: str) -> list[dict]:
+        """Get all OAuth connections for a user.
+
+        Args:
+            user_id: User ID
+
+        Returns:
+            List of OAuth connection dictionaries
+        """
+        ...
+
+    @abstractmethod
+    async def create_oauth_connection(
+        self,
+        user_id: str,
+        provider: str,
+        provider_id: str,
+        email: str | None = None,
+        name: str | None = None,
+        avatar_url: str | None = None,
+    ) -> dict:
+        """Create a new OAuth connection for a user.
+
+        Args:
+            user_id: User ID
+            provider: OAuth provider name (google, github, etc.)
+            provider_id: Provider's unique user ID
+            email: Email from OAuth provider (optional)
+            name: Name from OAuth provider (optional)
+            avatar_url: Profile picture URL from OAuth provider (optional)
+
+        Returns:
+            Created or existing OAuth connection dictionary
+        """
+        ...
+
+    @abstractmethod
+    async def delete_oauth_connection(self, user_id: str, provider: str) -> bool:
+        """Delete an OAuth connection for a user.
+
+        Args:
+            user_id: User ID
+            provider: OAuth provider name (google, github, etc.)
+
+        Returns:
+            True if connection deleted, False if not found
+        """
+        ...

@@ -2,6 +2,7 @@
 import { useI18n } from 'vue-i18n'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import DeleteAccountCard from '@/modules/settings/components/DeleteAccountCard.vue'
+import OAuthConnectionsCard from '../components/OAuthConnectionsCard.vue'
 import PreferencesSettingsCard from '../components/PreferencesSettingsCard.vue'
 import SecuritySettingsCard from '../components/SecuritySettingsCard.vue'
 
@@ -26,6 +27,9 @@ const { t } = useI18n()
 
         <!-- Security Settings (2FA) -->
         <SecuritySettingsCard />
+
+        <!-- OAuth Connections -->
+        <OAuthConnectionsCard />
 
         <!-- Additional Settings from other modules (via slot) -->
         <slot name="after" />

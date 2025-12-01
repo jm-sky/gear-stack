@@ -484,30 +484,39 @@ class AuthService:
         # Extract name
         name = user_info.get("name", email.split("@")[0])
 
-        # Check if user already exists
-        existing_user = await self.user_repository.get_user_by_email(email)
+        # Check if user already exists by OAuth provider
+        existing_user_by_provider = await self.user_repository.get_user_by_oauth_provider(provider, provider_id)
 
-        if existing_user:
-            # User exists - check if OAuth is already linked
-            if existing_user.oauthProvider and existing_user.oauthProviderId:
-                # OAuth already linked - verify it matches
-                if existing_user.oauthProvider != provider:
-                    raise ValueError(f"Email already registered with {existing_user.oauthProvider}")
-            else:
-                # Regular user exists - link OAuth to existing account
-                # This allows users to add OAuth to existing password-based accounts
-                pass
-
-            user = existing_user
+        if existing_user_by_provider:
+            # User exists with this OAuth provider - use existing user
+            user = existing_user_by_provider
         else:
-            # Create new OAuth user
-            user = await self.user_repository.create_oauth_user(
-                email=email,
-                name=name,
-                provider=provider,
-                provider_id=provider_id,
-                avatar_url=avatar_url,
-            )
+            # Check if user exists by email
+            existing_user = await self.user_repository.get_user_by_email(email)
+
+            if existing_user:
+                # User exists with this email - link OAuth to existing account
+                # This allows users to add OAuth to existing password-based accounts
+                user = existing_user
+            else:
+                # Create new OAuth user
+                user = await self.user_repository.create_oauth_user(
+                    email=email,
+                    name=name,
+                    provider=provider,
+                    provider_id=provider_id,
+                    avatar_url=avatar_url,
+                )
+
+        # Create or update OAuth connection in oauth_connections table
+        await self.user_repository.create_oauth_connection(
+            user_id=user.id,
+            provider=provider,
+            provider_id=provider_id,
+            email=email,
+            name=name,
+            avatar_url=avatar_url,
+        )
 
         # Generate tokens
         access_token = create_access_token({"sub": user.id})

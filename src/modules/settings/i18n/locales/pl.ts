@@ -151,6 +151,21 @@ export const settingsPl = {
       valueRequired: 'Nazwa marki jest wymagana',
       empty: 'Brak własnych marek. Dodaj pierwszą powyżej.',
     },
+    oauth: {
+      title: 'Połączenia OAuth',
+      description: 'Zarządzaj powiązanymi kontami OAuth (Google, Facebook itp.)',
+      login_required: 'Zaloguj się, aby zarządzać połączeniami OAuth.',
+      no_connections: 'Brak powiązanych kont OAuth.',
+      providers: {
+        google: 'Google',
+        facebook: 'Facebook',
+      },
+      connection: {
+        linked: 'Połączone',
+        deleted: 'Połączenie OAuth zostało usunięte',
+        confirm_delete: 'Czy na pewno chcesz usunąć połączenie z {provider}?',
+      },
+    },
     delete_account: {
       title: 'Usuń Konto',
       description: 'Trwale usuń swoje konto i wszystkie powiązane dane',

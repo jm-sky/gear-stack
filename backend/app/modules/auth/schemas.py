@@ -223,3 +223,21 @@ class OAuthCallbackResponse(BaseModel):
     tokenType: str = "bearer"
     expiresIn: int
     requiresEmailVerification: bool = False  # OAuth emails are pre-verified
+
+
+class OAuthConnectionResponse(BaseModel):
+    """Response schema for OAuth connection."""
+
+    id: str
+    provider: str
+    providerId: str
+    email: str | None = None
+    name: str | None = None
+    avatarUrl: str | None = None
+    createdAt: datetime
+
+
+class OAuthConnectionsListResponse(BaseModel):
+    """Response schema for list of OAuth connections."""
+
+    connections: list[OAuthConnectionResponse]

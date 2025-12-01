@@ -151,6 +151,21 @@ export const settingsEn = {
       valueRequired: 'Brand name is required',
       empty: 'No custom brands yet. Add your first one above.',
     },
+    oauth: {
+      title: 'OAuth Connections',
+      description: 'Manage linked OAuth accounts (Google, Facebook, etc.)',
+      login_required: 'Please log in to manage OAuth connections.',
+      no_connections: 'No linked OAuth accounts.',
+      providers: {
+        google: 'Google',
+        facebook: 'Facebook',
+      },
+      connection: {
+        linked: 'Connected',
+        deleted: 'OAuth connection has been removed',
+        confirm_delete: 'Are you sure you want to remove the connection to {provider}?',
+      },
+    },
     delete_account: {
       title: 'Delete Account',
       description: 'Permanently delete your account and all associated data',

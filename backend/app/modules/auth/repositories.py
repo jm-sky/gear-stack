@@ -28,7 +28,7 @@ from .auth_utils import (
     get_password_hash,
     verify_password,
 )
-from .db_models import UserDB
+from .db_models import OAuthConnectionDB, UserDB
 from .exceptions import UserAlreadyExistsError
 from .models import User
 from .types.repository import UserRepositoryInterface
@@ -396,6 +396,98 @@ class UserRepository(SearchMixin, UserRepositoryInterface):
             return None
 
         return self._map_user(user_db)
+
+    async def get_oauth_connections(self, user_id: str) -> list[dict]:
+        """Get all OAuth connections for a user."""
+        stmt = select(OAuthConnectionDB).where(OAuthConnectionDB.user_id == user_id)
+        result = await self.db.execute(stmt)
+        connections = result.scalars().all()
+
+        return [
+            {
+                "id": conn.id,
+                "provider": conn.provider,
+                "providerId": conn.provider_id,
+                "email": conn.email,
+                "name": conn.name,
+                "avatarUrl": conn.avatar_url,
+                "createdAt": conn.created_at,
+            }
+            for conn in connections
+        ]
+
+    async def create_oauth_connection(
+        self,
+        user_id: str,
+        provider: str,
+        provider_id: str,
+        email: str | None = None,
+        name: str | None = None,
+        avatar_url: str | None = None,
+    ) -> dict:
+        """Create a new OAuth connection for a user."""
+        # Check if connection already exists
+        stmt = select(OAuthConnectionDB).where(
+            OAuthConnectionDB.provider == provider,
+            OAuthConnectionDB.provider_id == provider_id,
+        )
+        result = await self.db.execute(stmt)
+        existing = result.scalar_one_or_none()
+
+        if existing:
+            # Connection already exists, return it
+            return {
+                "id": existing.id,
+                "provider": existing.provider,
+                "providerId": existing.provider_id,
+                "email": existing.email,
+                "name": existing.name,
+                "avatarUrl": existing.avatar_url,
+                "createdAt": existing.created_at,
+            }
+
+        # Create new connection
+        connection_id = generate_id()
+        connection_db = OAuthConnectionDB(
+            id=connection_id,
+            user_id=user_id,
+            provider=provider,
+            provider_id=provider_id,
+            email=email,
+            name=name,
+            avatar_url=avatar_url,
+            created_at=datetime.now(UTC),
+        )
+
+        self.db.add(connection_db)
+        await self.db.commit()
+        await self.db.refresh(connection_db)
+
+        return {
+            "id": connection_db.id,
+            "provider": connection_db.provider,
+            "providerId": connection_db.provider_id,
+            "email": connection_db.email,
+            "name": connection_db.name,
+            "avatarUrl": connection_db.avatar_url,
+            "createdAt": connection_db.created_at,
+        }
+
+    async def delete_oauth_connection(self, user_id: str, provider: str) -> bool:
+        """Delete an OAuth connection for a user."""
+        stmt = select(OAuthConnectionDB).where(
+            OAuthConnectionDB.user_id == user_id,
+            OAuthConnectionDB.provider == provider,
+        )
+        result = await self.db.execute(stmt)
+        connection = result.scalar_one_or_none()
+
+        if not connection:
+            return False
+
+        await self.db.delete(connection)
+        await self.db.commit()
+        return True
 
 
 def get_user_repository(

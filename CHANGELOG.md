@@ -21,6 +21,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.27.0] - 2025-12-01
+
+### Added
+- **OAuth Connections Management**: Settings section for managing linked OAuth providers
+  - New `oauth_connections` table and repository methods for multiple OAuth providers per user
+  - Backend endpoints: `GET /auth/oauth/connections` and `DELETE /auth/oauth/connections/{provider}`
+  - Frontend `OAuthConnectionsCard` in Settings listing linked providers (Google, Facebook) with remove action
+
+### Changed
+- **Image Processing Settings**: Enhanced image processing mode settings UI with Premium feature badge and clearer descriptions
+- **Container Color Picker**: Added search and improved color class mappings for container colors
+- **Layout and Header**: Updated header and layout styles for improved responsiveness and consistency
+- **Dependencies**: Updated `reka-ui` to version 2.6.1
+- **Documentation**: Added unified model analysis document for containers and items (`UNIFIED_MODEL_ANALYSIS.md`)
+
+---
+
 ## [2.26.0] - 2025-01-30
 
 ### Added

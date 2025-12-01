@@ -65,3 +65,36 @@ class UserDB(Base):
 
     def __repr__(self) -> str:
         return f"<UserDB(id={self.id}, email={self.email}, name={self.name})>"
+
+
+class OAuthConnectionDB(Base):
+    """SQLAlchemy OAuth Connection model for multiple OAuth providers per user.
+
+    This model allows users to link multiple OAuth providers to their account.
+    Each connection represents one OAuth provider linked to a user account.
+
+    Attributes:
+        id: Unique identifier (ULID format, 36 chars)
+        user_id: Foreign key to users table
+        provider: OAuth provider name (google, facebook, etc.)
+        provider_id: Provider's unique user ID
+        email: Email from OAuth provider (may differ from user's main email)
+        name: Name from OAuth provider
+        avatar_url: Profile picture URL from OAuth provider
+        created_at: Connection creation timestamp
+    """
+
+    __tablename__ = "oauth_connections"
+    __table_args__ = {"extend_existing": True}
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)  # ULID
+    user_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    provider: Mapped[str] = mapped_column(String(50), nullable=False)
+    provider_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    email: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    avatar_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<OAuthConnectionDB(id={self.id}, user_id={self.user_id}, provider={self.provider})>"
