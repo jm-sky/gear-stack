@@ -4,7 +4,6 @@ import { computed, ref, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import AiChatDialog from '@/modules/ai/components/AiChatDialog.vue'
 import { useAi } from '@/modules/ai/composables/useAi'
@@ -13,12 +12,11 @@ import { useBackend } from '@/shared/composables/useBackend'
 import { usePageTitle } from '@/shared/composables/usePageTitle'
 import { config } from '@/shared/config/config'
 import type { IGearItem } from '../types/gear.types'
-import type { TRatingType, TRatingValue } from '../types/gear.types'
 import AddNestedContainerDialog from '../components/AddNestedContainerDialog.vue'
 import CategoryPieChart from '../components/CategoryPieChart.vue'
 import ContainerHeader from '../components/ContainerHeader.vue'
 import ContainerItemImagesGallery from '../components/ContainerItemImagesGallery.vue'
-import ContainerRatingCard from '../components/ContainerRatingCard.vue'
+import ContainerRatingSection from '../components/ContainerRatingSection.vue'
 import ExportToCSVDialog from '../components/ExportToCSVDialog.vue'
 import ExportToPromptDialog from '../components/ExportToPromptDialog.vue'
 import ItemsTable from '../components/ItemsTable.vue'
@@ -26,7 +24,6 @@ import SortConfirmationAlert from '../components/SortConfirmationAlert.vue'
 import { useContainer } from '../composables/useContainer'
 import { useGear } from '../composables/useGear'
 import { GearRoutePath } from '../routes'
-import { gearContainerApiService } from '../services/gearContainerApiService'
 import { gearItemService } from '../services/gearItemService'
 import { useGearStore } from '../store/useGearStore'
 import { createNavigationQuery } from '../utils/navigationParams'
@@ -77,24 +74,7 @@ const isExportToPromptDialogOpen = ref(false)
 const isExportToCSVDialogOpen = ref(false)
 const isAiDialogOpen = ref(false)
 
-// Rating state
-const isRatingLoading = ref(false)
-const isOwner = computed(() => {
-  if (!isAuthenticated.value || !user.value || !container.value) {
-    return false
-  }
-  // For public containers, check authorId
-  if (container.value.authorId) {
-    return container.value.authorId === user.value.id
-  }
-  // For private containers (no authorId), if we can access the container,
-  // it means we own it (backend handles authorization)
-  // For localStorage, all containers are considered owned by current user
-  return true
-})
-const isPublic = computed(() => {
-  return container.value?.isPublic ?? false
-})
+// Rating section moved to ContainerRatingSection.vue component
 
 // File operations handled in handleImport
 
@@ -292,50 +272,7 @@ const handleAddContainer = () => {
   isAddContainerDialogOpen.value = true
 }
 
-const handleRate = async (rating: TRatingValue, type: TRatingType) => {
-  if (!container.value) return
-
-  isRatingLoading.value = true
-  try {
-    await gearContainerApiService.rateContainer(
-      container.value.id,
-      rating,
-      type
-    )
-    // Refresh container data
-    if (shouldUseAPI.value) {
-      await getContainerById(container.value.id)
-    }
-    toast.success(t('gear.container.ratingUpdated'))
-  } catch (error) {
-    console.error('Failed to rate container:', error)
-    toast.error(t('gear.errors.ratingFailed'))
-  } finally {
-    isRatingLoading.value = false
-  }
-}
-
-const handleDeleteRating = async (type: TRatingType) => {
-  if (!container.value) return
-
-  isRatingLoading.value = true
-  try {
-    await gearContainerApiService.deleteContainerRating(
-      container.value.id,
-      type
-    )
-    // Refresh container data
-    if (shouldUseAPI.value) {
-      await getContainerById(container.value.id)
-    }
-    toast.success(t('gear.container.ratingDeleted'))
-  } catch (error) {
-    console.error('Failed to delete rating:', error)
-    toast.error(t('gear.errors.deleteRatingFailed'))
-  } finally {
-    isRatingLoading.value = false
-  }
-}
+// Rating handlers moved to ContainerRatingSection.vue component
 
 const handleAddNestedContainer = async (nestedContainerId: string) => {
   try {
@@ -502,21 +439,7 @@ if (!container.value) {
       <CategoryPieChart :container="container" />
 
       <!-- Rating Section -->
-      <Card v-if="container && shouldUseAPI">
-        <CardHeader>
-          <CardTitle>{{ t('gear.container.ratings') }}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ContainerRatingCard
-            :container="container"
-            :is-owner="isOwner"
-            :is-public="isPublic"
-            :loading="isRatingLoading"
-            @rate="handleRate"
-            @delete-rating="handleDeleteRating"
-          />
-        </CardContent>
-      </Card>
+      <ContainerRatingSection v-if="container" :container="container" />
 
       <!-- Add Nested Container Dialog -->
       <AddNestedContainerDialog
