@@ -62,7 +62,7 @@ async def upgrade() -> None:
                     """
                     CREATE TABLE ai_user_settings (
                         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                        user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+                        user_id VARCHAR(36) NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
                         use_own_token BOOLEAN NOT NULL DEFAULT FALSE,
                         encrypted_api_token TEXT NULL,
                         token_validated_at TIMESTAMP WITH TIME ZONE NULL,
@@ -91,7 +91,7 @@ async def upgrade() -> None:
                     """
                     CREATE TABLE ai_history (
                         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                        user_id VARCHAR(36) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
                         operation_type VARCHAR(50) NOT NULL,
                         final_prompt TEXT NOT NULL,
                         context_data JSONB NULL,
