@@ -7,7 +7,7 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 
 <template>
   <SidebarProvider>
-    <AppSidebar class="pt-14" />
+    <AppSidebar class="mt-(--header-height) shadow-[0_0_.6rem_#0002]" />
     <SidebarInset class="pt-14 bg-surface">
       <div class="flex min-h-screen flex-col bg-muted bg-radial from-card to-slate-300 dark:to-slate-800 w-full max-w-full overflow-x-hidden">
         <!-- Top Bar -->
