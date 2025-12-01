@@ -155,12 +155,17 @@ Na stronach z filtrami (np. AllItemsPage, ShoppingPlanningPage, ContainersListPa
 **Status:** ✅ Completed | **Priority:** Medium | **Feature:** [FEATURE-003](./features/FEATURE-003-container-colors.md)
 
 - ✅ Możliwość przypisania koloru do kontenera
-- ✅ 10 dostępnych kolorów do wyboru (default, blue, green, red, yellow, purple, orange, pink, teal, indigo)
-- ✅ Wizualne rozróżnienie kontenerów na liście (kolorowa kropka i ramka)
+- ✅ Zestaw kolorów inspirowany realnymi kolorami sprzętu outdoor/taktycznego:
+  - `default` (neutralny szary)
+  - `coyote`, `khaki`, `olive`, `forestGreen`, `tan`, `brown`
+  - `black`, `navy`, `jeans`, `gray`, `orange`
+- ✅ Wizualne rozróżnienie kontenerów na liście (kolorowa kropka, kolor tekstu i ramki)
+- ✅ Kropka (`COLOR_DOT_CLASSES`) używa custom HEX, które możliwie wiernie odwzorowują kolory materiałów (np. cordura, plecaki, odzież)
+- ✅ Tekst i ramki (`COLOR_TEXT_CLASSES`, `COLOR_BORDER_CLASSES`) używają klas Tailwind dobranych tak, aby były jak najbliżej kropki, ale nadal dobrze czytelne w light/dark theme
 - ✅ Kolor wyświetlany w kartach kontenerów i rozwiniętych wierszach zagnieżdżonych kontenerów
 
-### 🔄 Ulepszenie wyboru koloru kontenera (wyszukiwarka i etykiety)
-**Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Small
+### ✅ Ulepszenie wyboru koloru kontenera (wyszukiwarka i etykiety)
+**Status:** ✅ Completed | **Priority:** Low | **Complexity:** Small
 
 **Koncepcja:**
 W komponencie `ContainerColorPicker.vue` dodać funkcjonalności ułatwiające wybór koloru, szczególnie gdy jest wiele dostępnych kolorów (obecnie 12 kolorów).
