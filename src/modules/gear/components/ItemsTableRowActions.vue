@@ -39,7 +39,12 @@ const isNestedContainer = computed(() => {
 <template>
   <DropdownMenu>
     <DropdownMenuTrigger as-child>
-      <Button variant="ghost" class="size-8 p-0">
+      <Button
+        v-tooltip.bottom="t('gear.actions.moreActions')"
+        variant="ghost"
+        class="size-8 p-0"
+        :aria-label="t('gear.actions.moreActions')"
+      >
         <MoreHorizontal class="size-4" />
       </Button>
     </DropdownMenuTrigger>

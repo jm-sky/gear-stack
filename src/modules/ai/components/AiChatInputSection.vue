@@ -60,9 +60,11 @@ const handleKeyDown = (event: KeyboardEvent): void => {
           </div>
           <div class="flex flex-row gap-2 items-center justify-end">
             <Button
+              v-tooltip.bottom="t('ai.chat.send')"
               :disabled="!userMessage.trim() || isLoading"
               size="icon"
               class="rounded-full"
+              :aria-label="t('ai.chat.send')"
               @click="handleSend"
             >
               <SendIcon class="size-4" />

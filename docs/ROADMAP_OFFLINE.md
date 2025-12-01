@@ -334,7 +334,13 @@ Kombinacja opcji 1 i 2:
 ## ♿ Accessibility (Dostępność)
 
 ### 🔄 Podstawowe oznaczenia ARIA i dostępność
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+**Status:** 🚧 In Progress | **Priority:** Medium | **Complexity:** Medium
+
+**Postęp (2025-01-21):**
+- ✅ Dodano tooltips i aria-label do głównych przycisków z ikonami (ItemsTableRowActions, ContainerCardActions, ContainerHeader, ContainersListPageDropdown, AiChatInputSection)
+- 🔄 Wymagany audyt pozostałych komponentów z przyciskami ikonowymi
+- ⏳ Semantyka HTML i landmarky ARIA (do zrobienia)
+- ⏳ Focus management (do zrobienia)
 
 **Zakres implementacji:**
 

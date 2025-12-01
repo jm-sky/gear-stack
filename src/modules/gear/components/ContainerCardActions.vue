@@ -50,10 +50,11 @@ const handleDelete = () => {
     <DropdownMenu>
       <DropdownMenuTrigger as-child>
         <Button
+          v-tooltip.bottom="t('gear.actions.moreActions')"
           variant="ghost"
           size="sm"
           class="size-8 p-0"
-          :aria-label="$t('gear.actions.moreActions')"
+          :aria-label="t('gear.actions.moreActions')"
           @click.stop
         >
           <MoreVertical class="size-4" />
@@ -90,4 +91,3 @@ const handleDelete = () => {
     />
   </div>
 </template>
-

@@ -8,6 +8,7 @@ export const aiEn = {
       startConversation: 'Start a conversation with AI...',
       thinking: 'AI is thinking...',
       placeholder: 'Ask AI about your gear...',
+      send: 'Send message',
       sendHint: 'Ctrl+Enter to send',
       includeContainerData: {
         tooltip: 'Include container items in context',
@@ -70,6 +71,7 @@ export const aiPl = {
       startConversation: 'Rozpocznij rozmowę z AI...',
       thinking: 'AI myśli...',
       placeholder: 'Zapytaj AI o swój sprzęt...',
+      send: 'Wyślij wiadomość',
       sendHint: 'Ctrl+Enter aby wysłać',
       includeContainerData: {
         tooltip: 'Dołącz przedmioty z kontenera do kontekstu',
@@ -121,4 +123,3 @@ export const aiPl = {
     },
   },
 }
-

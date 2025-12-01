@@ -64,9 +64,10 @@ const handleExportAllToCSV = () => {
   <DropdownMenu>
     <DropdownMenuTrigger as-child>
       <Button
+        v-tooltip.bottom="t('gear.actions.moreActions')"
         variant="outline"
         class="sm:shrink-0"
-        :aria-label="$t('gear.actions.moreActions')"
+        :aria-label="t('gear.actions.moreActions')"
       >
         <MoreActionsIcon class="size-4" />
       </Button>
@@ -107,4 +108,3 @@ const handleExportAllToCSV = () => {
     </DropdownMenuContent>
   </DropdownMenu>
 </template>
-

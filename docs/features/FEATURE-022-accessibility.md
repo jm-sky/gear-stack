@@ -1,9 +1,11 @@
 # FEATURE-022: Accessibility (Dostępność)
 
-**Status:** 🔄 Planned  
+**Status:** 🚧 In Progress  
 **Priority:** Medium  
 **Category:** ♿ Accessibility / 🎨 UI/UX  
 **Related:** [ROADMAP_OFFLINE.md](../ROADMAP_OFFLINE.md) - ♿ Accessibility (Dostępność)
+
+**Progress:** Faza 2 częściowo zrealizowana (4/4 główne komponenty + AiChatInputSection)
 
 ---
 
@@ -42,14 +44,19 @@ Implementacja podstawowych oznaczeń ARIA i poprawa dostępności aplikacji, szc
    - `v-tooltip` directive z floating-vue jest zarejestrowany w `main.ts`
    - Używa się `v-tooltip.bottom="t('key')"` dla tooltipów
 
+### ✅ Zrealizowane (2025-01-21):
+
+1. **Przyciski z ikonami - tooltips dodane:**
+   - ✅ `ItemsTableRowActions.vue` - przycisk MoreHorizontal (dodano tooltip i aria-label)
+   - ✅ `ContainerCardActions.vue` - przycisk MoreVertical (dodano tooltip, miał już aria-label)
+   - ✅ `ContainerHeader.vue` - przycisk MoreActionsIcon (dodano tooltip, miał już aria-label)
+   - ✅ `ContainersListPageDropdown.vue` - przycisk MoreActionsIcon (dodano tooltip, miał już aria-label)
+   - ✅ `AiChatInputSection.vue` - przycisk SendIcon (dodano tooltip i aria-label, dodano translację `ai.chat.send`)
+
 ### ❌ Co wymaga poprawy:
 
 1. **Przyciski z ikonami bez tooltipów:**
-   - `ItemsTableRowActions.vue` - przycisk MoreHorizontal (brak tooltipa i aria-label)
-   - `ContainerCardActions.vue` - przycisk MoreVertical (ma aria-label, brak tooltipa)
-   - `ContainerHeader.vue` - przycisk MoreActionsIcon (ma aria-label, brak tooltipa)
-   - `ContainersListPageDropdown.vue` - przycisk MoreActionsIcon (ma aria-label, brak tooltipa)
-   - Inne przyciski z ikonami w całej aplikacji
+   - Inne przyciski z ikonami w całej aplikacji (wymagają audytu)
 
 2. **Brakujące translacje dla tooltipów:**
    - Niektóre akcje mogą wymagać dodatkowych translacji dla tooltipów
@@ -96,14 +103,16 @@ Implementacja podstawowych oznaczeń ARIA i poprawa dostępności aplikacji, szc
 
 **Cel:** Wszystkie przyciski z ikonami powinny mieć tooltips
 
-#### 2.1. ItemsTableRowActions.vue
+#### 2.1. ItemsTableRowActions.vue ✅
 
 **Plik:** `src/modules/gear/components/ItemsTableRowActions.vue`
 
+**Status:** ✅ Zrealizowane (2025-01-21)
+
 **Zmiany:**
-- Dodanie `v-tooltip.bottom` do przycisku MoreHorizontal
-- Dodanie `aria-label` do przycisku MoreHorizontal
-- Użycie istniejącej translacji `gear.actions.moreActions`
+- ✅ Dodanie `v-tooltip.bottom` do przycisku MoreHorizontal
+- ✅ Dodanie `aria-label` do przycisku MoreHorizontal
+- ✅ Użycie istniejącej translacji `gear.actions.moreActions`
 
 ```vue
 <Button 
@@ -116,13 +125,15 @@ Implementacja podstawowych oznaczeń ARIA i poprawa dostępności aplikacji, szc
 </Button>
 ```
 
-#### 2.2. ContainerCardActions.vue
+#### 2.2. ContainerCardActions.vue ✅
 
 **Plik:** `src/modules/gear/components/ContainerCardActions.vue`
 
+**Status:** ✅ Zrealizowane (2025-01-21)
+
 **Zmiany:**
-- Dodanie `v-tooltip.bottom` do przycisku MoreVertical (już ma aria-label)
-- Użycie istniejącej translacji `gear.actions.moreActions`
+- ✅ Dodanie `v-tooltip.bottom` do przycisku MoreVertical (już ma aria-label)
+- ✅ Użycie istniejącej translacji `gear.actions.moreActions`
 
 ```vue
 <Button
@@ -137,13 +148,15 @@ Implementacja podstawowych oznaczeń ARIA i poprawa dostępności aplikacji, szc
 </Button>
 ```
 
-#### 2.3. ContainerHeader.vue
+#### 2.3. ContainerHeader.vue ✅
 
 **Plik:** `src/modules/gear/components/ContainerHeader.vue`
 
+**Status:** ✅ Zrealizowane (2025-01-21)
+
 **Zmiany:**
-- Dodanie `v-tooltip.bottom` do przycisku MoreActionsIcon (już ma aria-label)
-- Użycie istniejącej translacji `gear.actions.moreActions`
+- ✅ Dodanie `v-tooltip.bottom` do przycisku MoreActionsIcon (już ma aria-label)
+- ✅ Użycie istniejącej translacji `gear.actions.moreActions`
 
 ```vue
 <Button
@@ -157,13 +170,15 @@ Implementacja podstawowych oznaczeń ARIA i poprawa dostępności aplikacji, szc
 </Button>
 ```
 
-#### 2.4. ContainersListPageDropdown.vue
+#### 2.4. ContainersListPageDropdown.vue ✅
 
 **Plik:** `src/modules/gear/components/ContainersListPageDropdown.vue`
 
+**Status:** ✅ Zrealizowane (2025-01-21)
+
 **Zmiany:**
-- Dodanie `v-tooltip.bottom` do przycisku MoreActionsIcon (już ma aria-label)
-- Użycie istniejącej translacji `gear.actions.moreActions`
+- ✅ Dodanie `v-tooltip.bottom` do przycisku MoreActionsIcon (już ma aria-label)
+- ✅ Użycie istniejącej translacji `gear.actions.moreActions`
 
 ```vue
 <Button
@@ -451,8 +466,8 @@ Implementacja podstawowych oznaczeń ARIA i poprawa dostępności aplikacji, szc
 
 ## ✅ Definition of Done
 
-- [ ] Wszystkie przyciski z ikonami mają tooltips z przetłumaczoną nazwą akcji
-- [ ] Wszystkie przyciski z ikonami mają aria-label (może być taka sama treść jak tooltip)
+- [x] Wszystkie przyciski z ikonami mają tooltips z przetłumaczoną nazwą akcji (częściowo - główne komponenty zrobione)
+- [x] Wszystkie przyciski z ikonami mają aria-label (może być taka sama treść jak tooltip) (częściowo - główne komponenty zrobione)
 - [ ] Główne regiony strony mają odpowiednie landmarky ARIA
 - [ ] Interaktywne elementy mają odpowiednie atrybuty ARIA (aria-expanded, aria-labelledby, itp.)
 - [ ] Semantyczny HTML jest używany wszędzie, gdzie to możliwe
@@ -474,5 +489,6 @@ Implementacja podstawowych oznaczeń ARIA i poprawa dostępności aplikacji, szc
 ---
 
 **Ostatnia aktualizacja:** 2025-01-21
+
 
 

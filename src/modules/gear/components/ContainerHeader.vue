@@ -190,6 +190,7 @@ const handleBack = () => {
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
               <Button
+                v-tooltip.bottom="t('gear.actions.moreActions')"
                 variant="outline"
                 size="sm"
                 class="shrink-0"
@@ -236,4 +237,3 @@ const handleBack = () => {
     <ContainerHeaderStats :container />
   </div>
 </template>
-

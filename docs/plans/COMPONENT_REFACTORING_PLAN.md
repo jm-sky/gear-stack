@@ -380,7 +380,7 @@ src/modules/gear/components/shopping/
 
 ## Status realizacji
 
-### Ogólny postęp: 12.5% (1/8 komponentów zrefaktorowanych)
+### Ogólny postęp: 25% (2/8 komponentów zrefaktorowanych)
 
 #### Priorytet 1 (Wysoki)
 - [x] **ShoppingPlanningPage.vue** ✅ **UKOŃCZONO**
@@ -394,11 +394,13 @@ src/modules/gear/components/shopping/
   - [x] shopping.types.ts
 
 #### Priorytet 2 (Średni)
-- [ ] ItemsTable.vue
-  - [ ] ItemsTableNameCell.vue
-  - [ ] ItemsTableMoveButtons.vue
-  - [ ] ItemsTableCategoryCell.vue
-  - [ ] ItemsTableWeightCell.vue
+- [x] **ItemsTable.vue** ✅ **UKOŃCZONO**
+  - [x] ItemsTableNameCell.vue
+  - [x] ItemsTableMoveButtons.vue
+  - [x] ItemsTableCategoryCell.vue
+  - [x] ItemsTableWeightCell.vue
+  - [x] ItemsTableEditableNameCell.vue
+  - [x] ItemsTableImageCell.vue
 
 - [ ] ImportMarkdownDialog.vue
   - [ ] MarkdownImportOptions.vue
@@ -442,6 +444,7 @@ Po każdym refaktoringu:
 | 2025-11-26 | ShoppingPlanningPage.vue | ✅ Ukończono | Podzielono na 8 komponentów (1084→682 linie, -37%) |
 | 2025-11-26 | ShoppingPlanningPage.vue | 🔧 Poprawki | Zastosowano Vue 3.5+ best practices (defineModel, routing helpers) |
 | 2025-11-26 | Shopping components | 🔧 Refaktoring | Utworzono `useCategoryLabel()` composable, `DeletedItemCard.vue`, poprawiono kolejność deklaracji |
+| 2025-12-01 | ItemsTable.vue | ✅ Ukończono | Podzielono na 6 komponentów (552→511 linie, -7.4%), dodano inline editing support |
 
 ---
 
@@ -450,7 +453,7 @@ Po każdym refaktoringu:
 1. ✅ Utworzenie planu refaktoringu
 2. ✅ Start refaktoringu ShoppingPlanningPage.vue
 3. ✅ Testy i weryfikacja (type-check, lint, build)
-4. ⏳ Refaktoring ItemsTable.vue
+4. ✅ Refaktoring ItemsTable.vue
 5. ⏳ Refaktoring ImportMarkdownDialog.vue
 6. ⏳ Opcjonalne: pozostałe komponenty
 
@@ -487,4 +490,4 @@ Po ukończeniu refaktoringu tych dwóch komponentów:
 
 ---
 
-**Ostatnia aktualizacja:** 2025-11-26
+**Ostatnia aktualizacja:** 2025-12-01
