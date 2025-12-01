@@ -6,13 +6,6 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import Textarea from '@/components/ui/textarea/Textarea.vue'
 import WeightInputWithUnitPicker from '@/components/ui/weight-input/WeightInputWithUnitPicker.vue'
 import type { IGearItem } from '../types/gear.types'
@@ -21,6 +14,9 @@ import BrandAutocomplete from './inputs/BrandAutocomplete.vue'
 import CategorySelect from './inputs/CategorySelect.vue'
 import ColorAutocomplete from './inputs/ColorAutocomplete.vue'
 import CurrencySelect from './inputs/CurrencySelect.vue'
+import PrioritySelect from './inputs/PrioritySelect.vue'
+import QualitySelect from './inputs/QualitySelect.vue'
+import StatusSelect from './inputs/StatusSelect.vue'
 
 defineProps<{
   item?: IGearItem
@@ -116,25 +112,7 @@ const handleCancel = () => {
       <FormField v-slot="{ value, handleChange }" name="priority">
         <FormItem>
           <FormLabel :label="t('gear.item.priority')" required />
-          <Select :model-value="value" @update:model-value="handleChange">
-            <SelectTrigger class="min-w-36">
-              <SelectValue :placeholder="t('gear.item.priority')" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="critical">
-                {{ t('gear.item.priorities.critical') }}
-              </SelectItem>
-              <SelectItem value="high">
-                {{ t('gear.item.priorities.high') }}
-              </SelectItem>
-              <SelectItem value="medium">
-                {{ t('gear.item.priorities.medium') }}
-              </SelectItem>
-              <SelectItem value="low">
-                {{ t('gear.item.priorities.low') }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
+          <PrioritySelect :model-value="value" @update:model-value="handleChange" />
           <FormMessage />
         </FormItem>
       </FormField>
@@ -142,22 +120,7 @@ const handleCancel = () => {
       <FormField v-slot="{ value, handleChange }" name="status">
         <FormItem>
           <FormLabel :label="t('gear.item.status')" required />
-          <Select :model-value="value" @update:model-value="handleChange">
-            <SelectTrigger class="min-w-36">
-              <SelectValue :placeholder="t('gear.item.status')" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="owned">
-                {{ t('gear.item.statuses.owned') }}
-              </SelectItem>
-              <SelectItem value="missing">
-                {{ t('gear.item.statuses.missing') }}
-              </SelectItem>
-              <SelectItem value="toBuy">
-                {{ t('gear.item.statuses.toBuy') }}
-              </SelectItem>
-            </SelectContent>
-          </Select>
+          <StatusSelect :model-value="value" @update:model-value="handleChange" />
           <FormMessage />
         </FormItem>
       </FormField>
@@ -263,22 +226,7 @@ const handleCancel = () => {
         <FormField v-slot="{ value, handleChange }" name="quality">
           <FormItem>
             <FormLabel :label="t('gear.item.quality')" />
-            <Select :model-value="value" @update:model-value="handleChange">
-              <SelectTrigger class="w-full min-w-36">
-                <SelectValue :placeholder="t('gear.item.quality')" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="low">
-                  {{ t('gear.item.qualities.low') }}
-                </SelectItem>
-                <SelectItem value="medium">
-                  {{ t('gear.item.qualities.medium') }}
-                </SelectItem>
-                <SelectItem value="high">
-                  {{ t('gear.item.qualities.high') }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
+            <QualitySelect :model-value="value" @update:model-value="handleChange" />
             <FormMessage />
           </FormItem>
         </FormField>
