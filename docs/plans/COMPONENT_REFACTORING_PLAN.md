@@ -30,8 +30,8 @@ Identyfikacja i refaktoring komponentów Vue przekraczających 300 linii kodu. G
 |--------------------------|-----------|-----------|
 | ShoppingPlanningPage.vue | 1084      | 🔴 Wysoki |
 | ItemsTable.vue           |  552      | 🟡 Średni |
+| ContainerDetailPage.vue  |  549      | 🟡 Średni |
 | ItemFormFields.vue       |  389      | 🟢 Niski |
-| ContainerDetailPage.vue  |  389      | ✅ OK (dobrze zorganizowany) |
 | CategoryPieChart.vue     |  365      | 🟢 Niski |
 | ImportMarkdownDialog.vue |  360      | 🟡 Średni |
 | ContainerFormFields.vue  |  294      | ✅ OK |
@@ -166,9 +166,9 @@ src/modules/gear/components/
 
 ---
 
-#### 3. ImportMarkdownDialog.vue (360 linii)
+#### 3. ImportMarkdownDialog.vue (378 linii → 309 linii, -18.3%)
 
-**Status:** ❌ Nie rozpoczęto
+**Status:** ✅ Ukończono (2025-12-01)
 
 **Plan podziału:**
 
@@ -177,57 +177,108 @@ src/modules/gear/components/
 ├── ImportMarkdownDialog.vue (główny dialog + logika importu)
 └── import-markdown/
     ├── MarkdownImportPreview.vue
-    ├── MarkdownImportOptions.vue
-    └── MarkdownImportStats.vue
+    └── MarkdownImportOptions.vue
 ```
 
-**Komponenty do stworzenia:**
+**Komponenty utworzone:**
 
-- [ ] `MarkdownImportOptions.vue` - opcje importu
-  - Props: `importMode`, `recognizeFromName`
-  - Emits: `update:importMode`, `update:recognizeFromName`
-  - ~40 linii
+- [x] `MarkdownImportOptions.vue` - opcje importu
+  - Props: `recognizeFromName`, `importMode`, `hasUuids`, `showPreview`
+  - defineModel: `recognizeFromName`, `importMode`
+  - 58 linii ✅
 
-- [ ] `MarkdownImportPreview.vue` - podgląd parsowanego markdownu
+- [x] `MarkdownImportPreview.vue` - podgląd parsowanego markdownu
   - Props: `previewResult`
-  - ~80 linii
+  - 54 linii ✅
 
-- [ ] `MarkdownImportStats.vue` - statystyki importu
-  - Props: `containerCount`, `itemCount`, `hasUuids`
-  - ~30 linii
+**Wynik refaktoringu:**
+- Oryginalny plik: 378 linie → 309 linii (-18.3%)
+- Utworzono 2 nowe komponenty
+- Wszystkie testy przeszły: type-check ✅, lint ✅, build ✅
 
-**Pozostałe linie:** ~210 linii
+**Pozostałe linie:** 309 linii (główny dialog + logika importu + textarea)
 
 ---
 
 ### 🟢 Priorytet 3 (Niskie/Opcjonalne)
 
-#### 4. ItemFormFields.vue (389 linii)
+#### 4. ItemFormFields.vue (389 linii → 320 linii, -17.7%)
 
-**Status:** ⚠️ Opcjonalnie
+**Status:** ✅ Ukończono (2025-12-01) - Utworzono dedykowane select komponenty
 
-**Uwaga:** Komponent jest już dobrze podzielony na sekcje logiczne. Refaktoring jest opcjonalny.
+**Uwaga:** Nie rozbijano na sub-komponenty (ItemBasicFields, ItemStatusFields, etc.) - zamiast tego utworzono reużywalne select komponenty.
 
-**Opcjonalny plan podziału:**
+**Plan podziału:**
 
 ```
 src/modules/gear/components/
-├── ItemFormFields.vue (główny layout)
-└── item-form/
-    ├── ItemBasicFields.vue (name, category, quantity, weight)
-    ├── ItemStatusFields.vue (priority, status, expiration)
-    └── ItemExtendedFields.vue (price, brand, url, color, quality, wearable, consumable)
+├── ItemFormFields.vue (główny formularz)
+└── inputs/
+    ├── PrioritySelect.vue
+    ├── StatusSelect.vue
+    └── QualitySelect.vue
 ```
 
-**Komponenty do stworzenia (opcjonalnie):**
+**Komponenty utworzone:**
 
-- [ ] `ItemBasicFields.vue` - podstawowe pola (~100 linii)
-- [ ] `ItemStatusFields.vue` - pola statusu (~80 linii)
-- [ ] `ItemExtendedFields.vue` - pola rozszerzone (~180 linii)
+- [x] `PrioritySelect.vue` - select dla priority (critical/high/medium/low)
+  - defineModel: `TGearItemPriority`
+  - 34 linii ✅
+
+- [x] `StatusSelect.vue` - select dla status (owned/missing/toBuy)
+  - defineModel: `TGearItemStatus`
+  - 34 linii ✅
+
+- [x] `QualitySelect.vue` - select dla quality (low/medium/high)
+  - defineModel: `TGearItemQuality`
+  - 34 linii ✅
+
+**Wynik refaktoringu:**
+- Oryginalny plik: 389 linie → 320 linii (-17.7%)
+- Utworzono 3 reużywalne select komponenty
+- Wszystkie testy przeszły: type-check ✅, lint ✅, build ✅
+- Bonus: Naprawiono błędy TypeScript w ItemsTableEditablePriceCell i ItemsTableEditableWeightCell
+
+**Pozostałe linie:** 320 linii (główny formularz)
 
 ---
 
-#### 5. CategoryPieChart.vue (365 linii)
+#### 5. ContainerDetailPage.vue (549 linii → 472 linii, -14%)
+
+**Status:** ✅ Częściowo ukończono (2025-12-01) - Wyodrębniono rating section
+
+**Plan podziału:**
+
+```
+src/modules/gear/
+├── pages/
+│   └── ContainerDetailPage.vue (główna logika page)
+└── components/
+    └── ContainerRatingSection.vue (rating logic + UI)
+```
+
+**Komponenty utworzone:**
+
+- [x] `ContainerRatingSection.vue` - sekcja ratingów z pełną logiką
+  - Props: `container: IGearContainer`
+  - Zawiera: Rating state, handleRate, handleDeleteRating
+  - Używa: ContainerRatingCard, gearContainerApiService
+  - 105 linii ✅
+
+**Wynik refaktoringu:**
+- Oryginalny plik: 549 linie → 472 linie (-14%)
+- Utworzono 1 komponent z pełną logiką rating
+- Wszystkie testy przeszły: type-check ✅, lint ✅, build ✅
+
+**Pozostałe linie:** 472 linii (page logic + items + export/import)
+
+**Możliwe dalsze refaktoringi:**
+- Wyodrębnić composable dla export/import operations
+- Wyodrębnić logikę sortowania do composable
+
+---
+
+#### 6. CategoryPieChart.vue (365 linii)
 
 **Status:** ⚠️ Opcjonalnie
 
@@ -380,7 +431,7 @@ src/modules/gear/components/shopping/
 
 ## Status realizacji
 
-### Ogólny postęp: 25% (2/8 komponentów zrefaktorowanych)
+### Ogólny postęp: 55.5% (5/9 komponentów zrefaktorowanych)
 
 #### Priorytet 1 (Wysoki)
 - [x] **ShoppingPlanningPage.vue** ✅ **UKOŃCZONO**
@@ -402,13 +453,17 @@ src/modules/gear/components/shopping/
   - [x] ItemsTableEditableNameCell.vue
   - [x] ItemsTableImageCell.vue
 
-- [ ] ImportMarkdownDialog.vue
-  - [ ] MarkdownImportOptions.vue
-  - [ ] MarkdownImportPreview.vue
-  - [ ] MarkdownImportStats.vue
+- [x] **ImportMarkdownDialog.vue** ✅ **UKOŃCZONO**
+  - [x] MarkdownImportOptions.vue
+  - [x] MarkdownImportPreview.vue
 
 #### Priorytet 3 (Niski/Opcjonalny)
-- [ ] ItemFormFields.vue (opcjonalnie)
+- [x] **ItemFormFields.vue** ✅ **UKOŃCZONO** (select komponenty)
+  - [x] PrioritySelect.vue
+  - [x] StatusSelect.vue
+  - [x] QualitySelect.vue
+- [x] **ContainerDetailPage.vue** ✅ **CZĘŚCIOWO UKOŃCZONO** (rating section)
+  - [x] ContainerRatingSection.vue
 - [ ] CategoryPieChart.vue (opcjonalnie)
 
 ---
@@ -445,6 +500,9 @@ Po każdym refaktoringu:
 | 2025-11-26 | ShoppingPlanningPage.vue | 🔧 Poprawki | Zastosowano Vue 3.5+ best practices (defineModel, routing helpers) |
 | 2025-11-26 | Shopping components | 🔧 Refaktoring | Utworzono `useCategoryLabel()` composable, `DeletedItemCard.vue`, poprawiono kolejność deklaracji |
 | 2025-12-01 | ItemsTable.vue | ✅ Ukończono | Podzielono na 6 komponentów (552→511 linie, -7.4%), dodano inline editing support |
+| 2025-12-01 | ImportMarkdownDialog.vue | ✅ Ukończono | Podzielono na 3 komponenty (378→309 linie, -18.3%) |
+| 2025-12-01 | ItemFormFields.vue | ✅ Ukończono | Utworzono 3 reużywalne select komponenty (389→320 linie, -17.7%) |
+| 2025-12-01 | ContainerDetailPage.vue | ✅ Częściowo ukończono | Wyodrębniono ContainerRatingSection (549→472 linie, -14%) |
 
 ---
 
@@ -454,8 +512,8 @@ Po każdym refaktoringu:
 2. ✅ Start refaktoringu ShoppingPlanningPage.vue
 3. ✅ Testy i weryfikacja (type-check, lint, build)
 4. ✅ Refaktoring ItemsTable.vue
-5. ⏳ Refaktoring ImportMarkdownDialog.vue
-6. ⏳ Opcjonalne: pozostałe komponenty
+5. ✅ Refaktoring ImportMarkdownDialog.vue
+6. ⏳ Opcjonalne: ItemFormFields.vue i CategoryPieChart.vue
 
 ---
 
