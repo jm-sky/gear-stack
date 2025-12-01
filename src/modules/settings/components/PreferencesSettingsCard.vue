@@ -92,7 +92,7 @@ const onSubmit = handleSubmit(async (values) => {
       </div>
       <CardDescription>{{ t('settings.page.sections.preferences.description') }}</CardDescription>
     </CardHeader>
-    <CardContent>
+    <CardContent :class="{ 'opacity-50': isUpdating }">
       <div v-if="isLoading" class="space-y-4">
         <div class="h-16 bg-muted rounded animate-pulse" />
         <div class="h-16 bg-muted rounded animate-pulse" />

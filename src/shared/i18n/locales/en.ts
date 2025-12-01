@@ -554,4 +554,7 @@ export default {
     },
     copied: 'Context copied to clipboard',
   },
+  premium: {
+    premiumFeature: 'Premium Feature',
+  },
 }

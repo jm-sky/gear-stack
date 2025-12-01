@@ -554,4 +554,7 @@ export default {
     },
     copied: 'Kontekst skopiowany do schowka',
   },
+  premium: {
+    premiumFeature: 'Funkcja Premium',
+  },
 }
