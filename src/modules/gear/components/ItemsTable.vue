@@ -37,6 +37,7 @@ import ItemsTableNestedContainerRow from './ItemsTableNestedContainerRow.vue'
 import ItemsTableRowActions from './ItemsTableRowActions.vue'
 import ItemStatusBadge from './ItemStatusBadge.vue'
 import type { SortingState } from '@tanstack/vue-table'
+import type { TUUID } from '@/shared/types/base.type'
 
 const props = withDefaults(
   defineProps<{
@@ -367,10 +368,12 @@ function canMoveDown(item: IGearItem): boolean {
 
 // Track dirty state per row - Map<itemId, IUpdateItemDto>
 const dirtyChanges = ref<Map<string, IUpdateItemDto>>(new Map())
+const savingItems = ref<Set<TUUID>>(new Set())
 
 // Handle cell change - accumulate changes per row
-function handleCellChange(itemId: string, updates: IUpdateItemDto) {
-  const currentChanges = dirtyChanges.value.get(itemId) || {}
+function handleCellChange(item: IGearItem, updates: IUpdateItemDto, save?: boolean) {
+  const itemId = item.id
+  const currentChanges = dirtyChanges.value.get(itemId) ?? {}
 
   // Merge updates with existing changes
   const mergedChanges: IUpdateItemDto = { ...currentChanges, ...updates }
@@ -386,6 +389,10 @@ function handleCellChange(itemId: string, updates: IUpdateItemDto) {
   } else {
     dirtyChanges.value.delete(itemId)
   }
+
+  if (save && hasChanges) {
+    handleSaveRow(item)
+  }
 }
 
 // Check if row has dirty changes
@@ -400,12 +407,16 @@ async function handleSaveRow(item: IGearItem) {
 
   const { updateItem } = useGear()
   try {
+    savingItems.value.add(item.id)
     const updated = await updateItem(item.id, changes)
     // Clear dirty state for this row
     dirtyChanges.value.delete(item.id)
     emit('update', updated)
+    savingItems.value.delete(item.id)
   } catch (error) {
     console.error('Failed to save row changes:', error)
+  } finally {
+    savingItems.value.delete(item.id)
   }
 }
 
@@ -451,7 +462,8 @@ async function handleStarItem(item: IGearItem, newPriority: TGearItemPriority) {
         :item="row.original"
         :is-expired="isExpired(row.original)"
         :is-expiring-soon="isExpiringSoon(row.original)"
-        @change="(updates) => handleCellChange(row.original.id, updates)"
+        :is-saving="savingItems.has(row.original.id)"
+        @change="(updates, save) => handleCellChange(row.original, updates, save)"
       />
       <ItemsTableNameCell
         v-else
@@ -485,7 +497,7 @@ async function handleStarItem(item: IGearItem, newPriority: TGearItemPriority) {
       <ItemsTableEditableCategoryCell
         v-if="editMode && !publicMode"
         :item="row.original"
-        @change="(updates) => handleCellChange(row.original.id, updates)"
+        @change="(updates) => handleCellChange(row.original, updates)"
       />
       <ItemsTableCategoryCell
         v-else
@@ -497,7 +509,7 @@ async function handleStarItem(item: IGearItem, newPriority: TGearItemPriority) {
       <ItemsTableEditableQuantityCell
         v-if="editMode && !publicMode"
         :item="row.original"
-        @change="(updates) => handleCellChange(row.original.id, updates)"
+        @change="(updates) => handleCellChange(row.original, updates)"
       />
       <span v-else>{{ row.original.quantity }}</span>
     </template>
@@ -506,7 +518,7 @@ async function handleStarItem(item: IGearItem, newPriority: TGearItemPriority) {
       <ItemsTableEditableWeightCell
         v-if="editMode && !publicMode && !isNestedContainer(row.original)"
         :item="row.original"
-        @change="(updates) => handleCellChange(row.original.id, updates)"
+        @change="(updates) => handleCellChange(row.original, updates)"
       />
       <ItemsTableWeightCell
         v-else
@@ -521,7 +533,7 @@ async function handleStarItem(item: IGearItem, newPriority: TGearItemPriority) {
       <ItemsTableEditablePriorityCell
         v-if="editMode && !publicMode"
         :item="row.original"
-        @change="(updates) => handleCellChange(row.original.id, updates)"
+        @change="(updates) => handleCellChange(row.original, updates)"
       />
       <ItemPriorityBadge
         v-else
@@ -533,7 +545,7 @@ async function handleStarItem(item: IGearItem, newPriority: TGearItemPriority) {
       <ItemsTableEditableStatusCell
         v-if="editMode && !publicMode"
         :item="row.original"
-        @change="(updates) => handleCellChange(row.original.id, updates)"
+        @change="(updates) => handleCellChange(row.original, updates)"
       />
       <ItemStatusBadge
         v-else
@@ -545,7 +557,7 @@ async function handleStarItem(item: IGearItem, newPriority: TGearItemPriority) {
       <ItemsTableEditablePriceCell
         v-if="editMode && !publicMode"
         :item="row.original"
-        @change="(updates) => handleCellChange(row.original.id, updates)"
+        @change="(updates) => handleCellChange(row.original, updates)"
       />
       <div v-else-if="row.original.price != null" class="text-end px-4">
         {{ formatItemPrice(row.original, false, defaultCurrency) }}

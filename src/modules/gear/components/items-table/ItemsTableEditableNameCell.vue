@@ -12,10 +12,11 @@ const props = defineProps<{
   item: IGearItem
   isExpired?: boolean
   isExpiringSoon?: boolean
+  isSaving?: boolean
 }>()
 
 const emit = defineEmits<{
-  change: [updates: IUpdateItemDto]
+  change: [updates: IUpdateItemDto, save?: boolean]
 }>()
 
 // In edit mode, always show input
@@ -28,7 +29,7 @@ const textClass = computed<string>(() => {
 })
 
 // Handle change - emit updates to parent
-function handleChange() {
+function handleChange(save: boolean = false) {
   if (editedName.value.trim() === '') {
     // Validation - name is required, reset to original
     editedName.value = props.item.name
@@ -36,16 +37,16 @@ function handleChange() {
   }
 
   if (editedName.value.trim() !== props.item.name) {
-    emit('change', { name: editedName.value.trim() })
+    emit('change', { name: editedName.value.trim() }, save)
   } else {
     // No changes - emit empty to clear dirty state
-    emit('change', {})
+    emit('change', {}, save)
   }
 }
 
 // Handle Enter - same as blur
 function handleEnter() {
-  handleChange()
+  handleChange(true)
 }
 
 // Watch for external changes to item
@@ -71,6 +72,7 @@ function handleReset() {
         v-tooltip="isExpiringSoon ? t('gear.item.expiration.expiringSoon') : ''"
         class="pr-8 py-1! h-[2.1rem]!"
         :class="[textClass, isExpiringSoon ? 'border-yellow-600' : '']"
+        :disabled="isSaving"
         @keydown.enter.prevent="handleEnter"
         @blur="handleChange"
       />
