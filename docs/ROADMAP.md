@@ -63,6 +63,15 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - Limit: 50 MB (zwykli użytkownicy), 1 GB (owner) - konfigurowalny
    - Status: 🔄 Planned | Priority: High | Complexity: Medium
 
+8. **Unifikacja modeli kontenerów i przedmiotów**
+   - 📍 Analiza: [UNIFIED_MODEL_ANALYSIS.md](./analysis/UNIFIED_MODEL_ANALYSIS.md)
+   - Połączenie modeli `IGearContainer` i `IGearItem` w jeden model `IGearEntity` z flagą `isContainer`
+   - Uproszczenie zagnieżdżania (plecak → kubek → pudełko → zapałki) - jeden mechanizm `parentId`
+   - Wspólne obrazki dla kontenerów i przedmiotów (jedna tabela `entity_images`)
+   - Prostsze zapytania SQL (jedna tabela zamiast dwóch)
+   - Status: 🔄 Analysis Complete | Priority: High | Complexity: Large
+   - **Uwaga:** Wymaga migracji danych i refaktoryzacji ~80-150 plików (2-4 tygodnie pracy)
+
 ### Średni priorytet
 
 1. **Przenoszenie przedmiotów między kontenerami**
@@ -128,7 +137,7 @@ Funkcjonalności wymagające **backendu, bazy danych i/lub autoryzacji** (online
 - 🔄 Multi-device synchronization (planowane)
 - 🔄 Container sharing (planowane)
 - 🔄 Global item catalog (planowane)
-- 🔄 PWA (planowane)
+- ✅ PWA (planowane)
 
 **Kiedy sprawdzać:** Gdy implementujesz funkcje wymagające serwera, bazy danych lub systemu użytkowników.
 

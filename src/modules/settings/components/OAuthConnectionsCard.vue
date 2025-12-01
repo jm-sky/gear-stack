@@ -110,4 +110,3 @@ const hasConnections = computed(() => {
     </CardContent>
   </Card>
 </template>
-
