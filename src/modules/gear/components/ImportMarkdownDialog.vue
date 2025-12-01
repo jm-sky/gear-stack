@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import { AlertCircle, FileText, Info } from 'lucide-vue-next'
+import { FileText, Info } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -14,8 +12,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Label } from '@/components/ui/label'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import Textarea from '@/components/ui/textarea/Textarea.vue'
 import { useHandleError } from '@/shared/composables/useHandleError'
 import type { IGearContainer } from '../types/gear.types'
@@ -24,6 +20,8 @@ import { useGearSettings } from '../composables/useGearSettings'
 import { markdownImportService } from '../services/markdownImportService'
 import { useGearStore } from '../store/useGearStore'
 import GuidelinesDialog from './GuidelinesDialog.vue'
+import MarkdownImportOptions from './import-markdown/MarkdownImportOptions.vue'
+import MarkdownImportPreview from './import-markdown/MarkdownImportPreview.vue'
 
 const props = defineProps<{
   open: boolean
@@ -262,82 +260,16 @@ const handleImport = async () => {
           />
         </div>
 
-        <!-- Recognition Options -->
-        <div class="flex items-center space-x-2">
-          <Checkbox id="recognize-from-name" v-model="recognizeFromName" />
-          <Label for="recognize-from-name" class="text-sm font-normal cursor-pointer">
-            {{ t('gear.import.recognizeFromName') }}
-            <span class="text-xs text-muted-foreground block">
-              {{ t('gear.import.recognizeFromNameDesc') }}
-            </span>
-          </Label>
-        </div>
-
-        <!-- Import Mode Selection (shown only when UUIDs detected) -->
-        <div v-if="hasUuids && previewResult" class="border rounded-lg p-4 space-y-3">
-          <Label class="text-sm font-medium">{{ t('gear.import.mode') }}</Label>
-          <RadioGroup v-model="importMode" class="gap-3">
-            <div class="flex items-center space-x-2">
-              <RadioGroupItem id="mode-update" value="update" />
-              <Label for="mode-update" class="font-normal cursor-pointer">
-                {{ t('gear.import.modeUpdate') }}
-                <span class="text-xs text-muted-foreground block">
-                  {{ t('gear.import.modeUpdateDesc') }}
-                </span>
-              </Label>
-            </div>
-            <div class="flex items-center space-x-2">
-              <RadioGroupItem id="mode-create" value="create" />
-              <Label for="mode-create" class="font-normal cursor-pointer">
-                {{ t('gear.import.modeCreate') }}
-                <span class="text-xs text-muted-foreground block">
-                  {{ t('gear.import.modeCreateDesc') }}
-                </span>
-              </Label>
-            </div>
-          </RadioGroup>
-        </div>
+        <!-- Recognition Options & Import Mode -->
+        <MarkdownImportOptions
+          v-model:recognize-from-name="recognizeFromName"
+          v-model:import-mode="importMode"
+          :has-uuids="hasUuids"
+          :show-preview="!!previewResult"
+        />
 
         <!-- Preview Result -->
-        <div v-if="previewResult" class="space-y-4">
-          <!-- Errors -->
-          <Alert v-if="previewResult.errors.length > 0" variant="destructive">
-            <AlertCircle class="h-4 w-4" />
-            <AlertTitle>{{ t('gear.import.errors') }}</AlertTitle>
-            <AlertDescription>
-              <ul class="list-disc list-inside text-xs">
-                <li v-for="(error, idx) in previewResult.errors" :key="idx">
-                  {{ error }}
-                </li>
-              </ul>
-            </AlertDescription>
-          </Alert>
-
-          <!-- Preview Summary -->
-          <div v-if="previewResult.containers.length > 0" class="border rounded-lg p-4 space-y-3">
-            <h3 class="font-semibold">
-              {{ t('gear.import.previewTitle') }}
-            </h3>
-
-            <div class="space-y-2 text-sm">
-              <div v-for="(container, idx) in previewResult.containers" :key="idx" class="border-l-2 pl-3">
-                <div class="font-medium">
-                  {{ container.name }} ({{ container.items.length }} {{ t('gear.import.items') }})
-                </div>
-                <ul class="text-xs text-muted-foreground mt-1 space-y-0.5">
-                  <li v-for="(item, itemIdx) in container.items.slice(0, 5)" :key="itemIdx">
-                    {{ item.name }}
-                    <span v-if="item.brand" class="text-primary">{{ item.brand }}</span>
-                    <span v-if="item.quantity > 1">x{{ item.quantity }}</span>
-                  </li>
-                  <li v-if="container.items.length > 5" class="italic">
-                    {{ t('gear.import.andMore', { count: container.items.length - 5 }) }}
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
+        <MarkdownImportPreview :preview-result="previewResult" />
       </div>
 
       <DialogFooter class="flex-col sm:flex-row gap-2">
