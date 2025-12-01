@@ -11,6 +11,7 @@ import DropdownMenu from '@/components/ui/dropdown-menu/DropdownMenu.vue'
 import DropdownMenuContent from '@/components/ui/dropdown-menu/DropdownMenuContent.vue'
 import DropdownMenuItem from '@/components/ui/dropdown-menu/DropdownMenuItem.vue'
 import DropdownMenuTrigger from '@/components/ui/dropdown-menu/DropdownMenuTrigger.vue'
+import ImageWithLoadingState from '@/components/ui/image/ImageWithLoadingState.vue'
 import { Input } from '@/components/ui/input'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { useItemImage } from '@/modules/gear/composables/useItemImage'
@@ -234,12 +235,12 @@ async function handleAddFromUrl() {
             :to="routeTo"
             class="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <img
+            <ImageWithLoadingState
               :src="primaryImageUrl"
               :alt="`Image for item ${itemId}`"
-              loading="lazy"
-              :class="[
-                'size-12 rounded-md object-cover border border-border group-hover:border-primary/50 transition-colors',
+              class="size-12 group-hover:border-primary/50 transition-colors"
+              :image-class="[
+                'size-full object-cover',
                 { 'animate-pulse': isDeleting }
               ]"
             />
@@ -264,12 +265,12 @@ async function handleAddFromUrl() {
       :to="routeTo"
       class="-my-1 group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md overflow-hidden"
     >
-      <img
+      <ImageWithLoadingState
         :src="primaryImageUrl"
         :alt="`Image for item ${itemId}`"
-        loading="lazy"
-        :class="[
-          'size-12 rounded-md object-cover border border-border group-hover:border-primary/50 transition-colors',
+        class="size-12 group-hover:border-primary/50 transition-colors"
+        :image-class="[
+          'size-full object-cover',
           { 'animate-pulse': isDeleting }
         ]"
       />
