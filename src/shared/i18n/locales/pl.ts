@@ -155,6 +155,13 @@ export default {
     terms: 'Regulamin',
     contact: 'Kontakt',
     github: 'GitHub',
+    recaptcha: {
+      notice: 'Ta strona jest chroniona przez reCAPTCHA.',
+      privacy: 'Polityka prywatności',
+      and: ' i ',
+      terms: 'Warunki korzystania',
+      google: ' Google mają zastosowanie.',
+    },
   },
   cookies: {
     title: 'Informacja o ciasteczkach',
@@ -450,6 +457,9 @@ export default {
   about: {
     title: 'O aplikacji Gear Stack',
     subtitle: 'Kompleksowa aplikacja internetowa do zarządzania sprzętem survivalowym, plecakami bug-out i wyposażeniem outdoorowym',
+    tableOfContents: {
+      title: 'Spis treści',
+    },
     overview: {
       title: 'Przegląd',
       description: 'Gear Stack to aplikacja full-stack zaprojektowana dla entuzjastów outdooru, preppersów i kolekcjonerów sprzętu survivalowego. Łączy intuicyjny interfejs front-end z solidnym backendem, zapewniając bezpieczne zarządzanie sprzętem dla wielu użytkowników z synchronizacją w chmurze między urządzeniami.',

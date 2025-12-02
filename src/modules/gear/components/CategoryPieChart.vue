@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { Donut } from '@unovis/ts'
-import { VisDonut, VisSingleContainer } from '@unovis/vue'
-import { computed, ref } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -21,6 +19,10 @@ import { formatCurrency, getCurrency } from '../utils/currencyFormatter'
 import CategoryPieChartLabels from './CategoryPieChartLabels.vue'
 import CategoryPieChartLegend from './CategoryPieChartLegend.vue'
 import type { ChartConfig } from '@/components/ui/chart'
+
+// Lazy load unovis components
+const VisDonut = defineAsyncComponent(() => import('@unovis/vue').then(m => m.VisDonut))
+const VisSingleContainer = defineAsyncComponent(() => import('@unovis/vue').then(m => m.VisSingleContainer))
 
 type ChartMode = 'weight' | 'quantity' | 'price' | 'priority'
 
@@ -229,11 +231,26 @@ type Data = typeof chartData.value[number]
 
 const hasData = computed<boolean>(() => categoryData.value.length > 0 && totalValue.value > 0)
 
+// Lazy load Donut selector
+const donutSelectors = ref<typeof import('@unovis/ts').Donut.selectors | null>(null)
+
+onMounted(async () => {
+  try {
+    const { Donut } = await import('@unovis/ts')
+    donutSelectors.value = Donut.selectors
+  } catch (error) {
+    console.error('Failed to load @unovis/ts:', error)
+  }
+})
+
 const chartTooltipTriggers = computed(() => {
+  if (!donutSelectors.value) {
+    return {}
+  }
   const config = chartConfig.value as ChartConfig
   const mode = chartMode.value
   return {
-    [Donut.selectors.segment]: (d: Data & { data?: Data }) => {
+    [donutSelectors.value.segment]: (d: Data & { data?: Data }) => {
       // Unovis passes {data: Data, index, value, ...} structure
       const data = (d.data || d) as Data
       const template = componentToString(config, ChartTooltipContent, {
@@ -326,24 +343,37 @@ const valueFormatter = (value: number) => {
       <div v-if="!hasData" class="flex items-center justify-center py-12 text-muted-foreground">
         {{ t('gear.chart.noData', 'Brak danych do wyświetlenia') }}
       </div>
+      <div v-else-if="!donutSelectors" class="flex items-center justify-center py-12 text-muted-foreground">
+        {{ t('gear.chart.loading', 'Ładowanie wykresu...') }}
+      </div>
       <div v-else class="flex flex-col md:flex-row gap-6">
         <!-- Pie Chart - Left side -->
         <div class="shrink-0 md:w-1/2 relative max-w-full overflow-hidden">
           <ChartContainer :config="chartConfig" class="mx-auto aspect-square max-h-[300px] w-full max-w-full">
-            <VisSingleContainer
-              :data="chartData"
-              :margin="{ top: 30, bottom: 30, left: 30, right: 30 }"
-            >
-              <VisDonut
-                :value="(d: Data) => d.value"
-                :color="(d: Data) => chartConfig[d.category as keyof typeof chartConfig]?.color"
-                :arc-width="60"
-                :pad-angle="0.02"
-              />
-              <ChartTooltip :triggers="chartTooltipTriggers" />
-            </VisSingleContainer>
+            <Suspense>
+              <template #default>
+                <VisSingleContainer
+                  :data="chartData"
+                  :margin="{ top: 30, bottom: 30, left: 30, right: 30 }"
+                >
+                  <VisDonut
+                    :value="(d: Data) => d.value"
+                    :color="(d: Data) => chartConfig[d.category as keyof typeof chartConfig]?.color"
+                    :arc-width="60"
+                    :pad-angle="0.02"
+                  />
+                  <ChartTooltip :triggers="chartTooltipTriggers" />
+                </VisSingleContainer>
+              </template>
+              <template #fallback>
+                <div class="flex items-center justify-center py-12 text-muted-foreground">
+                  {{ t('gear.chart.loading', 'Ładowanie wykresu...') }}
+                </div>
+              </template>
+            </Suspense>
             <!-- Labels for segments with percentages - rendered outside VisSingleContainer -->
             <CategoryPieChartLabels
+              v-if="donutSelectors"
               :chart-data
               :center-x="chartGeometry.centerX"
               :center-y="chartGeometry.centerY"

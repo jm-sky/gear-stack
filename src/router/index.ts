@@ -1,3 +1,4 @@
+import { nextTick } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import { i18n } from '@/i18n'
 import { protectAdminRoutes } from '@/modules/admin/guards/adminGuard'
@@ -8,6 +9,32 @@ import { routes } from './routes'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+  async scrollBehavior(to, from, savedPosition) {
+    // Poczekaj na zaktualizowanie DOM
+    await nextTick()
+    
+    // Jeśli mamy zapisaną pozycję (np. przycisk wstecz/przód), przywróć ją
+    if (savedPosition) {
+      return savedPosition
+    }
+    
+    // Jeśli mamy hash w URL, przewiń do elementu z tym id
+    if (to.hash) {
+      // Czekamy dodatkowo, aby upewnić się, że strona jest w pełni zrenderowana
+      await new Promise(resolve => setTimeout(resolve, 100))
+      
+      const element = document.querySelector(to.hash)
+      if (element) {
+        return {
+          el: to.hash,
+          behavior: 'smooth',
+        }
+      }
+    }
+    
+    // W przeciwnym razie przewiń na górę
+    return { top: 0, left: 0 }
+  },
 })
 
 // Install auth guard (only active when backend is enabled)

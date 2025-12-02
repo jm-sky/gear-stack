@@ -1,12 +1,11 @@
 // router/publicRoutes.ts
-// Configurable route paths for public pages (about, ai-context, cookies, privacy, terms, contact, etc.)
+// Configurable route paths for public pages (about, cookies, privacy, terms, contact, etc.)
 
 import type { RouteRecordRaw } from 'vue-router'
 
 export const PublicRoutePaths = {
   landing: '/',
   about: '/about',
-  aiContext: '/ai-context',
   cookies: '/cookies',
   privacy: '/privacy',
   terms: '/terms',
@@ -17,7 +16,6 @@ export const PublicRoutePaths = {
 export const PublicRouteNames = {
   landing: 'landing',
   about: 'about',
-  aiContext: 'ai-context',
   cookies: 'cookies',
   privacy: 'privacy',
   terms: 'terms',
@@ -37,12 +35,6 @@ export const publicRoutes: RouteRecordRaw[] = [
     name: PublicRouteNames.about,
     component: () => import('@/pages/AboutPage.vue'),
     meta: { layout: 'authenticated', title: 'common.pages.about' },
-  },
-  {
-    path: PublicRoutePaths.aiContext,
-    name: PublicRouteNames.aiContext,
-    component: () => import('@/pages/AiContextPage.vue'),
-    meta: { layout: 'authenticated', title: 'common.pages.aiContext' },
   },
   {
     path: PublicRoutePaths.cookies,

@@ -102,9 +102,6 @@ if (!config.backend.enabled) {
         <RouterLink :to="{ name: PublicRouteNames.about }" class="text-muted-foreground hover:text-primary transition-colors">
           {{ t('common.pages.about', 'About') }}
         </RouterLink>
-        <RouterLink :to="{ name: PublicRouteNames.aiContext }" class="text-muted-foreground hover:text-primary transition-colors">
-          {{ t('common.pages.aiContext', 'AI Context') }}
-        </RouterLink>
       </div>
 
       <!-- Footer text -->

@@ -155,6 +155,13 @@ export default {
     terms: 'Terms of Use',
     contact: 'Contact',
     github: 'GitHub',
+    recaptcha: {
+      notice: 'This site is protected by reCAPTCHA. The Google',
+      privacy: 'Privacy Policy',
+      and: ' and ',
+      terms: 'Terms of Service',
+      google: ' apply.',
+    },
   },
   cookies: {
     title: 'Cookie Information',
@@ -450,6 +457,9 @@ export default {
   about: {
     title: 'About Gear Stack',
     subtitle: 'A comprehensive web application for managing survival gear, bug-out bags, and outdoor equipment',
+    tableOfContents: {
+      title: 'Table of Contents',
+    },
     overview: {
       title: 'Overview',
       description: 'Gear Stack is a full-stack application designed for outdoor enthusiasts, preppers, and survival gear collectors. It combines an intuitive front-end interface with a robust backend to provide secure multi-user gear management with cloud synchronization across devices.',

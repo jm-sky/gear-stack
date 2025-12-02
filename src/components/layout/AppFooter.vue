@@ -6,6 +6,7 @@ import { useAppVersion } from '@/shared/composables/useAppVersion'
 import { config } from '@/shared/config/config'
 import HoverLinkExternal from '../ui/hover-link/HoverLinkExternal.vue'
 import GithubIcon from '../ui/icons/GithubIcon.vue'
+import RecaptchaNotice from './RecaptchaNotice.vue'
 
 const { t } = useI18n()
 
@@ -40,9 +41,6 @@ const { version, buildDate } = useAppVersion()
           <HoverLink :to="{ name: PublicRouteNames.about }">
             {{ t('common.pages.about', 'About') }}
           </HoverLink>
-          <HoverLink :to="{ name: PublicRouteNames.aiContext }">
-            {{ t('common.pages.aiContext', 'AI Context') }}
-          </HoverLink>
           <HoverLink :to="{ name: PublicRouteNames.cookies }">
             {{ t('footer.cookies', 'Informacja o ciasteczkach') }}
           </HoverLink>
@@ -61,6 +59,8 @@ const { version, buildDate } = useAppVersion()
           </HoverLinkExternal>
         </nav>
       </div>
+      
+      <RecaptchaNotice />
     </div>
   </footer>
 </template>

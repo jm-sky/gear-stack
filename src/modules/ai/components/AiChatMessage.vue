@@ -3,8 +3,7 @@
   Displays a single chat message with markdown support
 -->
 <script setup lang="ts">
-import MarkdownIt from 'markdown-it'
-import { computed, ref, } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import type { IAiChatMessage, IAiStructuredOutput } from '../types'
 import AiChatMessageDebugPrompt from './AiChatMessageDebugPrompt.vue'
 import AiChatMessageDebugStructuredOutput from './AiChatMessageDebugStructuredOutput.vue'
@@ -16,18 +15,44 @@ const { message, debugPrompt, debugStructuredOutput } = defineProps<{
   debugStructuredOutput?: IAiStructuredOutput | null
 }>()
 
-const md = new MarkdownIt({
-  html: false, // Disable HTML tags for security
-  linkify: true, // Auto-convert URLs to links
-  typographer: true, // Enable smart quotes and other typographic replacements
-  breaks: true, // Convert line breaks to <br>
+const mdInstance = ref<InstanceType<typeof import('markdown-it').default> | null>(null)
+const isLoadingMd = ref(true)
+
+/**
+ * Lazy loads and initializes markdown-it parser
+ * Creates a configured instance with security-focused settings
+ */
+async function initializeMarkdownIt(): Promise<void> {
+  try {
+    const MarkdownItModule = await import('markdown-it')
+    const MarkdownIt = MarkdownItModule.default
+    mdInstance.value = new MarkdownIt({
+      html: false, // Disable HTML tags for security
+      linkify: true, // Auto-convert URLs to links
+      typographer: true, // Enable smart quotes and other typographic replacements
+      breaks: true, // Convert line breaks to <br>
+    })
+  } catch (error) {
+    console.error('Failed to load markdown-it:', error)
+  } finally {
+    isLoadingMd.value = false
+  }
+}
+
+// Lazy load markdown-it only when component is mounted
+onMounted(() => {
+  initializeMarkdownIt()
 })
 
 const debugPromptMessage = ref(false)
 const debugStructuredOutputMessage = ref(false)
 
 const renderedContent = computed<string>(() => {
-  return md.render(message.content)
+  if (!mdInstance.value) {
+    // Fallback: return plain text if markdown-it is not loaded yet
+    return message.content
+  }
+  return mdInstance.value.render(message.content)
 })
 
 const messageClasses = computed<string>(() => {

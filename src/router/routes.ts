@@ -16,7 +16,7 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/DashboardPage.vue'),
     meta: { layout: 'authenticated', title: 'navigation.dashboard' },
   },
-  // Other public pages (about, ai-context, cookies, privacy, terms, contact)
+  // Other public pages (about, cookies, privacy, terms, contact)
   ...publicRoutes.filter(route => route.name !== 'landing' && route.name !== 'not-found'),
   // Module routes
   ...authRoutes,

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BackpackIcon, Globe, Info, Package, ShoppingCart, Sparkles } from 'lucide-vue-next'
+import { BackpackIcon, Globe, Info, Package, ShoppingCart } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
@@ -121,19 +121,6 @@ const rootContainers = computed<IGearContainer[]>(() => {
             >
               <Info class="size-4" />
               <span>{{ t('common.pages.about', 'About') }}</span>
-            </SidebarMenuButton>
-          </RouterLink>
-        </SidebarMenuItem>
-        <SidebarMenuItem>
-          <RouterLink v-slot="{ href, navigate, isActive }" :to="PublicRoutePaths.aiContext" custom>
-            <SidebarMenuButton
-              :is-active="isActive"
-              as="a"
-              :href="href"
-              @click="navigate"
-            >
-              <Sparkles class="size-4" />
-              <span>{{ t('common.pages.aiContext', 'AI Context') }}</span>
             </SidebarMenuButton>
           </RouterLink>
         </SidebarMenuItem>
