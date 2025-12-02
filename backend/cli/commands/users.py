@@ -803,6 +803,7 @@ async def _users_toggle_owner_async(identifier: str | None, yes: bool) -> None:
         # Toggle owner status
         with console.status(f"[bold green]Updating user...", spinner="dots"):
             await _toggle_owner_in_db(user["id"], new_owner_status)
+            await _toggle_admin_in_db(user["id"], new_owner_status)
 
         console.print(f"\n[bold green]✓[/bold green] User {'promoted to owner' if new_owner_status else 'demoted from owner'} successfully\n")
 
