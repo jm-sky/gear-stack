@@ -9,23 +9,8 @@ gear-stack.ovh {
   # Enable gzip compression
   encode gzip zstd
 
-  # Static assets with long-term cache (hashed filenames)
-  # These files have hashes in their names (e.g., index-CZGLpK2X.js)
-  # Safe to cache for 1 year because filename changes when content changes
-  @hashed_assets {
-      path /assets/*.js
-      path /assets/*.css
-      path /assets/*.woff2
-      path /assets/*.woff
-      path /assets/*.ttf
-      path /assets/*.eot
-      path /webfonts/*
-  }
-  header @hashed_assets {
-      Cache-Control "public, max-age=31536000, immutable"
-  }
-
   # Other static assets (shorter cache)
+  # This should come first so hashed assets can override it
   @static_assets {
       path /assets/*
       path /favicon.ico
@@ -39,6 +24,24 @@ gear-stack.ovh {
   }
   header @static_assets {
       Cache-Control "public, max-age=3600"
+  }
+
+  # Static assets with long-term cache (hashed filenames)
+  # These files have hashes in their names (e.g., index-CZGLpK2X.js, index-CaYsQQIZ.css)
+  # Safe to cache for 1 year because filename changes when content changes
+  # This comes AFTER static_assets so it overrides for hashed files
+  @hashed_assets {
+      # Match files with hash pattern: name-HASH.ext (e.g., index-CZGLpK2X.js, index-CaYsQQIZ.css)
+      path_regexp hashed_js ^/assets/.*-[A-Za-z0-9]{8,}\.js$
+      path_regexp hashed_css ^/assets/.*-[A-Za-z0-9]{8,}\.css$
+      path /assets/*.woff2
+      path /assets/*.woff
+      path /assets/*.ttf
+      path /assets/*.eot
+      path /webfonts/*
+  }
+  header @hashed_assets {
+      Cache-Control "public, max-age=31536000, immutable"
   }
 
   # HTML files should not be cached (or very short cache)

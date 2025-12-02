@@ -40,6 +40,41 @@ export default defineConfig(({ mode }) => {
     build: {
       chunkSizeWarningLimit: 600,
       sourcemap: true, // Generate source maps to satisfy Lighthouse performance audit
+      rollupOptions: {
+        output: {
+          manualChunks: (id) => {
+            // Split vendor libraries into separate chunks
+            if (id.includes('node_modules')) {
+              // Vue core libraries
+              if (id.includes('vue') || id.includes('@vue')) {
+                return 'vendor-vue'
+              }
+              // Router
+              if (id.includes('vue-router')) {
+                return 'vendor-router'
+              }
+              // UI libraries
+              if (id.includes('lucide-vue-next') || id.includes('@radix-vue') || id.includes('floating-vue')) {
+                return 'vendor-ui'
+              }
+              // State management
+              if (id.includes('pinia') || id.includes('@tanstack/vue-query')) {
+                return 'vendor-state'
+              }
+              // i18n
+              if (id.includes('vue-i18n')) {
+                return 'vendor-i18n'
+              }
+              // Other large dependencies
+              if (id.includes('vue-sonner') || id.includes('sonner')) {
+                return 'vendor-notifications'
+              }
+              // All other node_modules
+              return 'vendor'
+            }
+          },
+        },
+      },
     },
   }
 })

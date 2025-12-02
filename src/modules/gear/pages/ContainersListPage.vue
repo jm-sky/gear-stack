@@ -214,9 +214,9 @@ const handleExportAllToCSV = () => {
           <h1 class="text-3xl font-bold">
             {{ t('gear.page.containers') }}
           </h1>
-          <p class="text-muted-foreground mt-1">
+          <h2 class="text-muted-foreground mt-1">
             {{ t('gear.page.title') }}
-          </p>
+          </h2>
         </div>
         <div class="flex flex-col sm:flex-row gap-2">
           <div class="flex gap-2">
