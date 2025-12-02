@@ -32,8 +32,8 @@ const { version, buildDate } = useAppVersion()
           <HoverLink :to="{ name: PublicRouteNames.landing }">
             {{ config.app.name }}
           </HoverLink>
-          <span class="ml-2 text-xs opacity-70">
-            v{{ version }} – {{ buildDate }}
+          <span v-tooltip="buildDate" class="ml-2 text-xs opacity-70">
+            v{{ version }}
           </span>
         </div>
 
@@ -53,9 +53,8 @@ const { version, buildDate } = useAppVersion()
           <HoverLink :to="{ name: PublicRouteNames.contact }">
             {{ t('footer.contact', 'Kontakt') }}
           </HoverLink>
-          <HoverLinkExternal href="https://github.com" class="inline-flex items-center gap-1">
+          <HoverLinkExternal :title="t('footer.github', 'GitHub')" href="https://github.com" class="inline-flex items-center gap-1">
             <GithubIcon class="size-4" />
-            {{ t('footer.github', 'GitHub') }}
           </HoverLinkExternal>
         </nav>
       </div>
