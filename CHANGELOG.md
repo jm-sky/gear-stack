@@ -21,6 +21,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.27.1] - 2025-12-02
+
+### Changed
+- **Vite Configuration**: Removed commented-out rollupOptions section from `vite.config.ts` for improved readability and maintainability
+
+---
+
 ## [2.27.0] - 2025-12-01
 
 ### Added
