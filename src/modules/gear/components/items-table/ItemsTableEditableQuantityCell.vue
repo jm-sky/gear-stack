@@ -60,7 +60,7 @@ function handleReset() {
       type="number"
       min="1"
       step="1"
-      class="py-1! h-[2.1rem]!"
+      class="py-1! h-[2.1rem]! border-0"
       @keyup.enter="handleEnter"
       @blur="handleChange"
     />

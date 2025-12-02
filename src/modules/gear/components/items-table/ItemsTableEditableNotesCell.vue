@@ -85,7 +85,7 @@ function handleReset() {
         v-model="editedNotes"
         :disabled="isLoading"
         :placeholder="t('gear.item.notes')"
-        class="pr-8 py-1! h-[2.1rem]!"
+        class="pr-8 py-1! h-[2.1rem]! border-0"
         @keyup.enter="handleEnter"
         @blur="handleBlur"
       />

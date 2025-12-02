@@ -455,6 +455,7 @@ async function handleStarItem(item: IGearItem, newPriority: TGearItemPriority) {
     :enable-pagination="true"
     :enable-column-visibility="true"
     :initial-page-size="10"
+    :class="{ 'items-table-edit-mode': editMode && !publicMode }"
   >
     <template #name="{ row }">
       <ItemsTableEditableNameCell
@@ -463,7 +464,11 @@ async function handleStarItem(item: IGearItem, newPriority: TGearItemPriority) {
         :is-expired="isExpired(row.original)"
         :is-expiring-soon="isExpiringSoon(row.original)"
         :is-saving="savingItems.has(row.original.id)"
+        :can-move-up="canMoveUp(row.original)"
+        :can-move-down="canMoveDown(row.original)"
         @change="(updates, save) => handleCellChange(row.original, updates, save)"
+        @move-up="handleMoveUp(row.original)"
+        @move-down="handleMoveDown(row.original)"
       />
       <ItemsTableNameCell
         v-else
@@ -643,4 +648,10 @@ async function handleStarItem(item: IGearItem, newPriority: TGearItemPriority) {
     </template>
   </DataTable>
 </template>
+
+<style scoped>
+.items-table-edit-mode :deep([data-slot="table-cell"]) {
+  padding: .5rem .5rem;
+}
+</style>
 

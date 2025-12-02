@@ -70,7 +70,7 @@ watch(
       type="number"
       min="0"
       step="0.01"
-      class="py-1! h-[2.1rem]! w-20"
+      class="py-1! h-[2.1rem]! w-20 border-0"
       @keyup.enter="handleEnter"
       @blur="handleChange"
     />
@@ -78,7 +78,7 @@ watch(
       v-model="editedWeightUnit"
       @update:model-value="handleChange"
     >
-      <SelectTrigger class="w-[70px] h-[2.1rem]!">
+      <SelectTrigger class="w-[70px] h-[2.1rem]! border-transparent">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

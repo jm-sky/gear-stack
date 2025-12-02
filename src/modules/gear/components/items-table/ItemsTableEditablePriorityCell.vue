@@ -49,7 +49,7 @@ watch(
     :model-value="editedPriority"
     @update:model-value="handlePriorityChange"
   >
-    <SelectTrigger class="h-[2.1rem]! min-w-[120px]">
+    <SelectTrigger class="h-[2.1rem]! min-w-[120px] border-transparent">
       <SelectValue />
     </SelectTrigger>
     <SelectContent>

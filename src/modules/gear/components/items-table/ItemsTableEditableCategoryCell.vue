@@ -68,7 +68,7 @@ watch(
     :model-value="editedCategory"
     @update:model-value="handleCategoryChange"
   >
-    <SelectTrigger class="h-[2.1rem]! min-w-[140px]">
+    <SelectTrigger class="h-[2.1rem]! min-w-[140px] border-transparent">
       <SelectValue>
         <div class="flex items-center gap-2">
           <CategoryIcon :category="editedCategory" :size="16" />

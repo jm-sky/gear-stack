@@ -4,6 +4,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Badge from '@/components/ui/badge/Badge.vue'
 import { Input } from '@/components/ui/input'
+import ItemsTableMoveButtons from './ItemsTableMoveButtons.vue'
 import type { IGearItem, IUpdateItemDto } from '@/modules/gear/types/gear.types'
 
 const { t } = useI18n()
@@ -13,10 +14,14 @@ const props = defineProps<{
   isExpired?: boolean
   isExpiringSoon?: boolean
   isSaving?: boolean
+  canMoveUp?: boolean
+  canMoveDown?: boolean
 }>()
 
 const emit = defineEmits<{
   change: [updates: IUpdateItemDto, save?: boolean]
+  moveUp: []
+  moveDown: []
 }>()
 
 // In edit mode, always show input
@@ -65,13 +70,21 @@ function handleReset() {
 </script>
 
 <template>
-  <div class="flex items-center gap-2">
+  <div class="flex items-center gap-1">
+    <!-- Move up/down buttons -->
+    <ItemsTableMoveButtons
+      v-if="canMoveUp !== undefined && canMoveDown !== undefined"
+      :can-move-up="canMoveUp"
+      :can-move-down="canMoveDown"
+      @move-up="emit('moveUp')"
+      @move-down="emit('moveDown')"
+    />
     <div class="relative flex-1">
       <Input
         v-model="editedName"
         v-tooltip="isExpiringSoon ? t('gear.item.expiration.expiringSoon') : ''"
-        class="pr-8 py-1! h-[2.1rem]!"
-        :class="[textClass, isExpiringSoon ? 'border-yellow-600' : '']"
+        class="pl-2 pr-8 py-1! h-[2.1rem]!"
+        :class="[textClass, isExpiringSoon ? 'border border-yellow-600' : 'border-transparent']"
         :disabled="isSaving"
         @keydown.enter.prevent="handleEnter"
         @blur="handleChange"

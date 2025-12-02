@@ -96,7 +96,7 @@ const hasChanges = computed(() => {
         min="0"
         step="0.01"
         :placeholder="t('gear.item.price')"
-        class="pr-8 py-1! h-[2.1rem]!"
+        class="pr-8 py-1! h-[2.1rem]! border-0"
         @keyup.enter="handleEnter"
         @blur="handleChange"
       />
@@ -114,7 +114,7 @@ const hasChanges = computed(() => {
       v-model="editedCurrency"
       @update:model-value="handleChange"
     >
-      <SelectTrigger class="w-[100px] h-[2.1rem]!">
+      <SelectTrigger class="w-[100px] h-[2.1rem]! border-transparent">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
