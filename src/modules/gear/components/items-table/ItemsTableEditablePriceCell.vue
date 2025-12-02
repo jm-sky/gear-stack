@@ -91,7 +91,9 @@ const hasChanges = computed(() => {
   <div class="flex items-center gap-2">
     <div class="relative flex-1">
       <Input
+        :id="`item-price-${item.id}`"
         v-model="editedPrice"
+        :name="`item-price-${item.id}`"
         type="number"
         min="0"
         step="0.01"

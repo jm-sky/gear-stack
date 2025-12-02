@@ -59,7 +59,9 @@ function handleReset() {
 <template>
   <div class="relative w-20">
     <Input
+      :id="`item-quantity-${item.id}`"
       v-model="editedQuantity"
+      :name="`item-quantity-${item.id}`"
       type="number"
       min="1"
       step="1"

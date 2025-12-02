@@ -82,7 +82,9 @@ function handleReset() {
   <div class="flex items-center">
     <div class="relative flex-1 mr-1">
       <Input
+        :id="`item-notes-${item.id}`"
         v-model="editedNotes"
+        :name="`item-notes-${item.id}`"
         :aria-label="t('gear.item.notes')"
         :disabled="isLoading"
         :placeholder="t('gear.item.notes')"

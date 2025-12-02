@@ -20,6 +20,53 @@
     <link rel="apple-touch-icon" sizes="76x76" href="/icons/icon-76x76.png">
     <link rel="apple-touch-icon" sizes="60x60" href="/icons/icon-60x60.png">
     <link rel="manifest" href="/manifest.webmanifest">
+    <!-- Preconnect to Google Fonts for better performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Ensure font-display: swap for Google Fonts (2025 best practice) -->
+    <script>
+      // Ensure display=swap for Google Fonts to improve FCP and prevent invisible text
+      // This handles both static and dynamically loaded fonts
+      (function() {
+        function ensureDisplaySwap(link) {
+          if (link.href && link.href.includes('fonts.googleapis.com/css') && !link.href.includes('display=')) {
+            try {
+              const url = new URL(link.href)
+              url.searchParams.set('display', 'swap')
+              link.href = url.toString()
+            } catch (e) {
+              // Ignore invalid URLs
+            }
+          }
+        }
+        
+        // Check existing links on DOMContentLoaded
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('link[href*="fonts.googleapis.com/css"]').forEach(ensureDisplaySwap)
+          })
+        } else {
+          document.querySelectorAll('link[href*="fonts.googleapis.com/css"]').forEach(ensureDisplaySwap)
+        }
+        
+        // Watch for dynamically added links (MutationObserver - 2025 best practice)
+        if (typeof MutationObserver !== 'undefined') {
+          const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+              mutation.addedNodes.forEach(function(node) {
+                if (node.nodeName === 'LINK' && node.href) {
+                  ensureDisplaySwap(node)
+                }
+              })
+            })
+          })
+          
+          if (document.head) {
+            observer.observe(document.head, { childList: true, subtree: true })
+          }
+        }
+      })()
+    </script>
     <title>Gear Stack</title>
   </head>
   <body class="bg-surface text-foreground overflow-x-hidden">

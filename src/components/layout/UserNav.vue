@@ -95,12 +95,16 @@ const handleLogout = () => {
   <DropdownMenu>
     <DropdownMenuTrigger
       as-child
-      :aria-label="t('user.menu.title', 'User menu')"
     >
       <Avatar
+        role="button"
+        :aria-label="t('user.menu.title', 'User menu')"
         :class="cn('cursor-pointer hover:brightness-95 transition-all duration-300', !isAuthenticated && 'ring-2 ring-muted-foreground/30', isAuthenticated && isAdmin && 'ring-2 ring-primary ring-offset-2 ring-offset-background')"
       >
-        <AvatarImage :src="avatarUrl ?? ''" />
+        <AvatarImage
+          :src="avatarUrl ?? ''"
+          :alt="isAuthenticated ? (userName ?? userEmail ?? t('user.avatar.alt', 'User avatar')) : t('user.avatar.guestAlt', 'Guest avatar')"
+        />
         <AvatarFallback :class="isAuthenticated ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'">
           <UserIcon v-if="!isAuthenticated" class="size-4" />
           <template v-else>

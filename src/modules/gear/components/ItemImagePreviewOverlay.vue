@@ -61,6 +61,7 @@ function showPrevious() {
             <ItemImagePreviewOverlayButton
               v-if="images.length > 1"
               class="left-2 sm:left-4"
+              :aria-label="t('gear.fileUpload.imageGallery.previousImage', 'Previous image')"
               @click.stop="showPrevious"
             >
               <ChevronLeft class="size-5" />
@@ -75,6 +76,7 @@ function showPrevious() {
             <ItemImagePreviewOverlayButton
               v-if="images.length > 1"
               class="right-2 sm:right-4"
+              :aria-label="t('gear.fileUpload.imageGallery.nextImage', 'Next image')"
               @click.stop="showNext"
             >
               <ChevronRight class="size-5" />

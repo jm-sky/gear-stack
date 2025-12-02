@@ -91,10 +91,10 @@ const handleIncludeExpiringUpdate = (value: boolean | 'indeterminate') => {
     </h3>
 
     <!-- Categories filter -->
-    <div v-if="allCategories.length > 0" class="flex gap-4">
-      <Label class="text-sm">
+    <div v-if="allCategories.length > 0" class="space-y-2">
+      <p class="text-sm font-medium">
         {{ t('gear.shopping.filterByCategory', 'Filter by Category') }}:
-      </Label>
+      </p>
       <div class="flex flex-wrap gap-4">
         <div
           v-for="category in allCategories"
@@ -118,11 +118,16 @@ const handleIncludeExpiringUpdate = (value: boolean | 'indeterminate') => {
 
     <!-- Budget filter -->
     <div class="space-y-2">
-      <Label class="text-sm">
+      <Label
+        for="shopping-budget-filter"
+        class="text-sm"
+      >
         {{ t('gear.shopping.filterByBudget', 'Filter by Budget') }}:
       </Label>
       <div class="flex items-center gap-2">
         <Input
+          id="shopping-budget-filter"
+          name="shopping-budget-filter"
           :model-value="budget?.toString() ?? ''"
           type="number"
           :placeholder="t('gear.shopping.budgetPlaceholder', 'Enter budget amount')"

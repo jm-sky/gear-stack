@@ -118,6 +118,7 @@ const handleGenerateGravatar = () => {
           <Button
             variant="ghost"
             size="icon"
+            :aria-label="t('common.back', 'Back')"
             @click="handleCancel"
           >
             <ArrowLeft class="size-4" />
@@ -192,7 +193,7 @@ const handleGenerateGravatar = () => {
                     type="button"
                     variant="outline"
                     size="icon"
-                    :title="t('user.edit.generate_gravatar') || 'Generate Gravatar URL from email'"
+                    :aria-label="t('user.edit.generate_gravatar') || 'Generate Gravatar URL from email'"
                     @click="handleGenerateGravatar"
                   >
                     <GravatarIcon class="size-4" />

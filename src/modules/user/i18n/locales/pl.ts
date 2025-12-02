@@ -1,6 +1,13 @@
 export const userPl = {
   user: {
     guest: 'Gość',
+    menu: {
+      title: 'Menu użytkownika',
+    },
+    avatar: {
+      alt: 'Avatar użytkownika',
+      guestAlt: 'Avatar gościa',
+    },
     profile: {
       title: 'Profil',
       edit_button: 'Edytuj Profil',

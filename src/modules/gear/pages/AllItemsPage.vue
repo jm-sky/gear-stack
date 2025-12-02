@@ -196,6 +196,7 @@ function navigateToContainer(containerId: string) {
           <Button
             variant="ghost"
             size="icon"
+            :aria-label="t('gear.allItems.refresh', 'Refresh items')"
             @click="refreshItems"
           >
             <RefreshCcwIcon class="size-4" :class="{ 'animate-spin': loading }" />

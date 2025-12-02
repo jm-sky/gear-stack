@@ -66,7 +66,9 @@ watch(
 <template>
   <div class="flex items-center gap-2">
     <Input
+      :id="`item-weight-${item.id}`"
       v-model="editedWeight"
+      :name="`item-weight-${item.id}`"
       type="number"
       min="0"
       step="0.01"

@@ -1,6 +1,13 @@
 export const userEn = {
   user: {
     guest: 'Guest',
+    menu: {
+      title: 'User menu',
+    },
+    avatar: {
+      alt: 'User avatar',
+      guestAlt: 'Guest avatar',
+    },
     profile: {
       title: 'Profile',
       edit_button: 'Edit Profile',
