@@ -26,10 +26,22 @@ export function useNavigationReturn(containerId: string, itemId?: string) {
     }
   }
 
-  function navigateBackAndClean() {
-    navigateBack()
-    // Clean query params from URL after navigation
-    router.replace({ query: {} })
+  async function navigateBackAndClean() {
+    const returnToValue = returnTo.value
+
+    if (returnToValue === 'detail' && itemId) {
+      await router.push({
+        path: GearRoutePath.ItemDetailById(containerId, itemId),
+        query: {},
+      })
+    } else if (returnToValue === 'shopping') {
+      await router.push(GearRoutePath.ShoppingPlanning)
+    } else {
+      await router.push({
+        path: GearRoutePath.ContainerDetailById(containerId),
+        query: {},
+      })
+    }
   }
 
   return {

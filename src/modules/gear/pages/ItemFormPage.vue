@@ -208,7 +208,7 @@ const onSubmit = handleSubmit(async (data: ICreateItemDto | IUpdateItemDto) => {
     if (isEditMode && itemId) {
       await updateItem(itemId, data as IUpdateItemDto)
       toast.success(t('common.success'))
-      navigateBackAndClean()
+      await navigateBackAndClean()
     } else {
       // Add linkedItemId if selecting from catalog
       const createData: ICreateItemDto = {
@@ -217,7 +217,7 @@ const onSubmit = handleSubmit(async (data: ICreateItemDto | IUpdateItemDto) => {
       }
       await createItem(containerId, createData)
       toast.success(t('common.success'))
-      navigateBackAndClean()
+      await navigateBackAndClean()
     }
   } catch (error) {
     console.error(error)
@@ -226,8 +226,8 @@ const onSubmit = handleSubmit(async (data: ICreateItemDto | IUpdateItemDto) => {
 })
 
 // Cancel handler
-const handleCancel = () => {
-  navigateBackAndClean()
+const handleCancel = async () => {
+  await navigateBackAndClean()
 }
 
 // Recognize parameters handler
