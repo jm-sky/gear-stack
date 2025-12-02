@@ -14,10 +14,10 @@ import type { IGearItem } from '../types/gear.types'
 import ContainerHeader from '../components/ContainerHeader.vue'
 import ContainerItemImagesGallery from '../components/ContainerItemImagesGallery.vue'
 import ContainerRatingSection from '../components/ContainerRatingSection.vue'
-import ItemsTable from '../components/ItemsTable.vue'
 import SortConfirmationAlert from '../components/SortConfirmationAlert.vue'
 
 // Lazy load dialogs - only loaded when user opens them
+const ItemsTable = defineAsyncComponent(() => import('../components/ItemsTable.vue'))
 const AddNestedContainerDialog = defineAsyncComponent(() => import('../components/AddNestedContainerDialog.vue'))
 const ExportToPromptDialog = defineAsyncComponent(() => import('../components/ExportToPromptDialog.vue'))
 const ExportToCSVDialog = defineAsyncComponent(() => import('../components/ExportToCSVDialog.vue'))

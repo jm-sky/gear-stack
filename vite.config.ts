@@ -81,7 +81,7 @@ export default defineConfig(({ mode }) => {
                 return 'vendor-charts'
               }
               // Heavy @unovis dependencies - split into separate chunk for better lazy loading
-              if (id.includes('elkjs') || id.includes('maplibre-gl') || id.includes('leaflet')) {
+              if (id.includes('elkjs') || id.includes('maplibre-gl') || id.includes('leaflet') || id.includes('three')) {
                 return 'vendor-charts-deps'
               }
               // Form validation (large library)
