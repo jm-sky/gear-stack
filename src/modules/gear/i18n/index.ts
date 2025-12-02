@@ -464,6 +464,7 @@ export const gearEn = {
       status: 'Status',
       priority: 'Priority',
       all: 'All',
+      refresh: 'Refresh containers',
     },
     validation: {
       nameRequired: 'Name is required',
@@ -1178,6 +1179,7 @@ export const gearPl = {
       status: 'Status',
       priority: 'Priorytet',
       all: 'Wszystkie',
+      refresh: 'Odśwież kontenery',
     },
     validation: {
       nameRequired: 'Nazwa jest wymagana',

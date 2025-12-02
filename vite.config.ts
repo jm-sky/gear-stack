@@ -25,19 +25,6 @@ export default defineConfig(({ mode }) => {
         '@': fileURLToPath(new URL('./src', import.meta.url))
       },
     },
-    optimizeDeps: {
-      // Exclude large @unovis dependencies that are only used in specific components
-      // These will be loaded dynamically when needed
-      exclude: [
-        'elkjs',
-        'maplibre-gl',
-        'leaflet',
-        '@unovis/ts/components/graph',
-        '@unovis/ts/components/timeline',
-        '@unovis/ts/components/topojson-map',
-        '@unovis/ts/components/leaflet-map',
-      ],
-    },
     server: {
       port: envVars.VITE_PORT ? parseInt(envVars.VITE_PORT) : 5176,
       proxy: {
@@ -90,25 +77,12 @@ export default defineConfig(({ mode }) => {
                 return 'vendor-notifications'
               }
               // Large visualization library (lazy loaded)
-              // Split @unovis into separate chunks for better tree-shaking
               if (id.includes('@unovis')) {
-                // Core @unovis components (used in charts)
-                if (id.includes('@unovis/ts/components/donut') || id.includes('@unovis/ts/components/single-container')) {
-                  return 'vendor-charts-core'
-                }
-                // Heavy @unovis components (graph, timeline, maps) - rarely used
-                if (id.includes('@unovis/ts/components/graph') || 
-                    id.includes('@unovis/ts/components/timeline') ||
-                    id.includes('@unovis/ts/components/topojson-map') ||
-                    id.includes('@unovis/ts/components/leaflet-map')) {
-                  return 'vendor-charts-heavy'
-                }
-                // @unovis dependencies (elkjs, maplibre, leaflet) - only load when needed
-                if (id.includes('elkjs') || id.includes('maplibre-gl') || id.includes('leaflet')) {
-                  return 'vendor-charts-deps'
-                }
-                // All other @unovis code
                 return 'vendor-charts'
+              }
+              // Heavy @unovis dependencies - split into separate chunk for better lazy loading
+              if (id.includes('elkjs') || id.includes('maplibre-gl') || id.includes('leaflet')) {
+                return 'vendor-charts-deps'
               }
               // Form validation (large library)
               if (id.includes('vee-validate') || id.includes('@vee-validate')) {
