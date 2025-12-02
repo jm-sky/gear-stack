@@ -119,6 +119,7 @@ export default {
       go_to_app: 'Przejdź do panelu',
       email_required: 'Adres email jest wymagany, aby ponownie wysłać link.',
       invalid_or_expired: 'Link weryfikacyjny jest nieprawidłowy lub wygasł. Poproś o nowy poniżej.',
+      redirecting_to_dashboard: 'Przekierowywanie do panelu...',
     },
     links: {
       or_create_account: 'Lub utwórz nowe konto',

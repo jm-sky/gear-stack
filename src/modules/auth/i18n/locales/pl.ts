@@ -167,6 +167,7 @@ export const authPl = {
       email_required: 'Adres email jest wymagany, aby ponownie wysłać link.',
       invalid_or_expired: 'Link weryfikacyjny jest nieprawidłowy lub wygasł. Poproś o nowy poniżej.',
       success: 'Adres email został pomyślnie zweryfikowany.',
+      redirecting_to_dashboard: 'Przekierowywanie do panelu...',
     },
     pages: {
       login: 'Logowanie',

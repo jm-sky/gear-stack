@@ -119,6 +119,7 @@ export default {
       go_to_app: 'Go to dashboard',
       email_required: 'Email address is required to resend the verification link.',
       invalid_or_expired: 'Verification link is invalid or has expired. Request a new one below.',
+      redirecting_to_dashboard: 'Redirecting to dashboard...',
     },
     links: {
       or_create_account: 'Or create a new account',

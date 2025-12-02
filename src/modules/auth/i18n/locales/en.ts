@@ -167,6 +167,7 @@ export const authEn = {
       email_required: 'Email address is required to resend the verification link.',
       invalid_or_expired: 'Verification link is invalid or has expired. Request a new one below.',
       success: 'Email address verified successfully.',
+      redirecting_to_dashboard: 'Redirecting to dashboard...',
     },
     pages: {
       login: 'Sign In',

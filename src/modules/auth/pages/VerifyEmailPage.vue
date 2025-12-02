@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { RotateCwIcon } from 'lucide-vue-next'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -127,7 +128,7 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="space-y-6">
-        <div class="space-y-2 text-left">
+        <div v-if="!isVerified" class="space-y-2 text-left">
           <Label for="email">
             {{ t('auth.verify_email.resend_label') }}
           </Label>
@@ -140,6 +141,13 @@ onBeforeUnmount(() => {
           />
           <p class="text-xs text-muted-foreground">
             {{ t('auth.verify_email.resend_helper') }}
+          </p>
+        </div>
+
+        <div v-if="isVerified" class="flex flex-col items-center justify-center gap-3">
+          <RotateCwIcon class="size-8 animate-spin opacity-50" />
+          <p class="text-xs text-muted-foreground">
+            {{ t('auth.verify_email.redirecting_to_dashboard') }}
           </p>
         </div>
 
