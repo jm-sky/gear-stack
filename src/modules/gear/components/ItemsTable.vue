@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useDebounceFn } from '@vueuse/core'
 import { Check, Package } from 'lucide-vue-next'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -105,15 +106,20 @@ function loadColumnVisibility(): Record<string, boolean> {
 // Column visibility state - load from localStorage or use defaults
 const columnVisibility = ref<Record<string, boolean>>(loadColumnVisibility())
 
-// Save column visibility to localStorage when it changes
+// Debounced save function to reduce localStorage writes
+const debouncedSaveColumnVisibility = useDebounceFn((value: Record<string, boolean>) => {
+  try {
+    localStorage.setItem(ITEMS_TABLE_COLUMN_VISIBILITY_KEY, JSON.stringify(value))
+  } catch (error) {
+    console.error('Error saving column visibility to storage:', error)
+  }
+}, 500)
+
+// Save column visibility to localStorage when it changes (debounced)
 watch(
   columnVisibility,
   (newValue) => {
-    try {
-      localStorage.setItem(ITEMS_TABLE_COLUMN_VISIBILITY_KEY, JSON.stringify(newValue))
-    } catch (error) {
-      console.error('Error saving column visibility to storage:', error)
-    }
+    debouncedSaveColumnVisibility(newValue)
   },
   { deep: true },
 )
@@ -209,6 +215,7 @@ function calculateTotalWeight(containerId: string): number {
 const tableSorting = ref<SortingState>([])
 
 // Sort items by order (default sorting) or by table sorting
+// Using toSorted() instead of sort() to avoid mutating the array
 const sortedItems = computed<IGearItem[]>(() => {
   const items = [...props.items]
 
@@ -220,7 +227,7 @@ const sortedItems = computed<IGearItem[]>(() => {
     const columnId = sortConfig.id
     const direction = sortConfig.desc ? -1 : 1
 
-    return items.sort((a, b) => {
+    return items.toSorted((a, b) => {
       const aValue: unknown = a[columnId as keyof IGearItem]
       const bValue: unknown = b[columnId as keyof IGearItem]
 
@@ -244,7 +251,7 @@ const sortedItems = computed<IGearItem[]>(() => {
   }
 
   // Default: Sort by order (null/undefined items go to end)
-  return items.sort((a, b) => {
+  return items.toSorted((a, b) => {
     const orderA = a.order ?? Number.MAX_SAFE_INTEGER
     const orderB = b.order ?? Number.MAX_SAFE_INTEGER
     return orderA - orderB
@@ -280,8 +287,8 @@ watch(
       const columnId = sortConfig.id
       const direction = sortConfig.desc ? -1 : 1
 
-      // Apply sorting
-      const sorted = items.sort((a, b) => {
+      // Apply sorting (using toSorted to avoid mutating original array)
+      const sorted = items.toSorted((a, b) => {
         const aValue: unknown = a[columnId as keyof IGearItem]
         const bValue: unknown = b[columnId as keyof IGearItem]
 

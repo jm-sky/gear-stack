@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watchEffect } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -10,8 +10,10 @@ import { usePageTitle } from '@/shared/composables/usePageTitle'
 import { config } from '@/shared/config/config'
 import type { IGearContainer, IGearItem } from '../types/gear.types'
 import ItemHeader from '../components/ItemHeader.vue'
-import ItemImageGallery from '../components/ItemImageGallery.vue'
 import SearchImagesButton from '../components/SearchImagesButton.vue'
+
+// Lazy load ItemImageGallery - not critical for initial render
+const ItemImageGallery = defineAsyncComponent(() => import('../components/ItemImageGallery.vue'))
 import { useExpiration } from '../composables/useExpiration'
 import { useFormattedItemPrice } from '../composables/useFormattedItemPrice'
 import { useFormattedItemWeight } from '../composables/useFormattedItemWeight'

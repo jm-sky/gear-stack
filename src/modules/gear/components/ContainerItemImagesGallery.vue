@@ -104,10 +104,11 @@ onMounted(() => {
   loadImages()
 })
 
-// Watch for changes in items
-watch(() => props.items, () => {
+// Watch for changes in items - only track IDs and length to avoid deep watching
+// This prevents reloading images when item properties change (name, category, etc.)
+watch(() => props.items.map(i => i.id).join(','), () => {
   loadImages()
-}, { deep: true })
+})
 </script>
 
 <template>

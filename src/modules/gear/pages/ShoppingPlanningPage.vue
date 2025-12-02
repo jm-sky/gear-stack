@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
+import { useDebounceFn } from '@vueuse/core'
 import { Download, Plus, RotateCcw, ShoppingCart } from 'lucide-vue-next'
 import { useForm } from 'vee-validate'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -11,13 +12,15 @@ import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { config, SHOPPING_PLANNING_PAGE_FILTERS_KEY } from '@/shared/config/config'
 import type { ICreateItemDto, IGearItem, TGearItemCategory, TGearItemPriority } from '../types/gear.types'
 import type { IItemWithContainerId } from '../types/shopping.types'
-import AddItemToShoppingDialog from '../components/shopping/AddItemToShoppingDialog.vue'
 import AvailableItemCard from '../components/shopping/AvailableItemCard.vue'
 import DeletedItemsList from '../components/shopping/DeletedItemsList.vue'
-import ShoppingExportDialog from '../components/shopping/ShoppingExportDialog.vue'
 import ShoppingListFilters from '../components/shopping/ShoppingListFilters.vue'
 import ShoppingListItem from '../components/shopping/ShoppingListItem.vue'
 import ShoppingListSummary from '../components/shopping/ShoppingListSummary.vue'
+
+// Lazy load dialogs - only loaded when user opens them
+const AddItemToShoppingDialog = defineAsyncComponent(() => import('../components/shopping/AddItemToShoppingDialog.vue'))
+const ShoppingExportDialog = defineAsyncComponent(() => import('../components/shopping/ShoppingExportDialog.vue'))
 import { useCategoryLabel } from '../composables/useCategoryLabel'
 import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
@@ -140,14 +143,23 @@ const shoppingList = ref<IItemWithContainerId[]>(loadShoppingListFromStorage())
 // Deleted items (local to this page)
 const deletedItems = ref<IItemWithContainerId[]>(loadDeletedItemsFromStorage())
 
-// Watch shopping list changes and save to localStorage
+// Debounced save functions to reduce localStorage writes
+const debouncedSaveShoppingList = useDebounceFn((list: IItemWithContainerId[]) => {
+  saveShoppingListToStorage(list)
+}, 500)
+
+const debouncedSaveDeletedItems = useDebounceFn((items: IItemWithContainerId[]) => {
+  saveDeletedItemsToStorage(items)
+}, 500)
+
+// Watch shopping list changes and save to localStorage (debounced)
 watch(shoppingList, (newList) => {
-  saveShoppingListToStorage(newList)
+  debouncedSaveShoppingList(newList)
 }, { deep: true })
 
-// Watch deleted items changes and save to localStorage
+// Watch deleted items changes and save to localStorage (debounced)
 watch(deletedItems, (newItems) => {
-  saveDeletedItemsToStorage(newItems)
+  debouncedSaveDeletedItems(newItems)
 }, { deep: true })
 
 // Get available items (toBuy + optionally expiring soon/expired) with container IDs
@@ -205,12 +217,10 @@ const filteredItems = computed<IItemWithContainerId[]>(() => {
     })
   }
 
-  // Sort by priority
-  items.sort((a, b) => {
+  // Sort by priority (using toSorted to avoid mutating the array)
+  return items.toSorted((a, b) => {
     return priorityOrder[a.priority] - priorityOrder[b.priority]
   })
-
-  return items
 })
 
 // Calculate total price for shopping list (per currency)
@@ -530,10 +540,17 @@ function syncDeletedItemsWithContainers() {
 }
 
 // Watch containers changes and sync shopping list
-watch(containers, () => {
+// Track only item IDs instead of deep watching to reduce reactivity overhead
+watch(() => {
+  // Create a string of all item IDs from all containers
+  // This will change when items are added/removed, but won't trigger on property changes
+  return containers.value
+    .flatMap(container => container.items.map(item => item.id))
+    .join(',')
+}, () => {
   syncShoppingListWithContainers()
   syncDeletedItemsWithContainers()
-}, { deep: true })
+})
 
 // Handle redirect from edit page
 onMounted(() => {
@@ -629,6 +646,7 @@ onMounted(() => {
           <ShoppingListItem
             v-for="item in shoppingList"
             :key="item.id"
+            v-memo="[item.id, item.quantity, itemsBeingPurchased.has(item.id)]"
             :item="item"
             :is-being-purchased="itemsBeingPurchased.has(item.id)"
             @purchase="markAsPurchased(item)"
@@ -672,6 +690,7 @@ onMounted(() => {
           <AvailableItemCard
             v-for="item in filteredItems"
             :key="item.id"
+            v-memo="[item.id, item.status, item.priority, isInShoppingList(item), itemsBeingPurchased.has(item.id)]"
             :item="item"
             :is-in-shopping-list="isInShoppingList(item)"
             :is-being-purchased="itemsBeingPurchased.has(item.id)"

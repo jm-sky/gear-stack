@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { refDebounced } from '@vueuse/core'
 import { FileInput, Package } from 'lucide-vue-next'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -14,10 +14,12 @@ import type { IGearContainer } from '../types/gear.types'
 import ContainerCard from '../components/ContainerCard.vue'
 import ContainersFilters from '../components/ContainersFilters.vue'
 import ContainersListPageDropdown from '../components/ContainersListPageDropdown.vue'
-import ExportToCSVDialog from '../components/ExportToCSVDialog.vue'
-import ExportToPromptDialog from '../components/ExportToPromptDialog.vue'
 import GenerateExampleGearButton from '../components/GenerateExampleGearButton.vue'
-import ImportMarkdownDialog from '../components/ImportMarkdownDialog.vue'
+
+// Lazy load dialogs - only loaded when user opens them
+const ExportToCSVDialog = defineAsyncComponent(() => import('../components/ExportToCSVDialog.vue'))
+const ExportToPromptDialog = defineAsyncComponent(() => import('../components/ExportToPromptDialog.vue'))
+const ImportMarkdownDialog = defineAsyncComponent(() => import('../components/ImportMarkdownDialog.vue'))
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { useGear } from '../composables/useGear'
 import { GearRoutePath } from '../routes'

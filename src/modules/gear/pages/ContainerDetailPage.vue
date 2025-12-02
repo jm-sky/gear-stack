@@ -1,26 +1,29 @@
 <script setup lang="ts">
 // File operations handled via native input element
-import { computed, ref, watchEffect } from 'vue'
+import { computed, defineAsyncComponent, ref, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import AiChatDialog from '@/modules/ai/components/AiChatDialog.vue'
 import { useAi } from '@/modules/ai/composables/useAi'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { useBackend } from '@/shared/composables/useBackend'
 import { usePageTitle } from '@/shared/composables/usePageTitle'
 import { config } from '@/shared/config/config'
 import type { IGearItem } from '../types/gear.types'
-import AddNestedContainerDialog from '../components/AddNestedContainerDialog.vue'
-import CategoryPieChart from '../components/CategoryPieChart.vue'
 import ContainerHeader from '../components/ContainerHeader.vue'
 import ContainerItemImagesGallery from '../components/ContainerItemImagesGallery.vue'
 import ContainerRatingSection from '../components/ContainerRatingSection.vue'
-import ExportToCSVDialog from '../components/ExportToCSVDialog.vue'
-import ExportToPromptDialog from '../components/ExportToPromptDialog.vue'
 import ItemsTable from '../components/ItemsTable.vue'
 import SortConfirmationAlert from '../components/SortConfirmationAlert.vue'
+
+// Lazy load dialogs - only loaded when user opens them
+const AddNestedContainerDialog = defineAsyncComponent(() => import('../components/AddNestedContainerDialog.vue'))
+const ExportToPromptDialog = defineAsyncComponent(() => import('../components/ExportToPromptDialog.vue'))
+const ExportToCSVDialog = defineAsyncComponent(() => import('../components/ExportToCSVDialog.vue'))
+
+// Lazy load CategoryPieChart - not critical for initial render
+const CategoryPieChart = defineAsyncComponent(() => import('../components/CategoryPieChart.vue'))
 import { useContainer } from '../composables/useContainer'
 import { useGear } from '../composables/useGear'
 import { GearRoutePath } from '../routes'
@@ -28,6 +31,11 @@ import { gearItemService } from '../services/gearItemService'
 import { useGearStore } from '../store/useGearStore'
 import { createNavigationQuery } from '../utils/navigationParams'
 import { recognizeParameters, recognizeParametersForItems } from '../utils/parameterRecognition'
+
+
+// Lazy load AI Chat Dialog - only needed when user opens AI dialog
+// This reduces initial bundle size and improves critical path performance
+const AiChatDialog = defineAsyncComponent(() => import('@/modules/ai/components/AiChatDialog.vue'))
 
 const route = useRoute()
 const router = useRouter()
