@@ -9,10 +9,30 @@ gear-stack.ovh {
   # Enable gzip compression
   encode gzip zstd
 
+  # Static assets with long-term cache (hashed filenames)
+  # Vite hashes all JS/CSS files in /assets/ directory, so they're safe to cache long-term
+  # Safe to cache for 1 year because filename changes when content changes
+  @hashed_assets {
+      # Match all JS and CSS files in /assets/ (Vite hashes all of them)
+      path /assets/*.js
+      path /assets/*.css
+      path /assets/*.woff2
+      path /assets/*.woff
+      path /assets/*.ttf
+      path /assets/*.eot
+      path /webfonts/*
+  }
+
+  # HTML files should not be cached (or very short cache)
+  # This ensures users always get the latest index.html
+  @html_files {
+      path /*.html
+      path /
+  }
+
   # Other static assets (shorter cache)
-  # This should come first so hashed assets can override it
+  # Only matches assets that are NOT hashed (images, favicon, etc.)
   @static_assets {
-      path /assets/*
       path /favicon.ico
       path /robots.txt
       path /*.png
@@ -22,38 +42,20 @@ gear-stack.ovh {
       path /*.svg
       path /*.ico
   }
-  header @static_assets {
-      Cache-Control "public, max-age=3600"
-  }
 
-  # Static assets with long-term cache (hashed filenames)
-  # These files have hashes in their names (e.g., index-CZGLpK2X.js, index-CaYsQQIZ.css)
-  # Safe to cache for 1 year because filename changes when content changes
-  # This comes AFTER static_assets so it overrides for hashed files
-  @hashed_assets {
-      # Match files with hash pattern: name-HASH.ext (e.g., index-CZGLpK2X.js, index-CaYsQQIZ.css)
-      path_regexp hashed_js ^/assets/.*-[A-Za-z0-9]{8,}\.js$
-      path_regexp hashed_css ^/assets/.*-[A-Za-z0-9]{8,}\.css$
-      path /assets/*.woff2
-      path /assets/*.woff
-      path /assets/*.ttf
-      path /assets/*.eot
-      path /webfonts/*
-  }
+  # Apply cache headers - order matters, more specific matchers first
   header @hashed_assets {
       Cache-Control "public, max-age=31536000, immutable"
   }
 
-  # HTML files should not be cached (or very short cache)
-  # This ensures users always get the latest index.html
-  @html_files {
-      path /*.html
-      path /
-  }
   header @html_files {
       Cache-Control "no-cache, no-store, must-revalidate"
       Pragma "no-cache"
       Expires "0"
+  }
+
+  header @static_assets {
+      Cache-Control "public, max-age=3600"
   }
 
   # API routes - proxy to FastAPI backend
