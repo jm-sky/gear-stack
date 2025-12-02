@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { defineAsyncComponent } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -7,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import type { IGearContainer, TRatingType, TRatingValue } from '../types/gear.types'
-import CategoryPieChart from '../components/CategoryPieChart.vue'
+const CategoryPieChart = defineAsyncComponent(() => import('../components/CategoryPieChart.vue'))
 import ContainerRatingCard from '../components/ContainerRatingCard.vue'
 import ContainerReadinessProgressBar from '../components/ContainerReadinessProgressBar.vue'
 import ItemsTable from '../components/ItemsTable.vue'

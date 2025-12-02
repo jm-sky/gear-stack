@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { defineAsyncComponent } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import type { IGearContainer } from '../types/gear.types'
-import CategoryPieChart from '../components/CategoryPieChart.vue'
+const CategoryPieChart = defineAsyncComponent(() => import('../components/CategoryPieChart.vue'))
 import ContainerReadinessProgressBar from '../components/ContainerReadinessProgressBar.vue'
 import ItemsTable from '../components/ItemsTable.vue'
 import PublicContainerHeader from '../components/PublicContainerHeader.vue'
