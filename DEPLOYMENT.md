@@ -237,6 +237,17 @@ ls -la /var/www/gear-stack/
 sudo systemctl reload caddy
 ```
 
+### Configure Cache Headers for Static Assets
+
+To improve Lighthouse performance scores, configure cache headers in your Caddyfile. See `docs/Caddyfile.example` for a complete example.
+
+Key points:
+- **Hashed assets** (`/assets/*.js`, `/assets/*.css`): Cache for 1 year (`max-age=31536000, immutable`)
+- **Other static files**: Cache for 1 hour (`max-age=3600`)
+- **HTML files**: No cache (always fresh)
+
+The FastAPI backend also adds cache headers as a fallback, but Caddy configuration is recommended for optimal performance.
+
 ### View deployment logs
 ```bash
 # Frontend build logs (during manual deployment)

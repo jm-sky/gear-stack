@@ -83,6 +83,7 @@ function handleReset() {
       <Input
         v-model="editedName"
         v-tooltip="isExpiringSoon ? t('gear.item.expiration.expiringSoon') : ''"
+        :aria-label="t('gear.item.name')"
         class="pl-2 pr-8 py-1! h-[2.1rem]!"
         :class="[textClass, isExpiringSoon ? 'border border-yellow-600' : 'border-transparent']"
         :disabled="isSaving"

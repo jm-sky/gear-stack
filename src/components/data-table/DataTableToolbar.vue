@@ -101,8 +101,11 @@ const getColumnHeaderText = (column: ReturnType<Table<TData>['getColumn']>): str
     <!-- Global Filter Input -->
     <Input
       v-if="enableFiltering"
+      id="data-table-search"
+      name="data-table-search"
       :model-value="globalFilter"
       :placeholder="searchPlaceholder"
+      :aria-label="searchPlaceholder || t('common.search', 'Search')"
       class="max-w-sm"
       @update:model-value="(value: string | number) => handleGlobalFilterChange(String(value))"
     />

@@ -16,12 +16,15 @@ import { useAuth } from '@/modules/auth/composables/useAuth'
 import { AuthRoutePaths } from '@/modules/auth/config/routes'
 import { SettingsRoutePaths } from '@/modules/settings/routes'
 import { UserRoutePaths } from '@/modules/user/routes'
+import { generateGravatarUrl, GRAVATAR_BASE_URL } from '@/modules/user/utils/generateGravatarUrl'
 import { usePermissions } from '@/shared/composables/usePermissions'
 import { getInitials } from '@/shared/utils/getInitials'
 import Avatar from '../ui/avatar/Avatar.vue'
 import AvatarFallback from '../ui/avatar/AvatarFallback.vue'
 import AvatarImage from '../ui/avatar/AvatarImage.vue'
 import DropdownMenuItemLink from '../ui/dropdown-menu/DropdownMenuItemLink.vue'
+
+const AVATAR_SIZE = 32
 
 export interface Link {
   to: string
@@ -71,6 +74,18 @@ const defaultCoreLinks = computed<Link[]>(() => [
 const coreLinksList = computed<Link[]>(() => props.coreLinks ?? defaultCoreLinks.value.filter((link) => !link.hidden))
 const initials = computed<string>(() => getInitials(props.userName ?? props.userEmail ?? 'U'))
 
+const avatarUrl = computed<string | undefined>(() =>{
+  if (props.userAvatar?.startsWith(GRAVATAR_BASE_URL)) {
+    return props.userAvatar.replace(/&s=\d+/, `&s=${AVATAR_SIZE}`)
+  }
+
+  if (!props.userAvatar && props.userEmail) {
+    return generateGravatarUrl(props.userEmail, AVATAR_SIZE)
+  }
+
+  return props.userAvatar
+})
+
 const handleLogout = () => {
   emit('logout')
 }
@@ -78,12 +93,14 @@ const handleLogout = () => {
 
 <template>
   <DropdownMenu>
-    <DropdownMenuTrigger as-child>
+    <DropdownMenuTrigger
+      as-child
+      :aria-label="t('user.menu.title', 'User menu')"
+    >
       <Avatar
-        aria-label="User menu"
         :class="cn('cursor-pointer hover:brightness-95 transition-all duration-300', !isAuthenticated && 'ring-2 ring-muted-foreground/30', isAuthenticated && isAdmin && 'ring-2 ring-primary ring-offset-2 ring-offset-background')"
       >
-        <AvatarImage :src="userAvatar ?? ''" />
+        <AvatarImage :src="avatarUrl ?? ''" />
         <AvatarFallback :class="isAuthenticated ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'">
           <UserIcon v-if="!isAuthenticated" class="size-4" />
           <template v-else>

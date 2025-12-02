@@ -49,7 +49,10 @@ watch(
     :model-value="editedStatus"
     @update:model-value="handleStatusChange"
   >
-    <SelectTrigger class="h-[2.1rem]! min-w-[120px] border-transparent">
+    <SelectTrigger
+      :aria-label="t('gear.item.status')"
+      class="h-[2.1rem]! min-w-[120px] border-transparent"
+    >
       <SelectValue />
     </SelectTrigger>
     <SelectContent>

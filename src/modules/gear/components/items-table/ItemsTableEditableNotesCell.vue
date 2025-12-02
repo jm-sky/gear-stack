@@ -83,6 +83,7 @@ function handleReset() {
     <div class="relative flex-1 mr-1">
       <Input
         v-model="editedNotes"
+        :aria-label="t('gear.item.notes')"
         :disabled="isLoading"
         :placeholder="t('gear.item.notes')"
         class="pr-8 py-1! h-[2.1rem]! border-0"

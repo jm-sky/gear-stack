@@ -2,7 +2,7 @@
 import { BackpackIcon, Globe, Info, Package, ShoppingCart, Sparkles } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink, useRoute } from 'vue-router'
+import { RouterLink } from 'vue-router'
 import SidebarMenuContainerItem from '@/components/layout/SidebarMenuContainerItem.vue'
 import {
   Sidebar,
@@ -20,11 +20,10 @@ import {
 import { useGear } from '@/modules/gear/composables/useGear'
 import { GearRoutePath } from '@/modules/gear/routes'
 import { getRootContainers } from '@/modules/gear/utils/containerNesting'
-import { PublicRouteNames, PublicRoutePaths } from '@/router/publicRoutes'
+import { PublicRoutePaths } from '@/router/publicRoutes'
 import type { IGearContainer } from '@/modules/gear/types/gear.types'
 
 const { t } = useI18n()
-const route = useRoute()
 const { containers } = useGear()
 
 // Główne linki nawigacyjne
@@ -65,12 +64,6 @@ const rootContainers = computed<IGearContainer[]>(() => {
     return a.name.localeCompare(b.name)
   })
 })
-
-// Sprawdzanie czy link jest aktywny
-const isLinkActive = (path: string): boolean => {
-  return route.path === path || route.path.startsWith(path + '/')
-}
-
 </script>
 
 <template>
@@ -82,12 +75,17 @@ const isLinkActive = (path: string): boolean => {
         <SidebarGroupContent>
           <SidebarMenu>
             <SidebarMenuItem v-for="link in navLinks" :key="link.to">
-              <SidebarMenuButton :is-active="isLinkActive(link.to)" as-child>
-                <RouterLink :to="link.to">
+              <RouterLink v-slot="{ href, navigate, isActive }" :to="link.to" custom>
+                <SidebarMenuButton
+                  :is-active="isActive"
+                  as="a"
+                  :href="href"
+                  @click="navigate"
+                >
                   <component :is="link.icon" />
                   <span>{{ link.label }}</span>
-                </RouterLink>
-              </SidebarMenuButton>
+                </SidebarMenuButton>
+              </RouterLink>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroupContent>
@@ -114,20 +112,30 @@ const isLinkActive = (path: string): boolean => {
     <SidebarFooter>
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton :is-active="isLinkActive(PublicRoutePaths.about)" as-child>
-            <RouterLink :to="{ name: PublicRouteNames.about }">
+          <RouterLink v-slot="{ href, navigate, isActive }" :to="PublicRoutePaths.about" custom>
+            <SidebarMenuButton
+              :is-active="isActive"
+              as="a"
+              :href="href"
+              @click="navigate"
+            >
               <Info class="size-4" />
               <span>{{ t('common.pages.about', 'About') }}</span>
-            </RouterLink>
-          </SidebarMenuButton>
+            </SidebarMenuButton>
+          </RouterLink>
         </SidebarMenuItem>
         <SidebarMenuItem>
-          <SidebarMenuButton :is-active="isLinkActive(PublicRoutePaths.aiContext)" as-child>
-            <RouterLink :to="{ name: PublicRouteNames.aiContext }">
+          <RouterLink v-slot="{ href, navigate, isActive }" :to="PublicRoutePaths.aiContext" custom>
+            <SidebarMenuButton
+              :is-active="isActive"
+              as="a"
+              :href="href"
+              @click="navigate"
+            >
               <Sparkles class="size-4" />
               <span>{{ t('common.pages.aiContext', 'AI Context') }}</span>
-            </RouterLink>
-          </SidebarMenuButton>
+            </SidebarMenuButton>
+          </RouterLink>
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarFooter>

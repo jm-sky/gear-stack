@@ -48,6 +48,9 @@ interface DataTableProps<TData, TValue> {
   // Pagination
   initialPageSize?: number
   pageSizeOptions?: number[]
+  // Accessibility
+  ariaLabel?: string
+  ariaLabelledby?: string
   // Server-side pagination
   total?: number
   // Events
@@ -276,7 +279,10 @@ const handlePageSizeChange = (newPageSize: number) => {
       <div class="overflow-x-auto">
         <!-- Horizontal scroll indicator (gradient hint on right side for mobile) -->
         <div class="absolute right-0 top-0 bottom-0 w-12 pointer-events-none z-10 bg-linear-to-l from-black/5 dark:from-muted/60 to-transparent md:hidden" aria-hidden="true" />
-        <Table>
+        <Table
+          :aria-label
+          :aria-labelledby
+        >
           <TableHeader>
             <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
               <TableHead v-for="header in headerGroup.headers" :key="header.id">

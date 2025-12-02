@@ -462,6 +462,7 @@ async function handleStarItem(item: IGearItem, newPriority: TGearItemPriority) {
     :enable-pagination="true"
     :enable-column-visibility="true"
     :initial-page-size="10"
+    :aria-label="t('gear.items.table.title', 'Items table')"
     :class="{ 'items-table-edit-mode': editMode && !publicMode }"
   >
     <template #name="{ row }">

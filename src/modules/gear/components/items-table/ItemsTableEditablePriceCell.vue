@@ -95,6 +95,7 @@ const hasChanges = computed(() => {
         type="number"
         min="0"
         step="0.01"
+        :aria-label="t('gear.item.price')"
         :placeholder="t('gear.item.price')"
         class="pr-8 py-1! h-[2.1rem]! border-0"
         @keyup.enter="handleEnter"
@@ -114,7 +115,10 @@ const hasChanges = computed(() => {
       v-model="editedCurrency"
       @update:model-value="handleChange"
     >
-      <SelectTrigger class="w-[100px] h-[2.1rem]! border-transparent">
+      <SelectTrigger
+        :aria-label="t('gear.item.currency')"
+        class="w-[100px] h-[2.1rem]! border-transparent"
+      >
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

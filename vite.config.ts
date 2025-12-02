@@ -39,6 +39,7 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       chunkSizeWarningLimit: 600,
+      sourcemap: true, // Generate source maps to satisfy Lighthouse performance audit
     },
   }
 })

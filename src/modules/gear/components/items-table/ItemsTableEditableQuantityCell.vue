@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { UndoIcon } from 'lucide-vue-next'
 import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Input } from '@/components/ui/input'
 import type { IGearItem, IUpdateItemDto } from '@/modules/gear/types/gear.types'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   item: IGearItem
@@ -60,6 +63,7 @@ function handleReset() {
       type="number"
       min="1"
       step="1"
+      :aria-label="t('gear.item.quantity')"
       class="py-1! h-[2.1rem]! border-0"
       @keyup.enter="handleEnter"
       @blur="handleChange"
