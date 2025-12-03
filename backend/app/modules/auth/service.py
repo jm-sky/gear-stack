@@ -489,6 +489,8 @@ class AuthService:
 
         if existing_user_by_provider:
             # User exists with this OAuth provider - use existing user
+            # IMPORTANT: We do NOT update user's name/avatar from OAuth here to preserve
+            # any manual changes the user made in their profile (e.g., custom avatar, display name)
             user = existing_user_by_provider
         else:
             # Check if user exists by email
@@ -497,9 +499,11 @@ class AuthService:
             if existing_user:
                 # User exists with this email - link OAuth to existing account
                 # This allows users to add OAuth to existing password-based accounts
+                # IMPORTANT: We do NOT update user's name/avatar from OAuth here to preserve
+                # any manual changes the user made in their profile
                 user = existing_user
             else:
-                # Create new OAuth user
+                # Create new OAuth user - only for new users do we set initial data from OAuth
                 user = await self.user_repository.create_oauth_user(
                     email=email,
                     name=name,
