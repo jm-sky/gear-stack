@@ -275,10 +275,10 @@ CATALOGUE_ITEMS = [
     },
     # First Aid
     {
-        "name": "Emergency Bandage 6\"",
+        "name": 'Emergency Bandage 6"',
         "category": "firstAid",
         "brand": "Emergency Bandage",
-        "model": "6\"",
+        "model": '6"',
         "description": "Izraelski opatrunek do tamowania krwotoków",
         "price_tier": "mid",
         "quality": "high",

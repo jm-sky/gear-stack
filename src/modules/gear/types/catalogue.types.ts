@@ -23,6 +23,7 @@ export interface IGlobalCatalogueItem {
   createdBy?: TUUID | null
   createdAt: TDateTime
   updatedAt: TDateTime
+  primaryImageUrl?: string | null
 }
 
 // Search parameters for catalogue items

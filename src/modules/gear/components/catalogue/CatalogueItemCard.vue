@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Package } from 'lucide-vue-next'
+import { ImageIcon, Package } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
@@ -39,7 +39,7 @@ const qualityLabel = computed(() => {
     <Card
       as="a"
       :href
-      class="gap-2 transition-all duration-300 cursor-pointer hover:-translate-y-1 hover:scale-102 hover:bg-current/5 hover:shadow-lg"
+      class="group gap-2 transition-all duration-300 cursor-pointer hover:-translate-y-1 hover:scale-102 hover:bg-current/5 hover:shadow-lg"
       @click.stop="navigate"
     >
       <CardHeader class="h-8 flex items-center justify-between text-card-foreground">
@@ -51,6 +51,19 @@ const qualityLabel = computed(() => {
       </CardHeader>
 
       <CardContent class="flex flex-1 flex-col gap-3 px-6 pb-4 text-card-foreground">
+        <!-- Primary Image -->
+        <div class="flex items-center justify-center overflow-hidden rounded-md bg-muted h-48">
+          <img
+            v-if="item.primaryImageUrl"
+            :src="item.primaryImageUrl"
+            :alt="item.name"
+            class="h-48 w-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+          <ImageIcon
+            v-else
+            class="size-20 w-full opacity-50"
+          />
+        </div>
         <!-- Badges Row -->
         <div class="flex flex-wrap gap-2">
           <Badge variant="secondary" class="text-xs">

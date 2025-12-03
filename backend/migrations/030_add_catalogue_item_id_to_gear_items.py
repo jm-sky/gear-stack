@@ -85,10 +85,7 @@ async def upgrade() -> None:
         # Check if referenced table exists
         table_exist = await table_exists(conn, "global_catalogue_items")
         if not table_exist:
-            raise RuntimeError(
-                "Table 'global_catalogue_items' does not exist. "
-                "Please run migration 029 (add_global_catalogue_items) first."
-            )
+            raise RuntimeError("Table 'global_catalogue_items' does not exist. " "Please run migration 029 (add_global_catalogue_items) first.")
 
         print("Adding catalogue_item_id column...")
         await conn.execute(

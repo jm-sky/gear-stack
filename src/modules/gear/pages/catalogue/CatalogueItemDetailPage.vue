@@ -130,6 +130,15 @@ const handleAddToContainer = () => {
         </Button>
       </div>
 
+      <!-- Primary Image -->
+      <div v-if="item.primaryImageUrl" class="flex items-center justify-center overflow-hidden rounded-lg border bg-muted">
+        <img
+          :src="item.primaryImageUrl"
+          :alt="item.name"
+          class="max-h-96 w-full object-contain"
+        />
+      </div>
+
       <!-- Badges -->
       <div class="flex flex-wrap gap-2">
         <Badge variant="secondary">

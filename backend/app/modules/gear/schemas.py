@@ -149,21 +149,13 @@ class ContainerResponse(BaseModel):
     favorite: bool
     showItemImages: bool | None = Field(None, alias="showItemImages")
     authorName: str | None = None  # Only populated for public containers
-    authorId: str | None = Field(
-        None, alias="authorId"
-    )  # Author user ID (only for public containers)
+    authorId: str | None = Field(None, alias="authorId")  # Author user ID (only for public containers)
     items: list[ItemResponse] = []
     # Rating fields
     ownerRating: int | None = Field(None, alias="ownerRating")  # Owner's rating (1-5)
-    userRating: int | None = Field(
-        None, alias="userRating"
-    )  # Current user's rating (if logged in)
-    averageUserRating: float | None = Field(
-        None, alias="averageUserRating"
-    )  # Average of all user ratings
-    userRatingCount: int = Field(
-        default=0, alias="userRatingCount"
-    )  # Number of user ratings
+    userRating: int | None = Field(None, alias="userRating")  # Current user's rating (if logged in)
+    averageUserRating: float | None = Field(None, alias="averageUserRating")  # Average of all user ratings
+    userRatingCount: int = Field(default=0, alias="userRatingCount")  # Number of user ratings
     createdAt: datetime
     updatedAt: datetime
 
@@ -243,9 +235,7 @@ class ItemOrderUpdate(BaseModel):
 class BatchOrderUpdateRequest(BaseModel):
     """Schema for batch updating items' order."""
 
-    items: list[ItemOrderUpdate] = Field(
-        ..., min_length=1, description="List of items with their new order values"
-    )
+    items: list[ItemOrderUpdate] = Field(..., min_length=1, description="List of items with their new order values")
 
     model_config = {"populate_by_name": True}
 
@@ -254,9 +244,7 @@ class BatchOrderUpdateRequest(BaseModel):
 class ShareTokenCreate(BaseModel):
     """Schema for creating a share token."""
 
-    expiresAt: datetime | None = Field(
-        None, alias="expiresAt", description="Optional expiration timestamp"
-    )
+    expiresAt: datetime | None = Field(None, alias="expiresAt", description="Optional expiration timestamp")
 
     model_config = {"populate_by_name": True}
 
@@ -266,12 +254,8 @@ class ShareTokenResponse(BaseModel):
 
     token: str = Field(..., description="Share token")
     containerId: str = Field(..., alias="containerId", description="Container ID")
-    expiresAt: datetime | None = Field(
-        None, alias="expiresAt", description="Expiration timestamp if set"
-    )
-    createdAt: datetime = Field(
-        ..., alias="createdAt", description="Token creation timestamp"
-    )
+    expiresAt: datetime | None = Field(None, alias="expiresAt", description="Expiration timestamp if set")
+    createdAt: datetime = Field(..., alias="createdAt", description="Token creation timestamp")
     shareUrl: str = Field(..., alias="shareUrl", description="Full share URL")
 
     model_config = {"populate_by_name": True}
