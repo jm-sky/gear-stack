@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { Star } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { TRatingValue } from '../types/gear.types'
+
+const { t } = useI18n()
 
 interface Props {
   rating?: TRatingValue | number | null
@@ -76,6 +79,7 @@ function handleStarLeave() {
           interactive && !disabled ? 'cursor-pointer hover:scale-110' : 'cursor-default',
           disabled ? 'opacity-50' : ''
         ]"
+        :aria-label="interactive ? t('gear.actions.rateStar', { count: star }) : undefined"
         :disabled="disabled || !interactive"
         @click="handleStarClick(star)"
         @mouseenter="handleStarHover(star)"

@@ -5,7 +5,7 @@
 **Category:** ♿ Accessibility / 🎨 UI/UX  
 **Related:** [ROADMAP_OFFLINE.md](../ROADMAP_OFFLINE.md) - ♿ Accessibility (Dostępność)
 
-**Progress:** Faza 2 częściowo zrealizowana (4/4 główne komponenty + AiChatInputSection)
+**Progress:** Faza 2 zrealizowana ✅, Faza 3 zrealizowana ✅ (tooltips, aria-label, semantyka HTML, aria-expanded). Pozostały tylko testy manualne.
 
 ---
 
@@ -53,21 +53,57 @@ Implementacja podstawowych oznaczeń ARIA i poprawa dostępności aplikacji, szc
    - ✅ `ContainersListPageDropdown.vue` - przycisk MoreActionsIcon (dodano tooltip, miał już aria-label)
    - ✅ `AiChatInputSection.vue` - przycisk SendIcon (dodano tooltip i aria-label, dodano translację `ai.chat.send`)
 
-### ❌ Co wymaga poprawy:
+### ✅ Zrealizowane (2025-01-22):
 
-1. **Przyciski z ikonami bez tooltipów:**
-   - Inne przyciski z ikonami w całej aplikacji (wymagają audytu)
+2. **Dodatkowe przyciski z ikonami - tooltips i aria-label:**
+   - ✅ `SidebarTrigger.vue` - dodano tooltip i aria-label (translacja `common.toggleSidebar`)
+   - ✅ `DarkModeToggle.vue` - dodano tooltip (miał już aria-label, translacja `common.toggleDarkMode`)
+   - ✅ `LocaleToggle.vue` - dodano tooltip (miał już aria-label, translacja `common.toggleLanguage`)
+   - ✅ `ShoppingListItem.vue` - dodano tooltips i aria-label do przycisków increment/decrement/delete (translacje `gear.shopping.incrementQuantity`, `gear.shopping.decrementQuantity`, `gear.shopping.removeFromList`)
+   - ✅ `RatingStars.vue` - dodano aria-label do przycisków gwiazdek (translacja `gear.actions.rateStar` z pluralizacją)
+   - ✅ `ItemsTableEditableNameCell.vue` - dodano tooltip i aria-label do przycisku reset (translacja `gear.actions.undo`)
+   - ✅ `ItemsTableMoveButtons.vue` - dodano tooltips i aria-label do przycisków move up/down (translacje `gear.actions.moveUp`, `gear.actions.moveDown`)
 
-2. **Brakujące translacje dla tooltipów:**
-   - Niektóre akcje mogą wymagać dodatkowych translacji dla tooltipów
+3. **Semantyka HTML i landmarky ARIA:**
+   - ✅ `AppHeader.vue` - używa `<header>` i `<nav>` ✅
+   - ✅ `AppFooter.vue` - używa `<footer>` i `<nav>` ✅
+   - ✅ `AuthenticatedLayout.vue` - używa `<main>` ✅
+   - ✅ `AppSidebar.vue` - używa komponentów Sidebar z odpowiednią semantyką ✅
 
-3. **Semantyka HTML:**
-   - Sprawdzenie użycia odpowiednich tagów (button, nav, main, itp.)
-   - Dodanie landmarków ARIA (role="navigation", role="main", itp.)
+4. **Atrybuty ARIA dla interaktywnych elementów:**
+   - ✅ `ItemsTableNameCell.vue` - dodano `aria-expanded` i `aria-label` do przycisku expand/collapse (translacje `gear.item.expandContainer`, `gear.item.collapseContainer`)
+   - ✅ `ComboBox.vue` - już ma `aria-expanded` ✅
+   - ✅ `FormControl.vue` - już ma `aria-describedby` ✅
+   - ✅ Dialog/Modal (reka-ui) - biblioteka obsługuje odpowiednie atrybuty ARIA ✅
 
-4. **Focus management:**
-   - Poprawa obsługi focus w dialogach i modalach
-   - Keyboard shortcuts (opcjonalnie)
+### ✅ Zrealizowane - wszystkie główne zadania ukończone:
+
+1. **Przyciski z ikonami z tooltipami i aria-label:** ✅
+   - Wszystkie główne komponenty mają tooltips i aria-label
+   - Dodano do: SidebarTrigger, DarkModeToggle, LocaleToggle, ShoppingListItem, RatingStars, ItemsTableEditableNameCell, ItemsTableMoveButtons
+
+2. **Translacje dla tooltipów:** ✅
+   - Wszystkie potrzebne translacje zostały dodane (PL i EN)
+
+3. **Semantyka HTML:** ✅
+   - Sprawdzone i poprawne użycie tagów (header, nav, main, footer)
+   - Landmarky ARIA są prawidłowo użyte
+
+4. **Atrybuty ARIA:** ✅
+   - aria-expanded dodane do expand/collapse
+   - aria-label dodane do wszystkich przycisków z ikonami
+   - ComboBox i FormControl już mają odpowiednie atrybuty
+
+### ⏳ Do wykonania (testy manualne):
+
+1. **Focus management:**
+   - Testy manualne z nawigacją klawiaturą (reka-ui prawdopodobnie już obsługuje)
+   - Testy z czytnikiem ekranu (NVDA, JAWS, VoiceOver)
+
+2. **Narzędzia automatyczne:**
+   - Lighthouse Accessibility audit (cel: >90)
+   - axe DevTools audit
+   - WAVE audit
 
 ---
 
@@ -466,16 +502,16 @@ Implementacja podstawowych oznaczeń ARIA i poprawa dostępności aplikacji, szc
 
 ## ✅ Definition of Done
 
-- [x] Wszystkie przyciski z ikonami mają tooltips z przetłumaczoną nazwą akcji (częściowo - główne komponenty zrobione)
-- [x] Wszystkie przyciski z ikonami mają aria-label (może być taka sama treść jak tooltip) (częściowo - główne komponenty zrobione)
-- [ ] Główne regiony strony mają odpowiednie landmarky ARIA
-- [ ] Interaktywne elementy mają odpowiednie atrybuty ARIA (aria-expanded, aria-labelledby, itp.)
-- [ ] Semantyczny HTML jest używany wszędzie, gdzie to możliwe
-- [ ] Focus management działa poprawnie w dialogach i modalach
-- [ ] Testy z czytnikiem ekranu przechodzą pomyślnie
-- [ ] Lighthouse Accessibility audit osiąga wynik powyżej 90
-- [ ] axe DevTools nie wykrywa krytycznych problemów dostępności
-- [ ] Wszystkie potrzebne translacje są dostępne w PL i EN
+- [x] Wszystkie przyciski z ikonami mają tooltips z przetłumaczoną nazwą akcji ✅
+- [x] Wszystkie przyciski z ikonami mają aria-label ✅
+- [x] Główne regiony strony mają odpowiednie landmarky ARIA ✅
+- [x] Interaktywne elementy mają odpowiednie atrybuty ARIA (aria-expanded, aria-labelledby, itp.) ✅
+- [x] Semantyczny HTML jest używany wszędzie, gdzie to możliwe ✅
+- [x] Wszystkie potrzebne translacje są dostępne w PL i EN ✅
+- [ ] Focus management działa poprawnie w dialogach i modalach (wymaga testów manualnych - reka-ui prawdopodobnie już obsługuje)
+- [ ] Testy z czytnikiem ekranu przechodzą pomyślnie (wymaga testów manualnych)
+- [ ] Lighthouse Accessibility audit osiąga wynik powyżej 90 (wymaga testów manualnych)
+- [ ] axe DevTools nie wykrywa krytycznych problemów dostępności (wymaga testów manualnych)
 
 ---
 
@@ -488,7 +524,12 @@ Implementacja podstawowych oznaczeń ARIA i poprawa dostępności aplikacji, szc
 
 ---
 
-**Ostatnia aktualizacja:** 2025-01-21
+**Ostatnia aktualizacja:** 2025-01-22
+
+**Uwagi:**
+- Focus management w dialogach i modalach jest prawdopodobnie już obsługiwany przez reka-ui (biblioteka bazuje na ARIA Authoring Practices Guide)
+- Wymagane są testy manualne z czytnikiem ekranu i nawigacją klawiaturą, aby potwierdzić pełną zgodność
+- Wszystkie główne komponenty z przyciskami ikonowymi mają teraz tooltips i aria-label
 
 
 

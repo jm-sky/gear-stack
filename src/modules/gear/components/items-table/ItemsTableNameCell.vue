@@ -75,6 +75,8 @@ const containerColor = computed<string>(() => {
       variant="ghost"
       size="sm"
       class="size-6 p-0 shrink-0"
+      :aria-expanded="isRowExpanded"
+      :aria-label="isRowExpanded ? t('gear.item.collapseContainer', 'Collapse container') : t('gear.item.expandContainer', 'Expand container')"
       @click.stop="emit('toggleExpand')"
     >
       <ChevronRight

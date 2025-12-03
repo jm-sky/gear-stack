@@ -95,7 +95,9 @@ function handleReset() {
       <!-- Reset button -->
       <button
         v-if="editedName && editedName !== props.item.name"
+        v-tooltip.bottom="t('gear.actions.undo')"
         type="button"
+        :aria-label="t('gear.actions.undo')"
         class="absolute right-2 top-0 bottom-0 my-auto p-0"
         @click.stop.prevent="handleReset"
       >

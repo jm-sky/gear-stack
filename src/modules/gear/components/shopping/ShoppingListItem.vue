@@ -89,8 +89,10 @@ const { isExpired, isExpiringSoon } = useExpiration(item)
     <!-- Quantity controls -->
     <div class="flex items-center gap-2 shrink-0">
       <Button
+        v-tooltip.bottom="t('gear.shopping.decrementQuantity')"
         variant="outline"
         size="sm"
+        :aria-label="t('gear.shopping.decrementQuantity')"
         :disabled="item.quantity <= 1"
         @click="emit('decrement')"
       >
@@ -100,8 +102,10 @@ const { isExpired, isExpiringSoon } = useExpiration(item)
         {{ item.quantity }}
       </span>
       <Button
+        v-tooltip.bottom="t('gear.shopping.incrementQuantity')"
         variant="outline"
         size="sm"
+        :aria-label="t('gear.shopping.incrementQuantity')"
         @click="emit('increment')"
       >
         <Plus class="size-4" />
@@ -120,8 +124,10 @@ const { isExpired, isExpiringSoon } = useExpiration(item)
         <span class="hidden sm:inline">{{ t('gear.shopping.purchased', 'Purchased') }}</span>
       </Button>
       <Button
+        v-tooltip.bottom="t('gear.shopping.removeFromList')"
         variant="outline"
         size="sm"
+        :aria-label="t('gear.shopping.removeFromList')"
         @click="emit('delete')"
       >
         <X class="size-4" />

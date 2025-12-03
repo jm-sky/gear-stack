@@ -33,6 +33,11 @@ export default {
     or: 'lub',
     created: 'Utworzono',
     updated: 'Zaktualizowano',
+    toggleSidebar: 'Przełącz pasek boczny',
+    toggleDarkMode: 'Przełącz na tryb {mode}',
+    darkMode: 'ciemny',
+    lightMode: 'jasny',
+    toggleLanguage: 'Przełącz język na {locale}',
     copyToClipboard: {
       success: 'Skopiowano do schowka',
       copied: 'Skopiowano',

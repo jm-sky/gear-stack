@@ -38,7 +38,7 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
 4. ✅ **Rozszerzone ustawienia użytkownika (waluta, widoczność, kategorie, marki w DB)** - Zakończone
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-ustawienia-użytkownika-wymagające-db)
    - ✅ **Domyślna waluta użytkownika** (zapisywana w DB) - Completed
-   - 🔄 Domyślna widoczność nowych kontenerów - częściowo (w `UserSettingsDB`)
+   - ✅ **Domyślna widoczność nowych kontenerów** - Completed
    - ✅ **Dodawanie nowych kategorii** (zapisywane w DB) - Completed
    - ✅ **Dodawanie firm/marek (brand)** — zapisywane w DB - Completed
    - Status: ✅ Completed | Priority: High | Complexity: Small
@@ -58,11 +58,11 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - ✅ Informacja "Only for premium users" lub "Premium feature" - Completed
    - Status: ✅ Completed | Priority: High | Complexity: Small
 
-7. **Wskaźnik użycia S3 storage**
+7. ✅ **Wskaźnik użycia S3 storage** - Zakończone
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md)
-   - Wyświetlanie w Profile lub Settings
-   - Limit: 50 MB (zwykli użytkownicy), 1 GB (owner) - konfigurowalny
-   - Status: 🔄 Planned | Priority: High | Complexity: Medium
+   - ✅ Wyświetlanie w Settings (`StorageUsageCard.vue`)
+   - ✅ Limit: 20 MB (zwykli użytkownicy), 50 MB (admin) - konfigurowalny przez zmienne środowiskowe
+   - Status: ✅ Completed | Priority: High | Complexity: Medium
 
 8. **Unifikacja modeli kontenerów i przedmiotów**
    - 📍 Analiza: [UNIFIED_MODEL_ANALYSIS.md](./analysis/UNIFIED_MODEL_ANALYSIS.md)
@@ -77,7 +77,7 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
 
 1. **Przenoszenie przedmiotów między kontenerami**
    - 📍 Lokalizacja: [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md)
-   - Funkcja drag & drop lub modal do przenoszenia itemów
+   - Modal do przenoszenia itemów
    - Status: 🔄 Planned | Priority: Medium | Complexity: Medium
 
 2. **Kasowanie obrazków z S3**
@@ -117,12 +117,29 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
 
 Funkcjonalności działające z **localStorage**, bez potrzeby backendu (offline-first):
 - ✅ Zarządzanie kontenerami i przedmiotami
-- ✅ Eksport/import markdown
-- ✅ Wykresy i analityka
+- ✅ Eksport/import markdown (AI-friendly format)
+- ✅ Wykresy i analityka (kategorie, cena, priorytet)
 - ✅ Kolorowanie kontenerów
 - ✅ Rozpoznawanie kategorii i parametrów
 - ✅ Inline editing (częściowo zakończone - v2.25.0: edycja nazwy przedmiotu)
-- 🔄 Custom brand management (planowane)
+- ✅ Custom brand management
+- ✅ Strona z listą wszystkich przedmiotów
+- ✅ Strona planowania zakupów
+- ✅ Dedykowane ikony dla kategorii
+- ✅ Relacja parent-children (nesting kontenerów)
+- ✅ Dodatkowe pola (cena, URL, marka, kolor, wearable, consumable)
+- ✅ Obsługa waluty (currency)
+- ✅ Kopiowanie/klonowanie kontenerów
+- ✅ Dodawanie istniejących przedmiotów do kontenera
+- ✅ Kolejność przedmiotów w kontenerze (drag & drop)
+- ✅ Maksymalna waga kontenera (maxWeight)
+- ✅ Rozpoznawanie parametrów przedmiotów na żądanie
+- ✅ Strona 404 i error handling
+- ✅ Footer i strony prawne
+- 🔄 Oznaczanie kontenerów jako fragmentów rodzica - planowane
+- 🔄 Obsługa Markdown w notatkach - planowane
+- 🔄 Zwijanie sekcji statystyk - planowane
+- ✅ Podstawowe oznaczenia ARIA i dostępność - ukończone
 
 **Kiedy sprawdzać:** Gdy implementujesz funkcje działające offline lub z localStorage.
 
@@ -135,10 +152,30 @@ Funkcjonalności wymagające **backendu, bazy danych i/lub autoryzacji** (online
 - ✅ OAuth authentication (completed)
 - ✅ reCAPTCHA integration (completed)
 - ✅ 2FA (completed)
-- 🔄 Multi-device synchronization (planowane)
-- 🔄 Container sharing (planowane)
-- 🔄 Global item catalog (planowane)
-- ✅ PWA (planowane)
+- ✅ Udostępnianie kontenerów (publiczne + token sharing)
+- ✅ Galeria publiczna kontenerów
+- ✅ Linkowanie przedmiotów (zmiana w jednym → zmiana w wielu)
+- ✅ Rozszerzone ustawienia użytkownika (waluta, widoczność, kategorie, marki w DB)
+- ✅ Domyślna widoczność nowych kontenerów
+- ✅ Wskaźnik użycia S3 storage
+- ✅ Profil użytkownika - link do Gravatara
+- ✅ UUID support dla update workflow
+- ✅ Zdjęcia przedmiotów (galeria, upload, S3)
+- ✅ Przetwarzanie obrazków z ustawieniami użytkownika (3 tryby)
+- ✅ PWA (Progressive Web App)
+- ✅ Ocenianie (gwiazdki) kontenerów - Completed
+- 🚧 Infrastruktura AI (OpenRouter, chat, historia) - częściowo zakończone
+- 🚧 Sekcja AI w Gear Settings - częściowo zakończone
+- 🚧 Synchronizacja między urządzeniami - częściowo zakończone
+- 🚧 Integracja z Sentry (backend) - częściowo zakończone
+- 🔄 Multi-device synchronization (automatyczna) - planowane
+- 🔄 Global item catalog - planowane
+- 🔄 Przenoszenie przedmiotów między kontenerami - planowane
+- 🔄 Statystyki wyświetleń kontenerów - planowane
+- 🔄 System zaproszeń - planowane
+- 🔄 Szablony kontenerów - planowane
+- 🔄 Wersjonowanie danych (historia zmian) - planowane
+- 🔄 Automatyczne wyszukiwanie obrazków dla przedmiotów - planowane
 
 **Kiedy sprawdzać:** Gdy implementujesz funkcje wymagające serwera, bazy danych lub systemu użytkowników.
 

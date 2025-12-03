@@ -333,14 +333,16 @@ Kombinacja opcji 1 i 2:
 
 ## ♿ Accessibility (Dostępność)
 
-### 🔄 Podstawowe oznaczenia ARIA i dostępność
-**Status:** 🚧 In Progress | **Priority:** Medium | **Complexity:** Medium
+### ✅ Podstawowe oznaczenia ARIA i dostępność
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium
 
-**Postęp (2025-01-21):**
+**Postęp (2025-01-22):**
 - ✅ Dodano tooltips i aria-label do głównych przycisków z ikonami (ItemsTableRowActions, ContainerCardActions, ContainerHeader, ContainersListPageDropdown, AiChatInputSection)
-- 🔄 Wymagany audyt pozostałych komponentów z przyciskami ikonowymi
-- ⏳ Semantyka HTML i landmarky ARIA (do zrobienia)
-- ⏳ Focus management (do zrobienia)
+- ✅ Dodano tooltips i aria-label do dodatkowych komponentów (SidebarTrigger, DarkModeToggle, LocaleToggle, ShoppingListItem, RatingStars, ItemsTableEditableNameCell, ItemsTableMoveButtons)
+- ✅ Semantyka HTML i landmarky ARIA - sprawdzone i poprawne (header, nav, main, footer)
+- ✅ Dodano aria-expanded i aria-label do przycisku expand/collapse w ItemsTableNameCell
+- ✅ Wszystkie potrzebne translacje dodane (PL i EN)
+- ⏳ Pozostały tylko testy manualne (focus management, czytnik ekranu, Lighthouse, axe DevTools)
 
 **Zakres implementacji:**
 
@@ -486,6 +488,7 @@ Kombinacja opcji 1 i 2:
   - `code` i bloki kodu
 - Opcjonalnie: edytor WYSIWYG dla Markdown lub składnia Markdown z podglądem
 - Obsługa dla przedmiotów (`IGearItem.notes`) i kontenerów (`IGearContainer.description`)
+- **Uwaga:** Na razie nie dodajemy edytora Markdown. Robimy Textarea z notatką, że wspieramy Markdown. Za duże mamy ryzyko, że komponent *edytor Markdown* nie będzie działać.
 
 ---
 

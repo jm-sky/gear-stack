@@ -208,16 +208,16 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - ✅ Strona szczegółów publicznego kontenera (`PublicContainerDetailPage`)
 - ✅ Publiczna strona szczegółów przedmiotu (`PublicItemDetailPage`)
 - ✅ Backend endpoint `/gear/public/containers` dla pobierania publicznych kontenerów
-- 🔄 **Ocenianie (gwiazdki) kontenerów** - planowane (HIGH PRIORITY)
-  - **Owner rating**: Właściciel kontenera może ocenić swój kontener (1-5 gwiazdek)
-  - **User rating**: Inni użytkownicy mogą ocenić publiczne kontenera (1-5 gwiazdek)
-  - Backend: Tabela `container_ratings` (container_id, user_id, rating, rating_type: 'owner' | 'user')
-  - Backend: Endpointy do dodawania/aktualizacji/usuwa oceny
-  - Backend: Obliczanie średniej oceny per kontener
-  - Frontend: Komponent gwiazdek do oceniania (w szczegółach kontenera)
-  - Frontend: Wyświetlanie średniej oceny w galerii i szczegółach kontenera
-  - Frontend: Rozróżnienie między owner rating a user rating w UI
-  - Frontend: Możliwość zmiany własnej oceny
+- ✅ **Ocenianie (gwiazdki) kontenerów** - Completed
+  - ✅ **Owner rating**: Właściciel kontenera może ocenić swój kontener (1-5 gwiazdek) - zaimplementowane
+  - ✅ **User rating**: Inni użytkownicy mogą ocenić publiczne kontenera (1-5 gwiazdek) - zaimplementowane
+  - ✅ Backend: Tabela `container_ratings` (container_id, user_id, rating, rating_type: 'owner' | 'user') - zaimplementowane
+  - ✅ Backend: Endpointy do dodawania/aktualizacji/usuwania oceny - zaimplementowane (`POST /containers/{id}/rating`, `DELETE /containers/{id}/rating`)
+  - ✅ Backend: Obliczanie średniej oceny per kontener - zaimplementowane
+  - ✅ Frontend: Komponent gwiazdek do oceniania (`RatingStars.vue`, `ContainerRatingCard.vue`, `ContainerRatingSection.vue`) - zaimplementowane
+  - ✅ Frontend: Wyświetlanie średniej oceny w szczegółach kontenera - zaimplementowane
+  - ✅ Frontend: Rozróżnienie między owner rating a user rating w UI - zaimplementowane
+  - ✅ Frontend: Możliwość zmiany własnej oceny - zaimplementowane
 - 🔄 Komentarze pod kontenerami - planowane
 - 🔄 Możliwość skopiowania publicznego kontenera do własnych - planowane
 
@@ -460,7 +460,7 @@ Kontenery i przedmioty już mają UUID - to ich pole `id` (typu `TUUID`). UUID s
 **Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium
 
 **Koncepcja:**
-System śledzenia wyświetleń kontenerów (publicznych i udostępnionych) z dashboardem statystyk dla właściciela.
+System śledzenia wyświetleń kontenerów (publicznych i udostępnionych) z ~~dashboardem~~ małą sekcją statystyk dla właściciela.
 
 **Zakres implementacji:**
 - **Backend:**
@@ -472,26 +472,27 @@ System śledzenia wyświetleń kontenerów (publicznych i udostępnionych) z das
   - Licznik unikalnych wyświetleń (tracking unikalnych użytkowników/sesji)
   - Historia wyświetleń z timestampami
   - Agregacja danych (dzienne, tygodniowe, miesięczne statystyki)
-  - Opcjonalne geolokalizacja (kraj/region) wyświetleń (anonimowe, zgodne z GDPR)
+  - **Uwaga**: Na początku wystarczy nam licznik wszystkich/unikalnych wyświetleń, bez agregacji
 
 - **Frontend:**
   - Automatyczne rejestrowanie wyświetleń przy otwarciu publicznego/udostępnionego kontenera
-  - Dashboard ze statystykami dla właściciela kontenera:
-    - Całkowita liczba wyświetleń per kontener
-    - Wyświetlenia w czasie (wykresy liniowe/słupkowe)
-    - Top 10 najczęściej oglądanych kontenerów
-    - Statystyki wyświetleń dla udostępnionych tokenów (które tokeny były najczęściej używane)
-    - Unikalne vs całkowite wyświetlenia
-    - Statystyki geograficzne (opcjonalnie)
-  - Strona statystyk kontenera (`ContainerStatsPage`) dostępna tylko dla właściciela
-  - Link do statystyk w menu akcji kontenera (tylko dla właściciela)
+  - Na początek robimy małą sekcję statystyk na stronie kontenera: wszystkie i unikalne wyświetlenia
+  - Na razie bez dashboard, czyli bez:
+    - Dashboard ze statystykami dla właściciela kontenera:
+      - Całkowita liczba wyświetleń per kontener
+      - Wyświetlenia w czasie (wykresy liniowe/słupkowe)
+      - Top 10 najczęściej oglądanych kontenerów
+      - Statystyki wyświetleń dla udostępnionych tokenów (które tokeny były najczęściej używane)
+      - Unikalne vs całkowite wyświetlenia
+      - Statystyki geograficzne (opcjonalnie)
+    - Strona statystyk kontenera (`ContainerStatsPage`) dostępna tylko dla właściciela
+    - Link do statystyk w menu akcji kontenera (tylko dla właściciela)
   - Prywatność: statystyki widoczne tylko dla właściciela kontenera
 
 - **Tracking:**
   - Tracking dla publicznych kontenerów (`/gear/public/:id`)
   - Tracking dla kontenerów udostępnionych przez token (`/shared/container/:token`)
   - Unikanie podwójnego liczenia (sprawdzanie sesji/cookies)
-  - Opcjonalnie: tracking dla prywatnych kontenerów (tylko dla właściciela)
 
 **Zalety:**
 - Właściciel kontenera widzi popularność swoich kontenerów
@@ -897,7 +898,7 @@ W wielu komponentach używane jest `$t()` zamiast `t()` z `useI18n()`. Zgodnie z
 2. **Globalny katalog itemów** - High priority, Medium complexity
 3. ✅ **Linkowanie przedmiotów** - High priority, Large complexity (Completed)
 4. ✅ **Rozszerzone ustawienia użytkownika** (waluta, kategorie, marki w DB) - High priority, Small complexity (Completed)
-5. 🔄 **Ocenianie (gwiazdki) kontenerów** - High priority, Medium complexity (Planned)
+5. ✅ **Ocenianie (gwiazdki) kontenerów** - High priority, Medium complexity (Completed)
 6. 🔄 **Przenoszenie przedmiotów między kontenerami** - High priority, Medium complexity (Planned)
 7. ✅ **Domyślna widoczność nowych kontenerów** - High priority, Small complexity (Completed)
 8. 🔄 **Statystyki wyświetleń kontenerów** - High priority, Medium complexity (Planned)

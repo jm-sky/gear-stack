@@ -33,6 +33,11 @@ export default {
     or: 'or',
     created: 'Created',
     updated: 'Updated',
+    toggleSidebar: 'Toggle sidebar',
+    toggleDarkMode: 'Switch to {mode} mode',
+    darkMode: 'dark',
+    lightMode: 'light',
+    toggleLanguage: 'Switch language to {locale}',
     copyToClipboard: {
       success: 'Copied to clipboard',
       copied: 'Copied',
