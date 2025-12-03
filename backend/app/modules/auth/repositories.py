@@ -425,9 +425,10 @@ class UserRepository(SearchMixin, UserRepositoryInterface):
         name: str | None = None,
         avatar_url: str | None = None,
     ) -> dict:
-        """Create a new OAuth connection for a user."""
-        # Check if connection already exists
+        """Create or update OAuth connection for a user."""
+        # Check if connection already exists for this user and provider
         stmt = select(OAuthConnectionDB).where(
+            OAuthConnectionDB.user_id == user_id,
             OAuthConnectionDB.provider == provider,
             OAuthConnectionDB.provider_id == provider_id,
         )
@@ -435,7 +436,13 @@ class UserRepository(SearchMixin, UserRepositoryInterface):
         existing = result.scalar_one_or_none()
 
         if existing:
-            # Connection already exists, return it
+            # Connection already exists for this user - update it with latest data
+            existing.email = email
+            existing.name = name
+            existing.avatar_url = avatar_url
+            await self.db.commit()
+            await self.db.refresh(existing)
+
             return {
                 "id": existing.id,
                 "provider": existing.provider,
@@ -444,6 +451,35 @@ class UserRepository(SearchMixin, UserRepositoryInterface):
                 "name": existing.name,
                 "avatarUrl": existing.avatar_url,
                 "createdAt": existing.created_at,
+            }
+
+        # Check if connection exists for this provider+provider_id but different user
+        # (shouldn't happen due to unique constraint, but check for safety)
+        stmt_check = select(OAuthConnectionDB).where(
+            OAuthConnectionDB.provider == provider,
+            OAuthConnectionDB.provider_id == provider_id,
+        )
+        result_check = await self.db.execute(stmt_check)
+        existing_check = result_check.scalar_one_or_none()
+
+        if existing_check:
+            # Connection exists but for different user - this shouldn't happen
+            # but if it does, update it to point to current user
+            existing_check.user_id = user_id
+            existing_check.email = email
+            existing_check.name = name
+            existing_check.avatar_url = avatar_url
+            await self.db.commit()
+            await self.db.refresh(existing_check)
+
+            return {
+                "id": existing_check.id,
+                "provider": existing_check.provider,
+                "providerId": existing_check.provider_id,
+                "email": existing_check.email,
+                "name": existing_check.name,
+                "avatarUrl": existing_check.avatar_url,
+                "createdAt": existing_check.created_at,
             }
 
         # Create new connection
