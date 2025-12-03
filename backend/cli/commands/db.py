@@ -239,6 +239,218 @@ def migrate_status() -> None:
     asyncio.run(_status())
 
 
+@db_app.command("migrate-graceful")
+def migrate_graceful(
+    from_version: str | None = typer.Option(None, "--from", help="Start from specific migration version (e.g., '020')"),
+    skip_init_check: bool = typer.Option(False, "--skip-init-check", help="Skip automatic init if database is not initialized"),
+) -> None:
+    """Run migrations gracefully, ignoring errors and continuing.
+
+    This command is useful when migrations were created in wrong order or
+    filenames were changed. It will attempt to run migrations but continue
+    even if errors occur.
+
+    If --from is provided, it will unmark that migration and all subsequent
+    ones, then re-run them. If --from is not provided, it will run all
+    pending migrations.
+
+    Examples:
+        cli db migrate-graceful                    # Run all pending migrations
+        cli db migrate-graceful --from 020         # Re-run from migration 020 onwards
+    """
+
+    async def _migrate_graceful() -> None:
+        from app.core.migrations import (
+            discover_migrations,
+            ensure_schema_migrations_table,
+            get_applied_migrations,
+            is_database_initialized,
+            is_migration_applied,
+            mark_migration_as_applied,
+            unmark_migration,
+        )
+
+        # Check if database is initialized, if not run init first
+        if not skip_init_check:
+            if not await is_database_initialized():
+                console.print("[yellow]Database is not initialized. Running 'db init' first...[/yellow]")
+                # Run init logic
+                _import_model_modules()
+                from app.core.migrations import SchemaMigration  # noqa: F401
+                from app.core.database import Base, engine, init_db
+
+                await init_db()
+
+                # Mark migration 000 as applied
+                await ensure_schema_migrations_table()
+                if not await is_migration_applied("000"):
+                    await mark_migration_as_applied("000", "create_schema_migrations")
+                    console.print("[green]✓ Migration 000 marked as applied[/green]")
+
+                console.print("[bold green]✓ Database initialized[/bold green]\n")
+
+        # Ensure schema_migrations table exists
+        await ensure_schema_migrations_table()
+
+        # Get migrations directory
+        migrations_dir = Path(__file__).resolve().parents[2] / "migrations"
+        if not migrations_dir.exists():
+            console.print(f"[red]Migrations directory not found:[/red] {migrations_dir}")
+            raise typer.Exit(1)
+
+        # Discover all migrations
+        all_migrations = discover_migrations(migrations_dir)
+        if not all_migrations:
+            console.print("[yellow]No migrations found[/yellow]")
+            return
+
+        # Get applied migrations
+        applied_versions = set(await get_applied_migrations())
+
+        # If --from is provided, unmark that migration and all subsequent ones
+        if from_version:
+            console.print(f"[bold yellow]Unmarking migrations from {from_version} onwards...[/bold yellow]")
+            unmarked_count = 0
+            for version, _, _ in all_migrations:
+                try:
+                    # Compare versions numerically
+                    version_float = float(version)
+                    from_float = float(from_version)
+                    if version_float >= from_float:
+                        if await is_migration_applied(version):
+                            await unmark_migration(version)
+                            console.print(f"[yellow]Unmarked migration {version}[/yellow]")
+                            unmarked_count += 1
+                            applied_versions.discard(version)
+                except ValueError:
+                    # If version comparison fails, use string comparison
+                    if version >= from_version:
+                        if await is_migration_applied(version):
+                            await unmark_migration(version)
+                            console.print(f"[yellow]Unmarked migration {version}[/yellow]")
+                            unmarked_count += 1
+                            applied_versions.discard(version)
+
+            if unmarked_count > 0:
+                console.print(f"[bold yellow]✓ Unmarked {unmarked_count} migration(s)[/bold yellow]\n")
+            else:
+                console.print(f"[yellow]No migrations found to unmark from version {from_version}[/yellow]\n")
+
+        # Find migrations to run
+        # If --from was provided, we want to run from that version onwards
+        # Otherwise, run all pending migrations
+        migrations_to_run: list[tuple[str, str, Path]] = []
+        for version, name, filepath in all_migrations:
+            if from_version:
+                # Check if this migration should be run (>= from_version)
+                try:
+                    version_float = float(version)
+                    from_float = float(from_version)
+                    if version_float >= from_float:
+                        migrations_to_run.append((version, name, filepath))
+                except ValueError:
+                    if version >= from_version:
+                        migrations_to_run.append((version, name, filepath))
+            else:
+                # Run all pending migrations
+                if version not in applied_versions:
+                    migrations_to_run.append((version, name, filepath))
+
+        if not migrations_to_run:
+            console.print("[bold green]✓ No migrations to run[/bold green]")
+            return
+
+        console.print(f"[bold]Found {len(migrations_to_run)} migration(s) to run gracefully[/bold]")
+
+        # Run migrations gracefully (ignore errors)
+        success_count = 0
+        error_count = 0
+        skipped_count = 0
+
+        for version, name, filepath in migrations_to_run:
+            console.print(f"\n[bold cyan]Running migration {version}: {name}[/bold cyan]")
+
+            try:
+                # Import and run migration
+                spec = importlib.util.spec_from_file_location(f"migration_{version}", filepath)
+                if spec is None or spec.loader is None:
+                    console.print(f"[red]Failed to load migration:[/red] {filepath}")
+                    error_count += 1
+                    continue
+
+                migration_module = importlib.util.module_from_spec(spec)
+                sys.modules[f"migration_{version}"] = migration_module
+                spec.loader.exec_module(migration_module)
+
+                # Run upgrade function
+                if not hasattr(migration_module, "upgrade"):
+                    console.print(f"[red]Migration {version} does not have upgrade() function[/red]")
+                    error_count += 1
+                    continue
+
+                await migration_module.upgrade()
+
+                # Mark as applied (even if it was already applied, this is safe)
+                await mark_migration_as_applied(version, name)
+                console.print(f"[bold green]✓ Migration {version} applied successfully[/bold green]")
+                success_count += 1
+
+            except Exception as e:
+                console.print(f"[yellow]⚠ Migration {version} failed (continuing):[/yellow] {e}")
+                error_count += 1
+                # Don't mark as applied if it failed
+                # But check if it was already applied before
+                if await is_migration_applied(version):
+                    console.print(f"[yellow]  Note: Migration {version} was already marked as applied in database[/yellow]")
+                    skipped_count += 1
+
+        console.print("\n[bold]Migration summary:[/bold]")
+        console.print(f"  [green]✓ Success: {success_count}[/green]")
+        if error_count > 0:
+            console.print(f"  [yellow]⚠ Errors (ignored): {error_count}[/yellow]")
+        if skipped_count > 0:
+            console.print(f"  [yellow]○ Skipped (already applied): {skipped_count}[/yellow]")
+        console.print(f"\n[bold green]✓ Graceful migration completed[/bold green]")
+
+    asyncio.run(_migrate_graceful())
+
+
+@db_app.command("migrate-unmark")
+def migrate_unmark(
+    version: str = typer.Argument(..., help="Migration version to unmark (e.g., '020')"),
+) -> None:
+    """Remove a migration from schema_migrations table.
+
+    This allows re-running a migration that was already marked as applied.
+    Useful when migration files were renamed or need to be re-executed.
+
+    Example:
+        cli db migrate-unmark 020
+    """
+
+    async def _unmark() -> None:
+        from app.core.migrations import (
+            ensure_schema_migrations_table,
+            is_migration_applied,
+            unmark_migration,
+        )
+
+        # Ensure schema_migrations table exists
+        await ensure_schema_migrations_table()
+
+        # Check if migration is applied
+        if not await is_migration_applied(version):
+            console.print(f"[yellow]Migration {version} is not marked as applied[/yellow]")
+            return
+
+        # Unmark migration
+        await unmark_migration(version)
+        console.print(f"[bold green]✓ Migration {version} unmarked successfully[/bold green]")
+        console.print(f"[yellow]You can now re-run it with:[/yellow] cli db migrate-graceful --from {version}")
+
+    asyncio.run(_unmark())
+
+
 @db_app.command("seed")
 def seed_database(
     catalogue: bool = typer.Option(True, "--catalogue/--no-catalogue", help="Seed catalogue items"),
