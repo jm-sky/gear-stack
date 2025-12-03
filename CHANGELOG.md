@@ -21,6 +21,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.28.0] - 2025-12-03
+
+### Added
+- **Markdown Support in Notes and Descriptions**: Full Markdown formatting support for item notes and container descriptions
+  - New `MarkdownRenderer` component for rendering Markdown content with security-focused settings
+  - New `TextareaWithMarkdownPreview` component with Edit/Preview toggle for editing Markdown
+  - Support for bold, italic, lists (ordered and unordered), links, code blocks, headings, quotes, and more
+  - Markdown rendering in all display contexts: item details, container headers, cards, and public views
+  - Shared Markdown translations in `common` namespace for use across the entire application
+
+### Changed
+- **Form Components**: Updated `ItemFormFields` and `ContainerFormFields` to use `TextareaWithMarkdownPreview` for notes and descriptions
+- **Markdown Renderer**: Improved list styling with proper indentation and visible markers (disc, circle, square for nested lists)
+- **Translations**: Moved Markdown-related translations from `gear` module to `shared/common` for better reusability
+
+### Fixed
+- Fixed CSS syntax errors in `MarkdownRenderer.vue` (missing semicolons)
+- Fixed item initialization order issue in `ItemFormPage.vue`
+
+---
+
 ## [2.27.1] - 2025-12-02
 
 ### Changed
