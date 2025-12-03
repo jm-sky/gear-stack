@@ -30,7 +30,11 @@ class ItemImageFromUrlRequest(BaseModel):
 
     url: str = Field(..., description="External image URL")
     is_primary: bool = Field(False, alias="isPrimary")
-    host_locally: bool = Field(True, alias="hostLocally", description="If True, download and store image. If False, only save external URL.")
+    host_locally: bool = Field(
+        True,
+        alias="hostLocally",
+        description="If True, download and store image. If False, only save external URL.",
+    )
 
     model_config = {"populate_by_name": True}
 

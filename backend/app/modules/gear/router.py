@@ -4,9 +4,7 @@ This module provides REST API endpoints for managing gear containers and items.
 All endpoints require authentication.
 """
 
-from typing import Annotated
-
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -27,6 +25,10 @@ from .schemas import (
     ContainerResponse,
     ContainerUpdate,
     ContainerRatingCreate,
+    GlobalCatalogueItemCreate,
+    GlobalCatalogueItemResponse,
+    GlobalCatalogueItemSearchParams,
+    GlobalCatalogueItemUpdate,
     ItemCreate,
     ItemResponse,
     ItemUpdate,
@@ -76,7 +78,9 @@ optional_security = HTTPBearer(auto_error=False)
 
 async def get_optional_user(
     credentials: HTTPAuthorizationCredentials | None = Security(optional_security),
-    user_repository: Annotated[UserRepositoryInterface | None, Depends(get_user_repository)] = None,
+    user_repository: Annotated[
+        UserRepositoryInterface | None, Depends(get_user_repository)
+    ] = None,
 ) -> User | None:
     """Get current user if authenticated, None otherwise."""
     if credentials is None:
@@ -124,11 +128,15 @@ async def create_container(
         HTTPException: If validation fails
     """
     # Get user settings for default public setting
-    result = await db.execute(select(UserSettingsDB).where(UserSettingsDB.user_id == current_user.id))
+    result = await db.execute(
+        select(UserSettingsDB).where(UserSettingsDB.user_id == current_user.id)
+    )
     settings = result.scalars().first()
     default_public = settings.default_containers_public if settings else False
 
-    return await service.create_container(current_user.id, data, default_public=default_public)
+    return await service.create_container(
+        current_user.id, data, default_public=default_public
+    )
 
 
 @router.get(
@@ -140,7 +148,9 @@ async def get_containers(
     current_user: CurrentUser,
     service: GearServiceDep,
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
+    limit: int = Query(
+        100, ge=1, le=1000, description="Maximum number of records to return"
+    ),
 ) -> list[ContainerResponse]:
     """Get all gear containers for the current user.
 
@@ -314,7 +324,9 @@ async def get_items(
     current_user: CurrentUser,
     service: GearServiceDep,
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
+    limit: int = Query(
+        100, ge=1, le=1000, description="Maximum number of records to return"
+    ),
 ) -> list[ItemResponse]:
     """Get all items in a container.
 
@@ -529,7 +541,9 @@ async def get_container_readiness(
 async def get_public_containers(
     service: GearServiceDep,
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
+    limit: int = Query(
+        100, ge=1, le=1000, description="Maximum number of records to return"
+    ),
     current_user: OptionalUser = None,
 ) -> list[ContainerResponse]:
     """Get all public containers from all users.
@@ -664,7 +678,9 @@ async def create_container_share_token(
     Raises:
         HTTPException: If container not found or user doesn't own it
     """
-    token = await service.create_share_token(container_id, current_user.id, data.expiresAt)
+    token = await service.create_share_token(
+        container_id, current_user.id, data.expiresAt
+    )
     tokens = await service.get_share_tokens(container_id, current_user.id)
     # Find the newly created token
     token_data = next((t for t in tokens if t["token"] == token), None)
@@ -707,7 +723,9 @@ async def revoke_container_share_token(
 
 
 # Rating endpoints
-@router.post("/containers/{container_id}/rating", response_model=dict, summary="Rate a container")
+@router.post(
+    "/containers/{container_id}/rating", response_model=dict, summary="Rate a container"
+)
 async def rate_container(
     container_id: str,
     rating_data: ContainerRatingCreate,
@@ -729,35 +747,65 @@ async def rate_container(
         # Try public container
         container = await repository.get_public_container(container_id)
         if not container:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Container not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Container not found"
+            )
 
     # Validate rating type
     is_owner = container.user_id == current_user.id
 
     if rating_data.ratingType == "owner" and not is_owner:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only container owner can set owner rating")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only container owner can set owner rating",
+        )
 
     if rating_data.ratingType == "user" and is_owner:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Container owner should use 'owner' rating type")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Container owner should use 'owner' rating type",
+        )
 
     if rating_data.ratingType == "user" and not container.is_public:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User ratings are only allowed for public containers")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User ratings are only allowed for public containers",
+        )
 
     # Upsert rating
-    rating = await repository.upsert_container_rating(container_id=container_id, user_id=current_user.id, rating=rating_data.rating, rating_type=rating_data.ratingType)
+    rating = await repository.upsert_container_rating(
+        container_id=container_id,
+        user_id=current_user.id,
+        rating=rating_data.rating,
+        rating_type=rating_data.ratingType,
+    )
     await db.commit()
 
     # Get updated stats
     if rating_data.ratingType == "owner":
         owner_rating: int | None = rating.rating
-        avg_user_rating = await repository.get_container_average_user_rating(container_id)
-        user_rating_count = await repository.get_container_user_rating_count(container_id)
+        avg_user_rating = await repository.get_container_average_user_rating(
+            container_id
+        )
+        user_rating_count = await repository.get_container_user_rating_count(
+            container_id
+        )
     else:
         owner_rating = await repository.get_container_owner_rating(container_id)
-        avg_user_rating = await repository.get_container_average_user_rating(container_id)
-        user_rating_count = await repository.get_container_user_rating_count(container_id)
+        avg_user_rating = await repository.get_container_average_user_rating(
+            container_id
+        )
+        user_rating_count = await repository.get_container_user_rating_count(
+            container_id
+        )
 
-    return {"rating": rating.rating, "ratingType": rating.rating_type, "ownerRating": owner_rating, "averageUserRating": float(avg_user_rating) if avg_user_rating else None, "userRatingCount": user_rating_count}
+    return {
+        "rating": rating.rating,
+        "ratingType": rating.rating_type,
+        "ownerRating": owner_rating,
+        "averageUserRating": float(avg_user_rating) if avg_user_rating else None,
+        "userRatingCount": user_rating_count,
+    }
 
 
 @router.delete("/containers/{container_id}/rating", summary="Delete container rating")
@@ -765,7 +813,9 @@ async def delete_container_rating(
     container_id: str,
     current_user: CurrentUser,
     service: GearServiceDep,
-    rating_type: str = Query(default="user", description="Type of rating to delete: 'owner' or 'user'"),
+    rating_type: str = Query(
+        default="user", description="Type of rating to delete: 'owner' or 'user'"
+    ),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """Delete user's rating for a container."""
@@ -776,24 +826,312 @@ async def delete_container_rating(
     if not container:
         container = await repository.get_public_container(container_id)
         if not container:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Container not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Container not found"
+            )
 
     # Validate rating type
     is_owner = container.user_id == current_user.id
 
     if rating_type == "owner" and not is_owner:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only container owner can delete owner rating")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only container owner can delete owner rating",
+        )
 
     # Delete rating
-    deleted = await repository.delete_container_rating(container_id, current_user.id, rating_type)
+    deleted = await repository.delete_container_rating(
+        container_id, current_user.id, rating_type
+    )
     await db.commit()
 
     if not deleted:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Rating not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Rating not found"
+        )
 
     # Get updated stats
     owner_rating = await repository.get_container_owner_rating(container_id)
     avg_user_rating = await repository.get_container_average_user_rating(container_id)
     user_rating_count = await repository.get_container_user_rating_count(container_id)
 
-    return {"message": "Rating deleted", "ownerRating": owner_rating, "averageUserRating": float(avg_user_rating) if avg_user_rating else None, "userRatingCount": user_rating_count}
+    return {
+        "message": "Rating deleted",
+        "ownerRating": owner_rating,
+        "averageUserRating": float(avg_user_rating) if avg_user_rating else None,
+        "userRatingCount": user_rating_count,
+    }
+
+
+# Global Catalogue endpoints (public - no authentication required for GET)
+@router.get(
+    "/catalogue/items",
+    response_model=list[GlobalCatalogueItemResponse],
+    summary="Get global catalogue items",
+)
+async def get_catalogue_items(
+    service: GearServiceDep,
+    query: str | None = Query(None, description="Search query"),
+    category: str | None = Query(None, description="Filter by category"),
+    brand: str | None = Query(None, description="Filter by brand"),
+    priceTier: Literal["low", "medium", "high"] | None = Query(
+        None, description="Filter by price tier", alias="priceTier"
+    ),
+    quality: Literal["low", "medium", "high"] | None = Query(
+        None, description="Filter by quality"
+    ),
+    isActive: bool | None = Query(
+        True, description="Filter by active status", alias="isActive"
+    ),
+    skip: int = Query(0, ge=0, description="Number of records to skip"),
+    limit: int = Query(
+        100, ge=1, le=1000, description="Maximum number of records to return"
+    ),
+    current_user: OptionalUser = None,
+) -> list[GlobalCatalogueItemResponse]:
+    """Get global catalogue items with filtering and search.
+
+    Args:
+        query: Search query
+        category: Filter by category
+        brand: Filter by brand
+        priceTier: Filter by price tier
+        quality: Filter by quality
+        isActive: Filter by active status
+        skip: Number of records to skip
+        limit: Maximum number of records to return
+        service: Gear service instance
+        current_user: Optional authenticated user (for future use, e.g., personalized results)
+
+    Returns:
+        List of catalogue items
+    """
+    search_params = GlobalCatalogueItemSearchParams(
+        query=query,
+        category=category,
+        brand=brand,
+        priceTier=priceTier,
+        quality=quality,
+        isActive=isActive,
+        skip=skip,
+        limit=limit,
+    )
+    return await service.get_catalogue_items(search_params)
+
+
+@router.get(
+    "/catalogue/items/{item_id}",
+    response_model=GlobalCatalogueItemResponse,
+    summary="Get a catalogue item by ID",
+)
+async def get_catalogue_item(
+    item_id: str,
+    service: GearServiceDep,
+    current_user: OptionalUser = None,
+) -> GlobalCatalogueItemResponse:
+    """Get a single catalogue item by ID.
+
+    Args:
+        item_id: Catalogue item ID
+        service: Gear service instance
+        current_user: Optional authenticated user (for future use, e.g., personalized results)
+
+    Returns:
+        Catalogue item
+
+    Raises:
+        HTTPException: If item not found
+    """
+    item = await service.get_catalogue_item(item_id)
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Catalogue item not found",
+        )
+    return item
+
+
+@router.post(
+    "/catalogue/items",
+    response_model=GlobalCatalogueItemResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create a new catalogue item",
+)
+async def create_catalogue_item(
+    data: GlobalCatalogueItemCreate,
+    current_user: CurrentUser,
+    service: GearServiceDep,
+) -> GlobalCatalogueItemResponse:
+    """Create a new catalogue item.
+
+    Args:
+        data: Item creation data
+        current_user: Authenticated user
+        service: Gear service instance
+
+    Returns:
+        Created catalogue item
+    """
+    return await service.create_catalogue_item(current_user.id, data)
+
+
+@router.patch(
+    "/catalogue/items/{item_id}",
+    response_model=GlobalCatalogueItemResponse,
+    summary="Update a catalogue item",
+)
+async def update_catalogue_item(
+    item_id: str,
+    data: GlobalCatalogueItemUpdate,
+    current_user: CurrentUser,
+    service: GearServiceDep,
+) -> GlobalCatalogueItemResponse:
+    """Update a catalogue item.
+
+    Only the creator or admin can update items.
+
+    Args:
+        item_id: Catalogue item ID
+        data: Update data
+        current_user: Authenticated user
+        service: Gear service instance
+
+    Returns:
+        Updated catalogue item
+
+    Raises:
+        HTTPException: If item not found or user doesn't have permission
+    """
+    # Check if user is admin
+    is_admin = current_user.isAdmin if hasattr(current_user, "isAdmin") else False
+    item = await service.update_catalogue_item(
+        item_id,
+        current_user.id,
+        data,
+        is_admin=is_admin,
+    )
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Catalogue item not found or you don't have permission to update it",
+        )
+    return item
+
+
+@router.delete(
+    "/catalogue/items/{item_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a catalogue item (soft delete)",
+)
+async def delete_catalogue_item(
+    item_id: str,
+    current_user: CurrentUser,
+    service: GearServiceDep,
+) -> None:
+    """Delete a catalogue item (soft delete by setting is_active=False).
+
+    Only the creator or admin can delete items.
+
+    Args:
+        item_id: Catalogue item ID
+        current_user: Authenticated user
+        service: Gear service instance
+
+    Raises:
+        HTTPException: If item not found or user doesn't have permission
+    """
+    # Check if user is admin
+    is_admin = current_user.isAdmin if hasattr(current_user, "isAdmin") else False
+    deleted = await service.delete_catalogue_item(
+        item_id,
+        current_user.id,
+        is_admin=is_admin,
+    )
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Catalogue item not found or you don't have permission to delete it",
+        )
+
+
+@router.post(
+    "/containers/{container_id}/items/from-catalogue/{catalogue_item_id}",
+    response_model=ItemResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Add a catalogue item to a container",
+)
+async def add_catalogue_item_to_container(
+    container_id: str,
+    catalogue_item_id: str,
+    current_user: CurrentUser,
+    service: GearServiceDep,
+    quantity: int = Query(1, ge=1, description="Item quantity"),
+    status_param: str = Query("owned", description="Item status", alias="status"),
+    priority: str = Query("medium", description="Item priority"),
+) -> ItemResponse:
+    """Add a catalogue item to a user's container.
+
+    Creates a new item in the container based on catalogue item data.
+    The new item is independent (not linked to catalogue).
+
+    Args:
+        container_id: Target container ID
+        catalogue_item_id: Catalogue item ID to copy
+        current_user: Authenticated user
+        quantity: Item quantity
+        status_param: Item status
+        priority: Item priority
+        service: Gear service instance
+
+    Returns:
+        Created item
+
+    Raises:
+        HTTPException: If container or catalogue item not found
+    """
+    item = await service.add_catalogue_item_to_container(
+        container_id,
+        catalogue_item_id,
+        current_user.id,
+        quantity=quantity,
+        status=status_param,
+        priority=priority,
+    )
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Container or catalogue item not found",
+        )
+    return item
+
+
+@router.patch(
+    "/items/{item_id}/unlink-from-catalogue",
+    response_model=ItemResponse,
+    summary="Unlink item from catalogue",
+)
+async def unlink_item_from_catalogue(
+    item_id: str,
+    current_user: CurrentUser,
+    service: GearServiceDep,
+) -> ItemResponse:
+    """Unlink an item from the catalogue (clear catalogue_item_id).
+
+    Args:
+        item_id: Item ID to unlink
+        current_user: Authenticated user
+        service: Gear service instance
+
+    Returns:
+        Updated item
+
+    Raises:
+        HTTPException: If item not found or user doesn't own it
+    """
+    item = await service.unlink_item_from_catalogue(item_id, current_user.id)
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Item not found or you don't have permission to modify it",
+        )
+    return item

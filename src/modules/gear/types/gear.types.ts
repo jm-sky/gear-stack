@@ -65,10 +65,31 @@ export type TGearItemCategory =
   | 'other'
   | string // Allow custom categories
 
+// Constants for item categories (default categories only)
+export const GEAR_ITEM_CATEGORIES: TGearItemCategory[] = [
+  'water',
+  'food',
+  'shelter',
+  'fire',
+  'firstAid',
+  'blades',
+  'tools',
+  'light',
+  'navigation',
+  'communication',
+  'clothing',
+  'hygiene',
+  'other',
+]
+
+// Constants for item qualities
+export const GEAR_ITEM_QUALITIES: TGearItemQuality[] = ['low', 'medium', 'high']
+
 // Pojedynczy przedmiot
 export interface IGearItem {
   id: TUUID
   linkedItemId?: TUUID | null // Reference to original item when linked (future-ready for backend)
+  catalogueItemId?: TUUID | null // Reference to global catalogue item (if item was added from catalogue)
   name: string
   category: TGearItemCategory
   quantity: number

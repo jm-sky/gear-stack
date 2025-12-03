@@ -19,6 +19,10 @@ from .schemas import (
     ContainerCreate,
     ContainerResponse,
     ContainerUpdate,
+    GlobalCatalogueItemCreate,
+    GlobalCatalogueItemResponse,
+    GlobalCatalogueItemSearchParams,
+    GlobalCatalogueItemUpdate,
     ItemCreate,
     ItemResponse,
     ItemUpdate,
@@ -33,7 +37,18 @@ WeightUnit = Literal["g", "kg", "oz", "lb"]
 Priority = Literal["critical", "high", "medium", "low"]
 ItemStatus = Literal["owned", "missing", "toBuy"]
 Quality = Literal["low", "medium", "high"]
-ContainerColor = Literal["default", "blue", "green", "red", "yellow", "purple", "orange", "pink", "teal", "indigo"]
+ContainerColor = Literal[
+    "default",
+    "blue",
+    "green",
+    "red",
+    "yellow",
+    "purple",
+    "orange",
+    "pink",
+    "teal",
+    "indigo",
+]
 
 
 class GearService:
@@ -53,7 +68,9 @@ class GearService:
         self._image_repository = ItemImageRepository(repository.db)
         self._storage = get_storage_adapter()
 
-    def _map_item_to_response(self, item: GearItemDB, primary_image_url: str | None = None) -> ItemResponse:
+    def _map_item_to_response(
+        self, item: GearItemDB, primary_image_url: str | None = None
+    ) -> ItemResponse:
         """Map database item to response schema.
 
         Args:
@@ -83,6 +100,7 @@ class GearService:
             color=item.color,
             quality=cast(Quality | None, item.quality),
             linkedItemId=item.linked_item_id,
+            catalogueItemId=item.catalogue_item_id,
             wearable=item.wearable,
             consumable=item.consumable,
             order=item.order,
@@ -92,7 +110,9 @@ class GearService:
             updatedAt=item.updated_at,
         )
 
-    async def _map_container_to_response(self, container: GearContainerDB, ratings_data: dict[str, Any] | None = None) -> ContainerResponse:
+    async def _map_container_to_response(
+        self, container: GearContainerDB, ratings_data: dict[str, Any] | None = None
+    ) -> ContainerResponse:
         """Map database container to response schema.
 
         Args:
@@ -107,7 +127,9 @@ class GearService:
 
         # Batch fetch primary images for all items
         item_ids = [item.id for item in container_items]
-        primary_images = await self._image_repository.get_primary_images_by_items(item_ids)
+        primary_images = await self._image_repository.get_primary_images_by_items(
+            item_ids
+        )
 
         # Get URLs for all primary images
         image_urls: dict[str, str] = {}
@@ -116,7 +138,10 @@ class GearService:
             image_urls[item_id] = url
 
         # Map items to responses with primary image URLs
-        items = [self._map_item_to_response(item, image_urls.get(item.id)) for item in container_items]
+        items = [
+            self._map_item_to_response(item, image_urls.get(item.id))
+            for item in container_items
+        ]
 
         # Map rating fields if provided
         owner_rating = None
@@ -154,13 +179,17 @@ class GearService:
             items=items,
             ownerRating=owner_rating,
             userRating=user_rating,
-            averageUserRating=float(average_user_rating) if average_user_rating else None,
+            averageUserRating=(
+                float(average_user_rating) if average_user_rating else None
+            ),
             userRatingCount=user_rating_count,
             createdAt=container.created_at,
             updatedAt=container.updated_at,
         )
 
-    async def _map_container_to_response_with_author(self, container: GearContainerDB, ratings_data: dict[str, Any] | None = None) -> ContainerResponse:
+    async def _map_container_to_response_with_author(
+        self, container: GearContainerDB, ratings_data: dict[str, Any] | None = None
+    ) -> ContainerResponse:
         """Map database container to response schema with author name.
 
         Args:
@@ -175,7 +204,9 @@ class GearService:
 
         # Batch fetch primary images for all items
         item_ids = [item.id for item in container_items]
-        primary_images = await self._image_repository.get_primary_images_by_items(item_ids)
+        primary_images = await self._image_repository.get_primary_images_by_items(
+            item_ids
+        )
 
         # Get URLs for all primary images
         image_urls: dict[str, str] = {}
@@ -184,7 +215,10 @@ class GearService:
             image_urls[item_id] = url
 
         # Map items to responses with primary image URLs
-        items = [self._map_item_to_response(item, image_urls.get(item.id)) for item in container_items]
+        items = [
+            self._map_item_to_response(item, image_urls.get(item.id))
+            for item in container_items
+        ]
 
         # Filter nested containers - only show items if nested container is public
         filtered_items = []
@@ -241,13 +275,17 @@ class GearService:
             items=filtered_items,
             ownerRating=owner_rating,
             userRating=user_rating,
-            averageUserRating=float(average_user_rating) if average_user_rating else None,
+            averageUserRating=(
+                float(average_user_rating) if average_user_rating else None
+            ),
             userRatingCount=user_rating_count,
             createdAt=container.created_at,
             updatedAt=container.updated_at,
         )
 
-    async def create_container(self, user_id: str, data: ContainerCreate, default_public: bool = False) -> ContainerResponse:
+    async def create_container(
+        self, user_id: str, data: ContainerCreate, default_public: bool = False
+    ) -> ContainerResponse:
         """Create a new gear container.
 
         Args:
@@ -271,9 +309,13 @@ class GearService:
             "user_rating_count": 0,
         }
 
-        return await self._map_container_to_response(container, dict(ratings_data) if ratings_data else None)
+        return await self._map_container_to_response(
+            container, dict(ratings_data) if ratings_data else None
+        )
 
-    async def get_container(self, container_id: str, user_id: str) -> ContainerResponse | None:
+    async def get_container(
+        self, container_id: str, user_id: str
+    ) -> ContainerResponse | None:
         """Get a container by ID.
 
         Args:
@@ -288,11 +330,17 @@ class GearService:
             return None
 
         is_owner = container.user_id == user_id
-        ratings_data = await self.repository.get_container_ratings_data(container_id, requesting_user_id=user_id, is_owner=is_owner)
+        ratings_data = await self.repository.get_container_ratings_data(
+            container_id, requesting_user_id=user_id, is_owner=is_owner
+        )
 
-        return await self._map_container_to_response(container, dict(ratings_data) if ratings_data else None)
+        return await self._map_container_to_response(
+            container, dict(ratings_data) if ratings_data else None
+        )
 
-    async def get_containers(self, user_id: str, skip: int = 0, limit: int = 100) -> list[ContainerResponse]:
+    async def get_containers(
+        self, user_id: str, skip: int = 0, limit: int = 100
+    ) -> list[ContainerResponse]:
         """Get all containers for a user.
 
         Args:
@@ -306,11 +354,19 @@ class GearService:
         containers = await self.repository.get_containers(user_id, skip, limit)
         results = []
         for container in containers:
-            ratings_data = await self.repository.get_container_ratings_data(container.id, requesting_user_id=user_id, is_owner=True)
-            results.append(await self._map_container_to_response(container, dict(ratings_data) if ratings_data else None))
+            ratings_data = await self.repository.get_container_ratings_data(
+                container.id, requesting_user_id=user_id, is_owner=True
+            )
+            results.append(
+                await self._map_container_to_response(
+                    container, dict(ratings_data) if ratings_data else None
+                )
+            )
         return results
 
-    async def get_public_containers(self, skip: int = 0, limit: int = 100, requesting_user_id: str | None = None) -> list[ContainerResponse]:
+    async def get_public_containers(
+        self, skip: int = 0, limit: int = 100, requesting_user_id: str | None = None
+    ) -> list[ContainerResponse]:
         """Get all public containers from all users.
 
         Args:
@@ -324,11 +380,19 @@ class GearService:
         containers = await self.repository.get_public_containers(skip, limit)
         results = []
         for container in containers:
-            ratings_data = await self.repository.get_container_ratings_data(container.id, requesting_user_id=requesting_user_id, is_owner=False)
-            results.append(await self._map_container_to_response_with_author(container, dict(ratings_data) if ratings_data else None))
+            ratings_data = await self.repository.get_container_ratings_data(
+                container.id, requesting_user_id=requesting_user_id, is_owner=False
+            )
+            results.append(
+                await self._map_container_to_response_with_author(
+                    container, dict(ratings_data) if ratings_data else None
+                )
+            )
         return results
 
-    async def get_public_container(self, container_id: str, requesting_user_id: str | None = None) -> ContainerResponse | None:
+    async def get_public_container(
+        self, container_id: str, requesting_user_id: str | None = None
+    ) -> ContainerResponse | None:
         """Get a public container by ID.
 
         Args:
@@ -342,11 +406,17 @@ class GearService:
         if not container:
             return None
 
-        ratings_data = await self.repository.get_container_ratings_data(container_id, requesting_user_id=requesting_user_id, is_owner=False)
+        ratings_data = await self.repository.get_container_ratings_data(
+            container_id, requesting_user_id=requesting_user_id, is_owner=False
+        )
 
-        return await self._map_container_to_response_with_author(container, dict(ratings_data) if ratings_data else None)
+        return await self._map_container_to_response_with_author(
+            container, dict(ratings_data) if ratings_data else None
+        )
 
-    async def get_container_by_share_token(self, token: str, requesting_user_id: str | None = None) -> ContainerResponse | None:
+    async def get_container_by_share_token(
+        self, token: str, requesting_user_id: str | None = None
+    ) -> ContainerResponse | None:
         """Get a container by share token.
 
         Args:
@@ -360,11 +430,17 @@ class GearService:
         if not container:
             return None
 
-        ratings_data = await self.repository.get_container_ratings_data(container.id, requesting_user_id=requesting_user_id, is_owner=False)
+        ratings_data = await self.repository.get_container_ratings_data(
+            container.id, requesting_user_id=requesting_user_id, is_owner=False
+        )
 
-        return await self._map_container_to_response_with_author(container, dict(ratings_data) if ratings_data else None)
+        return await self._map_container_to_response_with_author(
+            container, dict(ratings_data) if ratings_data else None
+        )
 
-    async def create_share_token(self, container_id: str, user_id: str, expires_at: datetime | None = None) -> str:
+    async def create_share_token(
+        self, container_id: str, user_id: str, expires_at: datetime | None = None
+    ) -> str:
         """Create a share token for a container.
 
         Args:
@@ -387,7 +463,9 @@ class GearService:
         token = secrets.token_urlsafe(32)
 
         # Create share token
-        await self.repository.create_share_token(container_id, user_id, token, expires_at)
+        await self.repository.create_share_token(
+            container_id, user_id, token, expires_at
+        )
 
         return token
 
@@ -401,7 +479,9 @@ class GearService:
         Returns:
             List of share token dictionaries with share URLs
         """
-        tokens = await self.repository.get_share_tokens_by_container(container_id, user_id)
+        tokens = await self.repository.get_share_tokens_by_container(
+            container_id, user_id
+        )
         result = []
         for token_db in tokens:
             # Construct share URL (frontend will handle the base URL)
@@ -429,7 +509,9 @@ class GearService:
         """
         return await self.repository.revoke_share_token(token, user_id)
 
-    async def update_container(self, container_id: str, user_id: str, data: ContainerUpdate) -> ContainerResponse | None:
+    async def update_container(
+        self, container_id: str, user_id: str, data: ContainerUpdate
+    ) -> ContainerResponse | None:
         """Update a container.
 
         Args:
@@ -444,9 +526,13 @@ class GearService:
         if not container:
             return None
 
-        ratings_data = await self.repository.get_container_ratings_data(container_id, requesting_user_id=user_id, is_owner=True)
+        ratings_data = await self.repository.get_container_ratings_data(
+            container_id, requesting_user_id=user_id, is_owner=True
+        )
 
-        return await self._map_container_to_response(container, dict(ratings_data) if ratings_data else None)
+        return await self._map_container_to_response(
+            container, dict(ratings_data) if ratings_data else None
+        )
 
     async def delete_container(self, container_id: str, user_id: str) -> bool:
         """Delete a container and all its items.
@@ -471,7 +557,9 @@ class GearService:
         """
         return await self.repository.delete_all_containers(user_id)
 
-    async def create_item(self, container_id: str, user_id: str, data: ItemCreate) -> ItemResponse | None:
+    async def create_item(
+        self, container_id: str, user_id: str, data: ItemCreate
+    ) -> ItemResponse | None:
         """Create a new gear item in a container.
 
         Args:
@@ -524,7 +612,9 @@ class GearService:
 
         return self._map_item_to_response(item, primary_image_url)
 
-    async def get_items(self, container_id: str, user_id: str, skip: int = 0, limit: int = 100) -> list[ItemResponse]:
+    async def get_items(
+        self, container_id: str, user_id: str, skip: int = 0, limit: int = 100
+    ) -> list[ItemResponse]:
         """Get all items in a container.
 
         Args:
@@ -540,7 +630,9 @@ class GearService:
 
         # Batch fetch primary images for all items
         item_ids = [item.id for item in items]
-        primary_images = await self._image_repository.get_primary_images_by_items(item_ids)
+        primary_images = await self._image_repository.get_primary_images_by_items(
+            item_ids
+        )
 
         # Get URLs for all primary images
         image_urls: dict[str, str] = {}
@@ -549,9 +641,13 @@ class GearService:
             image_urls[item_id] = url
 
         # Map items to responses with primary image URLs
-        return [self._map_item_to_response(item, image_urls.get(item.id)) for item in items]
+        return [
+            self._map_item_to_response(item, image_urls.get(item.id)) for item in items
+        ]
 
-    async def update_item(self, item_id: str, user_id: str, data: ItemUpdate) -> ItemResponse | None:
+    async def update_item(
+        self, item_id: str, user_id: str, data: ItemUpdate
+    ) -> ItemResponse | None:
         """Update a gear item.
 
         Args:
@@ -590,7 +686,9 @@ class GearService:
         """
         return await self.repository.delete_item(item_id, user_id)
 
-    async def batch_update_item_order(self, user_id: str, data: BatchOrderUpdateRequest) -> list[ItemResponse]:
+    async def batch_update_item_order(
+        self, user_id: str, data: BatchOrderUpdateRequest
+    ) -> list[ItemResponse]:
         """Batch update items' order values.
 
         Args:
@@ -606,7 +704,9 @@ class GearService:
         items = await self.repository.batch_update_item_order(user_id, data)
         return [self._map_item_to_response(item) for item in items]
 
-    def calculate_container_weight(self, container: ContainerResponse) -> dict[str, float]:
+    def calculate_container_weight(
+        self, container: ContainerResponse
+    ) -> dict[str, float]:
         """Calculate total weight of a container in grams and kilograms.
 
         Args:
@@ -633,7 +733,9 @@ class GearService:
             "kilograms": total_grams / 1000,
         }
 
-    def calculate_container_readiness(self, container: ContainerResponse) -> dict[str, int | float]:
+    def calculate_container_readiness(
+        self, container: ContainerResponse
+    ) -> dict[str, int | float]:
         """Calculate container readiness statistics.
 
         Args:
@@ -663,3 +765,180 @@ class GearService:
             "toBuyItems": to_buy,
             "readinessPercentage": (owned / total * 100) if total > 0 else 0.0,
         }
+
+    # Global Catalogue Methods
+    async def get_catalogue_items(
+        self,
+        search_params: GlobalCatalogueItemSearchParams,
+    ) -> list[GlobalCatalogueItemResponse]:
+        """Get global catalogue items.
+
+        Args:
+            search_params: Search and filter parameters
+
+        Returns:
+            List of catalogue items
+        """
+        items = await self.repository.get_catalogue_items(
+            query=search_params.query,
+            category=search_params.category,
+            brand=search_params.brand,
+            price_tier=search_params.priceTier,
+            quality=search_params.quality,
+            is_active=search_params.isActive,
+            skip=search_params.skip,
+            limit=search_params.limit,
+        )
+        return [GlobalCatalogueItemResponse.model_validate(item) for item in items]
+
+    async def get_catalogue_item(
+        self, item_id: str
+    ) -> GlobalCatalogueItemResponse | None:
+        """Get a single catalogue item.
+
+        Args:
+            item_id: Catalogue item ID
+
+        Returns:
+            Catalogue item if found, None otherwise
+        """
+        item = await self.repository.get_catalogue_item(item_id)
+        if not item:
+            return None
+        return GlobalCatalogueItemResponse.model_validate(item)
+
+    async def create_catalogue_item(
+        self,
+        user_id: str,
+        data: GlobalCatalogueItemCreate,
+    ) -> GlobalCatalogueItemResponse:
+        """Create a new catalogue item.
+
+        Args:
+            user_id: User ID creating the item
+            data: Item creation data
+
+        Returns:
+            Created catalogue item
+        """
+        item = await self.repository.create_catalogue_item(user_id, data)
+        return GlobalCatalogueItemResponse.model_validate(item)
+
+    async def update_catalogue_item(
+        self,
+        item_id: str,
+        user_id: str,
+        data: GlobalCatalogueItemUpdate,
+        is_admin: bool = False,
+    ) -> GlobalCatalogueItemResponse | None:
+        """Update a catalogue item.
+
+        Args:
+            item_id: Catalogue item ID
+            user_id: User ID updating the item
+            data: Update data
+            is_admin: Whether user is admin
+
+        Returns:
+            Updated item if found and user has permission, None otherwise
+        """
+        item = await self.repository.update_catalogue_item(
+            item_id, user_id, data, is_admin
+        )
+        if not item:
+            return None
+        return GlobalCatalogueItemResponse.model_validate(item)
+
+    async def delete_catalogue_item(
+        self,
+        item_id: str,
+        user_id: str,
+        is_admin: bool = False,
+    ) -> bool:
+        """Delete a catalogue item (soft delete).
+
+        Args:
+            item_id: Catalogue item ID
+            user_id: User ID deleting the item
+            is_admin: Whether user is admin
+
+        Returns:
+            True if deleted, False otherwise
+        """
+        return await self.repository.delete_catalogue_item(item_id, user_id, is_admin)
+
+    async def add_catalogue_item_to_container(
+        self,
+        container_id: str,
+        catalogue_item_id: str,
+        user_id: str,
+        quantity: int = 1,
+        status: str = "owned",
+        priority: str = "medium",
+    ) -> ItemResponse | None:
+        """Add a catalogue item to a user's container.
+
+        Creates a new item in the container based on catalogue item data.
+        The new item is independent (not linked to catalogue).
+
+        Args:
+            container_id: Target container ID
+            catalogue_item_id: Catalogue item ID to copy
+            user_id: User ID
+            quantity: Item quantity (default: 1)
+            status: Item status (default: "owned")
+            priority: Item priority (default: "medium")
+
+        Returns:
+            Created item if successful, None otherwise
+        """
+        # Get catalogue item
+        catalogue_item = await self.repository.get_catalogue_item(catalogue_item_id)
+        if not catalogue_item or not catalogue_item.is_active:
+            return None
+
+        # Verify container belongs to user
+        container = await self.repository.get_container(container_id, user_id)
+        if not container:
+            return None
+
+        # Create item from catalogue data
+        item_data = ItemCreate(  # type: ignore[call-arg]
+            name=catalogue_item.name,
+            category=catalogue_item.category,
+            weight=catalogue_item.weight,
+            weightUnit=cast(WeightUnit, catalogue_item.weight_unit),
+            quantity=quantity,
+            status=cast(ItemStatus, status),
+            priority=cast(Priority, priority),
+            brand=catalogue_item.brand,
+            color=catalogue_item.color,
+            url=catalogue_item.url,
+            catalogueItemId=catalogue_item_id,
+        )
+
+        # Create item
+        created_item = await self.create_item(container_id, user_id, item_data)
+        return created_item
+
+    async def unlink_item_from_catalogue(
+        self,
+        item_id: str,
+        user_id: str,
+    ) -> ItemResponse | None:
+        """Unlink an item from the catalogue (clear catalogue_item_id).
+
+        Args:
+            item_id: Item ID to unlink
+            user_id: User ID (must own the item)
+
+        Returns:
+            Updated item if successful, None otherwise
+        """
+        item = await self.repository.get_item(item_id, user_id)
+        if not item:
+            return None
+
+        # Clear catalogue_item_id
+        update_data = ItemUpdate(catalogueItemId=None)  # type: ignore[call-arg]
+        return await self.update_item(item_id, user_id, update_data)

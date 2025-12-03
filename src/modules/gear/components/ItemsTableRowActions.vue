@@ -3,6 +3,7 @@ import {
   AlertCircle,
   CheckCircle2,
   Eye,
+  Link2Off,
   MoreHorizontal,
   ShoppingCart,
   Trash2,
@@ -29,6 +30,7 @@ const emit = defineEmits<{
   recognizeParameters: [item: IGearItem]
   uploadPhoto: [item: IGearItem]
   starItem: [item: IGearItem, priority: TGearItemPriority]
+  unlinkFromCatalogue: [item: IGearItem]
 }>()
 
 const EditIcon = getActionIcon('edit')
@@ -39,6 +41,11 @@ const RecognizeParametersIcon = getActionIcon('recognizeParameters')
 // Check if item is a nested container
 const isNestedContainer = computed(() => {
   return !!props.row.containerId
+})
+
+// Check if item is linked to catalogue
+const isLinkedToCatalogue = computed(() => {
+  return !!props.row.catalogueItemId
 })
 </script>
 
@@ -90,6 +97,14 @@ const isNestedContainer = computed(() => {
           {{ t('gear.actions.starItem') }}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
+        <DropdownMenuItem
+          v-if="isLinkedToCatalogue"
+          @click="emit('unlinkFromCatalogue', row)"
+        >
+          <Link2Off class="size-4 mr-2" />
+          {{ t('gear.catalogue.unlinkFromCatalogue') }}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator v-if="isLinkedToCatalogue" />
         <DropdownMenuItem
           v-if="row.status !== 'owned'"
           @click="emit('statusChange', 'owned')"

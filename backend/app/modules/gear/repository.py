@@ -18,11 +18,19 @@ from app.common.id_utils import generate_id
 from app.common.search import SearchMixin
 from app.modules.auth.db_models import UserDB
 
-from .db_models import GearContainerDB, GearItemDB, ContainerShareTokenDB, ContainerRatingDB
+from .db_models import (
+    GearContainerDB,
+    GearItemDB,
+    ContainerShareTokenDB,
+    ContainerRatingDB,
+    GlobalCatalogueItemDB,
+)
 from .schemas import (
     BatchOrderUpdateRequest,
     ContainerCreate,
     ContainerUpdate,
+    GlobalCatalogueItemCreate,
+    GlobalCatalogueItemUpdate,
     ItemCreate,
     ItemUpdate,
 )
@@ -50,7 +58,9 @@ class GearRepository(SearchMixin):
         self._case_sensitive = False
 
     # Container operations
-    async def create_container(self, user_id: str, data: ContainerCreate) -> GearContainerDB:
+    async def create_container(
+        self, user_id: str, data: ContainerCreate
+    ) -> GearContainerDB:
         """Create a new gear container.
 
         Args:
@@ -61,7 +71,9 @@ class GearRepository(SearchMixin):
             Created container
         """
         container = GearContainerDB(
-            id=data.id if data.id else generate_id(),  # Use provided UUID if available, otherwise generate new one
+            id=(
+                data.id if data.id else generate_id()
+            ),  # Use provided UUID if available, otherwise generate new one
             user_id=user_id,
             name=data.name,
             description=data.description,
@@ -78,7 +90,9 @@ class GearRepository(SearchMixin):
             url=data.url,
             is_public=data.isPublic if data.isPublic is not None else False,
             favorite=data.favorite if data.favorite is not None else False,
-            show_item_images=data.showItemImages if data.showItemImages is not None else False,
+            show_item_images=(
+                data.showItemImages if data.showItemImages is not None else False
+            ),
         )
         self.db.add(container)
         await self.db.commit()
@@ -90,7 +104,9 @@ class GearRepository(SearchMixin):
         container = result.scalar_one()
         return container
 
-    async def get_container(self, container_id: str, user_id: str) -> GearContainerDB | None:
+    async def get_container(
+        self, container_id: str, user_id: str
+    ) -> GearContainerDB | None:
         """Get a container by ID for a specific user.
 
         Args:
@@ -113,7 +129,9 @@ class GearRepository(SearchMixin):
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def get_containers(self, user_id: str, skip: int = 0, limit: int = 100) -> Sequence[GearContainerDB]:
+    async def get_containers(
+        self, user_id: str, skip: int = 0, limit: int = 100
+    ) -> Sequence[GearContainerDB]:
         """Get all containers for a user.
 
         Args:
@@ -130,7 +148,9 @@ class GearRepository(SearchMixin):
         result = await self.db.execute(stmt)
         return result.scalars().all()
 
-    async def get_public_containers(self, skip: int = 0, limit: int = 100) -> Sequence[GearContainerDB]:
+    async def get_public_containers(
+        self, skip: int = 0, limit: int = 100
+    ) -> Sequence[GearContainerDB]:
         """Get all public containers from all users.
 
         Args:
@@ -179,7 +199,9 @@ class GearRepository(SearchMixin):
         result = await self.db.execute(stmt)
         return result.unique().scalar_one_or_none()
 
-    async def update_container(self, container_id: str, user_id: str, data: ContainerUpdate) -> GearContainerDB | None:
+    async def update_container(
+        self, container_id: str, user_id: str, data: ContainerUpdate
+    ) -> GearContainerDB | None:
         """Update a container.
 
         Args:
@@ -258,7 +280,9 @@ class GearRepository(SearchMixin):
         return len(containers)
 
     # Item operations
-    async def create_item(self, container_id: str, user_id: str, data: ItemCreate) -> GearItemDB | None:
+    async def create_item(
+        self, container_id: str, user_id: str, data: ItemCreate
+    ) -> GearItemDB | None:
         """Create a new gear item in a container.
 
         Args:
@@ -278,13 +302,17 @@ class GearRepository(SearchMixin):
         order = data.order
         if order is None:
             # Get max order in container
-            stmt = select(func.max(GearItemDB.order)).where(GearItemDB.container_id == container_id)
+            stmt = select(func.max(GearItemDB.order)).where(
+                GearItemDB.container_id == container_id
+            )
             result = await self.db.execute(stmt)
             max_order = result.scalar()
             order = (max_order + 1) if max_order is not None else 0
 
         item = GearItemDB(
-            id=data.id if data.id else generate_id(),  # Use provided UUID if available, otherwise generate new one
+            id=(
+                data.id if data.id else generate_id()
+            ),  # Use provided UUID if available, otherwise generate new one
             container_id=container_id,
             name=data.name,
             category=data.category,
@@ -303,6 +331,7 @@ class GearRepository(SearchMixin):
             color=data.color,
             quality=data.quality,
             linked_item_id=data.linkedItemId,
+            catalogue_item_id=data.catalogueItemId,
             wearable=data.wearable,
             consumable=data.consumable,
             order=order,
@@ -323,11 +352,17 @@ class GearRepository(SearchMixin):
         Returns:
             Item if found, None otherwise
         """
-        stmt = select(GearItemDB).join(GearContainerDB, GearItemDB.container_id == GearContainerDB.id).where(and_(GearItemDB.id == item_id, GearContainerDB.user_id == user_id))
+        stmt = (
+            select(GearItemDB)
+            .join(GearContainerDB, GearItemDB.container_id == GearContainerDB.id)
+            .where(and_(GearItemDB.id == item_id, GearContainerDB.user_id == user_id))
+        )
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def get_items(self, container_id: str, user_id: str, skip: int = 0, limit: int = 100) -> Sequence[GearItemDB]:
+    async def get_items(
+        self, container_id: str, user_id: str, skip: int = 0, limit: int = 100
+    ) -> Sequence[GearItemDB]:
         """Get all items in a container.
 
         Args:
@@ -345,11 +380,19 @@ class GearRepository(SearchMixin):
             return []
 
         # Sort by order (nulls last), then by created_at
-        stmt = select(GearItemDB).where(GearItemDB.container_id == container_id).offset(skip).limit(limit).order_by(GearItemDB.order.asc().nulls_last(), GearItemDB.created_at.desc())
+        stmt = (
+            select(GearItemDB)
+            .where(GearItemDB.container_id == container_id)
+            .offset(skip)
+            .limit(limit)
+            .order_by(GearItemDB.order.asc().nulls_last(), GearItemDB.created_at.desc())
+        )
         result = await self.db.execute(stmt)
         return result.scalars().all()
 
-    async def update_item(self, item_id: str, user_id: str, data: ItemUpdate) -> GearItemDB | None:
+    async def update_item(
+        self, item_id: str, user_id: str, data: ItemUpdate
+    ) -> GearItemDB | None:
         """Update a gear item and propagate changes to all linked items.
 
         When updating an item, if it's part of a linked group (via linked_item_id),
@@ -398,6 +441,7 @@ class GearRepository(SearchMixin):
             "expirationDate": "expiration_date",
             "containerId": "nested_container_id",
             "linkedItemId": "linked_item_id",
+            "catalogueItemId": "catalogue_item_id",
             "showOnContainer": "show_on_container",
         }
 
@@ -440,7 +484,9 @@ class GearRepository(SearchMixin):
         await self.db.commit()
         return True
 
-    async def batch_update_item_order(self, user_id: str, data: BatchOrderUpdateRequest) -> list[GearItemDB]:
+    async def batch_update_item_order(
+        self, user_id: str, data: BatchOrderUpdateRequest
+    ) -> list[GearItemDB]:
         """Batch update items' order values.
 
         Args:
@@ -492,7 +538,13 @@ class GearRepository(SearchMixin):
         return list(items)
 
     # Share token operations
-    async def create_share_token(self, container_id: str, user_id: str, token: str, expires_at: datetime | None = None) -> ContainerShareTokenDB:
+    async def create_share_token(
+        self,
+        container_id: str,
+        user_id: str,
+        token: str,
+        expires_at: datetime | None = None,
+    ) -> ContainerShareTokenDB:
         """Create a share token for a container.
 
         Args:
@@ -553,7 +605,9 @@ class GearRepository(SearchMixin):
         result = await self.db.execute(stmt)
         return result.unique().scalar_one_or_none()
 
-    async def get_share_tokens_by_container(self, container_id: str, user_id: str) -> Sequence[ContainerShareTokenDB]:
+    async def get_share_tokens_by_container(
+        self, container_id: str, user_id: str
+    ) -> Sequence[ContainerShareTokenDB]:
         """Get all share tokens for a container (only for owner).
 
         Args:
@@ -568,7 +622,11 @@ class GearRepository(SearchMixin):
         if not container:
             return []
 
-        stmt = select(ContainerShareTokenDB).where(ContainerShareTokenDB.container_id == container_id).order_by(ContainerShareTokenDB.created_at.desc())
+        stmt = (
+            select(ContainerShareTokenDB)
+            .where(ContainerShareTokenDB.container_id == container_id)
+            .order_by(ContainerShareTokenDB.created_at.desc())
+        )
         result = await self.db.execute(stmt)
         return result.scalars().all()
 
@@ -582,7 +640,9 @@ class GearRepository(SearchMixin):
         Returns:
             True if token was revoked, False otherwise
         """
-        token_stmt = select(ContainerShareTokenDB).where(ContainerShareTokenDB.token == token)
+        token_stmt = select(ContainerShareTokenDB).where(
+            ContainerShareTokenDB.token == token
+        )
         token_result = await self.db.execute(token_stmt)
         share_token = token_result.scalar_one_or_none()
 
@@ -594,7 +654,9 @@ class GearRepository(SearchMixin):
         return True
 
     # Rating operations
-    async def get_container_rating(self, container_id: str, user_id: str, rating_type: str = "user") -> ContainerRatingDB | None:
+    async def get_container_rating(
+        self, container_id: str, user_id: str, rating_type: str = "user"
+    ) -> ContainerRatingDB | None:
         """Get user's rating for a container by type.
 
         Args:
@@ -605,10 +667,17 @@ class GearRepository(SearchMixin):
         Returns:
             Rating if found, None otherwise
         """
-        result = await self.db.execute(select(ContainerRatingDB).where(ContainerRatingDB.container_id == container_id).where(ContainerRatingDB.user_id == user_id).where(ContainerRatingDB.rating_type == rating_type))
+        result = await self.db.execute(
+            select(ContainerRatingDB)
+            .where(ContainerRatingDB.container_id == container_id)
+            .where(ContainerRatingDB.user_id == user_id)
+            .where(ContainerRatingDB.rating_type == rating_type)
+        )
         return result.scalar_one_or_none()
 
-    async def upsert_container_rating(self, container_id: str, user_id: str, rating: int, rating_type: str = "user") -> ContainerRatingDB:
+    async def upsert_container_rating(
+        self, container_id: str, user_id: str, rating: int, rating_type: str = "user"
+    ) -> ContainerRatingDB:
         """Create or update user's rating for a container.
 
         Args:
@@ -639,7 +708,9 @@ class GearRepository(SearchMixin):
         await self.db.flush()
         return new_rating
 
-    async def delete_container_rating(self, container_id: str, user_id: str, rating_type: str = "user") -> bool:
+    async def delete_container_rating(
+        self, container_id: str, user_id: str, rating_type: str = "user"
+    ) -> bool:
         """Delete user's rating for a container.
 
         Args:
@@ -657,7 +728,9 @@ class GearRepository(SearchMixin):
             return True
         return False
 
-    async def get_container_average_user_rating(self, container_id: str) -> float | None:
+    async def get_container_average_user_rating(
+        self, container_id: str
+    ) -> float | None:
         """Calculate average user rating for a container (excluding owner ratings).
 
         Args:
@@ -666,7 +739,11 @@ class GearRepository(SearchMixin):
         Returns:
             Average rating or None if no ratings
         """
-        result = await self.db.execute(select(func.avg(ContainerRatingDB.rating)).where(ContainerRatingDB.container_id == container_id).where(ContainerRatingDB.rating_type == "user"))
+        result = await self.db.execute(
+            select(func.avg(ContainerRatingDB.rating))
+            .where(ContainerRatingDB.container_id == container_id)
+            .where(ContainerRatingDB.rating_type == "user")
+        )
         avg = result.scalar()
         return float(avg) if avg is not None else None
 
@@ -679,7 +756,11 @@ class GearRepository(SearchMixin):
         Returns:
             Number of user ratings
         """
-        result = await self.db.execute(select(func.count(ContainerRatingDB.id)).where(ContainerRatingDB.container_id == container_id).where(ContainerRatingDB.rating_type == "user"))
+        result = await self.db.execute(
+            select(func.count(ContainerRatingDB.id))
+            .where(ContainerRatingDB.container_id == container_id)
+            .where(ContainerRatingDB.rating_type == "user")
+        )
         return result.scalar() or 0
 
     async def get_container_owner_rating(self, container_id: str) -> int | None:
@@ -691,7 +772,12 @@ class GearRepository(SearchMixin):
         Returns:
             Owner rating (1-5) or None if not set
         """
-        result = await self.db.execute(select(ContainerRatingDB.rating).where(ContainerRatingDB.container_id == container_id).where(ContainerRatingDB.rating_type == "owner").limit(1))
+        result = await self.db.execute(
+            select(ContainerRatingDB.rating)
+            .where(ContainerRatingDB.container_id == container_id)
+            .where(ContainerRatingDB.rating_type == "owner")
+            .limit(1)
+        )
         rating = result.scalar_one_or_none()
         return rating if rating else None
 
@@ -703,7 +789,12 @@ class GearRepository(SearchMixin):
         average_user_rating: float | None
         user_rating_count: int
 
-    async def get_container_ratings_data(self, container_id: str, requesting_user_id: str | None = None, is_owner: bool = False) -> ContainerRatingsData:
+    async def get_container_ratings_data(
+        self,
+        container_id: str,
+        requesting_user_id: str | None = None,
+        is_owner: bool = False,
+    ) -> ContainerRatingsData:
         """Get all ratings data for a container.
 
         Args:
@@ -720,7 +811,9 @@ class GearRepository(SearchMixin):
         # Load user rating (only if not owner and user_id provided)
         user_rating = None
         if requesting_user_id and not is_owner:
-            user_rating_obj = await self.get_container_rating(container_id, requesting_user_id, rating_type="user")
+            user_rating_obj = await self.get_container_rating(
+                container_id, requesting_user_id, rating_type="user"
+            )
             user_rating = user_rating_obj.rating if user_rating_obj else None
 
         # Calculate average user rating and count
@@ -733,3 +826,199 @@ class GearRepository(SearchMixin):
             "average_user_rating": avg_user_rating,
             "user_rating_count": user_rating_count,
         }
+
+    # Global Catalogue Methods
+    async def get_catalogue_items(
+        self,
+        query: str | None = None,
+        category: str | None = None,
+        brand: str | None = None,
+        price_tier: str | None = None,
+        quality: str | None = None,
+        is_active: bool | None = True,
+        skip: int = 0,
+        limit: int = 100,
+    ) -> Sequence[GlobalCatalogueItemDB]:
+        """Get global catalogue items with filtering and search.
+
+        Args:
+            query: Search query (searches in name, description, brand, model)
+            category: Filter by category
+            brand: Filter by brand
+            price_tier: Filter by price tier
+            quality: Filter by quality
+            is_active: Filter by active status
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+
+        Returns:
+            List of catalogue items
+        """
+        stmt = select(GlobalCatalogueItemDB)
+
+        # Build filters
+        conditions = []
+        if is_active is not None:
+            conditions.append(GlobalCatalogueItemDB.is_active == is_active)
+        if category:
+            conditions.append(GlobalCatalogueItemDB.category == category)
+        if brand:
+            conditions.append(GlobalCatalogueItemDB.brand == brand)
+        if price_tier:
+            conditions.append(GlobalCatalogueItemDB.price_tier == price_tier)
+        if quality:
+            conditions.append(GlobalCatalogueItemDB.quality == quality)
+
+        # Search query (fuzzy search in name, description, brand, model)
+        if query:
+            search_pattern = f"%{query}%"
+            search_conditions = or_(
+                GlobalCatalogueItemDB.name.ilike(search_pattern),
+                GlobalCatalogueItemDB.description.ilike(search_pattern),
+                GlobalCatalogueItemDB.brand.ilike(search_pattern),
+                GlobalCatalogueItemDB.model.ilike(search_pattern),
+            )
+            conditions.append(search_conditions)
+
+        if conditions:
+            stmt = stmt.where(and_(*conditions))
+
+        # Order by name
+        stmt = stmt.order_by(GlobalCatalogueItemDB.name.asc())
+
+        # Pagination
+        stmt = stmt.offset(skip).limit(limit)
+
+        result = await self.db.execute(stmt)
+        return result.scalars().all()
+
+    async def get_catalogue_item(self, item_id: str) -> GlobalCatalogueItemDB | None:
+        """Get a single catalogue item by ID.
+
+        Args:
+            item_id: Catalogue item ID
+
+        Returns:
+            Catalogue item if found, None otherwise
+        """
+        stmt = select(GlobalCatalogueItemDB).where(GlobalCatalogueItemDB.id == item_id)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def create_catalogue_item(
+        self,
+        user_id: str,
+        data: GlobalCatalogueItemCreate,
+    ) -> GlobalCatalogueItemDB:
+        """Create a new catalogue item.
+
+        Args:
+            user_id: User ID creating the item
+            data: Item creation data
+
+        Returns:
+            Created catalogue item
+        """
+        item_id = generate_id()
+        item = GlobalCatalogueItemDB(
+            id=item_id,
+            version=1,
+            name=data.name,
+            category=data.category,
+            weight=data.weight,
+            weight_unit=data.weightUnit,
+            description=data.description,
+            brand=data.brand,
+            model=data.model,
+            price_tier=data.priceTier,
+            quality=data.quality,
+            url=data.url,
+            color=data.color,
+            is_active=True,
+            created_by=user_id,
+        )
+        self.db.add(item)
+        await self.db.commit()
+        await self.db.refresh(item)
+        return item
+
+    async def update_catalogue_item(
+        self,
+        item_id: str,
+        user_id: str,
+        data: GlobalCatalogueItemUpdate,
+        is_admin: bool = False,
+    ) -> GlobalCatalogueItemDB | None:
+        """Update a catalogue item.
+
+        Only the creator or admin can update items.
+
+        Args:
+            item_id: Catalogue item ID
+            user_id: User ID updating the item
+            data: Update data
+            is_admin: Whether user is admin
+
+        Returns:
+            Updated item if found and user has permission, None otherwise
+        """
+        item = await self.get_catalogue_item(item_id)
+        if not item:
+            return None
+
+        # Check permissions: creator or admin
+        if not is_admin and item.created_by != user_id:
+            return None
+
+        # Update fields
+        update_dict = data.model_dump(exclude_unset=True, by_alias=False)
+        for key, value in update_dict.items():
+            # Handle camelCase to snake_case conversion
+            if key == "weightUnit":
+                setattr(item, "weight_unit", value)
+            elif key == "priceTier":
+                setattr(item, "price_tier", value)
+            elif key == "isActive":
+                setattr(item, "is_active", value)
+            else:
+                setattr(item, key, value)
+
+        # Increment version on update
+        item.version += 1
+        item.updated_at = datetime.now(UTC)
+
+        await self.db.commit()
+        await self.db.refresh(item)
+        return item
+
+    async def delete_catalogue_item(
+        self,
+        item_id: str,
+        user_id: str,
+        is_admin: bool = False,
+    ) -> bool:
+        """Delete a catalogue item (soft delete by setting is_active=False).
+
+        Only the creator or admin can delete items.
+
+        Args:
+            item_id: Catalogue item ID
+            user_id: User ID deleting the item
+            is_admin: Whether user is admin
+
+        Returns:
+            True if deleted, False otherwise
+        """
+        item = await self.get_catalogue_item(item_id)
+        if not item:
+            return False
+
+        # Check permissions: creator or admin
+        if not is_admin and item.created_by != user_id:
+            return False
+
+        # Soft delete
+        item.is_active = False
+        item.updated_at = datetime.now(UTC)
+        await self.db.commit()
+        return True

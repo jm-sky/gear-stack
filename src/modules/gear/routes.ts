@@ -16,6 +16,8 @@ export const GearRouteName = {
   PublicItemDetail: 'gear-public-item-detail',
   ContainerShareTokens: 'gear-container-share-tokens',
   Settings: 'gear-settings',
+  CatalogueBrowser: 'gear-catalogue-browser',
+  CatalogueItemDetail: 'gear-catalogue-item-detail',
 }
 
 export const GearRoutePath = {
@@ -43,6 +45,9 @@ export const GearRoutePath = {
   ContainerShareTokens: '/gear/:id/share-tokens',
   ContainerShareTokensById: (id: string) => `/gear/${id}/share-tokens`,
   Settings: '/gear/settings',
+  CatalogueBrowser: '/gear/catalogue',
+  CatalogueItemDetail: '/gear/catalogue/:id',
+  CatalogueItemDetailById: (id: string) => `/gear/catalogue/${id}`,
 }
 
 export const gearRoutes: RouteRecordRaw[] = [
@@ -135,6 +140,18 @@ export const gearRoutes: RouteRecordRaw[] = [
     name: GearRouteName.Settings,
     component: () => import('@/pages/gear/GearSettingsPage.vue'),
     meta: { layout: 'authenticated', title: 'gear.settings.page.title' },
+  },
+  {
+    path: GearRoutePath.CatalogueBrowser,
+    name: GearRouteName.CatalogueBrowser,
+    component: () => import('@/modules/gear/pages/catalogue/CatalogueBrowserPage.vue'),
+    meta: { layout: 'authenticated', title: 'gear.catalogue.title' },
+  },
+  {
+    path: GearRoutePath.CatalogueItemDetail,
+    name: GearRouteName.CatalogueItemDetail,
+    component: () => import('@/modules/gear/pages/catalogue/CatalogueItemDetailPage.vue'),
+    meta: { layout: 'authenticated', title: 'gear.catalogue.itemDetail' },
   },
 ]
 

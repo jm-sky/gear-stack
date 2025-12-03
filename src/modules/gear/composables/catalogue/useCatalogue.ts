@@ -1,0 +1,188 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
+import { computed, ref } from 'vue'
+import { catalogueApiService } from '@/modules/gear/services/catalogueApiService'
+import type {
+  ICatalogueSearchParams,
+  IGlobalCatalogueItem,
+  IGlobalCatalogueItemCreate,
+  IGlobalCatalogueItemUpdate,
+} from '@/modules/gear/types/catalogue.types'
+import type { IGearItem } from '@/modules/gear/types/gear.types'
+import type { TUUID } from '@/shared/types/base.type'
+
+export function useCatalogue() {
+  const queryClient = useQueryClient()
+
+  // Search parameters
+  const searchParams = ref<ICatalogueSearchParams>({
+    query: null,
+    category: null,
+    brand: null,
+    priceTier: null,
+    quality: null,
+    isActive: true,
+    skip: 0,
+    limit: 100,
+  })
+
+  // ========== Queries ==========
+
+  const {
+    data: catalogueItems,
+    isLoading: isLoadingItems,
+    error: itemsError,
+    refetch: refetchItems,
+  } = useQuery({
+    queryKey: ['catalogue', 'items', searchParams],
+    queryFn: () => catalogueApiService.getCatalogueItems(searchParams.value),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+
+  const catalogueItemsArray = computed(() => catalogueItems.value ?? [])
+
+  // Get single catalogue item
+  const getCatalogueItem = (itemId: TUUID) => {
+    return useQuery({
+      queryKey: ['catalogue', 'item', itemId],
+      queryFn: () => catalogueApiService.getCatalogueItem(itemId),
+      staleTime: 5 * 60 * 1000,
+    })
+  }
+
+  // ========== Mutations ==========
+
+  // Create catalogue item
+  const createCatalogueItemMutation = useMutation({
+    mutationFn: (data: IGlobalCatalogueItemCreate) => catalogueApiService.createCatalogueItem(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['catalogue', 'items'] })
+    },
+  })
+
+  // Update catalogue item
+  const updateCatalogueItemMutation = useMutation({
+    mutationFn: ({ itemId, data }: { itemId: TUUID; data: IGlobalCatalogueItemUpdate }) =>
+      catalogueApiService.updateCatalogueItem(itemId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['catalogue', 'items'] })
+      queryClient.invalidateQueries({ queryKey: ['catalogue', 'item', variables.itemId] })
+    },
+  })
+
+  // Delete catalogue item (soft delete)
+  const deleteCatalogueItemMutation = useMutation({
+    mutationFn: (itemId: TUUID) => catalogueApiService.deleteCatalogueItem(itemId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['catalogue', 'items'] })
+    },
+  })
+
+  // Add catalogue item to container
+  const addToContainerMutation = useMutation({
+    mutationFn: ({
+      containerId,
+      catalogueItemId,
+      options,
+    }: {
+      containerId: TUUID
+      catalogueItemId: TUUID
+      options?: {
+        quantity?: number
+        status?: 'owned' | 'missing' | 'toBuy'
+        priority?: 'critical' | 'high' | 'medium' | 'low'
+      }
+    }) => catalogueApiService.addCatalogueItemToContainer(containerId, catalogueItemId, options),
+    onSuccess: () => {
+      // Invalidate gear items/containers queries
+      queryClient.invalidateQueries({ queryKey: ['gear'] })
+    },
+  })
+
+  // Unlink item from catalogue
+  const unlinkFromCatalogueMutation = useMutation({
+    mutationFn: (itemId: TUUID) => catalogueApiService.unlinkItemFromCatalogue(itemId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['gear'] })
+    },
+  })
+
+  // ========== Helper Methods ==========
+
+  const updateSearchParams = (params: Partial<ICatalogueSearchParams>) => {
+    searchParams.value = { ...searchParams.value, ...params }
+  }
+
+  const clearFilters = () => {
+    searchParams.value = {
+      query: null,
+      category: null,
+      brand: null,
+      priceTier: null,
+      quality: null,
+      isActive: true,
+      skip: 0,
+      limit: 100,
+    }
+  }
+
+  const createCatalogueItem = async (data: IGlobalCatalogueItemCreate): Promise<IGlobalCatalogueItem> => {
+    return await createCatalogueItemMutation.mutateAsync(data)
+  }
+
+  const updateCatalogueItem = async (
+    itemId: TUUID,
+    data: IGlobalCatalogueItemUpdate,
+  ): Promise<IGlobalCatalogueItem> => {
+    return await updateCatalogueItemMutation.mutateAsync({ itemId, data })
+  }
+
+  const deleteCatalogueItem = async (itemId: TUUID): Promise<void> => {
+    await deleteCatalogueItemMutation.mutateAsync(itemId)
+  }
+
+  const addCatalogueItemToContainer = async (
+    containerId: TUUID,
+    catalogueItemId: TUUID,
+    options?: {
+      quantity?: number
+      status?: 'owned' | 'missing' | 'toBuy'
+      priority?: 'critical' | 'high' | 'medium' | 'low'
+    },
+  ): Promise<IGearItem> => {
+    return await addToContainerMutation.mutateAsync({ containerId, catalogueItemId, options })
+  }
+
+  const unlinkItemFromCatalogue = async (itemId: TUUID): Promise<IGearItem> => {
+    return await unlinkFromCatalogueMutation.mutateAsync(itemId)
+  }
+
+  return {
+    // State
+    searchParams,
+    catalogueItems: catalogueItemsArray,
+    isLoadingItems,
+    itemsError,
+
+    // Queries
+    getCatalogueItem,
+    refetchItems,
+
+    // Mutations
+    createCatalogueItem,
+    updateCatalogueItem,
+    deleteCatalogueItem,
+    addCatalogueItemToContainer,
+    unlinkItemFromCatalogue,
+
+    // Mutation states
+    isCreating: computed(() => createCatalogueItemMutation.isPending.value),
+    isUpdating: computed(() => updateCatalogueItemMutation.isPending.value),
+    isDeleting: computed(() => deleteCatalogueItemMutation.isPending.value),
+    isAddingToContainer: computed(() => addToContainerMutation.isPending.value),
+    isUnlinking: computed(() => unlinkFromCatalogueMutation.isPending.value),
+
+    // Helpers
+    updateSearchParams,
+    clearFilters,
+  }
+}

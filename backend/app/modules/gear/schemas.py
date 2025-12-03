@@ -48,7 +48,10 @@ GearItemCategory = str  # Allows custom categories: 'water', 'food', 'shelter', 
 class ContainerCreate(BaseModel):
     """Schema for creating a new gear container."""
 
-    id: str | None = Field(None, description="Optional UUID for import/update workflow (when UUID is provided in markdown export)")
+    id: str | None = Field(
+        None,
+        description="Optional UUID for import/update workflow (when UUID is provided in markdown export)",
+    )
     name: str = Field(..., min_length=1, max_length=255)
     description: str | None = None
     type: GearContainerType
@@ -113,6 +116,7 @@ class ItemResponse(BaseModel):
     color: str | None = None
     quality: GearItemQuality | None = None
     linkedItemId: str | None = Field(None, alias="linkedItemId")
+    catalogueItemId: str | None = Field(None, alias="catalogueItemId")
     wearable: bool | None = None
     consumable: bool | None = None
     order: int | None = Field(None, ge=0)
@@ -145,13 +149,21 @@ class ContainerResponse(BaseModel):
     favorite: bool
     showItemImages: bool | None = Field(None, alias="showItemImages")
     authorName: str | None = None  # Only populated for public containers
-    authorId: str | None = Field(None, alias="authorId")  # Author user ID (only for public containers)
+    authorId: str | None = Field(
+        None, alias="authorId"
+    )  # Author user ID (only for public containers)
     items: list[ItemResponse] = []
     # Rating fields
     ownerRating: int | None = Field(None, alias="ownerRating")  # Owner's rating (1-5)
-    userRating: int | None = Field(None, alias="userRating")  # Current user's rating (if logged in)
-    averageUserRating: float | None = Field(None, alias="averageUserRating")  # Average of all user ratings
-    userRatingCount: int = Field(default=0, alias="userRatingCount")  # Number of user ratings
+    userRating: int | None = Field(
+        None, alias="userRating"
+    )  # Current user's rating (if logged in)
+    averageUserRating: float | None = Field(
+        None, alias="averageUserRating"
+    )  # Average of all user ratings
+    userRatingCount: int = Field(
+        default=0, alias="userRatingCount"
+    )  # Number of user ratings
     createdAt: datetime
     updatedAt: datetime
 
@@ -162,7 +174,10 @@ class ContainerResponse(BaseModel):
 class ItemCreate(BaseModel):
     """Schema for creating a new gear item."""
 
-    id: str | None = Field(None, description="Optional UUID for import/update workflow (when UUID is provided in markdown export)")
+    id: str | None = Field(
+        None,
+        description="Optional UUID for import/update workflow (when UUID is provided in markdown export)",
+    )
     name: str = Field(..., min_length=1, max_length=255)
     category: GearItemCategory
     quantity: int = Field(default=1, ge=1)
@@ -180,6 +195,7 @@ class ItemCreate(BaseModel):
     color: str | None = Field(None, max_length=50)
     quality: GearItemQuality | None = None
     linkedItemId: str | None = Field(None, alias="linkedItemId")
+    catalogueItemId: str | None = Field(None, alias="catalogueItemId")
     wearable: bool | None = Field(default=None)
     consumable: bool | None = Field(default=None)
     order: int | None = Field(None, ge=0)
@@ -208,6 +224,7 @@ class ItemUpdate(BaseModel):
     color: str | None = Field(None, max_length=50)
     quality: GearItemQuality | None = None
     linkedItemId: str | None = Field(None, alias="linkedItemId")
+    catalogueItemId: str | None = Field(None, alias="catalogueItemId")
     wearable: bool | None = None
     consumable: bool | None = None
     order: int | None = Field(None, ge=0)
@@ -226,7 +243,9 @@ class ItemOrderUpdate(BaseModel):
 class BatchOrderUpdateRequest(BaseModel):
     """Schema for batch updating items' order."""
 
-    items: list[ItemOrderUpdate] = Field(..., min_length=1, description="List of items with their new order values")
+    items: list[ItemOrderUpdate] = Field(
+        ..., min_length=1, description="List of items with their new order values"
+    )
 
     model_config = {"populate_by_name": True}
 
@@ -235,7 +254,9 @@ class BatchOrderUpdateRequest(BaseModel):
 class ShareTokenCreate(BaseModel):
     """Schema for creating a share token."""
 
-    expiresAt: datetime | None = Field(None, alias="expiresAt", description="Optional expiration timestamp")
+    expiresAt: datetime | None = Field(
+        None, alias="expiresAt", description="Optional expiration timestamp"
+    )
 
     model_config = {"populate_by_name": True}
 
@@ -245,8 +266,12 @@ class ShareTokenResponse(BaseModel):
 
     token: str = Field(..., description="Share token")
     containerId: str = Field(..., alias="containerId", description="Container ID")
-    expiresAt: datetime | None = Field(None, alias="expiresAt", description="Expiration timestamp if set")
-    createdAt: datetime = Field(..., alias="createdAt", description="Token creation timestamp")
+    expiresAt: datetime | None = Field(
+        None, alias="expiresAt", description="Expiration timestamp if set"
+    )
+    createdAt: datetime = Field(
+        ..., alias="createdAt", description="Token creation timestamp"
+    )
     shareUrl: str = Field(..., alias="shareUrl", description="Full share URL")
 
     model_config = {"populate_by_name": True}
@@ -257,7 +282,11 @@ class ContainerRatingCreate(BaseModel):
     """Schema for creating/updating container rating."""
 
     rating: int = Field(..., ge=1, le=5, description="Rating value from 1 to 5")
-    ratingType: RatingType = Field(default="user", alias="ratingType", description="Type of rating: 'owner' for owner rating, 'user' for user rating")
+    ratingType: RatingType = Field(
+        default="user",
+        alias="ratingType",
+        description="Type of rating: 'owner' for owner rating, 'user' for user rating",
+    )
 
     model_config = {"populate_by_name": True}
 
@@ -274,3 +303,75 @@ class ContainerRatingResponse(BaseModel):
     updatedAt: datetime = Field(alias="updatedAt")
 
     model_config = {"from_attributes": True, "populate_by_name": True}
+
+
+# Global Catalogue Schemas
+class GlobalCatalogueItemBase(BaseModel):
+    """Base schema for global catalogue items."""
+
+    name: str = Field(..., min_length=1, max_length=255)
+    category: GearItemCategory
+    weight: float = Field(..., gt=0)
+    weightUnit: GearWeightUnit = Field(default="g", alias="weightUnit")
+    description: str | None = None
+    brand: str | None = Field(None, max_length=255)
+    model: str | None = Field(None, max_length=255)
+    priceTier: Literal["low", "medium", "high"] | None = Field(None, alias="priceTier")
+    quality: GearItemQuality | None = None
+    url: str | None = None
+    color: str | None = Field(None, max_length=50)
+
+    model_config = {"populate_by_name": True}
+
+
+class GlobalCatalogueItemCreate(GlobalCatalogueItemBase):
+    """Schema for creating a global catalogue item."""
+
+    pass
+
+
+class GlobalCatalogueItemUpdate(BaseModel):
+    """Schema for updating a global catalogue item."""
+
+    name: str | None = Field(None, min_length=1, max_length=255)
+    category: GearItemCategory | None = None
+    weight: float | None = Field(None, gt=0)
+    weightUnit: GearWeightUnit | None = Field(None, alias="weightUnit")
+    description: str | None = None
+    brand: str | None = Field(None, max_length=255)
+    model: str | None = Field(None, max_length=255)
+    priceTier: Literal["low", "medium", "high"] | None = Field(None, alias="priceTier")
+    quality: GearItemQuality | None = None
+    url: str | None = None
+    color: str | None = Field(None, max_length=50)
+    isActive: bool | None = Field(None, alias="isActive")
+
+    model_config = {"populate_by_name": True}
+
+
+class GlobalCatalogueItemResponse(GlobalCatalogueItemBase):
+    """Schema for global catalogue item response."""
+
+    id: str
+    version: int
+    isActive: bool = Field(alias="isActive")
+    createdBy: str | None = Field(None, alias="createdBy")
+    createdAt: datetime = Field(alias="createdAt")
+    updatedAt: datetime = Field(alias="updatedAt")
+
+    model_config = {"from_attributes": True, "populate_by_name": True}
+
+
+class GlobalCatalogueItemSearchParams(BaseModel):
+    """Schema for catalogue item search parameters."""
+
+    query: str | None = None
+    category: GearItemCategory | None = None
+    brand: str | None = None
+    priceTier: Literal["low", "medium", "high"] | None = Field(None, alias="priceTier")
+    quality: GearItemQuality | None = None
+    isActive: bool | None = Field(True, alias="isActive")
+    skip: int = Field(0, ge=0)
+    limit: int = Field(100, ge=1, le=1000)
+
+    model_config = {"populate_by_name": True}

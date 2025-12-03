@@ -62,6 +62,7 @@ const emit = defineEmits<{
   reorder: [items: IGearItem[]]
   sortingChange: [items: IGearItem[]]
   update: [item: IGearItem]
+  unlinkFromCatalogue: [item: IGearItem]
 }>()
 
 const { t } = useI18n()
@@ -632,6 +633,7 @@ async function handleStarItem(item: IGearItem, newPriority: TGearItemPriority) {
           @recognize-parameters="emit('recognizeParameters', row.original)"
           @upload-photo="handleUploadPhoto"
           @star-item="handleStarItem"
+          @unlink-from-catalogue="emit('unlinkFromCatalogue', row.original)"
         />
       </div>
     </template>

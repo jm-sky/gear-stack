@@ -15,6 +15,7 @@ import ContainerHeader from '../components/ContainerHeader.vue'
 import ContainerItemImagesGallery from '../components/ContainerItemImagesGallery.vue'
 import ContainerRatingSection from '../components/ContainerRatingSection.vue'
 import SortConfirmationAlert from '../components/SortConfirmationAlert.vue'
+import { useCatalogue } from '../composables/catalogue/useCatalogue'
 import { useContainer } from '../composables/useContainer'
 import { useGear } from '../composables/useGear'
 import { useItemsParamRecognition } from '../composables/useItemsParamRecognition'
@@ -47,6 +48,7 @@ const { deleteItem, updateItem, updateContainer, createItem, getContainerById } 
 const { user, isAuthenticated } = useAuth()
 const { canUseAi } = useAi()
 const { setTitle } = usePageTitle()
+const { unlinkItemFromCatalogue } = useCatalogue()
 
 const containerId = route.params.id as string
 
@@ -149,6 +151,15 @@ const handleStatusChange = async (item: IGearItem, status: IGearItem['status']) 
   try {
     await updateItem(item.id, { status })
     toast.success(t('common.success'))
+  } catch {
+    toast.error(t('common.error'))
+  }
+}
+
+const handleUnlinkFromCatalogue = async (item: IGearItem) => {
+  try {
+    await unlinkItemFromCatalogue(item.id)
+    toast.success(t('gear.catalogue.unlinkedSuccess'))
   } catch {
     toast.error(t('common.error'))
   }
@@ -322,6 +333,7 @@ if (!container.value) {
         @recognize-parameters="handleRecognizeParameters"
         @reorder="handleReorder"
         @sorting-change="handleSortingChange"
+        @unlink-from-catalogue="handleUnlinkFromCatalogue"
       />
 
       <!-- Container Item Images Gallery -->

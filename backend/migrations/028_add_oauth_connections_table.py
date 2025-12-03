@@ -26,8 +26,8 @@ async def table_exists(conn, table_name: str) -> bool:
         text(
             """
             SELECT EXISTS (
-                SELECT FROM information_schema.tables 
-                WHERE table_schema = 'public' 
+                SELECT FROM information_schema.tables
+                WHERE table_schema = 'public'
                 AND table_name = :table_name
             );
         """
@@ -57,11 +57,11 @@ async def upgrade() -> None:
                         name VARCHAR(255),
                         avatar_url TEXT,
                         created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'UTC'),
-                        CONSTRAINT fk_oauth_connections_user 
-                            FOREIGN KEY (user_id) 
-                            REFERENCES users(id) 
+                        CONSTRAINT fk_oauth_connections_user
+                            FOREIGN KEY (user_id)
+                            REFERENCES users(id)
                             ON DELETE CASCADE,
-                        CONSTRAINT uq_oauth_connections_provider 
+                        CONSTRAINT uq_oauth_connections_provider
                             UNIQUE (provider, provider_id)
                     );
                 """
@@ -71,7 +71,7 @@ async def upgrade() -> None:
             await conn.execute(
                 text(
                     """
-                    CREATE INDEX IF NOT EXISTS ix_oauth_connections_user_id 
+                    CREATE INDEX IF NOT EXISTS ix_oauth_connections_user_id
                     ON oauth_connections(user_id);
                 """
                 )
@@ -79,7 +79,7 @@ async def upgrade() -> None:
             await conn.execute(
                 text(
                     """
-                    CREATE INDEX IF NOT EXISTS ix_oauth_connections_provider 
+                    CREATE INDEX IF NOT EXISTS ix_oauth_connections_provider
                     ON oauth_connections(provider, provider_id);
                 """
                 )

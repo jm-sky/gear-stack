@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowLeftIcon, PencilIcon } from 'lucide-vue-next'
+import { ArrowLeftIcon, ExternalLink, PencilIcon } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -81,6 +81,16 @@ const handleEdit = () => {
         <Badge v-if="item.consumable" variant="outline" class="text-xs">
           {{ t('gear.item.consumable') }}
         </Badge>
+        <ButtonLink
+          v-if="item.catalogueItemId"
+          :to="GearRoutePath.CatalogueItemDetailById(item.catalogueItemId)"
+          as="badge"
+          variant="secondary"
+          class="text-xs flex items-center gap-1 cursor-pointer hover:bg-secondary/80"
+        >
+          {{ t('gear.catalogue.fromCatalogue') }}
+          <ExternalLink class="size-3" />
+        </ButtonLink>
       </div>
     </div>
   </div>
