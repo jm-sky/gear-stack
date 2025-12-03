@@ -108,6 +108,11 @@ onMounted(async () => {
   await loadItem()
 })
 
+// Callback to refresh item after catalogue operations
+const handleItemUpdated = async () => {
+  await loadItem()
+}
+
 const { formattedWeight } = useFormattedItemWeight(item)
 const { formattedPrice } = useFormattedItemPrice(item)
 
@@ -148,7 +153,12 @@ const urlDomain = computed<string>(() => {
 
     <div v-else-if="item" class="w-full max-w-full space-y-6">
       <!-- Header -->
-      <ItemHeader :container-id :item-id :item />
+      <ItemHeader
+        :container-id
+        :item-id
+        :item
+        @item-updated="handleItemUpdated"
+      />
 
       <!-- Main Info -->
       <div class="grid grid-cols-1 gap-4 md:grid-cols-4">

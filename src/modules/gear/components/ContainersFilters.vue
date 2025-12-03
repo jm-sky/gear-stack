@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { RefreshCcw, Search } from 'lucide-vue-next'
+import { RefreshCcw } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import Button from '@/components/ui/button/Button.vue'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Input } from '@/components/ui/input'
+import SearchInput from '@/components/ui/input/SearchInput.vue'
 import { Label } from '@/components/ui/label'
 
 const { t } = useI18n()
@@ -25,16 +25,12 @@ const emit = defineEmits<{
 <template>
   <div class="flex flex-col gap-3">
     <div class="flex flex-row items-center gap-2">
-      <div class="relative flex-1">
-        <Search class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          id="container-search"
-          v-model="searchQuery"
-          name="container-search"
-          :placeholder="$t('gear.filters.searchContainers')"
-          class="pl-9"
-        />
-      </div>
+      <SearchInput
+        id="container-search"
+        v-model="searchQuery"
+        name="container-search"
+        :placeholder="$t('gear.filters.searchContainers')"
+      />
       <Button
         variant="ghost"
         size="sm"

@@ -1026,6 +1026,7 @@ async def add_catalogue_item_to_container(
     quantity: int = Query(1, ge=1, description="Item quantity"),
     status_param: str = Query("owned", description="Item status", alias="status"),
     priority: str = Query("medium", description="Item priority"),
+    copy_image: bool = Query(False, description="Copy image from catalogue item"),
 ) -> ItemResponse:
     """Add a catalogue item to a user's container.
 
@@ -1039,6 +1040,7 @@ async def add_catalogue_item_to_container(
         quantity: Item quantity
         status_param: Item status
         priority: Item priority
+        copy_image: Whether to copy images from catalogue item
         service: Gear service instance
 
     Returns:
@@ -1054,11 +1056,81 @@ async def add_catalogue_item_to_container(
         quantity=quantity,
         status=status_param,
         priority=priority,
+        copy_image=copy_image,
     )
     if not item:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Container or catalogue item not found",
+        )
+    return item
+
+
+@router.patch(
+    "/items/{item_id}/link-to-catalogue/{catalogue_item_id}",
+    response_model=ItemResponse,
+    summary="Link item to catalogue",
+)
+async def link_item_to_catalogue(
+    item_id: str,
+    catalogue_item_id: str,
+    current_user: CurrentUser,
+    service: GearServiceDep,
+) -> ItemResponse:
+    """Link an item to a catalogue item (set catalogue_item_id).
+
+    Args:
+        item_id: Item ID to link
+        catalogue_item_id: Catalogue item ID to link to
+        current_user: Authenticated user
+        service: Gear service instance
+
+    Returns:
+        Updated item
+
+    Raises:
+        HTTPException: If item or catalogue item not found, or user doesn't own the item
+    """
+    item = await service.link_item_to_catalogue(item_id, catalogue_item_id, current_user.id)
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Item or catalogue item not found, or you don't have permission to modify it",
+        )
+    return item
+
+
+@router.patch(
+    "/items/{item_id}/update-from-catalogue",
+    response_model=ItemResponse,
+    summary="Update item from catalogue",
+)
+async def update_item_from_catalogue(
+    item_id: str,
+    current_user: CurrentUser,
+    service: GearServiceDep,
+) -> ItemResponse:
+    """Update an item with data from its linked catalogue item.
+
+    Updates fields from catalogue while preserving user-specific fields
+    like quantity, status, priority, and notes.
+
+    Args:
+        item_id: Item ID to update
+        current_user: Authenticated user
+        service: Gear service instance
+
+    Returns:
+        Updated item
+
+    Raises:
+        HTTPException: If item not found, not linked to catalogue, or user doesn't own it
+    """
+    item = await service.update_item_from_catalogue(item_id, current_user.id)
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Item not found, not linked to catalogue, or you don't have permission to modify it",
         )
     return item
 

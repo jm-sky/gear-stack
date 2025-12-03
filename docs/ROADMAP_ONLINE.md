@@ -288,6 +288,43 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - ⏸️ "Odlinkowanie" przedmiotu (tworzenie kopii) - na razie nie implementowane (usuwanie = usunięcie z kontenera)
 - ⏸️ Zarządzanie referencjami - nie wymagane (uproszczona wersja)
 
+### 🔄 Pobierz obrazki z katalogu
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+
+**Koncepcja:**
+Akcja pozwalająca na pobranie obrazków z katalogu do przedmiotu, który jest już połączony z katalogiem (ma `catalogueItemId`). Obrazki z katalogu są kopiowane do galerii przedmiotu użytkownika.
+
+**Zakres implementacji:**
+- **Backend:**
+  - Endpoint `POST /gear/items/{item_id}/catalogue-images` do pobierania obrazków z katalogu
+  - Pobieranie obrazków powiązanych z `catalogueItemId` przedmiotu
+  - Kopiowanie obrazków z katalogu do storage użytkownika (S3 lub lokalny)
+  - Zachowanie kolejności obrazków z katalogu
+  - Ustawienie pierwszego obrazka jako primary (jeśli przedmiot nie ma jeszcze primary image)
+  - Walidacja: sprawdzanie czy przedmiot jest połączony z katalogiem
+
+- **Frontend:**
+  - Akcja "Pobierz obrazki z katalogu" w menu akcji przedmiotu (`ItemHeaderActions.vue`)
+  - Akcja widoczna tylko gdy przedmiot jest połączony z katalogiem (`isLinkedToCatalogue`)
+  - Umieszczenie akcji w dropdown menu pod innymi akcjami katalogu (po "Aktualizuj z katalogu", przed "Odłącz z katalogu")
+  - Loading state podczas pobierania obrazków
+  - Toast notification z potwierdzeniem sukcesu (liczba pobranych obrazków)
+  - Obsługa błędów (np. brak obrazków w katalogu, błąd pobierania)
+
+- **Edge cases:**
+  - Co jeśli przedmiot już ma obrazki? (dodanie do istniejących vs zastąpienie)
+  - Co jeśli obrazki z katalogu są już w przedmiocie? (pomijanie duplikatów)
+  - Limit liczby obrazków w galerii przedmiotu (max 10)
+
+**Zalety:**
+- Szybkie uzupełnienie galerii przedmiotu obrazkami z katalogu
+- Lepsze UX - automatyczne pobieranie obrazków zamiast ręcznego uploadu
+- Spójność z innymi akcjami katalogu (aktualizacja, odłącz)
+
+**Lokalizacja implementacji:**
+- `src/modules/gear/components/ItemHeaderActions.vue` (linie 53-88) - dodanie akcji w dropdown menu
+- `src/modules/gear/composables/catalogue/useCatalogue.ts` - dodanie funkcji `downloadImagesFromCatalogue`
+
 ### 🔄 Przenoszenie przedmiotów między kontenerami
 **Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium
 

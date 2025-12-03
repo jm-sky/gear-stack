@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ArrowLeftIcon, ExternalLink, PencilIcon } from 'lucide-vue-next'
-import { computed } from 'vue'
+import { ArrowLeftIcon, PencilIcon } from 'lucide-vue-next'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { Badge } from '@/components/ui/badge'
@@ -15,6 +15,9 @@ import { useCategoryLabel } from '../composables/useCategoryLabel'
 import { useExpiration } from '../composables/useExpiration'
 import { GearRoutePath } from '../routes'
 import { createNavigationQuery, getFrom } from '../utils/navigationParams'
+import FromCatalogueBadge from './catalogue/FromCatalogueBadge.vue'
+import MatchWithCatalogueDialog from './catalogue/MatchWithCatalogueDialog.vue'
+import ItemHeaderActions from './ItemHeaderActions.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -27,7 +30,13 @@ const { containerId, itemId, item } = defineProps<{
   item: IGearItem
 }>()
 
+const emit = defineEmits<{
+  itemUpdated: []
+}>()
+
 const { isExpired, isExpiringSoon } = useExpiration(item)
+
+const matchDialogOpen = ref(false)
 
 const backTo = computed<string>(() => {
   const from = getFrom(route)
@@ -54,11 +63,26 @@ const handleEdit = () => {
         {{ t('common.back') }}
       </ButtonLink>
 
-      <Button size="sm" @click="handleEdit">
-        <PencilIcon class="size-4" />
-        {{ t('common.edit') }}
-      </Button>
+      <div class="flex items-center justify-end gap-2">
+        <Button size="sm" @click="handleEdit">
+          <PencilIcon class="size-4" />
+          {{ t('common.edit') }}
+        </Button>
+
+        <ItemHeaderActions
+          v-model:match-dialog-open="matchDialogOpen"
+          :item="item"
+          @item-updated="emit('itemUpdated')"
+        />
+      </div>
     </div>
+
+    <!-- Match with Catalogue Dialog -->
+    <MatchWithCatalogueDialog
+      v-model:open="matchDialogOpen"
+      :item
+      @item-updated="emit('itemUpdated')"
+    />
 
     <div class="flex flex-col gap-2">
       <ItemHeaderName :item />
@@ -81,16 +105,10 @@ const handleEdit = () => {
         <Badge v-if="item.consumable" variant="outline" class="text-xs">
           {{ t('gear.item.consumable') }}
         </Badge>
-        <ButtonLink
+        <FromCatalogueBadge
           v-if="item.catalogueItemId"
-          :to="GearRoutePath.CatalogueItemDetailById(item.catalogueItemId)"
-          as="badge"
-          variant="secondary"
-          class="text-xs flex items-center gap-1 cursor-pointer hover:bg-secondary/80"
-        >
-          {{ t('gear.catalogue.fromCatalogue') }}
-          <ExternalLink class="size-3" />
-        </ButtonLink>
+          :catalogue-item-id="item.catalogueItemId"
+        />
       </div>
     </div>
   </div>

@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { RefreshCcw, Search, X } from 'lucide-vue-next'
+import { RefreshCcw, X } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Button from '@/components/ui/button/Button.vue'
 import { Input } from '@/components/ui/input'
+import SearchInput from '@/components/ui/input/SearchInput.vue'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import CategorySelect from '@/modules/gear/components/inputs/CategorySelect.vue'
@@ -47,16 +48,12 @@ const qualityOptions = computed(() => {
   <div class="flex flex-col gap-4">
     <!-- Search and Refresh Row -->
     <div class="flex flex-row items-center gap-2">
-      <div class="relative flex-1">
-        <Search class="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          id="catalogue-search"
-          v-model="searchQuery"
-          name="catalogue-search"
-          :placeholder="$t('gear.catalogue.searchPlaceholder')"
-          class="pl-9"
-        />
-      </div>
+      <SearchInput
+        id="catalogue-search"
+        v-model="searchQuery"
+        name="catalogue-search"
+        :placeholder="$t('gear.catalogue.searchPlaceholder')"
+      />
       <Button
         variant="ghost"
         size="sm"

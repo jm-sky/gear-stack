@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -23,13 +24,10 @@ import { GearRoutePath } from '../../routes'
 const { t } = useI18n()
 const router = useRouter()
 
-const props = defineProps<{
-  open: boolean
-  catalogueItem: IGlobalCatalogueItem
-}>()
+const open = defineModel<boolean>('open', { default: false })
 
-const emit = defineEmits<{
-  'update:open': [value: boolean]
+const props = defineProps<{
+  catalogueItem: IGlobalCatalogueItem
 }>()
 
 const { containers } = useGear()
@@ -40,26 +38,26 @@ const selectedContainerId = ref<string>('')
 const quantity = ref(1)
 const status = ref<TGearItemStatus>('owned')
 const priority = ref<TGearItemPriority>('medium')
+const copyImage = ref(false)
+const shouldRedirect = ref(false)
 
 const statuses: TGearItemStatus[] = ['owned', 'missing', 'toBuy']
 const priorities: TGearItemPriority[] = ['critical', 'high', 'medium', 'low']
 
 // Reset form when dialog opens
 watch(
-  () => props.open,
+  () => open.value,
   (isOpen) => {
     if (isOpen) {
       selectedContainerId.value = ''
       quantity.value = 1
       status.value = 'owned'
       priority.value = 'medium'
+      copyImage.value = false
+      shouldRedirect.value = false
     }
   },
 )
-
-const handleOpenChange = (open: boolean) => {
-  emit('update:open', open)
-}
 
 const handleConfirm = async () => {
   if (!selectedContainerId.value) return
@@ -72,36 +70,36 @@ const handleConfirm = async () => {
         quantity: quantity.value,
         status: status.value,
         priority: priority.value,
+        copyImage: copyImage.value,
       },
     )
 
     toast.success(t('gear.catalogue.addedToContainer'))
-    handleOpenChange(false)
+    open.value = false
 
     // Navigate to the container detail page
-    router.push(GearRoutePath.ContainerDetailById(selectedContainerId.value))
+    if (shouldRedirect.value) {
+      router.push(GearRoutePath.ContainerDetailById(selectedContainerId.value))
+    }
   } catch (error) {
     console.error('Failed to add catalogue item to container:', error)
     toast.error(t('common.error'))
   }
 }
 
-const isOpen = computed({
-  get: () => props.open,
-  set: (value) => handleOpenChange(value),
-})
-
 const canSubmit = computed(() => {
   return selectedContainerId.value && quantity.value > 0 && !isAddingToContainer.value
 })
+
+const hasImage = computed(() => !!props.catalogueItem.primaryImageUrl)
 </script>
 
 <template>
   <Teleport to="body">
     <div
-      v-if="isOpen"
+      v-if="open"
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-      @click="handleOpenChange(false)"
+      @click="open = false"
     >
       <div class="mx-4 w-[95vw] max-w-md rounded-lg border bg-card shadow-lg" @click.stop>
         <div class="space-y-4 p-6">
@@ -189,6 +187,28 @@ const canSubmit = computed(() => {
                 </SelectContent>
               </Select>
             </div>
+
+            <!-- Copy Image -->
+            <div class="flex items-center gap-2">
+              <Checkbox
+                id="should-redirect-to-container"
+                v-model="shouldRedirect"
+                :disabled="isAddingToContainer"
+              />
+              <Label for="should-redirect-to-container" class="text-sm font-normal cursor-pointer">
+                {{ t('gear.catalogue.shouldRedirectToContainer') }}
+              </Label>
+            </div>
+            <div v-if="hasImage" class="flex items-center gap-2">
+              <Checkbox
+                id="copy-image"
+                v-model="copyImage"
+                :disabled="isAddingToContainer"
+              />
+              <Label for="copy-image" class="text-sm font-normal cursor-pointer">
+                {{ t('gear.catalogue.copyImage') }}
+              </Label>
+            </div>
           </div>
 
           <!-- No containers message -->
@@ -198,7 +218,7 @@ const canSubmit = computed(() => {
 
           <!-- Actions -->
           <div class="flex justify-end gap-2 pt-4">
-            <Button variant="outline" :disabled="isAddingToContainer" @click="handleOpenChange(false)">
+            <Button variant="outline" :disabled="isAddingToContainer" @click="open = false">
               {{ t('gear.actions.cancel') }}
             </Button>
             <Button :disabled="!canSubmit" :loading="isAddingToContainer" @click="handleConfirm">

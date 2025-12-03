@@ -33,6 +33,7 @@ const defaultCategories = [
   'navigation',
   'communication',
   'clothing',
+  'container',
   'hygiene',
   'other',
 ] as const

@@ -1,4 +1,5 @@
 import {
+  Backpack,
   Compass,        // navigation
   Droplet,        // water
   Flame,          // fire
@@ -29,6 +30,7 @@ export const CATEGORY_ICONS: Record<string, Component> = {
   communication: Radio,
   clothing: Shirt,
   hygiene: Sparkles,
+  container: Backpack,
   other: Package,
 }
 

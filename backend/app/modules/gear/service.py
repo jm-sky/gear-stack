@@ -825,6 +825,7 @@ class GearService:
         quantity: int = 1,
         status: str = "owned",
         priority: str = "medium",
+        copy_image: bool = False,
     ) -> ItemResponse | None:
         """Add a catalogue item to a user's container.
 
@@ -838,6 +839,7 @@ class GearService:
             quantity: Item quantity (default: 1)
             status: Item status (default: "owned")
             priority: Item priority (default: "medium")
+            copy_image: Whether to copy images from catalogue item (default: False)
 
         Returns:
             Created item if successful, None otherwise
@@ -869,7 +871,173 @@ class GearService:
 
         # Create item
         created_item = await self.create_item(container_id, user_id, item_data)
+        if not created_item:
+            return None
+
+        # Copy images if requested
+        if copy_image:
+            await self._copy_catalogue_images_to_item(catalogue_item_id, created_item.id, user_id)
+
         return created_item
+
+    async def _copy_catalogue_images_to_item(
+        self,
+        catalogue_item_id: str,
+        item_id: str,
+        user_id: str,
+    ) -> None:
+        """Copy images from catalogue item to user item.
+
+        Args:
+            catalogue_item_id: Source catalogue item ID
+            item_id: Target item ID
+            user_id: User ID (owner of the target item)
+        """
+        from app.common.id_utils import generate_id
+        from app.modules.gear.catalogue_item_image_repository import (
+            CatalogueItemImageRepository,
+        )
+        from app.modules.gear.db_models import ItemImageDB
+
+        # Get catalogue images
+        catalogue_image_repo = CatalogueItemImageRepository(self.repository.db)
+        catalogue_images = await catalogue_image_repo.get_by_catalogue_item(catalogue_item_id)
+
+        if not catalogue_images:
+            return
+
+        # Copy each image
+        for idx, catalogue_image in enumerate(catalogue_images):
+            try:
+                # Download image from storage
+                image_content = await self._storage.download(catalogue_image.file_path)
+
+                # Create new file path for item image
+                # Extract extension from original filename
+                file_extension = ""
+                if "." in catalogue_image.file_name:
+                    file_extension = "." + catalogue_image.file_name.rsplit(".", 1)[1]
+                new_filename = f"{generate_id()}{file_extension}"
+                new_file_path = f"items/{item_id}/{new_filename}"
+
+                # Upload image to new location
+                await self._storage.upload(
+                    image_content,
+                    new_file_path,
+                    catalogue_image.mime_type,
+                    metadata={
+                        "item_id": item_id,
+                        "user_id": user_id,
+                        "copied_from_catalogue_image": catalogue_image.id,
+                    },
+                )
+
+                # Create ItemImageDB record
+                # Unset primary for other images if this is primary
+                if catalogue_image.is_primary:
+                    await self._image_repository.unset_primary_for_item(item_id)
+
+                # Get next order value
+                next_order = await self._image_repository.get_next_order(item_id)
+
+                new_image = ItemImageDB(
+                    id=generate_id(),
+                    item_id=item_id,
+                    user_id=user_id,
+                    storage_type=catalogue_image.storage_type,
+                    file_path=new_file_path,
+                    file_name=catalogue_image.file_name,
+                    file_size=catalogue_image.file_size,
+                    mime_type=catalogue_image.mime_type,
+                    width=catalogue_image.width,
+                    height=catalogue_image.height,
+                    is_primary=catalogue_image.is_primary,
+                    order=next_order,
+                    is_processed=catalogue_image.is_processed,
+                    original_file_size=catalogue_image.original_file_size,
+                )
+
+                self.repository.db.add(new_image)
+                await self.repository.db.commit()
+            except Exception as e:
+                logger.error(
+                    "Failed to copy image %s from catalogue item %s to item %s: %s",
+                    catalogue_image.id,
+                    catalogue_item_id,
+                    item_id,
+                    e,
+                )
+                # Continue copying other images even if one fails
+
+    async def update_item_from_catalogue(
+        self,
+        item_id: str,
+        user_id: str,
+    ) -> ItemResponse | None:
+        """Update an item with data from its linked catalogue item.
+
+        Updates fields from catalogue while preserving user-specific fields
+        like quantity, status, priority, and notes.
+
+        Args:
+            item_id: Item ID to update
+            user_id: User ID (must own the item)
+
+        Returns:
+            Updated item if successful, None otherwise
+        """
+        # Get user item
+        item = await self.repository.get_item(item_id, user_id)
+        if not item or not item.catalogue_item_id:
+            return None
+
+        # Get catalogue item
+        catalogue_item = await self.repository.get_catalogue_item(item.catalogue_item_id)
+        if not catalogue_item or not catalogue_item.is_active:
+            return None
+
+        # Update item with catalogue data (preserve user-specific fields)
+        update_data = ItemUpdate(  # type: ignore[call-arg]
+            name=catalogue_item.name,
+            category=catalogue_item.category,
+            weight=catalogue_item.weight,
+            weightUnit=cast(WeightUnit, catalogue_item.weight_unit),
+            brand=catalogue_item.brand,
+            color=catalogue_item.color,
+            url=catalogue_item.url,
+            # Preserve: quantity, status, priority, notes, expirationDate, etc.
+        )
+        return await self.update_item(item_id, user_id, update_data)
+
+    async def link_item_to_catalogue(
+        self,
+        item_id: str,
+        catalogue_item_id: str,
+        user_id: str,
+    ) -> ItemResponse | None:
+        """Link an item to a catalogue item (set catalogue_item_id).
+
+        Args:
+            item_id: Item ID to link
+            catalogue_item_id: Catalogue item ID to link to
+            user_id: User ID (must own the item)
+
+        Returns:
+            Updated item if successful, None otherwise
+        """
+        # Verify item belongs to user
+        item = await self.repository.get_item(item_id, user_id)
+        if not item:
+            return None
+
+        # Verify catalogue item exists and is active
+        catalogue_item = await self.repository.get_catalogue_item(catalogue_item_id)
+        if not catalogue_item or not catalogue_item.is_active:
+            return None
+
+        # Set catalogue_item_id
+        update_data = ItemUpdate(catalogueItemId=catalogue_item_id)  # type: ignore[call-arg]
+        return await self.update_item(item_id, user_id, update_data)
 
     async def unlink_item_from_catalogue(
         self,

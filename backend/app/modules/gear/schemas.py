@@ -5,9 +5,9 @@ using camelCase for JSON field names to match frontend conventions.
 """
 
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 # Type aliases matching frontend
@@ -296,16 +296,37 @@ class GlobalCatalogueItemBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
     category: GearItemCategory
     weight: float = Field(..., ge=0)
-    weightUnit: GearWeightUnit = Field(default="g", alias="weightUnit")
+    weightUnit: GearWeightUnit = Field(default="g", alias="weight_unit", serialization_alias="weightUnit")
     description: str | None = None
     brand: str | None = Field(None, max_length=255)
     model: str | None = Field(None, max_length=255)
-    priceTier: Literal["low", "medium", "high"] | None = Field(None, alias="priceTier")
+    priceTier: Literal["low", "medium", "high"] | None = Field(None, alias="price_tier", serialization_alias="priceTier")
     quality: GearItemQuality | None = None
     url: str | None = None
     color: str | None = Field(None, max_length=50)
 
     model_config = {"populate_by_name": True}
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate_price_tier_before(cls, data: Any) -> Any:
+        """Convert invalid price tier values to None before validation."""
+        if isinstance(data, dict):
+            # Handle both alias and field name
+            price_tier_value = data.get("price_tier") or data.get("priceTier")
+            if price_tier_value is not None:
+                if isinstance(price_tier_value, str):
+                    price_tier_lower = price_tier_value.lower()
+                    if price_tier_lower not in ("low", "medium", "high"):
+                        # Set invalid values to None
+                        if "price_tier" in data:
+                            data["price_tier"] = None
+                        if "priceTier" in data:
+                            data["priceTier"] = None
+                    elif "price_tier" in data and price_tier_lower != price_tier_value:
+                        # Normalize to lowercase
+                        data["price_tier"] = price_tier_lower
+        return data
 
 
 class GlobalCatalogueItemCreate(GlobalCatalogueItemBase):
@@ -320,11 +341,11 @@ class GlobalCatalogueItemUpdate(BaseModel):
     name: str | None = Field(None, min_length=1, max_length=255)
     category: GearItemCategory | None = None
     weight: float | None = Field(None, gt=0)
-    weightUnit: GearWeightUnit | None = Field(None, alias="weightUnit")
+    weightUnit: GearWeightUnit | None = Field(None, alias="weight_unit")
     description: str | None = None
     brand: str | None = Field(None, max_length=255)
     model: str | None = Field(None, max_length=255)
-    priceTier: Literal["low", "medium", "high"] | None = Field(None, alias="priceTier")
+    priceTier: Literal["low", "medium", "high"] | None = Field(None, alias="price_tier")
     quality: GearItemQuality | None = None
     url: str | None = None
     color: str | None = Field(None, max_length=50)
@@ -338,11 +359,11 @@ class GlobalCatalogueItemResponse(GlobalCatalogueItemBase):
 
     id: str
     version: int
-    isActive: bool = Field(alias="is_active")
-    createdBy: str | None = Field(None, alias="created_by")
-    createdAt: datetime = Field(alias="created_at")
-    updatedAt: datetime = Field(alias="updated_at")
-    primaryImageUrl: str | None = Field(None, alias="primaryImageUrl")
+    isActive: bool = Field(alias="is_active", serialization_alias="isActive")
+    createdBy: str | None = Field(None, alias="created_by", serialization_alias="createdBy")
+    createdAt: datetime = Field(alias="created_at", serialization_alias="createdAt")
+    updatedAt: datetime = Field(alias="updated_at", serialization_alias="updatedAt")
+    primaryImageUrl: str | None = Field(None, alias="primaryImageUrl", serialization_alias="primaryImageUrl")
 
     model_config = {"from_attributes": True, "populate_by_name": True}
 

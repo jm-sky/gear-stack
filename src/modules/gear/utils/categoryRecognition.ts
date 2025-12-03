@@ -61,9 +61,9 @@ export const CATEGORY_KEYWORDS: Record<TGearItemCategory, string[]> = {
   ],
   clothing: [
     // English
-    'clothing', 'clothes', 'jacket', 'pants', 'shirt', 'socks', 'boots', 'gloves', 'hat',
+    'clothing', 'clothes', 'jacket', 'pants', 'shirt', 'socks', 'boots', 'gloves', 'hat', 'poncho',
     // Polish
-    'odzież', 'ubranie', 'kurtka', 'spodnie', 'koszula', 'skarpety', 'buty', 'rękawice', 'czapka',
+    'odzież', 'ubranie', 'kurtka', 'spodnie', 'koszula', 'skarpety', 'buty', 'rękawice', 'czapka', 'płaszcz',
   ],
   hygiene: [
     // English
@@ -76,6 +76,12 @@ export const CATEGORY_KEYWORDS: Record<TGearItemCategory, string[]> = {
     'light', 'flashlight', 'torch', 'lamp', 'lantern', 'headlamp', 'headlight', 'illumination', 'led',
     // Polish
     'światło', 'latarka', 'lampa', 'lampion', 'reflektor', 'oświetlenie', 'świetlówka',
+  ],
+  container: [
+    // English
+    'container', 'box', 'bag', 'pouch', 'backpack', 'rucksack', 'sack',
+    // Polish
+    'kontener', 'skrzynka', 'torba', 'etui', 'plecak', 'tornister', 'worek', 'sakwa',
   ],
   other: [], // No keywords for "other" category
 }

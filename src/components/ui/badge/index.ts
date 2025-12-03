@@ -24,6 +24,8 @@ export const badgeVariants = cva(
           'text-success border-success [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
         'destructive-outline':
           'text-destructive border-destructive [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
+        'primary-outline':
+          'text-primary border-primary [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
       },
     },
     defaultVariants: {

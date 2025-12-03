@@ -1,6 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { computed, ref } from 'vue'
 import { catalogueApiService } from '@/modules/gear/services/catalogueApiService'
+import { gearContainerApiService } from '@/modules/gear/services/gearContainerApiService'
+import { gearContainerLocalService } from '@/modules/gear/services/gearContainerLocalService'
+import { useGearStore } from '@/modules/gear/store/useGearStore'
+import { useBackend } from '@/shared/composables/useBackend'
 import type {
   ICatalogueSearchParams,
   IGlobalCatalogueItem,
@@ -12,6 +16,7 @@ import type { TUUID } from '@/shared/types/base.type'
 
 export function useCatalogue() {
   const queryClient = useQueryClient()
+  const { shouldUseAPI } = useBackend()
 
   // Search parameters
   const searchParams = ref<ICatalogueSearchParams>({
@@ -90,19 +95,119 @@ export function useCatalogue() {
         quantity?: number
         status?: 'owned' | 'missing' | 'toBuy'
         priority?: 'critical' | 'high' | 'medium' | 'low'
+        copyImage?: boolean
       }
     }) => catalogueApiService.addCatalogueItemToContainer(containerId, catalogueItemId, options),
-    onSuccess: () => {
+    onSuccess: async (_, variables) => {
       // Invalidate gear items/containers queries
       queryClient.invalidateQueries({ queryKey: ['gear'] })
+
+      // Refresh container in Pinia store if using API
+      if (shouldUseAPI.value) {
+        try {
+          const container = await gearContainerApiService.getContainer(variables.containerId)
+          const store = useGearStore()
+          const existing = store.getContainerById(variables.containerId)
+          if (existing) {
+            store.updateContainer(container)
+          } else {
+            store.addContainer(container)
+          }
+        } catch (error) {
+          console.error('Failed to refresh container after adding catalogue item:', error)
+        }
+      }
+    },
+  })
+
+  // Link item to catalogue
+  const linkToCatalogueMutation = useMutation({
+    mutationFn: ({ itemId, catalogueItemId }: { itemId: TUUID; catalogueItemId: TUUID }) =>
+      catalogueApiService.linkItemToCatalogue(itemId, catalogueItemId),
+    onSuccess: async (_, variables) => {
+      // Invalidate gear items/containers queries
+      queryClient.invalidateQueries({ queryKey: ['gear'] })
+
+      // Refresh container in Pinia store if using API
+      if (shouldUseAPI.value) {
+        try {
+          const store = useGearStore()
+          // Find container that contains this item (including nested containers)
+          const itemWithContainer = gearContainerLocalService.getItemWithContainer(variables.itemId)
+
+          if (itemWithContainer?.containerId) {
+            const container = await gearContainerApiService.getContainer(itemWithContainer.containerId)
+            const existing = store.getContainerById(itemWithContainer.containerId)
+            if (existing) {
+              store.updateContainer(container)
+            } else {
+              store.addContainer(container)
+            }
+          }
+        } catch (error) {
+          console.error('Failed to refresh container after linking item to catalogue:', error)
+        }
+      }
+    },
+  })
+
+  // Update item from catalogue
+  const updateFromCatalogueMutation = useMutation({
+    mutationFn: (itemId: TUUID) => catalogueApiService.updateItemFromCatalogue(itemId),
+    onSuccess: async (_, itemId) => {
+      // Invalidate gear items/containers queries
+      queryClient.invalidateQueries({ queryKey: ['gear'] })
+
+      // Refresh container in Pinia store if using API
+      if (shouldUseAPI.value) {
+        try {
+          const store = useGearStore()
+          // Find container that contains this item (including nested containers)
+          const itemWithContainer = gearContainerLocalService.getItemWithContainer(itemId)
+
+          if (itemWithContainer?.containerId) {
+            const container = await gearContainerApiService.getContainer(itemWithContainer.containerId)
+            const existing = store.getContainerById(itemWithContainer.containerId)
+            if (existing) {
+              store.updateContainer(container)
+            } else {
+              store.addContainer(container)
+            }
+          }
+        } catch (error) {
+          console.error('Failed to refresh container after updating item from catalogue:', error)
+        }
+      }
     },
   })
 
   // Unlink item from catalogue
   const unlinkFromCatalogueMutation = useMutation({
     mutationFn: (itemId: TUUID) => catalogueApiService.unlinkItemFromCatalogue(itemId),
-    onSuccess: () => {
+    onSuccess: async (_, itemId) => {
+      // Invalidate gear items/containers queries
       queryClient.invalidateQueries({ queryKey: ['gear'] })
+
+      // Refresh container in Pinia store if using API
+      if (shouldUseAPI.value) {
+        try {
+          const store = useGearStore()
+          // Find container that contains this item (including nested containers)
+          const itemWithContainer = gearContainerLocalService.getItemWithContainer(itemId)
+
+          if (itemWithContainer?.containerId) {
+            const container = await gearContainerApiService.getContainer(itemWithContainer.containerId)
+            const existing = store.getContainerById(itemWithContainer.containerId)
+            if (existing) {
+              store.updateContainer(container)
+            } else {
+              store.addContainer(container)
+            }
+          }
+        } catch (error) {
+          console.error('Failed to refresh container after unlinking item from catalogue:', error)
+        }
+      }
     },
   })
 
@@ -147,9 +252,18 @@ export function useCatalogue() {
       quantity?: number
       status?: 'owned' | 'missing' | 'toBuy'
       priority?: 'critical' | 'high' | 'medium' | 'low'
+      copyImage?: boolean
     },
   ): Promise<IGearItem> => {
     return await addToContainerMutation.mutateAsync({ containerId, catalogueItemId, options })
+  }
+
+  const linkItemToCatalogue = async (itemId: TUUID, catalogueItemId: TUUID): Promise<IGearItem> => {
+    return await linkToCatalogueMutation.mutateAsync({ itemId, catalogueItemId })
+  }
+
+  const updateItemFromCatalogue = async (itemId: TUUID): Promise<IGearItem> => {
+    return await updateFromCatalogueMutation.mutateAsync(itemId)
   }
 
   const unlinkItemFromCatalogue = async (itemId: TUUID): Promise<IGearItem> => {
@@ -172,6 +286,8 @@ export function useCatalogue() {
     updateCatalogueItem,
     deleteCatalogueItem,
     addCatalogueItemToContainer,
+    linkItemToCatalogue,
+    updateItemFromCatalogue,
     unlinkItemFromCatalogue,
 
     // Mutation states
@@ -179,6 +295,8 @@ export function useCatalogue() {
     isUpdating: computed(() => updateCatalogueItemMutation.isPending.value),
     isDeleting: computed(() => deleteCatalogueItemMutation.isPending.value),
     isAddingToContainer: computed(() => addToContainerMutation.isPending.value),
+    isLinking: computed(() => linkToCatalogueMutation.isPending.value),
+    isUpdatingFromCatalogue: computed(() => updateFromCatalogueMutation.isPending.value),
     isUnlinking: computed(() => unlinkFromCatalogueMutation.isPending.value),
 
     // Helpers

@@ -84,6 +84,7 @@ export class CatalogueApiService {
       quantity?: number
       status?: TGearItemStatus
       priority?: TGearItemPriority
+      copyImage?: boolean
     },
   ): Promise<IGearItem> {
     const response = await apiClient.post<IGearItem>(
@@ -94,9 +95,29 @@ export class CatalogueApiService {
           quantity: options?.quantity ?? 1,
           status: options?.status ?? 'owned',
           priority: options?.priority ?? 'medium',
+          copy_image: options?.copyImage ?? false,
         },
       },
     )
+    return response.data
+  }
+
+  /**
+   * Link an item to a catalogue item (set catalogue_item_id)
+   * Requires authentication
+   */
+  async linkItemToCatalogue(itemId: TUUID, catalogueItemId: TUUID): Promise<IGearItem> {
+    const response = await apiClient.patch<IGearItem>(`/gear/items/${itemId}/link-to-catalogue/${catalogueItemId}`)
+    return response.data
+  }
+
+  /**
+   * Update an item with data from its linked catalogue item
+   * Updates fields from catalogue while preserving user-specific fields
+   * Requires authentication
+   */
+  async updateItemFromCatalogue(itemId: TUUID): Promise<IGearItem> {
+    const response = await apiClient.patch<IGearItem>(`/gear/items/${itemId}/update-from-catalogue`)
     return response.data
   }
 
