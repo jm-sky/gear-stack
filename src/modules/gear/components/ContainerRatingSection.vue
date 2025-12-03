@@ -3,15 +3,14 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useAuth } from '@/modules/auth/composables/useAuth'
 import { useBackend } from '@/shared/composables/useBackend'
 import type { IGearContainer, TRatingType, TRatingValue } from '../types/gear.types'
 import { useGear } from '../composables/useGear'
+import { useIsContainerOwner } from '../composables/useIsContainerOwner'
 import { gearContainerApiService } from '../services/gearContainerApiService'
 import ContainerRatingCard from './ContainerRatingCard.vue'
 
 const { t } = useI18n()
-const { user, isAuthenticated } = useAuth()
 const { shouldUseAPI } = useBackend()
 const { getContainerById } = useGear()
 
@@ -22,23 +21,8 @@ const props = defineProps<{
 // Rating state
 const isRatingLoading = ref(false)
 
-const isOwner = computed(() => {
-  if (!isAuthenticated.value || !user.value || !props.container) {
-    return false
-  }
-  // For public containers, check authorId
-  if (props.container.authorId) {
-    return props.container.authorId === user.value.id
-  }
-  // For private containers (no authorId), if we can access the container,
-  // it means we own it (backend handles authorization)
-  // For localStorage, all containers are considered owned by current user
-  return true
-})
-
-const isPublic = computed(() => {
-  return props.container?.isPublic ?? false
-})
+const isOwner = useIsContainerOwner(props.container, true)
+const isPublic = computed(() => props.container?.isPublic ?? false)
 
 const handleRate = async (rating: TRatingValue, type: TRatingType) => {
   if (!props.container) return
@@ -87,9 +71,9 @@ const handleDeleteRating = async (type: TRatingType) => {
 </script>
 
 <template>
-  <Card v-if="container && shouldUseAPI">
+  <Card v-if="container && shouldUseAPI" class="gap-4">
     <CardHeader>
-      <CardTitle>{{ t('gear.container.ratings') }}</CardTitle>
+      <CardTitle>{{ t('gear.container.averageUserRating') }}</CardTitle>
     </CardHeader>
     <CardContent>
       <ContainerRatingCard

@@ -185,6 +185,20 @@ const handleNameBlur = () => {
   }
 }
 
+// Auto-set consumable/wearable based on category (only for new items, not when editing)
+watch(
+  () => values.category,
+  (newCategory) => {
+    if (!isEditMode && newCategory) {
+      if (newCategory === 'food') {
+        setFieldValue('consumable', true)
+      } else if (newCategory === 'clothing') {
+        setFieldValue('wearable', true)
+      }
+    }
+  },
+)
+
 // Handle catalog item selection
 const handleCatalogItemSelect = (selectedItem: IItemWithContainer) => {
   // Pre-fill form with selected item data

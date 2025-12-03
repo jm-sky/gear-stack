@@ -49,7 +49,7 @@ function handleUserRatingChange(rating: TRatingValue | null) {
 <template>
   <div class="space-y-4">
     <!-- Owner Rating Section -->
-    <div v-if="isOwner" class="space-y-2">
+    <div v-if="isOwner" class="space-y-3">
       <div class="flex items-center justify-between">
         <label class="text-sm font-medium">
           {{ t('gear.container.ownerRating') }}
@@ -67,7 +67,7 @@ function handleUserRatingChange(rating: TRatingValue | null) {
     </div>
 
     <!-- User Rating Section -->
-    <div v-if="isPublic && !isOwner" class="space-y-2">
+    <div v-if="isPublic && !isOwner" class="space-y-3">
       <div class="flex items-center justify-between">
         <label class="text-sm font-medium">
           {{ t('gear.container.yourRating') }}
@@ -82,7 +82,7 @@ function handleUserRatingChange(rating: TRatingValue | null) {
     </div>
 
     <!-- Average User Rating Display -->
-    <div v-if="isPublic && userRatingCount > 0" class="space-y-2">
+    <div v-if="isPublic && userRatingCount > 0" class="space-y-3">
       <div class="flex items-center justify-between">
         <label class="text-sm font-medium">
           {{ t('gear.container.averageUserRating') }}

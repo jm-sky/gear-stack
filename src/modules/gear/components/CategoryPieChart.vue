@@ -13,7 +13,7 @@ import type { IGearContainer, IGearItem, TGearItemPriority } from '../types/gear
 import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
 import { usePieChartGeometry } from '../composables/usePieChartGeometry'
-import { calculateItemsByPriority, calculatePriceByCategory } from '../utils/containerCalculations'
+import { calculateItemsByPriority, calculatePriceByCategory, calculateWeightBreakdown } from '../utils/containerCalculations'
 import { getAllNestedContainers } from '../utils/containerNesting'
 import { formatCurrency, getCurrency } from '../utils/currencyFormatter'
 import CategoryPieChartLabels from './CategoryPieChartLabels.vue'
@@ -24,7 +24,7 @@ import type { ChartConfig } from '@/components/ui/chart'
 const VisDonut = defineAsyncComponent(() => import('@unovis/vue').then(m => m.VisDonut))
 const VisSingleContainer = defineAsyncComponent(() => import('@unovis/vue').then(m => m.VisSingleContainer))
 
-type ChartMode = 'weight' | 'quantity' | 'price' | 'priority'
+type ChartMode = 'weight' | 'quantity' | 'price' | 'priority' | 'weight-breakdown'
 
 interface CategoryData {
   category: string
@@ -61,6 +61,39 @@ const categoryData = computed<CategoryData[]>(() => {
   }
 
   const mode = chartMode.value
+
+  // Handle weight-breakdown mode
+  if (mode === 'weight-breakdown') {
+    const breakdown = calculateWeightBreakdown(props.container)
+    const total = breakdown.total
+
+    const breakdownData: CategoryData[] = [
+      {
+        category: 'base',
+        weight: breakdown.base,
+        quantity: 0,
+        percentage: total > 0 ? (breakdown.base / total) * 100 : 0,
+        value: breakdown.base,
+      },
+      {
+        category: 'worn',
+        weight: breakdown.worn,
+        quantity: 0,
+        percentage: total > 0 ? (breakdown.worn / total) * 100 : 0,
+        value: breakdown.worn,
+      },
+      {
+        category: 'consumable',
+        weight: breakdown.consumable,
+        quantity: 0,
+        percentage: total > 0 ? (breakdown.consumable / total) * 100 : 0,
+        value: breakdown.consumable,
+      },
+    ]
+
+    // Filter out categories with weight = 0
+    return breakdownData.filter(item => item.weight > 0)
+  }
 
   // Handle price mode
   if (mode === 'price') {
@@ -129,7 +162,7 @@ const categoryData = computed<CategoryData[]>(() => {
 
 const totalValue = computed(() => {
   const mode = chartMode.value
-  if (mode === 'weight') {
+  if (mode === 'weight' || mode === 'weight-breakdown') {
     return categoryData.value.reduce((sum, item) => sum + item.weight, 0)
   }
   if (mode === 'price') {
@@ -173,6 +206,17 @@ const chartConfig = computed<ChartConfig>(() => {
         label: t(`gear.item.priorities.${data.priority}`, data.priority),
         color: priorityColors[data.priority],
       }
+    } else if (mode === 'weight-breakdown') {
+      // Use fixed colors for weight-breakdown mode
+      const weightBreakdownColors: Record<string, string> = {
+        base: '#94a3b8', // slate-400 - lighter gray for base weight
+        worn: '#3b82f6', // blue-500
+        consumable: '#22c55e', // green-500
+      }
+      config[data.category] = {
+        label: t(`gear.weightBreakdown.${data.category}`, data.category),
+        color: weightBreakdownColors[data.category] ?? 'var(--muted-foreground)',
+      }
     } else {
       // Use category colors for other modes
       config[data.category] = {
@@ -204,7 +248,7 @@ const chartData = computed(() => {
 
   return dataWithLabels.map((data) => {
     let chartValue: number
-    if (mode === 'weight') {
+    if (mode === 'weight' || mode === 'weight-breakdown') {
       chartValue = data.weight
     } else if (mode === 'price') {
       chartValue = (data.price ?? 0) as number
@@ -261,7 +305,7 @@ const chartTooltipTriggers = computed(() => {
       // Pass raw numeric value - ChartTooltipContent will format it
       // The key must match the category in chartConfig for proper label translation
       let rawValue: number
-      if (mode === 'weight') {
+      if (mode === 'weight' || mode === 'weight-breakdown') {
         rawValue = data.weight ?? 0
       } else if (mode === 'price') {
         rawValue = (data.price ?? 0) as number
@@ -279,7 +323,7 @@ const chartTooltipTriggers = computed(() => {
 
 const valueFormatter = (value: number) => {
   const mode = chartMode.value
-  if (mode === 'weight') {
+  if (mode === 'weight' || mode === 'weight-breakdown') {
     return `${value.toFixed(2)} g`
   }
   if (mode === 'price') {
@@ -335,6 +379,13 @@ const valueFormatter = (value: number) => {
             @click="chartMode = 'priority'"
           >
             {{ t('gear.chart.byPriority', 'Priorytet') }}
+          </Button>
+          <Button
+            :variant="chartMode === 'weight-breakdown' ? 'default' : 'outline'"
+            size="sm"
+            @click="chartMode = 'weight-breakdown'"
+          >
+            {{ t('gear.chart.byWeightBreakdown', 'Podział wag') }}
           </Button>
         </div>
       </div>

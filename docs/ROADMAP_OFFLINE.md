@@ -852,6 +852,22 @@ Kombinacja opcji 1 i 2:
 - EDC: "Kieszeń max 500g"
 - Survival kit: "Zestaw przetrwania max 3kg"
 
+### ✅ Wizualizacja podziału wag (Other / Worn / Consumable)
+**Status:** ✅ Completed | **Priority:** High | **Complexity:** Medium | **Feature:** [FEATURE-027](./features/FEATURE-027-weight-breakdown-visualization.md) | **Version:** v2.29.0
+
+- ✅ Nowy tryb wykresu "weight-breakdown" w `CategoryPieChart.vue`
+- ✅ Funkcja `calculateWeightBreakdown()` kategoryzująca przedmioty według flag wearable/consumable
+- ✅ Wizualizacja podziału wag na trzy kategorie:
+  - ✅ **Inne** - przedmioty w plecaku (nie noszone ani zużywalne)
+  - ✅ **Noszone** - przedmioty noszone na sobie (wearable = true)
+  - ✅ **Zużywalna** - przedmioty zużywalne (consumable = true)
+- ✅ Priorytet kategoryzacji: consumable > worn > other (jeśli przedmiot ma obie flagi, traktowany jako consumable)
+- ✅ Kolory: Inne (slate-400), Noszone (blue-500), Zużywalna (green-500)
+- ✅ Obsługa tylko bezpośrednich przedmiotów kontenera (zagnieżdżone kontenery na razie nie uwzględniane)
+- ✅ Filtrowanie pustych kategorii (nie pokazywanie kategorii z wagą = 0)
+- ✅ Pełne wsparcie i18n (PL/EN) z opisowymi etykietami
+- ✅ Przycisk w wykresie: "Inne / Noszone / Zużywalna" / "Other / Worn / Consumable"
+
 ---
 
 ## 🛠️ Obsługa błędów i UX

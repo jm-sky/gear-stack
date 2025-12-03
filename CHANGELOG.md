@@ -21,6 +21,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.29.0] - 2025-12-03
+
+### Added
+- **Weight Breakdown Visualization**: New chart mode showing weight distribution by category (Other / Worn / Consumable)
+  - New `calculateWeightBreakdown()` function in `containerCalculations.ts` to categorize items by wearable/consumable flags
+  - Extended `CategoryPieChart` component with new `weight-breakdown` mode
+  - Visual breakdown showing: Other items (in pack), Worn items (on person), Consumable items
+  - Priority logic: consumable > worn > other (if item has both flags, treated as consumable)
+  - Color scheme: Other (slate-400), Worn (blue-500), Consumable (green-500)
+  - Full i18n support (PL/EN) with descriptive labels
+
+### Changed
+- **Chart Component**: Extended `CategoryPieChart` to support weight breakdown mode alongside existing modes (weight, quantity, price, priority)
+- **Chart Legend**: Updated `CategoryPieChartLegend` to display weight breakdown categories with proper translations
+- **Terminology**: Changed "Base Weight" to "Other" for better clarity (items not worn or consumable)
+
+---
+
 ## [2.28.0] - 2025-12-03
 
 ### Added

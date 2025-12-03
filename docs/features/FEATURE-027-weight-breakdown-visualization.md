@@ -1,6 +1,6 @@
 # FEATURE-027: Wizualizacja podziału wag (worn vs base vs consumable)
 
-**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium
+**Status:** ✅ Completed | **Priority:** High | **Complexity:** Medium | **Version:** v2.29.0
 **Category:** 📊 Wizualizacje / ⚖️ Kontrola wagi
 **Related Features:** [FEATURE-019](./FEATURE-019-extended-charts.md) - Extended Charts
 

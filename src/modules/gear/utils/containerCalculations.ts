@@ -193,3 +193,62 @@ export function calculateItemsByPriority(
   return result
 }
 
+/**
+ * Weight breakdown interface
+ */
+export interface WeightBreakdown {
+  base: number      // Other items weight in grams (not worn or consumable)
+  worn: number      // Worn weight in grams
+  consumable: number // Consumable weight in grams
+  total: number     // Total weight in grams
+}
+
+/**
+ * Calculate weight breakdown for a container
+ * Categorizes items by wearable/consumable flags
+ * Priority: consumable > worn > other (if item has both flags, treat as consumable)
+ * @param container - Container to calculate breakdown for
+ * @param allContainers - All containers (for nested container calculations - not used for now)
+ * @returns Weight breakdown with other, worn, consumable weights
+ */
+export function calculateWeightBreakdown(container: IGearContainer): WeightBreakdown {
+  let baseWeight = 0
+  let wornWeight = 0
+  let consumableWeight = 0
+
+  // Add container's own weight to other category (if set)
+  if (isSet(container.weight) && isSet(container.weightUnit)) {
+    const containerWeight = convertToGrams(container.weight, container.weightUnit)
+    baseWeight += containerWeight
+  }
+
+  // Process direct items only (no nested containers for now)
+  for (const item of container.items) {
+    // Skip nested containers for now
+    if (item.containerId) {
+      continue
+    }
+
+    const itemWeight = convertToGrams(item.weight, item.weightUnit ?? 'g') * item.quantity
+
+    // Categorize by wearable/consumable flags
+    // Priority: consumable > worn > base
+    if (item.consumable) {
+      consumableWeight += itemWeight
+    } else if (item.wearable) {
+      wornWeight += itemWeight
+    } else {
+      baseWeight += itemWeight
+    }
+  }
+
+  const total = baseWeight + wornWeight + consumableWeight
+
+  return {
+    base: baseWeight,
+    worn: wornWeight,
+    consumable: consumableWeight,
+    total,
+  }
+}
+

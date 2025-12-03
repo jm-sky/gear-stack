@@ -93,7 +93,7 @@ export function usePieChartGeometry(options: UsePieChartGeometryOptions = {}) {
 
   const calculateLabelPositions = (
     categoryData: readonly CategoryData[],
-    mode: 'weight' | 'quantity' | 'price' | 'priority',
+    mode: 'weight' | 'quantity' | 'price' | 'priority' | 'weight-breakdown',
   ): ChartDataPoint[] => {
     const geometry = chartGeometry.value
     let currentAngle = -90 // Start from top (12 o'clock)
@@ -106,7 +106,7 @@ export function usePieChartGeometry(options: UsePieChartGeometryOptions = {}) {
 
     return categoryData.map((data) => {
       let value: number
-      if (mode === 'weight') {
+      if (mode === 'weight' || mode === 'weight-breakdown') {
         value = data.weight
       } else if (mode === 'price') {
         value = data.price ?? 0

@@ -17,6 +17,7 @@ import { formatWeight } from '../utils/formatWeight'
 import { isSet } from '../utils/helpers'
 import ContainerHeaderName from './ContainerHeaderName.vue'
 import ContainerHeaderStats from './ContainerHeaderStats.vue'
+import ContainerRatingBadge from './ContainerRatingBadge.vue'
 import FavoriteContainerButton from './FavoriteContainerButton.vue'
 import ItemsTableEditModeToggle from './ItemsTableEditModeToggle.vue'
 import MarkdownRenderer from './MarkdownRenderer.vue'
@@ -157,6 +158,7 @@ const handleBack = () => {
               {{ formatWeight(container.weight, container.weightUnit) }}
             </Badge>
             <WeightLimitBadge :container />
+            <ContainerRatingBadge :container />
             <ExternalLink
               v-if="container.url"
               :href="container.url"

@@ -10,6 +10,7 @@ import { useAuth } from '@/modules/auth/composables/useAuth'
 import { smallDateTime } from '@/shared/utils/smallDateTime'
 import type { IGearContainer } from '../types/gear.types'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
+import { useIsContainerOwner } from '../composables/useIsContainerOwner'
 import { GearRoutePath } from '../routes'
 import { getActionIcon } from '../utils/actionIcons'
 import MarkdownRenderer from './MarkdownRenderer.vue'
@@ -26,18 +27,13 @@ const emit = defineEmits<{
 
 const router = useRouter()
 const { t } = useI18n()
-const { user, isAuthenticated } = useAuth()
+const { isAuthenticated } = useAuth()
 const { typeLabel } = useContainerTypeLabel(computed(() => props.container.type))
 
 const EditIcon = getActionIcon('edit')
 
 // Check if current user is the author
-const isAuthor = computed(() => {
-  if (!isAuthenticated.value || !user.value || !props.container.authorId) {
-    return false
-  }
-  return props.container.authorId === user.value.id
-})
+const isAuthor = useIsContainerOwner(props.container, false)
 
 const handleBack = () => {
   if (props.backPath) {

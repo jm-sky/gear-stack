@@ -17,7 +17,7 @@ interface CategoryData {
 interface Props {
   categoryData: CategoryData[]
   chartConfig: ChartConfig
-  chartMode: 'weight' | 'quantity' | 'price' | 'priority'
+  chartMode: 'weight' | 'quantity' | 'price' | 'priority' | 'weight-breakdown'
   totalValue: number
 }
 
@@ -49,6 +49,9 @@ const { defaultCurrency } = useGearSettings()
             <template v-if="chartMode === 'priority' && data.priority">
               {{ t(`gear.item.priorities.${data.priority}`, data.priority) }}
             </template>
+            <template v-else-if="chartMode === 'weight-breakdown'">
+              {{ t(`gear.weightBreakdown.${data.category}`, data.category) }}
+            </template>
             <template v-else>
               {{ t(`gear.item.categories.${data.category}`, data.category) }}
             </template>
@@ -57,7 +60,7 @@ const { defaultCurrency } = useGearSettings()
         <div class="text-sm text-muted-foreground shrink-0">
           <span class="font-semibold">{{ data.percentage.toFixed(1) }}%</span>
           <span class="ml-2">
-            <template v-if="chartMode === 'weight'">
+            <template v-if="chartMode === 'weight' || chartMode === 'weight-breakdown'">
               ({{ data.weight.toFixed(2) }} g)
             </template>
             <template v-else-if="chartMode === 'price' && data.price != null">
@@ -74,7 +77,7 @@ const { defaultCurrency } = useGearSettings()
       <div class="flex flex-row items-center justify-between gap-2">
         {{ t('gear.chart.total', 'Łącznie') }}:
         <span class="font-semibold">
-          <template v-if="chartMode === 'weight'">
+          <template v-if="chartMode === 'weight' || chartMode === 'weight-breakdown'">
             {{ totalValue.toFixed(2) }} g
           </template>
           <template v-else-if="chartMode === 'price'">
