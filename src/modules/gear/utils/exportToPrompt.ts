@@ -19,6 +19,7 @@ interface ExportOptions {
   showNestedContainer?: boolean // Whether to show nested container reference [#id] (default: true)
   showLegend?: boolean // Whether to show legend at the end (default: true)
   showPrices?: boolean // Whether to show prices in export (default: false)
+  showNotes?: boolean // Whether to show notes/descriptions in export (default: true)
   descriptionFormat?: 'off' | 'inline' | 'newline' // Description format (default: 'off')
   defaultCurrency?: string // Default currency to use when item/container doesn't have currency
 }
@@ -46,6 +47,17 @@ function generateContainerId(name: string): string {
 }
 
 /**
+ * Format notes as indented block (for newline format)
+ * Preserves Markdown and multiline structure
+ */
+function formatNotesAsIndentedBlock(notes: string, indent: number): string {
+  const indentStr = '  '.repeat(indent)
+  const noteIndent = '  ' // 2 spaces for note indentation
+  const lines = notes.split('\n')
+  return lines.map(line => `${indentStr}${noteIndent}${line}`).join('\n')
+}
+
+/**
  * Format item for markdown export (compact format)
  */
 function formatItem(
@@ -61,7 +73,8 @@ function formatItem(
   parts.push(`**${item.name}**`)
 
   // Description in inline format (immediately after name, before other fields)
-  if (item.notes && options.descriptionFormat === 'inline') {
+  // Only if showNotes is true (default: true) and descriptionFormat is inline
+  if (item.notes && options.showNotes !== false && options.descriptionFormat === 'inline') {
     parts.push(`*(${item.notes})*`)
   }
 
@@ -154,7 +167,8 @@ function formatItem(
   }
 
   // For newline format, split the line: name + metadata on first line, description alone on second line
-  if (item.notes && options.descriptionFormat === 'newline') {
+  // Only if showNotes is true (default: true) and descriptionFormat is newline
+  if (item.notes && options.showNotes !== false && options.descriptionFormat === 'newline') {
     const namePart = `**${item.name}**`
 
     // Build first line with name and all metadata EXCEPT description and weight
@@ -244,8 +258,9 @@ function formatItem(
       firstLineParts.push(`- ${formattedPrice}`)
     }
 
-    // Build output: first line with name and metadata, second line with description only
-    return `${indentStr}- ${firstLineParts.join(' ')}\n${indentStr}  *${item.notes}*`
+    // Build output: first line with name and metadata, notes as indented block below
+    const formattedNotes = formatNotesAsIndentedBlock(item.notes, indent)
+    return `${indentStr}- ${firstLineParts.join(' ')}\n${formattedNotes}`
   }
 
   return `${indentStr}- ${parts.join(' ')}`
@@ -282,6 +297,12 @@ function formatNestedContainer(
   }
 
   lines.push(headerParts.join(' '))
+
+  // Add container description as indented block (if showNotes is enabled)
+  if (container.description && options.showNotes !== false) {
+    const formattedDescription = formatNotesAsIndentedBlock(container.description, indent)
+    lines.push(formattedDescription)
+  }
 
   // Container items
   if (container.items.length === 0) {
@@ -426,6 +447,12 @@ export function exportContainerToPrompt(
   }
 
   lines.push(containerHeaderParts.join(' '))
+
+  // Add container description as indented block (if showNotes is enabled)
+  if (container.description && options.showNotes !== false) {
+    const formattedDescription = formatNotesAsIndentedBlock(container.description, 0)
+    lines.push(formattedDescription)
+  }
 
   // Collect nested containers to show separately
   const nestedContainers: Array<{ item: IGearItem; container: IGearContainer }> = []

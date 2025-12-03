@@ -48,6 +48,7 @@ const showBrand = ref(true)
 const showNestedContainer = ref(true)
 const showLegend = ref(true)
 const showPrices = ref(false)
+const showNotes = ref(true)
 const descriptionFormat = ref<'off' | 'inline' | 'newline'>('off')
 
 // Get container type label helper
@@ -78,6 +79,7 @@ const markdown = computed<string>(() => {
     showNestedContainer: showNestedContainer.value,
     showLegend: showLegend.value,
     showPrices: showPrices.value,
+    showNotes: showNotes.value,
     descriptionFormat: descriptionFormat.value,
     defaultCurrency: defaultCurrency.value,
   }
@@ -168,6 +170,12 @@ const handleOpenGuidelines = () => {
             <Checkbox id="showPrices" v-model="showPrices" />
             <Label for="showPrices" class="text-sm font-normal cursor-pointer">
               {{ t('gear.export.showPrices', 'Show prices') }}
+            </Label>
+          </div>
+          <div class="flex items-center space-x-2">
+            <Checkbox id="showNotes" v-model="showNotes" />
+            <Label for="showNotes" class="text-sm font-normal cursor-pointer">
+              {{ t('gear.export.showNotes', 'Show notes/descriptions') }}
             </Label>
           </div>
         </div>

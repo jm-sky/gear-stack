@@ -347,6 +347,53 @@ class MarkdownImportService {
             customBrands: options?.customBrands,
           })
           if (item) {
+            // Collect indented lines (notes) after the item line
+            const noteLines: string[] = []
+            let j = i + 1
+            while (j < lines.length) {
+              const nextLine = lines[j]
+              if (!nextLine) {
+                // Empty line - keep it in notes
+                noteLines.push('')
+                j++
+                continue
+              }
+
+              // Check if line starts with exactly 2 spaces (indented note)
+              if (nextLine.startsWith('  ') && !nextLine.startsWith('   ')) {
+                // Remove the 2-space indent and add to notes
+                const noteLine = nextLine.substring(2)
+                noteLines.push(noteLine)
+                j++
+                continue
+              }
+
+              // Stop if we encounter another item or container
+              const trimmedNextLine = nextLine.trim()
+              if (trimmedNextLine.startsWith('- ') || trimmedNextLine.startsWith('## ')) {
+                break
+              }
+
+              // If line doesn't start with 2 spaces, it's not a note
+              break
+            }
+
+            // Join note lines and set as item notes (if any)
+            // Indented lines take priority over inline *(text)* format
+            if (noteLines.length > 0) {
+              // Remove trailing empty lines but preserve empty lines in the middle
+              while (noteLines.length > 0 && noteLines[noteLines.length - 1] === '') {
+                noteLines.pop()
+              }
+              const notes = noteLines.join('\n')
+              if (notes.trim()) {
+                item.notes = notes
+              }
+              // Skip the lines we've processed
+              i = j - 1
+            }
+            // If no indented lines found, keep notes from parseItemLine (*(text)* format as fallback)
+
             currentContainer.items.push(item)
           }
         } catch (error) {
