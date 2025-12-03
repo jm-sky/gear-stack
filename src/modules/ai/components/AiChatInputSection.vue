@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { BackpackIcon, CheckIcon, SendIcon, XIcon } from 'lucide-vue-next'
+import { SendIcon } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import Button from '@/components/ui/button/Button.vue'
+import OnOffButton from '@/components/ui/button/OnOffButton.vue'
 
 const { t } = useI18n()
 
@@ -45,18 +46,10 @@ const handleKeyDown = (event: KeyboardEvent): void => {
           <div class="flex flex-row gap-2 items-center">
             <!-- Actions -->
             <!-- Context toggle (only show when containerIds are provided) -->
-            <Button
-              v-tooltip="t('ai.chat.includeContainerData.tooltip')"
-              :variant="includeContainerData ? 'default' : 'outline'"
-              size="sm"
-              class="group rounded-full"
-              @click="includeContainerData = !includeContainerData"
-            >
-              <BackpackIcon class="size-4 group-hover:hidden" />
-              <XIcon v-if="includeContainerData" class="size-4 hidden group-hover:block" />
-              <CheckIcon v-else class="size-4 hidden group-hover:block" />
-              {{ t('ai.chat.includeContainerData.label') }}
-            </Button>
+            <OnOffButton
+              v-model:on="includeContainerData"
+              :label="t('ai.chat.includeContainerData.label')"
+            />
           </div>
           <div class="flex flex-row gap-2 items-center justify-end">
             <Button

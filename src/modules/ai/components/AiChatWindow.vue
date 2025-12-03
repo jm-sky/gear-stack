@@ -73,23 +73,25 @@ const onTemplatePrompt = (prompt: string) => {
 <template>
   <div class="flex flex-col h-full">
     <!-- Header with model selector -->
-    <DialogTitle class="flex items-center justify-between border-b p-4">
+    <DialogTitle class="flex items-center justify-between gap-2 border-b p-4">
       <h2 class="text-lg font-semibold">
         {{ t('ai.chat.title') }}
       </h2>
-      <div class="flex items-center gap-2 -my-1">
-        <AiModelSelector />
-        <Button
-          :variant="showContextConfig ? 'default' : 'outline'"
-          size="sm"
-          @click="showContextConfig = !showContextConfig"
-        >
-          <Settings class="size-4" />
-          {{ t('ai.chat.context') }}
-        </Button>
-        <Button variant="ghost" size="sm" @click="clearMessages">
-          <Trash2 class="size-4" />
-        </Button>
+      <div class="flex flex-col md:flex-row items-center gap-2 -my-1">
+        <div class="hidden md:flex flex-row items-center gap-2">
+          <AiModelSelector />
+          <Button
+            :variant="showContextConfig ? 'default' : 'outline'"
+            size="sm"
+            @click="showContextConfig = !showContextConfig"
+          >
+            <Settings class="size-4" />
+            {{ t('ai.chat.context') }}
+          </Button>
+          <Button variant="ghost" size="sm" @click="clearMessages">
+            <Trash2 class="size-4" />
+          </Button>
+        </div>
         <Button variant="ghost" size="sm" @click="emit('close')">
           <X class="size-4" />
         </Button>
@@ -100,8 +102,8 @@ const onTemplatePrompt = (prompt: string) => {
     <AiContextConfig v-if="showContextConfig" />
 
     <!-- Messages -->
-    <div class="relative flex-1 overflow-y-auto p-4 space-y-4">
-      <div v-if="!hasMessages" class="absolute bottom-0 left-0 w-full text-sm z-10 flex gap-4 px-4">
+    <div class="relative flex-1 overflow-y-auto p-2 md:p-4 space-y-4">
+      <div v-if="!hasMessages" class="absolute bottom-0 left-0 w-full text-xs z-10 flex flex-nowrap whitespace-nowrap gap-4 px-4 overflow-x-auto">
         <AiChatTemplateMsgButton variant="whatsUnnecessary" @prompt="onTemplatePrompt" />
         <AiChatTemplateMsgButton variant="whatsNeeded" @prompt="onTemplatePrompt" />
         <AiChatTemplateMsgButton variant="addRandomItem" @prompt="onTemplatePrompt" />
