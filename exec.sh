@@ -118,7 +118,7 @@ fi
 if [ $# -eq 0 ]; then
   CMD_ARGS=("python" "-m" "cli")
 else
-  CMD_ARGS=("$@")
+  CMD_ARGS=("python" "-m" "cli" "$@")
 fi
 
 # Execute command in container

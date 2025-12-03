@@ -496,7 +496,7 @@ def seed_database(
 
 
 async def _seed_catalogue(db) -> None:
-    """Seed catalogue items, updating existing items by name."""
+    """Seed catalogue items, updating existing items by id."""
     from app.modules.gear.db_models import CatalogueItemImageDB, GlobalCatalogueItemDB
     from app.seeders import CATALOGUE_ITEM_IMAGES, CATALOGUE_ITEMS
     from sqlalchemy import select
@@ -505,14 +505,20 @@ async def _seed_catalogue(db) -> None:
 
     console.print("[bold cyan]Seeding catalogue items...[/bold cyan]")
 
-    # Create system user for seeded items (use first admin or create placeholder)
+    # Create system user for seeded items (use first owner, or admin if no owner, or create placeholder)
     from app.modules.auth.db_models import UserDB
 
-    result = await db.execute(select(UserDB).where(UserDB.is_admin == True).limit(1))
-    admin_user = result.scalar_one_or_none()
+    # First try to find an owner
+    result = await db.execute(select(UserDB).where(UserDB.is_owner == True).limit(1))
+    user = result.scalar_one_or_none()
 
-    if not admin_user:
-        console.print("[yellow]No admin user found. Creating placeholder 'system' user...[/yellow]")
+    # If no owner, fall back to admin
+    if not user:
+        result = await db.execute(select(UserDB).where(UserDB.is_admin == True).limit(1))
+        user = result.scalar_one_or_none()
+
+    if not user:
+        console.print("[yellow]No owner or admin user found. Creating placeholder 'system' user...[/yellow]")
         system_user = UserDB(
             email="system@gearstack.local",
             is_admin=True,
@@ -523,38 +529,37 @@ async def _seed_catalogue(db) -> None:
         await db.refresh(system_user)
         creator_id = str(system_user.id)
     else:
-        creator_id = str(admin_user.id)
+        creator_id = str(user.id)
 
-    # Get existing items by name for quick lookup
+    # Get existing items by id for quick lookup
     result = await db.execute(select(GlobalCatalogueItemDB))
-    existing_items = {item.name: item for item in result.scalars().all()}
+    existing_items = {item.id: item for item in result.scalars().all()}
 
     created_count = 0
     updated_count = 0
     images_count = 0
 
     for item_data in CATALOGUE_ITEMS:
-        item_name = item_data.get("name")
-        if not item_name or not isinstance(item_name, str):
-            console.print("[yellow]Skipping item without name[/yellow]")
+        item_id = item_data.get("id")
+        if not item_id or not isinstance(item_id, str):
+            console.print("[yellow]Skipping item without id[/yellow]")
             continue
 
-        # Check if item exists by name
-        existing_item = existing_items.get(item_name)
+        item_name = item_data.get("name")
+
+        # Check if item exists by id
+        existing_item = existing_items.get(item_id)
 
         if existing_item:
             # Update existing item
             for key, value in item_data.items():
-                if key != "name":  # Don't update name as it's the unique key
+                if key != "id":  # Don't update id as it's the primary key
                     setattr(existing_item, key, value)
             existing_item.updated_at = datetime.now(UTC)
             updated_count += 1
-            item_id = existing_item.id
         else:
             # Create new item
-            item_id = str(ULID())
             catalogue_item = GlobalCatalogueItemDB(
-                id=item_id,
                 **item_data,
                 created_by=creator_id,
             )
@@ -562,7 +567,7 @@ async def _seed_catalogue(db) -> None:
             created_count += 1
 
         # Handle images - check if image already exists for this item
-        if item_name in CATALOGUE_ITEM_IMAGES:
+        if item_name and item_name in CATALOGUE_ITEM_IMAGES:
             image_filename: str = CATALOGUE_ITEM_IMAGES[item_name]
             source_path = Path(__file__).parent.parent.parent / "images" / "global-catalogue" / image_filename
 

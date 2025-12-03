@@ -11,11 +11,28 @@ CATALOGUE_ITEM_IMAGES = {
     "Black Diamond Storm Headlamp": "black_diamond_storm_450.jpg",
     "Fenix PD35 V3.0": "fenix_pd35v3_flashlight.webp",
     "Anker PowerCore 20100": "anker_powercore_20100.png",
+    "Fiskars X7": "fiskars-x7.png",
+    "Leatherman Wave+": "leatherman-wave-plus.png",
+    "Leatherman Blast": "leatherman-blast.png",
+    "Gorilla Tape": "gorilla-tape.png",
+    "BAHCO 396-LAP": "bahco-laplander.jpg.png",
+    "Victorinox Ranger": "Victorinox-Ranger.png",
+    "Victorinox Alox Bantam - Silver": "Victorinox-Alox-Bantam-Silver.png",
+    "Sawyer Mini": "sawyer-mini.png",
+    "Sawyer Squeeze": "sawyer-squeeze-sp129.png",
+    "LifeStraw Personal Water Filter": "lifestraw-personal.png",
+    "LifeStraw Go 650 ml": "lifestraw-go-2.png",
+    "CAT GEN7 Tourniquet": "CAT-GEN7-Tourniquet.png",
+    "Condor MA36 Admin Pouch": "Condor-MA36-Admin-Pouch.png",
+    "Snugpak Stratosphere": "Snugpak-Stratosphere.png",
+    "Suunto MC-2 Compass": "Suunto-MC-2-Compass.png",
+    "Racje NRG-5": "NRG-5.png",
 }
 
 CATALOGUE_ITEMS = [
     # Ogień / Fire
     {
+        "id": "01KBJXFP7WMDKNJ8HNMBW1CZZG",
         "name": "Swedish FireSteel 2.0",
         "category": "fire",
         "brand": "Light My Fire",
@@ -27,6 +44,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
     },
     {
+        "id": "01KBJXGQ87FGHRFQTVMP3YFSNG",
         "name": "BIC Classic Lighter",
         "category": "fire",
         "brand": "BIC",
@@ -39,6 +57,7 @@ CATALOGUE_ITEMS = [
     },
     # Noże / Narzędzia tnące
     {
+        "id": "01KBJXH29HTYHNAD2QHR4VQ0H7",
         "name": "Fiskars X7",
         "category": "tools",
         "brand": "Fiskars",
@@ -51,6 +70,7 @@ CATALOGUE_ITEMS = [
     },
     # Narzędzia wielofunkcyjne
     {
+        "id": "01KBJXH4VP0T1SAZADHD3KY0RY",
         "name": "Leatherman Wave+",
         "category": "tools",
         "brand": "Leatherman",
@@ -62,6 +82,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
     },
     {
+        "id": "01KBJXH7904T9DT153977RWERA",
         "name": "Leatherman Blast",
         "category": "tools",
         "brand": "Leatherman",
@@ -73,6 +94,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
     },
     {
+        "id": "01KBJXHA4CVVWZJRSWDJ19F85C",
         "name": "Gerber E-Tool Folding Shovel",
         "category": "tools",
         "brand": "Gerber",
@@ -84,6 +106,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
     },
     {
+        "id": "01KBJXHCCSSKZWDFR4AB4H5DCV",
         "name": "Paracord 550 MIL-SPEC",
         "category": "tools",
         "brand": "Generic / MIL-SPEC",
@@ -95,6 +118,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
     },
     {
+        "id": "01KBJXHEW5ECFZVXQFB4E539E5",
         "name": "Paracord (Badger / MIL-SPEC)",
         "category": "tools",
         "brand": "Badger",
@@ -106,6 +130,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
     },
     {
+        "id": "01KBJXHH4WF4NYD9HD3P955H9H",
         "name": "Gorilla Tape",
         "category": "tools",
         "brand": "Gorilla Tape",
@@ -117,6 +142,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
     },
     {
+        "id": "01KBJXHKTWG3VFP9WR006129C0",
         "name": "BAHCO 396-LAP",
         "category": "tools",
         "brand": "BAHCO",
@@ -128,6 +154,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
     },
     {
+        "id": "01KBJXHP7289P4VEDKSCAMYBJW",
         "name": "Victorinox Ranger",
         "category": "tools",
         "brand": "Victorinox",
@@ -139,6 +166,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
     },
     {
+        "id": "01KBJXHRQ0NKA5QAGHHC41YE4A",
         "name": "Victorinox Alox Bantam - Silver",
         "category": "tools",
         "brand": "Victorinox",
@@ -151,6 +179,7 @@ CATALOGUE_ITEMS = [
     },
     # Woda / Water
     {
+        "id": "01KBJXHWAA2WJPCWEWDQ1HMZ38",
         "name": "Sawyer Mini",
         "category": "water",
         "brand": "Sawyer",
@@ -162,6 +191,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
     },
     {
+        "id": "01KBJXHYQ826J0HKQ21CK8CR6H",
         "name": "Sawyer Squeeze",
         "category": "water",
         "brand": "Sawyer",
@@ -173,6 +203,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
     },
     {
+        "id": "01KBJXJ16F5J1NYW6GZN2S906E",
         "name": "Katadyn BeFree 3L",
         "category": "water",
         "brand": "Katadyn",
@@ -184,6 +215,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
     },
     {
+        "id": "01KBJXJ3P532DYZMJ0DK2K6MW1",
         "name": "LifeStraw Personal Water Filter",
         "category": "water",
         "brand": "LifeStraw",
@@ -195,6 +227,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
     },
     {
+        "id": "01KBJXJ60YKWVB026N8YJ9TYPE",
         "name": "LifeStraw Go 650 ml",
         "category": "water",
         "brand": "LifeStraw",
@@ -207,6 +240,7 @@ CATALOGUE_ITEMS = [
     },
     # Schronienie / Shelter
     {
+        "id": "01KBJXJ89WTHT4WS6MPH83601A",
         "name": "DD Hammocks 3×3 Tarp",
         "category": "shelter",
         "brand": "DD Hammocks",
@@ -218,6 +252,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
     },
     {
+        "id": "01KBJXJAW5J9ZGT47V2262BEDR",
         "name": "Snugpak Stratosphere",
         "category": "shelter",
         "brand": "Snugpak",
@@ -229,6 +264,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
     },
     {
+        "id": "01KBJXJDA0BW8V8C8NCFGVM8BQ",
         "name": "MSR Hubba Hubba",
         "category": "shelter",
         "brand": "MSR",
@@ -241,6 +277,7 @@ CATALOGUE_ITEMS = [
     },
     # Light
     {
+        "id": "01KBJXJG4W8XTT9K3TPNHF10H9",
         "name": "Olight i5R EOS",
         "category": "light",
         "brand": "Olight",
@@ -252,6 +289,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
     },
     {
+        "id": "01KBJXJJMZZYVFYJWRQS4MPGQP",
         "name": "Black Diamond Storm Headlamp",
         "category": "light",
         "brand": "Black Diamond",
@@ -263,6 +301,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
     },
     {
+        "id": "01KBJXJNER6NZPMWMVMNEF084H",
         "name": "Fenix PD35 V3.0",
         "category": "light",
         "brand": "Fenix",
@@ -275,6 +314,7 @@ CATALOGUE_ITEMS = [
     },
     # First Aid
     {
+        "id": "01KBJXJR1XVTCHZFN6CG9A301C",
         "name": 'Emergency Bandage 6"',
         "category": "firstAid",
         "brand": "Emergency Bandage",
@@ -286,6 +326,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
     },
     {
+        "id": "01KBJXJT941E9K2RTM3C4G461B",
         "name": "CAT GEN7 Tourniquet",
         "category": "firstAid",
         "brand": "CAT",
@@ -298,6 +339,7 @@ CATALOGUE_ITEMS = [
     },
     # Container / Other
     {
+        "id": "01KBJXJWG88FJRXF8297YYFW05",
         "name": "Condor MA36 Admin Pouch",
         "category": "other",
         "brand": "Condor",
@@ -309,6 +351,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
     },
     {
+        "id": "01KBJXJYS9SVWHKZ402ZF2358F",
         "name": "Maxpedition Falcon II",
         "category": "other",
         "brand": "Maxpedition",
@@ -320,6 +363,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
     },
     {
+        "id": "01KBJXK1P9Z7DJ0TYR3AN5YRWS",
         "name": "5.11 Rush 24",
         "category": "other",
         "brand": "5.11",
@@ -332,6 +376,7 @@ CATALOGUE_ITEMS = [
     },
     # Food
     {
+        "id": "01KBJXK44TPQW7A9RHQH0WT147",
         "name": "Clif Bar Chocolate Chip",
         "category": "food",
         "brand": "Clif Bar",
@@ -343,6 +388,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
     },
     {
+        "id": "01KBJXK6YK4F82T57WCXV5J47D",
         "name": "LyoFood Beef Stroganoff",
         "category": "food",
         "brand": "LyoFood",
@@ -354,6 +400,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
     },
     {
+        "id": "01KBJXK97HRZVNG9MQ6R1BG1VY",
         "name": "Menażka Primus Eta Power",
         "category": "food",
         "brand": "Primus",
@@ -365,6 +412,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
     },
     {
+        "id": "01KBJXKBHHGBW27PNM3EEBRMMN",
         "name": "Racje NRG-5",
         "category": "food",
         "brand": "NRG-5",
@@ -377,6 +425,7 @@ CATALOGUE_ITEMS = [
     },
     # Navigation
     {
+        "id": "01KBJXKF6RS91JXKZQ0NBVFEVB",
         "name": "Rite in the Rain All-Weather Notebook",
         "category": "navigation",
         "brand": "Rite in the Rain",
@@ -388,6 +437,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
     },
     {
+        "id": "01KBJXKHNDWZ85HZZTG8DN0XVR",
         "name": "Suunto MC-2 Compass",
         "category": "navigation",
         "brand": "Suunto",
@@ -400,6 +450,7 @@ CATALOGUE_ITEMS = [
     },
     # Communication
     {
+        "id": "01KBJXKM1SJXS2T8GG7R4CGDN6",
         "name": "Fox 40 Classic Whistle",
         "category": "communication",
         "brand": "Fox 40",
@@ -411,6 +462,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
     },
     {
+        "id": "01KBJXKPDHSV3W2NNP222TVPZZ",
         "name": "Anker PowerCore 20100",
         "category": "communication",
         "brand": "Anker",
