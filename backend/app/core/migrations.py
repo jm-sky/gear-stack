@@ -85,7 +85,7 @@ async def unmark_migration(version: str) -> None:
         result = await session.execute(select(SchemaMigration).where(SchemaMigration.version == version))
         migration = result.scalar_one_or_none()
         if migration:
-            session.delete(migration)
+            await session.delete(migration)
             await session.commit()
 
 
