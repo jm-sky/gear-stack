@@ -2,6 +2,7 @@ import type {
   ICreateItemDto,
   IGearContainer,
   IGearItem,
+  IGearItemService,
   IUpdateItemDto,
 } from '../types/gear.types'
 import { useGearStore } from '../store/useGearStore'
@@ -13,7 +14,7 @@ import type { TUUID } from '@/shared/types/base.type'
  * Provides methods to interact with item data stored in localStorage.
  * Pure implementation without feature flag logic.
  */
-class GearItemLocalService {
+export class GearItemLocalService implements IGearItemService {
   private get store() {
     return useGearStore()
   }
@@ -177,7 +178,7 @@ class GearItemLocalService {
     throw new Error(`Item with id ${itemId} not found`)
   }
 
-  async getItemById(containerId: TUUID, itemId: TUUID): Promise<IGearItem | undefined> {
+  async getItemFromContainer(containerId: TUUID, itemId: TUUID): Promise<IGearItem | undefined> {
     const container = this.store.getContainerById(containerId)
     if (!container) {
       return Promise.resolve(undefined)

@@ -15,7 +15,7 @@ export function useContainer(containerId?: TUUID) {
   const { updateContainer, deleteContainer } = useGear()
 
   // Pobierz ID z route jeśli nie podano
-  const id = computed<TUUID>(() => containerId || (route.params.id as string))
+  const id = computed<TUUID>(() => containerId ?? (route.params.id as string))
 
   // Container data - use store directly for synchronous access in computed
   const container = computed<IGearContainer | undefined>(() => {
@@ -34,7 +34,7 @@ export function useContainer(containerId?: TUUID) {
   })
 
   const itemsCount = computed<number>(() => {
-    return container.value?.items.length || 0
+    return container.value?.items.length ?? 0
   })
 
   // Actions

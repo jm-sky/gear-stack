@@ -285,3 +285,12 @@ export interface IGearServiceExtended extends IGearService {
   importData(json: string): Promise<void>
 }
 
+export interface IGearItemService {
+  createItem(containerId: TUUID, data: ICreateItemDto): Promise<IGearItem>
+  getItems(containerId: TUUID, skip?: number, limit?: number): Promise<IGearItem[]>
+  getItem(itemId: TUUID): Promise<IGearItem>
+  getItemFromContainer(containerId: TUUID, itemId: TUUID): Promise<IGearItem | undefined>
+  updateItem(itemId: TUUID, data: IUpdateItemDto): Promise<IGearItem>
+  deleteItem(itemId: TUUID): Promise<void>
+  batchUpdateOrder(items: IGearItem[]): Promise<IGearItem[]>
+}

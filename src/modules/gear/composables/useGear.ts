@@ -130,7 +130,7 @@ export function useGear() {
   }
 
   const getItemById = async (containerId: TUUID, itemId: TUUID): Promise<IGearItem | undefined> => {
-    return await gearItemService().getItemById(containerId, itemId)
+    return await gearItemService().getItemFromContainer(containerId, itemId)
   }
 
   // ========== Business Logic ==========

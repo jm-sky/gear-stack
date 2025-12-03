@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import Separator from '@/components/ui/separator/Separator.vue'
 import { useLocale } from '@/shared/i18n/composables/useLocale'
+import { downloadBlob } from '@/shared/utils/downloadBlob'
 import type { IGearContainer } from '../types/gear.types'
 import { useGearStore } from '../store/useGearStore'
 import { exportContainersToCSV, exportContainerToCSV, generateAllContainersCSVFileName, generateCSVFileName, getDefaultSeparator } from '../utils/exportToCSV'
@@ -166,14 +167,8 @@ const handleExport = () => {
       [csv],
       { type: 'text/csv;charset=utf-8;' },
     )
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = fileName
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
+
+    downloadBlob(blob, fileName)
 
     open.value = false
     toast.success(t('gear.export.csv.success', 'CSV exported successfully'))

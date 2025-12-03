@@ -15,6 +15,14 @@ import ContainerHeader from '../components/ContainerHeader.vue'
 import ContainerItemImagesGallery from '../components/ContainerItemImagesGallery.vue'
 import ContainerRatingSection from '../components/ContainerRatingSection.vue'
 import SortConfirmationAlert from '../components/SortConfirmationAlert.vue'
+import { useContainer } from '../composables/useContainer'
+import { useGear } from '../composables/useGear'
+import { useItemsParamRecognition } from '../composables/useItemsParamRecognition'
+import { useJsonImportExport } from '../composables/useJsonImportExport'
+import { GearRoutePath } from '../routes'
+import { gearItemService } from '../services/gearItemService'
+import { useGearStore } from '../store/useGearStore'
+import { createNavigationQuery } from '../utils/navigationParams'
 
 // Lazy load dialogs - only loaded when user opens them
 const ItemsTable = defineAsyncComponent(() => import('../components/ItemsTable.vue'))
@@ -24,14 +32,6 @@ const ExportToCSVDialog = defineAsyncComponent(() => import('../components/Expor
 
 // Lazy load CategoryPieChart - not critical for initial render
 const CategoryPieChart = defineAsyncComponent(() => import('../components/CategoryPieChart.vue'))
-import { useContainer } from '../composables/useContainer'
-import { useGear } from '../composables/useGear'
-import { GearRoutePath } from '../routes'
-import { gearItemService } from '../services/gearItemService'
-import { useGearStore } from '../store/useGearStore'
-import { createNavigationQuery } from '../utils/navigationParams'
-import { recognizeParameters, recognizeParametersForItems } from '../utils/parameterRecognition'
-
 
 // Lazy load AI Chat Dialog - only needed when user opens AI dialog
 // This reduces initial bundle size and improves critical path performance
@@ -43,7 +43,7 @@ const { t } = useI18n()
 const store = useGearStore()
 const { shouldUseAPI } = useBackend()
 const { container } = useContainer()
-const { deleteItem, updateItem, updateContainer, exportData, importData, createItem, getContainerById } = useGear()
+const { deleteItem, updateItem, updateContainer, createItem, getContainerById } = useGear()
 const { user, isAuthenticated } = useAuth()
 const { canUseAi } = useAi()
 const { setTitle } = usePageTitle()
@@ -231,50 +231,7 @@ const handleCancelSorting = async () => {
   }
 }
 
-const handleExport = async () => {
-  try {
-    const json = await exportData()
-    const blob = new Blob([json], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `gear-stack-export-${new Date().toISOString().split('T')[0]}.json`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
-    toast.success(t('common.success'))
-  } catch {
-    toast.error(t('common.error'))
-  }
-}
-
-const handleImport = () => {
-  // Use native input element for file selection
-  const input = document.createElement('input')
-  input.type = 'file'
-  input.accept = 'application/json'
-  input.onchange = (e) => {
-    const file = (e.target as HTMLInputElement).files?.[0]
-    if (!file) return
-
-    const reader = new FileReader()
-    reader.onload = async (event) => {
-      try {
-        const json = event.target?.result as string
-        await importData(json)
-        toast.success(t('common.success'))
-        // Reload page to show imported data
-        window.location.reload()
-      } catch (error) {
-        toast.error(t('common.error'))
-        console.error('Import error:', error)
-      }
-    }
-    reader.readAsText(file)
-  }
-  input.click()
-}
+const { handleJsonExport, handleJsonImport } = useJsonImportExport()
 
 const handleAddContainer = () => {
   isAddContainerDialogOpen.value = true
@@ -319,74 +276,7 @@ const handleExportToCSV = () => {
   isExportToCSVDialogOpen.value = true
 }
 
-const handleRecognizeParameters = async (item: IGearItem) => {
-  try {
-    const params = recognizeParameters(item.name)
-
-    if (!params.brand && !params.color) {
-      toast.info(t('gear.actions.noParametersFound'))
-      return
-    }
-
-    const updateData: Partial<IGearItem> = {}
-    if (params.brand && !item.brand) {
-      updateData.brand = params.brand
-    }
-    if (params.color && !item.color) {
-      updateData.color = params.color
-    }
-
-    if (Object.keys(updateData).length > 0) {
-      await updateItem(item.id, updateData)
-      toast.success(t('gear.actions.parametersRecognized'))
-    } else {
-      toast.info(t('gear.actions.noParametersFound'))
-    }
-  } catch (error) {
-    toast.error(t('common.error'))
-    console.error('Error recognizing parameters:', error)
-  }
-}
-
-const handleRecognizeParametersAll = async () => {
-  if (!container.value || !items.value || items.value.length === 0) return
-
-  try {
-    toast.loading(t('gear.actions.recognizing'))
-
-    const paramsMap = recognizeParametersForItems(items.value)
-    let updatedCount = 0
-
-    for (const item of items.value) {
-      const params = paramsMap.get(item.id)
-      if (!params) continue
-
-      const updateData: Partial<IGearItem> = {}
-      if (params.brand && !item.brand) {
-        updateData.brand = params.brand
-      }
-      if (params.color && !item.color) {
-        updateData.color = params.color
-      }
-
-      if (Object.keys(updateData).length > 0) {
-        await updateItem(item.id, updateData)
-        updatedCount++
-      }
-    }
-
-    toast.dismiss()
-    if (updatedCount > 0) {
-      toast.success(t('gear.actions.parametersRecognized', { count: updatedCount }))
-    } else {
-      toast.info(t('gear.actions.noParametersFound'))
-    }
-  } catch (error) {
-    toast.dismiss()
-    toast.error(t('common.error'))
-    console.error('Error recognizing parameters:', error)
-  }
-}
+const { handleRecognizeParameters, handleRecognizeParametersAll } = useItemsParamRecognition(container, items)
 
 const handleManageShareTokens = () => {
   router.push(GearRoutePath.ContainerShareTokensById(containerId))
@@ -403,8 +293,8 @@ if (!container.value) {
     <div v-if="container" class="space-y-6 w-full max-w-full">
       <ContainerHeader
         :container="container"
-        @export="handleExport"
-        @import="handleImport"
+        @export="handleJsonExport"
+        @import="handleJsonImport"
         @add-container="handleAddContainer"
         @export-to-prompt="handleExportToPrompt"
         @export-to-csv="handleExportToCSV"
