@@ -7,21 +7,23 @@ import { toast } from 'vue-sonner'
 import { Badge } from '@/components/ui/badge'
 import Button from '@/components/ui/button/Button.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import AddCatalogueItemToContainerDialog from '@/modules/gear/components/catalogue/AddCatalogueItemToContainerDialog.vue'
+import ColorDot from '@/modules/gear/components/ColorDot.vue'
+import MarkdownRenderer from '@/modules/gear/components/MarkdownRenderer.vue'
+import { useCatalogue } from '@/modules/gear/composables/catalogue/useCatalogue'
+import { useCategoryLabel } from '@/modules/gear/composables/useCategoryLabel'
+import { usePriceTierLabel } from '@/modules/gear/composables/usePriceTierLabel'
+import { GearRoutePath } from '@/modules/gear/routes'
+import { DEFAULT_COLOR, getColorHex } from '@/modules/gear/utils/suggestedValues'
 import { usePageTitle } from '@/shared/composables/usePageTitle'
-import type { TContainerColor } from '../../types/gear.types'
-import AddCatalogueItemToContainerDialog from '../../components/catalogue/AddCatalogueItemToContainerDialog.vue'
-import ColorDot from '../../components/ColorDot.vue'
-import MarkdownRenderer from '../../components/MarkdownRenderer.vue'
-import { useCatalogue } from '../../composables/catalogue/useCatalogue'
-import { useCategoryLabel } from '../../composables/useCategoryLabel'
-import { GearRoutePath } from '../../routes'
-import { DEFAULT_COLOR, getColorHex } from '../../utils/suggestedValues'
+import type { TContainerColor } from '@/modules/gear/types/gear.types'
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 const { setTitle } = usePageTitle()
 const { getCategoryLabel } = useCategoryLabel()
+const { getPriceTierLabel } = usePriceTierLabel()
 
 const catalogueItemId = route.params.id as string
 const { getCatalogueItem } = useCatalogue()
@@ -57,7 +59,7 @@ const categoryLabel = computed(() => {
 
 const priceTierLabel = computed(() => {
   if (!item.value?.priceTier) return null
-  return t(`gear.catalogue.priceTiers.${item.value.priceTier}`)
+  return getPriceTierLabel(item.value.priceTier)
 })
 
 const qualityLabel = computed(() => {
@@ -134,13 +136,13 @@ const handleAddToContainer = () => {
           {{ categoryLabel }}
         </Badge>
         <Badge v-if="item.brand" variant="outline">
-          {{ item.brand }}
+          {{ t('gear.catalogue.brand') }}: {{ item.brand }}
         </Badge>
         <Badge v-if="priceTierLabel" variant="outline">
-          {{ priceTierLabel }}
+          {{ t('gear.catalogue.priceTier') }}: {{ priceTierLabel }}
         </Badge>
         <Badge v-if="qualityLabel" variant="outline">
-          {{ qualityLabel }}
+          {{ t('gear.catalogue.quality') }}: {{ qualityLabel }}
         </Badge>
         <Badge v-if="!item.isActive" variant="destructive">
           {{ t('gear.catalogue.isActive') }}: {{ item.isActive }}

@@ -311,7 +311,7 @@ class GlobalCatalogueItemBase(BaseModel):
 
     name: str = Field(..., min_length=1, max_length=255)
     category: GearItemCategory
-    weight: float = Field(..., gt=0)
+    weight: float = Field(..., ge=0)
     weightUnit: GearWeightUnit = Field(default="g", alias="weightUnit")
     description: str | None = None
     brand: str | None = Field(None, max_length=255)
@@ -354,10 +354,11 @@ class GlobalCatalogueItemResponse(GlobalCatalogueItemBase):
 
     id: str
     version: int
-    isActive: bool = Field(alias="isActive")
-    createdBy: str | None = Field(None, alias="createdBy")
-    createdAt: datetime = Field(alias="createdAt")
-    updatedAt: datetime = Field(alias="updatedAt")
+    isActive: bool = Field(alias="is_active")
+    createdBy: str | None = Field(None, alias="created_by")
+    createdAt: datetime = Field(alias="created_at")
+    updatedAt: datetime = Field(alias="updated_at")
+    primaryImageUrl: str | None = Field(None, alias="primaryImageUrl")
 
     model_config = {"from_attributes": True, "populate_by_name": True}
 

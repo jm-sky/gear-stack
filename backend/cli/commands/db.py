@@ -237,3 +237,121 @@ def migrate_status() -> None:
         console.print(f"\n[bold]Total: {len(all_migrations)}[/bold] | [green]Applied: {applied_count}[/green] | [yellow]Pending: {pending_count}[/yellow]")
 
     asyncio.run(_status())
+
+
+@db_app.command("seed")
+def seed_database(
+    catalogue: bool = typer.Option(True, "--catalogue/--no-catalogue", help="Seed catalogue items"),
+    force: bool = typer.Option(False, "--force", "-f", help="Force re-seed (delete existing data)"),
+) -> None:
+    """Seed database with initial data.
+
+    This command populates the database with predefined seed data.
+    Currently supports:
+    - Catalogue items (global gear catalogue)
+    """
+
+    async def _seed() -> None:
+        from app.core.database import get_db
+
+        # Get database session
+        async for db in get_db():
+            # Seed catalogue items
+            if catalogue:
+                from app.modules.gear.db_models import CatalogueItemImageDB, GlobalCatalogueItemDB
+                from app.seeders import CATALOGUE_ITEM_IMAGES, CATALOGUE_ITEMS
+                from sqlalchemy import delete, select
+
+                console.print("[bold cyan]Seeding catalogue items...[/bold cyan]")
+
+                # Check existing items
+                result = await db.execute(select(GlobalCatalogueItemDB))
+                existing_items = result.scalars().all()
+
+                if existing_items and not force:
+                    console.print(f"[yellow]Found {len(existing_items)} existing catalogue items[/yellow]")
+                    if not Confirm.ask("Delete existing items and re-seed?", default=False):
+                        console.print("[yellow]Skipping catalogue seed[/yellow]")
+                        return
+
+                if existing_items and force:
+                    console.print(f"[yellow]Deleting {len(existing_items)} existing items...[/yellow]")
+                    # Delete images first (CASCADE should handle this, but let's be explicit)
+                    await db.execute(delete(CatalogueItemImageDB))
+                    await db.execute(delete(GlobalCatalogueItemDB))
+                    await db.commit()
+
+                # Create system user for seeded items (use first admin or create placeholder)
+                from app.modules.auth.db_models import UserDB
+                result = await db.execute(select(UserDB).where(UserDB.is_admin == True).limit(1))
+                admin_user = result.scalar_one_or_none()
+
+                if not admin_user:
+                    console.print("[yellow]No admin user found. Creating placeholder 'system' user...[/yellow]")
+                    system_user = UserDB(
+                        email="system@gearstack.local",
+                        is_admin=True,
+                        is_active=True,
+                    )
+                    db.add(system_user)
+                    await db.commit()
+                    await db.refresh(system_user)
+                    creator_id = str(system_user.id)
+                else:
+                    creator_id = str(admin_user.id)
+
+                # Insert seed items
+                from pathlib import Path
+                from ulid import ULID
+
+                created_count = 0
+                images_count = 0
+                for item_data in CATALOGUE_ITEMS:
+                    item_id = str(ULID())
+                    catalogue_item = GlobalCatalogueItemDB(
+                        id=item_id,
+                        **item_data,
+                        created_by=creator_id,
+                    )
+                    db.add(catalogue_item)
+                    created_count += 1
+
+                    # Add image if exists for this item
+                    item_name = item_data.get("name")
+                    if item_name and item_name in CATALOGUE_ITEM_IMAGES:
+                        image_filename = CATALOGUE_ITEM_IMAGES[item_name]
+                        image_path = Path(__file__).parent.parent.parent / "images" / "global-catalogue" / image_filename
+
+                        if image_path.exists():
+                            # Get file size and MIME type
+                            file_size = image_path.stat().st_size
+                            mime_type = "image/jpeg" if image_filename.endswith(".jpg") else \
+                                       "image/png" if image_filename.endswith(".png") else \
+                                       "image/webp" if image_filename.endswith(".webp") else "image/jpeg"
+
+                            # Create image record
+                            relative_path = f"global-catalogue/{image_filename}"
+                            image = CatalogueItemImageDB(
+                                id=str(ULID()),
+                                catalogue_item_id=item_id,
+                                user_id=creator_id,
+                                storage_type="local",
+                                file_path=relative_path,
+                                file_name=image_filename,
+                                file_size=file_size,
+                                mime_type=mime_type,
+                                is_primary=True,
+                                order=0,
+                                is_processed=True,
+                            )
+                            db.add(image)
+                            images_count += 1
+
+                await db.commit()
+                console.print(f"[bold green]✓ Created {created_count} catalogue items with {images_count} images[/bold green]")
+
+            break  # Exit after first db session
+
+    console.print("[bold green]Starting database seeding...[/bold green]")
+    asyncio.run(_seed())
+    console.print("[bold green]✓ Database seeding complete[/bold green]")

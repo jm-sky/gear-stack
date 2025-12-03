@@ -6,14 +6,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useCategoryLabel } from '../../composables/useCategoryLabel'
-import { useGearSettings } from '../../composables/useGearSettings'
-import CategoryIcon from '../CategoryIcon.vue'
+import CategoryIcon from '@/modules/gear/components/CategoryIcon.vue'
+import { useCategoryLabel } from '@/modules/gear/composables/useCategoryLabel'
+import { useGearSettings } from '@/modules/gear/composables/useGearSettings'
 
-const modelValue = defineModel<string>()
+const modelValue = defineModel<string | null>()
 
 defineProps<{
   placeholder?: string
+  nullable?: boolean
+  id?: string
 }>()
 
 const { customCategories } = useGearSettings()
@@ -38,10 +40,21 @@ const defaultCategories = [
 
 <template>
   <Select v-model="modelValue">
-    <SelectTrigger class="min-w-36">
+    <SelectTrigger
+      :id="id"
+      class="min-w-36"
+    >
       <SelectValue :placeholder="placeholder ?? $t('gear.item.category')" />
     </SelectTrigger>
     <SelectContent>
+      <!-- "All" option when nullable -->
+      <SelectItem
+        v-if="nullable"
+        :value="null"
+      >
+        {{ $t('gear.filters.all') }}
+      </SelectItem>
+
       <!-- Default Categories - ordered by most commonly used -->
       <SelectItem
         v-for="category in defaultCategories"

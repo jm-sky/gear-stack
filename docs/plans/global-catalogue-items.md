@@ -161,10 +161,10 @@ Lista służy jako **globalna baza przedmiotów**, które użytkownicy mogą wyb
   - *klasa:* solid  
   - *website:
 
-- **Black Diamond Storm Headlamp**  
+- **Black Diamond Storm 450**  
   - *kategoria:* Light  
   - *firma:* Black Diamond  
-  - *model:* Storm  
+  - *model:* Storm 450  
   - *opis:* Czołówka outdoorowa z mocnym światłem, odporna na warunki  
   - *półka cenowa:* medium  
   - *klasa:* reliable  

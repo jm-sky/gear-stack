@@ -5,15 +5,17 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import type { IGlobalCatalogueItem } from '../../types/catalogue.types'
-import type { TContainerColor } from '../../types/gear.types'
-import { useCategoryLabel } from '../../composables/useCategoryLabel'
-import { GearRoutePath } from '../../routes'
-import ColorDot from '../ColorDot.vue'
-import MarkdownRenderer from '../MarkdownRenderer.vue'
+import ColorDot from '@/modules/gear/components/ColorDot.vue'
+import MarkdownRenderer from '@/modules/gear/components/MarkdownRenderer.vue'
+import { useCategoryLabel } from '@/modules/gear/composables/useCategoryLabel'
+import { usePriceTierLabel } from '@/modules/gear/composables/usePriceTierLabel'
+import { GearRoutePath } from '@/modules/gear/routes'
+import type { IGlobalCatalogueItem } from '@/modules/gear/types/catalogue.types'
+import type { TContainerColor } from '@/modules/gear/types/gear.types'
 
 const { t } = useI18n()
 const { getCategoryLabel } = useCategoryLabel()
+const { getPriceTierLabel } = usePriceTierLabel()
 
 const { item } = defineProps<{
   item: IGlobalCatalogueItem
@@ -23,7 +25,7 @@ const categoryLabel = computed(() => getCategoryLabel(item.category))
 
 const priceTierLabel = computed(() => {
   if (!item.priceTier) return null
-  return t(`gear.catalogue.priceTiers.${item.priceTier}`)
+  return getPriceTierLabel(item.priceTier)
 })
 
 const qualityLabel = computed(() => {
@@ -58,10 +60,10 @@ const qualityLabel = computed(() => {
             {{ item.brand }}
           </Badge>
           <Badge v-if="priceTierLabel" variant="outline" class="text-xs">
-            {{ priceTierLabel }}
+            {{ t('gear.catalogue.priceTier') }}: {{ priceTierLabel }}
           </Badge>
           <Badge v-if="qualityLabel" variant="outline" class="text-xs">
-            {{ qualityLabel }}
+            {{ t('gear.catalogue.quality') }}: {{ qualityLabel }}
           </Badge>
         </div>
 
@@ -81,13 +83,13 @@ const qualityLabel = computed(() => {
           </div>
         </div>
 
-        <!-- Version Info -->
-        <div class="-mb-6 mt-2 flex items-center justify-between text-xs text-muted-foreground">
+        <!-- Metadata (hidden for now) -->
+        <!-- <div class="-mb-6 mt-2 flex items-center justify-between text-xs text-muted-foreground">
           <span>v{{ item.version }}</span>
           <span v-if="item.createdBy">
             {{ t('gear.catalogue.createdBy') }}: {{ item.createdBy }}
           </span>
-        </div>
+        </div> -->
       </CardContent>
     </Card>
   </RouterLink>

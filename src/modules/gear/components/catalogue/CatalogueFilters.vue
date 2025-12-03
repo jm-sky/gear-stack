@@ -6,13 +6,14 @@ import Button from '@/components/ui/button/Button.vue'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import type { TCataloguePriceTier } from '../../types/catalogue.types'
-import type { TGearItemCategory, TGearItemQuality } from '../../types/gear.types'
-import { useCategoryLabel } from '../../composables/useCategoryLabel'
-import { GEAR_ITEM_CATEGORIES, GEAR_ITEM_QUALITIES } from '../../types/gear.types'
+import CategorySelect from '@/modules/gear/components/inputs/CategorySelect.vue'
+import { usePriceTierLabel } from '@/modules/gear/composables/usePriceTierLabel'
+import { GEAR_ITEM_QUALITIES } from '@/modules/gear/types/gear.types'
+import type { TCataloguePriceTier } from '@/modules/gear/types/catalogue.types'
+import type { TGearItemCategory, TGearItemQuality } from '@/modules/gear/types/gear.types'
 
 const { t } = useI18n()
-const { getCategoryLabel } = useCategoryLabel()
+const { getPriceTierLabel } = usePriceTierLabel()
 
 defineProps<{
   loading?: boolean
@@ -32,14 +33,6 @@ const emit = defineEmits<{
 }>()
 
 const priceTiers: TCataloguePriceTier[] = ['low', 'medium', 'high']
-
-// Computed categories for select
-const categoryOptions = computed(() => {
-  return GEAR_ITEM_CATEGORIES.map((cat: TGearItemCategory) => ({
-    value: cat,
-    label: getCategoryLabel(cat),
-  }))
-})
 
 // Computed qualities for select
 const qualityOptions = computed(() => {
@@ -82,19 +75,12 @@ const qualityOptions = computed(() => {
         <Label for="category-filter" class="text-xs text-muted-foreground">
           {{ t('gear.catalogue.category') }}
         </Label>
-        <Select v-model="category">
-          <SelectTrigger id="category-filter">
-            <SelectValue :placeholder="t('gear.filters.all')" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem :value="null">
-              {{ t('gear.filters.all') }}
-            </SelectItem>
-            <SelectItem v-for="option in categoryOptions" :key="option.value" :value="option.value">
-              {{ option.label }}
-            </SelectItem>
-          </SelectContent>
-        </Select>
+        <CategorySelect
+          id="category-filter"
+          v-model="category"
+          :nullable="true"
+          :placeholder="t('gear.filters.all')"
+        />
       </div>
 
       <!-- Brand Filter -->
@@ -124,7 +110,7 @@ const qualityOptions = computed(() => {
               {{ t('gear.filters.all') }}
             </SelectItem>
             <SelectItem v-for="tier in priceTiers" :key="tier" :value="tier">
-              {{ t(`gear.catalogue.priceTiers.${tier}`) }}
+              {{ getPriceTierLabel(tier) }}
             </SelectItem>
           </SelectContent>
         </Select>
