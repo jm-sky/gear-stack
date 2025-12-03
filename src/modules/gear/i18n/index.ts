@@ -177,6 +177,7 @@ export const gearEn = {
         fire: 'Fire',
         firstAid: 'First Aid',
         blades: 'Blades',
+        tool: 'Tools', // Alias for "tools" (singular form)
         tools: 'Tools',
         light: 'Light',
         navigation: 'Navigation',
@@ -972,6 +973,7 @@ export const gearPl = {
         fire: 'Ogień',
         firstAid: 'Pierwsza Pomoc',
         blades: 'Ostrza',
+        tool: 'Narzędzia', // Alias for "tools" (singular form)
         tools: 'Narzędzia',
         light: 'Światło',
         navigation: 'Nawigacja',

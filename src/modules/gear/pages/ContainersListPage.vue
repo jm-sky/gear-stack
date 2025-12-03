@@ -8,6 +8,7 @@ import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import ButtonLink from '@/components/ui/button-link/ButtonLink.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import { useAi } from '@/modules/ai/composables/useAi'
 import { CONTAINERS_LIST_PAGE_FILTERS_KEY } from '@/shared/config/config'
 import { config } from '@/shared/config/config'
 import type { IGearContainer } from '../types/gear.types'
@@ -20,6 +21,7 @@ import GenerateExampleGearButton from '../components/GenerateExampleGearButton.v
 const ExportToCSVDialog = defineAsyncComponent(() => import('../components/ExportToCSVDialog.vue'))
 const ExportToPromptDialog = defineAsyncComponent(() => import('../components/ExportToPromptDialog.vue'))
 const ImportMarkdownDialog = defineAsyncComponent(() => import('../components/ImportMarkdownDialog.vue'))
+const AiChatDialog = defineAsyncComponent(() => import('@/modules/ai/components/AiChatDialog.vue'))
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { useGear } from '../composables/useGear'
 import { GearRoutePath } from '../routes'
@@ -31,12 +33,14 @@ import type { TUUID } from '@/shared/types/base.type'
 // Action icons
 const ExportAllToMarkdownIcon = getActionIcon('exportAllToMarkdown')
 const CreateIcon = getActionIcon('create')
+const AiIcon = getActionIcon('ai')
 
 const router = useRouter()
 const route = useRoute()
 const { t } = useI18n()
 const { containers, deleteContainer } = useGear()
 const { getContainerTypeLabel } = useContainerTypeLabel()
+const { canUseAi } = useAi()
 
 // Filters - using refs that will be bound to ContainersFilters via v-model
 const loading = ref(false)
@@ -91,6 +95,7 @@ watch([searchQueryRaw, showOnlyRootContainers], () => {
 const importDialogOpen = ref(false)
 const isExportToPromptDialogOpen = ref(false)
 const isExportToCSVDialogOpen = ref(false)
+const isAiDialogOpen = ref(false)
 
 // Check for import query parameter and open dialog, and load containers from API
 onMounted(async () => {
@@ -203,6 +208,10 @@ const handleExportAllToCSV = () => {
 
   isExportToCSVDialogOpen.value = true
 }
+
+const handleAiChat = () => {
+  isAiDialogOpen.value = true
+}
 </script>
 
 <template>
@@ -220,6 +229,16 @@ const handleExportAllToCSV = () => {
         </div>
         <div class="flex flex-col sm:flex-row gap-2">
           <div class="flex gap-2">
+            <Button
+              v-if="canUseAi"
+              v-tooltip.bottom="t('gear.actions.aiAssistant')"
+              variant="outline"
+              class="shrink-0"
+              :aria-label="t('gear.actions.aiAssistant')"
+              @click="handleAiChat"
+            >
+              <AiIcon class="size-4" />
+            </Button>
             <Button
               v-if="containers.length > 0"
               v-tooltip.bottom="t('gear.export.allToMarkdown')"
@@ -312,6 +331,12 @@ const handleExportAllToCSV = () => {
     <ExportToCSVDialog
       v-model:open="isExportToCSVDialogOpen"
       :containers="containers"
+    />
+
+    <!-- AI Chat Dialog -->
+    <AiChatDialog
+      v-if="canUseAi"
+      v-model:open="isAiDialogOpen"
     />
   </AuthenticatedLayout>
 </template>

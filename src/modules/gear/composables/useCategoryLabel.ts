@@ -11,7 +11,9 @@ export const useCategoryLabel = (categoryValue?: Ref<string> | Reactive<string> 
     if (customCategory) {
       return customCategory.value
     }
-    return t(`gear.item.categories.${categoryValue}`)
+    // Fallback: handle singular "tool" -> plural "tools"
+    const normalizedCategory = categoryValue === 'tool' ? 'tools' : categoryValue
+    return t(`gear.item.categories.${normalizedCategory}`, categoryValue)
   }
 
   const categoryLabel = computed<string | undefined>(() => {
