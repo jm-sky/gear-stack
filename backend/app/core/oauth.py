@@ -67,7 +67,7 @@ class GoogleOAuthProvider(OAuthProvider):
             "state": state,
             "response_type": "code",
             "access_type": "offline",
-            "prompt": "consent",
+            "prompt": "select_account",
         }
 
         query_string = "&".join([f"{k}={v}" for k, v in params.items()])
