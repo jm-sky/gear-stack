@@ -285,9 +285,10 @@ function formatNestedContainer(
   const containerId = generateContainerId(container.name)
   const containerIdPart = options.showNestedContainer !== false ? ` [${containerId}]` : ''
   const uuidPart = options.showUuid !== false ? ` [uuid:${container.id}]` : ''
+  const favoritePart = container.favorite ? ' [favorite]' : ''
 
   // Build container header parts
-  const headerParts: string[] = [`${indentStr}## ${container.name}${containerIdPart}${uuidPart} (${typeLabel})`]
+  const headerParts: string[] = [`${indentStr}## ${container.name}${containerIdPart}${uuidPart} (${typeLabel})${favoritePart}`]
 
   // Add price to header if enabled
   if (options.showPrices && container.price) {
@@ -424,6 +425,10 @@ export function exportContainerToPrompt(
     containerHeaderParts.push(`[uuid:${container.id}]`)
   }
   containerHeaderParts.push(`(${typeLabel})`)
+  // Add favorite flag if container is marked as favorite
+  if (container.favorite) {
+    containerHeaderParts.push('[favorite]')
+  }
 
   // Add URL if provided
   if (container.url) {

@@ -9,7 +9,7 @@ When generating or updating gear lists, use this format:
 
 ## Standard Format
 \`\`\`markdown
-## [Container Name] [#container-id] ([Container Type]) <URL> - [weight]g
+## [Container Name] [#container-id] [uuid:xxx] ([Container Type]) [favorite] <URL> - [weight]g
 - **[Item Name]** x[qty] ([Brand], [Color]) [#nested-id] ([Status]) <URL> - [weight]g
 \`\`\`
 
@@ -40,6 +40,17 @@ When generating or updating gear lists, use this format:
 - ID is generated from container name as slug
 - Example: \`Bug-Out Bag\` → \`[#bug-out-bag]\`
 
+### UUID (Optional, recommended for updates)
+- Format: \`[uuid:xxx]\` in container header
+- Used for stable references when updating existing containers
+- Example: \`[uuid:7f6af1c1-7c6b-4b0d-9dd9-8c36f3d1b100]\`
+
+### Favorite Flag (Optional)
+- Format: \`[favorite]\` in container header
+- Marks container as favorite (will appear first in lists)
+- Only shown if container is marked as favorite
+- Example: \`## Bug-Out Bag [#bug-out-bag] [uuid:xxx] (Backpack) [favorite]\`
+
 ### URL (Optional)
 - Format: \`<URL>\` in angle brackets or plain URL
 - Recognized by \`http://\`, \`https://\`, or \`www.\`
@@ -53,7 +64,7 @@ When generating or updating gear lists, use this format:
 
 ## Example
 \`\`\`markdown
-## Bug-Out Bag [#bug-out-bag] (Backpack) <https://example.com/backpack> - 2000g
+## Bug-Out Bag [#bug-out-bag] [uuid:7f6af1c1-7c6b-4b0d-9dd9-8c36f3d1b100] (Backpack) [favorite] <https://example.com/backpack> - 2000g
 - **Water Bottle** x2 (Nalgene) - 300g
 - **Tactical Knife** (Victorinox, Black) - 200g
 - **Headlamp** (Petzl, Red) (Missing) - 90g
@@ -61,7 +72,7 @@ When generating or updating gear lists, use this format:
 - **Energy Bar** (Consumable) - 50g
 - **First Aid Pouch** (Pouch) [#first-aid-pouch] - 350g
 
-## First Aid Pouch [#first-aid-pouch] (Pouch) - 500g
+## First Aid Pouch [#first-aid-pouch] [uuid:9c4fc7c8-95b2-46cd-bb09-ef3ca52a3f45] (Pouch) - 500g
 - **Bandages** x5 - 100g
 - **Pain Pills** (Expiration: 31.12.2025, Consumable) - 50g
 \`\`\`
@@ -95,6 +106,7 @@ export interface IMarkdownImportResult {
     description?: string // Container description (text between header and first item)
     price?: number // Container price
     currency?: string // Container currency (PLN, USD, EUR, GBP, etc.)
+    favorite?: boolean // Container favorite flag from [favorite] in header
     items: Array<ICreateItemDto & { nestedContainerId?: string; uuid?: string }> // nestedContainerId is temporary slug reference, uuid for updates
   }>
   errors: string[]
@@ -208,7 +220,7 @@ class MarkdownImportService {
     }
 
     const lines = markdown.split('\n')
-    let currentContainer: { name: string; id?: string; uuid?: string; weight?: number; weightUnit?: 'g' | 'kg' | 'oz' | 'lb'; url?: string; description?: string; price?: number; currency?: string; items: ICreateItemDto[] } | null = null
+    let currentContainer: { name: string; id?: string; uuid?: string; weight?: number; weightUnit?: 'g' | 'kg' | 'oz' | 'lb'; url?: string; description?: string; price?: number; currency?: string; favorite?: boolean; items: ICreateItemDto[] } | null = null
     let descriptionLines: string[] = []
     let isCollectingDescription = false
 
@@ -248,6 +260,7 @@ class MarkdownImportService {
         let containerWeightUnit: 'g' | 'kg' | 'oz' | 'lb' | undefined
         let containerPrice: number | undefined
         let containerCurrency: string | undefined
+        let containerFavorite: boolean | undefined
 
         // Extract price (before other patterns to avoid conflicts)
         const priceResult = this.parsePrice(headerText)
@@ -270,6 +283,13 @@ class MarkdownImportService {
         if (uuidMatch) {
           containerUuid = uuidMatch[1]?.trim()
           headerText = headerText.replace(uuidMatch[0] ?? '', '').trim()
+        }
+
+        // Extract favorite flag from [favorite]
+        const favoriteMatch = headerText.match(/\[favorite\]/i)
+        if (favoriteMatch) {
+          containerFavorite = true
+          headerText = headerText.replace(favoriteMatch[0] ?? '', '').trim()
         }
 
         // Extract description/notes in italic format *(text)* BEFORE parsing name
@@ -321,6 +341,7 @@ class MarkdownImportService {
           description: containerDescription, // Description from *(text)* in header
           price: containerPrice,
           currency: containerCurrency,
+          favorite: containerFavorite,
           items: [],
         }
         continue

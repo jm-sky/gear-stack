@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { FileText, Info } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import DialogProgressOverlay from '@/components/ui/dialog/DialogProgressOverlay.vue'
 import Textarea from '@/components/ui/textarea/Textarea.vue'
 import { useHandleError } from '@/shared/composables/useHandleError'
 import type { IGearContainer } from '../types/gear.types'
@@ -44,6 +45,13 @@ const importMode = ref<'create' | 'update'>('update') // Default to update mode
 const recognizeFromName = ref(false) // Option to recognize brand and color from item name
 const previewResult = ref<ReturnType<typeof markdownImportService.parseMarkdown> | null>(null)
 const isGuidelinesDialogOpen = ref(false)
+const importProgress = ref({
+  current: 0,
+  total: 0,
+  phase: 'containers' as 'containers' | 'items',
+  currentItem: '',
+})
+const previewRef = ref<HTMLElement | null>(null)
 
 
 // Check if any containers/items have UUIDs
@@ -52,13 +60,25 @@ const hasUuids = computed(() => {
   return previewResult.value.containers.some(c => c.uuid || c.items.some(i => i.uuid))
 })
 
+// Calculate import progress percentage
+const importProgressPercentage = computed(() => {
+  if (importProgress.value.total === 0) return 0
+  return Math.round((importProgress.value.current / importProgress.value.total) * 100)
+})
+
 const handleClose = () => {
   markdownContent.value = ''
   previewResult.value = null
+  importProgress.value = {
+    current: 0,
+    total: 0,
+    phase: 'containers',
+    currentItem: '',
+  }
   emit('update:open', false)
 }
 
-const handlePreview = () => {
+const handlePreview = async () => {
   if (!markdownContent.value.trim()) {
     toast.error(t('gear.import.emptyContent'))
     return
@@ -74,6 +94,9 @@ const handlePreview = () => {
     toast.warning(t('gear.import.noContainersFound'))
   } else {
     toast.success(t('gear.import.previewSuccess', { count: result.containers.length }))
+    // Scroll to preview section after DOM update
+    await nextTick()
+    previewRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 }
 
@@ -95,6 +118,19 @@ const handleImport = async () => {
     let itemCount = 0
     let itemUpdatedCount = 0
 
+    // Calculate total items for progress tracking
+    const totalContainers = previewResult.value.containers.length
+    const totalItems = previewResult.value.containers.reduce((sum, c) => sum + c.items.length, 0)
+    const totalOperations = totalContainers + totalItems
+
+    // Initialize progress
+    importProgress.value = {
+      current: 0,
+      total: totalOperations,
+      phase: 'containers',
+      currentItem: '',
+    }
+
     // Map to store container slug/id -> container UUID for nested container resolution
     const containerIdMap = new Map<string, string>()
 
@@ -102,6 +138,7 @@ const handleImport = async () => {
     const createdContainers: Array<{ containerData: typeof previewResult.value.containers[0]; container: IGearContainer }> = []
 
     for (const containerData of previewResult.value.containers) {
+      importProgress.value.currentItem = containerData.name
       let container
 
       // Check if we should update existing container (has UUID and mode is update)
@@ -117,6 +154,7 @@ const handleImport = async () => {
             url: containerData.url,
             price: containerData.price,
             currency: containerData.currency,
+            favorite: containerData.favorite,
             // Keep existing type, color, brand, and other fields that aren't in markdown
           })
           updatedCount++
@@ -132,6 +170,7 @@ const handleImport = async () => {
             url: containerData.url,
             price: containerData.price,
             currency: containerData.currency,
+            favorite: containerData.favorite ?? false,
           })
           importedCount++
         }
@@ -146,6 +185,7 @@ const handleImport = async () => {
           url: containerData.url,
           price: containerData.price,
           currency: containerData.currency,
+          favorite: containerData.favorite ?? false,
         })
         importedCount++
       }
@@ -161,9 +201,11 @@ const handleImport = async () => {
       }
 
       createdContainers.push({ containerData, container })
+      importProgress.value.current++
     }
 
     // Phase 2: Create/update items with nested container resolution
+    importProgress.value.phase = 'items'
     for (const { containerData, container } of createdContainers) {
       // Fetch latest container from store to ensure we have up-to-date items
       const latestContainer = store.getContainerById(container.id)
@@ -174,6 +216,7 @@ const handleImport = async () => {
 
       // Import/update items
       for (const itemData of containerData.items) {
+        importProgress.value.currentItem = itemData.name || t('gear.import.importingItem', 'Importing item')
         // Extract nestedContainerId before destructuring
         const { uuid: itemUuid, nestedContainerId, ...itemDto } = itemData
 
@@ -207,6 +250,7 @@ const handleImport = async () => {
           await createItem(latestContainer.id, itemDto)
           itemCount++
         }
+        importProgress.value.current++
       }
     }
 
@@ -238,6 +282,15 @@ const handleImport = async () => {
 <template>
   <Dialog :open="props.open" @update:open="handleClose">
     <DialogContent class="min-w-full md:min-w-2xl max-w-screen md:max-w-6xl min-h-[70vh] max-h-[90vh] flex flex-col">
+      <DialogProgressOverlay
+        :visible="importing"
+        :progress-percentage="importProgressPercentage"
+        :title="t('gear.import.importing', 'Importing...')"
+        :progress-text="t('gear.import.progress', 'Progress')"
+        :current-item-text="importProgress.currentItem"
+        :current="importProgress.current"
+        :total="importProgress.total"
+      />
       <DialogHeader>
         <DialogTitle>{{ t('gear.import.title') }}</DialogTitle>
         <DialogDescription>
@@ -269,7 +322,9 @@ const handleImport = async () => {
         />
 
         <!-- Preview Result -->
-        <MarkdownImportPreview :preview-result="previewResult" />
+        <div ref="previewRef">
+          <MarkdownImportPreview :preview-result="previewResult" />
+        </div>
       </div>
 
       <DialogFooter class="flex-col sm:flex-row gap-2">
