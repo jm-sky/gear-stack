@@ -34,6 +34,7 @@ aioboto3>=13.3.0  # Async S3 client (optional, for S3 storage)
 typer[all]>=0.20.0
 rich>=14.2.0
 python-ulid>=2.7.0  # For user ID generation
+questionary>=2.0.1  # Interactive prompts with arrow key navigation
 
 # Development & Testing
 pytest>=8.3.0

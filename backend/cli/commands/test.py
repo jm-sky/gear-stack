@@ -14,14 +14,24 @@ from app.core.config import settings
 from app.core.email import get_email_service
 from app.core.storage.factory import get_storage_adapter
 
+from ..main import COMMAND_GROUPS, show_group_interactive_menu
+
 # Create test subcommand app
 test_app = typer.Typer(
     name="test",
     help="Test commands for development and debugging",
-    no_args_is_help=True,
+    no_args_is_help=False,  # We handle no-args case ourselves for interactive mode
 )
 
 console = Console()
+
+
+@test_app.callback(invoke_without_command=True)
+def test_callback(ctx: typer.Context) -> None:
+    """Callback for test command group - shows interactive menu if no subcommand provided."""
+    if ctx.invoked_subcommand is None:
+        # No subcommand provided, show interactive menu
+        show_group_interactive_menu("test", COMMAND_GROUPS["test"])
 
 
 @test_app.command("sentry")

@@ -11,6 +11,7 @@ from rich.panel import Panel
 from rich.prompt import Confirm, Prompt
 from rich.table import Table
 
+from ..main import COMMAND_GROUPS, show_group_interactive_menu
 from ..utils import (
     format_2fa_status,
     format_email_verified,
@@ -25,8 +26,16 @@ from ..utils import (
 users_app = typer.Typer(
     name="users",
     help="User management commands",
-    no_args_is_help=True,
+    no_args_is_help=False,  # We handle no-args case ourselves for interactive mode
 )
+
+
+@users_app.callback(invoke_without_command=True)
+def users_callback(ctx: typer.Context) -> None:
+    """Callback for users command group - shows interactive menu if no subcommand provided."""
+    if ctx.invoked_subcommand is None:
+        # No subcommand provided, show interactive menu
+        show_group_interactive_menu("users", COMMAND_GROUPS["users"])
 
 
 @users_app.command("create")

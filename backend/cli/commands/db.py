@@ -7,18 +7,31 @@ from datetime import UTC, datetime
 from importlib import import_module
 from pathlib import Path
 
+import sys
+
 import typer
 from rich.console import Console
 from rich.prompt import Confirm
 from rich.table import Table
 
+from ..main import COMMAND_GROUPS, show_group_interactive_menu
+
 db_app = typer.Typer(
     name="db",
     help="Database management commands",
-    no_args_is_help=True,
+    no_args_is_help=False,  # We handle no-args case ourselves for interactive mode
 )
 
 console = Console()
+
+
+@db_app.callback(invoke_without_command=True)
+def db_callback(ctx: typer.Context) -> None:
+    """Callback for db command group - shows interactive menu if no subcommand provided."""
+    if ctx.invoked_subcommand is None:
+        # No subcommand provided, show interactive menu
+        show_group_interactive_menu("db", COMMAND_GROUPS["db"])
+
 
 MODEL_MODULES = [
     "app.modules.auth.db_models",
@@ -494,6 +507,7 @@ async def _seed_catalogue(db) -> None:
 
     # Create system user for seeded items (use first admin or create placeholder)
     from app.modules.auth.db_models import UserDB
+
     result = await db.execute(select(UserDB).where(UserDB.is_admin == True).limit(1))
     admin_user = result.scalar_one_or_none()
 
@@ -521,7 +535,7 @@ async def _seed_catalogue(db) -> None:
 
     for item_data in CATALOGUE_ITEMS:
         item_name = item_data.get("name")
-        if not item_name:
+        if not item_name or not isinstance(item_name, str):
             console.print("[yellow]Skipping item without name[/yellow]")
             continue
 
@@ -549,10 +563,10 @@ async def _seed_catalogue(db) -> None:
 
         # Handle images - check if image already exists for this item
         if item_name in CATALOGUE_ITEM_IMAGES:
-            image_filename = CATALOGUE_ITEM_IMAGES[item_name]
-            image_path = Path(__file__).parent.parent.parent / "images" / "global-catalogue" / image_filename
+            image_filename: str = CATALOGUE_ITEM_IMAGES[item_name]
+            source_path = Path(__file__).parent.parent.parent / "images" / "global-catalogue" / image_filename
 
-            if image_path.exists():
+            if source_path.exists():
                 # Check if primary image already exists
                 result = await db.execute(
                     select(CatalogueItemImageDB).where(
@@ -563,19 +577,33 @@ async def _seed_catalogue(db) -> None:
                 existing_image = result.scalar_one_or_none()
 
                 if not existing_image:
+                    # Upload image to storage (S3 or local)
+                    from app.core.storage import get_storage_adapter
+
+                    storage = get_storage_adapter()
+
                     # Get file size and MIME type
-                    file_size = image_path.stat().st_size
-                    mime_type = "image/jpeg" if image_filename.endswith(".jpg") else \
-                               "image/png" if image_filename.endswith(".png") else \
-                               "image/webp" if image_filename.endswith(".webp") else "image/jpeg"
+                    file_size = source_path.stat().st_size
+                    mime_type = "image/jpeg" if image_filename.endswith(".jpg") else "image/png" if image_filename.endswith(".png") else "image/webp" if image_filename.endswith(".webp") else "image/jpeg"
+
+                    # Upload file to storage
+                    relative_path = f"global-catalogue/{image_filename}"
+
+                    with open(source_path, "rb") as f:
+                        file_content = f.read()
+                        await storage.upload(file_content, relative_path, mime_type)
+
+                    console.print(f"[cyan]  Uploaded {image_filename} to storage[/cyan]")
+
+                    # Determine storage type
+                    storage_type = "s3" if hasattr(storage, "bucket_name") else "local"
 
                     # Create image record
-                    relative_path = f"global-catalogue/{image_filename}"
                     image = CatalogueItemImageDB(
                         id=str(ULID()),
                         catalogue_item_id=item_id,
                         user_id=creator_id,
-                        storage_type="local",
+                        storage_type=storage_type,
                         file_path=relative_path,
                         file_name=image_filename,
                         file_size=file_size,
