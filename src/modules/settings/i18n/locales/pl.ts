@@ -166,6 +166,13 @@ export const settingsPl = {
         confirm_delete: 'Czy na pewno chcesz usunąć połączenie z {provider}?',
       },
     },
+    storage: {
+      title: 'Użycie Miejsca',
+      description: 'Zobacz użycie i limity miejsca na pliki',
+      used: 'Użyto',
+      usagePercentage: 'Użycie',
+      error: 'Nie można załadować informacji o miejscu',
+    },
     delete_account: {
       title: 'Usuń Konto',
       description: 'Trwale usuń swoje konto i wszystkie powiązane dane',

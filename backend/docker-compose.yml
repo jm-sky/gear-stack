@@ -64,6 +64,7 @@ services:
       - STORAGE_S3_SECRET_KEY=${STORAGE_S3_SECRET_KEY:-}
       - STORAGE_S3_REGION=${STORAGE_S3_REGION:-us-east-1}
       - STORAGE_S3_ENDPOINT_URL=${STORAGE_S3_ENDPOINT_URL:-}
+      - STORAGE_S3_PUBLIC_ENDPOINT_URL=${STORAGE_S3_PUBLIC_ENDPOINT_URL:-}
     ports:
       - "${APP_PORT:-8000}:8000"
     # Volumes (optional - for persistent logs)

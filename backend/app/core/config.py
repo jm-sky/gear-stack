@@ -463,6 +463,11 @@ class StorageSettings(BaseSettings):
         validation_alias="STORAGE_S3_ENDPOINT_URL",
         description="S3 endpoint URL (for S3-compatible services)",
     )
+    s3_public_endpoint_url: str | None = Field(
+        default=None,
+        validation_alias="STORAGE_S3_PUBLIC_ENDPOINT_URL",
+        description="Public S3 endpoint URL for generating accessible URLs (e.g., http://localhost:9000 for MinIO in Docker). If not set, uses s3_endpoint_url.",
+    )
 
     # Upload limits
     max_file_size: int = Field(

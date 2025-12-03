@@ -32,6 +32,7 @@ def get_storage_adapter() -> StorageAdapter:
             aws_secret_access_key=settings.storage.s3_secret_key,
             region_name=settings.storage.s3_region,
             endpoint_url=settings.storage.s3_endpoint_url,
+            public_endpoint_url=settings.storage.s3_public_endpoint_url,
         )
     else:
         raise ValueError(f"Unsupported storage type: {storage_type}")

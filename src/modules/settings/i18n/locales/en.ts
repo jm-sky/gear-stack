@@ -166,6 +166,13 @@ export const settingsEn = {
         confirm_delete: 'Are you sure you want to remove the connection to {provider}?',
       },
     },
+    storage: {
+      title: 'Storage Usage',
+      description: 'View your file storage usage and limits',
+      used: 'Used',
+      usagePercentage: 'Usage',
+      error: 'Unable to load storage information',
+    },
     delete_account: {
       title: 'Delete Account',
       description: 'Permanently delete your account and all associated data',

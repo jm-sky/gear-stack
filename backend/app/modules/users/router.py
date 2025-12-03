@@ -6,9 +6,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.database import get_db
 from app.modules.auth.repositories import UserRepository as AuthUserRepository
 from app.modules.auth.repositories import get_user_repository as get_auth_user_repository
+from app.modules.gear.item_image_repository import ItemImageRepository
 from app.modules.settings.db_models import UserSettingsDB
 
 from .dependencies import AdminUser, CurrentUser
@@ -17,6 +19,7 @@ from .repositories import UserRepository, get_user_repository
 from .schemas import (
     MessageResponse,
     PublicUserResponse,
+    StorageUsageResponse,
     UserCreate,
     UserListResponse,
     UserProfileUpdate,
@@ -248,3 +251,37 @@ async def hard_delete_user(
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User {user_id} not found")
     return MessageResponse(message=f"User {user_id} permanently deleted")
+
+
+@router.get(
+    "/me/storage/usage",
+    response_model=StorageUsageResponse,
+    summary="Get storage usage",
+    description="Get current user's storage usage and limit",
+)
+async def get_storage_usage(
+    current_user: CurrentUser,
+    db: AsyncSession = Depends(get_db),
+) -> StorageUsageResponse:
+    """Get storage usage for current user.
+
+    Returns:
+        Storage usage information including used bytes, limit bytes, and usage percentage
+    """
+    image_repo = ItemImageRepository(db)
+    used_bytes = await image_repo.get_user_storage_usage(current_user.id)
+
+    # Determine storage limit based on user role
+    if current_user.role == "admin":
+        limit_bytes = settings.storage.max_file_size_admin
+    else:
+        limit_bytes = settings.storage.max_file_size
+
+    # Calculate usage percentage
+    used_percentage = (used_bytes / limit_bytes * 100) if limit_bytes > 0 else 0.0
+
+    return StorageUsageResponse(
+        usedBytes=used_bytes,
+        limitBytes=limit_bytes,
+        usedPercentage=min(used_percentage, 100.0),  # Cap at 100%
+    )

@@ -100,3 +100,13 @@ class MessageResponse(BaseModel):
     """Generic message response."""
 
     message: str
+
+
+class StorageUsageResponse(BaseModel):
+    """Storage usage response schema with camelCase."""
+
+    usedBytes: int = Field(..., description="Total storage used in bytes")
+    limitBytes: int = Field(..., description="Storage limit in bytes")
+    usedPercentage: float = Field(..., description="Storage usage percentage (0-100)")
+
+    model_config = {"from_attributes": True, "populate_by_name": True}

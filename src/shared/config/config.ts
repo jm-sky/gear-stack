@@ -69,9 +69,9 @@ export const config = {
   },
   storage: {
     // Maximum file size for regular users (20 MB)
-    maxFileSize: 20 * 1024 * 1024,
+    maxFileSize: import.meta.env.VITE_MAX_FILE_SIZE ? parseInt(import.meta.env.VITE_MAX_FILE_SIZE) : 20 * 1024 * 1024,
     // Maximum file size for administrators (50 MB)
-    maxFileSizeAdmin: 50 * 1024 * 1024,
+    maxFileSizeAdmin: import.meta.env.VITE_MAX_FILE_SIZE_ADMIN ? parseInt(import.meta.env.VITE_MAX_FILE_SIZE_ADMIN) : 50 * 1024 * 1024,
   },
 }
 

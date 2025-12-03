@@ -168,3 +168,18 @@ class ItemImageRepository:
         result = await self.db.execute(stmt)
         images = result.scalars().all()
         return {img.item_id: img for img in images}
+
+    async def get_user_storage_usage(self, user_id: str) -> int:
+        """
+        Get total storage usage in bytes for a user.
+
+        Args:
+            user_id: User ID
+
+        Returns:
+            Total storage usage in bytes
+        """
+        stmt = select(func.sum(ItemImageDB.file_size)).where(ItemImageDB.user_id == user_id)
+        result = await self.db.execute(stmt)
+        total = result.scalar()
+        return total or 0

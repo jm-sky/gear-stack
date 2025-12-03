@@ -23,6 +23,7 @@ class S3StorageAdapter(StorageAdapter):
         aws_secret_access_key: str,
         region_name: str = "us-east-1",
         endpoint_url: Optional[str] = None,
+        public_endpoint_url: Optional[str] = None,
     ):
         """
         Initialize S3 storage adapter.
@@ -33,6 +34,8 @@ class S3StorageAdapter(StorageAdapter):
             aws_secret_access_key: AWS secret access key
             region_name: AWS region name
             endpoint_url: Custom endpoint URL (for S3-compatible services like MinIO, DigitalOcean Spaces)
+            public_endpoint_url: Public endpoint URL for generating accessible URLs (e.g., http://localhost:9000 for MinIO in Docker).
+                If not set, uses endpoint_url.
         """
         if not S3_AVAILABLE:
             raise ImportError("aioboto3 is required for S3 storage. Install with: pip install aioboto3")
@@ -42,6 +45,7 @@ class S3StorageAdapter(StorageAdapter):
         self.aws_secret_access_key = aws_secret_access_key
         self.region_name = region_name
         self.endpoint_url = endpoint_url
+        self.public_endpoint_url = public_endpoint_url or endpoint_url
         self.session = aioboto3.Session()
 
     async def upload(
@@ -113,12 +117,14 @@ class S3StorageAdapter(StorageAdapter):
 
     async def get_url(self, file_path: str, expires_in: int = 3600) -> str:
         """Generate pre-signed URL for S3 object."""
+        # Use public_endpoint_url for generating URLs accessible from browser
+        # but use endpoint_url for the actual connection
         async with self.session.client(
             "s3",
             region_name=self.region_name,
             aws_access_key_id=self.aws_access_key_id,
             aws_secret_access_key=self.aws_secret_access_key,
-            endpoint_url=self.endpoint_url,
+            endpoint_url=self.public_endpoint_url,
         ) as s3:
             url: str = await s3.generate_presigned_url(
                 "get_object",

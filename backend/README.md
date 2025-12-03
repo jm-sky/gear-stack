@@ -179,7 +179,8 @@ Key environment variables (see `.env` file):
 - `STORAGE_S3_ACCESS_KEY`: S3 access key ID
 - `STORAGE_S3_SECRET_KEY`: S3 secret access key
 - `STORAGE_S3_REGION`: S3 region (default: `us-east-1`)
-- `STORAGE_S3_ENDPOINT_URL`: S3 endpoint URL (for S3-compatible services like MinIO)
+- `STORAGE_S3_ENDPOINT_URL`: S3 endpoint URL (for S3-compatible services like MinIO). Used for internal operations (upload, download, delete).
+- `STORAGE_S3_PUBLIC_ENDPOINT_URL`: Public S3 endpoint URL for generating accessible URLs (e.g., `http://localhost:9000` for MinIO in Docker). If not set, uses `STORAGE_S3_ENDPOINT_URL`. Useful when MinIO is in Docker and internal endpoint (`http://minio:9000`) is not accessible from browser.
 
 ### Email Configuration
 
