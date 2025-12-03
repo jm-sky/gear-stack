@@ -19,6 +19,7 @@ import ContainerHeaderName from './ContainerHeaderName.vue'
 import ContainerHeaderStats from './ContainerHeaderStats.vue'
 import FavoriteContainerButton from './FavoriteContainerButton.vue'
 import ItemsTableEditModeToggle from './ItemsTableEditModeToggle.vue'
+import MarkdownRenderer from './MarkdownRenderer.vue'
 import WeightLimitBadge from './WeightLimitBadge.vue'
 
 // Action icons
@@ -123,9 +124,12 @@ const handleBack = () => {
       <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
         <div class="flex-1">
           <ContainerHeaderName :container />
-          <p v-if="container.description" class="text-muted-foreground mb-3">
-            {{ container.description }}
-          </p>
+          <div v-if="container.description" class="text-muted-foreground mb-3">
+            <MarkdownRenderer
+              :content="container.description"
+              class="text-sm"
+            />
+          </div>
           <div class="flex items-center gap-2 flex-wrap">
             <Badge variant="outline">
               {{ typeLabel }}

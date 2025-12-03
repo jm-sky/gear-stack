@@ -14,6 +14,7 @@ import SearchImagesButton from '../components/SearchImagesButton.vue'
 
 // Lazy load ItemImageGallery - not critical for initial render
 const ItemImageGallery = defineAsyncComponent(() => import('../components/ItemImageGallery.vue'))
+import MarkdownRenderer from '../components/MarkdownRenderer.vue'
 import { useExpiration } from '../composables/useExpiration'
 import { useFormattedItemPrice } from '../composables/useFormattedItemPrice'
 import { useFormattedItemWeight } from '../composables/useFormattedItemWeight'
@@ -245,9 +246,10 @@ const urlDomain = computed<string>(() => {
             <div class="mb-2 text-sm text-muted-foreground">
               {{ t('gear.item.notes') }}
             </div>
-            <div class="whitespace-pre-wrap text-sm">
-              {{ item.notes }}
-            </div>
+            <MarkdownRenderer
+              :content="item.notes"
+              class="text-sm"
+            />
           </div>
         </template>
 

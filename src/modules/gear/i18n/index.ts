@@ -236,7 +236,13 @@ export const gearEn = {
         high: 'High',
       },
     },
+    items: {
+      table: {
+        title: 'Items table',
+      },
+    },
     itemsTable: {
+      title: 'Items table',
       imageCell: {
         uploadSuccess: 'Image uploaded successfully',
         deleteSuccess: 'Image deleted successfully',
@@ -466,6 +472,7 @@ export const gearEn = {
       legend: 'Legend',
       total: 'Total',
       noData: 'No data to display',
+      loading: 'Loading chart...',
     },
     filters: {
       search: 'Search items...',
@@ -961,7 +968,13 @@ export const gearPl = {
         high: 'Wysoka',
       },
     },
+    items: {
+      table: {
+        title: 'Tabela przedmiotów',
+      },
+    },
     itemsTable: {
+      title: 'Tabela przedmiotów',
       imageCell: {
         uploadSuccess: 'Obrazek został dodany',
         deleteSuccess: 'Obrazek został usunięty',
@@ -1191,6 +1204,7 @@ export const gearPl = {
       legend: 'Legenda',
       total: 'Łącznie',
       noData: 'Brak danych do wyświetlenia',
+      loading: 'Ładowanie wykresu...',
     },
     filters: {
       search: 'Szukaj przedmiotów...',

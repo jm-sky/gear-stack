@@ -12,6 +12,7 @@ import UserRoleBadge from '@/components/ui/UserRoleBadge.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import ColorDot from '@/modules/gear/components/ColorDot.vue'
+import MarkdownRenderer from '@/modules/gear/components/MarkdownRenderer.vue'
 import { apiClient } from '@/shared/services/apiClient'
 import { getInitials } from '@/shared/utils/getInitials'
 import type { IUser } from '../types/user.types'
@@ -156,7 +157,10 @@ const handleContainerClick = (containerId: string) => {
                 <CardTitle>{{ container.name }}</CardTitle>
               </div>
               <CardDescription v-if="container.description">
-                {{ container.description }}
+                <MarkdownRenderer
+                  :content="container.description"
+                  class="text-sm"
+                />
               </CardDescription>
             </CardHeader>
 

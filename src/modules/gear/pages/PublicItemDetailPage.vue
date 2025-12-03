@@ -11,6 +11,7 @@ import type { IGearItem } from '../types/gear.types'
 import CategoryIcon from '../components/CategoryIcon.vue'
 import ItemPriorityBadge from '../components/ItemPriorityBadge.vue'
 import ItemStatusBadge from '../components/ItemStatusBadge.vue'
+import MarkdownRenderer from '../components/MarkdownRenderer.vue'
 import { useCategoryLabel } from '../composables/useCategoryLabel'
 import { useExpiration } from '../composables/useExpiration'
 import { useFormattedItemPrice } from '../composables/useFormattedItemPrice'
@@ -214,9 +215,10 @@ const hasDetails = computed<boolean>(() => {
             <div class="text-sm text-muted-foreground mb-2">
               {{ t('gear.item.notes') }}
             </div>
-            <div class="text-sm whitespace-pre-wrap">
-              {{ item.notes }}
-            </div>
+            <MarkdownRenderer
+              :content="item.notes"
+              class="text-sm"
+            />
           </div>
         </template>
 

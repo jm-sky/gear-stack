@@ -476,19 +476,20 @@ Kombinacja opcji 1 i 2:
 > **Uwaga:** Ta funkcjonalność działa z localStorage (front-end only). W przyszłości może być rozszerzona o synchronizację z backendem (zobacz [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md)).
 
 ### Obsługa Markdown w notatkach
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium
 
-- Możliwość formatowania notatek (pole `notes`) za pomocą Markdown
-- W formularzach: edytor Markdown (z podglądem na żywo lub split view)
-- W wyświetlaniu: renderowanie Markdown do HTML (linki, **pogrubienie**, *kursywa*, listy, itp.)
-- Podstawowe wsparcie dla:
+- ✅ Możliwość formatowania notatek (pole `notes`) za pomocą Markdown
+- ✅ W formularzach: edytor Markdown z przełącznikiem Edit/Preview (komponent `TextareaWithMarkdownPreview`)
+- ✅ W wyświetlaniu: renderowanie Markdown do HTML (linki, **pogrubienie**, *kursywa*, listy, itp.)
+- ✅ Podstawowe wsparcie dla:
   - **Bold** i *italic*
-  - Linki `[text](url)`
-  - Listy (ul/ol)
+  - Linki `[text](url)` i automatyczna konwersja URL-i
+  - Listy (ul/ol) z odpowiednimi markerami i wcięciami
   - `code` i bloki kodu
-- Opcjonalnie: edytor WYSIWYG dla Markdown lub składnia Markdown z podglądem
-- Obsługa dla przedmiotów (`IGearItem.notes`) i kontenerów (`IGearContainer.description`)
-- **Uwaga:** Na razie nie dodajemy edytora Markdown. Robimy Textarea z notatką, że wspieramy Markdown. Za duże mamy ryzyko, że komponent *edytor Markdown* nie będzie działać.
+  - Nagłówki, cytaty i inne elementy Markdown
+- ✅ Obsługa dla przedmiotów (`IGearItem.notes`) i kontenerów (`IGearContainer.description`)
+- ✅ Komponent `MarkdownRenderer` do wyświetlania Markdown w różnych miejscach aplikacji
+- ✅ Tłumaczenia Markdown przeniesione do `shared/common` (dostępne w całej aplikacji)
 
 ---
 
@@ -707,20 +708,23 @@ Kombinacja opcji 1 i 2:
 
 ## ✏️ Szybka edycja
 
-### Edycja bezpośrednio na liście (Inline Editing)
-**Status:** ✅ Partially Completed (v2.25.0) | **Priority:** High | **Feature:** FEATURE-007 | **Complexity:** Large
+### ✅ Edycja bezpośrednio na liście (Inline Editing)
+**Status:** ✅ Completed | **Priority:** High | **Feature:** FEATURE-007 | **Complexity:** Large
 
-- ✅ **Phase 1 Completed (v2.25.0)**: Inline editing dla nazwy przedmiotu
+- ✅ **Fully Completed**: Inline editing dla wszystkich podstawowych pól
   - Edit mode toggle z persystencją w localStorage
-  - Edytowalne pole nazwy w wierszu tabeli
+  - Edytowalne pola w wierszu tabeli
   - Zapis z Enter lub blur, anulowanie z Escape lub X
   - Wizualne feedback i stany ładowania
-- Możliwość szybkiej edycji listy - dodawanie i zmienianie przedmiotów bezpośrednio na liście
-- Bez wchodzenia w formularz
-- Inline editing dla podstawowych pól:
+- ✅ Inline editing dla wszystkich podstawowych pól:
   - ✅ Zmiana nazwy przedmiotu (edytowalne pole w wierszu) - Completed
-  - Zmiana opisu/notatek (edytowalne pole w wierszu)
-  - Zmiana innych kolumn (ilość, waga, cena, itp.)
+  - ✅ Zmiana ilości (edytowalne pole w wierszu) - Completed
+  - ✅ Zmiana wagi (edytowalne pole w wierszu) - Completed
+  - ✅ Zmiana priorytetu (select w wierszu) - Completed
+  - ✅ Zmiana statusu (select w wierszu) - Completed
+  - ✅ Zmiana ceny i waluty (edytowalne pole w wierszu) - Completed
+  - ✅ Zmiana kategorii (select w wierszu) - Completed
+  - ✅ Zmiana notatek (edytowalne pole w wierszu) - Completed
 - Szybkie akcje bezpośrednio z wiersza:
   - Upload photo (dodawanie zdjęcia do przedmiotu)
   - Add link for this item (dodawanie URL)

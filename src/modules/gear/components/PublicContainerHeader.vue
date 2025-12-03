@@ -12,6 +12,7 @@ import type { IGearContainer } from '../types/gear.types'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { GearRoutePath } from '../routes'
 import { getActionIcon } from '../utils/actionIcons'
+import MarkdownRenderer from './MarkdownRenderer.vue'
 import PublicContainerAuthorBadge from './PublicContainerAuthorBadge.vue'
 
 const props = defineProps<{
@@ -69,9 +70,12 @@ const handleBack = () => {
       <h1 class="text-2xl sm:text-3xl font-bold mb-2 wrap-break-word">
         {{ container.name }}
       </h1>
-      <p v-if="container.description" class="text-muted-foreground mb-3 text-sm sm:text-base wrap-break-word">
-        {{ container.description }}
-      </p>
+      <div v-if="container.description" class="text-muted-foreground mb-3">
+        <MarkdownRenderer
+          :content="container.description"
+          class="text-sm sm:text-base"
+        />
+      </div>
       <div class="flex items-center gap-2 flex-wrap">
         <Badge variant="outline">
           {{ typeLabel }}

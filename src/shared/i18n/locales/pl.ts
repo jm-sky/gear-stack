@@ -15,6 +15,7 @@ export default {
     create: 'Utwórz',
     delete: 'Usuń',
     edit: 'Edytuj',
+    preview: 'Podgląd',
     close: 'Zamknij',
     confirm: 'Potwierdź',
     search: 'Szukaj',
@@ -63,6 +64,11 @@ export default {
       aiContext: 'Kontekst AI',
       notFound: 'Strona nie znaleziona',
     },
+  },
+  markdown: {
+    supported: 'Markdown jest wspierany',
+    supportedHint: 'Możesz używać markdown do formatowania swojego tekstu. Obsługiwane funkcje: nagłówki, pogrubienie, kursywa, listy, linki, obrazy, bloki kodu, tabele, cytaty i więcej.',
+    showingPreview: 'Pokazywanie podglądu',
   },
   validation: {
     required: 'To pole jest wymagane',

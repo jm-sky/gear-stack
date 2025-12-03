@@ -27,6 +27,7 @@ import ContainerCardCreatedDate from './ContainerCardCreatedDate.vue'
 import ContainerCardStats from './ContainerCardStats.vue'
 import ContainerReadinessProgressBar from './ContainerReadinessProgressBar.vue'
 import FavoriteContainerButton from './FavoriteContainerButton.vue'
+import MarkdownRenderer from './MarkdownRenderer.vue'
 
 const props = defineProps<{
   container: IGearContainer
@@ -99,8 +100,11 @@ const handleShow = () => {
     <CardContent class="flex flex-col flex-1 gap-3 px-6 pb-4 text-card-foreground">
       <ContainerCardBadges :container />
 
-      <CardDescription class="flex-1">
-        {{ container.description ?? '' }}
+      <CardDescription v-if="container.description" class="flex-1">
+        <MarkdownRenderer
+          :content="container.description"
+          class="text-sm"
+        />
       </CardDescription>
 
       <ContainerCardStats

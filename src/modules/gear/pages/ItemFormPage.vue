@@ -46,6 +46,9 @@ const isEditMode: boolean = !!itemId
 const { container } = useContainer(containerId)
 const { navigateBackAndClean } = useNavigationReturn(containerId, itemId)
 
+// Local state for item (loaded explicitly, not from computed)
+const item = ref<IGearItem | null>(null)
+
 // Set dynamic page title
 watchEffect(() => {
   if (isEditMode && item.value?.name) {
@@ -54,9 +57,6 @@ watchEffect(() => {
     setTitle('gear.item.create', { name: container.value.name })
   }
 })
-
-// Local state for item (loaded explicitly, not from computed)
-const item = ref<IGearItem | null>(null)
 const isLoading = ref(isEditMode) // Only show loading when editing
 
 // Redirect if container not found

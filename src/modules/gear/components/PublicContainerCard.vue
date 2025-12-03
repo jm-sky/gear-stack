@@ -8,6 +8,7 @@ import ColorDot from '../components/ColorDot.vue'
 import { GearRoutePath } from '../routes'
 import ContainerCardBadges from './ContainerCardBadges.vue'
 import ContainerCardCreatedDate from './ContainerCardCreatedDate.vue'
+import MarkdownRenderer from './MarkdownRenderer.vue'
 import RatingStars from './RatingStars.vue'
 
 const { t } = useI18n()
@@ -36,8 +37,11 @@ defineProps<{
       <CardContent class="flex flex-col flex-1 gap-3 px-6 pb-4 text-card-foreground">
         <ContainerCardBadges :container with-author />
 
-        <CardDescription class="flex-1">
-          {{ container.description ?? '' }}
+        <CardDescription v-if="container.description" class="flex-1">
+          <MarkdownRenderer
+            :content="container.description"
+            class="text-sm"
+          />
         </CardDescription>
 
         <div class="text-sm text-muted-foreground">

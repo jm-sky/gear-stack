@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import Textarea from '@/components/ui/textarea/Textarea.vue'
 import WeightInputWithUnitPicker from '@/components/ui/weight-input/WeightInputWithUnitPicker.vue'
 import type { IGearItem } from '../types/gear.types'
 import { useGearSettings } from '../composables/useGearSettings'
@@ -17,6 +16,7 @@ import CurrencySelect from './inputs/CurrencySelect.vue'
 import PrioritySelect from './inputs/PrioritySelect.vue'
 import QualitySelect from './inputs/QualitySelect.vue'
 import StatusSelect from './inputs/StatusSelect.vue'
+import TextareaWithMarkdownPreview from './TextareaWithMarkdownPreview.vue'
 
 defineProps<{
   item?: IGearItem
@@ -143,11 +143,10 @@ const handleCancel = () => {
     <FormField v-slot="{ componentField }" name="notes">
       <FormItem>
         <FormLabel :label="t('gear.item.notes')" />
-        <Textarea
+        <TextareaWithMarkdownPreview
           v-bind="componentField"
           :placeholder="t('gear.item.notes')"
-          rows="3"
-          class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          :rows="3"
         />
         <FormMessage />
       </FormItem>

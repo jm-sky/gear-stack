@@ -15,6 +15,7 @@ export default {
     create: 'Create',
     delete: 'Delete',
     edit: 'Edit',
+    preview: 'Preview',
     close: 'Close',
     confirm: 'Confirm',
     search: 'Search',
@@ -63,6 +64,11 @@ export default {
       aiContext: 'AI Context',
       notFound: 'Page Not Found',
     },
+  },
+  markdown: {
+    supported: 'Markdown is supported',
+    supportedHint: 'You can use markdown to format your text. Supported features: headings, bold, italic, lists, links, images, code blocks, tables, quotes, and more.',
+    showingPreview: 'Showing preview',
   },
   validation: {
     required: 'This field is required',

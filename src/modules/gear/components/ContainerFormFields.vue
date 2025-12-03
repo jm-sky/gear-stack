@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import Textarea from '@/components/ui/textarea/Textarea.vue'
 import WeightInputWithUnitPicker from '@/components/ui/weight-input/WeightInputWithUnitPicker.vue'
 import type { IGearContainer } from '../types/gear.types'
 import { useGearSettings } from '../composables/useGearSettings'
@@ -14,6 +13,7 @@ import BrandAutocomplete from './inputs/BrandAutocomplete.vue'
 import ContainerColorPicker from './inputs/ContainerColorPicker.vue'
 import ContainerTypeSelect from './inputs/ContainerTypeSelect.vue'
 import CurrencySelect from './inputs/CurrencySelect.vue'
+import TextareaWithMarkdownPreview from './TextareaWithMarkdownPreview.vue'
 
 const _props = defineProps<{
   container?: IGearContainer
@@ -61,11 +61,10 @@ const handleCancel = () => {
     <FormField v-slot="{ componentField }" name="description">
       <FormItem>
         <FormLabel :label="t('gear.container.description')" />
-        <Textarea
+        <TextareaWithMarkdownPreview
           v-bind="componentField"
           :placeholder="t('gear.container.description')"
-          rows="3"
-          class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          :rows="3"
         />
         <FormMessage />
       </FormItem>

@@ -137,7 +137,7 @@ Funkcjonalności działające z **localStorage**, bez potrzeby backendu (offline
 - ✅ Strona 404 i error handling
 - ✅ Footer i strony prawne
 - 🔄 Oznaczanie kontenerów jako fragmentów rodzica - planowane
-- 🔄 Obsługa Markdown w notatkach - planowane
+- ✅ Obsługa Markdown w notatkach - ukończone
 - 🔄 Zwijanie sekcji statystyk - planowane
 - ✅ Podstawowe oznaczenia ARIA i dostępność - ukończone
 
