@@ -19,6 +19,31 @@ from sqlalchemy import text
 from app.core.database import engine
 
 
+async def table_exists(conn, table_name: str) -> bool:
+    """Check if a table exists in the database.
+
+    Args:
+        conn: Database connection
+        table_name: Name of the table to check
+
+    Returns:
+        True if table exists, False otherwise
+    """
+    result = await conn.execute(
+        text(
+            """
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables
+                WHERE table_schema = 'public'
+                AND table_name = :table_name
+            );
+        """
+        ),
+        {"table_name": table_name},
+    )
+    return result.scalar() is True
+
+
 async def column_exists(conn, table_name: str, column_name: str) -> bool:
     """Check if a column exists in a table.
 
@@ -56,6 +81,14 @@ async def upgrade() -> None:
         if column_exist:
             print("catalogue_item_id column already exists, skipping migration...")
             return
+
+        # Check if referenced table exists
+        table_exist = await table_exists(conn, "global_catalogue_items")
+        if not table_exist:
+            raise RuntimeError(
+                "Table 'global_catalogue_items' does not exist. "
+                "Please run migration 029 (add_global_catalogue_items) first."
+            )
 
         print("Adding catalogue_item_id column...")
         await conn.execute(
