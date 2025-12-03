@@ -101,8 +101,8 @@ class GlobalCatalogueItemDB(Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     brand: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
     model: Mapped[str | None] = mapped_column(String(255), nullable=True)
-        price_tier: Mapped[str | None] = mapped_column(String(20), nullable=True)  # low, medium, high
-        quality: Mapped[str | None] = mapped_column(String(20), nullable=True)  # low, medium, high (zgodne z GearItemQuality)
+    price_tier: Mapped[str | None] = mapped_column(String(20), nullable=True)  # low, medium, high
+    quality: Mapped[str | None] = mapped_column(String(20), nullable=True)  # low, medium, high (zgodne z GearItemQuality)
     url: Mapped[str | None] = mapped_column(Text, nullable=True)
     color: Mapped[str | None] = mapped_column(String(50), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, index=True)
@@ -245,6 +245,350 @@ async def upgrade() -> None:
         print("Migration completed successfully!")
 
 
+#### Step 1.4: Dodanie kolumny `catalogue_item_id` do `gear_items`
+
+**File:** `backend/migrations/030_add_catalogue_item_id_to_gear_items.py`
+
+**Uwaga:** Ta migracja dodaje pole `catalogue_item_id` do istniejącej tabeli `gear_items`, aby móc śledzić, które przedmioty pochodzą z katalogu.
+
+```python
+"""Migration: Add catalogue_item_id to gear_items table.
+
+This migration adds the catalogue_item_id column to gear_items table
+to track which items were added from the global catalogue.
+
+Usage:
+    python migrations/030_add_catalogue_item_id_to_gear_items.py upgrade
+    python migrations/030_add_catalogue_item_id_to_gear_items.py downgrade
+"""
+
+import asyncio
+import sys
+from pathlib import Path
+
+# Add parent directory to path to import app modules
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from sqlalchemy import text
+from app.core.database import engine
+
+
+async def column_exists(conn, table_name: str, column_name: str) -> bool:
+    """Check if a column exists in a table."""
+    result = await conn.execute(
+        text(
+            """
+            SELECT EXISTS (
+                SELECT FROM information_schema.columns 
+                WHERE table_schema = 'public' 
+                AND table_name = :table_name
+                AND column_name = :column_name
+            );
+        """
+        ),
+        {"table_name": table_name, "column_name": column_name},
+    )
+    return result.scalar() is True
+
+
+async def upgrade() -> None:
+    """Add catalogue_item_id column to gear_items table."""
+    print("Adding catalogue_item_id column to gear_items table...")
+
+    async with engine.begin() as conn:
+        column_exist = await column_exists(conn, "gear_items", "catalogue_item_id")
+
+        if column_exist:
+            print("catalogue_item_id column already exists, skipping migration...")
+            return
+
+        print("Adding catalogue_item_id column...")
+        await conn.execute(
+            text(
+                """
+                ALTER TABLE gear_items
+                ADD COLUMN catalogue_item_id VARCHAR(36),
+                ADD CONSTRAINT fk_gear_items_catalogue_item_id 
+                    FOREIGN KEY (catalogue_item_id) 
+                    REFERENCES global_catalogue_items(id) 
+                    ON DELETE SET NULL;
+            """
+            ),
+        )
+
+        # Create index for better query performance
+        print("Creating index...")
+        await conn.execute(
+            text("CREATE INDEX ix_gear_items_catalogue_item_id ON gear_items(catalogue_item_id);")
+        )
+
+        print("Migration completed successfully!")
+
+
+async def downgrade() -> None:
+    """Remove catalogue_item_id column from gear_items table."""
+    print("Removing catalogue_item_id column from gear_items table...")
+
+    async with engine.begin() as conn:
+        column_exist = await column_exists(conn, "gear_items", "catalogue_item_id")
+
+        if not column_exist:
+            print("catalogue_item_id column does not exist, skipping downgrade...")
+            return
+
+        # Drop index
+        print("Dropping index...")
+        await conn.execute(
+            text("DROP INDEX IF EXISTS ix_gear_items_catalogue_item_id;")
+        )
+
+        # Drop foreign key constraint
+        print("Dropping foreign key constraint...")
+        await conn.execute(
+            text("ALTER TABLE gear_items DROP CONSTRAINT IF EXISTS fk_gear_items_catalogue_item_id;")
+        )
+
+        # Drop column
+        print("Dropping column...")
+        await conn.execute(
+            text("ALTER TABLE gear_items DROP COLUMN IF EXISTS catalogue_item_id;")
+        )
+
+        print("Downgrade completed successfully!")
+
+
+if __name__ == "__main__":
+    import sys
+
+    if len(sys.argv) > 1 and sys.argv[1] == "downgrade":
+        asyncio.run(downgrade())
+    else:
+        asyncio.run(upgrade())
+```
+
+#### Step 1.5: Utworzenie modelu `CatalogueItemImageDB`
+
+**File:** `backend/app/modules/gear/db_models.py`
+
+**Uwaga:** Model identyczny z `ItemImageDB`, ale dla przedmiotów katalogu. Obrazki katalogu wymagają autoryzacji (nie są publiczne).
+
+```python
+class CatalogueItemImageDB(Base):
+    """SQLAlchemy model for catalogue item images.
+
+    Represents images uploaded for global catalogue items.
+    Identical structure to ItemImageDB, but for catalogue items.
+
+    Attributes:
+        id: Unique identifier (ULID format, 36 chars)
+        catalogue_item_id: Parent catalogue item ID
+        user_id: Uploader user ID (admin)
+        storage_type: Storage backend type (local or s3)
+        file_path: Relative path for local storage, S3 key for S3
+        file_name: Original filename
+        file_size: File size in bytes
+        mime_type: MIME type (image/jpeg, image/png, etc.)
+        width: Image width in pixels
+        height: Image height in pixels
+        is_primary: Whether this is the primary image for the item
+        order: Display order (0-based)
+        is_processed: Whether image has been processed (resized/optimized)
+        original_file_size: Original file size before processing
+        external_url: External URL if not hosted locally
+        created_at: Upload timestamp
+        updated_at: Last update timestamp
+    """
+
+    __tablename__ = "catalogue_item_images"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    catalogue_item_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("global_catalogue_items.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), nullable=False, index=True)
+
+    # Storage info
+    storage_type: Mapped[str] = mapped_column(String(10), nullable=False)
+    file_path: Mapped[str] = mapped_column(String(500), nullable=False)
+    file_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    file_size: Mapped[int] = mapped_column(Integer, nullable=False)
+    mime_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    external_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+
+    # Image metadata
+    width: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    height: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    is_primary: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+    # Processing flags
+    is_processed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    original_file_size: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    # Relationships
+    catalogue_item: Mapped["GlobalCatalogueItemDB"] = relationship("GlobalCatalogueItemDB", back_populates="images")
+    user: Mapped["UserDB"] = relationship("UserDB", foreign_keys=[user_id])
+
+    def __repr__(self) -> str:
+        return f"<CatalogueItemImageDB(id={self.id}, catalogue_item_id={self.catalogue_item_id}, file_name={self.file_name})>"
+
+
+# Add images relationship to GlobalCatalogueItemDB
+GlobalCatalogueItemDB.images = relationship(
+    "CatalogueItemImageDB",
+    back_populates="catalogue_item",
+    cascade="all, delete-orphan",
+    order_by="CatalogueItemImageDB.order",
+)
+```
+
+**Migracja dla tabeli `catalogue_item_images`:**
+
+**File:** `backend/migrations/031_add_catalogue_item_images_table.py`
+
+```python
+"""Migration: Add catalogue_item_images table.
+
+This migration adds the catalogue_item_images table for storing images
+for global catalogue items.
+
+Usage:
+    python migrations/031_add_catalogue_item_images_table.py upgrade
+    python migrations/031_add_catalogue_item_images_table.py downgrade
+"""
+
+import asyncio
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from sqlalchemy import text
+from app.core.database import engine
+
+
+async def table_exists(conn, table_name: str) -> bool:
+    """Check if a table exists in the database."""
+    result = await conn.execute(
+        text(
+            """
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_schema = 'public' 
+                AND table_name = :table_name
+            );
+        """
+        ),
+        {"table_name": table_name},
+    )
+    return result.scalar() is True
+
+
+async def upgrade() -> None:
+    """Create catalogue_item_images table."""
+    print("Creating catalogue_item_images table...")
+
+    async with engine.begin() as conn:
+        table_exist = await table_exists(conn, "catalogue_item_images")
+
+        if table_exist:
+            print("catalogue_item_images table already exists, skipping migration...")
+            return
+
+        print("Creating catalogue_item_images table...")
+        await conn.execute(
+            text(
+                """
+                CREATE TABLE catalogue_item_images (
+                    id VARCHAR(36) PRIMARY KEY,
+                    catalogue_item_id VARCHAR(36) NOT NULL,
+                    user_id VARCHAR(36) NOT NULL,
+                    storage_type VARCHAR(10) NOT NULL,
+                    file_path VARCHAR(500) NOT NULL,
+                    file_name VARCHAR(255) NOT NULL,
+                    file_size INTEGER NOT NULL,
+                    mime_type VARCHAR(50) NOT NULL,
+                    external_url VARCHAR(1000),
+                    width INTEGER,
+                    height INTEGER,
+                    is_primary BOOLEAN NOT NULL DEFAULT false,
+                    "order" INTEGER NOT NULL DEFAULT 0,
+                    is_processed BOOLEAN NOT NULL DEFAULT false,
+                    original_file_size INTEGER,
+                    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    CONSTRAINT fk_catalogue_item_images_catalogue_item_id 
+                        FOREIGN KEY (catalogue_item_id) 
+                        REFERENCES global_catalogue_items(id) 
+                        ON DELETE CASCADE,
+                    CONSTRAINT fk_catalogue_item_images_user_id 
+                        FOREIGN KEY (user_id) 
+                        REFERENCES users(id)
+                );
+            """
+            ),
+        )
+
+        # Create indexes
+        print("Creating indexes...")
+        await conn.execute(
+            text("CREATE INDEX ix_catalogue_item_images_catalogue_item_id ON catalogue_item_images(catalogue_item_id);")
+        )
+        await conn.execute(
+            text("CREATE INDEX ix_catalogue_item_images_user_id ON catalogue_item_images(user_id);")
+        )
+
+        print("Migration completed successfully!")
+
+
+async def downgrade() -> None:
+    """Drop catalogue_item_images table."""
+    print("Dropping catalogue_item_images table...")
+
+    async with engine.begin() as conn:
+        table_exist = await table_exists(conn, "catalogue_item_images")
+
+        if not table_exist:
+            print("catalogue_item_images table does not exist, skipping downgrade...")
+            return
+
+        # Drop indexes
+        print("Dropping indexes...")
+        await conn.execute(
+            text("DROP INDEX IF EXISTS ix_catalogue_item_images_user_id;")
+        )
+        await conn.execute(
+            text("DROP INDEX IF EXISTS ix_catalogue_item_images_catalogue_item_id;")
+        )
+
+        # Drop table
+        print("Dropping table...")
+        await conn.execute(text("DROP TABLE IF EXISTS catalogue_item_images;"))
+
+        print("Downgrade completed successfully!")
+
+
+if __name__ == "__main__":
+    import sys
+
+    if len(sys.argv) > 1 and sys.argv[1] == "downgrade":
+        asyncio.run(downgrade())
+    else:
+        asyncio.run(upgrade())
+```
+
+
 async def downgrade() -> None:
     """Drop global_catalogue_items table."""
     print("Dropping global_catalogue_items table...")
@@ -290,6 +634,13 @@ if __name__ == "__main__":
 #### Step 1.3: Utworzenie schematów Pydantic
 
 **File:** `backend/app/modules/gear/schemas.py`
+
+**Uwaga:** Trzeba również zaktualizować istniejące schematy `ItemCreate`, `ItemUpdate` i `ItemResponse` o pole `catalogueItemId`:
+
+```python
+# W ItemCreate, ItemUpdate, ItemResponse:
+catalogueItemId: str | None = Field(None, alias="catalogueItemId", description="Reference to global catalogue item")
+```
 
 ```python
 class GlobalCatalogueItemBase(BaseModel):
@@ -353,6 +704,8 @@ class GlobalCatalogueItemSearchParams(BaseModel):
 ```
 
 ### Faza 2: Backend - Repository i Service
+
+**Uwaga:** Trzeba zaktualizować istniejące metody `create_item` i `update_item` w repository, aby obsługiwały pole `catalogue_item_id` z schematu `ItemCreate`/`ItemUpdate`.
 
 #### Step 2.1: Dodanie metod do Repository
 
@@ -452,7 +805,9 @@ async def create_catalogue_item(
     Returns:
         Created catalogue item
     """
-    item_id = generate_ulid()
+    from app.common.id_utils import generate_id
+    
+    item_id = generate_id()
     item = GlobalCatalogueItemDB(
         id=item_id,
         version=1,
@@ -706,7 +1061,36 @@ async def add_catalogue_item_to_container(
         # User can edit the item after adding it
     )
 
-    return await self.create_item(container_id, user_id, item_data)
+    # Create item and set catalogue_item_id
+    created_item = await self.create_item(container_id, user_id, item_data)
+    if created_item:
+        # Update item to set catalogue_item_id
+        update_data = ItemUpdate(catalogue_item_id=catalogue_item_id)
+        return await self.update_item(created_item.id, user_id, update_data)
+    return None
+
+
+async def unlink_item_from_catalogue(
+    self,
+    item_id: str,
+    user_id: str,
+) -> ItemResponse | None:
+    """Unlink an item from the catalogue (clear catalogue_item_id).
+
+    Args:
+        item_id: Item ID to unlink
+        user_id: User ID (must own the item)
+
+    Returns:
+        Updated item if successful, None otherwise
+    """
+    item = await self.repository.get_item(item_id, user_id)
+    if not item:
+        return None
+    
+    # Clear catalogue_item_id
+    update_data = ItemUpdate(catalogue_item_id=None)
+    return await self.update_item(item_id, user_id, update_data)
 ```
 
 ### Faza 3: Backend - Router i Endpointy
@@ -714,6 +1098,8 @@ async def add_catalogue_item_to_container(
 #### Step 3.1: Dodanie endpointów do routera
 
 **File:** `backend/app/modules/gear/router.py`
+
+**Uwaga:** `OptionalUser` jest już zdefiniowany w `router.py` (linia 96), więc można go użyć bezpośrednio.
 
 ```python
 from .schemas import (
@@ -725,8 +1111,9 @@ from .schemas import (
 )
 
 # ... existing code
+# OptionalUser is already defined in router.py (line 96)
 
-# Global Catalogue endpoints
+# Global Catalogue endpoints (public - no authentication required for GET)
 @router.get(
     "/catalogue/items",
     response_model=list[GlobalCatalogueItemResponse],
@@ -742,6 +1129,7 @@ async def get_catalogue_items(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
     service: GearServiceDep = Depends(get_gear_service),
+    current_user: OptionalUser = None,
 ) -> list[GlobalCatalogueItemResponse]:
     """Get global catalogue items with filtering and search.
 
@@ -755,6 +1143,7 @@ async def get_catalogue_items(
         skip: Number of records to skip
         limit: Maximum number of records to return
         service: Gear service instance
+        current_user: Optional authenticated user (for future use, e.g., personalized results)
 
     Returns:
         List of catalogue items
@@ -780,12 +1169,14 @@ async def get_catalogue_items(
 async def get_catalogue_item(
     item_id: str,
     service: GearServiceDep = Depends(get_gear_service),
+    current_user: OptionalUser = None,
 ) -> GlobalCatalogueItemResponse:
     """Get a single catalogue item by ID.
 
     Args:
         item_id: Catalogue item ID
         service: Gear service instance
+        current_user: Optional authenticated user (for future use, e.g., personalized results)
 
     Returns:
         Catalogue item
@@ -957,7 +1348,197 @@ async def add_catalogue_item_to_container(
             detail="Container or catalogue item not found",
         )
     return item
+
+
+@router.patch(
+    "/items/{item_id}/unlink-from-catalogue",
+    response_model=ItemResponse,
+    summary="Unlink item from catalogue",
+)
+async def unlink_item_from_catalogue(
+    item_id: str,
+    current_user: CurrentUser,
+    service: GearServiceDep = Depends(get_gear_service),
+) -> ItemResponse:
+    """Unlink an item from the catalogue (clear catalogue_item_id).
+
+    Args:
+        item_id: Item ID to unlink
+        current_user: Authenticated user
+        service: Gear service instance
+
+    Returns:
+        Updated item
+
+    Raises:
+        HTTPException: If item not found or user doesn't own it
+    """
+    item = await service.unlink_item_from_catalogue(item_id, current_user.id)
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Item not found or you don't have permission to modify it",
+        )
+    return item
 ```
+
+#### Step 3.2: Endpointy do zarządzania obrazkami katalogu
+
+**File:** `backend/app/modules/gear/catalogue_item_image_router.py`
+
+**Uwaga:** Endpointy identyczne jak `item_image_router.py`, ale dla przedmiotów katalogu. Wymagają autoryzacji (nie są publiczne) - tylko admini mogą uploadować/usuwać obrazki.
+
+```python
+"""FastAPI router for catalogue item image endpoints.
+
+Endpoints for uploading and managing images for global catalogue items.
+Requires authentication (not public) to prevent unauthorized S3 costs.
+Only admins can upload/delete images.
+"""
+
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.database import get_db
+from app.modules.auth.dependencies import AdminUser
+from app.modules.gear.image_upload_service import ImageUploadService
+from app.modules.gear.catalogue_item_image_repository import CatalogueItemImageRepository
+
+router = APIRouter(prefix="/gear/catalogue/items", tags=["catalogue-images"])
+
+
+def get_catalogue_image_repository(db: AsyncSession = Depends(get_db)) -> CatalogueItemImageRepository:
+    """Dependency to get catalogue image repository instance."""
+    return CatalogueItemImageRepository(db)
+
+
+def get_catalogue_image_service(
+    repository: CatalogueItemImageRepository = Depends(get_catalogue_image_repository),
+) -> ImageUploadService:
+    """Dependency to get catalogue image service instance."""
+    return ImageUploadService(repository)
+
+
+@router.post(
+    "/{item_id}/images",
+    summary="Upload image for catalogue item",
+    status_code=status.HTTP_201_CREATED,
+)
+async def upload_catalogue_item_image(
+    item_id: str,
+    file: UploadFile = File(...),
+    is_primary: bool = Query(False, description="Whether this should be the primary image"),
+    current_user: AdminUser = None,  # Only admins can upload catalogue images
+    service: ImageUploadService = Depends(get_catalogue_image_service),
+) -> dict:
+    """Upload an image for a catalogue item.
+
+    Args:
+        item_id: Catalogue item ID
+        file: Image file to upload
+        is_primary: Whether this should be the primary image
+        current_user: Authenticated admin user
+        service: Image upload service instance
+
+    Returns:
+        Image data with URL
+
+    Raises:
+        HTTPException: If upload fails or user is not admin
+    """
+    result = await service.upload_image(
+        item_id=item_id,
+        file=file,
+        user_id=current_user.id,
+        is_primary=is_primary,
+    )
+    return result
+
+
+@router.get(
+    "/{item_id}/images",
+    summary="Get all images for catalogue item",
+)
+async def get_catalogue_item_images(
+    item_id: str,
+    service: ImageUploadService = Depends(get_catalogue_image_service),
+) -> list[dict]:
+    """Get all images for a catalogue item.
+
+    Args:
+        item_id: Catalogue item ID
+        service: Image upload service instance
+
+    Returns:
+        List of image data with URLs
+    """
+    return await service.get_item_images(item_id)
+
+
+@router.delete(
+    "/{item_id}/images/{image_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete catalogue item image",
+)
+async def delete_catalogue_item_image(
+    item_id: str,
+    image_id: str,
+    current_user: AdminUser = None,  # Only admins can delete catalogue images
+    service: ImageUploadService = Depends(get_catalogue_image_service),
+) -> None:
+    """Delete an image for a catalogue item.
+
+    Args:
+        item_id: Catalogue item ID
+        image_id: Image ID to delete
+        current_user: Authenticated admin user
+        service: Image upload service instance
+
+    Raises:
+        HTTPException: If deletion fails or user is not admin
+    """
+    deleted = await service.delete_image(image_id, current_user.id)
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Image not found or you don't have permission to delete it",
+        )
+
+
+@router.patch(
+    "/{item_id}/images/{image_id}/set-primary",
+    summary="Set primary image for catalogue item",
+)
+async def set_catalogue_item_primary_image(
+    item_id: str,
+    image_id: str,
+    current_user: AdminUser = None,  # Only admins can set primary image
+    service: ImageUploadService = Depends(get_catalogue_image_service),
+) -> dict:
+    """Set primary image for a catalogue item.
+
+    Args:
+        item_id: Catalogue item ID
+        image_id: Image ID to set as primary
+        current_user: Authenticated admin user
+        service: Image upload service instance
+
+    Returns:
+        Success message
+
+    Raises:
+        HTTPException: If operation fails or user is not admin
+    """
+    success = await service.set_primary_image(item_id, image_id)
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Image not found or you don't have permission to modify it",
+        )
+    return {"message": "Primary image updated"}
+```
+
+**Uwaga:** Trzeba dodać `router.include_router(catalogue_item_image_router)` w głównym routerze gear (`router.py`).
 
 ### Faza 4: Backend - Seed Data (Opcjonalnie)
 
@@ -1016,6 +1597,10 @@ export interface IGlobalCatalogueItemSearchParams {
   skip?: number
   limit?: number
 }
+
+// Update IGearItem interface to include catalogueItemId
+// Add to existing IGearItem interface in gear.types.ts:
+// catalogueItemId?: TUUID | null // Reference to global catalogue item (if added from catalogue)
 ```
 
 #### Step 5.2: Dodanie metod do API Client
@@ -1054,19 +1639,32 @@ export async function addCatalogueItemToContainer(
   )
   return response.data
 }
+
+export async function unlinkItemFromCatalogue(itemId: TUUID): Promise<IGearItem> {
+  const response = await apiClient.patch<IGearItem>(`/gear/items/${itemId}/unlink-from-catalogue`)
+  return response.data
+}
 ```
 
 ### Faza 6: Frontend - Przeglądarka Katalogu
+
+**Uwaga:** Użyj async components (`defineAsyncComponent`) dla optymalizacji - komponenty katalogu nie muszą być ładowane od razu.
 
 #### Step 6.1: Strona przeglądarki katalogu
 
 **File:** `src/modules/gear/pages/CatalogueBrowserPage.vue`
 
-- Lista przedmiotów z katalogu
+**Uwaga:** Strona publiczna (dostępna bez logowania). Użyj `DataTable` z server-side paginacją.
+
+- Lista przedmiotów z katalogu (użyj `DataTable` z paginacją)
 - Filtry: kategoria, brand, price tier, quality
 - Wyszukiwarka (query)
 - Karty przedmiotów z podstawowymi informacjami
-- Przycisk "Dodaj do kontenera" (otwiera dialog wyboru kontenera)
+- Przycisk "Dodaj do kontenera" (otwiera dialog wyboru kontenera - tylko dla zalogowanych)
+- Server-side paginacja (użyj `skip`/`limit` z API)
+- Link do strony szczegółów przedmiotu (`/catalogue/items/:id`)
+
+**Optymalizacja:** Użyj `defineAsyncComponent` dla cięższych komponentów (np. `CatalogueItemCard`).
 
 #### Step 6.2: Komponent karty przedmiotu katalogu
 
@@ -1074,7 +1672,45 @@ export async function addCatalogueItemToContainer(
 
 - Wyświetlanie podstawowych informacji (nazwa, kategoria, brand, waga)
 - Badge z price tier i quality
-- Przycisk "Dodaj do kontenera"
+- Obrazek przedmiotu (jeśli dostępny)
+- Przycisk "Dodaj do kontenera" (tylko dla zalogowanych)
+- Link do strony szczegółów przedmiotu
+
+**Optymalizacja:** Użyj `defineAsyncComponent` jeśli komponent jest duży.
+
+#### Step 6.3: Strona szczegółów przedmiotu w katalogu
+
+**File:** `src/modules/gear/pages/CatalogueItemDetailPage.vue`
+
+**Uwaga:** Strona publiczna (dostępna bez logowania). Galeria obrazków dla zalogowanych, readonly + info dla niezalogowanych.
+
+- Wyświetlanie pełnych informacji o przedmiocie z katalogu
+- Galeria obrazków:
+  - Dla zalogowanych: pełna galeria (jeśli admin - możliwość uploadu)
+  - Dla niezalogowanych: readonly + info "Zaloguj się aby zobaczyć więcej"
+- Przycisk "Dodaj do kontenera" (otwiera dialog wyboru kontenera - tylko dla zalogowanych)
+- Link do produktu (jeśli dostępny)
+- Badge z price tier i quality
+
+**Route:** `/catalogue/items/:id` (publiczny)
+
+**Optymalizacja:** Użyj `defineAsyncComponent` dla galerii obrazków.
+
+#### Step 6.4: Dialog wyboru kontenera
+
+**File:** `src/modules/gear/components/AddCatalogueItemToContainerDialog.vue`
+
+**Uwaga:** Dialog z ComboBox do wyboru kontenera. Podobny do `AddNestedContainerDialog.vue`, ale używa ComboBox z wyszukiwaniem.
+
+- ComboBox z wyszukiwaniem kontenerów użytkownika (podobny do `ItemCatalogSelector.vue`)
+- Używa `useGear()` do pobrania kontenerów użytkownika
+- Po wyborze kontenera → wywołanie `addCatalogueItemToContainer()`
+- Toast po dodaniu (bez przekierowania)
+- Zamykanie dialogu po dodaniu
+
+**Użycie:**
+- Z `CatalogueBrowserPage.vue` (przycisk "Dodaj do kontenera")
+- Z `CatalogueItemDetailPage.vue` (przycisk "Dodaj do kontenera")
 
 ### Faza 7: Frontend - Autocomplete z Katalogiem
 
@@ -1089,7 +1725,8 @@ export async function addCatalogueItemToContainer(
 - Dodaj `TabsContent` dla `"globalCatalogue"` z komponentem `GlobalCatalogueSelector`
 - Autocomplete z globalnym katalogiem (podobnie jak z przedmiotami użytkownika)
 - Po wyborze przedmiotu z katalogu - pre-fill formularza
-- **Ważne:** Nie ustawiamy `linkedItemId` - przedmiot z katalogu jest kopiowany, nie linkowany
+- **Ważne:** Ustawiamy `catalogueItemId` przy tworzeniu przedmiotu (nie `linkedItemId`)
+- Przedmiot z katalogu jest kopiowany, ale zachowuje referencję do katalogu
 
 #### Step 7.2: Komponent GlobalCatalogueSelector
 
@@ -1135,11 +1772,34 @@ export function useCatalogue() {
 }
 ```
 
-### Faza 8: Frontend - Zarządzanie Katalogiem (Admin)
+### Faza 8: Frontend - Badge z linkiem do katalogu
 
-#### Step 8.1: Strona zarządzania katalogiem
+#### Step 8.1: Dodanie badge w ItemHeader
+
+**File:** `src/modules/gear/components/ItemHeader.vue`
+
+- Dodaj badge "Z katalogu" + ikona książki (tylko gdy `item.catalogueItemId` istnieje)
+- Badge jako link do `/catalogue/items/{catalogueItemId}`
+- Użyj `RouterLink` z `GearRoutePath.CatalogueItemDetailById(catalogueItemId)`
+
+#### Step 8.2: Dodanie akcji "Odepnij od katalogu" w dropdown menu
+
+**File:** `src/modules/gear/components/ItemsTableRowActions.vue` lub podobny komponent
+
+- Dodaj akcję "Odepnij od katalogu" w dropdown menu (tylko gdy `item.catalogueItemId` istnieje)
+- Wywołanie `unlinkItemFromCatalogue(itemId)`
+- Toast po odpięciu
+- Odświeżenie danych
+
+**Uwaga:** Można też dodać tę akcję w `ItemDetailPage.vue` jeśli ma dropdown menu.
+
+### Faza 9: Frontend - Zarządzanie Katalogiem (Admin)
+
+#### Step 9.1: Strona zarządzania katalogiem
 
 **File:** `src/modules/gear/pages/CatalogueManagementPage.vue` (tylko dla adminów)
+
+**Uwaga:** Na razie nie implementujemy CRUD - będzie później.
 
 - Lista wszystkich przedmiotów katalogu
 - Formularz dodawania/edycji przedmiotu
@@ -1193,6 +1853,97 @@ W bazie używamy `GearItemQuality` (low, medium, high), więc trzeba zmapować:
 ## 📝 Notatki
 
 - **Linkowanie vs Katalog:** Globalny katalog to źródło szablonów, nie jest linkowane z przedmiotami użytkownika. Linkowanie działa tylko między przedmiotami użytkownika w różnych kontenerach.
-- **Niezależność:** Przedmioty dodane z katalogu są niezależne - użytkownik może je swobodnie edytować.
+- **Niezależność:** Przedmioty dodane z katalogu są niezależne - użytkownik może je swobodnie edytować. Pole `catalogueItemId` pozwala śledzić pochodzenie, ale nie wpływa na edycję.
 - **Wersjonowanie:** Pole `version` pozwala na śledzenie zmian w katalogu, ale nie wpływa na już dodane przedmioty użytkownika.
+- **Obrazki katalogu:** Obrazki katalogu wymagają autoryzacji (nie są publiczne) - tylko admini mogą uploadować/usuwać, aby uniknąć nieautoryzowanych kosztów S3.
+- **Odepinanie od katalogu:** Użytkownik może odpiąć przedmiot od katalogu (akcja "Odepnij od katalogu"), co czyści pole `catalogueItemId`. Po odpięciu przedmiot pozostaje niezależny.
+
+## ⚡ Optymalizacja - Async Components
+
+**Zalecenia dotyczące użycia `defineAsyncComponent`:**
+
+1. **CatalogueBrowserPage.vue** - użyj async dla:
+   - `CatalogueItemCard.vue` (jeśli duży)
+   - `AddCatalogueItemToContainerDialog.vue`
+
+2. **CatalogueItemDetailPage.vue** - użyj async dla:
+   - Galeria obrazków (jeśli duża)
+   - `AddCatalogueItemToContainerDialog.vue`
+
+3. **ItemFormPage.vue** - użyj async dla:
+   - `GlobalCatalogueSelector.vue` (jeśli duży)
+
+**Przykład użycia:**
+```typescript
+const CatalogueItemCard = defineAsyncComponent(() => import('../components/CatalogueItemCard.vue'))
+```
+
+**Korzyści:**
+- Mniejsze początkowe bundle size
+- Szybsze ładowanie strony
+- Lepsze UX (komponenty ładowane na żądanie)
+
+## ✅ Weryfikacja i Poprawki
+
+**Data weryfikacji:** 2025-01-21
+
+### Wprowadzone poprawki:
+
+1. **Błąd wcięcia w modelu** (linie 104-105)
+   - Poprawiono wcięcie dla pól `price_tier` i `quality` w `GlobalCatalogueItemDB`
+
+2. **Funkcja generowania ID**
+   - Zmieniono `generate_ulid()` na `generate_id()` z `app.common.id_utils`
+   - Dodano import w metodzie `create_catalogue_item` w repository
+
+3. **Publiczne endpointy GET**
+   - Dodano parametr `current_user: OptionalUser = None` do:
+     - `get_catalogue_items()` - endpoint przeglądania katalogu
+     - `get_catalogue_item()` - endpoint pobierania pojedynczego przedmiotu
+   - Endpointy GET są publiczne (nie wymagają autoryzacji)
+   - `OptionalUser` jest już zdefiniowany w `router.py` (linia 96)
+
+4. **Dokumentacja endpointów**
+   - Zaktualizowano dokumentację endpointów GET z informacją o opcjonalnym użytkowniku
+
+### Zgodność z istniejącym kodem:
+
+- ✅ Typy zgodne z istniejącymi (`GearItemQuality`, `GearWeightUnit`)
+- ✅ Użycie `CurrentUser` jako parametr funkcji (zgodnie z regułami projektu)
+- ✅ Format migracji zgodny z istniejącymi migracjami (async z `text()`)
+- ✅ Schematy Pydantic zgodne z konwencjami projektu (camelCase w JSON)
+- ✅ Endpointy POST/PATCH/DELETE wymagają autoryzacji (`CurrentUser`)
+
+### Dodatkowe elementy dodane podczas weryfikacji:
+
+5. **Obrazki katalogu**
+   - Model `CatalogueItemImageDB` (identyczny z `ItemImageDB`)
+   - Migracja dla tabeli `catalogue_item_images`
+   - Endpointy `/gear/catalogue/items/{id}/images` (wymagają autoryzacji - tylko admini)
+   - Galeria obrazków na stronie szczegółów katalogu (dla zalogowanych: pełna, dla niezalogowanych: readonly + info)
+
+6. **Pole `catalogueItemId` w przedmiotach**
+   - Migracja dodająca kolumnę `catalogue_item_id` do `gear_items`
+   - Aktualizacja schematów Pydantic (`ItemCreate`, `ItemUpdate`, `ItemResponse`)
+   - Aktualizacja typów TypeScript (`IGearItem`)
+   - Endpoint do odpinania: `PATCH /gear/items/{id}/unlink-from-catalogue`
+
+7. **Badge z linkiem do katalogu**
+   - Badge "Z katalogu" + ikona książki w `ItemHeader.vue`
+   - Link do `/catalogue/items/{catalogueItemId}`
+   - Akcja "Odepnij od katalogu" w dropdown menu
+
+8. **Dialog wyboru kontenera**
+   - Komponent `AddCatalogueItemToContainerDialog.vue`
+   - ComboBox z wyszukiwaniem kontenerów
+   - Użycie z przeglądarki i strony szczegółów katalogu
+
+9. **Strona szczegółów przedmiotu w katalogu**
+   - `CatalogueItemDetailPage.vue` (publiczna)
+   - Galeria obrazków (dla zalogowanych: pełna, dla niezalogowanych: readonly)
+   - Przycisk "Dodaj do kontenera"
+
+10. **Optymalizacja - Async Components**
+    - Zalecenia dotyczące użycia `defineAsyncComponent` dla cięższych komponentów
+    - Mniejsze bundle size i szybsze ładowanie
 

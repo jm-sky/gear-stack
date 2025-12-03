@@ -31,6 +31,7 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
 3. **Katalog i linkowanie**
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-globalny-katalog-i-linkowanie)
    - **Globalny katalog itemów** — High priority, Medium complexity (na później)
+   - 📋 **Plan implementacji:** [GLOBAL_CATALOGUE_IMPLEMENTATION_PLAN.md](./plans/GLOBAL_CATALOGUE_IMPLEMENTATION_PLAN.md)
    - ✅ **Linkowanie przedmiotów** — High priority, Large complexity (Completed)
    - Status: ✅ Linkowanie completed | 🔄 Katalog planned
 

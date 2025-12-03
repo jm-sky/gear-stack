@@ -268,6 +268,8 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - Możliwość dodawania przedmiotów z katalogu do własnych kontenerów
 - Wersjonowanie przedmiotów w katalogu
 
+**📋 Plan implementacji:** [GLOBAL_CATALOGUE_IMPLEMENTATION_PLAN.md](./plans/GLOBAL_CATALOGUE_IMPLEMENTATION_PLAN.md)
+
 ### ✅ Wyświetlanie kontenerów na liście wszystkich przedmiotów
 **Status:** ✅ Completed | **Priority:** Low | **Complexity:** Small
 
