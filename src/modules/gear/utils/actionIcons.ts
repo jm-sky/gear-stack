@@ -1,6 +1,7 @@
 import {
   ArrowLeft,
   BoxIcon,
+  Copy,
   Download,
   Edit,
   FileInput,
@@ -42,6 +43,7 @@ export const ACTION_ICONS: Record<string, Component> = {
   addItem: Plus,
   addContainer: BoxIcon,
   edit: Edit,
+  clone: Copy,
   delete: Trash2,
   deleteAll: Trash2,
 

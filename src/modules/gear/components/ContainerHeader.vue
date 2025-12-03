@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { CalendarPlus, CalendarSync, ExternalLink, Link2 } from 'lucide-vue-next'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { Badge } from '@/components/ui/badge'
@@ -15,6 +15,7 @@ import { GearRoutePath } from '../routes'
 import { getActionIcon } from '../utils/actionIcons'
 import { formatWeight } from '../utils/formatWeight'
 import { isSet } from '../utils/helpers'
+import CloneContainerDialog from './CloneContainerDialog.vue'
 import ContainerHeaderName from './ContainerHeaderName.vue'
 import ContainerHeaderStats from './ContainerHeaderStats.vue'
 import ContainerRatingBadge from './ContainerRatingBadge.vue'
@@ -27,6 +28,7 @@ import WeightLimitBadge from './WeightLimitBadge.vue'
 const BackIcon = getActionIcon('back')
 const ExportToPromptIcon = getActionIcon('exportToPrompt')
 const EditIcon = getActionIcon('edit')
+const CloneIcon = getActionIcon('clone')
 const AddContainerIcon = getActionIcon('addContainer')
 const AddItemIcon = getActionIcon('addItem')
 const MoreActionsIcon = getActionIcon('moreActions')
@@ -56,8 +58,14 @@ const { t } = useI18n()
 const { typeLabel } = useContainerTypeLabel(computed(() => props.container.type))
 const { canUseAi } = useAi()
 
+const isCloneDialogOpen = ref(false)
+
 const handleEdit = () => {
   router.push(GearRoutePath.ContainerEditById(props.container.id))
+}
+
+const handleClone = () => {
+  isCloneDialogOpen.value = true
 }
 
 const handleAddItem = () => {
@@ -206,6 +214,11 @@ const handleBack = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem @click="handleClone">
+                <CloneIcon class="size-4" />
+                {{ t('gear.container.clone') }}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem @click="handleImport">
                 <ImportIcon class="size-4" />
                 {{ t('gear.actions.import') }}
@@ -241,5 +254,11 @@ const handleBack = () => {
     </div>
 
     <ContainerHeaderStats :container />
+
+    <!-- Clone Dialog -->
+    <CloneContainerDialog
+      v-model:open="isCloneDialogOpen"
+      :container="container"
+    />
   </div>
 </template>
