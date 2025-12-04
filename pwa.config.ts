@@ -99,7 +99,7 @@ export const pwaPlugin = VitePWA({
             maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
           },
           cacheableResponse: {
-            statuses: [0, 200],
+            statuses: [200],
           },
         },
       },
@@ -113,7 +113,7 @@ export const pwaPlugin = VitePWA({
             maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
           },
           cacheableResponse: {
-            statuses: [0, 200],
+            statuses: [200],
           },
         },
       },
@@ -128,7 +128,7 @@ export const pwaPlugin = VitePWA({
           },
           networkTimeoutSeconds: 10,
           cacheableResponse: {
-            statuses: [0, 200],
+            statuses: [200],
           },
         },
       },

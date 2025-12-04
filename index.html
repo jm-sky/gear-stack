@@ -26,7 +26,6 @@
         const link = document.createElement('link')
         link.rel = 'manifest'
         link.href = '/manifest.webmanifest'
-        link.crossOrigin = 'use-credentials'
         // Load after DOMContentLoaded to avoid blocking initial render
         if (document.readyState === 'loading') {
           document.addEventListener('DOMContentLoaded', () => {
