@@ -397,6 +397,8 @@ class GlobalCatalogueItemDB(Base):
     brand: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
     model: Mapped[str | None] = mapped_column(String(255), nullable=True)
     price_tier: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    price: Mapped[float | None] = mapped_column(Float, nullable=True)
+    currency: Mapped[str | None] = mapped_column(String(10), nullable=True)
     quality: Mapped[str | None] = mapped_column(String(20), nullable=True)
     url: Mapped[str | None] = mapped_column(Text, nullable=True)
     color: Mapped[str | None] = mapped_column(String(50), nullable=True)

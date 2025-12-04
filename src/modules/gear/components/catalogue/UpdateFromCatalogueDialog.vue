@@ -23,13 +23,14 @@ const emit = defineEmits<{
   itemUpdated: []
 }>()
 
-type FieldKey = 'name' | 'description' | 'weight' | 'brand' | 'color' | 'category' | 'quality' | 'url'
+type FieldKey = 'name' | 'description' | 'weight' | 'weightUnit' | 'price' | 'currency' | 'brand' | 'color' | 'category' | 'quality' | 'url'
 
 // Available fields that can be updated from catalogue
 const availableFields = computed(() => [
   { key: 'name' as FieldKey, label: t('gear.item.name') },
   { key: 'description' as FieldKey, label: t('gear.catalogue.description') },
-  { key: 'weight' as FieldKey, label: t('gear.item.weight') },
+  { key: 'weight' as FieldKey, label: t('gear.catalogue.weightWithUnit') },
+  { key: 'price' as FieldKey, label: t('gear.catalogue.priceWithCurrency') },
   { key: 'brand' as FieldKey, label: t('gear.item.brand') },
   { key: 'color' as FieldKey, label: t('gear.item.color') },
   { key: 'category' as FieldKey, label: t('gear.item.category') },
@@ -44,14 +45,14 @@ const loadSelectedFields = (): FieldKey[] => {
     if (stored) {
       const parsed = JSON.parse(stored) as FieldKey[]
       // Validate that all fields are valid
-      const validFields: FieldKey[] = ['name', 'description', 'weight', 'brand', 'color', 'category', 'quality', 'url']
+      const validFields: FieldKey[] = ['name', 'description', 'weight', 'weightUnit', 'price', 'currency', 'brand', 'color', 'category', 'quality', 'url']
       return parsed.filter(field => validFields.includes(field))
     }
   } catch (error) {
     console.error('Failed to load selected fields from localStorage:', error)
   }
-  // Default: select name and weight
-  return ['name', 'weight']
+  // Default: weight (with unit), price (with currency), color, brand, quality, url
+  return ['weight', 'weightUnit', 'price', 'currency', 'color', 'brand', 'quality', 'url']
 }
 
 // Save selected fields to localStorage

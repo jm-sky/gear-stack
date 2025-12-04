@@ -859,6 +859,8 @@ class GearRepository(SearchMixin):
             brand=data.brand,
             model=data.model,
             price_tier=data.priceTier,
+            price=data.price,
+            currency=data.currency,
             quality=data.quality,
             url=data.url,
             color=data.color,

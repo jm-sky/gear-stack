@@ -301,6 +301,8 @@ class GlobalCatalogueItemBase(BaseModel):
     brand: str | None = Field(None, max_length=255)
     model: str | None = Field(None, max_length=255)
     priceTier: Literal["low", "medium", "high"] | None = Field(None, alias="price_tier", serialization_alias="priceTier")
+    price: float | None = Field(None, ge=0)
+    currency: str | None = Field(None, max_length=10)
     quality: GearItemQuality | None = None
     url: str | None = None
     color: str | None = Field(None, max_length=50)
@@ -346,6 +348,8 @@ class GlobalCatalogueItemUpdate(BaseModel):
     brand: str | None = Field(None, max_length=255)
     model: str | None = Field(None, max_length=255)
     priceTier: Literal["low", "medium", "high"] | None = Field(None, alias="price_tier")
+    price: float | None = Field(None, ge=0)
+    currency: str | None = Field(None, max_length=10)
     quality: GearItemQuality | None = None
     url: str | None = None
     color: str | None = Field(None, max_length=50)

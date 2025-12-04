@@ -1109,16 +1109,18 @@ async def update_item_from_catalogue(
     item_id: str,
     current_user: CurrentUser,
     service: GearServiceDep,
+    fields: str | None = Query(None, description="Comma-separated list of fields to update (e.g., 'name,weight,price')"),
 ) -> ItemResponse:
     """Update an item with data from its linked catalogue item.
 
-    Updates fields from catalogue while preserving user-specific fields
+    Updates only specified fields from catalogue while preserving user-specific fields
     like quantity, status, priority, and notes.
 
     Args:
         item_id: Item ID to update
         current_user: Authenticated user
         service: Gear service instance
+        fields: Comma-separated list of field names to update. If not provided, updates all available fields.
 
     Returns:
         Updated item
@@ -1126,7 +1128,11 @@ async def update_item_from_catalogue(
     Raises:
         HTTPException: If item not found, not linked to catalogue, or user doesn't own it
     """
-    item = await service.update_item_from_catalogue(item_id, current_user.id)
+    fields_list = None
+    if fields:
+        fields_list = [f.strip() for f in fields.split(',') if f.strip()]
+
+    item = await service.update_item_from_catalogue(item_id, current_user.id, fields_list)
     if not item:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
