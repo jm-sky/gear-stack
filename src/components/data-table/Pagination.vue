@@ -5,6 +5,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
 } from 'lucide-vue-next'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import {
@@ -21,6 +22,8 @@ interface Props {
   pageSizeOptions?: number[]
 }
 
+const { t } = useI18n()
+
 const props = withDefaults(defineProps<Props>(), {
   pageSizeOptions: () => [10, 20, 30, 40, 50, 100, 500],
 })
@@ -31,16 +34,14 @@ const emit = defineEmits<{
 }>()
 
 const totalPages = Math.ceil(props.total / props.pageSize)
-const canPreviousPage = props.page > 1
-const canNextPage = props.page < totalPages
+const canPreviousPage = computed<boolean>(() => props.page > 1)
+const canNextPage = computed<boolean>(() => props.page < totalPages)
 
 const goToPage = (page: number) => {
   if (page >= 1 && page <= totalPages) {
     emit('update:page', page)
   }
 }
-
-const { t } = useI18n()
 
 const setPageSize = (size: number) => {
   emit('update:pageSize', size)
