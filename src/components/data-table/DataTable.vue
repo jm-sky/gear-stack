@@ -271,6 +271,9 @@ const handlePageSizeChange = (newPageSize: number) => {
         <template #filters>
           <slot name="toolbar-filters" />
         </template>
+        <template #toolbar-badges>
+          <slot name="toolbar-badges" />
+        </template>
       </DataTableToolbar>
     </slot>
 
