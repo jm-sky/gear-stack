@@ -153,7 +153,8 @@ export function useCatalogue() {
 
   // Update item from catalogue
   const updateFromCatalogueMutation = useMutation({
-    mutationFn: (itemId: TUUID) => catalogueApiService.updateItemFromCatalogue(itemId),
+    mutationFn: ({ itemId, fields }: { itemId: TUUID; fields?: string[] }) =>
+      catalogueApiService.updateItemFromCatalogue(itemId, fields),
     onSuccess: async (_, itemId) => {
       // Invalidate gear items/containers queries
       queryClient.invalidateQueries({ queryKey: ['gear'] })
@@ -176,6 +177,36 @@ export function useCatalogue() {
           }
         } catch (error) {
           console.error('Failed to refresh container after updating item from catalogue:', error)
+        }
+      }
+    },
+  })
+
+  // Fetch images from catalogue
+  const fetchImagesFromCatalogueMutation = useMutation({
+    mutationFn: (itemId: TUUID) => catalogueApiService.fetchImagesFromCatalogue(itemId),
+    onSuccess: async (_, itemId) => {
+      // Invalidate gear items/containers queries
+      queryClient.invalidateQueries({ queryKey: ['gear'] })
+
+      // Refresh container in Pinia store if using API
+      if (shouldUseAPI.value) {
+        try {
+          const store = useGearStore()
+          // Find container that contains this item (including nested containers)
+          const itemWithContainer = gearContainerLocalService.getItemWithContainer(itemId)
+
+          if (itemWithContainer?.containerId) {
+            const container = await gearContainerApiService.getContainer(itemWithContainer.containerId)
+            const existing = store.getContainerById(itemWithContainer.containerId)
+            if (existing) {
+              store.updateContainer(container)
+            } else {
+              store.addContainer(container)
+            }
+          }
+        } catch (error) {
+          console.error('Failed to refresh container after fetching images from catalogue:', error)
         }
       }
     },
@@ -262,8 +293,12 @@ export function useCatalogue() {
     return await linkToCatalogueMutation.mutateAsync({ itemId, catalogueItemId })
   }
 
-  const updateItemFromCatalogue = async (itemId: TUUID): Promise<IGearItem> => {
-    return await updateFromCatalogueMutation.mutateAsync(itemId)
+  const updateItemFromCatalogue = async (itemId: TUUID, fields?: string[]): Promise<IGearItem> => {
+    return await updateFromCatalogueMutation.mutateAsync({ itemId, fields })
+  }
+
+  const fetchImagesFromCatalogue = async (itemId: TUUID): Promise<IGearItem> => {
+    return await fetchImagesFromCatalogueMutation.mutateAsync(itemId)
   }
 
   const unlinkItemFromCatalogue = async (itemId: TUUID): Promise<IGearItem> => {
@@ -288,6 +323,7 @@ export function useCatalogue() {
     addCatalogueItemToContainer,
     linkItemToCatalogue,
     updateItemFromCatalogue,
+    fetchImagesFromCatalogue,
     unlinkItemFromCatalogue,
 
     // Mutation states
@@ -297,6 +333,7 @@ export function useCatalogue() {
     isAddingToContainer: computed(() => addToContainerMutation.isPending.value),
     isLinking: computed(() => linkToCatalogueMutation.isPending.value),
     isUpdatingFromCatalogue: computed(() => updateFromCatalogueMutation.isPending.value),
+    isFetchingImages: computed(() => fetchImagesFromCatalogueMutation.isPending.value),
     isUnlinking: computed(() => unlinkFromCatalogueMutation.isPending.value),
 
     // Helpers

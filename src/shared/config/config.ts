@@ -99,3 +99,4 @@ export const SHOPPING_PLANNING_PAGE_FILTERS_KEY = `${config.app.id}:shopping-pla
 export const CONTAINERS_LIST_PAGE_FILTERS_KEY = `${config.app.id}:containers-list-page:filters`
 export const PUBLIC_CONTAINERS_BROWSER_PAGE_FILTERS_KEY = `${config.app.id}:public-containers-browser-page:filters`
 export const CATALOGUE_BROWSER_PAGE_FILTERS_KEY = `${config.app.id}:catalogue-browser-page:filters`
+export const UPDATE_FROM_CATALOGUE_FIELDS_KEY = `${config.app.id}:update-from-catalogue-fields`

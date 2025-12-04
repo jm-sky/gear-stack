@@ -35,7 +35,7 @@ const searchQuery = refDebounced(searchQueryRaw, 300)
 
 // Search catalogue items with local query
 const searchParams = computed(() => ({
-  query: searchQuery.value ?? null,
+  query: searchQuery.value?.trim() ?? null,
   category: category.value ?? null, // Pre-fill with item category for better matches
   isActive: true,
   skip: 0,

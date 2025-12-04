@@ -113,11 +113,16 @@ export class CatalogueApiService {
 
   /**
    * Update an item with data from its linked catalogue item
-   * Updates fields from catalogue while preserving user-specific fields
+   * Updates only specified fields from catalogue while preserving user-specific fields
    * Requires authentication
    */
-  async updateItemFromCatalogue(itemId: TUUID): Promise<IGearItem> {
-    const response = await apiClient.patch<IGearItem>(`/gear/items/${itemId}/update-from-catalogue`)
+  async updateItemFromCatalogue(
+    itemId: TUUID,
+    fields?: string[],
+  ): Promise<IGearItem> {
+    const response = await apiClient.patch<IGearItem>(`/gear/items/${itemId}/update-from-catalogue`, null, {
+      params: fields ? { fields: fields.join(',') } : undefined,
+    })
     return response.data
   }
 
@@ -128,6 +133,15 @@ export class CatalogueApiService {
    */
   async unlinkItemFromCatalogue(itemId: TUUID): Promise<IGearItem> {
     const response = await apiClient.patch<IGearItem>(`/gear/items/${itemId}/unlink-from-catalogue`)
+    return response.data
+  }
+
+  /**
+   * Fetch images from catalogue item and attach them to the gear item
+   * Requires authentication
+   */
+  async fetchImagesFromCatalogue(itemId: TUUID): Promise<IGearItem> {
+    const response = await apiClient.post<IGearItem>(`/gear/items/${itemId}/fetch-images-from-catalogue`)
     return response.data
   }
 }
