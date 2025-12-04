@@ -22,6 +22,8 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    networks:
+      - gearstack-network
 
   # Application (Development Mode)
   app:
@@ -85,6 +87,13 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    networks:
+      - gearstack-network
+
+networks:
+  gearstack-network:
+    name: gearstack-network
+    external: true
 
 volumes:
   gear_stack_postgres_data:
