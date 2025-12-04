@@ -9,6 +9,7 @@ import { i18n } from '@/i18n'
 import App from './App.vue'
 import router from './router'
 import { config } from './shared/config/config'
+import { initSentry } from './shared/services/sentry'
 import { setHtmlLangAttribute } from './shared/utils/appInit'
 import { setupChunkLoadErrorHandler } from './shared/utils/chunkLoadError'
 import { loadRecaptchaScript } from './shared/utils/recaptcha'
@@ -44,6 +45,9 @@ app.use(router)
 app.use(VueQueryPlugin, { queryClient })
 app.use(i18n)
 app.directive('tooltip', vTooltip)
+
+// Initialize Sentry (must be after router is registered)
+initSentry(app, router)
 
 // Set HTML lang attribute based on initial locale
 setHtmlLangAttribute(i18n)

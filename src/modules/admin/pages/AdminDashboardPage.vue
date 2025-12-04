@@ -85,6 +85,24 @@ if (!isAdmin.value) {
             </RouterLink>
           </div>
         </Card>
+
+        <Card class="p-6">
+          <div class="flex flex-col gap-4">
+            <div>
+              <h3 class="text-lg font-semibold">
+                {{ t('admin.dashboard.limits.title', 'Feature Limits') }}
+              </h3>
+              <p class="text-sm text-muted-foreground">
+                {{ t('admin.dashboard.limits.description', 'Configure AI and storage limits per role') }}
+              </p>
+            </div>
+            <RouterLink :to="AdminRoutePaths.limits">
+              <Button class="w-full">
+                {{ t('admin.dashboard.limits.button', 'Manage Limits') }}
+              </Button>
+            </RouterLink>
+          </div>
+        </Card>
       </div>
     </div>
   </AuthenticatedLayout>

@@ -8,6 +8,7 @@ from fastapi import APIRouter
 from app.modules.admin.router import router as admin_router
 from app.modules.ai.router import router as ai_router
 from app.modules.auth.router import router as auth_router
+from app.modules.feature_limits.router import router as feature_limits_router
 from app.modules.gear.router import router as gear_router
 from app.modules.gear_settings.router import router as gear_settings_router
 from app.modules.logs.router import router as logs_router
@@ -36,6 +37,7 @@ async def health_check() -> dict[str, str]:
 api_router.include_router(admin_router)
 api_router.include_router(ai_router)
 api_router.include_router(auth_router, prefix="/auth", tags=["Authentication"])
+api_router.include_router(feature_limits_router)
 api_router.include_router(gear_router)
 api_router.include_router(gear_settings_router, prefix="/me")
 api_router.include_router(logs_router, prefix="/logs", tags=["Logs", "Monitoring"])

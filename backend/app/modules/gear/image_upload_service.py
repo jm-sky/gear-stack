@@ -206,17 +206,40 @@ class ImageUploadService:
 
     async def _get_max_file_size_for_user(self, user_id: str) -> int:
         """
-        Get maximum file size for user based on admin status.
+        Get maximum file size for user based on role from feature_limits table.
 
         Args:
             user_id: User ID
 
         Returns:
-            Maximum file size in bytes (admin limit if user is admin, regular limit otherwise)
+            Maximum file size in bytes from feature_limits table, or fallback to config
         """
+        from app.modules.feature_limits.repository import FeatureLimitRepository
+
         result = await self.db.execute(select(UserDB).where(UserDB.id == user_id))
         user = result.scalars().first()
-        if user and user.is_admin:
+        if not user:
+            return self.max_file_size
+
+        # Determine user role
+        if user.is_owner:
+            role = "owner"
+        elif user.is_admin:
+            role = "admin"
+        elif user.is_premium:
+            role = "premium"
+        else:
+            role = "user"
+
+        # Get limit from database
+        feature_limit_repo = FeatureLimitRepository(self.db)
+        feature_limit = await feature_limit_repo.get_by_role(role)
+
+        if feature_limit:
+            return feature_limit.storage_limit_bytes
+
+        # Fallback to config if limit not found in database
+        if user.is_admin or user.is_owner:
             return self.max_file_size_admin
         return self.max_file_size
 

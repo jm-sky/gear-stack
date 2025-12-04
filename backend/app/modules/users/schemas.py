@@ -58,6 +58,7 @@ class UserResponse(BaseModel):
     avatarUrl: Optional[str] = None
     createdAt: datetime
     updatedAt: datetime
+    features: Optional[UserFeatures] = Field(None, description="User features and limits (only included in /me endpoint)")
 
     model_config = {"from_attributes": True, "populate_by_name": True}
 
@@ -110,3 +111,23 @@ class StorageUsageResponse(BaseModel):
     usedPercentage: float = Field(..., description="Storage usage percentage (0-100)")
 
     model_config = {"from_attributes": True, "populate_by_name": True}
+
+
+class AiFeatures(BaseModel):
+    """AI features configuration."""
+
+    enabled: bool = Field(..., description="Whether AI features are enabled for user")
+    limit: Optional[float] = Field(None, description="AI usage limit in USD (null = unlimited)")
+
+
+class StorageFeatures(BaseModel):
+    """Storage features configuration."""
+
+    limit: int = Field(..., description="Storage limit in bytes")
+
+
+class UserFeatures(BaseModel):
+    """User features configuration with limits."""
+
+    ai: AiFeatures = Field(..., description="AI features configuration")
+    storage: StorageFeatures = Field(..., description="Storage features configuration")

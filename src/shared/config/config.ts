@@ -73,6 +73,14 @@ export const config = {
     // Maximum file size for administrators (50 MB)
     maxFileSizeAdmin: import.meta.env.VITE_MAX_FILE_SIZE_ADMIN ? parseInt(import.meta.env.VITE_MAX_FILE_SIZE_ADMIN) : 50 * 1024 * 1024,
   },
+  sentry: {
+    dsn: import.meta.env.VITE_SENTRY_DSN ?? '',
+    enabled: !!import.meta.env.VITE_SENTRY_DSN,
+    environment: import.meta.env.VITE_SENTRY_ENVIRONMENT ?? import.meta.env.MODE ?? 'development',
+    tracesSampleRate: import.meta.env.VITE_SENTRY_TRACES_SAMPLE_RATE ? parseFloat(import.meta.env.VITE_SENTRY_TRACES_SAMPLE_RATE) : 1.0,
+    replaysSessionSampleRate: import.meta.env.VITE_SENTRY_REPLAYS_SESSION_SAMPLE_RATE ? parseFloat(import.meta.env.VITE_SENTRY_REPLAYS_SESSION_SAMPLE_RATE) : 0.1,
+    replaysOnErrorSampleRate: import.meta.env.VITE_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE ? parseFloat(import.meta.env.VITE_SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE) : 1.0,
+  },
 }
 
 // osobna zmienna do użycia w localStorage / store

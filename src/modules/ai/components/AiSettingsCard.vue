@@ -9,17 +9,19 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import Separator from '@/components/ui/separator/Separator.vue'
-import AiPremiumFeatureAlert from '@/modules/ai/components/AiPremiumFeatureAlert.vue'
 import { useAiModels } from '@/modules/ai/composables/useAiModels'
 import { useAiStore } from '@/modules/ai/store/useAiStore'
+import { useUser } from '@/modules/user/composables/useUser'
+import { useUserStore } from '@/modules/user/store/useUserStore'
 import { useHandleError } from '@/shared/composables/useHandleError'
 import { usePermissions } from '@/shared/composables/usePermissions'
 
 const { t } = useI18n()
 const { handleError } = useHandleError()
-const { canUsePremiumFeatures } = usePermissions()
+const { isAuthenticated } = usePermissions()
 
 const aiStore = useAiStore()
+const userStore = useUserStore()
 const { models, selectedModel, loadModels, selectModel } = useAiModels()
 
 const apiToken = ref('')
@@ -28,6 +30,18 @@ const isRemovingToken = ref(false)
 
 const monthlyUsage = computed(() => aiStore.monthlyUsage)
 const hasOwnToken = computed(() => aiStore.hasOwnToken)
+
+// Get features from user store
+const userFeatures = computed(() => userStore.user?.features)
+
+// Calculate limits based on features
+const costLimit = computed(() => {
+  // Use limit from features if available, otherwise fallback to aiStore
+  if (userFeatures.value?.ai?.limit !== undefined) {
+    return userFeatures.value.ai.limit
+  }
+  return monthlyUsage.value.costLimit
+})
 
 const selectedModelId = computed({
   get: () => selectedModel.value?.id ?? '',
@@ -40,13 +54,15 @@ const selectedModelId = computed({
 })
 
 const progressPercentage = computed(() => {
+  // Token limits are not used from features, keep existing logic
   if (!monthlyUsage.value.tokenLimit) return 0
   return Math.min((monthlyUsage.value.tokens / monthlyUsage.value.tokenLimit) * 100, 100)
 })
 
 const costProgressPercentage = computed(() => {
-  if (!monthlyUsage.value.costLimit) return 0
-  return Math.min((monthlyUsage.value.cost / monthlyUsage.value.costLimit) * 100, 100)
+  const limit = costLimit.value
+  if (!limit || limit === 0) return 0
+  return Math.min((monthlyUsage.value.cost / limit) * 100, 100)
 })
 
 const progressColor = computed(() => {
@@ -93,10 +109,21 @@ const handleRemoveToken = async () => {
   }
 }
 
+const { loadProfile } = useUser()
+
 onMounted(async () => {
   await aiStore.loadSettings()
   if (models.value.length === 0) {
     await loadModels()
+  }
+  // Load user profile to get features if not already loaded
+  if (!userStore.user?.features) {
+    try {
+      await loadProfile()
+    } catch (error) {
+      // Silently fail if user profile can't be loaded
+      console.warn('Failed to load user profile for features:', error)
+    }
   }
 })
 </script>
@@ -113,9 +140,7 @@ onMounted(async () => {
       </CardDescription>
     </CardHeader>
     <CardContent class="space-y-6">
-      <AiPremiumFeatureAlert v-if="!canUsePremiumFeatures" />
-
-      <div :class="{ 'opacity-50 pointer-events-none': !canUsePremiumFeatures }">
+      <div :class="{ 'opacity-50 pointer-events-none': !isAuthenticated }">
         <!-- Default Model -->
         <div class="space-y-3">
           <Label>
@@ -125,7 +150,7 @@ onMounted(async () => {
           <p class="text-sm text-muted-foreground">
             {{ t('gear.settings.ai.defaultModel.subtitle') }}
           </p>
-          <Select v-model="selectedModelId" :disabled="!canUsePremiumFeatures">
+          <Select v-model="selectedModelId" :disabled="!isAuthenticated">
             <SelectTrigger>
               <SelectValue :placeholder="t('gear.settings.ai.defaultModel.placeholder')">
                 <span v-if="selectedModel" class="flex items-center gap-2">
@@ -178,7 +203,7 @@ onMounted(async () => {
                   variant="destructive"
                   size="sm"
                   :loading="isRemovingToken"
-                  :disabled="!canUsePremiumFeatures"
+                  :disabled="!isAuthenticated"
                   @click="handleRemoveToken"
                 >
                   <Trash2 class="size-4" />
@@ -193,13 +218,13 @@ onMounted(async () => {
               v-model="apiToken"
               type="password"
               :placeholder="t('gear.settings.ai.apiToken.placeholder')"
-              :disabled="!canUsePremiumFeatures"
+              :disabled="!isAuthenticated"
               class="font-mono text-sm"
             />
             <Button
               type="button"
               :loading="isSavingToken"
-              :disabled="!canUsePremiumFeatures"
+              :disabled="!isAuthenticated"
               @click="handleSaveToken"
             >
               {{ t('gear.settings.ai.apiToken.save') }}
@@ -250,21 +275,25 @@ onMounted(async () => {
               <span class="text-muted-foreground">{{ t('gear.settings.ai.usage.cost') }}</span>
               <span class="font-medium">
                 ${{ monthlyUsage.cost.toFixed(4) }}
-                <span v-if="monthlyUsage.costLimit">
-                  / ${{ monthlyUsage.costLimit.toFixed(4) }}
+                <span v-if="costLimit && costLimit > 0">
+                  / ${{ costLimit.toFixed(4) }}
+                </span>
+                <span v-else-if="costLimit === 0" class="text-muted-foreground">
+                  ({{ t('gear.settings.ai.usage.noLimit') }})
                 </span>
                 <span v-else class="text-muted-foreground">
                   ({{ t('gear.settings.ai.usage.unlimited') }})
                 </span>
               </span>
             </div>
-            <div v-if="monthlyUsage.costLimit" class="h-2 w-full overflow-hidden rounded-full bg-muted">
+            <div v-if="costLimit && costLimit > 0" class="h-2 w-full overflow-hidden rounded-full bg-muted">
               <div
                 :class="costProgressColor"
                 class="h-full transition-all duration-300"
                 :style="{ width: `${costProgressPercentage}%` }"
               />
             </div>
+            <div v-else-if="costLimit === 0" class="h-2 w-full rounded-full bg-red-500/20" />
             <div v-else class="h-2 w-full rounded-full bg-green-500/20" />
           </div>
 

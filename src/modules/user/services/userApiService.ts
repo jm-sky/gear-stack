@@ -18,6 +18,15 @@ interface UserResponse {
   avatarUrl?: string
   createdAt: string
   updatedAt: string
+  features?: {
+    ai: {
+      enabled: boolean
+      limit: number | null
+    }
+    storage: {
+      limit: number
+    }
+  }
 }
 
 /**
@@ -77,6 +86,7 @@ class UserApiService {
       isPremium: response.isPremium ?? response.role === 'premium',
       createdAt: response.createdAt,
       updatedAt: response.updatedAt,
+      features: response.features,
     }
   }
 

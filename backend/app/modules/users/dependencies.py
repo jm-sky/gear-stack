@@ -18,11 +18,21 @@ from .models import User
 
 
 def _map_auth_user(auth_user: AuthUser) -> User:
+    # Determine role from auth user flags
+    if getattr(auth_user, "isOwner", False):
+        role = "owner"
+    elif getattr(auth_user, "isAdmin", False):
+        role = "admin"
+    elif getattr(auth_user, "isPremium", False):
+        role = "premium"
+    else:
+        role = "user"
+
     return User(
         id=auth_user.id,
         email=auth_user.email,
         name=auth_user.name,
-        role="admin" if getattr(auth_user, "isAdmin", False) else "user",
+        role=role,
         isActive=auth_user.isActive,
         createdAt=auth_user.createdAt,
         updatedAt=auth_user.createdAt,

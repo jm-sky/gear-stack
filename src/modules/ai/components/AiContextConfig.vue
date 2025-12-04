@@ -11,7 +11,7 @@ import { useAiContext } from '../composables/useAiContext'
 
 const { t } = useI18n()
 
-const { canUsePremiumFeatures } = usePermissions()
+const { isAuthenticated } = usePermissions()
 const { selectedFields, availableFields, toggleField } = useAiContext()
 
 const isFieldSelected = (field: string): boolean => {
@@ -25,7 +25,7 @@ const handleFieldToggle = (field: string): void => {
 
 <template>
   <div class="border-t p-4 space-y-3">
-    <div class="space-y-2" :class="{ 'opacity-50 pointer-events-none': !canUsePremiumFeatures }">
+    <div class="space-y-2" :class="{ 'opacity-50 pointer-events-none': !isAuthenticated }">
       <Label class="text-sm font-medium">{{ t('ai.context.fields') }}</Label>
       <p class="text-xs text-muted-foreground">
         {{ t('ai.context.description') }}

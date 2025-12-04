@@ -19,6 +19,8 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@sentry/vite-plugin": "^4.6.1",
+    "@sentry/vue": "^10.28.0",
     "@simplewebauthn/browser": "^13.2.2",
     "@tailwindcss/vite": "4.1.16",
     "@tanstack/vue-query": "^5.90.7",

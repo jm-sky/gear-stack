@@ -5,6 +5,7 @@ export const AdminRoutePaths = {
   users: '/admin/users',
   containers: '/admin/containers',
   items: '/admin/items',
+  limits: '/admin/limits',
 }
 
 export const AdminRouteNames = {
@@ -12,6 +13,7 @@ export const AdminRouteNames = {
   users: 'admin-users',
   containers: 'admin-containers',
   items: 'admin-items',
+  limits: 'admin-limits',
 }
 
 export const adminRoutes: RouteRecordRaw[] = [
@@ -38,5 +40,11 @@ export const adminRoutes: RouteRecordRaw[] = [
     name: AdminRouteNames.items,
     component: () => import('@/modules/admin/pages/AdminItemsPage.vue'),
     meta: { layout: 'authenticated', requiresAuth: true, requiresAdmin: true, title: 'admin.items.title' },
+  },
+  {
+    path: AdminRoutePaths.limits,
+    name: AdminRouteNames.limits,
+    component: () => import('@/modules/admin/pages/AdminLimitsPage.vue'),
+    meta: { layout: 'authenticated', requiresAuth: true, requiresAdmin: true, title: 'admin.limits.title' },
   },
 ]

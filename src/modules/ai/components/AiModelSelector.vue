@@ -11,7 +11,7 @@ import { useAiModels } from '../composables/useAiModels'
 
 const { t } = useI18n()
 
-const { canUsePremiumFeatures } = usePermissions()
+const { isAuthenticated } = usePermissions()
 
 const { models, selectedModel, loadModels, selectModel } = useAiModels()
 
@@ -42,7 +42,7 @@ const selectedModelId = computed({
 </script>
 
 <template>
-  <Select v-model="selectedModelId" :disabled="!canUsePremiumFeatures">
+  <Select v-model="selectedModelId" :disabled="!isAuthenticated">
     <SelectTrigger size="sm" class="w-56 cursor-pointer hover:bg-accent hover:border-accent-foreground/50">
       <SelectValue :placeholder="t('ai.model.selectPlaceholder')" class="w-full flex items-center gap-2">
         <span class="font-medium">{{ selectedModel?.name }}</span>
