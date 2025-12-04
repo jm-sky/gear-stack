@@ -10,19 +10,20 @@ import { usePageTitle } from '@/shared/composables/usePageTitle'
 import { config } from '@/shared/config/config'
 import type { IGearContainer, IGearItem } from '../types/gear.types'
 import ItemHeader from '../components/ItemHeader.vue'
-import SearchImagesButton from '../components/SearchImagesButton.vue'
-
-// Lazy load ItemImageGallery - not critical for initial render
-const ItemImageGallery = defineAsyncComponent(() => import('../components/ItemImageGallery.vue'))
 import MarkdownRenderer from '../components/MarkdownRenderer.vue'
+import SearchImagesButton from '../components/SearchImagesButton.vue'
 import { useExpiration } from '../composables/useExpiration'
 import { useFormattedItemPrice } from '../composables/useFormattedItemPrice'
 import { useFormattedItemWeight } from '../composables/useFormattedItemWeight'
+import { useGear } from '../composables/useGear'
 import { GearRoutePath } from '../routes'
 import { gearContainerService } from '../services/gearContainerService'
 import { gearItemService } from '../services/gearItemService'
 import { useGearStore } from '../store/useGearStore'
+import { getFrom } from '../utils/navigationParams'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
+
+const ItemImageGallery = defineAsyncComponent(() => import('../components/ItemImageGallery.vue'))
 
 const route = useRoute()
 const router = useRouter()
@@ -31,6 +32,7 @@ const store = useGearStore()
 const { shouldUseAPI } = useBackend()
 const { user, isAuthenticated } = useAuth()
 const { setTitle } = usePageTitle()
+const { deleteItem } = useGear()
 
 const containerId = route.params.containerId as string
 const itemId = route.params.itemId as string
@@ -113,6 +115,31 @@ const handleItemUpdated = async () => {
   await loadItem()
 }
 
+// Handle item deletion
+const handleDeleteItem = async () => {
+  if (!item.value) return
+
+  if (!confirm(t('gear.item.deleteConfirm'))) {
+    return
+  }
+
+  try {
+    await deleteItem(item.value.id)
+    toast.success(t('common.success'))
+
+    // Navigate back to the appropriate page
+    const from = getFrom(route)
+    if (from === 'all-items') {
+      router.push(GearRoutePath.AllItems)
+    } else {
+      router.push(GearRoutePath.ContainerDetailById(containerId))
+    }
+  } catch (error) {
+    console.error('Failed to delete item:', error)
+    toast.error(t('common.error'))
+  }
+}
+
 const { formattedWeight } = useFormattedItemWeight(item)
 const { formattedPrice } = useFormattedItemPrice(item)
 
@@ -158,6 +185,7 @@ const urlDomain = computed<string>(() => {
         :item-id
         :item
         @item-updated="handleItemUpdated"
+        @delete="handleDeleteItem"
       />
 
       <!-- Main Info -->

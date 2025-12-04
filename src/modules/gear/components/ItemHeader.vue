@@ -32,6 +32,7 @@ const { containerId, itemId, item } = defineProps<{
 
 const emit = defineEmits<{
   itemUpdated: []
+  delete: []
 }>()
 
 const { isExpired, isExpiringSoon } = useExpiration(item)
@@ -73,6 +74,7 @@ const handleEdit = () => {
           v-model:match-dialog-open="matchDialogOpen"
           :item="item"
           @item-updated="emit('itemUpdated')"
+          @delete="emit('delete')"
         />
       </div>
     </div>

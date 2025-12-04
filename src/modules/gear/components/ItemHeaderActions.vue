@@ -5,8 +5,10 @@ import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import DropdownMenuSeparator from '@/components/ui/dropdown-menu/DropdownMenuSeparator.vue'
 import type { IGearItem } from '../types/gear.types'
 import { useCatalogue } from '../composables/catalogue/useCatalogue'
+import { getActionIcon } from '../utils/actionIcons'
 import UpdateFromCatalogueDialog from './catalogue/UpdateFromCatalogueDialog.vue'
 
 const { t } = useI18n()
@@ -21,7 +23,10 @@ const { item } = defineProps<{
 
 const emit = defineEmits<{
   itemUpdated: []
+  delete: []
 }>()
+
+const DeleteIcon = getActionIcon('delete')
 
 const handleMatchWithCatalogue = () => {
   matchDialogOpen.value = true
@@ -102,6 +107,14 @@ const isLinkedToCatalogue = computed(() => !!item.catalogueItemId)
       >
         <Link2Off class="size-4" />
         {{ t('gear.catalogue.unlinkFromCatalogue') }}
+      </DropdownMenuItem>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem
+        class="text-destructive hover:text-destructive! hover:bg-destructive/4!"
+        @click="emit('delete')"
+      >
+        <DeleteIcon class="size-4 mr-2" />
+        {{ t('gear.actions.delete') }}
       </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>
