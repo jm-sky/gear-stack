@@ -99,8 +99,8 @@ const getColumnHeaderText = (column: ReturnType<Table<TData>['getColumn']>): str
       <SearchInput
         v-if="enableFiltering"
         id="data-table-search"
-        name="data-table-search"
         v-model="globalFilter"
+        name="data-table-search"
         :placeholder="searchPlaceholder"
         class="max-w-sm"
       />
