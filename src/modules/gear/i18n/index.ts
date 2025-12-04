@@ -416,6 +416,12 @@ export const gearEn = {
         containers: 'Containers',
         items: 'Items',
       },
+      filters: {
+        menu: 'More filters',
+        withImage: 'Only with image',
+        withoutImage: 'Only without image',
+        removeFilter: 'Remove filter',
+      },
     },
     shopping: {
       title: 'Shopping Planning',
@@ -1222,6 +1228,12 @@ export const gearPl = {
         all: 'Wszystkie',
         containers: 'Kontenery',
         items: 'Przedmioty',
+      },
+      filters: {
+        menu: 'Więcej filtrów',
+        withImage: 'Tylko z obrazkiem',
+        withoutImage: 'Tylko bez obrazka',
+        removeFilter: 'Usuń filtr',
       },
     },
     shopping: {

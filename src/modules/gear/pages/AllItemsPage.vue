@@ -5,6 +5,8 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink, useRouter } from 'vue-router'
 import DataTable from '@/components/data-table/DataTable.vue'
 import AllItemsFilters from '@/components/layout/AllItemsFilters.vue'
+import AllItemsFilterBadges from '@/components/layout/AllItemsFilterBadges.vue'
+import AllItemsFiltersMenu from '@/components/layout/AllItemsFiltersMenu.vue'
 import Badge from '@/components/ui/badge/Badge.vue'
 import Button from '@/components/ui/button/Button.vue'
 import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
@@ -42,6 +44,9 @@ const loading = ref(false)
 // Filter type: 'all' | 'containers' | 'items'
 const filterType = ref<'all' | 'containers' | 'items'>('all')
 
+// Image filter: 'all' | 'withImage' | 'withoutImage'
+const hasImageFilter = ref<'all' | 'withImage' | 'withoutImage'>('all')
+
 // Global filter (search) for DataTable
 const globalFilter = ref('')
 
@@ -49,6 +54,7 @@ const globalFilter = ref('')
 interface FiltersState {
   globalFilter: string
   filterType: 'all' | 'containers' | 'items'
+  hasImageFilter?: 'all' | 'withImage' | 'withoutImage'
 }
 
 function loadFiltersFromStorage(): FiltersState | null {
@@ -69,6 +75,7 @@ function saveFiltersToStorage(): void {
     const filters: FiltersState = {
       globalFilter: globalFilter.value,
       filterType: filterType.value,
+      hasImageFilter: hasImageFilter.value,
     }
     localStorage.setItem(ALL_ITEMS_PAGE_FILTERS_KEY, JSON.stringify(filters))
   } catch (error) {
@@ -82,11 +89,12 @@ onMounted(() => {
   if (savedFilters) {
     globalFilter.value = savedFilters.globalFilter
     filterType.value = savedFilters.filterType
+    hasImageFilter.value = savedFilters.hasImageFilter ?? 'all'
   }
 })
 
 // Watch filters and save to localStorage
-watch([globalFilter, filterType], () => {
+watch([globalFilter, filterType, hasImageFilter], () => {
   saveFiltersToStorage()
 }, { deep: true })
 
@@ -108,16 +116,33 @@ async function refreshItems() {
   }
 }
 
-// Filter items based on filterType
+// Filter items based on filterType and image filter
 const allItems = computed<IItemWithContainer[]>(() => {
-  if (filterType.value === 'all') {
-    return allItemsRaw.value
-  } else if (filterType.value === 'containers') {
-    return allItemsRaw.value.filter(item => item.isContainer === true)
-  } else {
-    return allItemsRaw.value.filter(item => item.isContainer !== true)
+  let filtered = allItemsRaw.value
+
+  // Apply filterType filter
+  if (filterType.value === 'containers') {
+    filtered = filtered.filter(item => item.isContainer === true)
+  } else if (filterType.value === 'items') {
+    filtered = filtered.filter(item => item.isContainer !== true)
   }
+
+  // Apply image filter
+  if (hasImageFilter.value === 'withImage') {
+    filtered = filtered.filter(item => !!item.primaryImageUrl)
+  } else if (hasImageFilter.value === 'withoutImage') {
+    filtered = filtered.filter(item => !item.primaryImageUrl)
+  }
+
+  return filtered
 })
+
+// Handle filter removal
+function removeImageFilter(filterKey: 'withImage' | 'withoutImage') {
+  if (hasImageFilter.value === filterKey) {
+    hasImageFilter.value = 'all'
+  }
+}
 
 // Column visibility
 function loadColumnVisibility(): Record<string, boolean> {
@@ -219,7 +244,14 @@ function navigateToContainer(containerId: string) {
         :initial-page-size="20"
       >
         <template #toolbar-filters>
-          <AllItemsFilters v-model:filter-type="filterType" />
+          <div class="flex flex-wrap items-center gap-2 sm:gap-4">
+            <AllItemsFilters v-model:filter-type="filterType" />
+            <AllItemsFiltersMenu v-model:hasImageFilter="hasImageFilter" />
+          </div>
+        </template>
+
+        <template #toolbar-badges>
+          <AllItemsFilterBadges :has-image-filter="hasImageFilter" @remove-filter="removeImageFilter" />
         </template>
 
         <template #image="{ row }">
