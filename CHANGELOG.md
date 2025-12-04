@@ -21,6 +21,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.30.0] - 2025-12-04
+
+### Added
+- **Feature Limits Management**: Configurable AI and storage limits per user role
+  - New `feature_limits` database table storing limits for user, premium, admin, and owner roles
+  - Migration `033_add_feature_limits_table` with default limits:
+    - User: 0$ AI limit (no access without own token), 20MB storage
+    - Premium: 5$ AI limit, 50MB storage
+    - Admin: Unlimited AI, 200MB storage
+    - Owner: Unlimited AI, 1GB storage
+  - Backend CRUD API endpoints (`/feature-limits`) for managing limits (admin/owner only)
+  - New admin page (`/admin/limits`) for configuring limits per role
+  - Limits are now stored in database instead of hard-coded values
+  - `/users/me` endpoint now returns `features` object with AI and storage limits
+  - Storage usage endpoint (`/users/me/storage/usage`) uses limits from database
+  - Image upload validation uses role-based limits from database
+
+### Changed
+- **AI Settings Access**: AI settings are now available for all authenticated users (not just premium)
+  - Regular users can use AI only if they have their own API token
+  - Premium users can use AI with system token (up to configured limit)
+  - `useAi` composable updated to check for own token or premium status
+- **User Features Endpoint**: `/users/me` now includes `features` object with:
+  - `ai.enabled`: Whether AI is enabled for user
+  - `ai.limit`: AI usage limit in USD (null = unlimited)
+  - `storage.limit`: Storage limit in bytes
+- **Limit Calculation**: All limit calculations now use database values with fallback to config
+
+### Fixed
+- Fixed type errors in `users/router.py` - `CurrentUser` from users module uses `role` string instead of boolean flags
+- Updated `_map_auth_user` to correctly map all roles (owner, admin, premium, user)
+
+---
+
 ## [2.29.0] - 2025-12-03
 
 ### Added
