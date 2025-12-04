@@ -18,7 +18,7 @@ const {
   updateSearchParams,
   clearFilters,
   refetchItems,
-} = useCatalogue()
+} = useCatalogue({ enableItemsQuery: true })
 
 // Search filter
 const searchQueryRaw = ref('')

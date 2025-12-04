@@ -14,7 +14,7 @@ import type {
 import type { IGearItem } from '@/modules/gear/types/gear.types'
 import type { TUUID } from '@/shared/types/base.type'
 
-export function useCatalogue() {
+export function useCatalogue(options?: { enableItemsQuery?: boolean }) {
   const queryClient = useQueryClient()
   const { shouldUseAPI } = useBackend()
 
@@ -41,6 +41,7 @@ export function useCatalogue() {
     queryKey: ['catalogue', 'items', searchParams],
     queryFn: () => catalogueApiService.getCatalogueItems(searchParams.value),
     staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: options?.enableItemsQuery ?? false, // Only fetch when explicitly enabled
   })
 
   const catalogueItemsArray = computed(() => catalogueItems.value ?? [])

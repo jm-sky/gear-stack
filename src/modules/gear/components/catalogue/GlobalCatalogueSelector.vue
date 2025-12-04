@@ -51,7 +51,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const { catalogueItems, isLoadingItems } = useCatalogue()
+const { catalogueItems, isLoadingItems } = useCatalogue({ enableItemsQuery: true })
 const { getAllItemsForCatalog } = useGear()
 
 const open = ref(false)
