@@ -6,8 +6,8 @@ import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import type { IGearItem } from '../types/gear.types'
-import UpdateFromCatalogueDialog from './catalogue/UpdateFromCatalogueDialog.vue'
 import { useCatalogue } from '../composables/catalogue/useCatalogue'
+import UpdateFromCatalogueDialog from './catalogue/UpdateFromCatalogueDialog.vue'
 
 const { t } = useI18n()
 const { fetchImagesFromCatalogue, unlinkItemFromCatalogue, isFetchingImages, isUnlinking } = useCatalogue()

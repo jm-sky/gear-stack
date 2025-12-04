@@ -155,7 +155,7 @@ export function useCatalogue() {
   const updateFromCatalogueMutation = useMutation({
     mutationFn: ({ itemId, fields }: { itemId: TUUID; fields?: string[] }) =>
       catalogueApiService.updateItemFromCatalogue(itemId, fields),
-    onSuccess: async (_, itemId) => {
+    onSuccess: async (_, variables) => {
       // Invalidate gear items/containers queries
       queryClient.invalidateQueries({ queryKey: ['gear'] })
 
@@ -164,7 +164,7 @@ export function useCatalogue() {
         try {
           const store = useGearStore()
           // Find container that contains this item (including nested containers)
-          const itemWithContainer = gearContainerLocalService.getItemWithContainer(itemId)
+          const itemWithContainer = gearContainerLocalService.getItemWithContainer(variables.itemId)
 
           if (itemWithContainer?.containerId) {
             const container = await gearContainerApiService.getContainer(itemWithContainer.containerId)
