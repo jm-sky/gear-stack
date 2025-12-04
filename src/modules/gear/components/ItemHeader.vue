@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { ArrowLeftIcon, PencilIcon } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import ButtonLink from '@/components/ui/button-link/ButtonLink.vue'
 import type { IGearItem } from '../types/gear.types'
 import CategoryIcon from '../components/CategoryIcon.vue'
 import ItemHeaderName from '../components/ItemHeaderName.vue'
@@ -39,14 +38,6 @@ const { isExpired, isExpiringSoon } = useExpiration(item)
 
 const matchDialogOpen = ref(false)
 
-const backTo = computed<string>(() => {
-  const from = getFrom(route)
-  if (from === 'all-items') {
-    return GearRoutePath.AllItems
-  }
-  return GearRoutePath.ContainerDetailById(containerId)
-})
-
 const handleEdit = () => {
   const from = getFrom(route)
   router.push({
@@ -59,10 +50,14 @@ const handleEdit = () => {
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between gap-4">
-      <ButtonLink :to="backTo" variant="ghost" size="sm">
+      <Button
+        variant="ghost"
+        size="sm"
+        @click="router.back()"
+      >
         <ArrowLeftIcon class="size-4" />
         {{ t('common.back') }}
-      </ButtonLink>
+      </Button>
 
       <div class="flex items-center justify-end gap-2">
         <Button size="sm" @click="handleEdit">

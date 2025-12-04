@@ -44,21 +44,20 @@ const { canUseAi } = useAi()
 
 // Filters - using refs that will be bound to ContainersFilters via v-model
 const loading = ref(false)
-const searchQueryRaw = ref('')
-const searchQuery = refDebounced(searchQueryRaw, 300)
-const showOnlyRootContainers = ref(false)
 
-// Helper to load filters from localStorage
-interface FiltersState {
-  searchQuery: string
-  showOnlyRootContainers: boolean
+// Initialize from URL query params or localStorage fallback
+function loadFiltersFromURL(): { searchQuery: string; showOnlyRootContainers: boolean } {
+  const searchQuery = typeof route.query.search === 'string' ? route.query.search : ''
+  const showOnlyRootContainers = route.query.rootOnly === 'true'
+  
+  return { searchQuery, showOnlyRootContainers }
 }
 
-function loadFiltersFromStorage(): FiltersState | null {
+function loadFiltersFromStorage(): { searchQuery: string; showOnlyRootContainers: boolean } | null {
   const stored = localStorage.getItem(CONTAINERS_LIST_PAGE_FILTERS_KEY)
   if (stored) {
     try {
-      return JSON.parse(stored) as FiltersState
+      return JSON.parse(stored)
     } catch (error) {
       console.error('Error loading filters from storage:', error)
     }
@@ -66,30 +65,47 @@ function loadFiltersFromStorage(): FiltersState | null {
   return null
 }
 
-// Helper to save filters to localStorage
-function saveFiltersToStorage(): void {
-  try {
-    const filters: FiltersState = {
-      searchQuery: searchQueryRaw.value,
-      showOnlyRootContainers: showOnlyRootContainers.value,
-    }
-    localStorage.setItem(CONTAINERS_LIST_PAGE_FILTERS_KEY, JSON.stringify(filters))
-  } catch (error) {
-    console.error('Error saving filters to storage:', error)
+// Load filters - prioritize URL params, fallback to localStorage
+const urlFilters = loadFiltersFromURL()
+const storedFilters = loadFiltersFromStorage()
+
+const searchQueryRaw = ref(urlFilters.searchQuery || storedFilters?.searchQuery || '')
+const searchQuery = refDebounced(searchQueryRaw, 300)
+const showOnlyRootContainers = ref(urlFilters.showOnlyRootContainers || storedFilters?.showOnlyRootContainers || false)
+
+// Update URL when filters change
+watch([searchQueryRaw, showOnlyRootContainers], ([newSearch, newRootOnly]) => {
+  const query = { ...route.query } as Record<string, string | undefined>
+  
+  if (newSearch) {
+    query.search = newSearch
+  } else {
+    delete query.search
   }
-}
-
-// Load filters from storage on mount
-const savedFilters = loadFiltersFromStorage()
-if (savedFilters) {
-  searchQueryRaw.value = savedFilters.searchQuery
-  showOnlyRootContainers.value = savedFilters.showOnlyRootContainers
-}
-
-// Watch filters and save to localStorage
-watch([searchQueryRaw, showOnlyRootContainers], () => {
-  saveFiltersToStorage()
+  
+  if (newRootOnly) {
+    query.rootOnly = 'true'
+  } else {
+    delete query.rootOnly
+  }
+  
+  // Preserve other query params (like import)
+  router.replace({ query })
 }, { deep: true })
+
+// Watch for URL changes (browser back/forward, refresh)
+watch(() => route.query, (newQuery) => {
+  const urlSearch = typeof newQuery.search === 'string' ? newQuery.search : ''
+  const urlRootOnly = newQuery.rootOnly === 'true'
+  
+  if (searchQueryRaw.value !== urlSearch) {
+    searchQueryRaw.value = urlSearch
+  }
+  
+  if (showOnlyRootContainers.value !== urlRootOnly) {
+    showOnlyRootContainers.value = urlRootOnly
+  }
+}, { immediate: false })
 
 // Dialogs
 const importDialogOpen = ref(false)

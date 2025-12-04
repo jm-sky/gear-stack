@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Box, Package, RefreshCcwIcon } from 'lucide-vue-next'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import DataTable from '@/components/data-table/DataTable.vue'
 import AllItemsFilterBadges from '@/components/layout/AllItemsFilterBadges.vue'
 import AllItemsFilters from '@/components/layout/AllItemsFilters.vue'
@@ -31,6 +31,7 @@ import { createNavigationQuery } from '../utils/navigationParams'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 
 const router = useRouter()
+const route = useRoute()
 const { t } = useI18n()
 const { containers } = useGear()
 const { getCategoryLabel } = useCategoryLabel()
@@ -41,16 +42,34 @@ const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.prefe
 // Loading state for refresh
 const loading = ref(false)
 
-// Filter type: 'all' | 'containers' | 'items'
-const filterType = ref<'all' | 'containers' | 'items'>('all')
+// Helper to load filters from URL query params
+function loadFiltersFromURL(): {
+  globalFilter: string
+  filterType: 'all' | 'containers' | 'items'
+  hasImageFilter: 'all' | 'withImage' | 'withoutImage'
+  page: number
+  pageSize: number
+} {
+  const globalFilter = typeof route.query.search === 'string' ? route.query.search : ''
+  const filterType = (route.query.filterType === 'containers' || route.query.filterType === 'items')
+    ? route.query.filterType
+    : 'all'
+  const hasImageFilter = (route.query.hasImage === 'withImage' || route.query.hasImage === 'withoutImage')
+    ? route.query.hasImage
+    : 'all'
+  const page = typeof route.query.page === 'string' ? parseInt(route.query.page, 10) : 1
+  const pageSize = typeof route.query.pageSize === 'string' ? parseInt(route.query.pageSize, 10) : 20
 
-// Image filter: 'all' | 'withImage' | 'withoutImage'
-const hasImageFilter = ref<'all' | 'withImage' | 'withoutImage'>('all')
+  return {
+    globalFilter,
+    filterType,
+    hasImageFilter,
+    page: isNaN(page) || page < 1 ? 1 : page,
+    pageSize: isNaN(pageSize) || pageSize < 1 ? 20 : pageSize,
+  }
+}
 
-// Global filter (search) for DataTable
-const globalFilter = ref('')
-
-// Helper to load filters from localStorage
+// Helper to load filters from localStorage (fallback)
 interface FiltersState {
   globalFilter: string
   filterType: 'all' | 'containers' | 'items'
@@ -69,34 +88,84 @@ function loadFiltersFromStorage(): FiltersState | null {
   return null
 }
 
-// Helper to save filters to localStorage
-function saveFiltersToStorage(): void {
-  try {
-    const filters: FiltersState = {
-      globalFilter: globalFilter.value,
-      filterType: filterType.value,
-      hasImageFilter: hasImageFilter.value,
-    }
-    localStorage.setItem(ALL_ITEMS_PAGE_FILTERS_KEY, JSON.stringify(filters))
-  } catch (error) {
-    console.error('Error saving filters to storage:', error)
-  }
-}
+// Initialize from URL or localStorage fallback
+const urlFilters = loadFiltersFromURL()
+const storedFilters = loadFiltersFromStorage()
 
-// Load filters from storage on mount
-onMounted(() => {
-  const savedFilters = loadFiltersFromStorage()
-  if (savedFilters) {
-    globalFilter.value = savedFilters.globalFilter
-    filterType.value = savedFilters.filterType
-    hasImageFilter.value = savedFilters.hasImageFilter ?? 'all'
-  }
-})
+// Filter type: 'all' | 'containers' | 'items'
+const filterType = ref<'all' | 'containers' | 'items'>(urlFilters.filterType || storedFilters?.filterType || 'all')
 
-// Watch filters and save to localStorage
-watch([globalFilter, filterType, hasImageFilter], () => {
-  saveFiltersToStorage()
+// Image filter: 'all' | 'withImage' | 'withoutImage'
+const hasImageFilter = ref<'all' | 'withImage' | 'withoutImage'>(urlFilters.hasImageFilter || storedFilters?.hasImageFilter || 'all')
+
+// Global filter (search) for DataTable
+const globalFilter = ref(urlFilters.globalFilter || storedFilters?.globalFilter || '')
+
+// Pagination state
+const page = ref(urlFilters.page)
+const pageSize = ref(urlFilters.pageSize)
+
+// Update URL when filters/search/pagination change
+watch([globalFilter, filterType, hasImageFilter, page, pageSize], ([newSearch, newFilterType, newHasImage, newPage, newPageSize]) => {
+  const query = { ...route.query } as Record<string, string | undefined>
+
+  if (newSearch) {
+    query.search = newSearch
+  } else {
+    delete query.search
+  }
+
+  if (newFilterType && newFilterType !== 'all') {
+    query.filterType = newFilterType
+  } else {
+    delete query.filterType
+  }
+
+  if (newHasImage && newHasImage !== 'all') {
+    query.hasImage = newHasImage
+  } else {
+    delete query.hasImage
+  }
+
+  if (newPage && newPage > 1) {
+    query.page = String(newPage)
+  } else {
+    delete query.page
+  }
+
+  if (newPageSize && newPageSize !== 20) {
+    query.pageSize = String(newPageSize)
+  } else {
+    delete query.pageSize
+  }
+
+  router.replace({ query })
 }, { deep: true })
+
+// Watch for URL changes (browser back/forward, refresh)
+watch(() => route.query, () => {
+  const urlFilters = loadFiltersFromURL()
+
+  if (globalFilter.value !== urlFilters.globalFilter) {
+    globalFilter.value = urlFilters.globalFilter
+  }
+
+  if (filterType.value !== urlFilters.filterType) {
+    filterType.value = urlFilters.filterType
+  }
+
+  if (hasImageFilter.value !== urlFilters.hasImageFilter) {
+    hasImageFilter.value = urlFilters.hasImageFilter
+  }
+
+  if (page.value !== urlFilters.page) {
+    page.value = urlFilters.page
+  }
+
+  if (pageSize.value !== urlFilters.pageSize) {
+    pageSize.value = urlFilters.pageSize
+  }
+}, { immediate: false })
 
 // Get all items from all containers (includes containers as items)
 const allItemsRaw = computed<IItemWithContainer[]>(() => {
@@ -233,6 +302,8 @@ function navigateToContainer(containerId: string) {
       <DataTable
         v-model:column-visibility="columnVisibility"
         v-model:global-filter="globalFilter"
+        v-model:page="page"
+        v-model:page-size="pageSize"
         :columns="columns"
         :data="allItems"
         :search-placeholder="t('gear.filters.search')"

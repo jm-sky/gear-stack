@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// File operations handled via native input element
 import { computed, defineAsyncComponent, ref, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -20,6 +19,7 @@ import { useContainer } from '../composables/useContainer'
 import { useGear } from '../composables/useGear'
 import { useItemsParamRecognition } from '../composables/useItemsParamRecognition'
 import { useJsonImportExport } from '../composables/useJsonImportExport'
+import { useSearchPaginationUrl } from '../composables/useSearchPaginationUrl'
 import { GearRoutePath } from '../routes'
 import { gearItemService } from '../services/gearItemService'
 import { useGearStore } from '../store/useGearStore'
@@ -90,6 +90,14 @@ const isAiDialogOpen = ref(false)
 
 // Items
 const items = computed<IGearItem[]>(() => container.value?.items ?? [])
+
+// Search and pagination state synchronized with URL
+const { search, page, pageSize } = useSearchPaginationUrl({
+  defaultPageSize: 10,
+  preserveKeys: ['returnTo', 'from'],
+})
+
+const globalFilter = search
 
 // Display items with pending sorting changes applied
 // This ensures that when user reorders items, the table shows the new order immediately
@@ -325,6 +333,9 @@ if (!container.value) {
 
       <!-- Items Table -->
       <ItemsTable
+        v-model:global-filter="globalFilter"
+        v-model:page="page"
+        v-model:page-size="pageSize"
         :items="displayItems"
         :container-id="containerId"
         @edit="handleEditItem"

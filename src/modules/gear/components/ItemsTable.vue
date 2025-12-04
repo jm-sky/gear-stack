@@ -46,13 +46,73 @@ const props = withDefaults(
     loading?: boolean
     publicMode?: boolean
     containerId?: string
+    globalFilter?: string
+    page?: number
+    pageSize?: number
   }>(),
   {
     loading: false,
     publicMode: false,
     containerId: undefined,
+    globalFilter: undefined,
+    page: undefined,
+    pageSize: undefined,
   },
 )
+
+// Internal state for search and pagination (used when not provided via props)
+const internalGlobalFilter = ref('')
+const internalPage = ref(1)
+const internalPageSize = ref(10)
+
+// Use props if provided, otherwise use internal state
+const globalFilterModel = computed({
+  get: () => {
+    if (props.globalFilter !== undefined) {
+      return props.globalFilter
+    }
+    return internalGlobalFilter.value
+  },
+  set: (value: string) => {
+    if (props.globalFilter !== undefined) {
+      emit('update:globalFilter', value)
+    } else {
+      internalGlobalFilter.value = value
+    }
+  },
+})
+
+const pageModel = computed({
+  get: () => {
+    if (props.page !== undefined) {
+      return props.page
+    }
+    return internalPage.value
+  },
+  set: (value: number) => {
+    if (props.page !== undefined) {
+      emit('update:page', value)
+    } else {
+      internalPage.value = value
+    }
+  },
+})
+
+const pageSizeModel = computed({
+  get: () => {
+    if (props.pageSize !== undefined) {
+      return props.pageSize
+    }
+    return internalPageSize.value
+  },
+  set: (value: number) => {
+    if (props.pageSize !== undefined) {
+      emit('update:pageSize', value)
+    } else {
+      internalPageSize.value = value
+    }
+  },
+})
 
 const emit = defineEmits<{
   edit: [item: IGearItem]
@@ -63,6 +123,9 @@ const emit = defineEmits<{
   sortingChange: [items: IGearItem[]]
   update: [item: IGearItem]
   unlinkFromCatalogue: [item: IGearItem]
+  'update:globalFilter': [filter: string]
+  'update:page': [page: number]
+  'update:pageSize': [pageSize: number]
 }>()
 
 const { t } = useI18n()
@@ -168,6 +231,7 @@ function navigateToItem(item: IGearItem) {
   if (props.publicMode && props.containerId) {
     router.push(GearRoutePath.PublicItemDetailById(props.containerId, item.id))
   } else if (props.containerId) {
+    // Only pass navigation params, router.back() will preserve search/pagination from browser history
     router.push({
       path: GearRoutePath.ItemDetailById(props.containerId, item.id),
       query: createNavigationQuery(undefined, 'container'),
@@ -454,6 +518,9 @@ async function handleStarItem(item: IGearItem, newPriority: TGearItemPriority) {
   <DataTable
     v-model:column-visibility="columnVisibility"
     v-model:sorting="tableSorting"
+    v-model:global-filter="globalFilterModel"
+    v-model:page="pageModel"
+    v-model:page-size="pageSizeModel"
     :columns="columns"
     :data="sortedItems"
     :search-placeholder="t('gear.filters.search')"

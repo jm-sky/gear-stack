@@ -91,10 +91,6 @@ const handleExportToPrompt = () => {
 const handleExportToCSV = () => {
   emit('exportToCsv')
 }
-
-const handleBack = () => {
-  router.push(GearRoutePath.Containers)
-}
 </script>
 
 <template>
@@ -102,7 +98,11 @@ const handleBack = () => {
     <!-- Header -->
     <div class="flex flex-col gap-4">
       <div class="flex items-center justify-between gap-3">
-        <Button variant="ghost" size="sm" @click="handleBack">
+        <Button
+          variant="ghost"
+          size="sm"
+          @click="router.back()"
+        >
           <BackIcon class="size-4" />
           {{ t('common.back') }}
         </Button>
