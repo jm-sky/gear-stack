@@ -96,7 +96,7 @@ export function formatWeightToPreferredUnit(weightInGrams: number, preferredUnit
     }
     case 'g':
     default:
-      return `${weightInGrams} g`
+      return `${weightInGrams.toFixed(WEIGHT_DECIMAL_PLACES)} g`
   }
 }
 
