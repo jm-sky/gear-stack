@@ -16,6 +16,8 @@ export interface IGlobalCatalogueItem {
   brand?: string | null
   model?: string | null
   priceTier?: TCataloguePriceTier | null
+  price?: number | null
+  currency?: string | null
   quality?: TGearItemQuality | null
   url?: string | null
   color?: string | null
@@ -48,6 +50,8 @@ export interface ICatalogueItemCreate {
   brand?: string | null
   model?: string | null
   priceTier?: TCataloguePriceTier | null
+  price?: number | null
+  currency?: string | null
   quality?: TGearItemQuality | null
   url?: string | null
   color?: string | null
@@ -63,6 +67,8 @@ export interface ICatalogueItemUpdate {
   brand?: string | null
   model?: string | null
   priceTier?: TCataloguePriceTier | null
+  price?: number | null
+  currency?: string | null
   quality?: TGearItemQuality | null
   url?: string | null
   color?: string | null

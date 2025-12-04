@@ -973,15 +973,17 @@ class GearService:
         self,
         item_id: str,
         user_id: str,
+        fields: list[str] | None = None,
     ) -> ItemResponse | None:
         """Update an item with data from its linked catalogue item.
 
-        Updates fields from catalogue while preserving user-specific fields
+        Updates only specified fields from catalogue while preserving user-specific fields
         like quantity, status, priority, and notes.
 
         Args:
             item_id: Item ID to update
             user_id: User ID (must own the item)
+            fields: List of field names to update. If None, updates all available fields.
 
         Returns:
             Updated item if successful, None otherwise
@@ -996,17 +998,39 @@ class GearService:
         if not catalogue_item or not catalogue_item.is_active:
             return None
 
-        # Update item with catalogue data (preserve user-specific fields)
-        update_data = ItemUpdate(  # type: ignore[call-arg]
-            name=catalogue_item.name,
-            category=catalogue_item.category,
-            weight=catalogue_item.weight,
-            weightUnit=cast(WeightUnit, catalogue_item.weight_unit),
-            brand=catalogue_item.brand,
-            color=catalogue_item.color,
-            url=catalogue_item.url,
-            # Preserve: quantity, status, priority, notes, expirationDate, etc.
-        )
+        # Build update data based on requested fields
+        update_data_dict: dict[str, Any] = {}
+
+        # If no fields specified, update all available fields
+        if fields is None:
+            fields = ['name', 'description', 'weight', 'weightUnit', 'price', 'currency', 'brand', 'color', 'category', 'quality', 'url']
+
+        # Map field names and update only requested fields
+        if 'name' in fields:
+            update_data_dict['name'] = catalogue_item.name
+        if 'description' in fields:
+            update_data_dict['description'] = catalogue_item.description
+        if 'weight' in fields:
+            update_data_dict['weight'] = catalogue_item.weight
+        if 'weightUnit' in fields or 'weight_unit' in fields:
+            update_data_dict['weightUnit'] = cast(WeightUnit, catalogue_item.weight_unit)
+        if 'price' in fields:
+            update_data_dict['price'] = catalogue_item.price
+        if 'currency' in fields:
+            update_data_dict['currency'] = catalogue_item.currency
+        if 'brand' in fields:
+            update_data_dict['brand'] = catalogue_item.brand
+        if 'color' in fields:
+            update_data_dict['color'] = catalogue_item.color
+        if 'category' in fields:
+            update_data_dict['category'] = catalogue_item.category
+        if 'quality' in fields:
+            update_data_dict['quality'] = catalogue_item.quality
+        if 'url' in fields:
+            update_data_dict['url'] = catalogue_item.url
+
+        # Preserve: quantity, status, priority, notes, expirationDate, etc.
+        update_data = ItemUpdate(**update_data_dict)  # type: ignore[call-arg]
         return await self.update_item(item_id, user_id, update_data)
 
     async def link_item_to_catalogue(

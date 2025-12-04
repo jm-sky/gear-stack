@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import { BookIcon, Link2Off, MoreHorizontalIcon, Sparkles } from 'lucide-vue-next'
-import { computed } from 'vue'
+import { BookIcon, ImageIcon, Link2Off, MoreHorizontalIcon, Sparkles } from 'lucide-vue-next'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import type { IGearItem } from '../types/gear.types'
+import UpdateFromCatalogueDialog from './catalogue/UpdateFromCatalogueDialog.vue'
 import { useCatalogue } from '../composables/catalogue/useCatalogue'
 
 const { t } = useI18n()
-const { updateItemFromCatalogue, unlinkItemFromCatalogue, isUpdatingFromCatalogue, isUnlinking } = useCatalogue()
+const { fetchImagesFromCatalogue, unlinkItemFromCatalogue, isFetchingImages, isUnlinking } = useCatalogue()
 
 const matchDialogOpen = defineModel<boolean>('matchDialogOpen', { default: false })
+const updateDialogOpen = ref(false)
 
 const { item } = defineProps<{
   item: IGearItem
@@ -25,15 +27,20 @@ const handleMatchWithCatalogue = () => {
   matchDialogOpen.value = true
 }
 
-const handleUpdateFromCatalogue = async () => {
+const handleUpdateFromCatalogue = () => {
+  if (!item.catalogueItemId) return
+  updateDialogOpen.value = true
+}
+
+const handleFetchImagesFromCatalogue = async () => {
   if (!item.catalogueItemId) return
 
   try {
-    await updateItemFromCatalogue(item.id)
-    toast.success(t('gear.catalogue.updatedFromCatalogue'))
+    await fetchImagesFromCatalogue(item.id)
+    toast.success(t('gear.catalogue.fetchedImagesFromCatalogue'))
     emit('itemUpdated')
   } catch (error) {
-    console.error('Failed to update item from catalogue:', error)
+    console.error('Failed to fetch images from catalogue:', error)
     toast.error(t('common.error'))
   }
 }
@@ -51,7 +58,7 @@ const handleUnlinkFromCatalogue = async () => {
   }
 }
 
-const isCatalogueActionLoading = computed(() => isUpdatingFromCatalogue.value || isUnlinking.value)
+const isCatalogueActionLoading = computed(() => isFetchingImages.value || isUnlinking.value)
 
 const isLinkedToCatalogue = computed(() => !!item.catalogueItemId)
 </script>
@@ -83,6 +90,14 @@ const isLinkedToCatalogue = computed(() => !!item.catalogueItemId)
       <DropdownMenuItem
         v-if="isLinkedToCatalogue"
         :disabled="isCatalogueActionLoading"
+        @click="handleFetchImagesFromCatalogue"
+      >
+        <ImageIcon class="size-4" />
+        {{ t('gear.catalogue.fetchImagesFromCatalogue') }}
+      </DropdownMenuItem>
+      <DropdownMenuItem
+        v-if="isLinkedToCatalogue"
+        :disabled="isCatalogueActionLoading"
         @click="handleUnlinkFromCatalogue"
       >
         <Link2Off class="size-4" />
@@ -90,4 +105,11 @@ const isLinkedToCatalogue = computed(() => !!item.catalogueItemId)
       </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>
+
+  <!-- Update from Catalogue Dialog -->
+  <UpdateFromCatalogueDialog
+    v-model:open="updateDialogOpen"
+    :item
+    @item-updated="emit('itemUpdated')"
+  />
 </template>
