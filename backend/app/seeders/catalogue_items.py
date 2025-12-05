@@ -43,6 +43,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 50.0,
         "weight_unit": "g",
+        "url": "https://lightmyfire.com/products/swedish-firesteel",
     },
     {
         "id": "01KBJXGQ87FGHRFQTVMP3YFSNG",
@@ -55,6 +56,7 @@ CATALOGUE_ITEMS = [
         "quality": "medium",
         "weight": 21.0,
         "weight_unit": "g",
+        "url": "https://www.bicworld.com/en/products/details/1/bic-lighter",
     },
     # Noże / Narzędzia tnące
     {
@@ -68,6 +70,7 @@ CATALOGUE_ITEMS = [
         "quality": "medium",
         "weight": 645.0,
         "weight_unit": "g",
+        "url": "https://www.fiskars.com/en-us/products/gardening/axes/x7-splitting-axe-1000573",
     },
     # Narzędzia wielofunkcyjne
     {
@@ -81,6 +84,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 8.5,
         "weight_unit": "oz",
+        "url": "https://www.leatherman.com/wave-plus-831429.html",
     },
     {
         "id": "01KBJXH7904T9DT153977RWERA",
@@ -93,6 +97,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 6.9,
         "weight_unit": "oz",
+        "url": "https://www.leatherman.com/blast-831429.html",
     },
     {
         "id": "01KBJXHA4CVVWZJRSWDJ19F85C",
@@ -153,6 +158,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 200.0,
         "weight_unit": "g",
+        "url": "https://www.bahco.com/en_us/products/hand-tools/saws/folding-saws/396-lap-folding-saw.html",
     },
     {
         "id": "01KBJXHP7289P4VEDKSCAMYBJW",
@@ -165,6 +171,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 118.0,
         "weight_unit": "g",
+        "url": "https://www.victorinox.com/global/en/products/Swiss-Army-Knives/Medium-Pocket-Knives/Ranger/p/1.3713",
     },
     {
         "id": "01KBJXHRQ0NKA5QAGHHC41YE4A",
@@ -177,6 +184,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 29.0,
         "weight_unit": "g",
+        "url": "https://www.victorinox.com/global/en/products/Swiss-Army-Knives/Small-Pocket-Knives/Alox-Bantam/p/0.6221",
     },
     # Woda / Water
     {
@@ -190,6 +198,7 @@ CATALOGUE_ITEMS = [
         "quality": "medium",
         "weight": 2.0,
         "weight_unit": "oz",
+        "url": "https://sawyer.com/products/mini-water-filtration-system",
     },
     {
         "id": "01KBJXHYQ826J0HKQ21CK8CR6H",
@@ -202,6 +211,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 3.0,
         "weight_unit": "oz",
+        "url": "https://sawyer.com/products/squeeze-water-filtration-system",
     },
     {
         "id": "01KBJXJ16F5J1NYW6GZN2S906E",
@@ -226,6 +236,7 @@ CATALOGUE_ITEMS = [
         "quality": "medium",
         "weight": 46.0,
         "weight_unit": "g",
+        "url": "https://www.lifestraw.com/products/lifestraw-personal-water-filter",
     },
     {
         "id": "01KBJXJ60YKWVB026N8YJ9TYPE",
@@ -238,6 +249,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 0.0,
         "weight_unit": "g",
+        "url": "https://www.lifestraw.com/products/lifestraw-go",
     },
     # Schronienie / Shelter
     {
@@ -251,6 +263,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 875.0,
         "weight_unit": "g",
+        "url": "https://www.ddhammocks.com/product/3x3-tarp",
     },
     {
         "id": "01KBJXJAW5J9ZGT47V2262BEDR",
@@ -275,6 +288,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 1.601,
         "weight_unit": "kg",
+        "url": "https://www.msrgear.com/tents/hubba-hubba-2-person-tent",
     },
     # Light
     {
@@ -288,6 +302,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 60.0,
         "weight_unit": "g",
+        "url": "https://www.olightstore.com/i5r-eos",
     },
     {
         "id": "01KBJXJJMZZYVFYJWRQS4MPGQP",
@@ -300,6 +315,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 92.0,
         "weight_unit": "g",
+        "url": "https://www.blackdiamondequipment.com/en_US/headlamps-and-lanterns/storm-450-headlamp-BD620625.html",
     },
     {
         "id": "01KBJXJNER6NZPMWMVMNEF084H",
@@ -312,6 +328,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 0.0,
         "weight_unit": "g",
+        "url": "https://www.fenixlighting.com/product/pd35-v3-flashlight/",
     },
     # First Aid
     {
@@ -337,6 +354,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 0.0,
         "weight_unit": "g",
+        "url": "https://www.cat-tourniquets.com/products/c-a-t-gen-7",
     },
     # Container / Other
     {
@@ -374,6 +392,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 3.85,
         "weight_unit": "lb",
+        "url": "https://www.511tactical.com/rush-24-backpack.html",
     },
     # Food
     {
@@ -473,6 +492,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 356.0,
         "weight_unit": "g",
+        "url": "https://www.anker.com/products/a1271",
     },
     # New items from global-catalogue-items-v2.md
     {
@@ -486,6 +506,7 @@ CATALOGUE_ITEMS = [
         "quality": "medium",
         "weight": 50.0,
         "weight_unit": "g",
+        "url": "https://www.mil-tec.com/en/emergency-thermal-blanket",
     },
     {
         "id": "01KBQ9MKG500FXNVND2X3J4AYX",
@@ -498,6 +519,7 @@ CATALOGUE_ITEMS = [
         "quality": "medium",
         "weight": 40.0,
         "weight_unit": "g",
+        "url": "https://cnocoutdoors.com/products/vecto-collapsible-water-container",
     },
     {
         "id": "01KBQ9MKG500FXNVND2X3J4AYY",
@@ -510,6 +532,7 @@ CATALOGUE_ITEMS = [
         "quality": "medium",
         "weight": 30.0,
         "weight_unit": "g",
+        "url": "https://www.aquamira.com/products/water-treatment-tablets",
     },
     {
         "id": "01KBQ9MKG500FXNVND2X3J4AYZ",
@@ -522,6 +545,7 @@ CATALOGUE_ITEMS = [
         "quality": "medium",
         "weight": 150.0,
         "weight_unit": "g",
+        "url": "https://www.gsioutdoors.com/stainless-steel-cup.html",
     },
     {
         "id": "01KBQ9MKG500FXNVND2X3J4AZ0",
@@ -534,6 +558,7 @@ CATALOGUE_ITEMS = [
         "quality": "medium",
         "weight": 25.0,
         "weight_unit": "g",
+        "url": "https://www.ucogear.com/products/stormproof-matches",
     },
     {
         "id": "01KBQ9MKG500FXNVND2X3J4AZ1",
