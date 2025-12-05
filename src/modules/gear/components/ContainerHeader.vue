@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CalendarPlus, CalendarSync, ExternalLink, Link2 } from 'lucide-vue-next'
+import { CalendarPlus, CalendarSync, ExternalLink, Link2, RefreshCcw } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import DropdownMenuSeparator from '@/components/ui/dropdown-menu/DropdownMenuSeparator.vue'
 import { useAi } from '@/modules/ai/composables/useAi'
+import { useBackend } from '@/shared/composables/useBackend'
 import { smallDateTime } from '@/shared/utils/smallDateTime'
 import type { IGearContainer } from '../types/gear.types'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
@@ -51,12 +52,14 @@ const emit = defineEmits<{
   recognizeParametersAll: []
   aiChat: []
   manageShareTokens: []
+  refresh: []
 }>()
 
 const router = useRouter()
 const { t } = useI18n()
 const { typeLabel } = useContainerTypeLabel(computed(() => props.container.type))
 const { canUseAi } = useAi()
+const { shouldUseAPI } = useBackend()
 
 const isCloneDialogOpen = ref(false)
 
@@ -107,6 +110,16 @@ const handleExportToCSV = () => {
           {{ t('common.back') }}
         </Button>
         <div class="flex items-center gap-2">
+          <Button
+            v-if="shouldUseAPI"
+            v-tooltip.bottom="t('gear.containers.refresh')"
+            variant="ghost"
+            size="sm"
+            :aria-label="t('gear.containers.refresh')"
+            @click="$emit('refresh')"
+          >
+            <RefreshCcw class="size-4" />
+          </Button>
           <Button
             v-if="canUseAi"
             v-tooltip.bottom="t('gear.actions.aiAssistant')"

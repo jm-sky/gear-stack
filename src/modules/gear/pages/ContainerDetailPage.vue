@@ -3,6 +3,7 @@ import { computed, defineAsyncComponent, ref, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
+import { RefreshCcw } from 'lucide-vue-next'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useAi } from '@/modules/ai/composables/useAi'
 import { useAuth } from '@/modules/auth/composables/useAuth'
@@ -301,6 +302,17 @@ const handleManageShareTokens = () => {
   router.push(GearRoutePath.ContainerShareTokensById(containerId))
 }
 
+const handleRefresh = async () => {
+  if (!container.value) return
+  try {
+    await getContainerById(container.value.id)
+    toast.success(t('gear.containers.refresh'))
+  } catch (error) {
+    console.error('Failed to refresh container:', error)
+    toast.error(t('common.error'))
+  }
+}
+
 // Redirect if container not found
 if (!container.value) {
   router.push(GearRoutePath.Containers)
@@ -320,6 +332,7 @@ if (!container.value) {
         @recognize-parameters-all="handleRecognizeParametersAll"
         @ai-chat="isAiDialogOpen = true"
         @manage-share-tokens="handleManageShareTokens"
+        @refresh="handleRefresh"
       />
 
       <!-- Sort Confirmation Alert (always show when there are pending changes) -->

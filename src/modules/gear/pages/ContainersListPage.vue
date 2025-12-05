@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { refDebounced } from '@vueuse/core'
-import { FileInput, Package } from 'lucide-vue-next'
+import { FileInput, Package, RefreshCcw } from 'lucide-vue-next'
 import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -192,6 +192,21 @@ const handleImport = () => {
   importDialogOpen.value = true
 }
 
+const handleRefresh = async () => {
+  if (config.backend.enabled) {
+    try {
+      loading.value = true
+      await gearContainerService().getContainers()
+      toast.success(t('gear.containers.refresh'))
+    } catch (error) {
+      console.error('Failed to refresh containers:', error)
+      toast.error(t('common.error'))
+    } finally {
+      loading.value = false
+    }
+  }
+}
+
 const handleImportComplete = () => {
   // Refresh is automatic via store reactivity
 }
@@ -245,6 +260,17 @@ const handleAiChat = () => {
         </div>
         <div class="flex flex-col sm:flex-row gap-2">
           <div class="flex gap-2">
+            <Button
+              v-if="config.backend.enabled"
+              v-tooltip.bottom="t('gear.containers.refresh')"
+              variant="outline"
+              class="shrink-0"
+              :aria-label="t('gear.containers.refresh')"
+              :disabled="loading"
+              @click="handleRefresh"
+            >
+              <RefreshCcw class="size-4" :class="{ 'animate-spin': loading }" />
+            </Button>
             <Button
               v-if="canUseAi"
               v-tooltip.bottom="t('gear.actions.aiAssistant')"
