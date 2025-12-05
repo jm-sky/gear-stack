@@ -7,12 +7,10 @@ import type {
   TGearWeightUnit,
 } from '../types/gear.types'
 import {
-  budgetEdcSurvivalKitItems,
   bugOutBagFirePouchItems,
   bugOutBagItems,
   edcItems,
   firePouchItems,
-  mediumEdcSurvivalKitItems,
   type IExampleSetItem,
 } from './exampleSets'
 import { gearContainerService } from './gearContainerService'

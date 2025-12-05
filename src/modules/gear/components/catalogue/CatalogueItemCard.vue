@@ -85,7 +85,7 @@ const qualityLabel = computed(() => {
           <MarkdownRenderer :content="item.description" class="text-sm" />
         </CardDescription>
 
-        <!-- Weight and Model -->
+        <!-- Weight, Model and Price -->
         <div class="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
           <div v-if="item.weight">
             {{ item.weight }}{{ item.weightUnit }}
@@ -93,6 +93,10 @@ const qualityLabel = computed(() => {
           <div v-if="item.model" class="flex items-center gap-1">
             <span class="text-xs">Model:</span>
             <span>{{ item.model }}</span>
+          </div>
+          <div v-if="item.price" class="flex items-center gap-1">
+            <span class="text-xs">{{ t('gear.item.price') }}:</span>
+            <span>{{ item.price }} {{ item.currency || 'USD' }}</span>
           </div>
         </div>
 

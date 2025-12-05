@@ -74,6 +74,7 @@ const hasDetails = computed<boolean>(() => {
     item.value.brand
     || item.value.model
     || item.value.color
+    || item.value.price
     || item.value.url
     || item.value.description
   )
@@ -222,6 +223,14 @@ const handleAddToContainer = () => {
                   }"
                 />
                 <span class="font-medium">{{ item.color }}</span>
+              </div>
+            </div>
+            <div v-if="item.price">
+              <div class="mb-1 text-sm text-muted-foreground">
+                {{ t('gear.item.price') }}
+              </div>
+              <div class="font-medium">
+                {{ item.price }} {{ item.currency || 'USD' }}
               </div>
             </div>
             <div v-if="item.url">

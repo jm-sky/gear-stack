@@ -547,12 +547,21 @@ async def _seed_catalogue(db) -> None:
 
         item_name = item_data.get("name")
 
+        # Map seeder field names to model field names
+        mapped_data = {}
+        for key, value in item_data.items():
+            # Map price_currency to currency
+            if key == "price_currency":
+                mapped_data["currency"] = value
+            else:
+                mapped_data[key] = value
+
         # Check if item exists by id
         existing_item = existing_items.get(item_id)
 
         if existing_item:
             # Update existing item
-            for key, value in item_data.items():
+            for key, value in mapped_data.items():
                 if key != "id":  # Don't update id as it's the primary key
                     setattr(existing_item, key, value)
             existing_item.updated_at = datetime.now(UTC)
@@ -560,14 +569,14 @@ async def _seed_catalogue(db) -> None:
         else:
             # Create new item
             catalogue_item = GlobalCatalogueItemDB(
-                **item_data,
+                **mapped_data,
                 created_by=creator_id,
             )
             db.add(catalogue_item)
             created_count += 1
 
         # Handle images - check if image already exists for this item
-        if item_name and item_name in CATALOGUE_ITEM_IMAGES:
+        if item_name and isinstance(item_name, str) and item_name in CATALOGUE_ITEM_IMAGES:
             image_filename: str = CATALOGUE_ITEM_IMAGES[item_name]
             source_path = Path(__file__).parent.parent.parent / "images" / "global-catalogue" / image_filename
 
