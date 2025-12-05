@@ -15,7 +15,7 @@ import { generateSampleSet } from '@/modules/gear/services/sampleSetGenerator'
 import { useHandleError } from '@/shared/composables/useHandleError'
 import type { ButtonProps } from '@/components/ui/button'
 
-export type SampleSetVariant = 'firePouch' | 'bugOutBag' | 'edc'
+export type SampleSetVariant = 'firePouch' | 'bugOutBag' | 'edc' | 'budgetEdc' | 'mediumEdc'
 
 const props = withDefaults(defineProps<{
   size?: ButtonProps['size']
@@ -68,6 +68,12 @@ const handleGenerate = async (variant: SampleSetVariant) => {
       </DropdownMenuItem>
       <DropdownMenuItem @click="handleGenerate('edc')">
         {{ t('gear.sampleSet.variants.edc.name', 'EDC (Every Day Carry)') }}
+      </DropdownMenuItem>
+      <DropdownMenuItem @click="handleGenerate('budgetEdc')">
+        {{ t('gear.sampleSet.variants.budgetEdc.name', 'Budget EDC Survival Kit') }}
+      </DropdownMenuItem>
+      <DropdownMenuItem @click="handleGenerate('mediumEdc')">
+        {{ t('gear.sampleSet.variants.mediumEdc.name', 'Medium EDC / Urban Survival Kit') }}
       </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>

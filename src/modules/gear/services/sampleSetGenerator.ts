@@ -7,20 +7,23 @@ import type {
   TGearWeightUnit,
 } from '../types/gear.types'
 import {
+  budgetEdcSurvivalKitItems,
   bugOutBagFirePouchItems,
   bugOutBagItems,
   edcItems,
   firePouchItems,
+  mediumEdcSurvivalKitItems,
   type IExampleSetItem,
 } from './exampleSets'
 import { gearContainerService } from './gearContainerService'
 import { gearItemService } from './gearItemService'
 import type { TUUID } from '@/shared/types/base.type'
 
-export type SampleSetVariant = 'firePouch' | 'bugOutBag' | 'edc'
+export type SampleSetVariant = 'firePouch' | 'bugOutBag' | 'edc' | 'budgetEdc' | 'mediumEdc'
 
 interface ISampleSetItem {
   name: string
+  catalogueItemId?: string
   category: TGearItemCategory
   weight: number
   weightUnit: TGearWeightUnit
@@ -98,6 +101,7 @@ async function createContainerWithItems(
 
     const itemData: ICreateItemDto = {
       name: item.name,
+      catalogueItemId: item.catalogueItemId || undefined,
       category: item.category,
       weight: item.weight,
       weightUnit: item.weightUnit,
@@ -161,6 +165,7 @@ function translateItems(
 
     return {
       name: translatedName,
+      catalogueItemId: item.catalogueItemId,
       category: item.category,
       weight: item.weight,
       weightUnit: item.weightUnit,

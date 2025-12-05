@@ -5,9 +5,11 @@ import type {
   TGearItemStatus,
   TGearWeightUnit,
 } from '../types/gear.types'
+import type { TUUID } from '@/shared/types/base.type'
 
 export interface IExampleSetItem {
   nameKey: string // Translation key for the item name
+  catalogueItemId?: TUUID // Reference to global catalogue item (if item exists in catalogue)
   category: TGearItemCategory
   weight: number
   weightUnit: TGearWeightUnit
@@ -28,6 +30,7 @@ export interface IExampleSetItem {
 export const firePouchItems: IExampleSetItem[] = [
   {
     nameKey: 'gear.sampleSet.items.lightMyFireFiresteel',
+    catalogueItemId: '01KBJXFP7WMDKNJ8HNMBW1CZZG', // Swedish FireSteel 2.0
     category: 'fire',
     weight: 28,
     weightUnit: 'g',
@@ -58,6 +61,7 @@ export const firePouchItems: IExampleSetItem[] = [
   },
   {
     nameKey: 'gear.sampleSet.items.bicLighter',
+    catalogueItemId: '01KBJXGQ87FGHRFQTVMP3YFSNG', // BIC Classic Lighter
     category: 'fire',
     weight: 12,
     weightUnit: 'g',
@@ -73,6 +77,7 @@ export const firePouchItems: IExampleSetItem[] = [
   },
   {
     nameKey: 'gear.sampleSet.items.ucoStormproofMatches',
+    catalogueItemId: '01KBQ9MKG500FXNVND2X3J4AZ0', // UCO Stormproof Matches
     category: 'fire',
     weight: 25,
     weightUnit: 'g',
@@ -107,6 +112,7 @@ export const bugOutBagItems: IExampleSetItem[] = [
   },
   {
     nameKey: 'gear.sampleSet.items.leathermanWave',
+    catalogueItemId: '01KBJXH4VP0T1SAZADHD3KY0RY', // Leatherman Wave+
     category: 'tools',
     weight: 241,
     weightUnit: 'g',
@@ -164,6 +170,7 @@ export const bugOutBagItems: IExampleSetItem[] = [
   },
   {
     nameKey: 'gear.sampleSet.items.lifestrawPersonal',
+    catalogueItemId: '01KBJXJ3P532DYZMJ0DK2K6MW1', // LifeStraw Personal Water Filter
     category: 'water',
     weight: 46,
     weightUnit: 'g',
@@ -196,6 +203,7 @@ export const bugOutBagItems: IExampleSetItem[] = [
 export const bugOutBagFirePouchItems: IExampleSetItem[] = [
   {
     nameKey: 'gear.sampleSet.items.lightMyFireFiresteel',
+    catalogueItemId: '01KBJXFP7WMDKNJ8HNMBW1CZZG', // Swedish FireSteel 2.0
     category: 'fire',
     weight: 28,
     weightUnit: 'g',
@@ -209,6 +217,7 @@ export const bugOutBagFirePouchItems: IExampleSetItem[] = [
   },
   {
     nameKey: 'gear.sampleSet.items.bicLighter',
+    catalogueItemId: '01KBJXGQ87FGHRFQTVMP3YFSNG', // BIC Classic Lighter
     category: 'fire',
     weight: 12,
     weightUnit: 'g',
@@ -256,6 +265,7 @@ export const edcItems: IExampleSetItem[] = [
   },
   {
     nameKey: 'gear.sampleSet.items.olightI3TEOS',
+    catalogueItemId: '01KBQ9MKG500FXNVND2X3J4AZ4', // Olight i3T EOS 2
     category: 'light',
     weight: 12,
     weightUnit: 'g',
@@ -314,6 +324,7 @@ export const edcItems: IExampleSetItem[] = [
   },
   {
     nameKey: 'gear.sampleSet.items.ankerPowerCore10000',
+    catalogueItemId: '01KBJXKPDHSV3W2NNP222TVPZZ', // Anker PowerCore 20100 (closest match)
     category: 'communication',
     weight: 180,
     weightUnit: 'g',
@@ -325,6 +336,303 @@ export const edcItems: IExampleSetItem[] = [
     price: 30,
     currency: 'USD',
     quality: 'high',
+  },
+]
+
+// Budget EDC Survival Kit
+export const budgetEdcSurvivalKitItems: IExampleSetItem[] = [
+  {
+    nameKey: 'gear.sampleSet.items.olightI3TEOS',
+    catalogueItemId: '01KBQ9MKG500FXNVND2X3J4AZ4', // Olight i3T EOS 2
+    category: 'light',
+    weight: 40,
+    weightUnit: 'g',
+    quantity: 1,
+    priority: 'high',
+    status: 'owned',
+    brand: 'Olight',
+    color: 'Black',
+    price: 25,
+    currency: 'USD',
+    quality: 'high',
+  },
+  {
+    nameKey: 'gear.sampleSet.items.lightMyFireFiresteel',
+    catalogueItemId: '01KBQ9MKG500FXNVND2X3J4AZ5', // Light My Fire Swedish FireSteel 2.0
+    category: 'fire',
+    weight: 50,
+    weightUnit: 'g',
+    quantity: 1,
+    priority: 'high',
+    status: 'owned',
+    brand: 'Light My Fire',
+    price: 15,
+    currency: 'USD',
+    quality: 'high',
+  },
+  {
+    catalogueItemId: '01KBQ9MKG60801WW461XE4JJA6', // Rite in the Rain All-Weather Notepad 3x5
+    nameKey: 'gear.sampleSet.items.riteInTheRainNotepad',
+    category: 'other',
+    weight: 70,
+    weightUnit: 'g',
+    quantity: 1,
+    priority: 'medium',
+    status: 'owned',
+    brand: 'Rite in the Rain',
+    color: 'Yellow',
+    price: 6,
+    currency: 'USD',
+    quality: 'medium',
+  },
+  {
+    catalogueItemId: '01KBQ9MKG60801WW461XE4JJA7', // Sharpie Permanent Marker
+    nameKey: 'gear.sampleSet.items.sharpieMarker',
+    category: 'other',
+    weight: 9,
+    weightUnit: 'g',
+    quantity: 1,
+    priority: 'low',
+    status: 'owned',
+    brand: 'Sharpie',
+    color: 'Black',
+    price: 2,
+    currency: 'USD',
+    quality: 'medium',
+  },
+  {
+    catalogueItemId: '01KBQ9MKG500FXNVND2X3J4AZ1', // Compact Duct Tape
+    nameKey: 'gear.sampleSet.items.ductTape',
+    category: 'tools',
+    weight: 100,
+    weightUnit: 'g',
+    quantity: 1,
+    priority: 'medium',
+    status: 'owned',
+    brand: 'Generic',
+    price: 5,
+    currency: 'USD',
+    quality: 'medium',
+  },
+  {
+    catalogueItemId: '01KBQ9MKG500FXNVND2X3J4AZ2', // Metal Spork
+    nameKey: 'gear.sampleSet.items.metalSpork',
+    category: 'tools',
+    weight: 25,
+    weightUnit: 'g',
+    quantity: 1,
+    priority: 'low',
+    status: 'owned',
+    brand: 'Generic',
+    price: 8,
+    currency: 'USD',
+    quality: 'medium',
+  },
+  {
+    catalogueItemId: '01KBQ9MKG500FXNVND2X3J4AYX', // CNOC Vecto Collapsible Water Bottle 1L
+    nameKey: 'gear.sampleSet.items.cnocVectoBottle',
+    category: 'water',
+    weight: 40,
+    weightUnit: 'g',
+    quantity: 1,
+    priority: 'high',
+    status: 'owned',
+    brand: 'CNOC',
+    price: 12,
+    currency: 'USD',
+    quality: 'medium',
+  },
+  {
+    catalogueItemId: '01KBQ9MKG500FXNVND2X3J4AZ0', // UCO Stormproof Matches
+    nameKey: 'gear.sampleSet.items.ucoStormproofMatches',
+    category: 'fire',
+    weight: 25,
+    weightUnit: 'g',
+    quantity: 1,
+    priority: 'medium',
+    status: 'owned',
+    brand: 'UCO',
+    price: 8,
+    currency: 'USD',
+    quality: 'high',
+    consumable: true,
+  },
+  {
+    catalogueItemId: '01KBQ9MKG60801WW461XE4JJA8', // Fenix E01 V2.0
+    nameKey: 'gear.sampleSet.items.fenixE01',
+    category: 'light',
+    weight: 13,
+    weightUnit: 'g',
+    quantity: 1,
+    priority: 'medium',
+    status: 'owned',
+    brand: 'Fenix',
+    color: 'Black',
+    price: 20,
+    currency: 'USD',
+    quality: 'high',
+  },
+]
+
+// Medium EDC / Urban Survival Kit
+export const mediumEdcSurvivalKitItems: IExampleSetItem[] = [
+  {
+    nameKey: 'gear.sampleSet.items.olightI3TEOS',
+    catalogueItemId: '01KBQ9MKG500FXNVND2X3J4AZ4', // Olight i3T EOS 2
+    category: 'light',
+    weight: 40,
+    weightUnit: 'g',
+    quantity: 1,
+    priority: 'high',
+    status: 'owned',
+    brand: 'Olight',
+    color: 'Black',
+    price: 25,
+    currency: 'USD',
+    quality: 'high',
+  },
+  {
+    catalogueItemId: '01KBQ9MKG50801WW461XE4JJA4', // Victorinox Huntsman
+    nameKey: 'gear.sampleSet.items.victorinoxHuntsman',
+    category: 'tools',
+    weight: 97,
+    weightUnit: 'g',
+    quantity: 1,
+    priority: 'high',
+    status: 'owned',
+    brand: 'Victorinox',
+    color: 'Red',
+    price: 45,
+    currency: 'USD',
+    quality: 'high',
+  },
+  {
+    nameKey: 'gear.sampleSet.items.lightMyFireFiresteel',
+    catalogueItemId: '01KBQ9MKG500FXNVND2X3J4AZ5', // Light My Fire Swedish FireSteel 2.0
+    category: 'fire',
+    weight: 50,
+    weightUnit: 'g',
+    quantity: 1,
+    priority: 'high',
+    status: 'owned',
+    brand: 'Light My Fire',
+    price: 15,
+    currency: 'USD',
+    quality: 'high',
+  },
+  {
+    catalogueItemId: '01KBQ9MKG60801WW461XE4JJA6', // Rite in the Rain All-Weather Notepad 3x5
+    nameKey: 'gear.sampleSet.items.riteInTheRainNotepad',
+    category: 'other',
+    weight: 70,
+    weightUnit: 'g',
+    quantity: 1,
+    priority: 'medium',
+    status: 'owned',
+    brand: 'Rite in the Rain',
+    color: 'Yellow',
+    price: 6,
+    currency: 'USD',
+    quality: 'medium',
+  },
+  {
+    catalogueItemId: '01KBQ9MKG60801WW461XE4JJA7', // Sharpie Permanent Marker
+    nameKey: 'gear.sampleSet.items.sharpieMarker',
+    category: 'other',
+    weight: 9,
+    weightUnit: 'g',
+    quantity: 1,
+    priority: 'low',
+    status: 'owned',
+    brand: 'Sharpie',
+    color: 'Black',
+    price: 2,
+    currency: 'USD',
+    quality: 'medium',
+  },
+  {
+    catalogueItemId: '01KBQ9MKG500FXNVND2X3J4AZ1', // Compact Duct Tape
+    nameKey: 'gear.sampleSet.items.ductTape',
+    category: 'tools',
+    weight: 100,
+    weightUnit: 'g',
+    quantity: 1,
+    priority: 'medium',
+    status: 'owned',
+    brand: 'Generic',
+    price: 5,
+    currency: 'USD',
+    quality: 'medium',
+  },
+  {
+    catalogueItemId: '01KBQ9MKG500FXNVND2X3J4AYX', // CNOC Vecto Collapsible Water Bottle 1L
+    nameKey: 'gear.sampleSet.items.cnocVectoBottle',
+    category: 'water',
+    weight: 40,
+    weightUnit: 'g',
+    quantity: 1,
+    priority: 'high',
+    status: 'owned',
+    brand: 'CNOC',
+    price: 12,
+    currency: 'USD',
+    quality: 'medium',
+  },
+  {
+    catalogueItemId: '01KBQ9MKG500FXNVND2X3J4AYW', // Mil-Tec Emergency Thermal Blanket
+    nameKey: 'gear.sampleSet.items.milTecEmergencyBlanket',
+    category: 'shelter',
+    weight: 50,
+    weightUnit: 'g',
+    quantity: 1,
+    priority: 'high',
+    status: 'owned',
+    brand: 'Mil-Tec',
+    price: 8,
+    currency: 'USD',
+    quality: 'medium',
+  },
+  {
+    catalogueItemId: '01KBQ9MKG60801WW461XE4JJA5', // Ferrocerium Rod 8 mm
+    nameKey: 'gear.sampleSet.items.ferroRod8mm',
+    category: 'fire',
+    weight: 35,
+    weightUnit: 'g',
+    quantity: 1,
+    priority: 'medium',
+    status: 'owned',
+    brand: 'Generic',
+    price: 8,
+    currency: 'USD',
+    quality: 'medium',
+  },
+  {
+    catalogueItemId: '01KBQ9MKG500FXNVND2X3J4AYZ', // GSI Outdoors Stainless Steel Cup 700 ml
+    nameKey: 'gear.sampleSet.items.gsiStainlessCup',
+    category: 'other',
+    weight: 150,
+    weightUnit: 'g',
+    quantity: 1,
+    priority: 'medium',
+    status: 'owned',
+    brand: 'GSI Outdoors',
+    price: 15,
+    currency: 'USD',
+    quality: 'medium',
+  },
+  {
+    // Note: FA001 (Basic Mini First Aid Kit) - assuming this exists in catalogue or will be added
+    nameKey: 'gear.sampleSet.items.basicMiniFirstAidKit',
+    category: 'firstAid',
+    weight: 100,
+    weightUnit: 'g',
+    quantity: 1,
+    priority: 'critical',
+    status: 'owned',
+    brand: 'Generic',
+    price: 15,
+    currency: 'USD',
+    quality: 'medium',
   },
 ]
 

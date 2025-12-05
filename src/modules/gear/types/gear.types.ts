@@ -196,6 +196,7 @@ export interface IUpdateContainerDto {
 export interface ICreateItemDto {
   id?: TUUID | null // Optional UUID for import/update workflow (when UUID is provided in markdown export)
   linkedItemId?: TUUID | null // Reference to original item when linking
+  catalogueItemId?: TUUID | null // Reference to global catalogue item (if item was added from catalogue)
   name: string
   category: TGearItemCategory
   quantity: number
