@@ -80,19 +80,29 @@ const hasDetails = computed<boolean>(() => {
   )
 })
 
-// Extract domain from URL
-const getUrlDomain = (url: string): string => {
+// Extract domain from URL with ellipsis if there's a path
+const getUrlDisplay = (url: string): string => {
   try {
     const urlObj = new URL(url)
-    return urlObj.hostname.replace(/^www\./, '')
+    const domain = urlObj.hostname.replace(/^www\./, '')
+    const hasPath = urlObj.pathname !== '/' || urlObj.search || urlObj.hash
+    return hasPath ? `${domain}/...` : domain
   } catch {
     return url
   }
 }
 
-const urlDomain = computed<string>(() => {
+const urlDisplay = computed<string>(() => {
   if (!item.value?.url) return ''
-  return getUrlDomain(item.value.url)
+  return getUrlDisplay(item.value.url)
+})
+
+// Display author name or "Admin" for created by
+const createdByDisplay = computed<string>(() => {
+  if (!item.value?.createdBy) return ''
+  // For now, just show "Admin" since we don't have author profile info
+  // In the future, this could check if the author has a public profile
+  return t('gear.catalogue.admin')
 })
 
 const goBack = () => {
@@ -160,18 +170,10 @@ const handleAddToContainer = () => {
       </div>
 
       <!-- Main Info -->
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div class="rounded-lg border bg-card p-4">
-          <div class="mb-1 text-sm text-muted-foreground">
-            {{ t('gear.item.weight') }}
-          </div>
-          <div class="text-2xl font-bold">
-            {{ item.weight }}{{ item.weightUnit }}
-          </div>
-        </div>
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div v-if="item.model" class="rounded-lg border bg-card p-4">
           <div class="mb-1 text-sm text-muted-foreground">
-            Model
+            {{ t('gear.catalogue.model') }}
           </div>
           <div class="text-2xl font-bold">
             {{ item.model }}
@@ -179,10 +181,10 @@ const handleAddToContainer = () => {
         </div>
         <div class="rounded-lg border bg-card p-4">
           <div class="mb-1 text-sm text-muted-foreground">
-            {{ t('gear.catalogue.version') }}
+            {{ t('gear.item.weight') }}
           </div>
           <div class="text-2xl font-bold">
-            v{{ item.version }}
+            {{ item.weight }}{{ item.weightUnit }}
           </div>
         </div>
       </div>
@@ -201,14 +203,6 @@ const handleAddToContainer = () => {
               </div>
               <div class="font-medium">
                 {{ item.brand }}
-              </div>
-            </div>
-            <div v-if="item.model">
-              <div class="mb-1 text-sm text-muted-foreground">
-                Model
-              </div>
-              <div class="font-medium">
-                {{ item.model }}
               </div>
             </div>
             <div v-if="item.color">
@@ -244,8 +238,7 @@ const handleAddToContainer = () => {
                   rel="noopener noreferrer"
                   class="font-medium text-primary hover:underline"
                 >
-                  <span class="sm:hidden">{{ t('gear.item.openLink') }}</span>
-                  <span class="hidden sm:inline">{{ urlDomain }}</span>
+                  {{ urlDisplay }}
                 </a>
               </div>
             </div>
@@ -254,7 +247,7 @@ const handleAddToContainer = () => {
                 {{ t('gear.catalogue.createdBy') }}
               </div>
               <div class="font-medium">
-                {{ item.createdBy }}
+                {{ createdByDisplay }}
               </div>
             </div>
           </div>
@@ -279,15 +272,15 @@ const handleAddToContainer = () => {
       <!-- Metadata -->
       <div class="rounded-lg border bg-card p-6">
         <h2 class="mb-4 text-lg font-semibold">
-          Metadata
+          {{ t('gear.catalogue.metadata') }}
         </h2>
         <div class="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
           <div>
-            <span class="text-muted-foreground">Created:</span>
+            <span class="text-muted-foreground">{{ t('gear.catalogue.metadataCreated') }}:</span>
             <span class="ml-2 font-medium">{{ new Date(item.createdAt).toLocaleString() }}</span>
           </div>
           <div>
-            <span class="text-muted-foreground">Updated:</span>
+            <span class="text-muted-foreground">{{ t('gear.catalogue.metadataUpdated') }}:</span>
             <span class="ml-2 font-medium">{{ new Date(item.updatedAt).toLocaleString() }}</span>
           </div>
         </div>

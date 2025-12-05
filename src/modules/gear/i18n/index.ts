@@ -812,6 +812,11 @@ export const gearEn = {
       deleteConfirm: 'Are you sure you want to delete this catalogue item?',
       empty: 'No catalogue items',
       emptyDescription: 'The global catalogue is empty. Add items to help others find gear.',
+      metadata: 'Metadata',
+      metadataCreated: 'Created',
+      metadataUpdated: 'Updated',
+      model: 'Model',
+      admin: 'Admin',
     },
   },
 }
@@ -1632,6 +1637,11 @@ export const gearPl = {
     deleteConfirm: 'Czy na pewno chcesz usunąć ten przedmiot z katalogu?',
     empty: 'Brak przedmiotów w katalogu',
     emptyDescription: 'Katalog globalny jest pusty. Dodaj przedmioty, aby pomóc innym znaleźć sprzęt.',
+    metadata: 'Metadane',
+    metadataCreated: 'Utworzono',
+    metadataUpdated: 'Zaktualizowano',
+    model: 'Model',
+    admin: 'Admin',
     },
   },
 }
