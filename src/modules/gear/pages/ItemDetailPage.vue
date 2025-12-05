@@ -112,7 +112,31 @@ onMounted(async () => {
 
 // Callback to refresh item after catalogue operations
 const handleItemUpdated = async () => {
-  await loadItem()
+  // After catalogue operations, container is refreshed in store
+  // Try to get item from refreshed container first, then fallback to API
+  if (shouldUseAPI.value) {
+    try {
+      // First try to get item from refreshed container in store
+      const refreshedContainer = store.getContainerById(containerId)
+      if (refreshedContainer) {
+        const refreshedItem = refreshedContainer.items.find(i => i.id === itemId)
+        if (refreshedItem) {
+          item.value = refreshedItem
+          container.value = refreshedContainer
+          return
+        }
+      }
+      // Fallback to loading from API
+      await loadItem()
+    } catch (error) {
+      console.error('Failed to refresh item:', error)
+      // Fallback to loading from API
+      await loadItem()
+    }
+  } else {
+    // For localStorage, just reload from store
+    await loadItem()
+  }
 }
 
 // Handle item deletion
