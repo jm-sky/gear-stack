@@ -1141,6 +1141,41 @@ async def update_item_from_catalogue(
     return item
 
 
+@router.post(
+    "/items/{item_id}/fetch-images-from-catalogue",
+    response_model=ItemResponse,
+    summary="Fetch images from catalogue",
+)
+async def fetch_images_from_catalogue(
+    item_id: str,
+    current_user: CurrentUser,
+    service: GearServiceDep,
+) -> ItemResponse:
+    """Fetch images from catalogue item and attach them to the gear item.
+
+    Copies images from the linked catalogue item to the user's item.
+    The item must be linked to a catalogue item (have catalogue_item_id).
+
+    Args:
+        item_id: Item ID to fetch images for
+        current_user: Authenticated user
+        service: Gear service instance
+
+    Returns:
+        Updated item with fetched images
+
+    Raises:
+        HTTPException: If item not found, not linked to catalogue, or user doesn't own it
+    """
+    item = await service.fetch_images_from_catalogue(item_id, current_user.id)
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Item not found, not linked to catalogue, or you don't have permission to modify it",
+        )
+    return item
+
+
 @router.patch(
     "/items/{item_id}/unlink-from-catalogue",
     response_model=ItemResponse,

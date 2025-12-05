@@ -1063,6 +1063,39 @@ class GearService:
         update_data = ItemUpdate(catalogueItemId=catalogue_item_id)  # type: ignore[call-arg]
         return await self.update_item(item_id, user_id, update_data)
 
+    async def fetch_images_from_catalogue(
+        self,
+        item_id: str,
+        user_id: str,
+    ) -> ItemResponse | None:
+        """Fetch images from catalogue item and attach them to the gear item.
+
+        Copies images from the linked catalogue item to the user's item.
+        The item must be linked to a catalogue item (have catalogue_item_id).
+
+        Args:
+            item_id: Item ID to fetch images for
+            user_id: User ID (must own the item)
+
+        Returns:
+            Updated item if successful, None otherwise
+        """
+        # Get user item
+        item = await self.repository.get_item(item_id, user_id)
+        if not item or not item.catalogue_item_id:
+            return None
+
+        # Get catalogue item to verify it exists and is active
+        catalogue_item = await self.repository.get_catalogue_item(item.catalogue_item_id)
+        if not catalogue_item or not catalogue_item.is_active:
+            return None
+
+        # Copy images from catalogue to item
+        await self._copy_catalogue_images_to_item(item.catalogue_item_id, item_id, user_id)
+
+        # Return updated item
+        return await self.get_item(item_id, user_id)
+
     async def unlink_item_from_catalogue(
         self,
         item_id: str,
