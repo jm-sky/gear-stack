@@ -17,10 +17,12 @@ def init_sentry() -> None:
         return
 
     try:
+        import logging
+
         import sentry_sdk
         from sentry_sdk.integrations.fastapi import FastApiIntegration
-        from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
         from sentry_sdk.integrations.logging import LoggingIntegration
+        from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 
         sentry_sdk.init(
             dsn=settings.sentry.dsn,
@@ -31,7 +33,7 @@ def init_sentry() -> None:
             integrations=[
                 FastApiIntegration(transaction_style="endpoint"),
                 SqlalchemyIntegration(),
-                LoggingIntegration(level=None, event_level="ERROR"),
+                LoggingIntegration(level=None, event_level=logging.ERROR),
             ],
             # Set user context in middleware or route handlers
             send_default_pii=False,  # Don't send PII by default

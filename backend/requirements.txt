@@ -45,6 +45,7 @@ httpx>=0.27.0
 black>=24.10.0
 ruff>=0.8.0
 mypy>=1.14.0
+types-passlib>=1.7.0  # Type stubs for passlib
 
 # Additional dependencies will be added here by fastapi-registry modules
 PyJWT>=2.10.0
