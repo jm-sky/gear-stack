@@ -6,16 +6,25 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
 const { t } = useI18n()
 
+const filterType = defineModel<'all' | 'containers' | 'items'>('filterType', {
+  required: true,
+})
+
 const hasImageFilter = defineModel<'all' | 'withImage' | 'withoutImage'>('hasImageFilter', {
   required: true,
 })
 
-function handleFilterChange(value: 'all' | 'withImage' | 'withoutImage') {
+function handleFilterTypeChange(value: 'all' | 'containers' | 'items') {
+  filterType.value = value
+}
+
+function handleImageFilterChange(value: 'all' | 'withImage' | 'withoutImage') {
   hasImageFilter.value = value
 }
 </script>
@@ -30,14 +39,33 @@ function handleFilterChange(value: 'all' | 'withImage' | 'withoutImage') {
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end">
       <DropdownMenuItem
+        :data-selected="filterType === 'all' ? '' : undefined"
+        @click="handleFilterTypeChange('all')"
+      >
+        {{ t('gear.allItems.filter.all', 'All') }}
+      </DropdownMenuItem>
+      <DropdownMenuItem
+        :data-selected="filterType === 'containers' ? '' : undefined"
+        @click="handleFilterTypeChange('containers')"
+      >
+        {{ t('gear.allItems.filter.containers', 'Containers') }}
+      </DropdownMenuItem>
+      <DropdownMenuItem
+        :data-selected="filterType === 'items' ? '' : undefined"
+        @click="handleFilterTypeChange('items')"
+      >
+        {{ t('gear.allItems.filter.items', 'Items') }}
+      </DropdownMenuItem>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem
         :data-selected="hasImageFilter === 'withImage' ? '' : undefined"
-        @click="handleFilterChange('withImage')"
+        @click="handleImageFilterChange('withImage')"
       >
         {{ t('gear.allItems.filters.withImage', 'Only with image') }}
       </DropdownMenuItem>
       <DropdownMenuItem
         :data-selected="hasImageFilter === 'withoutImage' ? '' : undefined"
-        @click="handleFilterChange('withoutImage')"
+        @click="handleImageFilterChange('withoutImage')"
       >
         {{ t('gear.allItems.filters.withoutImage', 'Only without image') }}
       </DropdownMenuItem>

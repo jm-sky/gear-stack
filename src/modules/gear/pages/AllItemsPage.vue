@@ -5,7 +5,6 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import DataTable from '@/components/data-table/DataTable.vue'
 import AllItemsFilterBadges from '@/components/layout/AllItemsFilterBadges.vue'
-import AllItemsFilters from '@/components/layout/AllItemsFilters.vue'
 import AllItemsFiltersMenu from '@/components/layout/AllItemsFiltersMenu.vue'
 import Badge from '@/components/ui/badge/Badge.vue'
 import Button from '@/components/ui/button/Button.vue'
@@ -213,6 +212,10 @@ function removeImageFilter(filterKey: 'withImage' | 'withoutImage') {
   }
 }
 
+function removeFilterType() {
+  filterType.value = 'all'
+}
+
 // Column visibility
 function loadColumnVisibility(): Record<string, boolean> {
   try {
@@ -316,13 +319,20 @@ function navigateToContainer(containerId: string) {
       >
         <template #toolbar-filters>
           <div class="flex flex-wrap items-center gap-2 sm:gap-4">
-            <AllItemsFilters v-model:filter-type="filterType" />
-            <AllItemsFiltersMenu v-model:has-image-filter="hasImageFilter" />
+            <AllItemsFiltersMenu
+              v-model:filter-type="filterType"
+              v-model:has-image-filter="hasImageFilter"
+            />
           </div>
         </template>
 
         <template #toolbar-badges>
-          <AllItemsFilterBadges :has-image-filter="hasImageFilter" @remove-filter="removeImageFilter" />
+          <AllItemsFilterBadges
+            :filter-type="filterType"
+            :has-image-filter="hasImageFilter"
+            @remove-filter-type="removeFilterType"
+            @remove-filter="removeImageFilter"
+          />
         </template>
 
         <template #image="{ row }">
