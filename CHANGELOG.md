@@ -21,6 +21,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.31.0] - 2025-12-05
+
+### Added
+- **Global Catalogue Enhancements**:
+  - Price and currency display for catalogue items
+  - URL links to product pages for enhanced product information
+  - New items added to global catalogue and example sets
+  - Endpoint to fetch images from catalogue items
+- **UI/UX Improvements**:
+  - Refresh functionality for containers and items
+  - Delete functionality for item management
+  - Image filter in AllItemsPage with refactored toolbar
+  - Search and pagination state now persisted in URL
+  - Enhanced item details with catalogue actions
+
+### Changed
+- Consolidated filter logic into AllItemsFiltersMenu component
+- Refactored pagination component to use computed properties
+- Enable conditional fetching of catalogue items in useCatalogue
+
+### Fixed
+- Resolved all mypy type checking errors in backend
+  - Added type stubs for passlib
+  - Fixed Sentry LoggingIntegration type error
+  - Added type ignore comments for libraries without stubs
+- Improved weight formatting in formatWeight utility
+- Corrected import order and v-model bindings in components
+- Updated .env.example with improved Sentry and storage configuration
+
+---
+
 ## [2.30.0] - 2025-12-04
 
 ### Added
