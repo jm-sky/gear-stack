@@ -70,7 +70,7 @@ CATALOGUE_ITEMS = [
         "quality": "medium",
         "weight": 645.0,
         "weight_unit": "g",
-        "url": "https://www.fiskars.com/en-us/products/gardening/axes/x7-splitting-axe-1000573",
+        "url": "https://www.fiskars.com/en-us/gardening-and-yard-care/products/axes-mauls-and-machetes/x7-hatchet-14-378501-1005",
     },
     # Narzędzia wielofunkcyjne
     {
@@ -84,7 +84,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 8.5,
         "weight_unit": "oz",
-        "url": "https://www.leatherman.com/wave-plus-831429.html",
+        "url": "https://www.leatherman.com/",
     },
     {
         "id": "01KBJXH7904T9DT153977RWERA",
@@ -97,7 +97,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 6.9,
         "weight_unit": "oz",
-        "url": "https://www.leatherman.com/blast-831429.html",
+        "url": "https://www.leatherman.com/",
     },
     {
         "id": "01KBJXHA4CVVWZJRSWDJ19F85C",
@@ -110,6 +110,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 0.0,
         "weight_unit": "g",
+        "url": "https://www.gerbergear.com/",
     },
     {
         "id": "01KBJXHCCSSKZWDFR4AB4H5DCV",
@@ -146,6 +147,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 0.0,
         "weight_unit": "g",
+        "url": "https://www.gorillatough.com/product/gorilla-tape/",
     },
     {
         "id": "01KBJXHKTWG3VFP9WR006129C0",
@@ -158,7 +160,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 200.0,
         "weight_unit": "g",
-        "url": "https://www.bahco.com/en_us/products/hand-tools/saws/folding-saws/396-lap-folding-saw.html",
+        "url": "https://www.bahco.com/",
     },
     {
         "id": "01KBJXHP7289P4VEDKSCAMYBJW",
@@ -224,6 +226,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 0.0,
         "weight_unit": "g",
+        "url": "https://www.katadyn.com/",
     },
     {
         "id": "01KBJXJ3P532DYZMJ0DK2K6MW1",
@@ -276,6 +279,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 1.13,
         "weight_unit": "kg",
+        "url": "https://www.snugpak.com/outdoor/stratosphere",
     },
     {
         "id": "01KBJXJDA0BW8V8C8NCFGVM8BQ",
@@ -342,6 +346,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 0.0,
         "weight_unit": "g",
+        "url": "https://www.emergencybandage.com/",
     },
     {
         "id": "01KBJXJT941E9K2RTM3C4G461B",
@@ -368,6 +373,7 @@ CATALOGUE_ITEMS = [
         "quality": "medium",
         "weight": 0.0,
         "weight_unit": "g",
+        "url": "https://www.condoroutdoor.com/",
     },
     {
         "id": "01KBJXJYS9SVWHKZ402ZF2358F",
@@ -380,6 +386,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 0.0,
         "weight_unit": "g",
+        "url": "https://www.maxpedition.com/",
     },
     {
         "id": "01KBJXK1P9Z7DJ0TYR3AN5YRWS",
@@ -392,7 +399,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 3.85,
         "weight_unit": "lb",
-        "url": "https://www.511tactical.com/rush-24-backpack.html",
+        "url": "https://www.511tactical.com/",
     },
     # Food
     {
@@ -406,6 +413,7 @@ CATALOGUE_ITEMS = [
         "quality": "medium",
         "weight": 68.0,
         "weight_unit": "g",
+        "url": "https://www.clifbar.com/products/clif-bar/chocolate-chip",
     },
     {
         "id": "01KBJXK6YK4F82T57WCXV5J47D",
@@ -418,6 +426,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 0.0,
         "weight_unit": "g",
+        "url": "https://www.lyofood.pl/produkty/beef-stroganoff",
     },
     {
         "id": "01KBJXK97HRZVNG9MQ6R1BG1VY",
@@ -430,6 +439,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 0.0,
         "weight_unit": "g",
+        "url": "https://www.primusequipment.com/",
     },
     {
         "id": "01KBJXKBHHGBW27PNM3EEBRMMN",
@@ -442,6 +452,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 500.0,
         "weight_unit": "g",
+        "url": "https://www.nrg5.com/",
     },
     # Navigation
     {
@@ -455,6 +466,7 @@ CATALOGUE_ITEMS = [
         "quality": "medium",
         "weight": 0.0,
         "weight_unit": "g",
+        "url": "https://riteintherain.com/products/all-weather-notebook",
     },
     {
         "id": "01KBJXKHNDWZ85HZZTG8DN0XVR",
@@ -467,6 +479,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 0.0,
         "weight_unit": "g",
+        "url": "https://www.suunto.com/en-us/Products/Compasses/Suunto-MC-2/",
     },
     # Communication
     {
@@ -480,6 +493,7 @@ CATALOGUE_ITEMS = [
         "quality": "medium",
         "weight": 0.01,
         "weight_unit": "oz",
+        "url": "https://www.fox40world.com/",
     },
     {
         "id": "01KBJXKPDHSV3W2NNP222TVPZZ",
@@ -492,7 +506,7 @@ CATALOGUE_ITEMS = [
         "quality": "high",
         "weight": 356.0,
         "weight_unit": "g",
-        "url": "https://www.anker.com/products/a1271",
+        "url": "https://www.anker.com/",
     },
     # New items from global-catalogue-items-v2.md
     {
@@ -506,7 +520,7 @@ CATALOGUE_ITEMS = [
         "quality": "medium",
         "weight": 50.0,
         "weight_unit": "g",
-        "url": "https://www.mil-tec.com/en/emergency-thermal-blanket",
+        "url": "https://www.mil-tec.com/",
     },
     {
         "id": "01KBQ9MKG500FXNVND2X3J4AYX",
@@ -532,7 +546,7 @@ CATALOGUE_ITEMS = [
         "quality": "medium",
         "weight": 30.0,
         "weight_unit": "g",
-        "url": "https://www.aquamira.com/products/water-treatment-tablets",
+        "url": "https://www.aquamira.com/",
     },
     {
         "id": "01KBQ9MKG500FXNVND2X3J4AYZ",
@@ -545,7 +559,7 @@ CATALOGUE_ITEMS = [
         "quality": "medium",
         "weight": 150.0,
         "weight_unit": "g",
-        "url": "https://www.gsioutdoors.com/stainless-steel-cup.html",
+        "url": "https://www.gsioutdoors.com/",
     },
     {
         "id": "01KBQ9MKG500FXNVND2X3J4AZ0",
@@ -558,7 +572,7 @@ CATALOGUE_ITEMS = [
         "quality": "medium",
         "weight": 25.0,
         "weight_unit": "g",
-        "url": "https://www.ucogear.com/products/stormproof-matches",
+        "url": "https://www.ucogear.com/",
     },
     {
         "id": "01KBQ9MKG500FXNVND2X3J4AZ1",
@@ -571,6 +585,7 @@ CATALOGUE_ITEMS = [
         "quality": "medium",
         "weight": 100.0,
         "weight_unit": "g",
+        "url": "https://www.amazon.com/s?k=duct+tape+10m",
     },
     {
         "id": "01KBQ9MKG500FXNVND2X3J4AZ2",
@@ -583,6 +598,7 @@ CATALOGUE_ITEMS = [
         "quality": "medium",
         "weight": 25.0,
         "weight_unit": "g",
+        "url": "https://www.amazon.com/s?k=titanium+spork",
     },
     {
         "id": "01KBQ9MKG500FXNVND2X3J4AZ3",
@@ -595,6 +611,7 @@ CATALOGUE_ITEMS = [
         "quality": "medium",
         "weight": 120.0,
         "weight_unit": "g",
+        "url": "https://www.amazon.com/s?k=emergency+poncho",
     },
     {
         "id": "01KBQ9MKG500FXNVND2X3J4AZ4",
