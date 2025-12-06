@@ -5,6 +5,7 @@ import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
+import CommonPageHeader from '@/components/layout/CommonPageHeader.vue'
 import { Button } from '@/components/ui/button'
 import ButtonLink from '@/components/ui/button-link/ButtonLink.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
@@ -249,61 +250,60 @@ const handleAiChat = () => {
   <AuthenticatedLayout>
     <div class="space-y-6 w-full max-w-full">
       <!-- Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 class="text-3xl font-bold">
-            {{ t('gear.page.containers') }}
-          </h1>
-          <h2 class="text-muted-foreground mt-1">
-            {{ t('gear.page.title') }}
-          </h2>
-        </div>
-        <div class="flex flex-col sm:flex-row gap-2">
-          <div class="flex gap-2">
-            <Button
-              v-if="config.backend.enabled"
-              v-tooltip.bottom="t('gear.containers.refresh')"
-              variant="outline"
-              class="shrink-0"
-              :aria-label="t('gear.containers.refresh')"
-              :disabled="loading"
-              @click="handleRefresh"
-            >
-              <RefreshCcw class="size-4" :class="{ 'animate-spin': loading }" />
-            </Button>
-            <Button
-              v-if="canUseAi"
-              v-tooltip.bottom="t('gear.actions.aiAssistant')"
-              variant="outline"
-              class="shrink-0"
-              :aria-label="t('gear.actions.aiAssistant')"
-              @click="handleAiChat"
-            >
-              <AiIcon class="size-4" />
-            </Button>
-            <Button
-              v-if="containers.length > 0"
-              v-tooltip.bottom="t('gear.export.allToMarkdown')"
-              variant="outline"
-              class="shrink-0"
-              :aria-label="$t('gear.export.allToMarkdown')"
-              @click="handleExportAllToMarkdown"
-            >
-              <ExportAllToMarkdownIcon class="size-4" />
-            </Button>
-            <Button
-              v-tooltip.bottom="t('gear.container.create.title')"
-              variant="default"
-              class="shrink-0 flex-1 sm:flex-none"
-              @click="handleCreate"
-            >
-              <CreateIcon class="size-4" />
-              {{ t('gear.container.create.title') }}
-            </Button>
-            <ContainersListPageDropdown @export-all-to-prompt="handleExportAllToMarkdown" @export-all-to-csv="handleExportAllToCSV" @import="handleImport" />
-          </div>
-        </div>
-      </div>
+      <CommonPageHeader
+        :icon="Package"
+        :label="t('gear.page.containers')"
+        :description="t('gear.page.title')"
+      >
+        <template #actions>
+          <Button
+            v-if="config.backend.enabled"
+            v-tooltip.bottom="t('gear.containers.refresh')"
+            variant="ghost"
+            size="sm"
+            class="shrink-0"
+            :aria-label="t('gear.containers.refresh')"
+            :disabled="loading"
+            @click="handleRefresh"
+          >
+            <RefreshCcw class="size-4" :class="{ 'animate-spin': loading }" />
+          </Button>
+          <Button
+            v-if="canUseAi"
+            v-tooltip.bottom="t('gear.actions.aiAssistant')"
+            variant="ghost"
+            size="sm"
+            class="shrink-0"
+            :aria-label="t('gear.actions.aiAssistant')"
+            @click="handleAiChat"
+          >
+            <AiIcon class="size-4" />
+          </Button>
+          <Button
+            v-if="containers.length > 0"
+            v-tooltip.bottom="t('gear.export.allToMarkdown')"
+            variant="ghost"
+            size="sm"
+            class="shrink-0"
+            :aria-label="$t('gear.export.allToMarkdown')"
+            @click="handleExportAllToMarkdown"
+          >
+            <ExportAllToMarkdownIcon class="size-4" />
+          </Button>
+          <Button
+            v-tooltip.bottom="t('gear.container.create.title')"
+            variant="default"
+            class="shrink-0 flex-1 sm:flex-none"
+            @click="handleCreate"
+          >
+            <CreateIcon class="size-4" />
+            {{ t('gear.container.create.title') }}
+          </Button>
+        </template>
+        <template #dropdown>
+          <ContainersListPageDropdown @export-all-to-prompt="handleExportAllToMarkdown" @export-all-to-csv="handleExportAllToCSV" @import="handleImport" />
+        </template>
+      </CommonPageHeader>
 
       <!-- Search and Filters -->
       <ContainersFilters

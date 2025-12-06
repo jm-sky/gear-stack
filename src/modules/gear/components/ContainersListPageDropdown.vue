@@ -65,7 +65,8 @@ const handleExportAllToCSV = () => {
     <DropdownMenuTrigger as-child>
       <Button
         v-tooltip.bottom="t('gear.actions.moreActions')"
-        variant="outline"
+        variant="ghost"
+        size="sm"
         class="sm:shrink-0"
         :aria-label="t('gear.actions.moreActions')"
       >

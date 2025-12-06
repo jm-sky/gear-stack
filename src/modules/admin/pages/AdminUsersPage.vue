@@ -4,6 +4,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
 import DataTable from '@/components/data-table/DataTable.vue'
+import CommonPageHeader from '@/components/layout/CommonPageHeader.vue'
 import Badge from '@/components/ui/badge/Badge.vue'
 import Button from '@/components/ui/button/Button.vue'
 import {
@@ -140,17 +141,11 @@ onMounted(() => {
   <AuthenticatedLayout>
     <div class="space-y-6 w-full max-w-full">
       <!-- Header -->
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-3xl font-bold tracking-tight flex items-center gap-3">
-            <Users class="size-8 text-primary" />
-            {{ t('admin.users.title', 'Users Management') }}
-          </h1>
-          <p class="text-muted-foreground mt-2">
-            {{ t('admin.users.subtitle', 'Manage user accounts and permissions') }}
-          </p>
-        </div>
-      </div>
+      <CommonPageHeader
+        :icon="Users"
+        :label="t('admin.users.title', 'Users Management')"
+        :description="t('admin.users.subtitle', 'Manage user accounts and permissions')"
+      />
 
       <!-- Table -->
       <DataTable

@@ -7,6 +7,7 @@ import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
+import CommonPageHeader from '@/components/layout/CommonPageHeader.vue'
 import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { config, SHOPPING_PLANNING_PAGE_FILTERS_KEY } from '@/shared/config/config'
@@ -570,17 +571,12 @@ onMounted(() => {
   <AuthenticatedLayout>
     <div class="space-y-6 w-full max-w-full">
       <!-- Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 class="text-3xl font-bold tracking-tight flex items-center gap-3">
-            <ShoppingCart class="size-8 text-primary" />
-            {{ t('gear.shopping.title', 'Shopping Planning') }}
-          </h1>
-          <p class="text-muted-foreground mt-2">
-            {{ t('gear.shopping.subtitle', 'Plan your purchases for items to buy and expiring soon') }}
-          </p>
-        </div>
-        <div class="flex items-center gap-2 flex-wrap">
+      <CommonPageHeader
+        :icon="ShoppingCart"
+        :label="t('gear.shopping.title', 'Shopping Planning')"
+        :description="t('gear.shopping.subtitle', 'Plan your purchases for items to buy and expiring soon')"
+      >
+        <template #actions>
           <Button
             variant="default"
             @click="addItemDialogOpen = true"
@@ -603,8 +599,8 @@ onMounted(() => {
             <RotateCcw class="size-4" />
             {{ t('gear.shopping.reset', 'Reset') }}
           </Button>
-        </div>
-      </div>
+        </template>
+      </CommonPageHeader>
 
       <!-- Summary above list -->
       <ShoppingListSummary

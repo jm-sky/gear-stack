@@ -6,6 +6,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import DataTable from '@/components/data-table/DataTable.vue'
 import AllItemsFilterBadges from '@/components/layout/AllItemsFilterBadges.vue'
 import AllItemsFiltersMenu from '@/components/layout/AllItemsFiltersMenu.vue'
+import CommonPageHeader from '@/components/layout/CommonPageHeader.vue'
 import Badge from '@/components/ui/badge/Badge.vue'
 import Button from '@/components/ui/button/Button.vue'
 import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
@@ -279,27 +280,23 @@ function navigateToContainer(containerId: string) {
   <AuthenticatedLayout>
     <div class="space-y-6 w-full max-w-full">
       <!-- Header -->
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-3xl font-bold tracking-tight flex items-center gap-3">
-            <Package class="size-8 text-primary" />
-            {{ t('gear.allItems.title', 'All Items') }}
-          </h1>
-          <p class="text-muted-foreground mt-2">
-            {{ t('gear.allItems.subtitle', 'View and manage all items from all containers') }}
-          </p>
-        </div>
-        <div class="flex flex-row items-center justify-end gap-2">
+      <CommonPageHeader
+        :icon="Package"
+        :label="t('gear.allItems.title', 'All Items')"
+        :description="t('gear.allItems.subtitle', 'View and manage all items from all containers')"
+      >
+        <template #actions>
           <Button
+            v-tooltip.bottom="t('gear.allItems.refresh', 'Refresh items')"
             variant="ghost"
-            size="icon"
+            size="sm"
             :aria-label="t('gear.allItems.refresh', 'Refresh items')"
             @click="refreshItems"
           >
             <RefreshCcwIcon class="size-4" :class="{ 'animate-spin': loading }" />
           </Button>
-        </div>
-      </div>
+        </template>
+      </CommonPageHeader>
 
       <!-- Table -->
       <DataTable

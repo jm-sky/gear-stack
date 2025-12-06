@@ -4,11 +4,11 @@ import {
   Copy,
   Download,
   Edit,
+  Ellipsis,
   FileInput,
   FileOutput,
   FileSpreadsheet,
   Image,
-  MoreVertical,
   Plus,
   Sparkles,
   SparklesIcon,
@@ -36,7 +36,7 @@ import type { Component } from 'vue'
 export const ACTION_ICONS: Record<string, Component> = {
   // Navigation
   back: ArrowLeft,
-  moreActions: MoreVertical,
+  moreActions: Ellipsis,
 
   // CRUD Operations
   create: Plus,

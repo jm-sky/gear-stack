@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import { toast } from 'vue-sonner'
 import DataTable from '@/components/data-table/DataTable.vue'
+import CommonPageHeader from '@/components/layout/CommonPageHeader.vue'
 import Badge from '@/components/ui/badge/Badge.vue'
 import Button from '@/components/ui/button/Button.vue'
 import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
@@ -132,17 +133,11 @@ onMounted(() => {
   <AuthenticatedLayout>
     <div class="space-y-6 w-full max-w-full">
       <!-- Header -->
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-3xl font-bold tracking-tight flex items-center gap-3">
-            <Package2 class="size-8 text-primary" />
-            {{ t('admin.items.title', 'Items Management') }}
-          </h1>
-          <p class="text-muted-foreground mt-2">
-            {{ t('admin.items.subtitle', 'View and manage all items') }}
-          </p>
-        </div>
-      </div>
+      <CommonPageHeader
+        :icon="Package2"
+        :label="t('admin.items.title', 'Items Management')"
+        :description="t('admin.items.subtitle', 'View and manage all items')"
+      />
 
       <!-- Table -->
       <DataTable
