@@ -25,7 +25,7 @@ const ImportMarkdownDialog = defineAsyncComponent(() => import('../components/Im
 const AiChatDialog = defineAsyncComponent(() => import('@/modules/ai/components/AiChatDialog.vue'))
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { useGear } from '../composables/useGear'
-import { GearRoutePath } from '../routes'
+import { GearRouteIcon, GearRoutePath } from '../routes'
 import { gearContainerService } from '../services/gearContainerService'
 import { getActionIcon } from '../utils/actionIcons'
 import { getRootContainers as getRootContainersUtil } from '../utils/containerNesting'
@@ -251,7 +251,7 @@ const handleAiChat = () => {
     <div class="space-y-6 w-full max-w-full">
       <!-- Header -->
       <CommonPageHeader
-        :icon="Package"
+        :icon="GearRouteIcon.Containers"
         :label="t('gear.page.containers')"
         :description="t('gear.page.title')"
       >

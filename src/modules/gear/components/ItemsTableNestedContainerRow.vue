@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Box } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -9,8 +8,10 @@ import { formatItemWeight } from '../composables/useFormattedItemWeight'
 import { useGearSettings } from '../composables/useGearSettings'
 import { GearRoutePath } from '../routes'
 import { useGearStore } from '../store/useGearStore'
-import { COLOR_BORDER_CLASSES, COLOR_TEXT_CLASSES } from '../utils/containerColors'
+import { COLOR_BORDER_CLASSES } from '../utils/containerColors'
+import { getContainerIcon } from '../utils/containerIcons'
 import CategoryIcon from './CategoryIcon.vue'
+import ColorDot from './ColorDot.vue'
 import ItemPriorityBadge from './ItemPriorityBadge.vue'
 import ItemStatusBadge from './ItemStatusBadge.vue'
 
@@ -53,6 +54,13 @@ function navigateToNestedContainer(item: IGearItem) {
     router.push(GearRoutePath.ContainerDetailById(item.containerId))
   }
 }
+
+// Get icon component for nested container
+function getNestedContainerIcon(item: IGearItem) {
+  const nestedContainer = getNestedContainerForItem(item)
+  if (!nestedContainer) return null
+  return getContainerIcon(nestedContainer.type)
+}
 </script>
 
 <template>
@@ -74,7 +82,11 @@ function navigateToNestedContainer(item: IGearItem) {
           >
             <div class="flex items-center gap-2 min-w-0 md:min-w-92">
               <template v-if="isNestedContainer(nestedItem)">
-                <Box :size="14" class="text-muted-foreground shrink-0" :class="COLOR_TEXT_CLASSES[getNestedContainerForItem(nestedItem)?.color ?? 'default']" />
+                <ColorDot
+                  :color="getNestedContainerForItem(nestedItem)?.color ?? 'default'"
+                  :icon="getNestedContainerIcon(nestedItem)"
+                  :size="3.5"
+                />
                 <span
                   class="font-semibold cursor-pointer text-foreground/80 hover:text-primary transition-colors"
                   @click="navigateToNestedContainer(nestedItem)"

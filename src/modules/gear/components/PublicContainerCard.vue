@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { Package } from 'lucide-vue-next'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import type { IGearContainer } from '../types/gear.types'
 import ColorDot from '../components/ColorDot.vue'
 import { GearRoutePath } from '../routes'
+import { getContainerIcon } from '../utils/containerIcons'
 import ContainerCardBadges from './ContainerCardBadges.vue'
 import ContainerCardCreatedDate from './ContainerCardCreatedDate.vue'
 import MarkdownRenderer from './MarkdownRenderer.vue'
@@ -13,9 +14,12 @@ import RatingStars from './RatingStars.vue'
 
 const { t } = useI18n()
 
-defineProps<{
+const props = defineProps<{
   container: IGearContainer
 }>()
+
+// Get container icon based on type
+const ContainerIcon = computed(() => getContainerIcon(props.container.type))
 </script>
 
 <template>
@@ -28,8 +32,7 @@ defineProps<{
     >
       <CardHeader class="h-8 text-card-foreground flex items-center justify-between">
         <div class="flex items-center gap-2">
-          <ColorDot :color="container.color ?? undefined" />
-          <Package class="size-5" />
+          <ColorDot :color="container.color ?? undefined" :icon="ContainerIcon" />
           <CardTitle>{{ container.name }}</CardTitle>
         </div>
       </CardHeader>

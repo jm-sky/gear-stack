@@ -4,12 +4,14 @@ import { Package } from 'lucide-vue-next'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
+import CommonPageHeader from '@/components/layout/CommonPageHeader.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { PUBLIC_CONTAINERS_BROWSER_PAGE_FILTERS_KEY } from '@/shared/config/config'
 import type { IGearContainer } from '../types/gear.types'
 import ContainersFilters from '../components/ContainersFilters.vue'
 import PublicContainerCard from '../components/PublicContainerCard.vue'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
+import { GearRouteIcon } from '../routes'
 import { publicContainersService } from '../services/publicContainersService'
 
 const { t } = useI18n()
@@ -104,14 +106,11 @@ onMounted(() => {
   <AuthenticatedLayout>
     <div class="space-y-6 w-full max-w-full">
       <!-- Header -->
-      <div>
-        <h1 class="text-2xl sm:text-3xl font-bold">
-          {{ t('gear.publicContainers.title') }}
-        </h1>
-        <p class="text-muted-foreground mt-1 text-sm sm:text-base">
-          {{ t('gear.publicContainers.description') }}
-        </p>
-      </div>
+      <CommonPageHeader
+        :icon="GearRouteIcon.PublicContainers"
+        :label="t('gear.publicContainers.title')"
+        :description="t('gear.publicContainers.description')"
+      />
 
       <!-- Search and Filters -->
       <ContainersFilters

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { refDebounced } from '@vueuse/core'
-import { Package } from 'lucide-vue-next'
+import { BookIcon, Package } from 'lucide-vue-next'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import CommonPageHeader from '@/components/layout/CommonPageHeader.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { CATALOGUE_BROWSER_PAGE_FILTERS_KEY } from '@/shared/config/config'
 import type { TCataloguePriceTier } from '../../types/catalogue.types'
@@ -129,14 +130,11 @@ const hasActiveFilters = computed(() => {
   <AuthenticatedLayout>
     <div class="w-full max-w-full space-y-6">
       <!-- Header -->
-      <div>
-        <h1 class="text-2xl font-bold sm:text-3xl">
-          {{ t('gear.catalogue.title') }}
-        </h1>
-        <p class="mt-1 text-sm text-muted-foreground sm:text-base">
-          {{ t('gear.catalogue.subtitle') }}
-        </p>
-      </div>
+      <CommonPageHeader
+        :icon="BookIcon"
+        :label="t('gear.catalogue.title')"
+        :description="t('gear.catalogue.subtitle')"
+      />
 
       <!-- Search and Filters -->
       <CatalogueFilters

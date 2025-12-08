@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Box, Package } from 'lucide-vue-next'
+import { Box } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -19,6 +19,7 @@ import {
   calculateTotalWeightSync,
 } from '../utils/containerCalculations'
 import { COLOR_BORDER_CLASSES, COLOR_TEXT_CLASSES } from '../utils/containerColors'
+import { getContainerIcon } from '../utils/containerIcons'
 import { formatWeightToPreferredUnit } from '../utils/formatWeight'
 import ColorDot from './ColorDot.vue'
 import ContainerCardActions from './ContainerCardActions.vue'
@@ -32,6 +33,7 @@ import MarkdownRenderer from './MarkdownRenderer.vue'
 const props = defineProps<{
   container: IGearContainer
 }>()
+
 const emit = defineEmits<{
   delete: [id: string]
 }>()
@@ -66,6 +68,9 @@ const isNested = computed<boolean>(() => {
   return !!props.container.parentContainerId
 })
 
+// Get container icon based on type
+const ContainerIcon = computed(() => getContainerIcon(props.container.type))
+
 // Navigate to container detail
 const handleShow = () => {
   router.push(GearRoutePath.ContainerDetailById(props.container.id))
@@ -83,15 +88,14 @@ const handleShow = () => {
   >
     <CardHeader class="h-8 text-card-foreground flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <ColorDot :color="container.color ?? undefined" />
-        <Package class="size-5" />
+        <ColorDot :color="container.color ?? undefined" :icon="ContainerIcon" />
         <CardTitle>{{ container.name }}</CardTitle>
         <Badge v-if="isNested" variant="outline" class="ml-auto text-xs">
           <Box :size="12" class="mr-1" />
           {{ t('gear.container.nested') }}
         </Badge>
       </div>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-1">
         <FavoriteContainerButton :container />
         <ContainerCardActions :container @delete="emit('delete', $event)" />
       </div>

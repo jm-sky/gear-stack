@@ -1,3 +1,5 @@
+import { BackpackIcon, BoxIcon, GlobeIcon, PackageIcon, ShoppingCartIcon } from 'lucide-vue-next'
+import type { Component } from 'vue'
 import type { RouteRecordRaw } from 'vue-router'
 
 export const GearRouteName = {
@@ -48,6 +50,14 @@ export const GearRoutePath = {
   CatalogueBrowser: '/gear/catalogue',
   CatalogueItemDetail: '/gear/catalogue/:id',
   CatalogueItemDetailById: (id: string) => `/gear/catalogue/${id}`,
+}
+
+export const GearRouteIcon: Partial<Record<keyof typeof GearRouteName, Component>> = {
+  Containers: BackpackIcon,
+  AllItems: PackageIcon,
+  ShoppingPlanning: ShoppingCartIcon,
+  ContainerDetail: BoxIcon,
+  PublicContainers: GlobeIcon,
 }
 
 export const gearRoutes: RouteRecordRaw[] = [

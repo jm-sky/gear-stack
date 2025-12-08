@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { CalendarPlus, CalendarSync, ExternalLink, Link2, RefreshCcw } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { Badge } from '@/components/ui/badge'
@@ -11,7 +11,6 @@ import { useAi } from '@/modules/ai/composables/useAi'
 import { useBackend } from '@/shared/composables/useBackend'
 import { smallDateTime } from '@/shared/utils/smallDateTime'
 import type { IGearContainer } from '../types/gear.types'
-import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { GearRoutePath } from '../routes'
 import { getActionIcon } from '../utils/actionIcons'
 import { formatWeight } from '../utils/formatWeight'
@@ -20,6 +19,7 @@ import CloneContainerDialog from './CloneContainerDialog.vue'
 import ContainerHeaderName from './ContainerHeaderName.vue'
 import ContainerHeaderStats from './ContainerHeaderStats.vue'
 import ContainerRatingBadge from './ContainerRatingBadge.vue'
+import ContainerTypeBadge from './ContainerTypeBadge.vue'
 import FavoriteContainerButton from './FavoriteContainerButton.vue'
 import ItemsTableEditModeToggle from './ItemsTableEditModeToggle.vue'
 import MarkdownRenderer from './MarkdownRenderer.vue'
@@ -57,7 +57,6 @@ const emit = defineEmits<{
 
 const router = useRouter()
 const { t } = useI18n()
-const { typeLabel } = useContainerTypeLabel(computed(() => props.container.type))
 const { canUseAi } = useAi()
 const { shouldUseAPI } = useBackend()
 
@@ -157,9 +156,7 @@ const handleBack = () => {
             />
           </div>
           <div class="flex items-center gap-2 flex-wrap">
-            <Badge variant="outline">
-              {{ typeLabel }}
-            </Badge>
+            <ContainerTypeBadge :container />
             <Badge
               v-tooltip.bottom="t('common.created')"
               variant="secondary"
