@@ -21,6 +21,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.32.0] - 2025-12-08
+
+### Added
+- **Redis Infrastructure**:
+  - Redis service added to all Docker Compose configurations (production, development, dev-minio)
+  - Redis client configuration with connection pooling and dependency injection
+  - Persistent storage with AOF (Append Only File) enabled
+  - Health checks and automatic restart policies
+
+- **Token Blacklist Service**:
+  - Server-side token invalidation using Redis
+  - SHA-256 hashing for secure token storage
+  - Automatic expiration using Redis TTL
+  - Token blacklisting on logout and account deletion
+  - Integration with authentication middleware
+
+- **WebAuthn Challenge Storage**:
+  - Server-side challenge storage in Redis (replaces client-side storage)
+  - Atomic get-and-delete operations for one-time use
+  - 5-minute TTL for challenges
+  - Protection against replay attacks
+  - Challenge tampering prevention
+
+- **Documentation**:
+  - Comprehensive REDIS-TESTING.md guide with testing procedures
+  - Troubleshooting guide for Redis issues
+  - Production deployment checklist
+  - Examples for testing token blacklist and WebAuthn flows
+
+### Changed
+- Updated authentication dependencies to include blacklist service
+- Refactored WebAuthn service to use server-side challenge storage
+- Enhanced logout and account deletion endpoints with token blacklisting
+- Improved error handling in optional authentication (gear module)
+
+### Fixed
+- Fixed all mypy type checking errors in security modules
+- Corrected Redis client method deprecation (close → aclose)
+- Fixed type annotations in challenge_store.py
+- Resolved AsyncGenerator await issues in two_factor router
+
+### Security
+- **CRITICAL**: Implemented token invalidation to prevent reuse after logout
+- **CRITICAL**: Server-side WebAuthn challenge storage prevents tampering
+- **CRITICAL**: One-time use challenges prevent replay attacks
+- Enhanced security posture with Redis-based session management
+- Tokens are now properly invalidated on account deletion
+
+---
+
 ## [2.31.0] - 2025-12-05
 
 ### Added
