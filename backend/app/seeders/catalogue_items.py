@@ -91,6 +91,7 @@ CATALOGUE_ITEMS = [
         "weight": 0.0,
         "weight_unit": "g",
         "url": "https://www.gerbergear.com/",
+        "image_filename": "gerber-folding-spade.png",
     },
     {
         "id": "01KBJXHCCSSKZWDFR4AB4H5DCV",
@@ -313,7 +314,7 @@ CATALOGUE_ITEMS = [
         "weight": 92.0,
         "weight_unit": "g",
         "url": "https://www.blackdiamondequipment.com/en_US/headlamps-and-lanterns/storm-450-headlamp-BD620625.html",
-        "image_filename": "black_diamond_storm_450.jpg",
+        "image_filename": "black-diamond-storm-450-black.png",
     },
     {
         "id": "01KBJXJNER6NZPMWMVMNEF084H",
@@ -384,6 +385,7 @@ CATALOGUE_ITEMS = [
         "weight": 0.0,
         "weight_unit": "g",
         "url": "https://www.maxpedition.com/",
+        "image_filename": "maxpedition-falcon-ii-backpack.png",
     },
     {
         "id": "01KBJXK1P9Z7DJ0TYR3AN5YRWS",
@@ -466,6 +468,7 @@ CATALOGUE_ITEMS = [
         "weight": 0.0,
         "weight_unit": "g",
         "url": "https://riteintherain.com/products/all-weather-notebook",
+        "image_filename": "rite-in-rain-notebook.png",
     },
     {
         "id": "01KBJXKHNDWZ85HZZTG8DN0XVR",
@@ -710,5 +713,6 @@ CATALOGUE_ITEMS = [
         "weight": 13.0,
         "weight_unit": "g",
         "url": "https://www.fenixlighting.com/product/e01-v2-flashlight/",
+        "image_filename": "fenix-e01-v2.png",
     },
 ]
