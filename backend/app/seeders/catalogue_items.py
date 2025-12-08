@@ -4,32 +4,6 @@ This file contains the initial catalogue items to be seeded into the database.
 Data is sourced from docs/plans/global-catalogue-items.md
 """
 
-# Mapping of item names to image filenames
-CATALOGUE_ITEM_IMAGES = {
-    "Swedish FireSteel 2.0": "light_my_fire_firesteel_2.0.jpg",
-    "5.11 Rush 24": "5.11_rush_24.png",
-    "Black Diamond Storm Headlamp": "black_diamond_storm_450.jpg",
-    "Fenix PD35 V3.0": "fenix_pd35v3_flashlight.webp",
-    "Anker PowerCore 20100": "anker_powercore_20100.png",
-    "Fiskars X7": "fiskars-x7.png",
-    "Leatherman Wave+": "leatherman-wave-plus.png",
-    "Leatherman Blast": "leatherman-blast.png",
-    "Gorilla Tape": "gorilla-tape.png",
-    "BAHCO 396-LAP": "bahco-laplander.jpg.png",
-    "Victorinox Ranger": "Victorinox-Ranger.png",
-    "Victorinox Alox Bantam - Silver": "Victorinox-Alox-Bantam-Silver.png",
-    "Sawyer Mini": "sawyer-mini.png",
-    "Sawyer Squeeze": "sawyer-squeeze-sp129.png",
-    "LifeStraw Personal Water Filter": "lifestraw-personal.png",
-    "LifeStraw Go 650 ml": "lifestraw-go-2.png",
-    "CAT GEN7 Tourniquet": "CAT-GEN7-Tourniquet.png",
-    "Condor MA36 Admin Pouch": "Condor-MA36-Admin-Pouch.png",
-    "Snugpak Stratosphere": "Snugpak-Stratosphere.png",
-    "Suunto MC-2 Compass": "Suunto-MC-2-Compass.png",
-    "Racje NRG-5": "NRG-5.png",
-    "DD Hammocks 3×3 Tarp": "DD-Hammocks-3×3-Tarp.png",
-}
-
 CATALOGUE_ITEMS = [
     # Ogień / Fire
     {
@@ -41,9 +15,12 @@ CATALOGUE_ITEMS = [
         "description": "Krzesiwo ferrocerowe, niezawodne w trudnych warunkach",
         "price_tier": "medium",
         "quality": "high",
+        "price": 15.0,
+        "price_currency": "USD",
         "weight": 50.0,
         "weight_unit": "g",
         "url": "https://lightmyfire.com/products/swedish-firesteel",
+        "image_filename": "light_my_fire_firesteel_2.0.jpg",
     },
     {
         "id": "01KBJXGQ87FGHRFQTVMP3YFSNG",
@@ -71,6 +48,7 @@ CATALOGUE_ITEMS = [
         "weight": 645.0,
         "weight_unit": "g",
         "url": "https://www.fiskars.com/en-us/gardening-and-yard-care/products/axes-mauls-and-machetes/x7-hatchet-14-378501-1005",
+        "image_filename": "fiskars-x7.png",
     },
     # Narzędzia wielofunkcyjne
     {
@@ -85,6 +63,7 @@ CATALOGUE_ITEMS = [
         "weight": 8.5,
         "weight_unit": "oz",
         "url": "https://www.leatherman.com/",
+        "image_filename": "leatherman-wave-plus.png",
     },
     {
         "id": "01KBJXH7904T9DT153977RWERA",
@@ -98,6 +77,7 @@ CATALOGUE_ITEMS = [
         "weight": 6.9,
         "weight_unit": "oz",
         "url": "https://www.leatherman.com/",
+        "image_filename": "leatherman-blast.png",
     },
     {
         "id": "01KBJXHA4CVVWZJRSWDJ19F85C",
@@ -148,6 +128,7 @@ CATALOGUE_ITEMS = [
         "weight": 0.0,
         "weight_unit": "g",
         "url": "https://www.gorillatough.com/product/gorilla-tape/",
+        "image_filename": "gorilla-tape.png",
     },
     {
         "id": "01KBJXHKTWG3VFP9WR006129C0",
@@ -161,6 +142,7 @@ CATALOGUE_ITEMS = [
         "weight": 200.0,
         "weight_unit": "g",
         "url": "https://www.bahco.com/",
+        "image_filename": "bahco-laplander.jpg.png",
     },
     {
         "id": "01KBJXHP7289P4VEDKSCAMYBJW",
@@ -174,6 +156,7 @@ CATALOGUE_ITEMS = [
         "weight": 118.0,
         "weight_unit": "g",
         "url": "https://www.victorinox.com/global/en/products/Swiss-Army-Knives/Medium-Pocket-Knives/Ranger/p/1.3713",
+        "image_filename": "Victorinox-Ranger.png",
     },
     {
         "id": "01KBJXHRQ0NKA5QAGHHC41YE4A",
@@ -190,6 +173,7 @@ CATALOGUE_ITEMS = [
         "shops": [
             {"url": "https://militaria.pl/p/scyzoryk-victorinox-alox-bantam-silver-2608760"},
         ],
+        "image_filename": "Victorinox-Alox-Bantam-Silver.png",
     },
     # Woda / Water
     {
@@ -204,6 +188,7 @@ CATALOGUE_ITEMS = [
         "weight": 2.0,
         "weight_unit": "oz",
         "url": "https://sawyer.com/products/mini-water-filtration-system",
+        "image_filename": "sawyer-mini.png",
     },
     {
         "id": "01KBJXHYQ826J0HKQ21CK8CR6H",
@@ -217,6 +202,7 @@ CATALOGUE_ITEMS = [
         "weight": 3.0,
         "weight_unit": "oz",
         "url": "https://sawyer.com/products/squeeze-water-filtration-system",
+        "image_filename": "sawyer-squeeze-sp129.png",
     },
     {
         "id": "01KBJXJ16F5J1NYW6GZN2S906E",
@@ -243,6 +229,7 @@ CATALOGUE_ITEMS = [
         "weight": 46.0,
         "weight_unit": "g",
         "url": "https://www.lifestraw.com/products/lifestraw-personal-water-filter",
+        "image_filename": "lifestraw-personal.png",
     },
     {
         "id": "01KBJXJ60YKWVB026N8YJ9TYPE",
@@ -256,6 +243,7 @@ CATALOGUE_ITEMS = [
         "weight": 0.0,
         "weight_unit": "g",
         "url": "https://www.lifestraw.com/products/lifestraw-go",
+        "image_filename": "lifestraw-go-2.png",
     },
     # Schronienie / Shelter
     {
@@ -270,6 +258,7 @@ CATALOGUE_ITEMS = [
         "weight": 875.0,
         "weight_unit": "g",
         "url": "https://www.ddhammocks.com/product/3x3-tarp",
+        "image_filename": "DD-Hammocks-3×3-Tarp.png",
     },
     {
         "id": "01KBJXJAW5J9ZGT47V2262BEDR",
@@ -283,6 +272,7 @@ CATALOGUE_ITEMS = [
         "weight": 1.13,
         "weight_unit": "kg",
         "url": "https://www.snugpak.com/outdoor/stratosphere",
+        "image_filename": "Snugpak-Stratosphere.png",
     },
     {
         "id": "01KBJXJDA0BW8V8C8NCFGVM8BQ",
@@ -323,6 +313,7 @@ CATALOGUE_ITEMS = [
         "weight": 92.0,
         "weight_unit": "g",
         "url": "https://www.blackdiamondequipment.com/en_US/headlamps-and-lanterns/storm-450-headlamp-BD620625.html",
+        "image_filename": "black_diamond_storm_450.jpg",
     },
     {
         "id": "01KBJXJNER6NZPMWMVMNEF084H",
@@ -336,6 +327,7 @@ CATALOGUE_ITEMS = [
         "weight": 0.0,
         "weight_unit": "g",
         "url": "https://www.fenixlighting.com/product/pd35-v3-flashlight/",
+        "image_filename": "fenix_pd35v3_flashlight.webp",
     },
     # First Aid
     {
@@ -363,6 +355,7 @@ CATALOGUE_ITEMS = [
         "weight": 0.0,
         "weight_unit": "g",
         "url": "https://www.cat-tourniquets.com/products/c-a-t-gen-7",
+        "image_filename": "CAT-GEN7-Tourniquet.png",
     },
     # Container / Other
     {
@@ -377,6 +370,7 @@ CATALOGUE_ITEMS = [
         "weight": 0.0,
         "weight_unit": "g",
         "url": "https://www.condoroutdoor.com/",
+        "image_filename": "Condor-MA36-Admin-Pouch.png",
     },
     {
         "id": "01KBJXJYS9SVWHKZ402ZF2358F",
@@ -403,6 +397,7 @@ CATALOGUE_ITEMS = [
         "weight": 3.85,
         "weight_unit": "lb",
         "url": "https://www.511tactical.com/",
+        "image_filename": "5.11_rush_24.png",
     },
     # Food
     {
@@ -456,6 +451,7 @@ CATALOGUE_ITEMS = [
         "weight": 500.0,
         "weight_unit": "g",
         "url": "https://www.nrg5.com/",
+        "image_filename": "NRG-5.png",
     },
     # Navigation
     {
@@ -483,6 +479,7 @@ CATALOGUE_ITEMS = [
         "weight": 0.0,
         "weight_unit": "g",
         "url": "https://www.suunto.com/en-us/Products/Compasses/Suunto-MC-2/",
+        "image_filename": "Suunto-MC-2-Compass.png",
     },
     # Communication
     {
@@ -510,6 +507,7 @@ CATALOGUE_ITEMS = [
         "weight": 356.0,
         "weight_unit": "g",
         "url": "https://www.anker.com/",
+        "image_filename": "anker_powercore_20100.png",
     },
     # New items from global-catalogue-items-v2.md
     {
@@ -631,21 +629,7 @@ CATALOGUE_ITEMS = [
         "weight": 40.0,
         "weight_unit": "g",
         "url": "https://www.olightstore.com/i3t-eos",
-    },
-    {
-        "id": "01KBQ9MKG500FXNVND2X3J4AZ5",
-        "name": "Light My Fire Swedish FireSteel 2.0",
-        "category": "fire",
-        "brand": "Light My Fire",
-        "model": "Swedish FireSteel 2.0",
-        "description": "Klasyczne ferro rod — iskry 3000°C, bardzo niezawodne w warunkach terenowych.",
-        "price_tier": "medium",
-        "quality": "high",
-        "price": 15.0,
-        "price_currency": "USD",
-        "weight": 50.0,
-        "weight_unit": "g",
-        "url": "https://lightmyfire.com/products/swedish-firesteel",
+        "image_filename": "olight-i3T-2-EOS.jpg.png",
     },
     {
         "id": "01KBQ9MKG50801WW461XE4JJA4",
@@ -662,6 +646,7 @@ CATALOGUE_ITEMS = [
         "weight": 97.0,
         "weight_unit": "g",
         "url": "https://www.victorinox.com/global/en/products/Swiss-Army-Knives/Medium-Pocket-Knives/Huntsman/p/1.3713",
+        "image_filename": "Victorinox-Huntsman.png",
     },
     {
         "id": "01KBQ9MKG60801WW461XE4JJA5",

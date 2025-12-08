@@ -501,7 +501,7 @@ async def _seed_catalogue(db: "AsyncSession") -> None:
     """Seed catalogue items, updating existing items by id."""
     from app.common.id_utils import generate_id
     from app.modules.gear.db_models import CatalogueItemImageDB, GlobalCatalogueItemDB
-    from app.seeders import CATALOGUE_ITEM_IMAGES, CATALOGUE_ITEMS
+    from app.seeders import CATALOGUE_ITEMS
     from sqlalchemy import select
     from pathlib import Path
     from ulid import ULID
@@ -551,10 +551,15 @@ async def _seed_catalogue(db: "AsyncSession") -> None:
             continue
 
         item_name = item_data.get("name")
+        image_filename = item_data.get("image_filename")  # Extract image filename from item data
 
         # Map seeder field names to model field names
+        # Exclude fields that shouldn't be saved to database (like image_filename)
         mapped_data = {}
         for key, value in item_data.items():
+            # Skip fields that are not part of the database model
+            if key == "image_filename":
+                continue
             # Map price_currency to currency
             if key == "price_currency":
                 mapped_data["currency"] = value
@@ -580,59 +585,63 @@ async def _seed_catalogue(db: "AsyncSession") -> None:
             db.add(catalogue_item)
             created_count += 1
 
-        # Handle images - check if image already exists for this item
-        if item_name and isinstance(item_name, str) and item_name in CATALOGUE_ITEM_IMAGES:
-            image_filename: str = CATALOGUE_ITEM_IMAGES[item_name]
-            source_path = Path(__file__).parent.parent.parent / "images" / "global-catalogue" / image_filename
+        # Handle images - upload if image_filename is provided
+        if image_filename and isinstance(image_filename, str):
+            # Build path relative to backend directory (works both locally and in Docker)
+            source_path = Path(__file__).resolve().parent.parent.parent / "images" / "global-catalogue" / image_filename
 
-            if source_path.exists():
-                # Check if primary image already exists
-                result = await db.execute(
-                    select(CatalogueItemImageDB).where(
-                        CatalogueItemImageDB.catalogue_item_id == item_id,
-                        CatalogueItemImageDB.is_primary == True,
-                    )
+            if not source_path.exists():
+                console.print(f"[yellow]  Image file not found: {source_path}[/yellow]")
+                console.print(f"[yellow]  Item: {item_name}, Expected image: {image_filename}[/yellow]")
+                continue
+
+            # Check if primary image already exists
+            result = await db.execute(
+                select(CatalogueItemImageDB).where(
+                    CatalogueItemImageDB.catalogue_item_id == item_id,
+                    CatalogueItemImageDB.is_primary == True,
                 )
-                existing_image = result.scalar_one_or_none()
+            )
+            existing_image = result.scalar_one_or_none()
 
-                if not existing_image:
-                    # Upload image to storage (S3 or local)
-                    from app.core.storage import get_storage_adapter
+            if not existing_image:
+                # Upload image to storage (S3 or local)
+                from app.core.storage import get_storage_adapter
 
-                    storage = get_storage_adapter()
+                storage = get_storage_adapter()
 
-                    # Get file size and MIME type
-                    file_size = source_path.stat().st_size
-                    mime_type = "image/jpeg" if image_filename.endswith(".jpg") else "image/png" if image_filename.endswith(".png") else "image/webp" if image_filename.endswith(".webp") else "image/jpeg"
+                # Get file size and MIME type
+                file_size = source_path.stat().st_size
+                mime_type = "image/jpeg" if image_filename.endswith(".jpg") else "image/png" if image_filename.endswith(".png") else "image/webp" if image_filename.endswith(".webp") else "image/jpeg"
 
-                    # Upload file to storage
-                    relative_path = f"global-catalogue/{image_filename}"
+                # Upload file to storage
+                relative_path = f"global-catalogue/{image_filename}"
 
-                    with open(source_path, "rb") as f:
-                        file_content = f.read()
-                        await storage.upload(file_content, relative_path, mime_type)
+                with open(source_path, "rb") as f:
+                    file_content = f.read()
+                    await storage.upload(file_content, relative_path, mime_type)
 
-                    console.print(f"[cyan]  Uploaded {image_filename} to storage[/cyan]")
+                console.print(f"[cyan]  Uploaded {image_filename} to storage[/cyan]")
 
-                    # Determine storage type
-                    storage_type = "s3" if hasattr(storage, "bucket_name") else "local"
+                # Determine storage type
+                storage_type = "s3" if hasattr(storage, "bucket_name") else "local"
 
-                    # Create image record
-                    image = CatalogueItemImageDB(
-                        id=str(ULID()),
-                        catalogue_item_id=item_id,
-                        user_id=creator_id,
-                        storage_type=storage_type,
-                        file_path=relative_path,
-                        file_name=image_filename,
-                        file_size=file_size,
-                        mime_type=mime_type,
-                        is_primary=True,
-                        order=0,
-                        is_processed=True,
-                    )
-                    db.add(image)
-                    images_count += 1
+                # Create image record
+                image = CatalogueItemImageDB(
+                    id=str(ULID()),
+                    catalogue_item_id=item_id,
+                    user_id=creator_id,
+                    storage_type=storage_type,
+                    file_path=relative_path,
+                    file_name=image_filename,
+                    file_size=file_size,
+                    mime_type=mime_type,
+                    is_primary=True,
+                    order=0,
+                    is_processed=True,
+                )
+                db.add(image)
+                images_count += 1
 
     await db.commit()
     console.print(f"[bold green]✓ Created {created_count}, updated {updated_count} catalogue items with {images_count} new images[/bold green]")
