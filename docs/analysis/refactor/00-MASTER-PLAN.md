@@ -11,34 +11,177 @@ Przeprowadzenie systematycznej analizy projektu pod kątem:
 ## Strategia Analizy
 
 ### Podejście wieloetapowe
-Projekt jest zbyt duży, aby analizować wszystko naraz. Zastosujemy podejście bottom-up + context-aware:
+Projekt składa się z dwóch warstw: **Backend (Python/FastAPI)** i **Frontend (Vue 3/TypeScript)**.
+Zastosujemy podejście **Backend → Frontend → Integration**:
 
-1. **Warstwa podstawowa** - Utilities, helpers, types
-2. **Warstwa logiki biznesowej** - Services, stores, composables
-3. **Warstwa prezentacji** - Components, pages
-4. **Warstwa integracji** - Router, i18n, API clients
-5. **Cross-cutting concerns** - Guards, interceptors, middleware
+**Dlaczego Backend First:**
+- Backend jest mniejszy i prostszy (szybszy start)
+- API design wpływa na frontend
+- Foundation first - logika biznesowa backendu to fundament
+- Kontekst dla frontendu - wiedząc co robi backend, lepiej ocenimy jak frontend z niego korzysta
+- Quick win - szybko zamkniemy całą warstwę
 
-## Iteracje Analizy
+### Fazy Analizy
 
-### Iteracja 1: Shared Infrastructure & Utilities
+#### **PHASE A: BACKEND** (3 iteracje, ~2-3 sesje)
+1. **Backend Infrastructure** - Common utilities, exceptions, config
+2. **Backend Modules** - Auth, AI, Stats, Users, Admin, Gear
+3. **Backend API Layer** - Routers, schemas, middleware, integration
+
+#### **PHASE B: FRONTEND** (11 iteracji, ~8-10 sesji)
+1. **Frontend Infrastructure** - Shared utils, types, composables, services
+2. **Frontend Modules** - Gear, AI, Auth, Admin, User, Settings, Stats
+3. **Frontend UI** - Components, pages, layouts
+4. **Frontend Integration** - Router, i18n, configuration
+5. **Frontend Cross-cutting** - Patterns, duplication, opportunities
+
+#### **PHASE C: INTEGRATION** (1 iteracja)
+1. **Backend ↔ Frontend** - API contracts, data flow, error handling, consistency
+
+---
+
+## PHASE A: Backend Analysis
+
+### Backend Structure Overview
+```
+backend/
+├── app/
+│   ├── common/              # Shared utilities, models, repositories
+│   ├── exceptions/          # Exception handling
+│   ├── api/                 # Main API router
+│   ├── modules/             # Feature modules
+│   │   ├── auth/           # Authentication & WebAuthn
+│   │   ├── ai/             # AI integration
+│   │   ├── users/          # User management
+│   │   ├── admin/          # Admin functionality
+│   │   ├── stats/          # Statistics
+│   │   ├── gear/           # Gear/container management
+│   │   ├── settings/       # Settings
+│   │   ├── tenants/        # Multi-tenancy
+│   │   ├── two_factor/     # 2FA
+│   │   ├── feature_limits/ # Feature limiting
+│   │   ├── gear_settings/  # Gear-specific settings
+│   │   └── logs/           # Logging
+│   └── seeders/            # Database seeders
+├── migrations/             # Database migrations
+├── tests/                  # Test suite
+└── cli/                    # CLI tools
+```
+
+---
+
+## Iteracje Analizy - BACKEND
+
+### B1: Backend Infrastructure (Foundation)
+**Zakres:** `backend/app/common/`, `backend/app/exceptions/`
+- **Common utilities:**
+  - `id_utils.py` - ID generation/validation
+  - `pagination.py` - Pagination helpers
+  - `repository_utils.py` - Repository patterns
+  - `search.py` - Search utilities
+- **Common models & repositories:**
+  - `models/` - Shared database models
+  - `repositories/` - Shared repository implementations
+- **Exception handling:**
+  - `custom_exceptions.py` - Custom exception classes
+  - `exception_handler.py` - Global exception handlers
+
+**Dlaczego tutaj zaczynamy:**
+- Najbardziej fundamentalna warstwa backendu
+- Używana przez wszystkie moduły
+- Łatwo identyfikować wzorce i duplikacje
+- Foundation dla pozostałych modułów
+
+**Output:** `B1-backend-infrastructure.md`
+
+---
+
+### B2: Backend Modules (Business Logic)
+**Zakres:** `backend/app/modules/`
+
+Analiza wszystkich modułów backendowych:
+- **auth/** - Authentication, WebAuthn, credentials, tokens
+- **ai/** - AI provider integration, chat, model management
+- **users/** - User management, profiles, CRUD operations
+- **admin/** - Admin functionality, user/container management
+- **stats/** - Statistics, analytics, aggregations
+- **gear/** - Gear/container management (if implemented on backend)
+- **settings/** - Application settings
+- **tenants/** - Multi-tenancy support
+- **two_factor/** - Two-factor authentication
+- **feature_limits/** - Feature limiting/quotas
+- **gear_settings/** - Gear-specific settings
+- **logs/** - Logging functionality
+
+**Dla każdego modułu:**
+- Models (SQLAlchemy/Pydantic)
+- Schemas (Pydantic validation)
+- Services (business logic)
+- Repositories (data access)
+- Dependencies (FastAPI dependencies)
+- Utils (module-specific utilities)
+
+**Output:** `B2-backend-modules.md`
+
+---
+
+### B3: Backend API Layer (Integration)
+**Zakres:** `backend/app/api/`, routers, middleware
+- **API routing:**
+  - `api/router.py` - Main API router aggregation
+  - Module routers - Endpoint definitions
+- **Middleware & dependencies:**
+  - Authentication middleware
+  - Authorization guards
+  - Rate limiting
+  - CORS configuration
+- **Request/Response handling:**
+  - Schema validation
+  - Error responses
+  - Response formatting
+- **Configuration:**
+  - `main.py` - FastAPI app initialization
+  - Environment configuration
+  - Database setup
+  - Logging configuration
+
+**Database & Migrations:**
+- Migration files structure
+- Database models consistency
+- Seeders quality
+
+**Testing:**
+- Test structure (`tests/`)
+- Test coverage
+- Test patterns
+
+**Output:** `B3-backend-api-layer.md`
+
+---
+
+## Iteracje Analizy - FRONTEND
+
+### F1: Frontend Infrastructure (Foundation)
 **Zakres:** `src/shared/`
 - `utils/` - Funkcje pomocnicze
 - `types/` - Definicje typów
 - `composables/` - Reusable composition functions
-- `services/` - API client, interceptors
+- `services/` - API client, interceptors (auth, error)
+- `store/` - Shared stores (token refresh)
+- `config/` - Shared configuration
+- `i18n/` - i18n infrastructure
 
 **Dlaczego tutaj zaczynamy:**
-- Najbardziej fundamentalna warstwa
+- Najbardziej fundamentalna warstwa frontendu
 - Używana przez wszystkie moduły
 - Łatwo identyfikować duplikacje
 - Można szybko ocenić quality utilities
 
-**Output:** `01-shared-infrastructure.md`
+**Output:** `F1-frontend-infrastructure.md`
 
 ---
 
-### Iteracja 2: Module - Gear (Core Business Logic)
+### F2: Module - Gear (Core Business Logic)
 **Zakres:** `src/modules/gear/`
 - `services/gearService.ts` - Business logic
 - `store/` - State management
@@ -51,11 +194,11 @@ Projekt jest zbyt duży, aby analizować wszystko naraz. Zastosujemy podejście 
 - Największa logika biznesowa
 - Wzorzec dla innych modułów
 
-**Output:** `02-module-gear-logic.md`
+**Output:** `F2-module-gear-logic.md`
 
 ---
 
-### Iteracja 3: Module - Gear (UI Components)
+### F3: Module - Gear (UI Components)
 **Zakres:** `src/modules/gear/components/` i `src/modules/gear/pages/`
 - Component composition
 - Props design
@@ -67,11 +210,11 @@ Projekt jest zbyt duży, aby analizować wszystko naraz. Zastosujemy podejście 
 - Inna perspektywa analizy (UI patterns vs business logic)
 - Można ocenić component reusability
 
-**Output:** `03-module-gear-ui.md`
+**Output:** `F3-module-gear-ui.md`
 
 ---
 
-### Iteracja 4: Module - AI
+### F4: Module - AI
 **Zakres:** `src/modules/ai/`
 - AI service integration
 - Chat management
@@ -83,11 +226,11 @@ Projekt jest zbyt duży, aby analizować wszystko naraz. Zastosujemy podejście 
 - TanStack Query patterns
 - Error handling
 
-**Output:** `04-module-ai.md`
+**Output:** `F4-module-ai.md`
 
 ---
 
-### Iteracja 5: Module - Auth
+### F5: Module - Auth
 **Zakres:** `src/modules/auth/`
 - WebAuthn integration
 - Token management
@@ -99,22 +242,32 @@ Projekt jest zbyt duży, aby analizować wszystko naraz. Zastosujemy podejście 
 - Cross-cutting concern
 - Guards pattern
 
-**Output:** `05-module-auth.md`
+**Output:** `F5-module-auth.md`
 
 ---
 
-### Iteracja 6: Module - Admin
+### F6: Module - Admin
 **Zakres:** `src/modules/admin/`
 - Admin services
 - User management
 - Analytics
 - Admin guards
 
-**Output:** `06-module-admin.md`
+**Output:** `F6-module-admin.md`
 
 ---
 
-### Iteracja 7: Shared Components & UI
+### F7: Module - User, Settings, Stats
+**Zakres:** `src/modules/user/`, `src/modules/settings/`, `src/modules/stats/`
+- User profile management
+- Application settings
+- Statistics and analytics
+
+**Output:** `F7-modules-user-settings-stats.md`
+
+---
+
+### F8: Shared Components & UI
 **Zakres:** `src/components/`
 - `ui/` - shadcn-vue components
 - `data-table/` - Table components
@@ -124,32 +277,32 @@ Projekt jest zbyt duży, aby analizować wszystko naraz. Zastosujemy podejście 
 - Potrzebujemy kontekstu z modułów, jak są używane
 - Można ocenić reusability patterns
 
-**Output:** `07-shared-components.md`
+**Output:** `F8-shared-components.md`
 
 ---
 
-### Iteracja 8: Router & Navigation
+### F9: Router & Navigation
 **Zakres:** `src/router/`
 - Route definitions
 - Guards composition
 - Navigation patterns
 - Layouts integration
 
-**Output:** `08-router-navigation.md`
+**Output:** `F9-router-navigation.md`
 
 ---
 
-### Iteracja 9: Internationalization
+### F10: Internationalization
 **Zakres:** `src/i18n/`, `src/shared/i18n/`, module i18n
 - Registry pattern
 - Translation loading
 - Locale management
 
-**Output:** `09-i18n.md`
+**Output:** `F10-i18n.md`
 
 ---
 
-### Iteracja 10: Integration & Configuration
+### F11: Integration & Configuration
 **Zakres:** Root-level files
 - `main.ts` - App initialization
 - Vite config
@@ -157,22 +310,60 @@ Projekt jest zbyt duży, aby analizować wszystko naraz. Zastosujemy podejście 
 - ESLint config
 - PWA config
 
-**Output:** `10-integration-config.md`
+**Output:** `F11-integration-config.md`
 
 ---
 
-### Iteracja 11: Cross-Cutting Analysis
-**Zakres:** Wzorce międzymodułowe
+### F12: Frontend Cross-Cutting Analysis
+**Zakres:** Wzorce międzymodułowe (frontend)
 - Code duplication across modules
 - Inconsistent patterns
 - Missing abstractions
 - Shared opportunities
 
 **Dlaczego na końcu:**
-- Wymaga znajomości całego projektu
+- Wymaga znajomości całego frontendu
 - Identyfikacja globalnych patterns
 
-**Output:** `11-cross-cutting.md`
+**Output:** `F12-cross-cutting.md`
+
+---
+
+## Iteracje Analizy - INTEGRATION
+
+### I1: Backend ↔ Frontend Integration
+**Zakres:** Współpraca między warstwami
+- **API Contracts:**
+  - Request/Response schema consistency
+  - Endpoint naming conventions
+  - HTTP methods & status codes
+  - Error response format
+- **Data Flow:**
+  - Frontend → Backend (validation, transformation)
+  - Backend → Frontend (serialization, typing)
+  - State synchronization
+- **Error Handling:**
+  - Backend exceptions → Frontend errors
+  - User-friendly error messages
+  - Error recovery strategies
+- **Authentication Flow:**
+  - Token management consistency
+  - Session handling
+  - WebAuthn flow
+- **Type Safety:**
+  - Shared type definitions (or lack thereof)
+  - TypeScript types vs Pydantic schemas
+  - Type mismatches
+- **Performance:**
+  - N+1 queries
+  - Over-fetching / Under-fetching
+  - Caching strategies
+- **Security:**
+  - CORS configuration
+  - Input validation (frontend + backend)
+  - Authorization checks consistency
+
+**Output:** `I1-backend-frontend-integration.md`
 
 ---
 
@@ -293,33 +484,109 @@ Każda iteracja będzie zawierać:
 
 Po zakończeniu wszystkich iteracji:
 
-1. **11 szczegółowych raportów** (01-*.md ... 11-*.md)
-2. **Zbiorczy dokument** (`REFACTOR-SUMMARY.md`)
-   - Consolidated findings
+1. **Backend Reports** (3 pliki)
+   - `B1-backend-infrastructure.md`
+   - `B2-backend-modules.md`
+   - `B3-backend-api-layer.md`
+
+2. **Frontend Reports** (12 plików)
+   - `F1-frontend-infrastructure.md`
+   - `F2-module-gear-logic.md`
+   - `F3-module-gear-ui.md`
+   - `F4-module-ai.md`
+   - `F5-module-auth.md`
+   - `F6-module-admin.md`
+   - `F7-modules-user-settings-stats.md`
+   - `F8-shared-components.md`
+   - `F9-router-navigation.md`
+   - `F10-i18n.md`
+   - `F11-integration-config.md`
+   - `F12-cross-cutting.md`
+
+3. **Integration Report** (1 plik)
+   - `I1-backend-frontend-integration.md`
+
+4. **Zbiorczy dokument** (`REFACTOR-SUMMARY.md`)
+   - Consolidated findings z wszystkich warstw
    - Prioritized backlog
    - Refactoring roadmap
-3. **Action Plan** (`REFACTOR-ACTION-PLAN.md`)
+
+5. **Action Plan** (`REFACTOR-ACTION-PLAN.md`)
    - Konkretne tasks
    - Estimated effort
    - Dependencies między tasks
+   - Podział na Backend/Frontend/Integration tracks
+
+**Total:** 16 detailed reports + 2 summary documents = **18 dokumentów**
 
 ---
 
 ## Timeline & Execution
 
+### Approach
 - **Jedna iteracja = jedna sesja** (możemy zrobić więcej, jeśli są krótkie)
-- **Rozpoczynamy od Iteracji 1** po zatwierdzeniu tego planu
+- **Rozpoczynamy od B1 (Backend Infrastructure)** po zatwierdzeniu tego planu
 - **Każda iteracja kończy się review**
 - **Elastyczność** - możemy dostosować kolejność/zakres w trakcie
+
+### Estimated Timeline
+- **Phase A (Backend):** 2-3 sesje (~3-5 godzin)
+  - B1: ~60-90 min (mała warstwa)
+  - B2: ~90-120 min (najwięcej modułów)
+  - B3: ~60-90 min (API + config)
+
+- **Phase B (Frontend):** 8-10 sesji (~12-16 godzin)
+  - F1: ~60 min
+  - F2-F3: ~120-150 min (gear jest duży)
+  - F4-F7: ~60-90 min per iteration
+  - F8-F11: ~45-60 min per iteration
+  - F12: ~60-90 min (cross-cutting)
+
+- **Phase C (Integration):** 1 sesja (~60-90 min)
+
+**Total estimate:** 11-14 sesji, ~16-22 godzin pracy
 
 ---
 
 ## Następne Kroki
 
 1. ✅ Review tego master planu
-2. ⏳ Start Iteracji 1: Shared Infrastructure & Utilities
-3. ⏳ Kontynuacja według planu
+2. ⏳ **START: B1 - Backend Infrastructure** (po zatwierdzeniu)
+3. ⏳ Continue through phases: B2 → B3 → F1 → ... → I1
+4. ⏳ Generate summary documents
+
+---
+
+## Quick Reference
+
+### Phase Progression
+```
+BACKEND (3 iterations)
+  ├─ B1: Infrastructure ✓
+  ├─ B2: Modules
+  └─ B3: API Layer
+
+FRONTEND (12 iterations)
+  ├─ F1: Infrastructure
+  ├─ F2-F3: Gear (Logic + UI)
+  ├─ F4-F6: AI, Auth, Admin
+  ├─ F7: User, Settings, Stats
+  ├─ F8-F11: Components, Router, i18n, Config
+  └─ F12: Cross-cutting
+
+INTEGRATION (1 iteration)
+  └─ I1: Backend ↔ Frontend
+```
+
+### Command to Start
+```bash
+# Gdy będziesz gotowy, powiedz:
+"start iteration B1"
+# lub po prostu:
+"start B1"
+```
 
 ---
 
 *Plan utworzony: 2025-12-05*
+*Ostatnia aktualizacja: 2025-12-08 (dodano strukturę Backend + Frontend + Integration)*
