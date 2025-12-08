@@ -44,7 +44,7 @@ services:
         max-file: "3"
     # Expose port only for development (comment out in production)
     # ports:
-    #   - "6379:6379"
+    #   - "${REDIS_FORWARD_PORT:-6379}:6379"
 
   # Application
   app:
