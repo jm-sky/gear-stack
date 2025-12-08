@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Copy, Edit, Eye, MoreVertical, Trash2 } from 'lucide-vue-next'
-import { ref } from 'vue'
+import { defineAsyncComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { Button } from '@/components/ui/button'
@@ -13,7 +13,9 @@ import {
 } from '@/components/ui/dropdown-menu'
 import type { IGearContainer } from '../types/gear.types'
 import { GearRoutePath } from '../routes'
-import CloneContainerDialog from './CloneContainerDialog.vue'
+
+// Lazy load dialog to reduce initial bundle size
+const CloneContainerDialog = defineAsyncComponent(() => import('./CloneContainerDialog.vue'))
 
 const props = defineProps<{
   container: IGearContainer

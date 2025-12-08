@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ArrowLeftIcon, PencilIcon } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
+import { computed, defineAsyncComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { Badge } from '@/components/ui/badge'
@@ -15,8 +15,10 @@ import { useExpiration } from '../composables/useExpiration'
 import { GearRoutePath } from '../routes'
 import { createNavigationQuery, getFrom } from '../utils/navigationParams'
 import FromCatalogueBadge from './catalogue/FromCatalogueBadge.vue'
-import MatchWithCatalogueDialog from './catalogue/MatchWithCatalogueDialog.vue'
 import ItemHeaderActions from './ItemHeaderActions.vue'
+
+// Lazy load dialog to reduce initial bundle size
+const MatchWithCatalogueDialog = defineAsyncComponent(() => import('./catalogue/MatchWithCatalogueDialog.vue'))
 
 const route = useRoute()
 const router = useRouter()

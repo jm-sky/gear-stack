@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useDebounceFn } from '@vueuse/core'
 import { Check, Package } from 'lucide-vue-next'
-import { computed, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import DataTable from '@/components/data-table/DataTable.vue'
@@ -35,10 +35,12 @@ import ItemsTableImageCell from './items-table/ItemsTableImageCell.vue'
 import ItemsTableNameCell from './items-table/ItemsTableNameCell.vue'
 import ItemsTableWeightCell from './items-table/ItemsTableWeightCell.vue'
 import ItemsTableNestedContainerRow from './ItemsTableNestedContainerRow.vue'
-import ItemsTableRowActions from './ItemsTableRowActions.vue'
 import ItemStatusBadge from './ItemStatusBadge.vue'
 import type { SortingState } from '@tanstack/vue-table'
 import type { TUUID } from '@/shared/types/base.type'
+
+// Lazy load row actions - only used in non-public mode
+const ItemsTableRowActions = defineAsyncComponent(() => import('./ItemsTableRowActions.vue'))
 
 const props = withDefaults(
   defineProps<{

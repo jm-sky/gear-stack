@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { BookIcon, ImageIcon, Link2Off, MoreHorizontalIcon, Sparkles } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
+import { computed, defineAsyncComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
@@ -9,7 +9,9 @@ import DropdownMenuSeparator from '@/components/ui/dropdown-menu/DropdownMenuSep
 import type { IGearItem } from '../types/gear.types'
 import { useCatalogue } from '../composables/catalogue/useCatalogue'
 import { getActionIcon } from '../utils/actionIcons'
-import UpdateFromCatalogueDialog from './catalogue/UpdateFromCatalogueDialog.vue'
+
+// Lazy load dialog to reduce initial bundle size
+const UpdateFromCatalogueDialog = defineAsyncComponent(() => import('./catalogue/UpdateFromCatalogueDialog.vue'))
 
 const { t } = useI18n()
 const { fetchImagesFromCatalogue, unlinkItemFromCatalogue, isFetchingImages, isUnlinking } = useCatalogue()

@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { ArrowLeft, ExternalLink, Package } from 'lucide-vue-next'
-import { computed, ref, watchEffect } from 'vue'
+import { computed, defineAsyncComponent, ref, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { Badge } from '@/components/ui/badge'
 import Button from '@/components/ui/button/Button.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import AddCatalogueItemToContainerDialog from '@/modules/gear/components/catalogue/AddCatalogueItemToContainerDialog.vue'
 import ColorDot from '@/modules/gear/components/ColorDot.vue'
 import MarkdownRenderer from '@/modules/gear/components/MarkdownRenderer.vue'
 import { useCatalogue } from '@/modules/gear/composables/catalogue/useCatalogue'
@@ -17,6 +16,9 @@ import { GearRoutePath } from '@/modules/gear/routes'
 import { DEFAULT_COLOR, getColorHex } from '@/modules/gear/utils/suggestedValues'
 import { usePageTitle } from '@/shared/composables/usePageTitle'
 import type { TContainerColor } from '@/modules/gear/types/gear.types'
+
+// Lazy load dialog to reduce initial bundle size
+const AddCatalogueItemToContainerDialog = defineAsyncComponent(() => import('@/modules/gear/components/catalogue/AddCatalogueItemToContainerDialog.vue'))
 
 const route = useRoute()
 const router = useRouter()

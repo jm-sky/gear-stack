@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { CalendarPlus, CalendarSync, ExternalLink, Link2, RefreshCcw } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
+import { computed, defineAsyncComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { Badge } from '@/components/ui/badge'
@@ -16,7 +16,6 @@ import { getActionIcon } from '../utils/actionIcons'
 import { formatWeight } from '../utils/formatWeight'
 import { isSet } from '../utils/helpers'
 import { getFrom } from '../utils/navigationParams'
-import CloneContainerDialog from './CloneContainerDialog.vue'
 import ContainerHeaderName from './ContainerHeaderName.vue'
 import ContainerHeaderStats from './ContainerHeaderStats.vue'
 import ContainerRatingBadge from './ContainerRatingBadge.vue'
@@ -25,6 +24,9 @@ import FavoriteContainerButton from './FavoriteContainerButton.vue'
 import ItemsTableEditModeToggle from './ItemsTableEditModeToggle.vue'
 import MarkdownRenderer from './MarkdownRenderer.vue'
 import WeightLimitBadge from './WeightLimitBadge.vue'
+
+// Lazy load dialog to reduce initial bundle size
+const CloneContainerDialog = defineAsyncComponent(() => import('./CloneContainerDialog.vue'))
 
 // Action icons
 const BackIcon = getActionIcon('back')
