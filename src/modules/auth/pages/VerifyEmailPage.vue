@@ -60,7 +60,7 @@ async function handleVerify(currentToken: string) {
     message.value = t('auth.verify_email.success')
     toast.success(t('auth.verify_email.success'))
     redirectTimeout.value = setTimeout(() => {
-      router.push(AuthRoutePaths.dashboard)
+      router.push(AuthRoutePaths.login)
     }, REDIRECT_TIMEOUT)
   } catch (error) {
     verificationStatus.value = 'error'
@@ -147,7 +147,7 @@ onBeforeUnmount(() => {
         <div v-if="isVerified" class="flex flex-col items-center justify-center gap-3">
           <RotateCwIcon class="size-8 animate-spin opacity-50" />
           <p class="text-xs text-muted-foreground">
-            {{ t('auth.verify_email.redirecting_to_dashboard') }}
+            {{ t('auth.verify_email.redirecting_to_login') }}
           </p>
         </div>
 
@@ -165,9 +165,9 @@ onBeforeUnmount(() => {
             v-if="isVerified"
             type="button"
             variant="outline"
-            :to="AuthRoutePaths.dashboard"
+            :to="AuthRoutePaths.login"
           >
-            {{ t('auth.verify_email.go_to_app') }}
+            {{ t('auth.verify_email.back_to_login') }}
           </ButtonLink>
           <ButtonLink
             v-else
