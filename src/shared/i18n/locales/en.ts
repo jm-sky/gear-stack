@@ -19,6 +19,7 @@ export default {
     close: 'Close',
     confirm: 'Confirm',
     search: 'Search',
+    refresh: 'Refresh',
     filter: 'Filter',
     sort: 'Sort',
     actions: 'Actions',

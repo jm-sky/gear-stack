@@ -287,10 +287,10 @@ function navigateToContainer(containerId: string) {
       >
         <template #actions>
           <Button
-            v-tooltip.bottom="t('gear.allItems.refresh', 'Refresh items')"
+            v-tooltip.bottom="t('common.refresh', 'Refresh items')"
             variant="ghost"
             size="sm"
-            :aria-label="t('gear.allItems.refresh', 'Refresh items')"
+            :aria-label="t('common.refresh', 'Refresh items')"
             @click="refreshItems"
           >
             <RefreshCcwIcon class="size-4" :class="{ 'animate-spin': loading }" />

@@ -4,6 +4,12 @@ import type { TDateTime, TUUID } from '@/shared/types/base.type'
 // Price tier for catalogue items
 export type TCataloguePriceTier = 'low' | 'medium' | 'high'
 
+// Shop link for catalogue items
+export interface ICatalogueShop {
+  url: string
+  name?: string
+}
+
 // Global catalogue item (template for creating gear items)
 export interface IGlobalCatalogueItem {
   id: TUUID
@@ -21,6 +27,7 @@ export interface IGlobalCatalogueItem {
   quality?: TGearItemQuality | null
   url?: string | null
   color?: string | null
+  shops?: ICatalogueShop[]
   isActive: boolean
   createdBy?: TUUID | null
   createdAt: TDateTime
@@ -55,6 +62,7 @@ export interface ICatalogueItemCreate {
   quality?: TGearItemQuality | null
   url?: string | null
   color?: string | null
+  shops?: ICatalogueShop[]
 }
 
 // Catalogue item update data
@@ -72,6 +80,7 @@ export interface ICatalogueItemUpdate {
   quality?: TGearItemQuality | null
   url?: string | null
   color?: string | null
+  shops?: ICatalogueShop[]
   isActive?: boolean | null
 }
 

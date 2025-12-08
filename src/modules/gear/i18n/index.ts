@@ -566,6 +566,14 @@ export const gearEn = {
           name: 'EDC (Every Day Carry)',
           description: 'Essential items for daily carry',
         },
+        budgetEdc: {
+          name: 'Budget EDC Survival Kit',
+          description: 'Affordable everyday carry survival essentials',
+        },
+        mediumEdc: {
+          name: 'Medium EDC / Urban Survival Kit',
+          description: 'Mid-range everyday carry with urban survival focus',
+        },
       },
       items: {
         lightMyFireFiresteel: {
@@ -817,6 +825,10 @@ export const gearEn = {
       metadataUpdated: 'Updated',
       model: 'Model',
       admin: 'Admin',
+      shops: 'Shops',
+      shopsTitle: 'Where to buy',
+      shopLink: 'Shop link',
+      openShop: 'Open shop',
     },
   },
 }
@@ -1391,6 +1403,14 @@ export const gearPl = {
           name: 'EDC (Every Day Carry)',
           description: 'Niezbędne przedmioty do codziennego noszenia',
         },
+        budgetEdc: {
+          name: 'Budżetowy zestaw EDC Survival',
+          description: 'Przystępne cenowo podstawowe przedmioty survivalowe do codziennego noszenia',
+        },
+        mediumEdc: {
+          name: 'Średni zestaw EDC / Urban Survival',
+          description: 'Zestaw średniego poziomu do codziennego noszenia z naciskiem na survival miejski',
+        },
       },
       items: {
         lightMyFireFiresteel: {
@@ -1637,11 +1657,15 @@ export const gearPl = {
     deleteConfirm: 'Czy na pewno chcesz usunąć ten przedmiot z katalogu?',
     empty: 'Brak przedmiotów w katalogu',
     emptyDescription: 'Katalog globalny jest pusty. Dodaj przedmioty, aby pomóc innym znaleźć sprzęt.',
-    metadata: 'Metadane',
-    metadataCreated: 'Utworzono',
-    metadataUpdated: 'Zaktualizowano',
-    model: 'Model',
-    admin: 'Admin',
+      metadata: 'Metadane',
+      metadataCreated: 'Utworzono',
+      metadataUpdated: 'Zaktualizowano',
+      model: 'Model',
+      admin: 'Admin',
+      shops: 'Sklepy',
+      shopsTitle: 'Gdzie kupić',
+      shopLink: 'Link do sklepu',
+      openShop: 'Otwórz sklep',
     },
   },
 }

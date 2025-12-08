@@ -290,6 +290,15 @@ class ContainerRatingResponse(BaseModel):
 
 
 # Global Catalogue Schemas
+class CatalogueShop(BaseModel):
+    """Schema for a shop link in catalogue items."""
+
+    url: str
+    name: str | None = None
+
+    model_config = {"populate_by_name": True}
+
+
 class GlobalCatalogueItemBase(BaseModel):
     """Base schema for global catalogue items."""
 
@@ -306,6 +315,7 @@ class GlobalCatalogueItemBase(BaseModel):
     quality: GearItemQuality | None = None
     url: str | None = None
     color: str | None = Field(None, max_length=50)
+    shops: list[CatalogueShop] = Field(default_factory=list, alias="shops", serialization_alias="shops")
 
     model_config = {"populate_by_name": True}
 
@@ -353,6 +363,7 @@ class GlobalCatalogueItemUpdate(BaseModel):
     quality: GearItemQuality | None = None
     url: str | None = None
     color: str | None = Field(None, max_length=50)
+    shops: list[CatalogueShop] | None = Field(None, alias="shops", serialization_alias="shops")
     isActive: bool | None = Field(None, alias="isActive")
 
     model_config = {"populate_by_name": True}

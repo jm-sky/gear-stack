@@ -6,8 +6,7 @@ import sys
 from datetime import UTC, datetime
 from importlib import import_module
 from pathlib import Path
-
-import sys
+from typing import TYPE_CHECKING
 
 import typer
 from rich.console import Console
@@ -15,6 +14,9 @@ from rich.prompt import Confirm
 from rich.table import Table
 
 from ..main import COMMAND_GROUPS, show_group_interactive_menu
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 db_app = typer.Typer(
     name="db",
@@ -495,8 +497,9 @@ def seed_database(
     console.print("[bold green]✓ Database seeding complete[/bold green]")
 
 
-async def _seed_catalogue(db) -> None:
+async def _seed_catalogue(db: "AsyncSession") -> None:
     """Seed catalogue items, updating existing items by id."""
+    from app.common.id_utils import generate_id
     from app.modules.gear.db_models import CatalogueItemImageDB, GlobalCatalogueItemDB
     from app.seeders import CATALOGUE_ITEM_IMAGES, CATALOGUE_ITEMS
     from sqlalchemy import select
@@ -520,7 +523,9 @@ async def _seed_catalogue(db) -> None:
     if not user:
         console.print("[yellow]No owner or admin user found. Creating placeholder 'system' user...[/yellow]")
         system_user = UserDB(
+            id=generate_id(),
             email="system@gearstack.local",
+            name="System User",
             is_admin=True,
             is_active=True,
         )
@@ -532,8 +537,8 @@ async def _seed_catalogue(db) -> None:
         creator_id = str(user.id)
 
     # Get existing items by id for quick lookup
-    result = await db.execute(select(GlobalCatalogueItemDB))
-    existing_items = {item.id: item for item in result.scalars().all()}
+    items_result = await db.execute(select(GlobalCatalogueItemDB))
+    existing_items: dict[str, GlobalCatalogueItemDB] = {item.id: item for item in items_result.scalars().all()}
 
     created_count = 0
     updated_count = 0
@@ -559,7 +564,7 @@ async def _seed_catalogue(db) -> None:
         # Check if item exists by id
         existing_item = existing_items.get(item_id)
 
-        if existing_item:
+        if existing_item is not None:
             # Update existing item
             for key, value in mapped_data.items():
                 if key != "id":  # Don't update id as it's the primary key
@@ -667,7 +672,7 @@ def remove_seeder(
     console.print("[bold green]✓ Data removal complete[/bold green]")
 
 
-async def _remove_catalogue(db) -> None:
+async def _remove_catalogue(db: "AsyncSession") -> None:
     """Remove all catalogue items and their images."""
     from app.modules.gear.db_models import CatalogueItemImageDB, GlobalCatalogueItemDB
     from sqlalchemy import delete, select

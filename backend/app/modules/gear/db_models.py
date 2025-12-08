@@ -19,6 +19,7 @@ from sqlalchemy import (
     UniqueConstraint,
     CheckConstraint,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -379,6 +380,7 @@ class GlobalCatalogueItemDB(Base):
         quality: Quality tier (low, medium, high) - zgodne z GearItemQuality
         url: Product URL
         color: Item color (optional)
+        shops: List of shop links with optional names (JSONB array of objects)
         is_active: Whether item is active in catalogue
         created_by: User ID who created this item (nullable for system items)
         created_at: Creation timestamp
@@ -402,6 +404,7 @@ class GlobalCatalogueItemDB(Base):
     quality: Mapped[str | None] = mapped_column(String(20), nullable=True)
     url: Mapped[str | None] = mapped_column(Text, nullable=True)
     color: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    shops: Mapped[list[dict[str, str]]] = mapped_column(JSONB, nullable=False, default=list)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, index=True)
     created_by: Mapped[str | None] = mapped_column(
         String(36),

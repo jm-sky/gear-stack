@@ -3,8 +3,8 @@
 from typing import Optional
 
 try:
-    import aioboto3  # type: ignore[import-untyped]
-    from botocore.exceptions import ClientError  # type: ignore[import-untyped]
+    import aioboto3
+    from botocore.exceptions import ClientError
 
     S3_AVAILABLE = True
 except ImportError:

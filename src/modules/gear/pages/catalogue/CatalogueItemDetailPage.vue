@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowLeft, Package } from 'lucide-vue-next'
+import { ArrowLeft, ExternalLink, Package } from 'lucide-vue-next'
 import { computed, ref, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -78,6 +78,11 @@ const hasDetails = computed<boolean>(() => {
     || item.value.url
     || item.value.description
   )
+})
+
+// Check if there are shops to display
+const hasShops = computed<boolean>(() => {
+  return !!(item.value?.shops && item.value.shops.length > 0)
 })
 
 // Extract domain from URL with ellipsis if there's a path
@@ -267,6 +272,33 @@ const handleAddToContainer = () => {
             </p>
           </div>
         </template>
+      </div>
+
+      <!-- Shops -->
+      <div v-if="hasShops" class="rounded-lg border bg-card p-6">
+        <h2 class="mb-4 text-lg font-semibold">
+          {{ t('gear.catalogue.shopsTitle') }}
+        </h2>
+        <div class="space-y-2">
+          <a
+            v-for="(shop, index) in item.shops"
+            :key="index"
+            :href="shop.url"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="flex items-center gap-2 rounded-md border p-3 transition-colors hover:bg-muted"
+          >
+            <ExternalLink class="size-4 shrink-0 text-muted-foreground" />
+            <div class="flex-1 min-w-0">
+              <div v-if="shop.name" class="font-medium">
+                {{ shop.name }}
+              </div>
+              <div class="truncate text-sm text-muted-foreground">
+                {{ getUrlDisplay(shop.url) }}
+              </div>
+            </div>
+          </a>
+        </div>
       </div>
 
       <!-- Metadata -->

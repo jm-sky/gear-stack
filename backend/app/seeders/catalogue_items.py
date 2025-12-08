@@ -187,6 +187,9 @@ CATALOGUE_ITEMS = [
         "weight": 29.0,
         "weight_unit": "g",
         "url": "https://www.victorinox.com/global/en/products/Swiss-Army-Knives/Small-Pocket-Knives/Alox-Bantam/p/0.6221",
+        "shops": [
+            {"url": "https://militaria.pl/p/scyzoryk-victorinox-alox-bantam-silver-2608760"},
+        ],
     },
     # Woda / Water
     {

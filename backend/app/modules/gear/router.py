@@ -1130,7 +1130,7 @@ async def update_item_from_catalogue(
     """
     fields_list = None
     if fields:
-        fields_list = [f.strip() for f in fields.split(',') if f.strip()]
+        fields_list = [f.strip() for f in fields.split(",") if f.strip()]
 
     item = await service.update_item_from_catalogue(item_id, current_user.id, fields_list)
     if not item:

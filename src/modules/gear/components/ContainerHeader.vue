@@ -116,10 +116,10 @@ const handleBack = () => {
         <div class="flex items-center gap-2">
           <Button
             v-if="shouldUseAPI"
-            v-tooltip.bottom="t('gear.containers.refresh')"
+            v-tooltip.bottom="t('common.refresh')"
             variant="ghost"
             size="sm"
-            :aria-label="t('gear.containers.refresh')"
+            :aria-label="t('common.refresh')"
             @click="$emit('refresh')"
           >
             <RefreshCcw class="size-4" />

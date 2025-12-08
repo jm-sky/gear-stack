@@ -19,6 +19,7 @@ export default {
     close: 'Zamknij',
     confirm: 'Potwierdź',
     search: 'Szukaj',
+    refresh: 'Odśwież',
     filter: 'Filtruj',
     sort: 'Sortuj',
     actions: 'Akcje',

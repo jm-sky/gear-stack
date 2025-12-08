@@ -50,7 +50,7 @@ const loading = ref(false)
 function loadFiltersFromURL(): { searchQuery: string; showOnlyRootContainers: boolean } {
   const searchQuery = typeof route.query.search === 'string' ? route.query.search : ''
   const showOnlyRootContainers = route.query.rootOnly === 'true'
-  
+
   return { searchQuery, showOnlyRootContainers }
 }
 
@@ -77,19 +77,19 @@ const showOnlyRootContainers = ref(urlFilters.showOnlyRootContainers || storedFi
 // Update URL when filters change
 watch([searchQueryRaw, showOnlyRootContainers], ([newSearch, newRootOnly]) => {
   const query = { ...route.query } as Record<string, string | undefined>
-  
+
   if (newSearch) {
     query.search = newSearch
   } else {
     delete query.search
   }
-  
+
   if (newRootOnly) {
     query.rootOnly = 'true'
   } else {
     delete query.rootOnly
   }
-  
+
   // Preserve other query params (like import)
   router.replace({ query })
 }, { deep: true })
@@ -98,11 +98,11 @@ watch([searchQueryRaw, showOnlyRootContainers], ([newSearch, newRootOnly]) => {
 watch(() => route.query, (newQuery) => {
   const urlSearch = typeof newQuery.search === 'string' ? newQuery.search : ''
   const urlRootOnly = newQuery.rootOnly === 'true'
-  
+
   if (searchQueryRaw.value !== urlSearch) {
     searchQueryRaw.value = urlSearch
   }
-  
+
   if (showOnlyRootContainers.value !== urlRootOnly) {
     showOnlyRootContainers.value = urlRootOnly
   }
@@ -198,7 +198,7 @@ const handleRefresh = async () => {
     try {
       loading.value = true
       await gearContainerService().getContainers()
-      toast.success(t('gear.containers.refresh'))
+      toast.success(t('common.refresh'))
     } catch (error) {
       console.error('Failed to refresh containers:', error)
       toast.error(t('common.error'))
@@ -258,11 +258,11 @@ const handleAiChat = () => {
         <template #actions>
           <Button
             v-if="config.backend.enabled"
-            v-tooltip.bottom="t('gear.containers.refresh')"
+            v-tooltip.bottom="t('common.refresh')"
             variant="ghost"
             size="sm"
             class="shrink-0"
-            :aria-label="t('gear.containers.refresh')"
+            :aria-label="t('common.refresh')"
             :disabled="loading"
             @click="handleRefresh"
           >
