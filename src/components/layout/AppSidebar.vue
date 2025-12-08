@@ -39,11 +39,6 @@ const navLinks = computed(() => [
     icon: Package,
   },
   {
-    to: GearRoutePath.CatalogueBrowser,
-    label: t('gear.catalogue.navTitle', 'Catalogue'),
-    icon: BookIcon,
-  },
-  {
     to: GearRoutePath.ShoppingPlanning,
     label: t('gear.shopping.navTitle', 'Shopping'),
     icon: ShoppingCart,
@@ -52,6 +47,11 @@ const navLinks = computed(() => [
     to: GearRoutePath.PublicContainers,
     label: t('gear.publicContainers.navTitle', 'Public Browser'),
     icon: Globe,
+  },
+  {
+    to: GearRoutePath.CatalogueBrowser,
+    label: t('gear.catalogue.navTitle', 'Catalogue'),
+    icon: BookIcon,
   },
 ])
 

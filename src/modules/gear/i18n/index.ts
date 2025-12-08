@@ -1589,9 +1589,9 @@ export const gearPl = {
       },
     },
     catalogue: {
-    title: 'Katalog Globalny',
-    subtitle: 'Przeglądaj i dodawaj przedmioty z katalogu globalnego',
-    navTitle: 'Katalog',
+    title: 'Globalny Katalog Przedmiotów',
+    subtitle: 'Przeglądaj i dodawaj przedmioty z katalogu przedmiotów',
+    navTitle: 'Katalog przedmiotów',
     browser: 'Przeglądarka Katalogu',
     search: 'Szukaj w katalogu...',
     searchPlaceholder: 'Szukaj po nazwie, marce lub modelu...',
@@ -1642,7 +1642,7 @@ export const gearPl = {
     },
     create: {
       title: 'Utwórz przedmiot w katalogu',
-      description: 'Dodaj nowy przedmiot do katalogu globalnego',
+      description: 'Dodaj nowy przedmiot do katalogu przedmiotów',
     },
     edit: {
       title: 'Edytuj przedmiot z katalogu',
@@ -1656,7 +1656,7 @@ export const gearPl = {
     delete: 'Usuń przedmiot z katalogu',
     deleteConfirm: 'Czy na pewno chcesz usunąć ten przedmiot z katalogu?',
     empty: 'Brak przedmiotów w katalogu',
-    emptyDescription: 'Katalog globalny jest pusty. Dodaj przedmioty, aby pomóc innym znaleźć sprzęt.',
+    emptyDescription: 'Katalog przedmiotów jest pusty. Dodaj przedmioty, aby pomóc innym znaleźć sprzęt.',
       metadata: 'Metadane',
       metadataCreated: 'Utworzono',
       metadataUpdated: 'Zaktualizowano',
