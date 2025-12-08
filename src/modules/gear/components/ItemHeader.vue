@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ArrowLeftIcon, PencilIcon } from 'lucide-vue-next'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { Badge } from '@/components/ui/badge'
@@ -38,6 +38,18 @@ const { isExpired, isExpiringSoon } = useExpiration(item)
 
 const matchDialogOpen = ref(false)
 
+const backTo = computed<string>(() => {
+  const from = getFrom(route)
+  if (from === 'all-items') {
+    return GearRoutePath.AllItems
+  }
+  return GearRoutePath.ContainerDetailById(containerId)
+})
+
+const handleBack = () => {
+  router.push(backTo.value)
+}
+
 const handleEdit = () => {
   const from = getFrom(route)
   router.push({
@@ -53,7 +65,7 @@ const handleEdit = () => {
       <Button
         variant="ghost"
         size="sm"
-        @click="router.back()"
+        @click="handleBack"
       >
         <ArrowLeftIcon class="size-4" />
         {{ t('common.back') }}

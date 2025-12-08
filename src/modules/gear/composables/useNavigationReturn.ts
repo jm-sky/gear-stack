@@ -28,11 +28,14 @@ export function useNavigationReturn(containerId: string, itemId?: string) {
 
   async function navigateBackAndClean() {
     const returnToValue = returnTo.value
+    const fromValue = from.value
 
     if (returnToValue === 'detail' && itemId) {
+      // Preserve 'from' parameter when navigating back to ItemDetails
+      // This ensures the back button in ItemHeader works correctly
       await router.push({
         path: GearRoutePath.ItemDetailById(containerId, itemId),
-        query: {},
+        query: createNavigationQuery(undefined, fromValue),
       })
     } else if (returnToValue === 'shopping') {
       await router.push(GearRoutePath.ShoppingPlanning)

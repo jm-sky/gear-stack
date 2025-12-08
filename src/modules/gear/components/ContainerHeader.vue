@@ -94,6 +94,10 @@ const handleExportToPrompt = () => {
 const handleExportToCSV = () => {
   emit('exportToCsv')
 }
+
+const handleBack = () => {
+  router.push(GearRoutePath.Containers)
+}
 </script>
 
 <template>
@@ -104,7 +108,7 @@ const handleExportToCSV = () => {
         <Button
           variant="ghost"
           size="sm"
-          @click="router.back()"
+          @click="handleBack"
         >
           <BackIcon class="size-4" />
           {{ t('common.back') }}

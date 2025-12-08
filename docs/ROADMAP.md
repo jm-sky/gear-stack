@@ -75,12 +75,18 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
 
 ### Średni priorytet
 
-1. **Przenoszenie przedmiotów między kontenerami**
+1. ✅ **Nawigacja przycisku "Wróć"** - Zakończone
+   - 📍 Lokalizacja: [FEATURE-028-back-button-navigation.md](./features/FEATURE-028-back-button-navigation.md)
+   - Naprawa nawigacji przycisku "Wróć" w różnych komponentach aplikacji
+   - Użycie parametru `from` zamiast `router.back()` dla przewidywalnej nawigacji
+   - Status: ✅ Completed | Priority: High | Complexity: Small
+
+2. **Przenoszenie przedmiotów między kontenerami**
    - 📍 Lokalizacja: [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md)
    - Modal do przenoszenia itemów
    - Status: 🔄 Planned | Priority: Medium | Complexity: Medium
 
-2. **Kasowanie obrazków z S3**
+3. **Kasowanie obrazków z S3**
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md)
    - Automatyczne usuwanie z S3 po usunięciu przedmiotu
    - Automatyczne usuwanie z S3 po usunięciu kontenera
