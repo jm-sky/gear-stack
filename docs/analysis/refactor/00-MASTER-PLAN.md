@@ -23,9 +23,11 @@ Zastosujemy podejście **Backend → Frontend → Integration**:
 
 ### Fazy Analizy
 
-#### **PHASE A: BACKEND** (3 iteracje, ~2-3 sesje)
+#### **PHASE A: BACKEND** (5 iteracje, ~4-6 sesji)
 1. **Backend Infrastructure** - Common utilities, exceptions, config
-2. **Backend Modules** - Auth, AI, Stats, Users, Admin, Gear
+2a. **Backend Modules: Security** - Auth, Users, Admin, Two-Factor
+2b. **Backend Modules: AI** - AI provider integration, chat, models
+2c. **Backend Modules: Business** - Gear, Stats, Settings, Tenants, Feature Limits, Logs
 3. **Backend API Layer** - Routers, schemas, middleware, integration
 
 #### **PHASE B: FRONTEND** (11 iteracji, ~8-10 sesji)
@@ -96,32 +98,65 @@ backend/
 
 ---
 
-### B2: Backend Modules (Business Logic)
-**Zakres:** `backend/app/modules/`
+### B2a: Backend Modules - Security Critical (Auth, Users, Admin)
+**Zakres:** `backend/app/modules/auth/`, `backend/app/modules/users/`, `backend/app/modules/admin/`
 
-Analiza wszystkich modułów backendowych:
-- **auth/** - Authentication, WebAuthn, credentials, tokens
-- **ai/** - AI provider integration, chat, model management
+**Moduły:**
+- **auth/** (~2,847 LOC) - Authentication, WebAuthn, credentials, JWT tokens, password reset, email verification
+  - Files: service.py, repositories.py, router.py, auth_utils.py, dependencies.py, decorators.py
+- **two_factor/** - Two-factor authentication, WebAuthn/passkeys integration
 - **users/** - User management, profiles, CRUD operations
-- **admin/** - Admin functionality, user/container management
+- **admin/** - Admin functionality, user/container management, admin guards
+
+**Focus Areas:**
+- Security best practices (token handling, password hashing, WebAuthn)
+- Authentication/authorization patterns
+- User data handling (GDPR compliance)
+- TODOs related to security (token invalidation, Redis storage for WebAuthn)
+
+**Output:** `B2a-backend-security-modules.md`
+
+---
+
+### B2b: Backend Modules - AI Integration
+**Zakres:** `backend/app/modules/ai/`
+
+**Moduły:**
+- **ai/** (~30 files) - AI provider integration, chat, model management, context handling
+  - Provider abstractions
+  - Chat history management
+  - Model configuration
+  - Prompt engineering
+
+**Focus Areas:**
+- AI provider abstractions (OpenAI, Anthropic, etc.)
+- API integration patterns
+- Error handling for external services
+- Cost management and rate limiting
+
+**Output:** `B2b-backend-ai-module.md`
+
+---
+
+### B2c: Backend Modules - Business Features
+**Zakres:** `backend/app/modules/gear/`, `backend/app/modules/stats/`, `backend/app/modules/settings/`, etc.
+
+**Moduły:**
+- **gear/** - Gear/container management, catalogue items, image uploads
 - **stats/** - Statistics, analytics, aggregations
-- **gear/** - Gear/container management (if implemented on backend)
 - **settings/** - Application settings
 - **tenants/** - Multi-tenancy support
-- **two_factor/** - Two-factor authentication
 - **feature_limits/** - Feature limiting/quotas
 - **gear_settings/** - Gear-specific settings
 - **logs/** - Logging functionality
 
-**Dla każdego modułu:**
-- Models (SQLAlchemy/Pydantic)
-- Schemas (Pydantic validation)
-- Services (business logic)
-- Repositories (data access)
-- Dependencies (FastAPI dependencies)
-- Utils (module-specific utilities)
+**Focus Areas:**
+- Business logic patterns
+- Data modeling
+- Repository patterns consistency
+- Cross-module dependencies
 
-**Output:** `B2-backend-modules.md`
+**Output:** `B2c-backend-business-modules.md`
 
 ---
 
@@ -484,9 +519,11 @@ Każda iteracja będzie zawierać:
 
 Po zakończeniu wszystkich iteracji:
 
-1. **Backend Reports** (3 pliki)
+1. **Backend Reports** (5 plików)
    - `B1-backend-infrastructure.md`
-   - `B2-backend-modules.md`
+   - `B2a-backend-security-modules.md`
+   - `B2b-backend-ai-module.md`
+   - `B2c-backend-business-modules.md`
    - `B3-backend-api-layer.md`
 
 2. **Frontend Reports** (12 plików)
@@ -517,7 +554,7 @@ Po zakończeniu wszystkich iteracji:
    - Dependencies między tasks
    - Podział na Backend/Frontend/Integration tracks
 
-**Total:** 16 detailed reports + 2 summary documents = **18 dokumentów**
+**Total:** 18 detailed reports + 2 summary documents = **20 dokumentów**
 
 ---
 
@@ -530,9 +567,11 @@ Po zakończeniu wszystkich iteracji:
 - **Elastyczność** - możemy dostosować kolejność/zakres w trakcie
 
 ### Estimated Timeline
-- **Phase A (Backend):** 2-3 sesje (~3-5 godzin)
-  - B1: ~60-90 min (mała warstwa)
-  - B2: ~90-120 min (najwięcej modułów)
+- **Phase A (Backend):** 4-6 sesji (~6-9 godzin)
+  - B1: ~60-90 min (mała warstwa) ✅ COMPLETED
+  - B2a: ~90-120 min (auth, users, admin, two_factor - security critical)
+  - B2b: ~90-120 min (ai module - 30 plików)
+  - B2c: ~60-90 min (gear, stats, settings, etc. - business modules)
   - B3: ~60-90 min (API + config)
 
 - **Phase B (Frontend):** 8-10 sesji (~12-16 godzin)
@@ -544,16 +583,17 @@ Po zakończeniu wszystkich iteracji:
 
 - **Phase C (Integration):** 1 sesja (~60-90 min)
 
-**Total estimate:** 11-14 sesji, ~16-22 godzin pracy
+**Total estimate:** 13-17 sesji, ~19-26 godzin pracy
 
 ---
 
 ## Następne Kroki
 
 1. ✅ Review tego master planu
-2. ⏳ **START: B1 - Backend Infrastructure** (po zatwierdzeniu)
-3. ⏳ Continue through phases: B2 → B3 → F1 → ... → I1
-4. ⏳ Generate summary documents
+2. ✅ **COMPLETED: B1 - Backend Infrastructure**
+3. ⏳ **CURRENT: B2a - Backend Security Modules** (Auth, Users, Admin, Two-Factor)
+4. ⏳ Continue: B2b → B2c → B3 → F1 → ... → I1
+5. ⏳ Generate summary documents
 
 ---
 
@@ -561,9 +601,11 @@ Po zakończeniu wszystkich iteracji:
 
 ### Phase Progression
 ```
-BACKEND (3 iterations)
-  ├─ B1: Infrastructure ✓
-  ├─ B2: Modules
+BACKEND (5 iterations)
+  ├─ B1: Infrastructure ✅ COMPLETED
+  ├─ B2a: Security Modules (Auth, Users, Admin, 2FA) ⏳ CURRENT
+  ├─ B2b: AI Module
+  ├─ B2c: Business Modules (Gear, Stats, Settings, etc.)
   └─ B3: API Layer
 
 FRONTEND (12 iterations)
@@ -578,12 +620,16 @@ INTEGRATION (1 iteration)
   └─ I1: Backend ↔ Frontend
 ```
 
-### Command to Start
+### Command to Start Next Iteration
 ```bash
-# Gdy będziesz gotowy, powiedz:
-"start iteration B1"
-# lub po prostu:
-"start B1"
+# ✅ B1 completed!
+# ⏳ Current iteration:
+"start B2a"
+
+# Next iterations:
+"start B2b"  # AI module
+"start B2c"  # Business modules
+"start B3"   # API layer
 ```
 
 ---

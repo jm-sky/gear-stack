@@ -17,10 +17,12 @@ docs/analysis/refactor/
 ├── TEMPLATE.md                    # Szablon dla każdej iteracji
 ├── README.md                      # Ten plik
 │
-├── BACKEND (Phase A - 3 iteracje)
-│   ├── B1-backend-infrastructure.md  # Backend: Common, exceptions
-│   ├── B2-backend-modules.md         # Backend: Auth, AI, Users, Admin, Stats, etc.
-│   └── B3-backend-api-layer.md       # Backend: API, routers, middleware
+├── BACKEND (Phase A - 5 iteracji)
+│   ├── B1-backend-infrastructure.md      # Backend: Common, exceptions
+│   ├── B2a-backend-security-modules.md   # Backend: Auth, Users, Admin, Two-Factor
+│   ├── B2b-backend-ai-module.md          # Backend: AI integration (30 files)
+│   ├── B2c-backend-business-modules.md   # Backend: Gear, Stats, Settings, etc.
+│   └── B3-backend-api-layer.md           # Backend: API, routers, middleware
 │
 ├── FRONTEND (Phase B - 12 iteracji)
 │   ├── F1-frontend-infrastructure.md # Frontend: Shared utils, types, composables
@@ -43,16 +45,18 @@ docs/analysis/refactor/
 └── REFACTOR-ACTION-PLAN.md        # Action plan z priorytetami (końcowy deliverable)
 ```
 
-**Total:** 16 detailed reports + 2 summary documents = **18 dokumentów**
+**Total:** 18 detailed reports + 2 summary documents = **20 dokumentów**
 
 ## Status Iteracji
 
-### Phase A: Backend (3 iteracje)
+### Phase A: Backend (5 iteracji)
 
 | ID | Iteracja | Status | Data | Findings |
 |----|----------|--------|------|----------|
-| B1 | Backend Infrastructure | ⏳ Pending | - | - |
-| B2 | Backend Modules | ⏳ Pending | - | - |
+| B1 | Backend Infrastructure | ✅ Completed | 2025-12-08 | 2 Critical, 3 High, 4 Medium |
+| B2a | Backend Security Modules | 🔄 In Progress | - | - |
+| B2b | Backend AI Module | ⏳ Pending | - | - |
+| B2c | Backend Business Modules | ⏳ Pending | - | - |
 | B3 | Backend API Layer | ⏳ Pending | - | - |
 
 ### Phase B: Frontend (12 iteracji)
@@ -84,7 +88,7 @@ docs/analysis/refactor/
 - ✅ Completed - Zakończona i zatwierdzona
 - 🚫 Skipped - Pominięta (z uzasadnieniem)
 
-**Progress:** 0/16 completed (0%)
+**Progress:** 1/18 completed (5.6%)
 
 ## Jak używać tej dokumentacji
 
@@ -232,9 +236,13 @@ cat docs/analysis/refactor/00-MASTER-PLAN.md
 ### Phase Progression
 
 ```
-CURRENT → B1: Backend Infrastructure (start here!)
+COMPLETED ✅ B1: Backend Infrastructure
           ↓
-          B2: Backend Modules
+CURRENT → B2a: Backend Security Modules (start here!)
+          ↓
+          B2b: Backend AI Module
+          ↓
+          B2c: Backend Business Modules
           ↓
           B3: Backend API Layer
           ↓
