@@ -47,7 +47,7 @@ function handleImageClick() {
       </div>
 
       <!-- Item name overlay -->
-      <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+      <div class="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/80 to-transparent p-2">
         <p class="truncate text-sm font-medium text-white">
           {{ item.name }}
         </p>

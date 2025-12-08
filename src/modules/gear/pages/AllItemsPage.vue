@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Box, Package, RefreshCcwIcon } from 'lucide-vue-next'
+import { Package, RefreshCcwIcon } from 'lucide-vue-next'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
@@ -11,9 +11,11 @@ import Badge from '@/components/ui/badge/Badge.vue'
 import Button from '@/components/ui/button/Button.vue'
 import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import { useBackend } from '@/shared/composables/useBackend'
 import { ALL_ITEMS_PAGE_FILTERS_KEY, ALL_ITEMS_TABLE_COLUMN_VISIBILITY_KEY, config } from '@/shared/config/config'
 import type { IItemWithContainer } from '../utils/allItemsColumns'
 import CategoryIcon from '../components/CategoryIcon.vue'
+import ContainerIcon from '../components/ContainerIcon.vue'
 import ItemPriorityBadge from '../components/ItemPriorityBadge.vue'
 import ItemsTableImageCell from '../components/items-table/ItemsTableImageCell.vue'
 import ItemStatusBadge from '../components/ItemStatusBadge.vue'
@@ -24,8 +26,10 @@ import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
 import { GearRoutePath } from '../routes'
 import { gearContainerService } from '../services/gearContainerService'
+import { gearItemApiService } from '../services/gearItemApiService'
+import { useGearStore } from '../store/useGearStore'
 import { createAllItemsColumns } from '../utils/allItemsColumns'
-import { COLOR_DOT_CLASSES, COLOR_TEXT_CLASSES } from '../utils/containerColors'
+import { COLOR_TEXT_CLASSES } from '../utils/containerColors'
 import { getAllItems } from '../utils/getAllItems'
 import { createNavigationQuery } from '../utils/navigationParams'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
@@ -176,7 +180,41 @@ const allItemsRaw = computed<IItemWithContainer[]>(() => {
 async function refreshItems() {
   try {
     loading.value = true
-    await gearContainerService().getContainers()
+    const { shouldUseAPI } = useBackend()
+    const store = useGearStore()
+
+    // Get containers from API/localStorage
+    const fetchedContainers = await gearContainerService().getContainers()
+
+    // If using API, fetch all items in one request and distribute them to containers
+    if (shouldUseAPI.value) {
+      // Fetch all items for the user in one request
+      const allItems = await gearItemApiService.getAllItems()
+
+      // Group items by container ID
+      // Note: item.containerId refers to nested container (if item is a container)
+      // item.container.id refers to the parent container where item is located
+      const itemsByContainerId = new Map<string, typeof allItems>()
+      for (const item of allItems) {
+        // Use container.id (parent container) instead of containerId (nested container)
+        const containerId = item.container?.id
+        if (containerId) {
+          if (!itemsByContainerId.has(containerId)) {
+            itemsByContainerId.set(containerId, [])
+          }
+          itemsByContainerId.get(containerId)!.push(item)
+        }
+      }
+
+      // Update containers with their items
+      const containersWithItems = fetchedContainers.map((container) => ({
+        ...container,
+        items: itemsByContainerId.get(container.id) ?? [],
+      }))
+
+      // Update store with containers that have items
+      store.setContainers(containersWithItems)
+    }
     // Store will automatically update containers.value, which triggers allItemsRaw recomputation
   } catch (error) {
     console.error('Failed to refresh items:', error)
@@ -269,11 +307,6 @@ const globalFilterFn = (row: IItemWithContainer, filterValue: string) => {
     (row.color?.toLowerCase().includes(query) ?? false)
   )
 }
-
-// Navigate to container
-function navigateToContainer(containerId: string) {
-  router.push(GearRoutePath.ContainerDetailById(containerId))
-}
 </script>
 
 <template>
@@ -343,7 +376,7 @@ function navigateToContainer(containerId: string) {
         <template #category="{ row }">
           <div class="flex items-center gap-2">
             <template v-if="row.original.isContainer">
-              <Box :size="16" class="text-muted-foreground shrink-0" :class="COLOR_TEXT_CLASSES[row.original.containerColor]" />
+              <ContainerIcon :type="row.original.containerType ?? 'other'" :color="row.original.containerColor" :size="4" />
               <span>{{ getContainerTypeLabel(row.original.containerType ?? 'other') }}</span>
             </template>
             <template v-else>
@@ -356,7 +389,7 @@ function navigateToContainer(containerId: string) {
         <template #name="{ row }">
           <div class="flex items-center gap-2">
             <RouterLink
-              :to="row.original.isContainer ? GearRoutePath.ContainerDetailById(row.original.id) : { path: GearRoutePath.ItemDetailById(row.original.containerId, row.original.id), query: createNavigationQuery(undefined, 'all-items') }"
+              :to="row.original.isContainer ? { path: GearRoutePath.ContainerDetailById(row.original.id), query: createNavigationQuery(undefined, 'all-items') } : { path: GearRoutePath.ItemDetailById(row.original.containerId, row.original.id), query: createNavigationQuery(undefined, 'all-items') }"
               class="font-medium hover:text-primary hover:underline transition-colors"
             >
               {{ row.original.name }}
@@ -368,18 +401,17 @@ function navigateToContainer(containerId: string) {
         </template>
 
         <template #container="{ row }">
-          <button
-            type="button"
+          <RouterLink
+            v-if="row.original.containerId !== row.original.id"
+            :to="{ path: GearRoutePath.ContainerDetailById(row.original.containerId), query: createNavigationQuery(undefined, 'all-items') }"
             class="flex items-center gap-2 cursor-pointer hover:underline font-medium"
             :class="COLOR_TEXT_CLASSES[row.original.containerColor]"
-            @click="navigateToContainer(row.original.containerId)"
+            :title="JSON.stringify(row.original)"
           >
-            <div
-              class="size-2 rounded-full shrink-0"
-              :class="COLOR_DOT_CLASSES[row.original.containerColor]"
-            />
+            <ContainerIcon :type="row.original.containerType ?? 'other'" :color="row.original.containerColor" :size="4" />
             {{ row.original.containerName }}
-          </button>
+          </RouterLink>
+          <span v-else>-</span>
         </template>
 
         <template #quantity="{ row }">

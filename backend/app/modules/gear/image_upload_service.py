@@ -390,24 +390,33 @@ class ImageUploadService:
             await self.repository.update(item["id"], {"order": item["order"]})
         return True
 
-    async def set_primary_image(self, item_id: str, image_id: str) -> bool:
+    async def toggle_primary_image(self, item_id: str, image_id: str) -> bool:
         """
-        Set image as primary for item.
+        Toggle primary status for image (set if not primary, unset if already primary).
 
         Args:
             item_id: Item ID
-            image_id: Image ID to set as primary
+            image_id: Image ID to toggle primary status
 
         Returns:
-            True if successful
+            True if image is now primary, False if it was unset
         """
-        # Unset current primary
-        await self.repository.unset_primary_for_item(item_id)
+        # Get current image to check if it's already primary
+        image = await self.repository.get_by_id(image_id)
+        if not image:
+            raise ValueError(f"Image {image_id} not found")
 
-        # Set new primary
-        await self.repository.update(image_id, {"is_primary": True})
+        is_currently_primary = image.is_primary
 
-        return True
+        if is_currently_primary:
+            # If already primary, unset it
+            await self.repository.update(image_id, {"is_primary": False})
+            return False
+        else:
+            # If not primary, unset all other primaries and set this one
+            await self.repository.unset_primary_for_item(item_id)
+            await self.repository.update(image_id, {"is_primary": True})
+            return True
 
     async def get_item_images(self, item_id: str) -> list[dict]:
         """

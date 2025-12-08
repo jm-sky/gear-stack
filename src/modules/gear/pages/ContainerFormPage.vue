@@ -18,6 +18,7 @@ import { useGearSettings } from '../composables/useGearSettings'
 import { GearRoutePath } from '../routes'
 import { CONTAINER_COLORS } from '../utils/containerColors'
 import { recognizeContainerType } from '../utils/containerTypeRecognition'
+import { createNavigationQuery, getFrom } from '../utils/navigationParams'
 import { recognizeParameters } from '../utils/parameterRecognition'
 import { type ContainerFormData, containerSchema } from '../utils/validation'
 
@@ -200,7 +201,13 @@ const onSubmit = handleSubmit(async (data: ContainerFormData) => {
     if (isEditMode && containerId) {
       updateContainer(containerId, data as IUpdateContainerDto)
       toast.success(t('common.success'))
-      router.push(GearRoutePath.ContainerDetailById(containerId))
+      // Preserve 'from' parameter when navigating back to ContainerDetails
+      // This ensures the back button in ContainerHeader works correctly
+      const from = getFrom(route)
+      router.push({
+        path: GearRoutePath.ContainerDetailById(containerId),
+        query: createNavigationQuery(undefined, from),
+      })
     } else {
       const newContainer = await createContainer(data as ICreateContainerDto)
       toast.success(t('common.success'))

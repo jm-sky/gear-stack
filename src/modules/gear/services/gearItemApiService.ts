@@ -27,6 +27,13 @@ export class GearItemApiService implements IGearItemService {
     return response.data
   }
 
+  async getAllItems(skip = 0, limit = 100): Promise<IGearItem[]> {
+    const response = await apiClient.get<IGearItem[]>('/gear/items', {
+      params: { skip, limit },
+    })
+    return response.data
+  }
+
   async getItem(itemId: TULID): Promise<IGearItem> {
     const response = await apiClient.get<IGearItem>(`/gear/items/${itemId}`)
     return response.data

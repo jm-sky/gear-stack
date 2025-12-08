@@ -17,6 +17,7 @@ from .repository import GearRepository
 from .schemas import (
     BatchOrderUpdateRequest,
     ContainerCreate,
+    ContainerInfo,
     ContainerResponse,
     ContainerUpdate,
     GlobalCatalogueItemCreate,
@@ -68,16 +69,33 @@ class GearService:
         self._image_repository = ItemImageRepository(repository.db)
         self._storage = get_storage_adapter()
 
-    def _map_item_to_response(self, item: GearItemDB, primary_image_url: str | None = None) -> ItemResponse:
+    def _map_item_to_response(
+        self,
+        item: GearItemDB,
+        primary_image_url: str | None = None,
+        container: GearContainerDB | None = None,
+    ) -> ItemResponse:
         """Map database item to response schema.
 
         Args:
             item: Database item model
             primary_image_url: Optional primary image URL for the item
+            container: Optional container model (if not provided, will try to use item.container)
 
         Returns:
             Item response schema
         """
+        # Use provided container or fallback to item.container if available
+        container_obj = container or (item.container if hasattr(item, "container") and item.container else None)
+        container_info = None
+        if container_obj:
+            container_info = ContainerInfo(
+                id=container_obj.id,
+                name=container_obj.name,
+                type=container_obj.type,
+                color=cast(ContainerColor | None, container_obj.color),
+            )
+
         # Cast database string fields to their Literal types
         return ItemResponse(
             id=item.id,
@@ -90,7 +108,8 @@ class GearService:
             expirationDate=item.expiration_date,
             priority=cast(Priority, item.priority),
             status=cast(ItemStatus, item.status),
-            containerId=item.nested_container_id,
+            containerId=item.nested_container_id,  # Reference to nested container if item is a container
+            container=container_info,  # Information about parent container where item is located
             price=item.price,
             currency=item.currency,
             url=item.url,
@@ -131,8 +150,8 @@ class GearService:
             url = await self._storage.get_url(image.file_path)
             image_urls[item_id] = url
 
-        # Map items to responses with primary image URLs
-        items = [self._map_item_to_response(item, image_urls.get(item.id)) for item in container_items]
+        # Map items to responses with primary image URLs and container information
+        items = [self._map_item_to_response(item, image_urls.get(item.id), container=container) for item in container_items]
 
         # Map rating fields if provided
         owner_rating = None
@@ -199,8 +218,8 @@ class GearService:
             url = await self._storage.get_url(image.file_path)
             image_urls[item_id] = url
 
-        # Map items to responses with primary image URLs
-        items = [self._map_item_to_response(item, image_urls.get(item.id)) for item in container_items]
+        # Map items to responses with primary image URLs and container information
+        items = [self._map_item_to_response(item, image_urls.get(item.id), container=container) for item in container_items]
 
         # Filter nested containers - only show items if nested container is public
         filtered_items = []
@@ -512,7 +531,9 @@ class GearService:
             else:
                 primary_image_url = await self._storage.get_url(primary_image.file_path)
 
-        return self._map_item_to_response(item, primary_image_url)
+        # Load container for the created item
+        container = await self.repository.get_container(container_id, user_id)
+        return self._map_item_to_response(item, primary_image_url, container=container)
 
     async def get_item(self, item_id: str, user_id: str) -> ItemResponse | None:
         """Get an item by ID.
@@ -522,7 +543,7 @@ class GearService:
             user_id: Owner user ID
 
         Returns:
-            Item response if found, None otherwise
+            Item response if found, None otherwise (with container information)
         """
         item = await self.repository.get_item(item_id, user_id)
         if not item:
@@ -538,7 +559,8 @@ class GearService:
             else:
                 primary_image_url = await self._storage.get_url(primary_image.file_path)
 
-        return self._map_item_to_response(item, primary_image_url)
+        # Container is already loaded via joinedload in repository.get_item
+        return self._map_item_to_response(item, primary_image_url, container=item.container)
 
     async def get_items(self, container_id: str, user_id: str, skip: int = 0, limit: int = 100) -> list[ItemResponse]:
         """Get all items in a container.
@@ -550,7 +572,7 @@ class GearService:
             limit: Maximum number of records to return
 
         Returns:
-            List of item responses with primary image URLs
+            List of item responses with primary image URLs and container information
         """
         items = await self.repository.get_items(container_id, user_id, skip, limit)
 
@@ -564,8 +586,36 @@ class GearService:
             url = await self._storage.get_url(image.file_path)
             image_urls[item_id] = url
 
-        # Map items to responses with primary image URLs
-        return [self._map_item_to_response(item, image_urls.get(item.id)) for item in items]
+        # Map items to responses with primary image URLs and container information
+        # Container is already loaded via joinedload in repository.get_items
+        return [self._map_item_to_response(item, image_urls.get(item.id), container=item.container) for item in items]
+
+    async def get_all_items(self, user_id: str, skip: int = 0, limit: int = 100) -> list[ItemResponse]:
+        """Get all items for a user across all containers.
+
+        Args:
+            user_id: Owner user ID
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+
+        Returns:
+            List of item responses with primary image URLs and container information
+        """
+        items = await self.repository.get_all_items(user_id, skip, limit)
+
+        # Batch fetch primary images for all items
+        item_ids = [item.id for item in items]
+        primary_images = await self._image_repository.get_primary_images_by_items(item_ids)
+
+        # Get URLs for all primary images
+        image_urls: dict[str, str] = {}
+        for item_id, image in primary_images.items():
+            url = await self._storage.get_url(image.file_path)
+            image_urls[item_id] = url
+
+        # Map items to responses with primary image URLs and container information
+        # Container is already loaded via joinedload in repository.get_all_items
+        return [self._map_item_to_response(item, image_urls.get(item.id), container=item.container) for item in items]
 
     async def update_item(self, item_id: str, user_id: str, data: ItemUpdate) -> ItemResponse | None:
         """Update a gear item.
@@ -592,7 +642,8 @@ class GearService:
             else:
                 primary_image_url = await self._storage.get_url(primary_image.file_path)
 
-        return self._map_item_to_response(item, primary_image_url)
+        # Container is already loaded via get_item in repository.update_item
+        return self._map_item_to_response(item, primary_image_url, container=item.container)
 
     async def delete_item(self, item_id: str, user_id: str) -> bool:
         """Delete a gear item.

@@ -51,13 +51,16 @@ export function getAllItems(containers: IGearContainer[], excludeContainerId?: T
 
     // Add regular items from container
     container.items.forEach(item => {
+      // Use container data from API if available, otherwise fallback to local container
+      const containerInfo = item.container
       allItems.push({
         id: item.id,
         name: item.name,
         category: item.category,
         containerId: container.id,
-        containerName: container.name,
-        containerColor: container.color ?? 'default',
+        containerName: containerInfo?.name ?? container.name,
+        containerColor: containerInfo?.color ?? container.color ?? 'default',
+        containerType: containerInfo?.type ?? container.type, // Add container type for regular items
         quantity: item.quantity,
         weight: item.weight,
         weightUnit: item.weightUnit ?? config.defaults.preferredWeightUnit,

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { CalendarPlus, CalendarSync, ExternalLink, Link2, RefreshCcw } from 'lucide-vue-next'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
@@ -15,6 +15,7 @@ import { GearRoutePath } from '../routes'
 import { getActionIcon } from '../utils/actionIcons'
 import { formatWeight } from '../utils/formatWeight'
 import { isSet } from '../utils/helpers'
+import { getFrom } from '../utils/navigationParams'
 import CloneContainerDialog from './CloneContainerDialog.vue'
 import ContainerHeaderName from './ContainerHeaderName.vue'
 import ContainerHeaderStats from './ContainerHeaderStats.vue'
@@ -55,12 +56,22 @@ const emit = defineEmits<{
   refresh: []
 }>()
 
+const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 const { canUseAi } = useAi()
 const { shouldUseAPI } = useBackend()
 
 const isCloneDialogOpen = ref(false)
+
+const backTo = computed<string>(() => {
+  const from = getFrom(route)
+  if (from === 'all-items') {
+    return GearRoutePath.AllItems
+  }
+  // Domyślnie wracamy do ContainersList
+  return GearRoutePath.Containers
+})
 
 const handleEdit = () => {
   router.push(GearRoutePath.ContainerEditById(props.container.id))
@@ -95,7 +106,7 @@ const handleExportToCSV = () => {
 }
 
 const handleBack = () => {
-  router.push(GearRoutePath.Containers)
+  router.push(backTo.value)
 }
 </script>
 

@@ -81,14 +81,15 @@ class ItemImageApiService {
   }
 
   /**
-   * Set image as primary for item
+   * Toggle primary status for image (set if not primary, unset if already primary)
    *
    * @param itemId - Item ID
-   * @param imageId - Image ID to set as primary
-   * @returns void
+   * @param imageId - Image ID to toggle primary status
+   * @returns True if image is now primary, False if it was unset
    */
-  async setPrimaryImage(itemId: TUUID, imageId: TUUID): Promise<void> {
-    await apiClient.put(`/gear/items/${itemId}/images/${imageId}/primary`)
+  async togglePrimaryImage(itemId: TUUID, imageId: TUUID): Promise<boolean> {
+    const response = await apiClient.put<{ is_primary: boolean }>(`/gear/items/${itemId}/images/${imageId}/primary`)
+    return response.data.is_primary
   }
 }
 

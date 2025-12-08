@@ -116,27 +116,30 @@ async def reorder_item_images(
 
 
 @router.put("/{item_id}/images/{image_id}/primary")
-async def set_primary_image(
+async def toggle_primary_image(
     item_id: str,
     image_id: str,
     current_user: PremiumOrHigherUser,
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """
-    Set image as primary for item (admin only).
+    Toggle primary status for image (set if not primary, unset if already primary).
 
     Args:
         item_id: Item ID
-        image_id: Image ID to set as primary
+        image_id: Image ID to toggle primary status
         current_user: Current authenticated admin user
         db: Database session
 
     Returns:
-        Success message
+        Success message with is_primary status
     """
     service = ImageUploadService(db)
-    await service.set_primary_image(item_id, image_id)
-    return {"message": "Primary image set successfully"}
+    is_primary = await service.toggle_primary_image(item_id, image_id)
+    return {
+        "message": "Primary image toggled successfully",
+        "is_primary": is_primary,
+    }
 
 
 @router.post("/{item_id}/images/from-url", response_model=dict)

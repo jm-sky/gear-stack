@@ -342,6 +342,31 @@ async def get_items(
 
 
 @router.get(
+    "/items",
+    response_model=list[ItemResponse],
+    summary="Get all items for the current user",
+)
+async def get_all_items(
+    current_user: CurrentUser,
+    service: GearServiceDep,
+    skip: int = Query(0, ge=0, description="Number of records to skip"),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
+) -> list[ItemResponse]:
+    """Get all gear items for the current user across all containers.
+
+    Args:
+        current_user: Authenticated user
+        service: Gear service instance
+        skip: Number of records to skip
+        limit: Maximum number of records to return
+
+    Returns:
+        List of items
+    """
+    return await service.get_all_items(current_user.id, skip, limit)
+
+
+@router.get(
     "/items/{item_id}",
     response_model=ItemResponse,
     summary="Get an item by ID",

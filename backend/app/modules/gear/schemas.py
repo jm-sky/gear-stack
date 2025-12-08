@@ -95,6 +95,17 @@ class ContainerUpdate(BaseModel):
     model_config = {"populate_by_name": True}
 
 
+class ContainerInfo(BaseModel):
+    """Minimal container information included in item responses."""
+
+    id: str
+    name: str
+    type: GearContainerType
+    color: ContainerColor | None = None
+
+    model_config = {"from_attributes": True, "populate_by_name": True}
+
+
 class ItemResponse(BaseModel):
     """Schema for gear item response."""
 
@@ -109,6 +120,7 @@ class ItemResponse(BaseModel):
     priority: GearItemPriority
     status: GearItemStatus
     containerId: str | None = Field(None, alias="containerId")
+    container: ContainerInfo | None = None  # Container information (id, name, type, color)
     price: float | None = None
     currency: str | None = None
     url: str | None = None

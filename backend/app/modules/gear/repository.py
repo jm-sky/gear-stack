@@ -320,7 +320,10 @@ class GearRepository(SearchMixin):
         self.db.add(item)
         await self.db.commit()
         await self.db.refresh(item)
-        return item
+        # Reload container relationship after refresh
+        reload_stmt = select(GearItemDB).where(GearItemDB.id == item.id).options(joinedload(GearItemDB.container))
+        reload_result = await self.db.execute(reload_stmt)
+        return reload_result.unique().scalar_one()
 
     async def get_item(self, item_id: str, user_id: str) -> GearItemDB | None:
         """Get an item by ID for a specific user.
@@ -330,11 +333,11 @@ class GearRepository(SearchMixin):
             user_id: Owner user ID
 
         Returns:
-            Item if found, None otherwise
+            Item if found, None otherwise (with container relationship loaded)
         """
-        stmt = select(GearItemDB).join(GearContainerDB, GearItemDB.container_id == GearContainerDB.id).where(and_(GearItemDB.id == item_id, GearContainerDB.user_id == user_id))
+        stmt = select(GearItemDB).join(GearContainerDB, GearItemDB.container_id == GearContainerDB.id).where(and_(GearItemDB.id == item_id, GearContainerDB.user_id == user_id)).options(joinedload(GearItemDB.container))
         result = await self.db.execute(stmt)
-        return result.scalar_one_or_none()
+        return result.unique().scalar_one_or_none()
 
     async def get_items(self, container_id: str, user_id: str, skip: int = 0, limit: int = 100) -> Sequence[GearItemDB]:
         """Get all items in a container.
@@ -346,7 +349,7 @@ class GearRepository(SearchMixin):
             limit: Maximum number of records to return
 
         Returns:
-            List of items
+            List of items (with container relationship loaded)
         """
         # Verify container belongs to user
         container = await self.get_container(container_id, user_id)
@@ -354,9 +357,35 @@ class GearRepository(SearchMixin):
             return []
 
         # Sort by order (nulls last), then by created_at
-        stmt = select(GearItemDB).where(GearItemDB.container_id == container_id).offset(skip).limit(limit).order_by(GearItemDB.order.asc().nulls_last(), GearItemDB.created_at.desc())
+        # Load container relationship for each item
+        stmt = select(GearItemDB).where(GearItemDB.container_id == container_id).options(joinedload(GearItemDB.container)).offset(skip).limit(limit).order_by(GearItemDB.order.asc().nulls_last(), GearItemDB.created_at.desc())
         result = await self.db.execute(stmt)
-        return result.scalars().all()
+        return result.unique().scalars().all()
+
+    async def get_all_items(self, user_id: str, skip: int = 0, limit: int = 100) -> Sequence[GearItemDB]:
+        """Get all items for a user across all containers.
+
+        Args:
+            user_id: Owner user ID
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+
+        Returns:
+            List of items (with container relationship loaded)
+        """
+        # Join with containers to filter by user_id
+        # Load container relationship for each item
+        stmt = (
+            select(GearItemDB)
+            .join(GearContainerDB, GearItemDB.container_id == GearContainerDB.id)
+            .where(GearContainerDB.user_id == user_id)
+            .options(joinedload(GearItemDB.container))
+            .offset(skip)
+            .limit(limit)
+            .order_by(GearItemDB.order.asc().nulls_last(), GearItemDB.created_at.desc())
+        )
+        result = await self.db.execute(stmt)
+        return result.unique().scalars().all()
 
     async def update_item(self, item_id: str, user_id: str, data: ItemUpdate) -> GearItemDB | None:
         """Update a gear item and propagate changes to all linked items.
@@ -430,6 +459,10 @@ class GearRepository(SearchMixin):
         await self.db.commit()
         if updated_item:
             await self.db.refresh(updated_item)
+            # Reload container relationship after refresh
+            reload_stmt = select(GearItemDB).where(GearItemDB.id == updated_item.id).options(joinedload(GearItemDB.container))
+            reload_result = await self.db.execute(reload_stmt)
+            updated_item = reload_result.unique().scalar_one()
         return updated_item
 
     async def delete_item(self, item_id: str, user_id: str) -> bool:

@@ -22,7 +22,7 @@ const props = defineProps<{
 
 const { t } = useI18n()
 const { handleError } = useHandleError()
-const { deleteImage: deleteImageWithUpdate, setPrimaryImage: setPrimaryImageWithUpdate, uploadImage: uploadImageWithUpdate } = useItemImage()
+const { deleteImage: deleteImageWithUpdate, togglePrimaryImage: togglePrimaryImageWithUpdate, uploadImage: uploadImageWithUpdate } = useItemImage()
 
 const images = ref<IItemImage[]>([])
 const draggedImages = ref<IItemImage[]>([]) // Separate state for drag operations
@@ -140,22 +140,20 @@ async function deleteImage(imageId: TUUID) {
   }
 }
 
-async function setPrimary(imageId: TUUID) {
-  // Check if image is already primary - if so, do nothing
-  const image = images.value.find(img => img.id === imageId)
-  if (image?.isPrimary) {
-    // Already primary, no need to do anything
-    return
-  }
-
+async function togglePrimary(imageId: TUUID) {
   try {
     // Use composable that updates both API and Pinia store
-    await setPrimaryImageWithUpdate(props.itemId, imageId)
+    const isPrimary = await togglePrimaryImageWithUpdate(props.itemId, imageId)
+    // Update local state
     images.value = images.value.map(img => ({
       ...img,
-      isPrimary: img.id === imageId,
+      isPrimary: img.id === imageId ? isPrimary : false,
     }))
-    toast.success(t('gear.fileUpload.imageGallery.messages.primarySuccess'))
+    if (isPrimary) {
+      toast.success(t('gear.fileUpload.imageGallery.messages.primarySuccess'))
+    } else {
+      toast.success(t('gear.fileUpload.imageGallery.messages.primaryUnset'))
+    }
   } catch (error: unknown) {
     console.error(error)
     handleError(error)
@@ -358,7 +356,7 @@ onMounted(() => {
         @dragleave="handleDragLeave"
         @dragstart="handleDragStart"
         @preview="handleImagePreview"
-        @set-primary="setPrimary"
+        @toggle-primary="togglePrimary"
         @delete="deleteImage"
         @image-error="handleImageError"
       />

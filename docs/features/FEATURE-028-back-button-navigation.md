@@ -98,47 +98,108 @@ const handleBack = () => {
 
 **Lokalizacja:** `src/modules/gear/components/ContainerHeader.vue`  
 **Użycie:** Wyświetlany na stronie `ContainerDetailPage`  
-**Metoda nawigacji:** `router.back()` ⚠️ **Wymaga poprawki**
+**Metoda nawigacji:** Explicit navigation do `GearRoutePath.Containers` ⚠️ **Wymaga poprawki**
 
 **Obecna logika nawigacji:**
-```typescript
-@click="router.back()"
-```
-
-**Problemy z obecnym podejściem:**
-- `ContainerDetailPage` może być otwarty z różnych miejsc:
-  - `ContainersList` (główna lista)
-  - `AllItemsPage` (kliknięcie w kontener)
-  - `ContainerFormPage` (po zapisie edycji)
-  - `ContainerShareTokensPage` (po zarządzaniu tokenami)
-  - Bezpośrednie linki (zakładki, emaile)
-- `router.back()` może nie działać poprawnie w niektórych scenariuszach
-- Po zapisie edycji kontenera, historia przeglądarki może być skomplikowana
-
-**Proponowana poprawka:**
 ```typescript
 const handleBack = () => {
   router.push(GearRoutePath.Containers)
 }
 ```
 
+**Problemy z obecnym podejściem:**
+- `ContainerDetailPage` może być otwarty z różnych miejsc:
+  - `ContainersList` (główna lista) → oczekiwane: powrót do `ContainersList` ✅
+  - `AllItemsPage` (kliknięcie w kontener) → oczekiwane: powrót do `AllItemsPage` ❌ (obecnie wraca do `ContainersList`)
+  - `ContainerFormPage` (po zapisie edycji) → oczekiwane: powrót do poprzedniej strony ❌ (obecnie wraca do `ContainersList`)
+  - `ContainerShareTokensPage` (po zarządzaniu tokenami) → oczekiwane: powrót do `ContainerDetailPage` ✅
+  - Bezpośrednie linki (zakładki, emaile) → oczekiwane: powrót do `ContainersList` ✅
+- Obecna implementacja zawsze nawiguje do `ContainersList`, co nie uwzględnia kontekstu nawigacji
+- Użytkownik przychodzący z `AllItemsPage` oczekuje powrotu do `AllItemsPage`, a nie do `ContainersList`
+
+**Przypadek użycia - problem:**
+1. Użytkownik otwiera `/gear/items` (AllItemsPage)
+2. Wybiera na liście kontener → otwiera się `/gear/01KBYM0E0D3STQ8Z279HMDQWKB` (ContainerDetailPage)
+3. Klika "Edytuj" → otwiera się `/gear/01KBYM0E0D3STQ8Z279HMDQWKB/edit` (ContainerFormPage)
+4. Klika "Zapisz" → otwiera się znowu `/gear/01KBYM0E0D3STQ8Z279HMDQWKB` (ContainerDetailPage)
+5. Klika "Wstecz" → otwiera się `/gear` (ContainersList) ❌
+   - **Oczekiwane:** `/gear/items` (AllItemsPage) ✅
+
+**Proponowana poprawka - użycie parametru `from`:**
+
+Podobnie jak w `ItemHeader.vue`, użyjemy parametru `from` z query string do określenia źródła nawigacji:
+
+```typescript
+import { useRoute } from 'vue-router'
+import { getFrom } from '../utils/navigationParams'
+import { GearRoutePath } from '../routes'
+
+const route = useRoute()
+
+const backTo = computed<string>(() => {
+  const from = getFrom(route)
+  if (from === 'all-items') {
+    return GearRoutePath.AllItems
+  }
+  // Domyślnie wracamy do ContainersList
+  return GearRoutePath.Containers
+})
+
+const handleBack = () => {
+  router.push(backTo.value)
+}
+```
+
+**Wymagane zmiany w innych miejscach:**
+
+1. **AllItemsPage.vue** - dodać parametr `from='all-items'` przy nawigacji do `ContainerDetailPage`:
+   ```typescript
+   // Linia 355: gdy klikamy na kontener w kolumnie name
+   :to="row.original.isContainer 
+     ? { path: GearRoutePath.ContainerDetailById(row.original.id), query: createNavigationQuery(undefined, 'all-items') }
+     : { path: GearRoutePath.ItemDetailById(row.original.containerId, row.original.id), query: createNavigationQuery(undefined, 'all-items') }"
+   
+   // Linia 369: gdy klikamy na kontener w kolumnie container
+   :to="{ path: GearRoutePath.ContainerDetailById(row.original.containerId), query: createNavigationQuery(undefined, 'all-items') }"
+   ```
+
+2. **ContainerFormPage.vue** - zachować parametr `from` przy nawigacji po zapisie:
+   ```typescript
+   // Linia 203: po zapisie edycji kontenera
+   const from = getFrom(route)
+   router.push({
+     path: GearRoutePath.ContainerDetailById(containerId),
+     query: createNavigationQuery(undefined, from),
+   })
+   ```
+
+3. **ContainerHeader.vue** - użyć parametru `from` do określenia celu nawigacji (jak wyżej)
+
 **Uzasadnienie poprawki:**
-- Explicit navigation do `ContainersList` jest bardziej przewidywalne
-- Użytkownik zawsze wie, dokąd trafi po kliknięciu "Wróć"
+- Użycie parametru `from` jest spójne z rozwiązaniem używanym w `ItemHeader.vue`
+- Użytkownik zawsze wraca tam, skąd przyszedł (zachowanie zgodne z oczekiwaniami)
 - Działa poprawnie niezależnie od źródła nawigacji
-- Spójne z innymi komponentami używającymi explicit navigation
+- Parametr `from` jest zachowywany podczas nawigacji po zapisie edycji
 
 **Scenariusze po poprawce:**
 
 1. **ContainersList → ContainerDetails**
+   - Parametr `from`: `undefined` (domyślnie)
    - Przycisk "Wróć" → `ContainersList` ✅
 
 2. **AllItemsPage → ContainerDetails**
-   - Przycisk "Wróć" → `ContainersList` ✅
+   - Parametr `from`: `'all-items'` (ustawiany przez `AllItemsPage`)
+   - Przycisk "Wróć" → `AllItemsPage` ✅
 
-3. **ContainerDetails → Edit → Save → ContainerDetails**
-   - Po zapisie: nawigacja do `ContainerDetails` (nowy wpis w historii)
-   - Przycisk "Wróć" → `ContainersList` ✅ (zamiast powrotu do formularza edycji)
+3. **AllItemsPage → ContainerDetails → Edit → Save → ContainerDetails**
+   - Parametr `from`: `'all-items'` (zachowywany przez `ContainerFormPage`)
+   - Po zapisie: nawigacja do `ContainerDetails` z `from=all-items`
+   - Przycisk "Wróć" → `AllItemsPage` ✅
+
+4. **ContainerDetails → Edit → Save → ContainerDetails**
+   - Parametr `from`: `undefined` (domyślnie)
+   - Po zapisie: nawigacja do `ContainerDetails` bez parametru `from`
+   - Przycisk "Wróć" → `ContainersList` ✅
 
 #### 3. PublicContainerHeader.vue
 
@@ -368,6 +429,34 @@ async function navigateBackAndClean() {
 5. AllItemsPage ✅
 ```
 
+### Scenariusz 5: AllItemsPage → ContainerDetails → Edit → Save
+
+```
+1. AllItemsPage
+   ↓ (kliknięcie w kontener z from='all-items')
+2. ContainerDetails?from=all-items
+   ↓ (kliknięcie "Edytuj")
+3. ContainerEdit
+   ↓ (zapis - ContainerFormPage zachowuje from='all-items')
+4. ContainerDetails?from=all-items
+   ↓ (przycisk "Wróć")
+5. AllItemsPage ✅
+```
+
+### Scenariusz 6: ContainersList → ContainerDetails → Edit → Save
+
+```
+1. ContainersList
+   ↓ (kliknięcie w kontener)
+2. ContainerDetails
+   ↓ (kliknięcie "Edytuj")
+3. ContainerEdit
+   ↓ (zapis - ContainerFormPage bez parametru from)
+4. ContainerDetails
+   ↓ (przycisk "Wróć")
+5. ContainersList ✅
+```
+
 ## 🎓 Dlaczego nie `router.back()`?
 
 ### Problem z `router.back()`
@@ -413,31 +502,58 @@ async function navigateBackAndClean() {
 
 ### Proponowane poprawki
 
-#### 1. ContainerHeader.vue - zmiana z `router.back()` na explicit navigation
+#### 1. ContainerHeader.vue - zmiana na użycie parametru `from` (PRIORYTET)
 
 **Obecne zachowanie:**
-```typescript
-@click="router.back()"
-```
-
-**Proponowane zachowanie:**
 ```typescript
 const handleBack = () => {
   router.push(GearRoutePath.Containers)
 }
 ```
 
+**Proponowane zachowanie:**
+```typescript
+import { useRoute } from 'vue-router'
+import { getFrom } from '../utils/navigationParams'
+import { GearRoutePath } from '../routes'
+
+const route = useRoute()
+
+const backTo = computed<string>(() => {
+  const from = getFrom(route)
+  if (from === 'all-items') {
+    return GearRoutePath.AllItems
+  }
+  // Domyślnie wracamy do ContainersList
+  return GearRoutePath.Containers
+})
+
+const handleBack = () => {
+  router.push(backTo.value)
+}
+```
+
 **Uzasadnienie:**
 - `ContainerDetailPage` może być otwarty z różnych miejsc:
-  - `ContainersList` (główna lista)
-  - `AllItemsPage` (kliknięcie w kontener z listy wszystkich przedmiotów)
-  - `ContainerFormPage` (po zapisie edycji)
-  - `ContainerShareTokensPage` (po zarządzaniu tokenami)
-  - Bezpośrednie linki (zakładki, emaile)
-- Explicit navigation do `ContainersList` jest bardziej przewidywalne i spójne
-- Użytkownik zawsze wie, dokąd trafi po kliknięciu "Wróć"
+  - `ContainersList` (główna lista) → powrót do `ContainersList` ✅
+  - `AllItemsPage` (kliknięcie w kontener) → powrót do `AllItemsPage` ✅ (obecnie ❌)
+  - `ContainerFormPage` (po zapisie edycji) → powrót do poprzedniej strony ✅
+  - `ContainerShareTokensPage` (po zarządzaniu tokenami) → powrót do `ContainerDetailPage` ✅
+  - Bezpośrednie linki (zakładki, emaile) → powrót do `ContainersList` ✅
+- Użycie parametru `from` jest spójne z rozwiązaniem używanym w `ItemHeader.vue`
+- Użytkownik zawsze wraca tam, skąd przyszedł (zachowanie zgodne z oczekiwaniami)
+- Parametr `from` jest zachowywany podczas nawigacji po zapisie edycji
 
-**Alternatywa:** Można też użyć parametru `from` podobnie jak w `ItemHeader`, ale dla `ContainerHeader` explicit navigation do głównej listy jest prostsze i bardziej intuicyjne.
+**Wymagane zmiany w innych plikach:**
+
+1. **AllItemsPage.vue** - dodać parametr `from='all-items'` przy nawigacji do `ContainerDetailPage`:
+   - Linia 355: gdy klikamy na kontener w kolumnie `name`
+   - Linia 369: gdy klikamy na kontener w kolumnie `container`
+
+2. **ContainerFormPage.vue** - zachować parametr `from` przy nawigacji po zapisie:
+   - Linia 203: po zapisie edycji kontenera
+
+**Status:** ⚠️ **Wymaga implementacji** - zidentyfikowany problem w scenariuszu użycia
 
 #### 2. PublicContainerHeader.vue - już dobrze zaimplementowane
 
@@ -460,13 +576,77 @@ Wszystkie pozostałe komponenty używają explicit navigation, co jest poprawne:
 - ✅ Parametr `from` jest zachowywany podczas nawigacji po zapisie edycji
 - ✅ `navigateBackAndClean()` zachowuje parametr `from` przy nawigacji do ItemDetails
 - ✅ Wszystkie scenariusze nawigacji działają poprawnie
+- ⚠️ Przycisk "Wróć" w `ContainerHeader` nawiguje poprawnie we wszystkich scenariuszach (wymaga implementacji)
+- ⚠️ Parametr `from` jest przekazywany z `AllItemsPage` do `ContainerDetailPage` (wymaga implementacji)
+- ⚠️ Parametr `from` jest zachowywany przez `ContainerFormPage` przy nawigacji po zapisie (wymaga implementacji)
 
 ## 📝 Pliki związane
 
-- `src/modules/gear/components/ItemHeader.vue` - implementacja przycisku "Wróć"
-- `src/modules/gear/components/ContainerHeader.vue` - implementacja przycisku "Wróć" (używa `router.back()`)
+- `src/modules/gear/components/ItemHeader.vue` - implementacja przycisku "Wróć" ✅
+- `src/modules/gear/components/ContainerHeader.vue` - implementacja przycisku "Wróć" ⚠️ (wymaga poprawki - użycie parametru `from`)
+- `src/modules/gear/pages/AllItemsPage.vue` - nawigacja do `ContainerDetailPage` ⚠️ (wymaga dodania parametru `from='all-items'`)
+- `src/modules/gear/pages/ContainerFormPage.vue` - nawigacja po zapisie ⚠️ (wymaga zachowania parametru `from`)
 - `src/modules/gear/composables/useNavigationReturn.ts` - logika nawigacji po zapisie
 - `src/modules/gear/utils/navigationParams.ts` - helper functions do zarządzania parametrami
+
+## 📌 Uwagi i przypadki użycia
+
+### Zidentyfikowany problem
+
+**Scenariusz:**
+1. Użytkownik otwiera `/gear/items` (AllItemsPage)
+2. Wybiera na liście kontener → otwiera się `/gear/01KBYM0E0D3STQ8Z279HMDQWKB` (ContainerDetailPage)
+3. Klika "Edytuj" → otwiera się `/gear/01KBYM0E0D3STQ8Z279HMDQWKB/edit` (ContainerFormPage)
+4. Klika "Zapisz" → otwiera się znowu `/gear/01KBYM0E0D3STQ8Z279HMDQWKB` (ContainerDetailPage)
+5. Klika "Wstecz" → otwiera się `/gear` (ContainersList) ❌
+   - **Oczekiwane:** `/gear/items` (AllItemsPage) ✅
+
+**Przyczyna:**
+- `ContainerHeader.vue` zawsze nawiguje do `GearRoutePath.Containers` niezależnie od źródła nawigacji
+- `AllItemsPage.vue` nie przekazuje parametru `from='all-items'` przy nawigacji do `ContainerDetailPage`
+- `ContainerFormPage.vue` nie zachowuje parametru `from` przy nawigacji po zapisie
+
+**Rozwiązanie:**
+Użycie parametru `from` podobnie jak w `ItemHeader.vue`:
+1. `AllItemsPage.vue` - dodać parametr `from='all-items'` przy nawigacji do `ContainerDetailPage`
+2. `ContainerFormPage.vue` - zachować parametr `from` przy nawigacji po zapisie
+3. `ContainerHeader.vue` - użyć parametru `from` do określenia celu nawigacji
+
+### Inne przypadki użycia do rozważenia
+
+1. **Nawigacja z ContainerShareTokensPage:**
+   - Obecnie: `ContainerShareTokensPage` zawsze wraca do `ContainerDetailPage`
+   - Czy powinien zachowywać parametr `from`? → **Nie**, ponieważ jest to strona pomocnicza, zawsze wraca do kontenera
+
+2. **Nawigacja z bezpośrednich linków:**
+   - Obecnie: bez parametru `from` → powrót do `ContainersList`
+   - Czy to jest poprawne? → **Tak**, domyślne zachowanie jest intuicyjne
+
+3. **Nawigacja z ContainersList:**
+   - Obecnie: bez parametru `from` → powrót do `ContainersList`
+   - Czy to jest poprawne? → **Tak**, zgodne z oczekiwaniami
+
+## 🔧 Plan implementacji
+
+### Krok 1: Aktualizacja `AllItemsPage.vue`
+- Dodać parametr `from='all-items'` przy nawigacji do `ContainerDetailPage` (linie 355 i 369)
+- Użyć `createNavigationQuery(undefined, 'all-items')` podobnie jak przy nawigacji do `ItemDetailPage`
+
+### Krok 2: Aktualizacja `ContainerFormPage.vue`
+- Pobrać parametr `from` z route przed nawigacją po zapisie
+- Przekazać parametr `from` w query string przy nawigacji do `ContainerDetailPage`
+- Użyć `createNavigationQuery(undefined, from)` do zachowania parametru
+
+### Krok 3: Aktualizacja `ContainerHeader.vue`
+- Dodać import `useRoute` i `getFrom` z `navigationParams.ts`
+- Utworzyć computed `backTo` podobnie jak w `ItemHeader.vue`
+- Zmienić `handleBack` aby używał `backTo.value` zamiast hardcoded `GearRoutePath.Containers`
+
+### Krok 4: Testowanie
+- Przetestować scenariusz: AllItemsPage → ContainerDetails → Edit → Save → Back
+- Przetestować scenariusz: ContainersList → ContainerDetails → Edit → Save → Back
+- Przetestować scenariusz: AllItemsPage → ContainerDetails → Back
+- Przetestować scenariusz: ContainersList → ContainerDetails → Back
 
 ## 🔗 Powiązane dokumenty
 

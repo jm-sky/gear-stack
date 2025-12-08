@@ -20,7 +20,7 @@ const emit = defineEmits<{
   dragleave: [event: DragEvent, index: number]
   dragend: []
   preview: [imageId: TUUID]
-  setPrimary: [imageId: TUUID]
+  togglePrimary: [imageId: TUUID]
   delete: [imageId: TUUID]
   imageError: [imageId: TUUID]
 }>()
@@ -106,7 +106,7 @@ function handleImageError() {
       v-if="editable"
       :class="isDragging ? 'pointer-events-none' : ''"
       :image
-      @set-primary="emit('setPrimary', $event)"
+      @toggle-primary="emit('togglePrimary', $event)"
       @delete="emit('delete', $event)"
     />
 

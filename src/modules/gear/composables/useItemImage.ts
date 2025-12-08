@@ -85,14 +85,14 @@ export function useItemImage() {
   }
 
   /**
-   * Set image as primary for item and update primaryImageUrl
+   * Toggle primary status for image and update primaryImageUrl
    *
    * @param itemId - Item ID
-   * @param imageId - Image ID to set as primary
-   * @returns void
+   * @param imageId - Image ID to toggle primary status
+   * @returns True if image is now primary, False if it was unset
    */
-  async function setPrimaryImage(itemId: TUUID, imageId: TUUID): Promise<void> {
-    // Get the image details before setting as primary
+  async function togglePrimaryImage(itemId: TUUID, imageId: TUUID): Promise<boolean> {
+    // Get the image details before toggling
     const images = await itemImageApiService.getImages(itemId)
     const image = images.find(img => img.id === imageId)
 
@@ -100,11 +100,13 @@ export function useItemImage() {
       throw new Error('Image not found')
     }
 
-    // Set as primary on backend
-    await itemImageApiService.setPrimaryImage(itemId, imageId)
+    // Toggle primary status on backend
+    const isPrimary = await itemImageApiService.togglePrimaryImage(itemId, imageId)
 
-    // Update item's primaryImageUrl
-    await updateItem(itemId, { primaryImageUrl: image.url })
+    // Update item's primaryImageUrl (null if unset, image.url if set)
+    await updateItem(itemId, { primaryImageUrl: isPrimary ? image.url : null })
+
+    return isPrimary
   }
 
   /**
@@ -122,7 +124,7 @@ export function useItemImage() {
     uploadImage,
     uploadImageFromUrl,
     deleteImage,
-    setPrimaryImage,
+    togglePrimaryImage,
     reorderImages,
   }
 }

@@ -85,6 +85,14 @@ export const GEAR_ITEM_CATEGORIES: TGearItemCategory[] = [
 // Constants for item qualities
 export const GEAR_ITEM_QUALITIES: TGearItemQuality[] = ['low', 'medium', 'high']
 
+// Container information included in item responses
+export interface IContainerInfo {
+  id: TUUID
+  name: string
+  type: TGearContainerType
+  color?: TContainerColor | null
+}
+
 // Pojedynczy przedmiot
 export interface IGearItem {
   id: TUUID
@@ -100,6 +108,7 @@ export interface IGearItem {
   priority: TGearItemPriority
   status: TGearItemStatus
   containerId?: TUUID | null // Reference to a nested container (if this item is a container)
+  container?: IContainerInfo | null // Information about parent container where item is located (from API)
   // Extended fields
   price?: number | null // Price in currency (optional)
   currency?: string | null // Currency code (PLN, USD, EUR, GBP, etc.)
