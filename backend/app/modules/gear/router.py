@@ -85,11 +85,19 @@ async def get_optional_user(
         return None
     try:
         from app.modules.auth.dependencies import _verify_user_token
+        from app.core.redis import get_redis_client
+        from app.core.config import settings
+        from app.core.auth.token_blacklist import TokenBlacklistService
 
         token = credentials.credentials
         if user_repository is None:
             return None
-        return await _verify_user_token(token, user_repository, None)
+
+        # Get blacklist service
+        redis_client = await get_redis_client()
+        blacklist_service = TokenBlacklistService(redis_client=redis_client, key_prefix=settings.redis.token_blacklist_prefix)
+
+        return await _verify_user_token(token, user_repository, blacklist_service, None)
     except Exception:
         # If authentication fails, return None (endpoint is public)
         return None

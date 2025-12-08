@@ -5,6 +5,9 @@ from typing import Annotated, Any, Union
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+from app.core.auth.dependencies import get_token_blacklist_service
+from app.core.auth.token_blacklist import TokenBlacklistService
+
 from .service import AuthService
 from .types.repository import UserRepositoryInterface
 from .auth_utils import verify_token
@@ -65,14 +68,24 @@ def get_auth_service(
 async def _verify_user_token(
     token: str,
     user_repository: UserRepositoryInterface,
+    blacklist_service: TokenBlacklistService,
     two_factor_repository: Any = None,
 ) -> User:
     """
     Verify JWT token and return authenticated user.
 
     SECURITY: Enforces 2FA verification if user has 2FA enabled.
+    SECURITY: Checks if token is blacklisted (revoked after logout or account deletion).
     """
     try:
+        # SECURITY: Check if token is blacklisted
+        if await blacklist_service.is_blacklisted(token):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token has been revoked",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
         payload = verify_token(token)
 
         # Verify token type
@@ -176,14 +189,27 @@ async def _verify_user_token(
 async def get_current_user(
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
     user_repository: Annotated[UserRepositoryInterface, Depends(get_user_repository)],
+    blacklist_service: Annotated[TokenBlacklistService, Depends(get_token_blacklist_service)],
     two_factor_repository: Any = (Depends(lambda: None) if not HAS_2FA else Depends(get_two_factor_repository)),
 ) -> User:
-    """Get current user with optional 2FA verification check."""
+    """Get current user with optional 2FA verification check and blacklist validation."""
     token = credentials.credentials
     if HAS_2FA and two_factor_repository is not None:
-        return await _verify_user_token(token, user_repository, two_factor_repository)
+        return await _verify_user_token(token, user_repository, blacklist_service, two_factor_repository)
     else:
-        return await _verify_user_token(token, user_repository, None)
+        return await _verify_user_token(token, user_repository, blacklist_service, None)
+
+
+def get_current_token(credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)]) -> str:
+    """Extract JWT token from Authorization header.
+
+    Args:
+        credentials: HTTP Bearer credentials
+
+    Returns:
+        JWT token string (without "Bearer " prefix)
+    """
+    return credentials.credentials
 
 
 async def require_admin(

@@ -616,6 +616,55 @@ class AISettings(BaseSettings):
         return False
 
 
+class RedisSettings(BaseSettings):
+    """Redis configuration for token blacklist and challenge storage."""
+
+    model_config = _base_config
+
+    url: str = Field(
+        default="redis://localhost:6379/0",
+        validation_alias="REDIS_URL",
+        description="Redis connection URL",
+    )
+    token_blacklist_prefix: str = Field(
+        default="blacklist:token:",
+        validation_alias="REDIS_TOKEN_BLACKLIST_PREFIX",
+        description="Redis key prefix for token blacklist",
+    )
+    webauthn_challenge_prefix: str = Field(
+        default="webauthn:challenge:",
+        validation_alias="REDIS_WEBAUTHN_CHALLENGE_PREFIX",
+        description="Redis key prefix for WebAuthn challenges",
+    )
+    webauthn_challenge_ttl: int = Field(
+        default=300,
+        validation_alias="REDIS_WEBAUTHN_CHALLENGE_TTL",
+        description="WebAuthn challenge TTL in seconds (default: 5 minutes)",
+    )
+
+
+class WebAuthnSettings(BaseSettings):
+    """WebAuthn configuration."""
+
+    model_config = _base_config
+
+    rp_id: str = Field(
+        default="localhost",
+        validation_alias="WEBAUTHN_RP_ID",
+        description="WebAuthn Relying Party ID (domain)",
+    )
+    rp_name: str = Field(
+        default="Gear Stack",
+        validation_alias="WEBAUTHN_RP_NAME",
+        description="WebAuthn Relying Party Name",
+    )
+    origin: str = Field(
+        default="http://localhost:5176",
+        validation_alias="WEBAUTHN_ORIGIN",
+        description="WebAuthn expected origin (frontend URL)",
+    )
+
+
 class Settings(BaseSettings):
     """
     Main application settings composed of nested configuration classes.
@@ -639,6 +688,8 @@ class Settings(BaseSettings):
     storage: StorageSettings = Field(default_factory=StorageSettings)
     sentry: SentrySettings = Field(default_factory=SentrySettings)
     ai: AISettings = Field(default_factory=AISettings)
+    redis: RedisSettings = Field(default_factory=RedisSettings)
+    webauthn: WebAuthnSettings = Field(default_factory=WebAuthnSettings)
 
     # Legacy compatibility - still accessible at root level
     frontend_url: str = Field(

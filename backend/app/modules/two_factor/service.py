@@ -30,16 +30,17 @@ class TwoFactorService:
     services while providing a unified API for 2FA operations.
     """
 
-    def __init__(self, repository: TwoFactorRepositoryInterface):
+    def __init__(self, repository: TwoFactorRepositoryInterface, challenge_store: Any = None):
         """Initialize with repository and create service dependencies.
 
         Args:
             repository: Two-factor repository interface
+            challenge_store: WebAuthn challenge store (optional)
         """
         self.repository = repository
         # Composition: create specialized services
         self.totp = TotpService(repository)
-        self.webauthn = WebAuthnService(repository)
+        self.webauthn = WebAuthnService(repository, challenge_store)
 
     async def _get_or_create_user_settings(self, user_id: str) -> UserSettingsDB:
         """Get or create user settings.

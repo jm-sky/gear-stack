@@ -36,8 +36,12 @@ if TYPE_CHECKING:
     )
     from app.modules.auth.types.repository import UserRepositoryInterface
 
+from app.core.auth.dependencies import get_token_blacklist_service
+from app.core.auth.token_blacklist import TokenBlacklistService
+
+from .auth_utils import verify_token
 from .decorators import rate_limit, recaptcha_protected
-from .dependencies import AuthServiceDep, CurrentUser
+from .dependencies import AuthServiceDep, CurrentUser, get_current_token
 from .exceptions import (
     InvalidCredentialsError,
     InvalidTokenError,
@@ -197,14 +201,39 @@ async def refresh_token(token_data: TokenRefresh, auth_service: AuthServiceDep, 
     description="Logout current user",
     tags=["Authentication"],
 )
-async def logout(current_user: CurrentUser) -> MessageResponse:
+async def logout(
+    current_user: CurrentUser,
+    token: Annotated[str, Depends(get_current_token)],
+    blacklist: Annotated[TokenBlacklistService, Depends(get_token_blacklist_service)],
+) -> MessageResponse:
     """
-    Logout current user.
+    Logout current user by blacklisting the access token.
 
     Security features:
     - ✅ Authentication required (JWT token via CurrentUser)
-    - TODO: Invalidate token
+    - ✅ Token invalidation (blacklisted in Redis)
+
+    Note:
+        The token is blacklisted until its natural expiration.
+        Client should also delete refresh token.
     """
+    # Verify and extract payload to get expiration
+    payload = verify_token(token)
+    expires_at = payload.get("exp")
+
+    if not expires_at:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid token: missing expiration",
+        )
+
+    # Blacklist the token
+    await blacklist.blacklist_token(
+        token=token,
+        expires_at=expires_at,
+        reason="logout",
+    )
+
     return MessageResponse(message="Logged out successfully")
 
 
@@ -425,6 +454,8 @@ async def resend_email_verification(
 async def delete_account(
     request_data: DeleteAccountRequest,
     current_user: CurrentUser,
+    token: Annotated[str, Depends(get_current_token)],
+    blacklist: Annotated[TokenBlacklistService, Depends(get_token_blacklist_service)],
     auth_service: AuthServiceDep,
     request: Request,
     db: AsyncSession = Depends(get_db),
@@ -438,6 +469,7 @@ async def delete_account(
     - ✅ Password verification (optional but recommended)
     - ✅ Confirmation phrase required
     - ✅ Soft delete by default (GDPR compliant with data anonymization)
+    - ✅ Token invalidation (blacklisted after deletion)
     """
     try:
         # Determine locale for email (before account is deleted)
@@ -453,6 +485,16 @@ async def delete_account(
             locale=locale,
             translations=translations,
         )
+
+        # Blacklist current token after successful deletion
+        payload = verify_token(token)
+        if payload.get("exp"):
+            await blacklist.blacklist_token(
+                token=token,
+                expires_at=payload["exp"],
+                reason="account_deleted",
+            )
+            logger.info(f"Token blacklisted after account deletion: user_id={current_user.id}")
         return MessageResponse(message="Account has been deleted successfully")
     except InvalidCredentialsError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

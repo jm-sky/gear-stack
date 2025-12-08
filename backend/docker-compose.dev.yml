@@ -25,6 +25,29 @@ services:
     networks:
       - gearstack-network
 
+  # Redis (for token blacklist and challenge storage)
+  redis:
+    image: redis:7-alpine
+    container_name: gear-stack-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - gear_stack_redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - gearstack-network
+
   # Application (Development Mode)
   app:
     build:
@@ -36,6 +59,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     env_file:
       - .env
     environment:
@@ -43,6 +68,7 @@ services:
       - PROJECT_NAME=${PROJECT_NAME:-backend}
       - APP_PORT=${APP_PORT:-8000}
       - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-backend}:${POSTGRES_PASSWORD:-changeme}@db:5432/${POSTGRES_DB:-backend}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
       - SECRET_KEY=${SECRET_KEY}
       - LOG_LEVEL=${LOG_LEVEL:-DEBUG}
       - CORS_ORIGINS=${CORS_ORIGINS:-["http://localhost:3000"]}
@@ -97,6 +123,8 @@ networks:
 
 volumes:
   gear_stack_postgres_data:
+    driver: local
+  gear_stack_redis_data:
     driver: local
   gear_stack_uploads:
     driver: local

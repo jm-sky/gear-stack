@@ -89,13 +89,15 @@ def _verify_passkey_registration_token(
 class WebAuthnService:
     """Service for WebAuthn/Passkey operations using composition pattern."""
 
-    def __init__(self, repository: TwoFactorRepositoryInterface):
+    def __init__(self, repository: TwoFactorRepositoryInterface, challenge_store: Any = None):
         """Initialize with repository dependency.
 
         Args:
             repository: Two-factor repository interface
+            challenge_store: WebAuthn challenge store (optional, imported to avoid circular dependency)
         """
         self.repository = repository
+        self.challenge_store = challenge_store
 
     async def initiate_registration(
         self,
@@ -249,13 +251,18 @@ class WebAuthnService:
         challenge_token = secrets.token_urlsafe(32)
         expires_at = datetime.now(UTC) + timedelta(minutes=5)
 
-        # TODO: Store challenge_token with challenge and user_id in Redis
-        # For now, encode it in response (NOT PRODUCTION SAFE)
-        challenge_data = {
-            "user_id": user_id,
-            "challenge": challenge,
-            "expires_at": expires_at.isoformat(),
-        }
+        # Store challenge in Redis (PRODUCTION SAFE)
+        if self.challenge_store:
+            await self.challenge_store.store_challenge(
+                challenge_token=challenge_token,
+                user_id=user_id,
+                challenge=challenge.encode("utf-8"),
+                challenge_type="authentication",
+                ttl=300,  # 5 minutes
+            )
+            logger.info(f"Challenge stored in Redis for user_id={user_id}")
+        else:
+            logger.warning("Challenge store not available - challenge NOT stored server-side (INSECURE)")
 
         # Create authentication options
         # Get domain from frontend URL or default to localhost
@@ -278,8 +285,6 @@ class WebAuthnService:
             "options": options,
             "challengeToken": challenge_token,
             "expiresAt": expires_at,
-            # Temporary solution - use Redis in production
-            "_challenge_data": challenge_data,
         }
 
     async def complete_authentication(
@@ -293,7 +298,7 @@ class WebAuthnService:
         Args:
             challenge_token: Challenge token from initiation
             credential_json: PublicKeyCredential from WebAuthn API
-            challenge_data: Challenge data (temp - use Redis in production)
+            challenge_data: Challenge data (deprecated - use Redis)
 
         Returns:
             Dict with success, userId, passkeyId
@@ -301,14 +306,19 @@ class WebAuthnService:
         Raises:
             ValueError: If verification fails
         """
-        # TODO: Retrieve challenge_data from Redis using challenge_token
-        if not challenge_data:
-            raise ValueError("Challenge data not found or expired")
+        # Retrieve challenge_data from Redis using challenge_token
+        if self.challenge_store:
+            challenge_data_from_redis = await self.challenge_store.get_and_delete_challenge(challenge_token)
+            if not challenge_data_from_redis:
+                raise ValueError("Challenge not found or expired")
+            challenge_data = challenge_data_from_redis
+            logger.info("Challenge retrieved and consumed from Redis")
+        elif not challenge_data:
+            raise ValueError("Challenge data not found or expired - Redis not configured")
 
-        # Verify expiry
-        expires_at = datetime.fromisoformat(challenge_data["expires_at"])
-        if datetime.now(UTC) > expires_at:
-            raise ValueError("Challenge expired")
+        # Verify challenge type
+        if challenge_data.get("challenge_type") != "authentication":
+            raise ValueError("Invalid challenge type")
 
         # Get credential ID from response
         raw_id = credential_json.get("rawId")

@@ -34,8 +34,28 @@ from .service import TwoFactorService
 router = APIRouter(prefix="/two-factor", tags=["Two-Factor Authentication"])
 
 
-def get_service(repo: Any = Depends(get_two_factor_repository)) -> TwoFactorService:
-    return TwoFactorService(repository=repo)
+async def get_service(repo: Any = Depends(get_two_factor_repository)) -> TwoFactorService:
+    """Get TwoFactorService with Redis challenge store."""
+    challenge_store = None
+    try:
+        # Try to get Redis-based challenge store
+        from app.core.redis import get_redis_client
+        from app.core.config import settings
+        from .challenge_store import WebAuthnChallengeStore
+
+        redis_client = await get_redis_client()
+        challenge_store = WebAuthnChallengeStore(
+            redis_client=redis_client,
+            key_prefix=settings.redis.webauthn_challenge_prefix,
+            default_ttl=settings.redis.webauthn_challenge_ttl,
+        )
+    except Exception as e:
+        import logging
+
+        logger = logging.getLogger(__name__)
+        logger.warning(f"Failed to initialize challenge store: {e}. WebAuthn will work without server-side challenge storage (INSECURE)")
+
+    return TwoFactorService(repository=repo, challenge_store=challenge_store)
 
 
 @router.post("/totp/initiate", response_model=TotpInitiateResponse)
