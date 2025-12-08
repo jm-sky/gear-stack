@@ -3,6 +3,12 @@ import AppFooter from '@/components/layout/AppFooter.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import { cn } from '@/lib/utils'
+import type { HTMLAttributes } from 'vue'
+
+defineProps<{
+  cardClass?: HTMLAttributes['class']
+}>()
 </script>
 
 <template>
@@ -15,7 +21,7 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 
         <!-- Main Content -->
         <main class="w-full max-w-7xl mx-auto flex-1 py-6 px-2 sm:px-6 lg:px-8">
-          <div class="rounded-xl bg-card p-4 sm:p-6 shadow-lg w-full max-w-full">
+          <div :class="cn('border border-border rounded-xl bg-card p-4 sm:p-6 shadow-lg w-full max-w-full', cardClass)">
             <slot />
           </div>
         </main>

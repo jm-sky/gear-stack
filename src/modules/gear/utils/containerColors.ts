@@ -33,7 +33,7 @@ export const COLOR_CLASSES: Record<TContainerColor, string> = {
 export const COLOR_BORDER_CLASSES: Record<TContainerColor, string> = {
   default: 'border-gray-300',
   coyote: 'border-amber-700',
-  khaki: 'border-yellow-300',
+  khaki: 'border-yellow-400',
   olive: 'border-lime-700',
   forestGreen: 'border-green-700',
   tan: 'border-amber-300',

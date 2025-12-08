@@ -23,6 +23,7 @@ import { useSearchPaginationUrl } from '../composables/useSearchPaginationUrl'
 import { GearRoutePath } from '../routes'
 import { gearItemService } from '../services/gearItemService'
 import { useGearStore } from '../store/useGearStore'
+import { COLOR_BORDER_CLASSES, COLOR_TEXT_CLASSES } from '../utils/containerColors'
 import { createNavigationQuery } from '../utils/navigationParams'
 
 // Lazy load dialogs - only loaded when user opens them
@@ -51,6 +52,12 @@ const { setTitle } = usePageTitle()
 const { unlinkItemFromCatalogue } = useCatalogue()
 
 const containerId = route.params.id as string
+
+const cardClass = computed(() => {
+  if (!container.value?.color) return ''
+  if (container.value.color === 'default') return ''
+  return `${COLOR_TEXT_CLASSES[container.value.color]} border ${COLOR_BORDER_CLASSES[container.value.color]} outline-2 outline-current/15`
+})
 
 // Set dynamic page title
 watchEffect(() => {
@@ -319,8 +326,8 @@ if (!container.value) {
 </script>
 
 <template>
-  <AuthenticatedLayout>
-    <div v-if="container" class="space-y-6 w-full max-w-full">
+  <AuthenticatedLayout :card-class="cardClass">
+    <div v-if="container" class="space-y-6 w-full max-w-full text-card-foreground">
       <ContainerHeader
         :container="container"
         @export="handleJsonExport"

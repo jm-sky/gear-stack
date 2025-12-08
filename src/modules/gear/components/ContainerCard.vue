@@ -83,6 +83,7 @@ const handleShow = () => {
     :class="[
       container.color ? COLOR_BORDER_CLASSES[container.color] : '',
       container.color ? COLOR_TEXT_CLASSES[container.color] : '',
+      container.color && container.color !== 'default' ? 'outline-2 outline-current/15' : '',
     ]"
     @click="handleShow"
   >

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ChevronDown, ChevronRight } from 'lucide-vue-next'
+import { ChevronRight } from 'lucide-vue-next'
 import { onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
@@ -123,7 +123,7 @@ const handleIncludeExpiringUpdate = (value: boolean | 'indeterminate') => {
 </script>
 
 <template>
-  <div class="space-y-4 p-4 border rounded-lg bg-muted/50">
+  <div class="space-y-4 border rounded-lg bg-muted/50 transition-all" :class="isCollapsed ? 'py-1 px-4' : 'py-4 px-4'">
     <!-- Header with collapse button -->
     <div class="flex items-center justify-between">
       <h3 class="font-semibold text-base">
@@ -135,8 +135,7 @@ const handleIncludeExpiringUpdate = (value: boolean | 'indeterminate') => {
         :aria-label="isCollapsed ? t('gear.shopping.expandFilters', 'Expand filters') : t('gear.shopping.collapseFilters', 'Collapse filters')"
         @click="toggleCollapse"
       >
-        <ChevronRight v-if="isCollapsed" class="size-4" />
-        <ChevronDown v-else class="size-4" />
+        <ChevronRight class="size-4 transition-transform" :class="isCollapsed ? 'rotate-90' : ''" />
       </Button>
     </div>
 
