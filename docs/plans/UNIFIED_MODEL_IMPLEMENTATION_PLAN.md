@@ -207,7 +207,334 @@ if (entity.isContainer) {
 
 ---
 
-## 🗓️ Plan Fazowy (8 Faz)
+## 🗓️ Plan Fazowy (9 Faz)
+
+### FAZA 0: Test Creation (Pre-Implementation Safety Net)
+**Czas:** 2-3 dni
+**Cel:** Utworzenie testów weryfikujących obecne zachowanie przed rozpoczęciem migracji
+**Priorytet:** KRYTYCZNY - wszystkie testy muszą być zielone przed FAZĄ 1
+
+#### Dlaczego FAZA 0?
+- ✅ **Regression detection** - wykryje jeśli coś się złamie podczas migracji
+- ✅ **Dokumentacja zachowania** - testy opisują jak system POWINIEN działać
+- ✅ **Confidence** - możemy śmiało refaktorować wiedząc że mamy sieć bezpieczeństwa
+- ✅ **Baseline** - ustala punkt odniesienia dla porównania po migracji
+
+#### Kroki:
+
+**1. Backend Integration Tests (Vitest/Pytest)**
+
+**1.1. Container CRUD Operations**
+```python
+# backend/tests/integration/test_containers_crud.py
+def test_create_container_with_nested_containers():
+    """Verify current nesting behavior: parent_container_id"""
+    # Plecak
+    backpack = create_container(name="Backpack", type="backpack")
+    # Pudełko w plecaku
+    box = create_container(name="Box", type="box", parent_container_id=backpack.id)
+
+    assert box.parent_container_id == backpack.id
+    # Verify API returns nested structure
+    response = get_container(backpack.id)
+    assert len(response.nested_containers) == 1
+    assert response.nested_containers[0].id == box.id
+
+def test_create_item_in_container():
+    """Verify current item-container relationship"""
+    container = create_container(name="Backpack")
+    item = create_item(container_id=container.id, name="Knife")
+
+    assert item.container_id == container.id
+    response = get_container(container.id)
+    assert len(response.items) == 1
+
+def test_item_with_nested_container_reference():
+    """Verify current dual-nesting mechanism"""
+    # System 1: Container with parent_container_id
+    backpack = create_container(name="Backpack")
+    mug_container = create_container(name="Mug Container", parent_container_id=backpack.id)
+
+    # System 2: Item with containerId pointing to nested container
+    mug_item = create_item(
+        container_id=backpack.id,
+        name="Mug",
+        nested_container_id=mug_container.id
+    )
+
+    assert mug_item.nested_container_id == mug_container.id
+    assert mug_container.parent_container_id == backpack.id
+```
+
+**1.2. Weight Calculations**
+```python
+def test_calculate_total_weight_with_nesting():
+    """Ensure weight calculations work correctly before migration"""
+    backpack = create_container(name="Backpack", weight=500, weight_unit="g")
+    knife = create_item(container_id=backpack.id, name="Knife", weight=100, weight_unit="g", quantity=1)
+    mug = create_item(container_id=backpack.id, name="Mug", weight=200, weight_unit="g", quantity=2)
+
+    total = calculate_total_weight(backpack.id)
+    assert total == 500 + 100 + (200 * 2)  # 1000g
+```
+
+**1.3. Data Integrity**
+```python
+def test_delete_container_cascades_to_items():
+    """Verify cascade deletion works"""
+    container = create_container(name="Backpack")
+    item1 = create_item(container_id=container.id, name="Knife")
+    item2 = create_item(container_id=container.id, name="Mug")
+
+    delete_container(container.id)
+
+    # Items should be deleted
+    assert get_item(item1.id) is None
+    assert get_item(item2.id) is None
+
+def test_circular_nesting_prevention():
+    """Verify circular references are prevented"""
+    container_a = create_container(name="A")
+    container_b = create_container(name="B", parent_container_id=container_a.id)
+
+    # Should raise error
+    with pytest.raises(ValidationError):
+        update_container(container_a.id, parent_container_id=container_b.id)
+```
+
+**2. Frontend Integration Tests (Vitest)**
+
+**2.1. Store Tests**
+```typescript
+// src/modules/gear/store/useGearStore.spec.ts
+describe('useGearStore - Pre-Migration Baseline', () => {
+  it('should load containers from localStorage', async () => {
+    const store = useGearStore()
+    await store.initialize()
+
+    expect(store.isInitialized).toBe(true)
+    expect(store.containers).toBeInstanceOf(Array)
+  })
+
+  it('should handle nested containers correctly', () => {
+    const store = useGearStore()
+    const backpack = createMockContainer({ id: 'backpack-1', name: 'Backpack' })
+    const box = createMockContainer({
+      id: 'box-1',
+      name: 'Box',
+      parentContainerId: 'backpack-1'
+    })
+
+    store.setContainers([backpack, box])
+
+    const nested = store.getNestedContainers('backpack-1')
+    expect(nested).toHaveLength(1)
+    expect(nested[0].id).toBe('box-1')
+  })
+})
+```
+
+**2.2. Service Tests**
+```typescript
+// src/modules/gear/services/gearContainerService.spec.ts
+describe('gearContainerService - Baseline Behavior', () => {
+  it('should create container with items', async () => {
+    const service = new GearContainerService()
+    const container = await service.createContainer({
+      name: 'Backpack',
+      type: 'backpack',
+    })
+
+    const item = await service.createItem(container.id, {
+      name: 'Knife',
+      category: 'tools',
+      quantity: 1,
+    })
+
+    expect(item.containerId).toBe(container.id)
+  })
+
+  it('should calculate readiness percentage', async () => {
+    const service = new GearContainerService()
+    // Create container with mixed status items
+    const container = await service.createContainer({ name: 'Test' })
+    await service.createItem(container.id, { name: 'Item1', status: 'owned' })
+    await service.createItem(container.id, { name: 'Item2', status: 'missing' })
+
+    const readiness = await service.calculateReadinessPercentage(container.id)
+    expect(readiness).toBe(50) // 1 owned out of 2 total
+  })
+})
+```
+
+**3. API Snapshot Tests**
+
+**3.1. Response Format Snapshots**
+```typescript
+// tests/snapshots/api-responses.spec.ts
+describe('API Response Snapshots', () => {
+  it('GET /api/containers/:id should match snapshot', async () => {
+    const container = await createTestContainer()
+    const response = await fetch(`/api/containers/${container.id}`)
+    const data = await response.json()
+
+    expect(data).toMatchSnapshot()
+  })
+
+  it('GET /api/containers/:id/items should match snapshot', async () => {
+    const container = await createTestContainerWithItems()
+    const response = await fetch(`/api/containers/${container.id}/items`)
+    const data = await response.json()
+
+    expect(data).toMatchSnapshot()
+  })
+})
+```
+
+**4. E2E Tests (Playwright)**
+
+**4.1. Critical User Flows**
+```typescript
+// tests/e2e/containers.spec.ts
+test('User can create nested containers', async ({ page }) => {
+  await page.goto('/gear')
+
+  // Create main container
+  await page.click('[data-testid="create-container"]')
+  await page.fill('[data-testid="container-name"]', 'Backpack')
+  await page.click('[data-testid="save-container"]')
+
+  // Create nested container
+  await page.click('[data-testid="add-nested-container"]')
+  await page.fill('[data-testid="container-name"]', 'Box')
+  await page.click('[data-testid="save-container"]')
+
+  // Verify nesting
+  await expect(page.locator('[data-testid="nested-container"]')).toContainText('Box')
+})
+
+test('User can add items to container', async ({ page }) => {
+  const container = await createTestContainer()
+  await page.goto(`/gear/${container.id}`)
+
+  await page.click('[data-testid="add-item"]')
+  await page.fill('[data-testid="item-name"]', 'Knife')
+  await page.selectOption('[data-testid="item-category"]', 'tools')
+  await page.click('[data-testid="save-item"]')
+
+  await expect(page.locator('[data-testid="item-row"]')).toContainText('Knife')
+})
+```
+
+**5. Data Migration Test Suite**
+
+**5.1. Migration Simulation**
+```python
+# backend/tests/migration/test_data_migration.py
+def test_migration_preserves_all_containers():
+    """Verify no data loss during migration"""
+    # Create test data
+    containers = create_test_containers(count=10)
+
+    # Run migration (simulate)
+    migrate_containers_to_entities()
+
+    # Verify all containers exist in new table
+    entities = db.query(GearEntity).filter_by(is_container=True).all()
+    assert len(entities) == 10
+
+    for container in containers:
+        entity = db.query(GearEntity).filter_by(id=container.id).first()
+        assert entity is not None
+        assert entity.name == container.name
+        assert entity.is_container is True
+
+def test_migration_preserves_nesting_relationships():
+    """Verify parent-child relationships are preserved"""
+    parent = create_container(name="Parent")
+    child = create_container(name="Child", parent_container_id=parent.id)
+
+    migrate_containers_to_entities()
+
+    # Verify relationship exists in entity_relationships table
+    relationship = db.query(EntityRelationship).filter_by(
+        parent_id=parent.id,
+        child_id=child.id
+    ).first()
+
+    assert relationship is not None
+```
+
+**6. Performance Baseline Tests**
+
+```python
+def test_query_performance_baseline():
+    """Establish performance baseline before migration"""
+    # Create realistic dataset
+    create_test_containers(count=100)
+    create_test_items(count=1000)
+
+    # Measure query performance
+    start = time.time()
+    containers = get_all_containers(user_id=test_user.id)
+    duration = time.time() - start
+
+    # Should complete in <100ms
+    assert duration < 0.1
+
+    # Store baseline for comparison
+    save_performance_baseline('get_all_containers', duration)
+```
+
+#### Pliki do utworzenia:
+
+**Backend:**
+- `backend/tests/integration/test_containers_crud.py`
+- `backend/tests/integration/test_items_crud.py`
+- `backend/tests/integration/test_nesting.py`
+- `backend/tests/integration/test_calculations.py`
+- `backend/tests/migration/test_data_migration.py`
+- `backend/tests/performance/test_query_performance.py`
+
+**Frontend:**
+- `src/modules/gear/store/useGearStore.spec.ts`
+- `src/modules/gear/services/gearContainerService.spec.ts`
+- `src/modules/gear/services/gearItemService.spec.ts`
+- `tests/snapshots/api-responses.spec.ts`
+- `tests/e2e/containers.spec.ts`
+- `tests/e2e/items.spec.ts`
+- `tests/e2e/nesting.spec.ts`
+
+#### Kryteria sukcesu FAZY 0:
+- ✅ **100% testów przechodzi** - wszystkie testy zielone
+- ✅ **Pokrycie kodu >80%** dla kluczowych modułów (containers, items, nesting)
+- ✅ **E2E testy** dla 5+ krytycznych flow użytkownika
+- ✅ **Performance baseline** - zapisane czasy dla porównania po migracji
+- ✅ **Snapshots** - API responses zapisane dla weryfikacji kompatybilności
+
+#### Metryki sukcesu:
+```bash
+# Backend
+pytest backend/tests/integration/ --cov=backend/app/modules/gear
+# Expected: >80% coverage, all tests passing
+
+# Frontend
+pnpm test:run src/modules/gear/
+# Expected: >80% coverage, all tests passing
+
+# E2E
+pnpm test:e2e
+# Expected: All critical flows passing
+```
+
+#### Checkpoint przed FAZĄ 1:
+⚠️ **NIE ZACZYNAJ FAZY 1 dopóki:**
+- [ ] Wszystkie testy z FAZY 0 nie przechodzą (100% zielone)
+- [ ] Code coverage <80% dla gear module
+- [ ] E2E testy nie działają
+- [ ] Performance baseline nie został zapisany
+
+---
 
 ### FAZA 1: Nowe Typy i Interfejsy
 **Czas:** 1-2 dni

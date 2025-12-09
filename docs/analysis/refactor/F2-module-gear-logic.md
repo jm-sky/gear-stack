@@ -260,6 +260,58 @@
 
 ---
 
+### L1-L2: LOW Priority Quick Wins ✅ FIXED
+**Issues:** Production console.warn/log statements and magic numbers scattered across codebase
+**Fixes Applied:**
+
+**L1: Console Statements Cleanup (8 statements fixed)**
+- Replaced `console.warn` with `logger.warn` in:
+  - `gearSettingsService.ts` (3 occurrences) - API fallback warnings
+  - `useDataMigration.ts` (2 occurrences) - Migration warnings
+  - `ImportMarkdownDialog.vue` (2 occurrences) - Import warnings
+- Removed debug `console.log` from:
+  - `ItemImageCard.vue` - Debug statement removed
+- Added `logger` imports where needed
+
+**L2: Magic Numbers Extraction (Added 4 constants)**
+- Created new constants in `utils/constants.ts`:
+  - `DEFAULT_PAGINATION_LIMIT = 100` - Default pagination limit
+  - `DEFAULT_PAGINATION_SKIP = 0` - Default pagination offset
+  - `DEFAULT_ITEM_WEIGHT_GRAMS = 100` - Default item weight
+  - `PERCENTAGE_MULTIPLIER = 100` - For percentage calculations
+- Updated service files to use constants:
+  - `gearContainerLocalService.ts` - 7 magic numbers replaced (pagination, weight conversion, percentages, expiration days)
+  - `gearItemHybridService.ts` - pagination limit
+  - `gearItemLocalService.ts` - pagination limit
+- Reused existing constants:
+  - `GRAMS_PER_KILOGRAM = 1000` - Already existed
+  - `EXPIRATION_SOON_DAYS = 30` - Already existed
+
+**Files Modified:**
+- Added constants: `src/modules/gear/utils/constants.ts`
+- Console cleanup:
+  - `src/modules/gear/components/ItemImageCard.vue`
+  - `src/modules/gear/components/ImportMarkdownDialog.vue`
+  - `src/modules/gear/services/gearSettingsService.ts`
+  - `src/modules/gear/composables/useDataMigration.ts`
+- Magic numbers:
+  - `src/modules/gear/services/gearContainerLocalService.ts`
+  - `src/modules/gear/services/gearItemHybridService.ts`
+  - `src/modules/gear/services/gearItemLocalService.ts`
+
+**Test Coverage:** ✅
+- Type-check passing
+- Lint passing
+- No behavioral changes, only code quality improvements
+
+**Impact:**
+- Maintainability: Easier to update pagination limits and other constants in one place
+- Debugging: Production logs now use proper logger utility (can be configured for different environments)
+- Readability: Constants have descriptive names instead of magic numbers
+- Consistency: All services now use same constants for common values
+
+---
+
 ## 1. Overview
 
 ### Struktura katalogów
@@ -935,15 +987,15 @@ src/modules/gear/
 | 🟡 | `gearContainerService.ts` | No pagination total count or cursor support | API design |
 | 🟡 | `markdownImportService.ts:149-186` | Price parsing regex duplication | DRY |
 
-### Low (Optional)
-| Priority | File | Issue | Impact |
-|----------|------|-------|--------|
-| 🟢 | Multiple files | 15+ console.warn/log statements in production code | Production logs |
-| 🟢 | Multiple files | Magic numbers (100, 30, 2000) not extracted to constants | Readability |
+### Low (Optional) - ✅ 2 of 8 FIXED (2025-12-09)
+| Priority | File | Issue | Impact | Status |
+|----------|------|-------|--------|--------|
+| ✅ ~~🟢~~ | Multiple files | ~~15+ console.warn/log statements in production code~~ | ~~Production logs~~ | **FIXED** - Replaced with logger utility |
+| ✅ ~~🟢~~ | Multiple files | ~~Magic numbers (100, 30, 2000) not extracted to constants~~ | ~~Readability~~ | **FIXED** - Extracted to utils/constants.ts |
 | 🟢 | `gearItemApiService.ts:42` | TODO comment for unimplemented method | Technical debt |
 | 🟢 | Multiple files | Inconsistent naming (getAllContainers vs getRootContainers) | Consistency |
 | 🟢 | Store files | Missing JSDoc documentation | Documentation |
-| 🟢 | `markdownImportService.ts:115-125` | Unused IItemParams interface | Code cleanup |
+| 🟢 | `markdownImportService.ts:115-125` | IItemParams interface | Code cleanup | N/A - Actually in use |
 | 🟢 | Multiple service files | Optional chaining overuse suggests uncertain data shapes | Type safety |
 | 🟢 | `sampleSetGenerator.ts:128-140` | Complex translation fallback heuristics | Fragility |
 

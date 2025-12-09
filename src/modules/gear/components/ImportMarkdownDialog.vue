@@ -15,6 +15,7 @@ import {
 import DialogProgressOverlay from '@/components/ui/dialog/DialogProgressOverlay.vue'
 import Textarea from '@/components/ui/textarea/Textarea.vue'
 import { useHandleError } from '@/shared/composables/useHandleError'
+import { logger } from '@/shared/utils/logger'
 import type { IGearContainer } from '../types/gear.types'
 import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
@@ -210,7 +211,7 @@ const handleImport = async () => {
       // Fetch latest container from store to ensure we have up-to-date items
       const latestContainer = store.getContainerById(container.id)
       if (!latestContainer) {
-        console.warn(`Container ${container.id} not found in store`)
+        logger.warn(`Container ${container.id} not found in store`)
         continue
       }
 
@@ -226,7 +227,7 @@ const handleImport = async () => {
           if (nestedContainerUuid) {
             itemDto.containerId = nestedContainerUuid
           } else {
-            console.warn(`Nested container with id "${nestedContainerId}" not found`)
+            logger.warn(`Nested container with id "${nestedContainerId}" not found`)
           }
         }
 

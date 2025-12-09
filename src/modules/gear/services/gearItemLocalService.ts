@@ -6,6 +6,7 @@ import type {
   IUpdateItemDto,
 } from '../types/gear.types'
 import { useGearStore } from '../store/useGearStore'
+import { DEFAULT_PAGINATION_LIMIT } from '../utils/constants'
 import type { TUUID } from '@/shared/types/base.type'
 
 /**
@@ -75,7 +76,7 @@ export class GearItemLocalService implements IGearItemService {
     return Promise.resolve(item)
   }
 
-  async getItems(containerId: TUUID, skip = 0, limit = 100): Promise<IGearItem[]> {
+  async getItems(containerId: TUUID, skip = 0, limit = DEFAULT_PAGINATION_LIMIT): Promise<IGearItem[]> {
     const container = this.store.getContainerById(containerId)
     if (!container) {
       throw new Error(`Container with id ${containerId} not found`)

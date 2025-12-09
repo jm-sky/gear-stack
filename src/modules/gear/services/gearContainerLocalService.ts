@@ -7,6 +7,12 @@ import type {
 } from '../types/gear.types'
 import type { IItemWithContainer } from '../utils/allItemsColumns'
 import { useGearStore } from '../store/useGearStore'
+import {
+  DEFAULT_PAGINATION_LIMIT,
+  EXPIRATION_SOON_DAYS,
+  GRAMS_PER_KILOGRAM,
+  PERCENTAGE_MULTIPLIER,
+} from '../utils/constants'
 import { getAllNestedContainers, getRootContainers, wouldCreateCircularReference } from '../utils/containerNesting'
 import { convertToGrams } from '../utils/formatWeight'
 import { getAllItems } from '../utils/getAllItems'
@@ -121,7 +127,7 @@ class GearContainerLocalService {
     return Promise.resolve()
   }
 
-  async getContainers(skip = 0, limit = 100): Promise<IGearContainer[]> {
+  async getContainers(skip = 0, limit = DEFAULT_PAGINATION_LIMIT): Promise<IGearContainer[]> {
     const all = this.store.getAllContainers
     return Promise.resolve(all.slice(skip, skip + limit))
   }
@@ -157,7 +163,7 @@ class GearContainerLocalService {
     const grams = await this.calculateTotalWeight(containerId)
     return Promise.resolve({
       grams,
-      kilograms: grams / 1000,
+      kilograms: grams / GRAMS_PER_KILOGRAM,
     })
   }
 
@@ -177,7 +183,7 @@ class GearContainerLocalService {
     const ownedItems = container.items.filter(item => item.status === 'owned').length
     const missingItems = container.items.filter(item => item.status === 'missing').length
     const toBuyItems = container.items.filter(item => item.status === 'toBuy').length
-    const readinessPercentage = totalItems > 0 ? Math.round((ownedItems / totalItems) * 100) : 0
+    const readinessPercentage = totalItems > 0 ? Math.round((ownedItems / totalItems) * PERCENTAGE_MULTIPLIER) : 0
 
     return Promise.resolve({
       totalItems,
@@ -221,7 +227,7 @@ class GearContainerLocalService {
     }
 
     const ownedItems = container.items.filter(item => item.status === 'owned').length
-    return Promise.resolve(Math.round((ownedItems / container.items.length) * 100))
+    return Promise.resolve(Math.round((ownedItems / container.items.length) * PERCENTAGE_MULTIPLIER))
   }
 
   async calculateWeightLimitPercentage(containerId: TUUID): Promise<number | null> {
@@ -237,12 +243,12 @@ class GearContainerLocalService {
       return Promise.resolve(0)
     }
 
-    return Promise.resolve(Math.round((totalWeight / maxWeightInGrams) * 100))
+    return Promise.resolve(Math.round((totalWeight / maxWeightInGrams) * PERCENTAGE_MULTIPLIER))
   }
 
   async isWeightLimitExceeded(containerId: TUUID): Promise<boolean> {
     const percentage = await this.calculateWeightLimitPercentage(containerId)
-    return Promise.resolve(percentage !== null && percentage > 100)
+    return Promise.resolve(percentage !== null && percentage > PERCENTAGE_MULTIPLIER)
   }
 
   async getItemsByStatus(containerId: TUUID, status: TGearItemStatus): Promise<IGearItem[]> {
@@ -272,7 +278,7 @@ class GearContainerLocalService {
     }))
   }
 
-  async getExpiringSoonItems(containerId: TUUID, days: number = 30): Promise<IGearItem[]> {
+  async getExpiringSoonItems(containerId: TUUID, days: number = EXPIRATION_SOON_DAYS): Promise<IGearItem[]> {
     const container = this.store.getContainerById(containerId)
     if (!container) {
       return []

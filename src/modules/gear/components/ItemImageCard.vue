@@ -54,7 +54,6 @@ function handleDragEnd() {
 }
 
 function handleClick() {
-  console.log('[ItemImageCard] handleClick', props.image.id)
   emit('preview', props.image.id)
 }
 

@@ -1,5 +1,6 @@
 import { useBackend } from '@/shared/composables/useBackend'
 import { GEAR_SETTINGS_STORAGE_KEY, SETTINGS_STORAGE_KEY } from '@/shared/config/config'
+import { logger } from '@/shared/utils/logger'
 import type {
   IGearSettings,
   IGearSettingsService,
@@ -268,7 +269,7 @@ export const gearSettingsService = () => {
           return settings
         } catch (error) {
           // Fallback to localStorage on API error
-          console.warn('API failed, falling back to localStorage', error)
+          logger.warn('API failed, falling back to localStorage', error)
           return localService.loadFromStorage()
         }
       },
@@ -279,7 +280,7 @@ export const gearSettingsService = () => {
           await localService.saveToStorage(settings)
         } catch (error) {
           // Fallback to localStorage on API error
-          console.warn('API failed, falling back to localStorage', error)
+          logger.warn('API failed, falling back to localStorage', error)
           await localService.saveToStorage(settings)
         }
       },
@@ -291,7 +292,7 @@ export const gearSettingsService = () => {
           return updated
         } catch (error) {
           // Fallback to localStorage on API error
-          console.warn('API failed, falling back to localStorage', error)
+          logger.warn('API failed, falling back to localStorage', error)
           return localService.updateSettings(current, updates)
         }
       },

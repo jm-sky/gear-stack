@@ -2,11 +2,19 @@
  * Constants for gear module
  */
 
+// Pagination
+export const DEFAULT_PAGINATION_LIMIT = 100
+export const DEFAULT_PAGINATION_SKIP = 0
+
 // Weight conversion
 export const GRAMS_PER_KILOGRAM = 1000
 export const GRAMS_PER_OUNCE = 28.3495
 export const GRAMS_PER_POUND = 453.592
 export const WEIGHT_DECIMAL_PLACES = 2
+export const DEFAULT_ITEM_WEIGHT_GRAMS = 100
+
+// Percentage calculations
+export const PERCENTAGE_MULTIPLIER = 100
 
 // Readiness thresholds (percentages)
 export const READINESS_EXCELLENT_THRESHOLD = 81

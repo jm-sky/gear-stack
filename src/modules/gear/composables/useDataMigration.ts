@@ -1,5 +1,6 @@
 // modules/gear/composables/useDataMigration.ts
 import { useBackend } from '@/shared/composables/useBackend'
+import { logger } from '@/shared/utils/logger'
 import { hasLocalData, migrateLocalDataToAPI, shouldPromptForMigration } from '../services/dataMigrationService'
 
 /**
@@ -35,12 +36,12 @@ export function useDataMigration() {
    */
   const checkAndMigrate = async (): Promise<void> => {
     if (!shouldUseAPI.value) {
-      console.warn('Cannot migrate: backend not enabled or user not authenticated')
+      logger.warn('Cannot migrate: backend not enabled or user not authenticated')
       return
     }
 
     if (!hasLocalData()) {
-      console.log('No local data to migrate')
+      logger.info('No local data to migrate')
       return
     }
 

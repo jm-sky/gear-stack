@@ -2,6 +2,7 @@ import { logger } from '@/shared/utils/logger'
 import type { ICreateItemDto, IGearItem, IGearItemService, IUpdateItemDto } from '../types/gear.types'
 import type { GearItemLocalService } from './gearItemLocalService'
 import { useGearStore } from '../store/useGearStore'
+import { DEFAULT_PAGINATION_LIMIT } from '../utils/constants'
 import { gearContainerApiService } from './gearContainerApiService'
 import { GearItemApiService } from './gearItemApiService'
 import type { TULID } from '@/shared/types/base.type'
@@ -46,7 +47,7 @@ export class GearItemHybridService implements IGearItemService {
     }
   }
 
-  async getItems(containerId: TULID, skip = 0, limit = 100): Promise<IGearItem[]> {
+  async getItems(containerId: TULID, skip = 0, limit = DEFAULT_PAGINATION_LIMIT): Promise<IGearItem[]> {
     try {
       const items = await this.gearItemApiService.getItems(containerId, skip, limit)
       // Refresh container from API
