@@ -50,6 +50,9 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - ✅ Chat interface z AI (Phase 1 & 2)
    - ✅ Model selection, token management, context configuration
    - ✅ History tracking, cost display, template messages
+   - ✅ Backend endpoints do zarządzania historią (GET, DELETE)
+   - ✅ Frontend composable do zarządzania historią
+   - 🔄 **Zarządzanie historią - UI:** przeglądanie historii chatów, powrót do konwersacji, kasowanie historii - planowane
    - 🔄 Classification, embeddings, vision models - planowane
 
 6. ✅ **AI settings - Premium feature** - Zakończone
