@@ -259,14 +259,14 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 
 ## 🗂️ Globalny katalog i linkowanie
 
-### Globalny katalog itemów
-**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium
+### ✅ Globalny katalog itemów
+**Status:** ✅ Completed | **Priority:** High | **Complexity:** Medium
 
-- Globalny katalog wszystkich przedmiotów (wszystkich użytkowników lub tylko własnych)
-- Przeglądarka przedmiotów (globalny katalog)
-- Autocomplete przy dodawaniu itemu do kontenera z globalnego katalogu
-- Możliwość dodawania przedmiotów z katalogu do własnych kontenerów
-- Wersjonowanie przedmiotów w katalogu
+- ✅ Globalny katalog wszystkich przedmiotów (wszystkich użytkowników lub tylko własnych)
+- ✅ Przeglądarka przedmiotów (globalny katalog)
+- ✅ Autocomplete przy dodawaniu itemu do kontenera z globalnego katalogu
+- ✅ Możliwość dodawania przedmiotów z katalogu do własnych kontenerów
+- ✅ Wersjonowanie przedmiotów w katalogu
 
 **📋 Plan implementacji:** [GLOBAL_CATALOGUE_IMPLEMENTATION_PLAN.md](./plans/GLOBAL_CATALOGUE_IMPLEMENTATION_PLAN.md)
 
@@ -814,7 +814,7 @@ Po uploadzie obrazków automatyczne przetwarzanie (zmiana rozmiaru, kompresja) w
 ## 🔍 Monitoring i diagnostyka
 
 ### Integracja z Sentry
-**Status:** 🚧 Partially Completed | **Priority:** Medium | **Complexity:** Small
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Small
 
 **Backend (Python):**
 - ✅ Monitoring błędów w czasie rzeczywistym (backend)
@@ -826,10 +826,10 @@ Po uploadzie obrazków automatyczne przetwarzanie (zmiana rozmiaru, kompresja) w
 - ✅ Konfiguracja przez zmienne środowiskowe (DSN, environment, sample rates)
 
 **Frontend (Vue.js):**
-- 🔄 **Do omówienia** - Integracja z Sentry dla Vue.js będzie omówiona w przyszłości (nie zaimplementowane na razie)
-- 🔄 Source maps dla lepszego debugowania (frontend)
-- 🔄 User feedback integration
-- 🔄 Browser performance monitoring
+- ✅ Integracja z Sentry dla Vue.js - zaimplementowane
+- 🔄 Source maps dla lepszego debugowania (frontend) - planowane
+- 🔄 User feedback integration - planowane
+- 🔄 Browser performance monitoring - planowane
 
 **Konfiguracja (Backend):**
 - ✅ Opcjonalne włączenie przez zmienną środowiskową `SENTRY_ENABLED=true`
@@ -932,7 +932,7 @@ W wielu komponentach używane jest `$t()` zamiast `t()` z `useI18n()`. Zgodnie z
 
 ### High Priority (Następne do zrobienia)
 1. ✅ **Autoryzacja i konta użytkowników** - High priority, Large complexity (Completed)
-2. **Globalny katalog itemów** - High priority, Medium complexity
+2. ✅ **Globalny katalog itemów** - High priority, Medium complexity (Completed)
 3. ✅ **Linkowanie przedmiotów** - High priority, Large complexity (Completed)
 4. ✅ **Rozszerzone ustawienia użytkownika** (waluta, kategorie, marki w DB) - High priority, Small complexity (Completed)
 5. ✅ **Ocenianie (gwiazdki) kontenerów** - High priority, Medium complexity (Completed)

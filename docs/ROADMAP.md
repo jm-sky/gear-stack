@@ -28,12 +28,12 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - ✅ **Primary image w wierszu tabeli** — opcjonalne wyświetlanie miniaturki primary image w tabeli przedmiotów
    - Status: ✅ Completed
 
-3. **Katalog i linkowanie**
+3. ✅ **Katalog i linkowanie** - Zakończone
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-globalny-katalog-i-linkowanie)
-   - **Globalny katalog itemów** — High priority, Medium complexity (na później)
+   - ✅ **Globalny katalog itemów** — High priority, Medium complexity (Completed)
    - 📋 **Plan implementacji:** [GLOBAL_CATALOGUE_IMPLEMENTATION_PLAN.md](./plans/GLOBAL_CATALOGUE_IMPLEMENTATION_PLAN.md)
    - ✅ **Linkowanie przedmiotów** — High priority, Large complexity (Completed)
-   - Status: ✅ Linkowanie completed | 🔄 Katalog planned
+   - Status: ✅ Completed
 
 4. ✅ **Rozszerzone ustawienia użytkownika (waluta, widoczność, kategorie, marki w DB)** - Zakończone
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-ustawienia-użytkownika-wymagające-db)
@@ -72,6 +72,12 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - Prostsze zapytania SQL (jedna tabela zamiast dwóch)
    - Status: 🔄 Analysis Complete | Priority: High | Complexity: Large
    - **Uwaga:** Wymaga migracji danych i refaktoryzacji ~80-150 plików (2-4 tygodnie pracy)
+
+9. **Pełna analiza backend i frontend + refaktoryzacja**
+   - Pełna analiza architektury backend i frontend
+   - Identyfikacja problemów i obszarów do poprawy
+   - Refaktoryzacja kodu zgodnie z najlepszymi praktykami
+   - Status: 🚧 In Progress | Priority: High | Complexity: Large
 
 ### Średni priorytet
 
@@ -173,9 +179,9 @@ Funkcjonalności wymagające **backendu, bazy danych i/lub autoryzacji** (online
 - 🚧 Infrastruktura AI (OpenRouter, chat, historia) - częściowo zakończone
 - 🚧 Sekcja AI w Gear Settings - częściowo zakończone
 - 🚧 Synchronizacja między urządzeniami - częściowo zakończone
-- 🚧 Integracja z Sentry (backend) - częściowo zakończone
+- ✅ Integracja z Sentry (backend + frontend) - completed
 - 🔄 Multi-device synchronization (automatyczna) - planowane
-- 🔄 Global item catalog - planowane
+- ✅ Global item catalog - completed
 - 🔄 Przenoszenie przedmiotów między kontenerami - planowane
 - 🔄 Statystyki wyświetleń kontenerów - planowane
 - 🔄 System zaproszeń - planowane
