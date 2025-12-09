@@ -373,6 +373,17 @@ Umożliwienie przenoszenia przedmiotów z jednego kontenera do drugiego bez koni
   - ✅ **Frontend:** Możliwość nadpisania domyślnego ustawienia w formularzu kontenera - zaimplementowane
   - ✅ **Zachowanie:** Jeśli użytkownik nie ma ustawienia, domyślnie `false` (prywatne) - zaimplementowane
 - ✅ Preferowana jednostka wagi (zapisywana w DB, nie tylko localStorage) - zaimplementowane
+- 🔄 **Automatyczny wybór jednostki wagi (auto) i formatowanie z separatorem tysięcznym** - planowane
+  - 🔄 Rozszerzenie typu jednostki wagi o opcje `auto_g_kg` i `auto_oz_lb`
+  - 🔄 Aktualizacja schematów walidacji (Pydantic) - dodanie nowych wartości do enum `TGearWeightUnit`
+  - 🔄 Aktualizacja modelu `GearSettingsDB` w bazie danych - obsługa nowych wartości jednostki wagi
+  - 🔄 Aktualizacja endpointów API (`/me/gear-settings`) - walidacja i zapis nowych opcji auto
+  - 🔄 Migracja bazy danych (jeśli wymagana) - rozszerzenie kolumny jednostki wagi
+  - 🔄 Logika automatycznego wyboru jednostki (frontend):
+    - Jeśli waga < 1 kg → wyświetlanie w `g` (dla systemu metrycznego) lub `oz` (dla systemu imperialnego)
+    - Jeśli waga ≥ 1 kg → wyświetlanie w `kg` (dla systemu metrycznego) lub `lb` (dla systemu imperialnego)
+  - 🔄 Formatowanie liczby z separatorem tysięcznym w wyświetlanych wagach
+  - 📍 Szczegóły implementacji: [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-automatyczny-wybór-jednostki-wagi-auto-i-formatowanie-z-separatorem-tysięcznym)
 - ✅ **Dodawanie nowych kategorii** (zapisywane w DB) - zaimplementowane
 - ✅ **Dodawanie firm / marek (brand)** - zapisywane w DB - zaimplementowane
 - 🔄 Uczenie się na podstawie wcześniejszych wyborów użytkownika (dla kategorii) - planowane
