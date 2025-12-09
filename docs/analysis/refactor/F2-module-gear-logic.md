@@ -77,6 +77,52 @@
 
 ---
 
+## ⚠️ HIGH PRIORITY FIXES APPLIED (2025-12-09)
+
+**Status:** ✅ 2 of 6 HIGH issues have been fixed and tested
+
+### H1: Code Duplication in gearSettingsService - Static Methods ✅ FIXED
+**Issue:** 12 static methods with identical delegation pattern (61 lines of duplicated code)
+**Fix Applied:**
+- Created generic `delegate<TArgs, TReturn>()` wrapper method
+- Reduced 12 static methods (~60 lines) to 1 wrapper + 12 one-line declarations
+- Improved maintainability: adding new static methods now requires only one line
+
+**Files Modified:**
+- `src/modules/gear/services/gearSettingsService.ts:222-244`
+
+**Test Coverage:** ✅
+- `src/modules/gear/services/gearSettingsService.spec.ts` (7 test cases for static delegation)
+
+---
+
+### H2: DRY Violation in gearSettingsService - Array Operations ✅ FIXED
+**Issue:** 9 methods with duplicated add/update/remove logic for categories/types/brands (105 lines)
+**Fix Applied:**
+- Created 3 generic helper methods: `addToArray<T>()`, `updateInArray<T>()`, `removeFromArray()`
+- Refactored 9 methods (categories/types/brands) to use generic helpers
+- Reduced ~105 lines of duplicated code to ~45 lines of helpers + 9 one-line method bodies
+- Type-safe with TypeScript generics: `T extends { id: string }`
+
+**Files Modified:**
+- `src/modules/gear/services/gearSettingsService.ts:111-220`
+
+**Test Coverage:** ✅
+- `src/modules/gear/services/gearSettingsService.spec.ts` (13 test cases for generic helpers + integration)
+
+---
+
+**Total Test Coverage for H1 & H2 Fixes:** 20 test cases
+**All tests passing:** ✅
+
+**Impact:**
+- Code reduction: ~165 lines of duplication reduced to ~90 lines (45% reduction)
+- Maintainability: Adding new array types (e.g., customMaterials) requires only 3 one-line methods
+- Type safety: Generic methods enforce `{ id: string }` constraint at compile time
+- Consistency: All array operations now use identical logic via shared helpers
+
+---
+
 ## 1. Overview
 
 ### Struktura katalogów
@@ -728,11 +774,11 @@ src/modules/gear/
 | ✅ ~~🔴~~ | `dataMigrationService.ts:10-132` | ~~Circular dependency risk - parentContainerId not handled correctly~~ | ~~Orphaned containers~~ | **FIXED** - Topological sort implemented |
 | ✅ ~~🔴~~ | `gearItemHybridService.ts:46-134` | ~~Race condition in container refresh after item update~~ | ~~Wrong container updated~~ | **FIXED** - Container ID lookup before update |
 
-### High (Should Fix)
-| Priority | File | Issue | Impact |
-|----------|------|-------|--------|
-| 🟠 | `gearSettingsService.ts:219-279` | 61 lines of duplicated code (11 static method wrappers) | Maintenance burden |
-| 🟠 | `gearSettingsService.ts:333-395` | 63 lines duplicated 3x (Category/Type/Brand operations) | DRY violation |
+### High (Should Fix) - ✅ 2 of 6 FIXED (2025-12-09)
+| Priority | File | Issue | Impact | Status |
+|----------|------|-------|--------|--------|
+| ✅ ~~🟠~~ | `gearSettingsService.ts:219-279` | ~~61 lines of duplicated code (11 static method wrappers)~~ | ~~Maintenance burden~~ | **FIXED** - Generic delegate() wrapper |
+| ✅ ~~🟠~~ | `gearSettingsService.ts:333-395` | ~~63 lines duplicated 3x (Category/Type/Brand operations)~~ | ~~DRY violation~~ | **FIXED** - Generic array helpers |
 | 🟠 | `gear.types.ts:284-317` | ISP violation - IGearServiceExtended has 11 localStorage-specific methods | Poor abstraction |
 | 🟠 | `markdownImportService.ts:210-445` | parseMarkdown method is 235 lines with 7 nesting levels | Complexity |
 | 🟠 | `useGearStore.ts:12-30` | Synchronous localStorage parsing blocks main thread | Performance |
