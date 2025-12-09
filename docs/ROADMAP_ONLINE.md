@@ -592,11 +592,11 @@ System śledzenia wyświetleń kontenerów (publicznych i udostępnionych) z ~~d
 - ✅ Nie zapisujemy template'u promptu (tylko finalny prompt) - zaimplementowane
 - ✅ Backend endpoints do zarządzania historią (GET, DELETE) - zaimplementowane
 - ✅ Frontend composable `useAiHistory` z funkcjami do zarządzania historią - zaimplementowane
-- 🔄 **Zarządzanie historią - UI:**
-  - 🔄 Przeglądanie historii chatów (lista konwersacji z filtrowaniem i wyszukiwaniem) - planowane
-  - 🔄 Powrót do konwersacji (restore conversation from history - załadowanie wiadomości z historii do chat window) - planowane
-  - 🔄 Kasowanie historii (UI do usuwania pojedynczych wpisów i całej historii) - planowane
-  - 🔄 Historia viewer page (strona z listą historii, szczegóły konwersacji) - planowane
+- ✅ **Zarządzanie historią - UI:**
+  - ✅ Przeglądanie historii chatów (lista konwersacji z filtrowaniem i wyszukiwaniem) - Completed
+  - ✅ Powrót do konwersacji (restore conversation from history - załadowanie wiadomości z historii do chat window) - Completed
+  - ✅ Kasowanie historii (UI do usuwania pojedynczych wpisów i całej historii) - Completed
+  - ✅ Historia viewer page (strona z listą historii, szczegóły konwersacji) - Completed
 - 🔄 Mechanizm limitu historii (domyślnie 100 wpisów) + automatyczne usuwanie najstarszych - planowane
 
 **Cache:**
