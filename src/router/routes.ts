@@ -1,4 +1,5 @@
 import { adminRoutes } from '@/modules/admin/routes'
+import { aiRoutes } from '@/modules/ai/routes'
 import { AuthRouteNames, AuthRoutePaths, authRoutes } from '@/modules/auth/config/routes'
 import { gearRoutes } from '@/modules/gear/routes'
 import { settingsRoutes } from '@/modules/settings/routes'
@@ -21,6 +22,7 @@ export const routes: RouteRecordRaw[] = [
   // Module routes
   ...authRoutes,
   ...adminRoutes,
+  ...aiRoutes,
   ...gearRoutes,
   ...settingsRoutes,
   ...userRoutes,

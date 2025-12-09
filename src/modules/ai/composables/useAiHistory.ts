@@ -12,6 +12,7 @@ export function useAiHistory() {
   const selectedHistoryItem = ref<IAiHistoryItem | null>(null)
 
   const history = computed<IAiHistoryItem[]>(() => aiStore.history)
+  const historyTotal = computed<number>(() => aiStore.historyTotal)
   const isLoading = computed<boolean>(() => aiStore.isLoading)
 
   const loadHistory = async (query?: IAiHistoryQuery): Promise<void> => {
@@ -40,6 +41,7 @@ export function useAiHistory() {
 
   return {
     history,
+    historyTotal,
     selectedHistoryItem,
     isLoading,
     loadHistory,

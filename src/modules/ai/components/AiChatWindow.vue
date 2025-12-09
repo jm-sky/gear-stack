@@ -3,11 +3,9 @@
   Main chat interface for AI interactions
 -->
 <script setup lang="ts">
-import { Loader2, Settings, Trash2, X } from 'lucide-vue-next'
+import { Loader2 } from 'lucide-vue-next'
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Button } from '@/components/ui/button'
-import DialogTitle from '@/components/ui/dialog/DialogTitle.vue'
 import { useAiActions } from '../composables/useAiActions'
 import { useAiChat } from '../composables/useAiChat'
 import { useAiContext } from '../composables/useAiContext'
@@ -15,8 +13,8 @@ import { useAiStore } from '../store/useAiStore'
 import AiChatInputSection from './AiChatInputSection.vue'
 import AiChatMessage from './AiChatMessage.vue'
 import AiChatTemplateMsgButton from './AiChatTemplateMsgButton.vue'
+import AiChatWindowHeader from './AiChatWindowHeader.vue'
 import AiContextConfig from './AiContextConfig.vue'
-import AiModelSelector from './AiModelSelector.vue'
 
 const { t } = useI18n()
 
@@ -25,7 +23,7 @@ const props = defineProps<{
 }>()
 
 const aiStore = useAiStore()
-const { messages, isLoading, lastPrompt, lastStructuredOutput, sendMessage, clearMessages, hasMessages } = useAiChat()
+const { messages, isLoading, lastPrompt, lastStructuredOutput, sendMessage, hasMessages } = useAiChat()
 const { buildContextData } = useAiContext()
 const { executeAction } = useAiActions()
 
@@ -73,30 +71,10 @@ const onTemplatePrompt = (prompt: string) => {
 <template>
   <div class="flex flex-col h-full">
     <!-- Header with model selector -->
-    <DialogTitle class="flex items-center justify-between gap-2 border-b p-4">
-      <h2 class="text-lg font-semibold">
-        {{ t('ai.chat.title') }}
-      </h2>
-      <div class="flex flex-col md:flex-row items-center gap-2 -my-1">
-        <div class="hidden md:flex flex-row items-center gap-2">
-          <AiModelSelector />
-          <Button
-            :variant="showContextConfig ? 'default' : 'outline'"
-            size="sm"
-            @click="showContextConfig = !showContextConfig"
-          >
-            <Settings class="size-4" />
-            {{ t('ai.chat.context') }}
-          </Button>
-          <Button variant="ghost" size="sm" @click="clearMessages">
-            <Trash2 class="size-4" />
-          </Button>
-        </div>
-        <Button variant="ghost" size="sm" @click="emit('close')">
-          <X class="size-4" />
-        </Button>
-      </div>
-    </DialogTitle>
+    <AiChatWindowHeader
+      v-model:show-context-config="showContextConfig"
+      @close="emit('close')"
+    />
 
     <!-- Context config (collapsible) -->
     <AiContextConfig v-if="showContextConfig" />
@@ -136,6 +114,7 @@ const onTemplatePrompt = (prompt: string) => {
       :is-loading="isLoading"
       :include-container-data="includeContainerData"
       @send="handleSend"
+      @toggle-context-config="showContextConfig = !showContextConfig"
     />
   </div>
 </template>

@@ -2,7 +2,7 @@
 import { SendIcon } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import Button from '@/components/ui/button/Button.vue'
-import OnOffButton from '@/components/ui/button/OnOffButton.vue'
+import AiIncludeContainerDataButton from './AiIncludeContainerDataButton.vue'
 
 const { t } = useI18n()
 
@@ -16,6 +16,7 @@ const includeContainerData = defineModel<boolean>('includeContainerData', { requ
 
 const emit = defineEmits<{
   send: [message: string]
+  toggleContextConfig: []
 }>()
 
 const handleSend = (): void => {
@@ -46,9 +47,9 @@ const handleKeyDown = (event: KeyboardEvent): void => {
           <div class="flex flex-row gap-2 items-center">
             <!-- Actions -->
             <!-- Context toggle (only show when containerIds are provided) -->
-            <OnOffButton
-              v-model:on="includeContainerData"
-              :label="t('ai.chat.includeContainerData.label')"
+            <AiIncludeContainerDataButton
+              v-model:include-container-data="includeContainerData"
+              @toggle-context-config="emit('toggleContextConfig')"
             />
           </div>
           <div class="flex flex-row gap-2 items-center justify-end">

@@ -64,7 +64,7 @@ const userItems = computed<IItemWithContainer[]>(() => {
 
 // Convert catalogue items to options
 const catalogueOptions = computed<CatalogueOption[]>(() => {
-  return (catalogueItems.value || []).map(item => ({
+  return (catalogueItems.value ?? []).map(item => ({
     value: `catalogue:${item.id}`,
     label: item.name,
     type: 'catalogue' as const,

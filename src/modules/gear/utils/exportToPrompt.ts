@@ -354,7 +354,7 @@ function generateToBuySummary(
   // Group by currency
   const byCurrency = new Map<string, typeof toBuyItems>()
   toBuyItems.forEach(item => {
-    const existing = byCurrency.get(item.currency) || []
+    const existing = byCurrency.get(item.currency) ?? []
     existing.push(item)
     byCurrency.set(item.currency, existing)
   })

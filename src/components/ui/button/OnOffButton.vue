@@ -23,5 +23,6 @@ defineProps<{
     <slot>
       {{ label }}
     </slot>
+    <slot name="after" />
   </Button>
 </template>

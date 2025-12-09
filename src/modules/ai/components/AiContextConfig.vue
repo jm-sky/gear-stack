@@ -24,7 +24,7 @@ const handleFieldToggle = (field: string): void => {
 </script>
 
 <template>
-  <div class="border-t p-4 space-y-3">
+  <div class="border-b shadow-lg p-4 space-y-3">
     <div class="space-y-2" :class="{ 'opacity-50 pointer-events-none': !isAuthenticated }">
       <Label class="text-sm font-medium">{{ t('ai.context.fields') }}</Label>
       <p class="text-xs text-muted-foreground">
@@ -43,9 +43,9 @@ const handleFieldToggle = (field: string): void => {
           />
           <Label
             :for="`field-${field}`"
-            class="text-sm font-normal cursor-pointer capitalize"
+            class="text-sm font-normal cursor-pointer"
           >
-            {{ field }}
+            {{ t(`gear.item.${field}`) }}
           </Label>
         </div>
       </div>

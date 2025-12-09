@@ -30,7 +30,7 @@ const { t } = useI18n()
 
 const handleColumnVisibilityChange = (columnId: string, visible: boolean) => {
   // Update column visibility through table state - this will trigger onColumnVisibilityChange
-  const currentState = props.table.getState().columnVisibility || {}
+  const currentState = props.table.getState().columnVisibility ?? {}
   const newState = {
     ...currentState,
     [columnId]: visible,

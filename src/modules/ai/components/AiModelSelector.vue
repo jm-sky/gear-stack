@@ -43,7 +43,7 @@ const selectedModelId = computed({
 
 <template>
   <Select v-model="selectedModelId" :disabled="!isAuthenticated">
-    <SelectTrigger size="sm" class="w-56 cursor-pointer hover:bg-accent hover:border-accent-foreground/50">
+    <SelectTrigger v-tooltip.bottom="t('ai.model.selectTooltip')" size="sm" class="w-56 cursor-pointer hover:bg-accent hover:border-accent-foreground/50">
       <SelectValue :placeholder="t('ai.model.selectPlaceholder')" class="w-full flex items-center gap-2">
         <span class="font-medium">{{ selectedModel?.name }}</span>
         <span class="text-xs text-muted-foreground uppercase ml-auto">{{ selectedModel?.provider }}</span>

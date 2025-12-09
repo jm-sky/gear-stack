@@ -5,6 +5,7 @@
 
 import { computed, ref } from 'vue'
 import type { IAiChatHistoryMessage, IAiChatMessage, IAiChatRequest, IAiChatResponse, IAiStructuredOutput } from '../types'
+import type { IAiHistoryItem } from '../types/history'
 import { aiApiService } from '../services/aiApiService'
 import { useAiStore } from '../store/useAiStore'
 
@@ -104,6 +105,63 @@ export function useAiChat() {
 
   const hasMessages = computed<boolean>(() => messages.value.length > 0)
 
+  const restoreFromHistory = async (historyItem: IAiHistoryItem): Promise<void> => {
+    try {
+      // Clear current messages
+      clearMessages()
+
+      // Try to get full history detail to get responsePreview
+      let responsePreview: string | undefined
+      try {
+        const detail = await aiApiService.getHistoryDetail(historyItem.id)
+        responsePreview = detail.responsePreview
+      } catch (error) {
+        // If detail fetch fails, continue with basic restoration
+        console.warn('Failed to fetch history detail:', error)
+      }
+
+      // Reconstruct messages from history
+      const restoredMessages: IAiChatMessage[] = []
+
+      // Extract user message from finalPrompt
+      // Note: This is simplified - finalPrompt contains the full prompt with context
+      // In a real scenario, we'd need to parse the prompt to extract individual messages
+      // For now, we'll use the finalPrompt as the last user message
+      if (historyItem.finalPrompt) {
+        restoredMessages.push({
+          id: `user-restored-${historyItem.id}`,
+          role: 'user',
+          content: historyItem.finalPrompt,
+          created_at: historyItem.created_at,
+        })
+      }
+
+      // Add assistant response
+      const assistantContent = responsePreview
+        || (historyItem.responseData && typeof historyItem.responseData.message === 'string'
+          ? historyItem.responseData.message
+          : JSON.stringify(historyItem.responseData))
+
+      if (assistantContent) {
+        restoredMessages.push({
+          id: `assistant-restored-${historyItem.id}`,
+          role: 'assistant',
+          content: assistantContent,
+          tokens: historyItem.tokens,
+          cost: historyItem.cost,
+          created_at: historyItem.created_at,
+        })
+      }
+
+      // Set messages
+      messages.value = restoredMessages
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to restore conversation'
+      error.value = errorMessage
+      throw err
+    }
+  }
+
   return {
     messages,
     isLoading,
@@ -112,6 +170,7 @@ export function useAiChat() {
     lastStructuredOutput,
     sendMessage,
     clearMessages,
+    restoreFromHistory,
     hasMessages,
   }
 }

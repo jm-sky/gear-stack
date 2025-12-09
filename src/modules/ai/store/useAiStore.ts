@@ -19,6 +19,7 @@ export const useAiStore = defineStore('ai', () => {
   const settings = ref<IAiSettings | null>(null)
   const availableModels = ref<IAiModel[]>([])
   const history = ref<IAiHistoryItem[]>([])
+  const historyTotal = ref(0)
   const isLoading = ref(false)
 
   // Computed
@@ -79,6 +80,7 @@ export const useAiStore = defineStore('ai', () => {
     try {
       const response = await aiApiService.getHistory(params)
       history.value = response.items
+      historyTotal.value = response.total
     } finally {
       isLoading.value = false
     }
@@ -99,6 +101,7 @@ export const useAiStore = defineStore('ai', () => {
     settings,
     availableModels,
     history,
+    historyTotal,
     isLoading,
 
     // Computed

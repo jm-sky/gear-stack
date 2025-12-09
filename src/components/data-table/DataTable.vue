@@ -91,7 +91,7 @@ const emit = defineEmits<{
 const sorting = ref<SortingState>([])
 const globalFilter = ref(globalFilterModel.value || '')
 // Use model value if provided, otherwise use internal ref
-const columnVisibility = ref<VisibilityState>({ ...(columnVisibilityModel.value || {}) })
+const columnVisibility = ref<VisibilityState>({ ...(columnVisibilityModel.value ?? {}) })
 
 // Sync model with internal ref only on initial mount or when model changes externally
 // Don't sync when table updates (that's handled by onColumnVisibilityChange)

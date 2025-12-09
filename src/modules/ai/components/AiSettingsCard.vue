@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { Bot } from 'lucide-vue-next'
+import { Bot, History } from 'lucide-vue-next'
 import { onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { ButtonLink } from '@/components/ui/button-link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Separator from '@/components/ui/separator/Separator.vue'
 import AiModelSelector from '@/modules/ai/components/settings/AiModelSelector.vue'
 import AiTokenManager from '@/modules/ai/components/settings/AiTokenManager.vue'
 import AiUsageDisplay from '@/modules/ai/components/settings/AiUsageDisplay.vue'
 import { useAiModels } from '@/modules/ai/composables/useAiModels'
+import { AiRoutePath } from '@/modules/ai/config/routes'
 import { useAiStore } from '@/modules/ai/store/useAiStore'
 import { useUser } from '@/modules/user/composables/useUser'
 import { useUserStore } from '@/modules/user/store/useUserStore'
@@ -54,15 +56,36 @@ onMounted(async () => {
         <!-- AI Model Selector -->
         <AiModelSelector :is-authenticated />
 
-        <Separator />
+        <Separator class="my-4" />
 
         <!-- API Token Manager -->
         <AiTokenManager :is-authenticated />
 
-        <Separator />
+        <Separator class="my-4" />
 
         <!-- Usage Display -->
         <AiUsageDisplay />
+
+        <Separator class="my-4" />
+
+        <!-- History Link -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <History class="size-4 text-muted-foreground" />
+            <div>
+              <div class="text-sm font-medium">
+                {{ t('ai.history.title') }}
+              </div>
+              <div class="text-xs text-muted-foreground">
+                {{ t('ai.history.details') }}
+              </div>
+            </div>
+          </div>
+          <ButtonLink :to="AiRoutePath.History" variant="outline" size="sm">
+            <History class="size-4 mr-2" />
+            {{ t('ai.history.title') }}
+          </ButtonLink>
+        </div>
       </div>
     </CardContent>
   </Card>
