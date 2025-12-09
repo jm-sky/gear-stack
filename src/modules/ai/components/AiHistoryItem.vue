@@ -27,10 +27,11 @@ const formattedDate = computed(() => {
 
 const preview = computed(() => {
   const prompt = props.item.finalPrompt
-  if (prompt.length > 150) {
-    return prompt.substring(0, 150) + '...'
-  }
-  return prompt || t('ai.history.noPreview')
+  if (!prompt) return t('ai.history.noPreview')
+
+  return prompt.length > 150
+    ? prompt.substring(0, 150) + '...'
+    : prompt
 })
 
 const handleRestore = (): void => {
