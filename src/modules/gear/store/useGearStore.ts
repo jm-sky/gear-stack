@@ -1,16 +1,16 @@
 import { defineStore } from 'pinia'
+import { CONTAINERS_STORAGE_KEY } from '@/shared/config/config'
 import type { IGearContainer } from '../types/gear.types'
 import type { TUUID } from '@/shared/types/base.type'
 
 interface IGearStoreState {
   containers: IGearContainer[]
+  isInitialized: boolean
 }
 
-const STORAGE_KEY = 'gear-stack:containers'
-
-// Helper do ładowania z localStorage
-function loadFromStorage(): IGearContainer[] {
-  const stored = localStorage.getItem(STORAGE_KEY)
+// H5 FIX: Helper do ładowania z localStorage (synchronous for backward compatibility)
+function loadFromStorageSync(): IGearContainer[] {
+  const stored = localStorage.getItem(CONTAINERS_STORAGE_KEY)
   if (stored) {
     try {
       const containers = JSON.parse(stored) as IGearContainer[]
@@ -29,10 +29,22 @@ function loadFromStorage(): IGearContainer[] {
   return []
 }
 
+// H5 FIX: Asynchronous loading to avoid blocking main thread
+// Uses queueMicrotask to defer parsing until after initial render
+async function loadFromStorageAsync(): Promise<IGearContainer[]> {
+  return new Promise((resolve) => {
+    // Defer parsing to not block main thread during app initialization
+    queueMicrotask(() => {
+      resolve(loadFromStorageSync())
+    })
+  })
+}
+
 export const useGearStore = defineStore('gear', {
   state: (): IGearStoreState => {
     return {
-      containers: loadFromStorage(),
+      containers: [],
+      isInitialized: false,
     }
   },
 
@@ -94,14 +106,23 @@ export const useGearStore = defineStore('gear', {
       this.saveToStorage()
     },
 
-    // Synchronizacja z localStorage
+    // H5 FIX: Asynchronous initialization to avoid blocking main thread
+    async initialize(): Promise<void> {
+      if (this.isInitialized) return
+
+      this.containers = await loadFromStorageAsync()
+      this.isInitialized = true
+    },
+
+    // Synchronous loading (for backward compatibility, prefer initialize() for better performance)
     loadFromStorage(): void {
-      this.containers = loadFromStorage()
+      this.containers = loadFromStorageSync()
+      this.isInitialized = true
     },
 
     saveToStorage(): void {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.containers))
+        localStorage.setItem(CONTAINERS_STORAGE_KEY, JSON.stringify(this.containers))
       } catch (error) {
         console.error('Error saving to storage:', error)
       }

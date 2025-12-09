@@ -10,7 +10,7 @@ import App from './App.vue'
 import router from './router'
 import { config } from './shared/config/config'
 import { initSentry } from './shared/services/sentry'
-import { setHtmlLangAttribute } from './shared/utils/appInit'
+import { initializeStores, setHtmlLangAttribute } from './shared/utils/appInit'
 import { setupChunkLoadErrorHandler } from './shared/utils/chunkLoadError'
 import { loadRecaptchaScript } from './shared/utils/recaptcha'
 import 'floating-vue/dist/style.css'
@@ -56,3 +56,9 @@ setHtmlLangAttribute(i18n)
 setupChunkLoadErrorHandler(i18n)
 
 app.mount('#app')
+
+// H5 FIX: Initialize stores asynchronously after mount to avoid blocking main thread
+// This loads data from localStorage without blocking initial UI render
+initializeStores().catch((error) => {
+  console.error('Failed to initialize stores:', error)
+})

@@ -8,6 +8,7 @@ export type TCataloguePriceTier = 'low' | 'medium' | 'high'
 export interface ICatalogueShop {
   url: string
   name?: string
+  variant?: string
 }
 
 // Global catalogue item (template for creating gear items)

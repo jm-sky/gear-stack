@@ -21,6 +21,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
         "url": "https://lightmyfire.com/products/swedish-firesteel",
         "image_filename": "light_my_fire_firesteel_2.0.jpg",
+        "shops": [],
     },
     {
         "id": "01KBJXGQ87FGHRFQTVMP3YFSNG",
@@ -34,6 +35,7 @@ CATALOGUE_ITEMS = [
         "weight": 21.0,
         "weight_unit": "g",
         "url": "https://www.bicworld.com/en/products/details/1/bic-lighter",
+        "shops": [],
     },
     # Noże / Narzędzia tnące
     {
@@ -49,6 +51,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
         "url": "https://www.fiskars.com/en-us/gardening-and-yard-care/products/axes-mauls-and-machetes/x7-hatchet-14-378501-1005",
         "image_filename": "fiskars-x7.png",
+        "shops": [],
     },
     # Narzędzia wielofunkcyjne
     {
@@ -64,6 +67,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "oz",
         "url": "https://www.leatherman.com/",
         "image_filename": "leatherman-wave-plus.png",
+        "shops": [],
     },
     {
         "id": "01KBJXH7904T9DT153977RWERA",
@@ -78,6 +82,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "oz",
         "url": "https://www.leatherman.com/",
         "image_filename": "leatherman-blast.png",
+        "shops": [],
     },
     {
         "id": "01KBJXHA4CVVWZJRSWDJ19F85C",
@@ -92,6 +97,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
         "url": "https://www.gerbergear.com/",
         "image_filename": "gerber-folding-spade.png",
+        "shops": [],
     },
     {
         "id": "01KBJXHCCSSKZWDFR4AB4H5DCV",
@@ -104,6 +110,7 @@ CATALOGUE_ITEMS = [
         "quality": "medium",
         "weight": 0.0,
         "weight_unit": "g",
+        "shops": [],
     },
     {
         "id": "01KBJXHEW5ECFZVXQFB4E539E5",
@@ -116,6 +123,7 @@ CATALOGUE_ITEMS = [
         "quality": "medium",
         "weight": 0.0,
         "weight_unit": "g",
+        "shops": [],
     },
     {
         "id": "01KBJXHH4WF4NYD9HD3P955H9H",
@@ -130,6 +138,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
         "url": "https://www.gorillatough.com/product/gorilla-tape/",
         "image_filename": "gorilla-tape.png",
+        "shops": [],
     },
     {
         "id": "01KBJXHKTWG3VFP9WR006129C0",
@@ -144,6 +153,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
         "url": "https://www.bahco.com/",
         "image_filename": "bahco-laplander.jpg.png",
+        "shops": [],
     },
     {
         "id": "01KBJXHP7289P4VEDKSCAMYBJW",
@@ -158,6 +168,9 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
         "url": "https://www.victorinox.com/global/en/products/Swiss-Army-Knives/Medium-Pocket-Knives/Ranger/p/1.3713",
         "image_filename": "Victorinox-Ranger.png",
+        "shops": [
+            {"url": "https://militaria.pl/p/scyzoryk-victorinox-ranger-red-64893?pref_q=scyzoryk+victorinox+ranger+red"}
+        ],
     },
     {
         "id": "01KBJXHRQ0NKA5QAGHHC41YE4A",
@@ -171,10 +184,10 @@ CATALOGUE_ITEMS = [
         "weight": 29.0,
         "weight_unit": "g",
         "url": "https://www.victorinox.com/global/en/products/Swiss-Army-Knives/Small-Pocket-Knives/Alox-Bantam/p/0.6221",
+        "image_filename": "Victorinox-Alox-Bantam-Silver.png",
         "shops": [
             {"url": "https://militaria.pl/p/scyzoryk-victorinox-alox-bantam-silver-2608760"},
         ],
-        "image_filename": "Victorinox-Alox-Bantam-Silver.png",
     },
     # Woda / Water
     {
@@ -190,6 +203,9 @@ CATALOGUE_ITEMS = [
         "weight_unit": "oz",
         "url": "https://sawyer.com/products/mini-water-filtration-system",
         "image_filename": "sawyer-mini.png",
+        "shops": [
+            {"url": "https://militaria.pl/p/filtr-do-wody-sawyer-mini-blue-20615?pref_q=filtr+do+wody+sawyer+mini+-+blue"},
+        ],
     },
     {
         "id": "01KBJXHYQ826J0HKQ21CK8CR6H",
@@ -204,6 +220,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "oz",
         "url": "https://sawyer.com/products/squeeze-water-filtration-system",
         "image_filename": "sawyer-squeeze-sp129.png",
+        "shops": [],
     },
     {
         "id": "01KBJXJ16F5J1NYW6GZN2S906E",
@@ -217,6 +234,7 @@ CATALOGUE_ITEMS = [
         "weight": 0.0,
         "weight_unit": "g",
         "url": "https://www.katadyn.com/",
+        "shops": [],
     },
     {
         "id": "01KBJXJ3P532DYZMJ0DK2K6MW1",
@@ -231,6 +249,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
         "url": "https://www.lifestraw.com/products/lifestraw-personal-water-filter",
         "image_filename": "lifestraw-personal.png",
+        "shops": [],
     },
     {
         "id": "01KBJXJ60YKWVB026N8YJ9TYPE",
@@ -238,13 +257,18 @@ CATALOGUE_ITEMS = [
         "category": "water",
         "brand": "LifeStraw",
         "model": "Go 650 ml",
-        "description": "Butelka z wbudowanym filtrem do wody, wygodna w użyciu",
+        "description": "Butelka z wbudowanym filtrem do wody, wygodna w użyciu. Mikrofiltr membranowy pozwala na przefiltrowanie do 4000 litrów wody.",
         "price_tier": "medium",
         "quality": "high",
-        "weight": 0.0,
+        "weight": 247.0,
         "weight_unit": "g",
         "url": "https://www.lifestraw.com/products/lifestraw-go",
         "image_filename": "lifestraw-go-2.png",
+        "shops": [
+            {"url": "https://militaria.pl/p/butelka-z-filtrem-lifestraw-go-2-0-tritan-650-ml-polar-white-1950957?pref_q=butelka+z+filtrem+lifestraw+go+2.0+tritan+650+ml+-+polar+white", "variant": "polar white"},
+            {"url": "https://militaria.pl/p/butelka-z-filtrem-lifestraw-go-2-0-tritan-650-ml-nordic-noir-1950955?pref_q=butelka+z+filtrem+lifestraw+go+2.0+tritan+650+ml+-+nordic+noir", "variant": "nordic noir"},
+
+        ],
     },
     # Schronienie / Shelter
     {
@@ -618,6 +642,20 @@ CATALOGUE_ITEMS = [
         "url": "https://www.amazon.com/s?k=emergency+poncho",
     },
     {
+        "id": "01KC2C9M9BNYBJY74WCR1DD1G9",
+        "name": "Ponczo Badger Outdoor Rain Poncho Ripstop - Olive",
+        "category": "shelter",
+        "brand": "Badger Outdoor",
+        "model": "Poncho Ripstop - Olive",
+        "description": "Ponczo przeciwdeszczowe z praktycznym kapturem ze ściągaczem. To lekki, wytrzymały i wielofunkcyjny ekwipunek, który warto mieć zawsze pod ręką. Sprawdzi się zarówno w leśnej głuszy, jak i w samochodowym schowku czy rowerowej sakwie, gotowe na deszczową pogodę.",
+        "price_tier": "medium",
+        "quality": "medium",
+        "weight": 254.0,
+        "weight_unit": "g",
+        "url": "https://www.amazon.com/s?k=emergency+poncho",
+        "shops": [{"url": "https://militaria.pl/p/ponczo-badger-outdoor-rain-poncho-ripstop-olive-172615?pref_q=ponczo+badger+outdoor+rain+poncho+ripstop+-+olive"}],
+    },
+    {
         "id": "01KBQ9MKG500FXNVND2X3J4AZ4",
         "name": "Olight i3T EOS 2",
         "category": "light",
@@ -633,6 +671,10 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
         "url": "https://www.olightstore.com/i3t-eos",
         "image_filename": "olight-i3T-2-EOS.jpg.png",
+        "shops": [
+            {"url": "https://militaria.pl/p/latarka-olight-i3t-2-eos-black-300-lumenow-2237331?pref_q=latarka+olight+i3t+2+eos+black+-+300+lumen%c3%b3w", "variant": "black"},
+            {"url": "https://militaria.pl/p/latarka-olight-i3t-2-eos-od-green-300-lumenow-2808151?pref_q=latarka+olight+i3t+2+eos+od+green+-+300+lumen%c3%b3w", "variant": "green"}
+        ]
     },
     {
         "id": "01KBQ9MKG50801WW461XE4JJA4",
@@ -650,6 +692,10 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
         "url": "https://www.victorinox.com/global/en/products/Swiss-Army-Knives/Medium-Pocket-Knives/Huntsman/p/1.3713",
         "image_filename": "Victorinox-Huntsman.png",
+        "shops": [
+            {"url": "https://militaria.pl/p/scyzoryk-victorinox-huntsman-red-10025?pref_q=scyzoryk+victorinox+huntsman+-+red", "variant": "red"},
+            {"url": "https://militaria.pl/p/scyzoryk-victorinox-huntsman-black-18746?pref_q=scyzoryk+victorinox+huntsman+-+black", "variant": "black"}
+        ],
     },
     {
         "id": "01KBQ9MKG60801WW461XE4JJA5",
@@ -665,6 +711,7 @@ CATALOGUE_ITEMS = [
         "weight": 35.0,
         "weight_unit": "g",
         "url": "https://www.amazon.com",
+        "shops": [],
     },
     {
         "id": "01KBQ9MKG60801WW461XE4JJA6",
@@ -681,6 +728,7 @@ CATALOGUE_ITEMS = [
         "weight": 70.0,
         "weight_unit": "g",
         "url": "https://riteintherain.com/products/top-spiral-notepad-3x5",
+        "shops": [{"url": "https://militaria.pl/p/notes-wodoodporny-rite-in-the-rain-3x5-tan-24620?pref_q=notes+wodoodporny+rite+in+the+rain+3x5%22+-+tan"}],
     },
     {
         "id": "01KBQ9MKG60801WW461XE4JJA7",
@@ -697,6 +745,7 @@ CATALOGUE_ITEMS = [
         "weight": 9.0,
         "weight_unit": "g",
         "url": "https://www.sharpie.com",
+        "shops": [],
     },
     {
         "id": "01KBQ9MKG60801WW461XE4JJA8",
@@ -714,5 +763,6 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
         "url": "https://www.fenixlighting.com/product/e01-v2-flashlight/",
         "image_filename": "fenix-e01-v2.png",
+        "shops": [{"url": "https://militaria.pl/p/latarka-fenix-e01-v2-0-black-100-lumenow-2839708?pref_q=latarka+fenix+e01+v2.0+black+-+100+lumen%c3%b3w"}],
     },
 ]

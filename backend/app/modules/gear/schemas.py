@@ -307,6 +307,7 @@ class CatalogueShop(BaseModel):
 
     url: str
     name: str | None = None
+    variant: str | None = None
 
     model_config = {"populate_by_name": True}
 

@@ -292,8 +292,10 @@ const handleAddToContainer = () => {
           >
             <ExternalLink class="size-4 shrink-0 text-muted-foreground" />
             <div class="flex-1 min-w-0">
-              <div v-if="shop.name" class="font-medium">
-                {{ shop.name }}
+              <div v-if="shop.name || shop.variant" class="font-medium">
+                <span v-if="shop.name">{{ shop.name }}</span>
+                <span v-if="shop.name && shop.variant" class="text-muted-foreground"> • </span>
+                <span v-if="shop.variant" class="capitalize">{{ shop.variant }}</span>
               </div>
               <div class="truncate text-sm text-muted-foreground">
                 {{ getUrlDisplay(shop.url) }}

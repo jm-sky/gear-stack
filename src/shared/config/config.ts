@@ -97,6 +97,7 @@ export const ALL_ITEMS_TABLE_COLUMN_VISIBILITY_KEY = `${config.app.id}:all-items
 export const ALL_ITEMS_PAGE_FILTERS_KEY = `${config.app.id}:all-items-page:filters`
 export const SHOPPING_PLANNING_PAGE_FILTERS_KEY = `${config.app.id}:shopping-planning-page:filters`
 export const SHOPPING_PLANNING_PAGE_FILTERS_COLLAPSED_KEY = `${config.app.id}:shopping-planning-page:filters-collapsed`
+export const CONTAINERS_STORAGE_KEY = `${config.app.id}:containers`
 export const CONTAINERS_LIST_PAGE_FILTERS_KEY = `${config.app.id}:containers-list-page:filters`
 export const PUBLIC_CONTAINERS_BROWSER_PAGE_FILTERS_KEY = `${config.app.id}:public-containers-browser-page:filters`
 export const CATALOGUE_BROWSER_PAGE_FILTERS_KEY = `${config.app.id}:catalogue-browser-page:filters`

@@ -16,15 +16,31 @@ export class GearItemHybridService implements IGearItemService {
   }
 
   async createItem(containerId: TULID, data: ICreateItemDto): Promise<IGearItem> {
+    let createdItem: IGearItem | null = null
+
     try {
-      const item = await this.gearItemApiService.createItem(containerId, data)
-      // Refresh container from API to get updated items
-      const container = await gearContainerApiService.getContainer(containerId)
-      useGearStore().updateContainer(container)
-      // Store automatically saves to localStorage via saveToStorage()
-      return item
+      // H6 FIX: Transaction boundary - Phase 1: Create item on API
+      createdItem = await this.gearItemApiService.createItem(containerId, data)
+
+      try {
+        // H6 FIX: Transaction boundary - Phase 2: Sync store with API
+        const container = await gearContainerApiService.getContainer(containerId)
+        useGearStore().updateContainer(container)
+        // Store automatically saves to localStorage via saveToStorage()
+
+        return createdItem
+      } catch (syncError) {
+        // H6 FIX: Sync failed after create - rollback by deleting created item
+        logger.error('Failed to sync store after item creation, rolling back', syncError)
+        try {
+          await this.gearItemApiService.deleteItem(createdItem.id)
+        } catch (rollbackError) {
+          logger.error('Rollback failed - data inconsistency detected', rollbackError)
+        }
+        throw syncError
+      }
     } catch (error) {
-      // Fallback to localStorage on API error
+      // Fallback to localStorage on API error or rollback failure
       logger.warn('API failed, falling back to localStorage', error)
       return this.gearItemLocalService.createItem(containerId, data)
     }
@@ -45,54 +61,88 @@ export class GearItemHybridService implements IGearItemService {
   }
 
   async updateItem(itemId: TULID, data: IUpdateItemDto): Promise<IGearItem> {
+    const store = useGearStore()
+    // CRITICAL FIX: Get container ID BEFORE update to prevent race condition
+    const containerId = store.getContainerIdByItemId(itemId)
+
+    if (!containerId) {
+      logger.warn('Container not found for item, falling back to localStorage', itemId)
+      return this.gearItemLocalService.updateItem(itemId, data)
+    }
+
+    // H6 FIX: Save previous item state for rollback
+    const previousItem = store.getContainerById(containerId)?.items.find(item => item.id === itemId)
+
     try {
-      const store = useGearStore()
-      // CRITICAL FIX: Get container ID BEFORE update to prevent race condition
-      const containerId = store.getContainerIdByItemId(itemId)
+      // H6 FIX: Transaction boundary - Phase 1: Update item on API
+      const updatedItem = await this.gearItemApiService.updateItem(itemId, data)
 
-      if (!containerId) {
-        logger.warn('Container not found for item, falling back to localStorage', itemId)
-        return this.gearItemLocalService.updateItem(itemId, data)
+      try {
+        // H6 FIX: Transaction boundary - Phase 2: Sync store with API
+        const updatedContainer = await gearContainerApiService.getContainer(containerId)
+        store.updateContainer(updatedContainer)
+        // Store automatically saves to localStorage via saveToStorage()
+
+        return updatedItem
+      } catch (syncError) {
+        // H6 FIX: Sync failed after update - rollback to previous state
+        logger.error('Failed to sync store after item update, rolling back', syncError)
+        if (previousItem) {
+          try {
+            await this.gearItemApiService.updateItem(itemId, previousItem)
+          } catch (rollbackError) {
+            logger.error('Rollback failed - data inconsistency detected', rollbackError)
+          }
+        }
+        throw syncError
       }
-
-      const item = await this.gearItemApiService.updateItem(itemId, data)
-
-      // Refresh the correct container (no loop needed, no race condition)
-      const updatedContainer = await gearContainerApiService.getContainer(containerId)
-      store.updateContainer(updatedContainer)
-      // Store automatically saves to localStorage via saveToStorage()
-
-      return item
     } catch (error) {
-      // Fallback to localStorage on API error
+      // Fallback to localStorage on API error or rollback failure
       logger.warn('API failed, falling back to localStorage', error)
       return this.gearItemLocalService.updateItem(itemId, data)
     }
   }
 
   async deleteItem(itemId: TULID): Promise<void> {
+    const store = useGearStore()
+    // CRITICAL FIX: Get container ID BEFORE deletion to prevent race condition
+    const containerId = store.getContainerIdByItemId(itemId)
+
+    if (!containerId) {
+      logger.warn('Container not found for item, falling back to localStorage', itemId)
+      return this.gearItemLocalService.deleteItem(itemId)
+    }
+
+    // H6 FIX: Save deleted item for rollback
+    const deletedItem = store.getContainerById(containerId)?.items.find(item => item.id === itemId)
+
     try {
-      const store = useGearStore()
-      // CRITICAL FIX: Get container ID BEFORE deletion to prevent race condition
-      const containerId = store.getContainerIdByItemId(itemId)
-
-      if (!containerId) {
-        logger.warn('Container not found for item, falling back to localStorage', itemId)
-        return this.gearItemLocalService.deleteItem(itemId)
-      }
-
+      // H6 FIX: Transaction boundary - Phase 1: Delete item on API
       await this.gearItemApiService.deleteItem(itemId)
 
-      // Refresh the correct container (no loop needed, no race condition)
-      const updatedContainer = await gearContainerApiService.getContainer(containerId)
-      store.updateContainer(updatedContainer)
+      try {
+        // H6 FIX: Transaction boundary - Phase 2: Sync store with API
+        const updatedContainer = await gearContainerApiService.getContainer(containerId)
+        store.updateContainer(updatedContainer)
 
-      // Also remove from localStorage backup
-      this.gearItemLocalService.deleteItem(itemId).catch(err => {
-        logger.warn('Failed to remove item from localStorage backup:', err)
-      })
+        // Also remove from localStorage backup
+        this.gearItemLocalService.deleteItem(itemId).catch(err => {
+          logger.warn('Failed to remove item from localStorage backup:', err)
+        })
+      } catch (syncError) {
+        // H6 FIX: Sync failed after delete - rollback by recreating item
+        logger.error('Failed to sync store after item deletion, rolling back', syncError)
+        if (deletedItem) {
+          try {
+            await this.gearItemApiService.createItem(containerId, deletedItem)
+          } catch (rollbackError) {
+            logger.error('Rollback failed - data inconsistency detected', rollbackError)
+          }
+        }
+        throw syncError
+      }
     } catch (error) {
-      // Fallback to localStorage on API error
+      // Fallback to localStorage on API error or rollback failure
       logger.warn('API failed, falling back to localStorage', error)
       await this.gearItemLocalService.deleteItem(itemId)
     }
@@ -108,27 +158,46 @@ export class GearItemHybridService implements IGearItemService {
 
   // Batch update order
   async batchUpdateOrder(items: IGearItem[]): Promise<IGearItem[]> {
+    const store = useGearStore()
+    // CRITICAL FIX: Get container ID BEFORE batch update to prevent race condition
+    // Assume all items in batch belong to same container (standard practice)
+    const containerId = items.length > 0 ? store.getContainerIdByItemId(items[0]!.id) : undefined
+
+    if (!containerId) {
+      logger.warn('Container not found for items, falling back to localStorage')
+      return this.gearItemLocalService.batchUpdateOrder(items)
+    }
+
+    // H6 FIX: Save previous items state for rollback
+    const container = store.getContainerById(containerId)
+    const itemIds = new Set(items.map(item => item.id))
+    const previousItems = container?.items.filter(item => itemIds.has(item.id)) ?? []
+
     try {
-      const store = useGearStore()
-      // CRITICAL FIX: Get container ID BEFORE batch update to prevent race condition
-      // Assume all items in batch belong to same container (standard practice)
-      const containerId = items.length > 0 ? store.getContainerIdByItemId(items[0]!.id) : undefined
-
-      if (!containerId) {
-        logger.warn('Container not found for items, falling back to localStorage')
-        return this.gearItemLocalService.batchUpdateOrder(items)
-      }
-
+      // H6 FIX: Transaction boundary - Phase 1: Batch update on API
       const updatedItems = await this.gearItemApiService.batchUpdateOrder(items)
 
-      // Refresh the correct container (no loop needed, no race condition)
-      const updatedContainer = await gearContainerApiService.getContainer(containerId)
-      store.updateContainer(updatedContainer)
-      // Store automatically saves to localStorage via saveToStorage()
+      try {
+        // H6 FIX: Transaction boundary - Phase 2: Sync store with API
+        const updatedContainer = await gearContainerApiService.getContainer(containerId)
+        store.updateContainer(updatedContainer)
+        // Store automatically saves to localStorage via saveToStorage()
 
-      return updatedItems
+        return updatedItems
+      } catch (syncError) {
+        // H6 FIX: Sync failed after batch update - rollback to previous state
+        logger.error('Failed to sync store after batch update, rolling back', syncError)
+        if (previousItems.length > 0) {
+          try {
+            await this.gearItemApiService.batchUpdateOrder(previousItems)
+          } catch (rollbackError) {
+            logger.error('Rollback failed - data inconsistency detected', rollbackError)
+          }
+        }
+        throw syncError
+      }
     } catch (error) {
-      // Fallback to localStorage on API error
+      // Fallback to localStorage on API error or rollback failure
       logger.warn('API failed, falling back to localStorage', error)
       return this.gearItemLocalService.batchUpdateOrder(items)
     }
