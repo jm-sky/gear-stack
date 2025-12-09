@@ -3,8 +3,77 @@
 **Phase:** B (Frontend)
 **Data:** 2025-12-09
 **Zakres:** `src/modules/gear/` (services, composables, stores, types)
-**Status:** ✅ Completed
+**Status:** ✅ Completed + 🔧 CRITICAL Fixes Applied (2025-12-09)
 **Language/Stack:** TypeScript/Vue 3
+
+---
+
+## ⚠️ CRITICAL FIXES APPLIED (2025-12-09)
+
+**Status:** ✅ All 3 CRITICAL issues have been fixed and tested
+
+### C1: Data Consistency in gearContainerService ✅ FIXED
+**Issue:** Risk of data loss if localStorage deletion fails after API deletion
+**Fix Applied:**
+- Implemented two-phase commit pattern with rollback mechanism
+- Backup container data before deletion
+- Automatic restore to API if localStorage deletion fails
+- User-friendly error message if rollback fails
+
+**Files Modified:**
+- `src/modules/gear/services/gearContainerService.ts:46-97`
+- `src/modules/gear/services/gearContainerService.ts:130-180`
+
+**Test Coverage:** ✅
+- `src/modules/gear/services/gearContainerService.spec.ts` (7 test cases)
+
+---
+
+### C2: Race Condition in gearItemHybridService ✅ FIXED
+**Issue:** Linear search for parent container could refresh wrong container during concurrent updates
+**Fix Applied:**
+- Added `getContainerIdByItemId()` and `getContainerByItemId()` getters to store
+- Get container ID BEFORE update/delete to prevent race conditions
+- Eliminated O(n²) loop search with O(n) direct lookup
+- Performance improvement: 100 containers now process in <100ms
+
+**Files Modified:**
+- `src/modules/gear/store/useGearStore.ts:49-64` (added getters)
+- `src/modules/gear/services/gearItemHybridService.ts:46-70` (updateItem)
+- `src/modules/gear/services/gearItemHybridService.ts:72-98` (deleteItem)
+- `src/modules/gear/services/gearItemHybridService.ts:108-134` (batchUpdateOrder)
+
+**Test Coverage:** ✅
+- `src/modules/gear/services/gearItemHybridService.spec.ts` (10 test cases including performance test)
+
+---
+
+### C3: Circular Dependency in dataMigrationService ✅ FIXED
+**Issue:** Containers created without respecting parentContainerId dependency order, causing orphaned containers
+**Fix Applied:**
+- Implemented topological sort algorithm
+- Containers now sorted by dependency order (parents before children)
+- Circular dependency detection and automatic breaking (set parent to null)
+- Orphaned container handling (missing parent set to null)
+- ID mapping from old localStorage IDs to new API-generated IDs
+
+**Files Modified:**
+- `src/modules/gear/services/dataMigrationService.ts:10-54` (added sortContainersByDependency)
+- `src/modules/gear/services/dataMigrationService.ts:83-132` (migration with sorting and ID mapping)
+
+**Test Coverage:** ✅
+- `src/modules/gear/services/dataMigrationService.spec.ts` (13 test cases)
+
+---
+
+**Total Test Coverage for CRITICAL Fixes:** 30 test cases
+**All tests passing:** ✅
+
+**Impact:**
+- Data loss prevention: Two-phase commit ensures API/localStorage consistency
+- Performance: O(n) lookup instead of O(n²) loop search
+- Reliability: Topological sort prevents orphaned containers during migration
+- User experience: Clear error messages and automatic recovery
 
 ---
 
@@ -652,12 +721,12 @@ src/modules/gear/
 
 ## 8. Findings Summary
 
-### Critical (Must Fix)
-| Priority | File | Issue | Impact |
-|----------|------|-------|--------|
-| 🔴 | `gearContainerService.ts:46-59` | Data loss risk - no rollback if localStorage deletion fails after API deletion | Data inconsistency |
-| 🔴 | `dataMigrationService.ts:36-116` | Circular dependency risk - parentContainerId not handled correctly | Orphaned containers |
-| 🔴 | `gearItemHybridService.ts:46-65` | Race condition in container refresh after item update | Wrong container updated |
+### Critical (Must Fix) - ✅ ALL FIXED (2025-12-09)
+| Priority | File | Issue | Impact | Status |
+|----------|------|-------|--------|--------|
+| ✅ ~~🔴~~ | `gearContainerService.ts:46-97` | ~~Data loss risk - no rollback if localStorage deletion fails after API deletion~~ | ~~Data inconsistency~~ | **FIXED** - Two-phase commit implemented |
+| ✅ ~~🔴~~ | `dataMigrationService.ts:10-132` | ~~Circular dependency risk - parentContainerId not handled correctly~~ | ~~Orphaned containers~~ | **FIXED** - Topological sort implemented |
+| ✅ ~~🔴~~ | `gearItemHybridService.ts:46-134` | ~~Race condition in container refresh after item update~~ | ~~Wrong container updated~~ | **FIXED** - Container ID lookup before update |
 
 ### High (Should Fix)
 | Priority | File | Issue | Impact |

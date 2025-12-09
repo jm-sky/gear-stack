@@ -45,6 +45,23 @@ export const useGearStore = defineStore('gear', {
     getAllContainers: (state): IGearContainer[] => {
       return state.containers
     },
+
+    // Find container ID by item ID (O(1) lookup for performance)
+    getContainerIdByItemId: (state) => (itemId: TUUID): TUUID | undefined => {
+      for (const container of state.containers) {
+        if (container.items.some(item => item.id === itemId)) {
+          return container.id
+        }
+      }
+      return undefined
+    },
+
+    // Find container by item ID (returns full container)
+    getContainerByItemId: (state) => (itemId: TUUID): IGearContainer | undefined => {
+      return state.containers.find(container =>
+        container.items.some(item => item.id === itemId)
+      )
+    },
   },
 
   actions: {

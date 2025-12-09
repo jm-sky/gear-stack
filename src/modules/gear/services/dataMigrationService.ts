@@ -1,3 +1,5 @@
+import { logger } from '@/shared/utils/logger'
+import type { IGearContainer } from '../types/gear.types'
 import { useGearStore } from '../store/useGearStore'
 // modules/gear/services/dataMigrationService.ts
 import { gearContainerApiService } from './gearContainerApiService'
@@ -5,6 +7,52 @@ import { gearContainerLocalService } from './gearContainerLocalService'
 import { gearItemApiService } from './gearItemApiService'
 
 const STORAGE_KEY = 'gear-stack:containers'
+
+/**
+ * CRITICAL FIX: Sort containers by dependency order (topological sort)
+ * This ensures parent containers are created before their children
+ * Prevents circular dependency issues and orphaned containers
+ */
+function sortContainersByDependency(containers: IGearContainer[]): IGearContainer[] {
+  const sorted: IGearContainer[] = []
+  const visited = new Set<string>()
+  const visiting = new Set<string>() // For cycle detection
+
+  function visit(container: IGearContainer): void {
+    if (visited.has(container.id)) return
+
+    // Detect circular dependencies
+    if (visiting.has(container.id)) {
+      logger.warn(`Circular dependency detected for container: ${container.name}`)
+      // Break the cycle by setting parentContainerId to null
+      container.parentContainerId = null
+      return
+    }
+
+    visiting.add(container.id)
+
+    // Visit parent first if it exists
+    if (container.parentContainerId) {
+      const parent = containers.find(c => c.id === container.parentContainerId)
+      if (parent) {
+        visit(parent)
+      } else {
+        // Parent not found - orphaned container, set parent to null
+        logger.warn(`Parent container not found for ${container.name}, setting parent to null`)
+        container.parentContainerId = null
+      }
+    }
+
+    visiting.delete(container.id)
+    visited.add(container.id)
+    sorted.push(container)
+  }
+
+  // Visit all containers
+  containers.forEach(container => visit(container))
+
+  return sorted
+}
 
 /**
  * Check if there are containers in localStorage
@@ -35,29 +83,41 @@ export function hasLocalData(): boolean {
  */
 export async function migrateLocalDataToAPI(): Promise<void> {
   const localContainers = await gearContainerLocalService.getAllContainers()
-  
+
   if (localContainers.length === 0) {
-    console.log('No local data to migrate')
+    logger.info('No local data to migrate')
     return
   }
 
-  console.log(`Migrating ${localContainers.length} containers to API...`)
-  
+  logger.info(`Migrating ${localContainers.length} containers to API...`)
+
+  // CRITICAL FIX: Sort containers by dependency to avoid orphaned containers
+  const sortedContainers = sortContainersByDependency([...localContainers])
+  logger.info('Containers sorted by dependency order')
+
   const store = useGearStore()
   const migratedContainers = []
+  // Map old IDs to new IDs for parent reference updates
+  const idMapping = new Map<string, string>()
 
-  for (const localContainer of localContainers) {
+  for (const localContainer of sortedContainers) {
     try {
       // Create container via API
       // Note: We need to extract items first, as API expects separate creation
       const { items, ...containerData } = localContainer
-      
+
+      // CRITICAL FIX: Map old parent ID to new API-generated ID
+      let parentContainerId = containerData.parentContainerId
+      if (parentContainerId && idMapping.has(parentContainerId)) {
+        parentContainerId = idMapping.get(parentContainerId) ?? null
+      }
+
       // Create container without items first
       const createdContainer = await gearContainerApiService.createContainer({
         name: containerData.name,
         description: containerData.description,
         type: containerData.type,
-        parentContainerId: containerData.parentContainerId,
+        parentContainerId, // Use mapped ID
         maxWeight: containerData.maxWeight,
         maxWeightUnit: containerData.maxWeightUnit,
         weight: containerData.weight,
@@ -68,6 +128,9 @@ export async function migrateLocalDataToAPI(): Promise<void> {
         url: containerData.url,
         hideWhenNested: containerData.hideWhenNested,
       })
+
+      // CRITICAL FIX: Store ID mapping for child containers
+      idMapping.set(localContainer.id, createdContainer.id)
 
       // Create items for this container
       if (items && items.length > 0) {
@@ -92,16 +155,16 @@ export async function migrateLocalDataToAPI(): Promise<void> {
               consumable: item.consumable ?? null,
             })
           } catch (itemError) {
-            console.warn(`Failed to migrate item ${item.name} for container ${createdContainer.name}:`, itemError)
+            logger.warn(`Failed to migrate item ${item.name} for container ${createdContainer.name}:`, itemError)
             // Continue with other items
           }
         }
       }
 
       migratedContainers.push(createdContainer)
-      console.log(`Migrated container: ${createdContainer.name}`)
+      logger.info(`Migrated container: ${createdContainer.name}`)
     } catch (error) {
-      console.error(`Failed to migrate container ${localContainer.name}:`, error)
+      logger.error(`Failed to migrate container ${localContainer.name}:`, error)
       // Continue with other containers
     }
   }
@@ -111,7 +174,7 @@ export async function migrateLocalDataToAPI(): Promise<void> {
     // Fetch all containers from API to get complete data
     const allContainers = await gearContainerApiService.getContainers()
     store.setContainers(allContainers)
-    console.log(`Migration complete: ${migratedContainers.length} containers migrated`)
+    logger.info(`Migration complete: ${migratedContainers.length} containers migrated`)
   }
 }
 

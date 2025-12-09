@@ -1,3 +1,4 @@
+import { logger } from '@/shared/utils/logger'
 import type { ICreateItemDto, IGearItem, IGearItemService, IUpdateItemDto } from '../types/gear.types'
 import type { GearItemLocalService } from './gearItemLocalService'
 import { useGearStore } from '../store/useGearStore'
@@ -24,7 +25,7 @@ export class GearItemHybridService implements IGearItemService {
       return item
     } catch (error) {
       // Fallback to localStorage on API error
-      console.warn('API failed, falling back to localStorage', error)
+      logger.warn('API failed, falling back to localStorage', error)
       return this.gearItemLocalService.createItem(containerId, data)
     }
   }
@@ -38,53 +39,61 @@ export class GearItemHybridService implements IGearItemService {
       return items
     } catch (error) {
       // Fallback to localStorage on API error
-      console.warn('API failed, falling back to localStorage', error)
+      logger.warn('API failed, falling back to localStorage', error)
       return this.gearItemLocalService.getItems(containerId, skip, limit)
     }
   }
 
   async updateItem(itemId: TULID, data: IUpdateItemDto): Promise<IGearItem> {
     try {
-      const item = await this.gearItemApiService.updateItem(itemId, data)
-      // Find container and refresh it
       const store = useGearStore()
-      const allContainers = store.getAllContainers
-      for (const container of allContainers) {
-        if (container.items.some(i => i.id === itemId)) {
-          const updatedContainer = await gearContainerApiService.getContainer(container.id)
-          store.updateContainer(updatedContainer)
-          // Store automatically saves to localStorage via saveToStorage()
-          break
-        }
+      // CRITICAL FIX: Get container ID BEFORE update to prevent race condition
+      const containerId = store.getContainerIdByItemId(itemId)
+
+      if (!containerId) {
+        logger.warn('Container not found for item, falling back to localStorage', itemId)
+        return this.gearItemLocalService.updateItem(itemId, data)
       }
+
+      const item = await this.gearItemApiService.updateItem(itemId, data)
+
+      // Refresh the correct container (no loop needed, no race condition)
+      const updatedContainer = await gearContainerApiService.getContainer(containerId)
+      store.updateContainer(updatedContainer)
+      // Store automatically saves to localStorage via saveToStorage()
+
       return item
     } catch (error) {
       // Fallback to localStorage on API error
-      console.warn('API failed, falling back to localStorage', error)
+      logger.warn('API failed, falling back to localStorage', error)
       return this.gearItemLocalService.updateItem(itemId, data)
     }
   }
 
   async deleteItem(itemId: TULID): Promise<void> {
     try {
-      await this.gearItemApiService.deleteItem(itemId)
-      // Find container and refresh it
       const store = useGearStore()
-      const allContainers = store.getAllContainers
-      for (const container of allContainers) {
-        if (container.items.some(i => i.id === itemId)) {
-          const updatedContainer = await gearContainerApiService.getContainer(container.id)
-          store.updateContainer(updatedContainer)
-          // Also remove from localStorage
-          this.gearItemLocalService.deleteItem(itemId).catch(err => {
-            console.warn('Failed to remove item from localStorage backup:', err)
-          })
-          break
-        }
+      // CRITICAL FIX: Get container ID BEFORE deletion to prevent race condition
+      const containerId = store.getContainerIdByItemId(itemId)
+
+      if (!containerId) {
+        logger.warn('Container not found for item, falling back to localStorage', itemId)
+        return this.gearItemLocalService.deleteItem(itemId)
       }
+
+      await this.gearItemApiService.deleteItem(itemId)
+
+      // Refresh the correct container (no loop needed, no race condition)
+      const updatedContainer = await gearContainerApiService.getContainer(containerId)
+      store.updateContainer(updatedContainer)
+
+      // Also remove from localStorage backup
+      this.gearItemLocalService.deleteItem(itemId).catch(err => {
+        logger.warn('Failed to remove item from localStorage backup:', err)
+      })
     } catch (error) {
       // Fallback to localStorage on API error
-      console.warn('API failed, falling back to localStorage', error)
+      logger.warn('API failed, falling back to localStorage', error)
       await this.gearItemLocalService.deleteItem(itemId)
     }
   }
@@ -100,21 +109,27 @@ export class GearItemHybridService implements IGearItemService {
   // Batch update order
   async batchUpdateOrder(items: IGearItem[]): Promise<IGearItem[]> {
     try {
-      const updatedItems = await this.gearItemApiService.batchUpdateOrder(items)
-      // Refresh container from API to get updated items
-      const allContainers = useGearStore().getAllContainers
-      for (const container of allContainers) {
-        if (container.items.some(i => items.some(updated => updated.id === i.id))) {
-          const updatedContainer = await gearContainerApiService.getContainer(container.id)
-          useGearStore().updateContainer(updatedContainer)
-          // Store automatically saves to localStorage via saveToStorage()
-          break
-        }
+      const store = useGearStore()
+      // CRITICAL FIX: Get container ID BEFORE batch update to prevent race condition
+      // Assume all items in batch belong to same container (standard practice)
+      const containerId = items.length > 0 ? store.getContainerIdByItemId(items[0]!.id) : undefined
+
+      if (!containerId) {
+        logger.warn('Container not found for items, falling back to localStorage')
+        return this.gearItemLocalService.batchUpdateOrder(items)
       }
+
+      const updatedItems = await this.gearItemApiService.batchUpdateOrder(items)
+
+      // Refresh the correct container (no loop needed, no race condition)
+      const updatedContainer = await gearContainerApiService.getContainer(containerId)
+      store.updateContainer(updatedContainer)
+      // Store automatically saves to localStorage via saveToStorage()
+
       return updatedItems
     } catch (error) {
       // Fallback to localStorage on API error
-      console.warn('API failed, falling back to localStorage', error)
+      logger.warn('API failed, falling back to localStorage', error)
       return this.gearItemLocalService.batchUpdateOrder(items)
     }
   }
