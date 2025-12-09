@@ -21,6 +21,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.33.0] - 2025-12-09
+
+### Added
+- **AI History Management UI**: Complete user interface for managing AI chat history
+  - New `AiHistoryPage` with full history browsing, filtering, and search capabilities
+  - `AiHistoryList` component displaying history items with operation type badges
+  - `AiHistoryItem` component with restore, delete, and view details actions
+  - `AiHistoryFilters` component with search query and operation type filtering
+  - `AiHistoryDetailDialog` for viewing complete conversation details
+  - Client-side search filtering across prompts, responses, models, and providers
+  - Pagination support with URL state persistence
+  - Restore conversation functionality to continue previous AI chats
+  - Delete individual history items with confirmation dialog
+  - Clear all history functionality with bulk delete confirmation
+  - Full i18n support (PL/EN) for all history-related features
+  - Link to history page from AI Settings card
+
+- **AI Settings Component Refactoring**: Modular architecture for better maintainability
+  - Extracted `AiModelSelector` into dedicated settings component
+  - New `AiTokenManager` component for API token management
+  - New `AiUsageDisplay` component for showing AI usage statistics
+  - Improved component organization and separation of concerns
+  - Enhanced `AiChatWindowHeader` with better structure and functionality
+
+- **Lazy Loading for Dialogs**: Performance optimization for dialog components
+  - Implemented lazy loading for dialog components to reduce initial bundle size
+  - Improved application startup time and performance
+
+- **Backend Analysis Documentation**: Comprehensive analysis documentation
+  - Complete backend analysis for business modules and API layer
+  - Detailed refactoring plans and architectural improvements
+  - Security module analysis and fixes documentation
+
+- **Database Migrations**:
+  - Migration `037_add_max_tokens_and_temperature_to_ai_settings.py` for AI settings enhancements
+  - Migration `038_migrate_ai_history_to_new_schema.py` for AI history schema updates
+
+### Changed
+- **AI Chat Window**: Enhanced chat interface with improved header and context configuration
+- **Container Styling**: Enhanced container styling and internationalization support
+- **Image Management**: Improved image management and item retrieval in gear module
+- **Data Table Components**: Minor improvements to DataTable and DataTableToolbar components
+
+### Fixed
+- **Gear Module Services**: Applied critical fixes to gear module services for enhanced data consistency
+- **Backend Security Modules**: Completed security module fixes and improvements
+
+---
+
 ## [2.32.0] - 2025-12-08
 
 ### Added
