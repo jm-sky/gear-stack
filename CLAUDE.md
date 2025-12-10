@@ -456,3 +456,4 @@ const checked = ref(true)
 - Add desktop variants using Tailwind breakpoint prefixes (eg. `sm:`)
 - Example: `text-sm sm:text-base lg:text-lg` (small on mobile, base on tablet, large on desktop)
 - Consider spacing, typography, layout, and visibility across breakpoints
+- Run `python -m black .` and `python -m mypy .` in backend/ dir before commiting Python code.

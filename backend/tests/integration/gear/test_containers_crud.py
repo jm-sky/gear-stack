@@ -369,12 +369,8 @@ class TestContainerNesting:
         """Test retrieving nested containers structure."""
         # Arrange
         parent = await create_test_container(gear_service, test_user.id, "Backpack")
-        child1 = await create_test_container(
-            gear_service, test_user.id, "Pouch 1", parent_id=parent["id"]
-        )
-        child2 = await create_test_container(
-            gear_service, test_user.id, "Pouch 2", parent_id=parent["id"]
-        )
+        child1 = await create_test_container(gear_service, test_user.id, "Pouch 1", parent_id=parent["id"])
+        child2 = await create_test_container(gear_service, test_user.id, "Pouch 2", parent_id=parent["id"])
 
         # Act
         parent_container = await gear_service.get_container(parent["id"], test_user.id)
@@ -393,9 +389,7 @@ class TestContainerNesting:
         """Test that deleting parent container cascades to nested containers."""
         # Arrange
         parent = await create_test_container(gear_service, test_user.id, "Parent")
-        child = await create_test_container(
-            gear_service, test_user.id, "Child", parent_id=parent["id"]
-        )
+        child = await create_test_container(gear_service, test_user.id, "Child", parent_id=parent["id"])
 
         # Act
         await gear_service.delete_container(parent["id"], test_user.id)
@@ -414,12 +408,8 @@ class TestContainerNesting:
         """Test creating multiple levels of nested containers."""
         # Arrange & Act
         level1 = await create_test_container(gear_service, test_user.id, "Backpack")
-        level2 = await create_test_container(
-            gear_service, test_user.id, "Pouch", parent_id=level1["id"]
-        )
-        level3 = await create_test_container(
-            gear_service, test_user.id, "Small Box", parent_id=level2["id"]
-        )
+        level2 = await create_test_container(gear_service, test_user.id, "Pouch", parent_id=level1["id"])
+        level3 = await create_test_container(gear_service, test_user.id, "Small Box", parent_id=level2["id"])
 
         # Assert
         assert level2["parent_container_id"] == level1["id"]
