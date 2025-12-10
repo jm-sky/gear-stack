@@ -123,6 +123,8 @@ export const gearEn = {
         drawer: 'Drawer',
         case: 'Case',
         trunk: 'Trunk',
+        ubranie: 'Clothing',
+        naczynie: 'Vessel',
         other: 'Other',
         // Legacy types (for backward compatibility)
         bugOutBag: 'Bug-Out Bag',
@@ -963,6 +965,8 @@ export const gearPl = {
         drawer: 'Szuflada',
         case: 'Walizka',
         trunk: 'Bagażnik',
+        ubranie: 'Ubranie',
+        naczynie: 'Naczynie',
         other: 'Inne',
         // Legacy types (for backward compatibility)
         bugOutBag: 'Bug-Out Bag',

@@ -4,9 +4,11 @@ import {
   Box,          // box
   Briefcase,    // case
   Car,          // vehicle
+  CookingPot,     // naczynie
   Layers,       // shelf
   Luggage,      // trunk
   Package,      // other (default)
+  Shirt,        // ubranie
   ShoppingBag,  // bag, pouch
 } from 'lucide-vue-next'
 import type { TGearContainerType } from '../types/gear.types'
@@ -23,6 +25,8 @@ export const CONTAINER_ICONS: Record<string, Component> = {
   drawer: Archive,
   case: Briefcase,
   trunk: Luggage,
+  ubranie: Shirt,
+  naczynie: CookingPot,
   other: Package,
 }
 

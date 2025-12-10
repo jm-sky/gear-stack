@@ -29,6 +29,8 @@ const defaultContainerTypes = [
   'drawer',
   'case',
   'trunk',
+  'ubranie',
+  'naczynie',
   'other',
 ] as const
 </script>

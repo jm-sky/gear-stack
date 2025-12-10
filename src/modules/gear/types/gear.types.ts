@@ -12,6 +12,8 @@ export type TGearContainerType =
   | 'drawer'
   | 'case'
   | 'trunk'
+  | 'ubranie'
+  | 'naczynie'
   | 'other'
   | string // Allow custom container types
 

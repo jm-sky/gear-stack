@@ -65,6 +65,18 @@ export const CONTAINER_TYPE_KEYWORDS: Record<string, string[]> = {
     // Polish
     'bagażnik', 'kufer',
   ],
+  ubranie: [
+    // English
+    'clothing', 'garment', 'wear',
+    // Polish
+    'ubranie', 'odzież', 'odzienie',
+  ],
+  naczynie: [
+    // English
+    'vessel', 'dish', 'bowl', 'pot', 'pan',
+    // Polish
+    'naczynie', 'miska', 'garnek', 'patelnia',
+  ],
 }
 
 /**
