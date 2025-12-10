@@ -26,8 +26,8 @@ import type { IGearContainer } from '@/modules/gear/types/gear.types'
 const { t } = useI18n()
 const { containers } = useGear()
 
-// Główne linki nawigacyjne
-const navLinks = computed(() => [
+// Linki: Mój sprzęt
+const myGearLinks = computed(() => [
   {
     to: GearRoutePath.Containers,
     label: t('gear.page.title', 'Gear'),
@@ -43,6 +43,10 @@ const navLinks = computed(() => [
     label: t('gear.shopping.navTitle', 'Shopping'),
     icon: ShoppingCart,
   },
+])
+
+// Linki: Publiczne
+const publicLinks = computed(() => [
   {
     to: GearRoutePath.PublicContainers,
     label: t('gear.publicContainers.navTitle', 'Public Browser'),
@@ -74,12 +78,37 @@ const rootContainers = computed<IGearContainer[]>(() => {
 <template>
   <Sidebar collapsible="icon">
     <SidebarContent class="overflow-x-hidden">
-      <!-- Sekcja: Główne linki nawigacyjne -->
+      <!-- Sekcja: Mój sprzęt -->
       <SidebarGroup>
-        <SidebarGroupLabel>{{ t('navigation.main', 'Navigation') }}</SidebarGroupLabel>
+        <SidebarGroupLabel>{{ t('navigation.myGear', 'My Gear') }}</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu>
-            <SidebarMenuItem v-for="link in navLinks" :key="link.to">
+            <SidebarMenuItem v-for="link in myGearLinks" :key="link.to">
+              <RouterLink v-slot="{ href, navigate, isActive }" :to="link.to" custom>
+                <SidebarMenuButton
+                  :is-active="isActive"
+                  as="a"
+                  :href="href"
+                  @click="navigate"
+                >
+                  <component :is="link.icon" />
+                  <span>{{ link.label }}</span>
+                </SidebarMenuButton>
+              </RouterLink>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+
+      <!-- Separator -->
+      <SidebarSeparator class="group-data-[collapsible=icon]:w-auto!" />
+
+      <!-- Sekcja: Publiczne -->
+      <SidebarGroup>
+        <SidebarGroupLabel>{{ t('navigation.public', 'Public') }}</SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            <SidebarMenuItem v-for="link in publicLinks" :key="link.to">
               <RouterLink v-slot="{ href, navigate, isActive }" :to="link.to" custom>
                 <SidebarMenuButton
                   :is-active="isActive"

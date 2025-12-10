@@ -6,17 +6,14 @@ These fixtures establish baseline behavior before unified model migration.
 
 from datetime import UTC, datetime
 from typing import AsyncGenerator
-from unittest.mock import AsyncMock
 
 import pytest
 import pytest_asyncio
-from sqlalchemy import create_engine, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from sqlalchemy.orm import Session, sessionmaker
-from sqlalchemy.pool import StaticPool
 
 from app.core.database import Base
-from app.modules.auth.models import User
+from app.modules.auth.db_models import UserDB
 from app.modules.auth.auth_utils import get_password_hash
 from app.modules.gear.db_models import GearContainerDB, GearItemDB
 from app.modules.gear.repository import GearRepository
@@ -26,22 +23,32 @@ from app.modules.gear.schemas import ContainerCreate, ItemCreate
 
 @pytest_asyncio.fixture
 async def async_db_session() -> AsyncGenerator[AsyncSession, None]:
-    """Create async database session for testing."""
-    # Use in-memory SQLite for tests
+    """Create async database session for testing.
+
+    Uses PostgreSQL test database (backend_test) from Docker container.
+    Creates and drops all tables for each test to ensure isolation.
+    """
+    # Use PostgreSQL test database from Docker
+    # Connection from within Docker: db:5432
+    # Connection from host: localhost:5432 (if running tests outside Docker)
+    test_db_url = "postgresql+asyncpg://backend:changeme@db:5432/backend_test"
+
     engine = create_async_engine(
-        "sqlite+aiosqlite:///:memory:",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
+        test_db_url,
+        echo=False,  # Set to True for SQL query debugging
     )
 
+    # Create all tables before test
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
+    # Create session
     async_session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
     async with async_session_maker() as session:
         yield session
 
+    # Drop all tables after test for isolation
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
 
@@ -49,16 +56,16 @@ async def async_db_session() -> AsyncGenerator[AsyncSession, None]:
 
 
 @pytest_asyncio.fixture
-async def test_user(async_db_session: AsyncSession) -> User:
-    """Create a test user."""
-    user = User(
+async def test_user(async_db_session: AsyncSession) -> UserDB:
+    """Create a test user in the database."""
+    user = UserDB(
         id="test-user-id-123",
         email="test@example.com",
         name="Test User",
-        hashedPassword=get_password_hash("password123"),
-        isActive=True,
-        isEmailVerified=True,
-        createdAt=datetime.now(UTC),
+        hashed_password=get_password_hash("password123"),
+        is_active=True,
+        is_email_verified=True,
+        created_at=datetime.now(UTC),
     )
 
     async_db_session.add(user)

@@ -99,6 +99,7 @@ watch(
     })
     saveFiltersToStorage()
   },
+  { immediate: true },
 )
 
 const handleClearFilters = () => {

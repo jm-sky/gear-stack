@@ -1029,6 +1029,7 @@
     "weight": 85,
     "weight_unit": "g",
     "url": "https://www.eseeknives.com/izula.htm",
+    "image_filename": "esee-izula.jpg",
     "shops": []
   },
   {
@@ -1043,6 +1044,7 @@
     "weight": 60,
     "weight_unit": "g",
     "url": "https://www.opinel.com/en/classic-knife-no-8",
+    "image_filename": "opinel-8.png",
     "shops": [
       {
         "url": "https://militaria.pl/p/noz-opinel-no-8-carbon-12001",
@@ -1093,7 +1095,16 @@
     "weight": 340,
     "weight_unit": "g",
     "url": "https://www.coldsteel.com/",
-    "shops": []
+    "image_filename": "cold-steel-srk.png",
+    "shops": [
+      {
+        "url": "https://militaria.pl/p/noz-cold-steel-srk-sk5-black-20416",
+        "price": 279,
+        "currency": "PLN",
+        "updated_at": "2025-12-10",
+        "variant": "Black"
+      }
+    ]
   },
   {
     "id": "01KBJXKV6R7S8T9U0V1W2X3Y4Z5",
@@ -1107,6 +1118,7 @@
     "weight": 357,
     "weight_unit": "g",
     "url": "https://www.ontarioknife.com/",
+    "image_filename": "ontario-sp-2-air-force.png",
     "shops": []
   },
   {
@@ -1143,6 +1155,93 @@
     "weight": 70,
     "weight_unit": "g",
     "url": "https://www.spyderco.com/",
+    "image_filename": "Spyderco-Delica-4.png",
     "shops": []
+  },
+  {
+    "id": "01KBJXKY9U0V1W2X3Y4Z5A6B7C8",
+    "name": "Ruike P8O1-SF Grey",
+    "category": "blades",
+    "brand": "Ruike",
+    "model": "P8O1-SF Grey",
+    "description": "Nóż składany z ostrzem ze stali nierdzewnej, kompaktowy i praktyczny do EDC.",
+    "price_tier": "medium",
+    "quality": "high",
+    "weight": 0,
+    "weight_unit": "g",
+    "image_filename": "ruike-p8o1-sf-grey.png",
+    "shops": [
+      {
+        "url": "https://militaria.pl/p/noz-skladany-ruike-p8o1-sf-grey-70796?pref_q=n%c3%b3%c5%bc+sk%c5%82adany+ruike+p8o1-sf+grey",
+        "price": 175,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      }
+    ]
+  },
+  {
+    "id": "01KBJXKZ0V1W2X3Y4Z5A6B7C8D9",
+    "name": "Sanrenmu Land 710 EDC Classic",
+    "category": "blades",
+    "brand": "Sanrenmu",
+    "model": "Land 710 EDC Classic",
+    "description": "Klasyczny nóż składany EDC, niezawodny i niedrogi. Idealny do codziennego użytku.",
+    "price_tier": "low",
+    "quality": "medium",
+    "weight": 0,
+    "weight_unit": "g",
+    "image_filename": "sanrenmu-land-710-edc-classic.png",
+    "shops": [
+      {
+        "url": "https://militaria.pl/p/noz-skladany-sanrenmu-land-710-edc-classic-8930?pref_q=n%c3%b3%c5%bc+sk%c5%82adany+sanrenmu+land+710+edc+classic#",
+        "price": 79,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      }
+    ]
+  },
+  {
+    "id": "01KBJXLA1W2X3Y4Z5A6B7C8D9E0",
+    "name": "Civivi D2 Elementum Flipper C907Z",
+    "category": "blades",
+    "brand": "Civivi",
+    "model": "D2 Elementum Flipper C907Z",
+    "description": "Nóż składany z ostrzem D2, flipper mechanism. Elegancki design z micarta scales.",
+    "price_tier": "medium",
+    "quality": "high",
+    "weight": 0,
+    "weight_unit": "g",
+    "image_filename": "civivi-d2-elementum-flipper-c907z-black.png",
+    "shops": [
+      {
+        "url": "https://militaria.pl/p/noz-skladany-civivi-d2-elementum-flipper-c907z-black-stonewashed-dark-green-micarta-2789852",
+        "variant": "Black Stonewashed",
+        "price": 299,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      }
+    ]
+  },
+  {
+    "id": "01KBJXLB2X3Y4Z5A6B7C8D9E0F1",
+    "name": "Ontario Rat-2 Folder AUS-8",
+    "category": "blades",
+    "brand": "Ontario",
+    "model": "Rat-2 Folder AUS-8",
+    "description": "Popularny nóż składany z ostrzem AUS-8. Solidny i niezawodny, idealny do codziennego użytku.",
+    "price_tier": "medium",
+    "quality": "high",
+    "weight": 0,
+    "weight_unit": "g",
+    "image_filename": "ontario-rat-2-folder-aus-8-black.png",
+    "shops": [
+      {
+        "url": "https://militaria.pl/p/noz-skladany-ontario-rat-2-folder-aus-8-black-64008?pref_q=n%c3%b3%c5%bc+sk%c5%82adany+ontario+rat-2+folder+aus-8+-+black",
+        "variant": "Black",
+        "price": 269,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      }
+    ]
   }
 ]

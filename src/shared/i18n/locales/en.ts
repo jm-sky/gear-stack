@@ -100,6 +100,8 @@ export default {
     dashboard: 'Dashboard',
     profile: 'Profile',
     settings: 'Settings',
+    myGear: 'My Gear',
+    public: 'Public',
   },
   footer: {
     cookies: 'Cookie Information',

@@ -100,6 +100,8 @@ export default {
     dashboard: 'Panel',
     profile: 'Profil',
     settings: 'Ustawienia',
+    myGear: 'Mój sprzęt',
+    public: 'Publiczne',
   },
   footer: {
     cookies: 'Informacja o ciasteczkach',

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowLeft } from 'lucide-vue-next'
+import { ArrowLeft, ImageIcon } from 'lucide-vue-next'
 import { computed, defineAsyncComponent, ref, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -262,11 +262,16 @@ const handleAddToContainer = () => {
         </div>
 
         <!-- Primary Image -->
-        <div v-if="item.primaryImageUrl" class="flex items-center justify-center overflow-hidden rounded-lg border bg-muted">
+        <div class="flex items-center justify-center overflow-hidden rounded-lg border bg-muted">
           <img
+            v-if="item.primaryImageUrl"
             :src="item.primaryImageUrl"
             :alt="item.name"
             class="max-h-96 w-full object-contain"
+          />
+          <ImageIcon
+            v-else
+            class="size-20 w-full opacity-50"
           />
         </div>
       </div>

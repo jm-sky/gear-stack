@@ -11,7 +11,7 @@ These tests document the current system with two separate models:
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.auth.models import User
+from app.modules.auth.db_models import UserDB
 from app.modules.gear.service import GearService
 from app.modules.gear.schemas import ContainerCreate, ContainerUpdate
 
@@ -28,7 +28,7 @@ class TestContainerCreate:
     async def test_create_container_minimal_data(
         self,
         gear_service: GearService,
-        test_user: User,
+        test_user: UserDB,
         async_db_session: AsyncSession,
     ) -> None:
         """Test creating a container with minimal required fields."""
@@ -53,7 +53,7 @@ class TestContainerCreate:
     async def test_create_container_full_data(
         self,
         gear_service: GearService,
-        test_user: User,
+        test_user: UserDB,
         sample_container_data: ContainerCreate,
     ) -> None:
         """Test creating a container with all fields populated."""
@@ -75,7 +75,7 @@ class TestContainerCreate:
     async def test_create_container_with_weight(
         self,
         gear_service: GearService,
-        test_user: User,
+        test_user: UserDB,
     ) -> None:
         """Test creating a container with weight specification."""
         # Arrange
@@ -97,7 +97,7 @@ class TestContainerCreate:
     async def test_create_multiple_containers(
         self,
         gear_service: GearService,
-        test_user: User,
+        test_user: UserDB,
         async_db_session: AsyncSession,
     ) -> None:
         """Test creating multiple containers for the same user."""
@@ -118,7 +118,7 @@ class TestContainerRead:
     async def test_get_container_by_id(
         self,
         gear_service: GearService,
-        test_user: User,
+        test_user: UserDB,
     ) -> None:
         """Test retrieving a container by its ID."""
         # Arrange
@@ -137,7 +137,7 @@ class TestContainerRead:
     async def test_get_all_containers(
         self,
         gear_service: GearService,
-        test_user: User,
+        test_user: UserDB,
     ) -> None:
         """Test retrieving all containers for a user."""
         # Arrange
@@ -157,7 +157,7 @@ class TestContainerRead:
     async def test_get_container_not_found(
         self,
         gear_service: GearService,
-        test_user: User,
+        test_user: UserDB,
     ) -> None:
         """Test retrieving a non-existent container returns None."""
         # Act
@@ -170,7 +170,7 @@ class TestContainerRead:
     async def test_get_container_wrong_user(
         self,
         gear_service: GearService,
-        test_user: User,
+        test_user: UserDB,
     ) -> None:
         """Test that user cannot access another user's container."""
         # Arrange
@@ -190,7 +190,7 @@ class TestContainerUpdate:
     async def test_update_container_name(
         self,
         gear_service: GearService,
-        test_user: User,
+        test_user: UserDB,
     ) -> None:
         """Test updating a container's name."""
         # Arrange
@@ -208,7 +208,7 @@ class TestContainerUpdate:
     async def test_update_container_multiple_fields(
         self,
         gear_service: GearService,
-        test_user: User,
+        test_user: UserDB,
     ) -> None:
         """Test updating multiple fields of a container."""
         # Arrange
@@ -235,7 +235,7 @@ class TestContainerUpdate:
     async def test_update_container_partial(
         self,
         gear_service: GearService,
-        test_user: User,
+        test_user: UserDB,
     ) -> None:
         """Test partial update (only some fields) preserves other fields."""
         # Arrange
@@ -267,7 +267,7 @@ class TestContainerDelete:
     async def test_delete_container(
         self,
         gear_service: GearService,
-        test_user: User,
+        test_user: UserDB,
         async_db_session: AsyncSession,
     ) -> None:
         """Test deleting a container."""
@@ -289,7 +289,7 @@ class TestContainerDelete:
     async def test_delete_all_containers(
         self,
         gear_service: GearService,
-        test_user: User,
+        test_user: UserDB,
         async_db_session: AsyncSession,
     ) -> None:
         """Test deleting all containers for a user."""
@@ -309,7 +309,7 @@ class TestContainerDelete:
     async def test_delete_container_not_found(
         self,
         gear_service: GearService,
-        test_user: User,
+        test_user: UserDB,
     ) -> None:
         """Test deleting a non-existent container doesn't raise error."""
         # Act & Assert - Should not raise exception
@@ -319,7 +319,7 @@ class TestContainerDelete:
     async def test_delete_container_wrong_user(
         self,
         gear_service: GearService,
-        test_user: User,
+        test_user: UserDB,
         async_db_session: AsyncSession,
     ) -> None:
         """Test that user cannot delete another user's container."""
@@ -342,7 +342,7 @@ class TestContainerNesting:
     async def test_create_nested_container(
         self,
         gear_service: GearService,
-        test_user: User,
+        test_user: UserDB,
     ) -> None:
         """Test creating a container inside another container (System 1 nesting)."""
         # Arrange
@@ -364,7 +364,7 @@ class TestContainerNesting:
     async def test_get_nested_containers(
         self,
         gear_service: GearService,
-        test_user: User,
+        test_user: UserDB,
     ) -> None:
         """Test retrieving nested containers structure."""
         # Arrange
@@ -384,7 +384,7 @@ class TestContainerNesting:
     async def test_delete_parent_deletes_nested(
         self,
         gear_service: GearService,
-        test_user: User,
+        test_user: UserDB,
     ) -> None:
         """Test that deleting parent container cascades to nested containers."""
         # Arrange
@@ -403,7 +403,7 @@ class TestContainerNesting:
     async def test_multiple_nesting_levels(
         self,
         gear_service: GearService,
-        test_user: User,
+        test_user: UserDB,
     ) -> None:
         """Test creating multiple levels of nested containers."""
         # Arrange & Act
@@ -423,7 +423,7 @@ class TestContainerValidation:
     async def test_create_container_missing_name(
         self,
         gear_service: GearService,
-        test_user: User,
+        test_user: UserDB,
     ) -> None:
         """Test that container requires a name."""
         # Note: This should be caught by Pydantic validation
@@ -439,7 +439,7 @@ class TestContainerValidation:
     async def test_create_container_missing_type(
         self,
         gear_service: GearService,
-        test_user: User,
+        test_user: UserDB,
     ) -> None:
         """Test that container requires a type."""
         with pytest.raises((ValueError, Exception)):
