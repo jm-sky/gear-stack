@@ -168,9 +168,7 @@ CATALOGUE_ITEMS = [
         "weight_unit": "g",
         "url": "https://www.victorinox.com/global/en/products/Swiss-Army-Knives/Medium-Pocket-Knives/Ranger/p/1.3713",
         "image_filename": "Victorinox-Ranger.png",
-        "shops": [
-            {"url": "https://militaria.pl/p/scyzoryk-victorinox-ranger-red-64893?pref_q=scyzoryk+victorinox+ranger+red"}
-        ],
+        "shops": [{"url": "https://militaria.pl/p/scyzoryk-victorinox-ranger-red-64893?pref_q=scyzoryk+victorinox+ranger+red"}],
     },
     {
         "id": "01KBJXHRQ0NKA5QAGHHC41YE4A",
@@ -267,7 +265,6 @@ CATALOGUE_ITEMS = [
         "shops": [
             {"url": "https://militaria.pl/p/butelka-z-filtrem-lifestraw-go-2-0-tritan-650-ml-polar-white-1950957?pref_q=butelka+z+filtrem+lifestraw+go+2.0+tritan+650+ml+-+polar+white", "variant": "polar white"},
             {"url": "https://militaria.pl/p/butelka-z-filtrem-lifestraw-go-2-0-tritan-650-ml-nordic-noir-1950955?pref_q=butelka+z+filtrem+lifestraw+go+2.0+tritan+650+ml+-+nordic+noir", "variant": "nordic noir"},
-
         ],
     },
     # Schronienie / Shelter
@@ -673,8 +670,8 @@ CATALOGUE_ITEMS = [
         "image_filename": "olight-i3T-2-EOS.jpg.png",
         "shops": [
             {"url": "https://militaria.pl/p/latarka-olight-i3t-2-eos-black-300-lumenow-2237331?pref_q=latarka+olight+i3t+2+eos+black+-+300+lumen%c3%b3w", "variant": "black"},
-            {"url": "https://militaria.pl/p/latarka-olight-i3t-2-eos-od-green-300-lumenow-2808151?pref_q=latarka+olight+i3t+2+eos+od+green+-+300+lumen%c3%b3w", "variant": "green"}
-        ]
+            {"url": "https://militaria.pl/p/latarka-olight-i3t-2-eos-od-green-300-lumenow-2808151?pref_q=latarka+olight+i3t+2+eos+od+green+-+300+lumen%c3%b3w", "variant": "green"},
+        ],
     },
     {
         "id": "01KBQ9MKG50801WW461XE4JJA4",
@@ -694,7 +691,7 @@ CATALOGUE_ITEMS = [
         "image_filename": "Victorinox-Huntsman.png",
         "shops": [
             {"url": "https://militaria.pl/p/scyzoryk-victorinox-huntsman-red-10025?pref_q=scyzoryk+victorinox+huntsman+-+red", "variant": "red"},
-            {"url": "https://militaria.pl/p/scyzoryk-victorinox-huntsman-black-18746?pref_q=scyzoryk+victorinox+huntsman+-+black", "variant": "black"}
+            {"url": "https://militaria.pl/p/scyzoryk-victorinox-huntsman-black-18746?pref_q=scyzoryk+victorinox+huntsman+-+black", "variant": "black"},
         ],
     },
     {

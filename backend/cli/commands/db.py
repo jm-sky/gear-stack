@@ -42,6 +42,8 @@ MODEL_MODULES = [
     "app.modules.settings.db_models",
     "app.modules.tenants.db_models",
     "app.modules.two_factor.db_models",
+    "app.modules.gear.db_models",
+    "app.modules.gear_settings.db_models",
 ]
 
 
