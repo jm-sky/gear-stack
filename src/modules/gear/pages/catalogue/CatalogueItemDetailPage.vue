@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowLeft, ImageIcon } from 'lucide-vue-next'
+import { ImageIcon } from 'lucide-vue-next'
 import { computed, defineAsyncComponent, ref, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -17,6 +17,7 @@ import { GearRoutePath } from '@/modules/gear/routes'
 import { getCategoryIcon } from '@/modules/gear/utils/categoryIcons'
 import { DEFAULT_COLOR, getColorHex } from '@/modules/gear/utils/suggestedValues'
 import { usePageTitle } from '@/shared/composables/usePageTitle'
+import { COLOR_TEXT_CLASSES } from '../../utils/containerColors'
 
 // Lazy load dialog to reduce initial bundle size
 const AddCatalogueItemToContainerDialog = defineAsyncComponent(() => import('@/modules/gear/components/catalogue/AddCatalogueItemToContainerDialog.vue'))
@@ -139,14 +140,12 @@ const handleAddToContainer = () => {
       <CommonPageHeader
         :icon="categoryIcon"
         :label="item.name"
+        :icon-class="COLOR_TEXT_CLASSES[item.color ?? 'default']"
+        with-back-button
+        @back="goBack"
       >
-        <template #above>
-          <Button variant="ghost" size="icon" @click="goBack">
-            <ArrowLeft class="size-5" />
-          </Button>
-        </template>
-        <template #actions>
-          <Button @click="handleAddToContainer">
+        <template #top-actions>
+          <Button size="sm" @click="handleAddToContainer">
             {{ t('gear.catalogue.addToContainer') }}
           </Button>
         </template>

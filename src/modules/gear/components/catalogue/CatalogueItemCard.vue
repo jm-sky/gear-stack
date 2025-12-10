@@ -1,17 +1,16 @@
 <script setup lang="ts">
-import { ImageIcon, Package } from 'lucide-vue-next'
+import { ImageIcon } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import ColorDot from '@/modules/gear/components/ColorDot.vue'
 import MarkdownRenderer from '@/modules/gear/components/MarkdownRenderer.vue'
 import { useCategoryLabel } from '@/modules/gear/composables/useCategoryLabel'
 import { usePriceTierLabel } from '@/modules/gear/composables/usePriceTierLabel'
 import { GearRoutePath } from '@/modules/gear/routes'
+import CategoryIcon from '../CategoryIcon.vue'
 import type { IGlobalCatalogueItem } from '@/modules/gear/types/catalogue.types'
-import type { TContainerColor } from '@/modules/gear/types/gear.types'
 
 const { t } = useI18n()
 const { getCategoryLabel } = useCategoryLabel()
@@ -44,8 +43,7 @@ const qualityLabel = computed(() => {
     >
       <CardHeader class="h-8 flex items-center justify-between text-card-foreground">
         <div class="flex items-center gap-2">
-          <ColorDot :color="(item.color as TContainerColor) ?? undefined" />
-          <Package class="size-5" />
+          <CategoryIcon :category="item.category" :color="item.color" class="size-5" />
           <CardTitle>{{ item.name }}</CardTitle>
         </div>
       </CardHeader>

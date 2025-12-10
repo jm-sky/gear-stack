@@ -1,18 +1,46 @@
 <script setup lang="ts">
-import type { Component } from 'vue'
+import { useI18n } from 'vue-i18n'
+import Button from '@/components/ui/button/Button.vue'
+import { cn } from '@/lib/utils'
+import { getActionIcon } from '@/modules/gear/utils/actionIcons'
+import type { Component, HTMLAttributes } from 'vue'
 
 const { icon, label, description } = defineProps<{
   icon?: Component
   label: string
   description?: string
+  iconClass?: HTMLAttributes['class']
+  withBackButton?: boolean
+}>()
+
+const { t } = useI18n()
+
+const BackIcon = getActionIcon('back')
+
+const emit = defineEmits<{
+  back: []
 }>()
 </script>
 
 <template>
   <div class="space-y-6">
     <!-- Above section (optional): back button + top actions -->
-    <div v-if="$slots.above" class="flex items-center justify-between gap-3">
-      <slot name="above" />
+    <div v-if="$slots.above || withBackButton" class="flex items-center justify-between gap-3">
+      <slot name="above">
+        <slot name="back-button">
+          <Button
+            v-if="withBackButton"
+            variant="ghost"
+            size="sm"
+            @click="emit('back')"
+          >
+            <BackIcon class="size-4" />
+            {{ t('common.back') }}
+          </Button>
+        </slot>
+        <slot name="top-actions" />
+        <slot name="dropdown" />
+      </slot>
     </div>
 
     <!-- Center section: title + actions -->
@@ -23,7 +51,7 @@ const { icon, label, description } = defineProps<{
           <component
             :is="icon"
             v-if="icon"
-            class="size-8 shrink-0 text-primary"
+            :class="cn('size-8 shrink-0 text-primary', iconClass)"
           />
           <h1 class="text-3xl font-bold tracking-tight">
             {{ label }}

@@ -1,4 +1,4 @@
-import type { TGearItemCategory, TGearItemQuality, TGearWeightUnit } from './gear.types'
+import type { TContainerColor, TGearItemCategory, TGearItemQuality, TGearWeightUnit } from './gear.types'
 import type { TDateTime, TUUID } from '@/shared/types/base.type'
 
 // Price tier for catalogue items
@@ -28,7 +28,7 @@ export interface IGlobalCatalogueItem {
   priceTier?: TCataloguePriceTier | null
   quality?: TGearItemQuality | null
   url?: string | null
-  color?: string | null
+  color?: TContainerColor | null
   shops?: ICatalogueShop[]
   isActive: boolean
   createdBy?: TUUID | null
