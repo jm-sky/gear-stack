@@ -41,6 +41,36 @@ docker-compose -f backend/docker-compose.dev.yml down  # Stop backend
 
 **Important:** In development, the backend typically runs in a Docker container via `docker-compose.dev.yml`. This ensures consistent environment and dependencies. The backend is accessible at `http://localhost:8000` (or the port specified in `VITE_API_PROXY_URL`).
 
+### Backend Testing
+The backend uses **pytest** for testing with async support via `pytest-asyncio`.
+
+**Running tests:**
+```bash
+# Option 1: Using Docker (recommended - ensures consistent environment)
+docker exec gear-stack-app python -m pytest tests/ -v
+
+# Option 2: Using venv (if dependencies are installed)
+cd backend
+source .venv/bin/activate
+python -m pytest tests/ -v
+
+# Run specific test file
+docker exec gear-stack-app python -m pytest tests/integration/gear/test_containers_crud.py -v
+
+# Run single test
+docker exec gear-stack-app python -m pytest tests/integration/gear/test_containers_crud.py::TestContainerCreate::test_create_container_minimal_data -v
+
+# Run with coverage
+docker exec gear-stack-app python -m pytest tests/ --cov=app --cov-report=html
+```
+
+**Test structure:**
+- `backend/tests/` - Test files
+  - `integration/gear/` - Integration tests for gear module (PHASE 0 baseline tests)
+  - `conftest.py` - Pytest configuration and fixtures
+
+**Note:** Current test setup uses in-memory SQLite, but some models use PostgreSQL-specific types (JSONB). Test database configuration may need adjustment for full compatibility.
+
 ## Architecture
 
 ### Module-Based Structure
