@@ -103,8 +103,33 @@ abstract class RegexCurrencyParser implements ICurrencyParser {
     for (const pattern of this.patterns) {
       const match = text.match(pattern)
       if (match && match[1]) {
-        // Remove spaces and replace comma with dot for parsing
-        const priceStr = match[1].replace(/\s/g, '').replace(',', '.')
+        let priceStr = match[1].replace(/\s/g, '')
+
+        // Smart separator handling:
+        // If both comma and dot present, determine which is decimal separator
+        const hasComma = priceStr.includes(',')
+        const hasDot = priceStr.includes('.')
+
+        if (hasComma && hasDot) {
+          // Find last separator - that's the decimal separator
+          const lastCommaIndex = priceStr.lastIndexOf(',')
+          const lastDotIndex = priceStr.lastIndexOf('.')
+
+          if (lastDotIndex > lastCommaIndex) {
+            // Dot is decimal separator (e.g., "$1,234.56")
+            // Remove commas (thousands separator)
+            priceStr = priceStr.replace(/,/g, '')
+          } else {
+            // Comma is decimal separator (e.g., "1.234,56 EUR")
+            // Remove dots (thousands separator) and replace comma with dot
+            priceStr = priceStr.replace(/\./g, '').replace(',', '.')
+          }
+        } else if (hasComma) {
+          // Only comma present - treat as decimal separator (e.g., "10,50 PLN")
+          priceStr = priceStr.replace(',', '.')
+        }
+        // If only dot or no separators, leave as is
+
         const price = Number.parseFloat(priceStr)
         if (!Number.isNaN(price)) {
           return { price, currency: this.currency }
