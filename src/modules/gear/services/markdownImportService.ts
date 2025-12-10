@@ -1,5 +1,6 @@
 import type { ICreateItemDto } from '../types/gear.types'
 import { recognizeParameters } from '../utils/parameterRecognition'
+import { priceParser } from '../utils/priceParser'
 import { SUGGESTED_BRANDS, SUGGESTED_COLORS } from '../utils/suggestedValues'
 
 // Markdown template for AI guidelines
@@ -145,45 +146,9 @@ interface IItemParams {
  */
 class MarkdownImportService {
   /**
-   * Parse price from text
-   * Supports formats: 100PLN, 10 PLN, 10,00 PLN, 1 000,00 PLN, 10zł, $50, 50$, €100, 100€, £75, 75£
-   * @returns {price: number, currency: string} or undefined if not found
+   * M7 FIX: Use PriceParser with registry pattern (OCP compliance)
+   * Price parsing is now delegated to the priceParser singleton
    */
-  private parsePrice(text: string): { price: number; currency: string } | undefined {
-    // Currency symbols and codes
-    const currencyPatterns = [
-      // Format: 100PLN, 100 PLN
-      { regex: /(\d+(?:[\s,.]\d+)*)\s*PLN/i, currency: 'PLN' },
-      { regex: /(\d+(?:[\s,.]\d+)*)\s*zł/i, currency: 'PLN' },
-      { regex: /(\d+(?:[\s,.]\d+)*)\s*z[lł]/i, currency: 'PLN' },
-      // Format: $50, 50$
-      { regex: /\$\s*(\d+(?:[\s,.]\d+)*)/i, currency: 'USD' },
-      { regex: /(\d+(?:[\s,.]\d+)*)\s*\$/i, currency: 'USD' },
-      { regex: /(\d+(?:[\s,.]\d+)*)\s*USD/i, currency: 'USD' },
-      // Format: €100, 100€
-      { regex: /€\s*(\d+(?:[\s,.]\d+)*)/i, currency: 'EUR' },
-      { regex: /(\d+(?:[\s,.]\d+)*)\s*€/i, currency: 'EUR' },
-      { regex: /(\d+(?:[\s,.]\d+)*)\s*EUR/i, currency: 'EUR' },
-      // Format: £75, 75£
-      { regex: /£\s*(\d+(?:[\s,.]\d+)*)/i, currency: 'GBP' },
-      { regex: /(\d+(?:[\s,.]\d+)*)\s*£/i, currency: 'GBP' },
-      { regex: /(\d+(?:[\s,.]\d+)*)\s*GBP/i, currency: 'GBP' },
-    ]
-
-    for (const pattern of currencyPatterns) {
-      const match = text.match(pattern.regex)
-      if (match && match[1]) {
-        // Remove spaces and replace comma with dot for parsing
-        const priceStr = match[1].replace(/\s/g, '').replace(',', '.')
-        const price = Number.parseFloat(priceStr)
-        if (!Number.isNaN(price)) {
-          return { price, currency: pattern.currency }
-        }
-      }
-    }
-
-    return undefined
-  }
 
   private categoryKeywords: Record<string, string[]> = {
     water: ['butelka', 'bottle', 'water', 'woda', 'filtr'],
@@ -286,7 +251,7 @@ class MarkdownImportService {
           let containerDescription: string | undefined
 
           // Extract price (before other patterns to avoid conflicts)
-          const priceResult = this.parsePrice(headerText)
+          const priceResult = priceParser.parse(headerText)
           if (priceResult) {
             containerPrice = priceResult.price
             containerCurrency = priceResult.currency
@@ -538,7 +503,7 @@ class MarkdownImportService {
         let containerFavorite: boolean | undefined
 
         // Extract price (before other patterns to avoid conflicts)
-        const priceResult = this.parsePrice(headerText)
+        const priceResult = priceParser.parse(headerText)
         if (priceResult) {
           containerPrice = priceResult.price
           containerCurrency = priceResult.currency
@@ -756,7 +721,7 @@ class MarkdownImportService {
     let currency: string | undefined
 
     // 0. Extract price first (before other patterns to avoid conflicts)
-    const priceResult = this.parsePrice(workingLine)
+    const priceResult = priceParser.parse(workingLine)
     if (priceResult) {
       price = priceResult.price
       currency = priceResult.currency

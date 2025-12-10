@@ -1,9 +1,9 @@
 # F2: Gear Module - Logic Layer - Analiza
 
 **Phase:** B (Frontend)
-**Data:** 2025-12-09
+**Data:** 2025-12-10
 **Zakres:** `src/modules/gear/` (services, composables, stores, types)
-**Status:** ✅ Completed + 🔧 CRITICAL Fixes Applied (2025-12-09)
+**Status:** ✅ Completed + 🔧 All Priority Fixes Applied (CRITICAL, HIGH, LOW, MEDIUM)
 **Language/Stack:** TypeScript/Vue 3
 
 ---
@@ -309,6 +309,28 @@
 - Debugging: Production logs now use proper logger utility (can be configured for different environments)
 - Readability: Constants have descriptive names instead of magic numbers
 - Consistency: All services now use same constants for common values
+
+---
+
+## ⚠️ MEDIUM PRIORITY FIXES APPLIED (2025-12-10)
+
+**Status:** ✅ 5 of 7 MEDIUM issues have been fixed (2 marked as Won't Fix)
+
+**Summary:**
+- M1: Mega-Composable Split ✅ FIXED (2025-12-09)
+- M2: Store Patterns Standardization ✅ FIXED (2025-12-09)
+- M3: Scattered Calculation Logic ✅ FIXED (2025-12-09)
+- M4: Primitive Obsession ❌ WON'T FIX (Not a problem)
+- M5: Async Markdown Parsing ✅ FIXED (2025-12-10)
+- M6: Input Validation ✅ FIXED (2025-12-10)
+- M7: Price Parser Registry (OCP) ✅ FIXED (2025-12-10)
+
+**Total Impact:**
+- Architecture: Clean separation of concerns (composables split, validation before services)
+- Performance: UI stays responsive during large file parsing (chunked processing)
+- Maintainability: Consistent store patterns, centralized calculations
+- Extensibility: Price parser follows OCP (open for extension, closed for modification)
+- Data Quality: Zod validation applied before all service calls
 
 ---
 
@@ -710,6 +732,261 @@ const handlePreview = async () => {
 - **Event Loop Friendly:** `setTimeout(resolve, 0)` allows browser to handle events
 - **Error Handling:** Proper try/catch with cleanup in finally block
 - **TypeScript Safe:** Full type inference, no `any` types
+
+---
+
+### M6: Input Validation Before Service Calls ✅ FIXED
+**Issue:** Data quality issues - containers/items created without validation when bypassing forms
+**Fixes Applied:**
+
+**Problem Identified:**
+- Forms already validate using Zod schemas (via vee-validate)
+- However, 3 places call services directly without validation:
+  - `ImportMarkdownDialog.vue` - Imports from markdown
+  - `sampleSetGenerator.ts` - Generates sample data
+  - `dataMigrationService.ts` - Migrates localStorage to API
+- These bypass form validation, allowing invalid data to reach services
+- User requirement: **"Nie chcę walidacji w serwisie, ale przed serwisem"** (validate BEFORE service, not IN service)
+
+**Key Changes:**
+
+1. **Added Validation Helpers to validation.ts:**
+   - `validateContainerDto()` - Throws ZodError with validation details
+   - `validateItemDto()` - Throws ZodError with validation details
+   - `safeValidateContainer()` - Returns result object (success/errors)
+   - `safeValidateItem()` - Returns result object (success/errors)
+   - Comprehensive JSDoc with usage examples
+
+2. **Updated ImportMarkdownDialog.vue:**
+   - Added validation before `createContainer()` and `createItem()` calls
+   - Used `safeValidateContainer()` and `safeValidateItem()` to collect errors
+   - Shows warning toast when validation fails, skips invalid data
+   - Added `favorite` field to containerSchema (was missing)
+
+3. **Updated sampleSetGenerator.ts:**
+   - Added validation before all `createContainer()` calls
+   - Added validation before all `createItem()` calls
+   - Uses throwing variants (`validateContainerDto`, `validateItemDto`) since sample data should always be valid
+
+4. **Updated dataMigrationService.ts:**
+   - Added validation before `createContainer()` during migration
+   - Added validation before `createItem()` during migration
+   - Uses throwing variants since migration failures should be caught at higher level
+
+**Implementation Example:**
+
+```typescript
+// validation.ts - New helpers
+export function validateContainerDto(data: unknown): ContainerFormData {
+  return containerSchema.parse(data) // Throws ZodError if invalid
+}
+
+export function safeValidateContainer(data: unknown): ValidationResult<ContainerFormData> {
+  const result = containerSchema.safeParse(data)
+  if (result.success) {
+    return { success: true, data: result.data }
+  }
+  return {
+    success: false,
+    errors: result.error.errors.map(e => `${e.path.join('.')}: ${e.message}`)
+  }
+}
+```
+
+```typescript
+// ImportMarkdownDialog.vue - Validation before service call
+const containerDto = {
+  name: containerData.name,
+  type: 'other' as const,
+  description: containerData.description || t('gear.import.importedDescription'),
+  weight: containerData.weight,
+  weightUnit: containerData.weightUnit,
+  url: containerData.url,
+  price: containerData.price,
+  currency: containerData.currency,
+  favorite: containerData.favorite ?? false,
+}
+
+const validation = safeValidateContainer(containerDto)
+if (!validation.success) {
+  logger.warn(`Container validation failed: ${containerData.name}`, validation.errors)
+  toast.warning(t('gear.import.containerValidationFailed'))
+  continue // Skip invalid container
+}
+
+// Only call service with validated data
+const container = await createContainer(validation.data)
+```
+
+**Files Modified:**
+- `src/modules/gear/utils/validation.ts` - Added 4 validation helper functions
+- `src/modules/gear/components/ImportMarkdownDialog.vue` - Added validation before service calls
+- `src/modules/gear/services/sampleSetGenerator.ts` - Added validation before service calls
+- `src/modules/gear/services/dataMigrationService.ts` - Added validation before service calls
+
+**Test Coverage:** ✅
+- Type-check passing
+- Lint passing
+- All forms continue to work (unchanged)
+- Import/sample/migration now validate data before service calls
+
+**Impact:**
+- **Data Quality:** Invalid data caught before reaching services
+- **Error Messages:** Clear validation errors shown to users
+- **Architecture:** Clean separation - validation before services, not in services
+- **Consistency:** Same Zod schemas used everywhere (forms + direct calls)
+- **User Feedback:** Warnings for invalid data during import, instead of silent failures
+- **Maintainability:** Schema changes automatically apply to all validation points
+
+---
+
+### M7: Price Parser Registry Pattern (OCP Compliance) ✅ FIXED
+**Issue:** Price parsing in markdownImportService violates Open-Closed Principle (hardcoded currency patterns)
+**Fixes Applied:**
+
+**Problem Identified:**
+- Price parsing used hardcoded array of currency patterns in `parsePrice()` method
+- Adding new currencies requires modifying the method (violates OCP)
+- Patterns scattered inline with no clear extension point
+- Difficult to test individual currency parsers
+
+**Key Changes:**
+
+1. **Created Price Parser with Registry Pattern:**
+   - New file: `src/modules/gear/utils/priceParser.ts`
+   - Interface-based design for easy extension
+   - Registry pattern allows adding currencies without modifying core code
+   - Each currency has dedicated parser class
+
+2. **Architecture:**
+
+```typescript
+// Interface for currency parsers
+interface ICurrencyParser {
+  currency: string
+  priority?: number  // For matching order
+  parse(text: string): { price: number; currency: string } | undefined
+}
+
+// Registry class
+class PriceParser {
+  private parsers: ICurrencyParser[] = []
+
+  register(parser: ICurrencyParser): void {
+    this.parsers.push(parser)
+    this.parsers.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
+  }
+
+  parse(text: string): { price: number; currency: string } | undefined {
+    for (const parser of this.parsers) {
+      const result = parser.parse(text)
+      if (result) return result
+    }
+    return undefined
+  }
+}
+
+// Base class for regex-based parsers
+abstract class RegexCurrencyParser implements ICurrencyParser {
+  abstract currency: string
+  abstract patterns: RegExp[]
+
+  parse(text: string): { price: number; currency: string } | undefined {
+    // Shared parsing logic for all regex-based parsers
+  }
+}
+
+// Currency parsers (extend base class)
+class PLNCurrencyParser extends RegexCurrencyParser { ... }
+class USDCurrencyParser extends RegexCurrencyParser { ... }
+class EURCurrencyParser extends RegexCurrencyParser { ... }
+class GBPCurrencyParser extends RegexCurrencyParser { ... }
+
+// Singleton with default parsers
+export const priceParser = new PriceParser()
+priceParser.register(new PLNCurrencyParser())
+priceParser.register(new USDCurrencyParser())
+priceParser.register(new EURCurrencyParser())
+priceParser.register(new GBPCurrencyParser())
+```
+
+3. **Updated markdownImportService.ts:**
+   - Removed `parsePrice()` method (45 lines)
+   - Replaced `this.parsePrice(text)` with `priceParser.parse(text)` (3 occurrences)
+   - Added import: `import { priceParser } from '../utils/priceParser'`
+   - Added M7 FIX comment explaining the change
+
+**OCP Compliance:**
+
+**Before (Violates OCP):**
+```typescript
+// Adding new currency requires modifying this method
+private parsePrice(text: string) {
+  const currencyPatterns = [
+    { regex: /(\d+(?:[\s,.]\d+)*)\s*PLN/i, currency: 'PLN' },
+    { regex: /(\d+(?:[\s,.]\d+)*)\s*USD/i, currency: 'USD' },
+    // ... hardcoded patterns
+  ]
+  // ... parsing logic
+}
+```
+
+**After (OCP Compliant):**
+```typescript
+// Extend without modifying existing code
+class JPYCurrencyParser extends RegexCurrencyParser {
+  currency = 'JPY'
+  patterns = [/(\d+(?:[\s,.]\d+)*)\s*JPY/i, /(\d+(?:[\s,.]\d+)*)\s*¥/i]
+}
+
+// Register in app initialization
+priceParser.register(new JPYCurrencyParser())
+```
+
+**Extension Example:**
+```typescript
+// Custom cryptocurrency parser (in user code, not core)
+class BTCCurrencyParser implements ICurrencyParser {
+  currency = 'BTC'
+  priority = 10  // Check before fiat currencies
+
+  parse(text: string) {
+    const match = text.match(/(\d+(?:\.\d+)?)\s*BTC/i)
+    if (match) {
+      return { price: parseFloat(match[1]), currency: 'BTC' }
+    }
+    return undefined
+  }
+}
+
+// Register without modifying core code
+priceParser.register(new BTCCurrencyParser())
+```
+
+**Files Modified:**
+- `src/modules/gear/utils/priceParser.ts` - New file (172 lines with docs)
+- `src/modules/gear/services/markdownImportService.ts` - Removed parsePrice method, use priceParser
+
+**Test Coverage:** ✅
+- Type-check passing
+- Lint passing
+- All existing price parsing tests pass
+- Backward compatible: Same price formats supported
+
+**Impact:**
+- **OCP Compliance:** Open for extension (register new parsers), closed for modification (core code unchanged)
+- **Extensibility:** Users can add custom currencies without touching core code
+- **Testability:** Each currency parser can be tested independently
+- **Maintainability:** Clear separation of concerns (each parser in its own class)
+- **Flexibility:** Priority system allows controlling match order
+- **Reusability:** PriceParser can be used in other modules (e.g., settings, export)
+- **Type Safety:** Interface ensures all parsers implement required methods
+
+**Benefits:**
+- Adding new currency: Create class + register (2-3 lines)
+- No risk of breaking existing parsers when adding new ones
+- Each parser is self-contained and independently testable
+- Follows SOLID principles (SRP, OCP, LSP via inheritance)
 
 ---
 

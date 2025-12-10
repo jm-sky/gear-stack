@@ -1,6 +1,7 @@
 import { logger } from '@/shared/utils/logger'
 import type { IGearContainer } from '../types/gear.types'
 import { useGearStore } from '../store/useGearStore'
+import { validateContainerDto, validateItemDto } from '../utils/validation'
 // modules/gear/services/dataMigrationService.ts
 import { gearContainerApiService } from './gearContainerApiService'
 import { gearContainerLocalService } from './gearContainerLocalService'
@@ -112,8 +113,8 @@ export async function migrateLocalDataToAPI(): Promise<void> {
         parentContainerId = idMapping.get(parentContainerId) ?? null
       }
 
-      // Create container without items first
-      const createdContainer = await gearContainerApiService.createContainer({
+      // M6 FIX: Validate container data before service call
+      const containerDto = validateContainerDto({
         name: containerData.name,
         description: containerData.description,
         type: containerData.type,
@@ -129,6 +130,9 @@ export async function migrateLocalDataToAPI(): Promise<void> {
         hideWhenNested: containerData.hideWhenNested,
       })
 
+      // Create container without items first
+      const createdContainer = await gearContainerApiService.createContainer(containerDto)
+
       // CRITICAL FIX: Store ID mapping for child containers
       idMapping.set(localContainer.id, createdContainer.id)
 
@@ -136,24 +140,27 @@ export async function migrateLocalDataToAPI(): Promise<void> {
       if (items && items.length > 0) {
         for (const item of items) {
           try {
-            await gearItemApiService.createItem(createdContainer.id, {
+            // M6 FIX: Validate item data before service call
+            const itemDto = validateItemDto({
               name: item.name,
               category: item.category,
               quantity: item.quantity ?? 1,
               weight: item.weight ?? 0,
               weightUnit: item.weightUnit ?? 'g',
               status: item.status,
-              notes: item.notes ?? null,
-              expirationDate: item.expirationDate ?? null,
+              notes: item.notes ?? undefined,
+              expirationDate: item.expirationDate ?? undefined,
               priority: item.priority ?? 'medium',
-              brand: item.brand ?? null,
-              color: item.color ?? null,
-              price: item.price ?? null,
-              url: item.url ?? null,
-              quality: item.quality ?? null,
-              wearable: item.wearable ?? null,
-              consumable: item.consumable ?? null,
+              brand: item.brand ?? undefined,
+              color: item.color ?? undefined,
+              price: item.price ?? undefined,
+              url: item.url ?? undefined,
+              quality: item.quality ?? undefined,
+              wearable: item.wearable ?? undefined,
+              consumable: item.consumable ?? undefined,
             })
+
+            await gearItemApiService.createItem(createdContainer.id, itemDto)
           } catch (itemError) {
             logger.warn(`Failed to migrate item ${item.name} for container ${createdContainer.name}:`, itemError)
             // Continue with other items

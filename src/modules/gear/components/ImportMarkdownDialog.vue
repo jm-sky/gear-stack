@@ -21,6 +21,7 @@ import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
 import { markdownImportService } from '../services/markdownImportService'
 import { useGearStore } from '../store/useGearStore'
+import { safeValidateContainer, safeValidateItem } from '../utils/validation'
 import GuidelinesDialog from './GuidelinesDialog.vue'
 import MarkdownImportOptions from './import-markdown/MarkdownImportOptions.vue'
 import MarkdownImportPreview from './import-markdown/MarkdownImportPreview.vue'
@@ -160,6 +161,28 @@ const handleImport = async () => {
 
     for (const containerData of previewResult.value.containers) {
       importProgress.value.currentItem = containerData.name
+
+      // M6 FIX: Validate container data before service call
+      const containerDto = {
+        name: containerData.name,
+        type: 'other' as const,
+        description: containerData.description || t('gear.import.importedDescription'),
+        weight: containerData.weight,
+        weightUnit: containerData.weightUnit,
+        url: containerData.url,
+        price: containerData.price,
+        currency: containerData.currency,
+        favorite: containerData.favorite ?? false,
+      }
+
+      const validation = safeValidateContainer(containerDto)
+      if (!validation.success) {
+        logger.warn(`Container validation failed: ${containerData.name}`, validation.errors)
+        toast.warning(t('gear.import.containerValidationFailed', { name: containerData.name, errors: validation.errors.join(', ') }))
+        importProgress.value.current++
+        continue // Skip invalid container
+      }
+
       let container
 
       // Check if we should update existing container (has UUID and mode is update)
@@ -168,46 +191,28 @@ const handleImport = async () => {
         if (existing) {
           // Update existing container with all parsed fields
           container = await updateContainer(existing.id, {
-            name: containerData.name,
-            description: containerData.description,
-            weight: containerData.weight,
-            weightUnit: containerData.weightUnit,
-            url: containerData.url,
-            price: containerData.price,
-            currency: containerData.currency,
-            favorite: containerData.favorite,
+            name: validation.data.name,
+            description: validation.data.description,
+            weight: validation.data.weight,
+            weightUnit: validation.data.weightUnit,
+            url: validation.data.url,
+            price: validation.data.price,
+            currency: validation.data.currency,
+            favorite: validation.data.favorite,
             // Keep existing type, color, brand, and other fields that aren't in markdown
           })
           updatedCount++
         } else {
           // UUID provided but container not found - create new with same UUID
           container = await createContainer({
+            ...validation.data,
             id: containerData.uuid, // Use UUID from markdown export
-            name: containerData.name,
-            type: 'other',
-            description: containerData.description || t('gear.import.importedDescription'),
-            weight: containerData.weight,
-            weightUnit: containerData.weightUnit,
-            url: containerData.url,
-            price: containerData.price,
-            currency: containerData.currency,
-            favorite: containerData.favorite ?? false,
           })
           importedCount++
         }
       } else {
         // Create new container
-        container = await createContainer({
-          name: containerData.name,
-          type: 'other',
-          description: containerData.description || t('gear.import.importedDescription'),
-          weight: containerData.weight,
-          weightUnit: containerData.weightUnit,
-          url: containerData.url,
-          price: containerData.price,
-          currency: containerData.currency,
-          favorite: containerData.favorite ?? false,
-        })
+        container = await createContainer(validation.data)
         importedCount++
       }
 
@@ -251,24 +256,33 @@ const handleImport = async () => {
           }
         }
 
+        // M6 FIX: Validate item data before service call
+        const validation = safeValidateItem(itemDto)
+        if (!validation.success) {
+          logger.warn(`Item validation failed: ${itemData.name}`, validation.errors)
+          toast.warning(t('gear.import.itemValidationFailed', { name: itemData.name || 'Unknown', errors: validation.errors.join(', ') }))
+          importProgress.value.current++
+          continue // Skip invalid item
+        }
+
         if (importMode.value === 'update' && itemUuid) {
           // Try to find existing item by UUID in the latest container from store
           const existingItem = latestContainer.items.find(i => i.id === itemUuid)
           if (existingItem) {
             // Update existing item
-            await updateItem(existingItem.id, itemDto)
+            await updateItem(existingItem.id, validation.data)
             itemUpdatedCount++
           } else {
             // UUID provided but item not found - create new with same UUID
             await createItem(latestContainer.id, {
-              ...itemDto,
+              ...validation.data,
               id: itemUuid, // Use UUID from markdown export
             })
             itemCount++
           }
         } else {
           // Create new item
-          await createItem(latestContainer.id, itemDto)
+          await createItem(latestContainer.id, validation.data)
           itemCount++
         }
         importProgress.value.current++

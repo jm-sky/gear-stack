@@ -1,11 +1,11 @@
 import type {
-  ICreateItemDto,
   TGearItemCategory,
   TGearItemPriority,
   TGearItemQuality,
   TGearItemStatus,
   TGearWeightUnit,
 } from '../types/gear.types'
+import { validateContainerDto, validateItemDto } from '../utils/validation'
 import {
   bugOutBagFirePouchItems,
   bugOutBagItems,
@@ -59,12 +59,15 @@ export async function generateSampleSet(
   const setDefinition = getSampleSetDefinition(t, variant)
   const containerIds: TUUID[] = []
 
-  // Create main container
-  const mainContainer = await gearContainerService().createContainer({
+  // M6 FIX: Validate container data before service call
+  const mainContainerDto = validateContainerDto({
     name: setDefinition.name,
     type: setDefinition.type,
     description: setDefinition.description,
   })
+
+  // Create main container
+  const mainContainer = await gearContainerService().createContainer(mainContainerDto)
   containerIds.push(mainContainer.id)
 
   // Recursively create containers and items
@@ -81,11 +84,14 @@ async function createContainerWithItems(
   const nestedContainerIds: Map<string, TUUID> = new Map()
   if (containerDef.nestedContainers) {
     for (const nestedDef of containerDef.nestedContainers) {
-      const nestedContainer = await gearContainerService().createContainer({
+      // M6 FIX: Validate nested container data before service call
+      const nestedContainerDto = validateContainerDto({
         name: nestedDef.name,
         type: nestedDef.type,
         description: nestedDef.description,
       })
+
+      const nestedContainer = await gearContainerService().createContainer(nestedContainerDto)
       nestedContainerIds.set(nestedDef.name, nestedContainer.id)
       // Recursively create items in nested container
       await createContainerWithItems(nestedContainer.id, nestedDef)
@@ -97,7 +103,8 @@ async function createContainerWithItems(
     // Check if this item represents a nested container
     const nestedContainerId = nestedContainerIds.get(item.name)
 
-    const itemData: ICreateItemDto = {
+    // M6 FIX: Validate item data before service call
+    const itemDto = validateItemDto({
       name: item.name,
       catalogueItemId: item.catalogueItemId || undefined,
       category: item.category,
@@ -115,9 +122,9 @@ async function createContainerWithItems(
       url: item.url,
       quality: item.quality,
       consumable: item.consumable,
-    }
+    })
 
-    await gearItemService().createItem(containerId, itemData)
+    await gearItemService().createItem(containerId, itemDto)
   }
 }
 

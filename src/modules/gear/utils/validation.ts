@@ -11,6 +11,7 @@ export const containerSchema = z.object({
   parentContainerId: z.string().uuid().optional().nullable(),
   hideWhenNested: z.boolean().optional(),
   isPublic: z.boolean().optional(),
+  favorite: z.boolean().optional(),
   brand: z.string().optional(),
   price: z.number().min(0, 'Cena nie może być ujemna').optional(),
   currency: z.string().optional(),
@@ -49,4 +50,126 @@ export const itemSchema = z.object({
 // Type inference dla TypeScript
 export type ContainerFormData = z.infer<typeof containerSchema>
 export type ItemFormData = z.infer<typeof itemSchema>
+
+/**
+ * Validation result for safe validation
+ */
+export type ValidationResult<T> =
+  | { success: true; data: T }
+  | { success: false; errors: string[] }
+
+/**
+ * M6 FIX: Validate container data before service call
+ *
+ * Use this when calling service methods directly (not through forms).
+ * Examples: ImportMarkdownDialog, sampleSetGenerator, dataMigrationService
+ *
+ * @param data - Data to validate
+ * @returns Validated container data
+ * @throws ZodError with validation details
+ *
+ * @example
+ * ```typescript
+ * const validated = validateContainerDto({
+ *   name: 'My Container',
+ *   type: 'backpack',
+ *   weight: 1500,
+ *   weightUnit: 'g'
+ * })
+ * await createContainer(validated)
+ * ```
+ */
+export function validateContainerDto(data: unknown): ContainerFormData {
+  return containerSchema.parse(data)
+}
+
+/**
+ * M6 FIX: Validate item data before service call
+ *
+ * Use this when calling service methods directly (not through forms).
+ * Examples: ImportMarkdownDialog, sampleSetGenerator, dataMigrationService
+ *
+ * @param data - Data to validate
+ * @returns Validated item data
+ * @throws ZodError with validation details
+ *
+ * @example
+ * ```typescript
+ * const validated = validateItemDto({
+ *   name: 'Water Bottle',
+ *   category: 'water',
+ *   quantity: 2,
+ *   weight: 300,
+ *   weightUnit: 'g',
+ *   priority: 'high',
+ *   status: 'owned'
+ * })
+ * await createItem(containerId, validated)
+ * ```
+ */
+export function validateItemDto(data: unknown): ItemFormData {
+  return itemSchema.parse(data)
+}
+
+/**
+ * M6 FIX: Safe validation for container data
+ *
+ * Returns a result object instead of throwing errors.
+ * Useful when you want to collect validation errors without stopping execution.
+ *
+ * @param data - Data to validate
+ * @returns Validation result with success flag and data or errors
+ *
+ * @example
+ * ```typescript
+ * const result = safeValidateContainer(containerData)
+ * if (result.success) {
+ *   await createContainer(result.data)
+ * } else {
+ *   console.error('Validation failed:', result.errors)
+ *   toast.error(result.errors.join(', '))
+ * }
+ * ```
+ */
+export function safeValidateContainer(data: unknown): ValidationResult<ContainerFormData> {
+  const result = containerSchema.safeParse(data)
+  if (result.success) {
+    return { success: true, data: result.data }
+  }
+  return {
+    success: false,
+    errors: result.error.errors.map(e => `${e.path.join('.')}: ${e.message}`),
+  }
+}
+
+/**
+ * M6 FIX: Safe validation for item data
+ *
+ * Returns a result object instead of throwing errors.
+ * Useful when you want to collect validation errors without stopping execution.
+ *
+ * @param data - Data to validate
+ * @returns Validation result with success flag and data or errors
+ *
+ * @example
+ * ```typescript
+ * const result = safeValidateItem(itemData)
+ * if (result.success) {
+ *   await createItem(containerId, result.data)
+ * } else {
+ *   console.error('Validation failed:', result.errors)
+ *   toast.error(result.errors.join(', '))
+ * }
+ * ```
+ */
+export function safeValidateItem(data: unknown): ValidationResult<ItemFormData> {
+  const result = itemSchema.safeParse(data)
+  if (result.success) {
+    return { success: true, data: result.data }
+  }
+  return {
+    success: false,
+    errors: result.error.errors.map(e => `${e.path.join('.')}: ${e.message}`),
+  }
+}
 
