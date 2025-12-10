@@ -1,21 +1,22 @@
 <script setup lang="ts">
-import { ArrowLeft, ExternalLink, Package } from 'lucide-vue-next'
+import { ArrowLeft } from 'lucide-vue-next'
 import { computed, defineAsyncComponent, ref, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
+import CommonPageHeader from '@/components/layout/CommonPageHeader.vue'
 import { Badge } from '@/components/ui/badge'
 import Button from '@/components/ui/button/Button.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import ColorDot from '@/modules/gear/components/ColorDot.vue'
+import CatalogueShopCard from '@/modules/gear/components/catalogue/CatalogueShopCard.vue'
 import MarkdownRenderer from '@/modules/gear/components/MarkdownRenderer.vue'
 import { useCatalogue } from '@/modules/gear/composables/catalogue/useCatalogue'
 import { useCategoryLabel } from '@/modules/gear/composables/useCategoryLabel'
 import { usePriceTierLabel } from '@/modules/gear/composables/usePriceTierLabel'
 import { GearRoutePath } from '@/modules/gear/routes'
+import { getCategoryIcon } from '@/modules/gear/utils/categoryIcons'
 import { DEFAULT_COLOR, getColorHex } from '@/modules/gear/utils/suggestedValues'
 import { usePageTitle } from '@/shared/composables/usePageTitle'
-import type { TContainerColor } from '@/modules/gear/types/gear.types'
 
 // Lazy load dialog to reduce initial bundle size
 const AddCatalogueItemToContainerDialog = defineAsyncComponent(() => import('@/modules/gear/components/catalogue/AddCatalogueItemToContainerDialog.vue'))
@@ -59,6 +60,11 @@ const categoryLabel = computed(() => {
   return getCategoryLabel(item.value.category)
 })
 
+const categoryIcon = computed(() => {
+  if (!item.value) return undefined
+  return getCategoryIcon(item.value.category)
+})
+
 const priceTierLabel = computed(() => {
   if (!item.value?.priceTier) return null
   return getPriceTierLabel(item.value.priceTier)
@@ -76,9 +82,9 @@ const hasDetails = computed<boolean>(() => {
     item.value.brand
     || item.value.model
     || item.value.color
-    || item.value.price
     || item.value.url
     || item.value.description
+    || item.value.weight
   )
 })
 
@@ -130,23 +136,21 @@ const handleAddToContainer = () => {
 
     <div v-else-if="item" class="w-full max-w-full space-y-6">
       <!-- Header -->
-      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div class="flex items-center gap-3">
+      <CommonPageHeader
+        :icon="categoryIcon"
+        :label="item.name"
+      >
+        <template #above>
           <Button variant="ghost" size="icon" @click="goBack">
             <ArrowLeft class="size-5" />
           </Button>
-          <div class="flex items-center gap-2">
-            <ColorDot :color="(item.color as TContainerColor) ?? undefined" />
-            <Package class="size-6" />
-            <h1 class="text-2xl font-bold sm:text-3xl">
-              {{ item.name }}
-            </h1>
-          </div>
-        </div>
-        <Button @click="handleAddToContainer">
-          {{ t('gear.catalogue.addToContainer') }}
-        </Button>
-      </div>
+        </template>
+        <template #actions>
+          <Button @click="handleAddToContainer">
+            {{ t('gear.catalogue.addToContainer') }}
+          </Button>
+        </template>
+      </CommonPageHeader>
 
       <!-- Primary Image -->
       <div v-if="item.primaryImageUrl" class="flex items-center justify-center overflow-hidden rounded-lg border bg-muted">
@@ -176,26 +180,6 @@ const handleAddToContainer = () => {
         </Badge>
       </div>
 
-      <!-- Main Info -->
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div v-if="item.model" class="rounded-lg border bg-card p-4">
-          <div class="mb-1 text-sm text-muted-foreground">
-            {{ t('gear.catalogue.model') }}
-          </div>
-          <div class="text-2xl font-bold">
-            {{ item.model }}
-          </div>
-        </div>
-        <div class="rounded-lg border bg-card p-4">
-          <div class="mb-1 text-sm text-muted-foreground">
-            {{ t('gear.item.weight') }}
-          </div>
-          <div class="text-2xl font-bold">
-            {{ item.weight }}{{ item.weightUnit }}
-          </div>
-        </div>
-      </div>
-
       <!-- Details -->
       <div class="space-y-4 rounded-lg border bg-card p-6">
         <h2 class="text-lg font-semibold">
@@ -204,6 +188,22 @@ const handleAddToContainer = () => {
 
         <template v-if="hasDetails">
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div v-if="item.model">
+              <div class="mb-1 text-sm text-muted-foreground">
+                {{ t('gear.catalogue.model') }}
+              </div>
+              <div class="font-medium">
+                {{ item.model }}
+              </div>
+            </div>
+            <div v-if="item.weight">
+              <div class="mb-1 text-sm text-muted-foreground">
+                {{ t('gear.item.weight') }}
+              </div>
+              <div class="font-medium">
+                {{ item.weight }}{{ item.weightUnit }}
+              </div>
+            </div>
             <div v-if="item.brand">
               <div class="mb-1 text-sm text-muted-foreground">
                 {{ t('gear.item.brand') }}
@@ -224,14 +224,6 @@ const handleAddToContainer = () => {
                   }"
                 />
                 <span class="font-medium">{{ item.color }}</span>
-              </div>
-            </div>
-            <div v-if="item.price">
-              <div class="mb-1 text-sm text-muted-foreground">
-                {{ t('gear.item.price') }}
-              </div>
-              <div class="font-medium">
-                {{ item.price }} {{ item.currency || 'USD' }}
               </div>
             </div>
             <div v-if="item.url">
@@ -281,27 +273,14 @@ const handleAddToContainer = () => {
         <h2 class="mb-4 text-lg font-semibold">
           {{ t('gear.catalogue.shopsTitle') }}
         </h2>
-        <div class="space-y-2">
-          <a
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <CatalogueShopCard
             v-for="(shop, index) in item.shops"
             :key="index"
-            :href="shop.url"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="flex items-center gap-2 rounded-md border p-3 transition-colors hover:bg-muted"
-          >
-            <ExternalLink class="size-4 shrink-0 text-muted-foreground" />
-            <div class="flex-1 min-w-0">
-              <div v-if="shop.name || shop.variant" class="font-medium">
-                <span v-if="shop.name">{{ shop.name }}</span>
-                <span v-if="shop.name && shop.variant" class="text-muted-foreground"> • </span>
-                <span v-if="shop.variant" class="capitalize">{{ shop.variant }}</span>
-              </div>
-              <div class="truncate text-sm text-muted-foreground">
-                {{ getUrlDisplay(shop.url) }}
-              </div>
-            </div>
-          </a>
+            :shop="shop"
+            :item-name="item.name"
+            :item-created-at="item.createdAt"
+          />
         </div>
       </div>
 

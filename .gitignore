@@ -36,4 +36,4 @@ coverage
 # Vitest
 __screenshots__/
 .env
-test-results/.last-run.json
+test-results/

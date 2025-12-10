@@ -42,14 +42,6 @@
         "enum": ["low", "medium", "high"],
         "description": "Product quality"
       },
-      "price": {
-        "type": "number",
-        "description": "Product price"
-      },
-      "price_currency": {
-        "type": "string",
-        "description": "Price currency (e.g., USD, PLN)"
-      },
       "weight": {
         "type": "number",
         "description": "Product weight"
@@ -87,6 +79,20 @@
             "variant": {
               "type": "string",
               "description": "Product variant (e.g., color, size)"
+            },
+            "price": {
+              "type": "number",
+              "description": "Product price"
+            },
+            "currency": {
+              "type": "string",
+              "description": "Price currency (e.g., USD, PLN)",
+              "enum": ["USD", "PLN", "EUR", "GBP", "JPY", "CHF", "CAD", "AUD"]
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date",
+              "description": "Date when the price was last updated (ISO date format: YYYY-MM-DD)"
             }
           },
           "additionalProperties": false

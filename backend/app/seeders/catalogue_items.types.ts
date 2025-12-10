@@ -10,6 +10,9 @@ import type catalogueItemsJson from './catalogue_items.json'
 export interface CatalogueItemShop {
   url: string
   variant?: string
+  price?: number
+  currency?: string
+  updated_at?: string
 }
 
 export interface CatalogueItem {
@@ -21,8 +24,6 @@ export interface CatalogueItem {
   description?: string
   price_tier?: 'low' | 'medium' | 'high'
   quality?: 'low' | 'medium' | 'high'
-  price?: number
-  price_currency?: string
   weight?: number
   weight_unit?: string
   url?: string

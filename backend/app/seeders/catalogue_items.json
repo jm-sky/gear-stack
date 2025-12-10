@@ -8,13 +8,31 @@
     "description": "Krzesiwo ferrocerowe, niezawodne w trudnych warunkach",
     "price_tier": "medium",
     "quality": "high",
-    "price": 15.0,
-    "price_currency": "USD",
-    "weight": 50.0,
+    "weight": 50,
     "weight_unit": "g",
     "url": "https://lightmyfire.com/products/swedish-firesteel",
     "image_filename": "light_my_fire_firesteel_2.0.jpg",
-    "shops": []
+    "shops": [
+      {
+        "url": "https://militaria.pl/p/krzesiwo-light-my-fire-firesteel-2-0-bioscout-cocoshell-151419",
+        "price": 54.95,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      },
+      {
+        "url": "https://militaria.pl/p/krzesiwo-light-my-fire-firesteel-2-0-bio-army-orange-62624",
+        "price": 74.95,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      },
+      {
+        "url": "https://militaria.pl/p/krzesiwo-light-my-fire-firesteel-2-0-bio-army-z-gwizdkiem-black-43447",
+        "variant": "Black",
+        "price": 74.95,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      }
+    ]
   },
   {
     "id": "01KBJXGQ87FGHRFQTVMP3YFSNG",
@@ -25,10 +43,31 @@
     "description": "Prosta i tania zapalniczka jednorazowa",
     "price_tier": "low",
     "quality": "medium",
-    "weight": 21.0,
+    "weight": 21,
     "weight_unit": "g",
     "url": "https://www.bicworld.com/en/products/details/1/bic-lighter",
-    "shops": []
+    "shops": [
+      {
+        "url": "https://militaria.pl/p/kurtka-military-wear-m65-classic-wz-93-pantera-pl-woodland-2794137",
+        "price": 329,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      },
+      {
+        "url": "https://militaria.pl/p/kurtka-brandit-m65-classic-olive-98640",
+        "variant": "Olive",
+        "price": 299,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      },
+      {
+        "url": "https://militaria.pl/p/kurtka-brandit-m65-classic-black-98639",
+        "variant": "Black",
+        "price": 299,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      }
+    ]
   },
   {
     "id": "01KBJXH29HTYHNAD2QHR4VQ0H7",
@@ -39,11 +78,15 @@
     "description": "Lekka, kompaktowa siekierka turystyczna / survivalowa",
     "price_tier": "low",
     "quality": "medium",
-    "weight": 645.0,
+    "weight": 645,
     "weight_unit": "g",
     "url": "https://www.fiskars.com/en-us/gardening-and-yard-care/products/axes-mauls-and-machetes/x7-hatchet-14-378501-1005",
     "image_filename": "fiskars-x7.png",
-    "shops": []
+    "shops": [
+      {
+        "url": "https://militaria.pl/p/zestaw-wiley-x-vapor-comm-shooting-range-kit-2849983"
+      }
+    ]
   },
   {
     "id": "01KBJXH4VP0T1SAZADHD3KY0RY",
@@ -58,7 +101,17 @@
     "weight_unit": "oz",
     "url": "https://www.leatherman.com/",
     "image_filename": "leatherman-wave-plus.png",
-    "shops": []
+    "shops": [
+      {
+        "url": "https://militaria.pl/p/multitool-leatherman-wave-plus-z-kabura-23574"
+      },
+      {
+        "url": "https://militaria.pl/p/multitool-leatherman-wave-plus-polish-army-z-kabura-35440"
+      },
+      {
+        "url": "https://militaria.pl/p/multitool-leatherman-wave-plus-black-z-kabura-23575"
+      }
+    ]
   },
   {
     "id": "01KBJXH7904T9DT153977RWERA",
@@ -84,7 +137,7 @@
     "description": "Składana saperka terenowa",
     "price_tier": "medium",
     "quality": "high",
-    "weight": 0.0,
+    "weight": 0,
     "weight_unit": "g",
     "url": "https://www.gerbergear.com/",
     "image_filename": "gerber-folding-spade.png",
@@ -92,29 +145,59 @@
   },
   {
     "id": "01KBJXHCCSSKZWDFR4AB4H5DCV",
-    "name": "Paracord 550 MIL-SPEC",
+    "name": "Paracord Mil-Tec Commando 5 mm x 15 m - Olive",
     "category": "tools",
-    "brand": "Generic / MIL-SPEC",
-    "model": "Paracord 550",
-    "description": "Uniwersalna linka ratunkowa / survivalowa",
-    "price_tier": "low",
+    "brand": "Mil-Tec",
+    "model": "Commando 5 mm x 15 m",
+    "description": "Uniwersalna linka ratunkowa / survivalowa o wytrzymałości do 220 kg",
+    "price_tier": "medium",
     "quality": "medium",
-    "weight": 0.0,
+    "weight": 0,
     "weight_unit": "g",
-    "shops": []
+    "shops": [
+      {
+        "url": "https://militaria.pl/p/linka-mil-tec-commando-5-mm-x-15-m-olive-67413",
+        "variant": "olive",
+        "price": 19.99,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      },
+      {
+        "url": "https://militaria.pl/p/linka-mil-tec-commando-5-mm-x-15-m-black-57957",
+        "variant": "black",
+        "price": 19.99,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      }
+    ]
   },
   {
     "id": "01KBJXHEW5ECFZVXQFB4E539E5",
-    "name": "Paracord (Badger / MIL-SPEC)",
+    "name": "Paracord Badger Outdoor 500 30m - Olive",
     "category": "tools",
-    "brand": "Badger",
+    "brand": "Badger Outdoor",
     "model": "Paracord 550",
-    "description": "Mocna linka survivalowa / ratunkowa",
-    "price_tier": "low",
+    "description": "Linka paracord 550 o długości 30 metrów i średnicy 5 mm, wykonana z odpornego na uszkodzenia nylonu i wyposażona w 7 rdzeni.",
+    "price_tier": "medium",
     "quality": "medium",
-    "weight": 0.0,
+    "weight": 0,
     "weight_unit": "g",
-    "shops": []
+    "shops": [
+      {
+        "url": "https://militaria.pl/p/linka-spadochronowa-paracord-badger-outdoor-550-30-m-olive-18082",
+        "variant": "olive",
+        "price": 29.99,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      },
+      {
+        "url": "https://militaria.pl/p/linka-spadochronowa-paracord-badger-outdoor-550-30-m-black-18080",
+        "variant": "black",
+        "price": 29.99,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      }
+    ]
   },
   {
     "id": "01KBJXHH4WF4NYD9HD3P955H9H",
@@ -125,7 +208,7 @@
     "description": "Uniwersalna, mocna taśma naprawcza do terenu",
     "price_tier": "low",
     "quality": "high",
-    "weight": 0.0,
+    "weight": 0,
     "weight_unit": "g",
     "url": "https://www.gorillatough.com/product/gorilla-tape/",
     "image_filename": "gorilla-tape.png",
@@ -140,7 +223,7 @@
     "description": "Składana piła ręczna, idealna do cięcia drewna w terenie",
     "price_tier": "medium",
     "quality": "high",
-    "weight": 200.0,
+    "weight": 200,
     "weight_unit": "g",
     "url": "https://www.bahco.com/",
     "image_filename": "bahco-laplander.jpg.png",
@@ -155,13 +238,17 @@
     "description": "Szwajcarski scyzoryk z wieloma funkcjami, idealny do outdoor",
     "price_tier": "medium",
     "quality": "high",
-    "weight": 118.0,
+    "weight": 118,
     "weight_unit": "g",
     "url": "https://www.victorinox.com/global/en/products/Swiss-Army-Knives/Medium-Pocket-Knives/Ranger/p/1.3713",
     "image_filename": "Victorinox-Ranger.png",
     "shops": [
       {
-        "url": "https://militaria.pl/p/scyzoryk-victorinox-ranger-red-64893?pref_q=scyzoryk+victorinox+ranger+red"
+        "url": "https://militaria.pl/p/scyzoryk-victorinox-ranger-red-64893?pref_q=scyzoryk+victorinox+ranger+red",
+        "variant": "red",
+        "price": 249,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
       }
     ]
   },
@@ -174,13 +261,16 @@
     "description": "Ultra-kompaktowy scyzoryk w aluminiowej obudowie",
     "price_tier": "low",
     "quality": "high",
-    "weight": 29.0,
+    "weight": 29,
     "weight_unit": "g",
     "url": "https://www.victorinox.com/global/en/products/Swiss-Army-Knives/Small-Pocket-Knives/Alox-Bantam/p/0.6221",
     "image_filename": "Victorinox-Alox-Bantam-Silver.png",
     "shops": [
       {
-        "url": "https://militaria.pl/p/scyzoryk-victorinox-alox-bantam-silver-2608760"
+        "url": "https://militaria.pl/p/scyzoryk-victorinox-alox-bantam-silver-2608760",
+        "price": 119.99,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
       }
     ]
   },
@@ -193,7 +283,7 @@
     "description": "Kompaktowy filtr do wody, łatwy w transporcie",
     "price_tier": "low",
     "quality": "medium",
-    "weight": 2.0,
+    "weight": 2,
     "weight_unit": "oz",
     "url": "https://sawyer.com/products/mini-water-filtration-system",
     "image_filename": "sawyer-mini.png",
@@ -212,11 +302,24 @@
     "description": "Wydajny filtr do zastosowań outdoor",
     "price_tier": "medium",
     "quality": "high",
-    "weight": 3.0,
+    "weight": 3,
     "weight_unit": "oz",
     "url": "https://sawyer.com/products/squeeze-water-filtration-system",
     "image_filename": "sawyer-squeeze-sp129.png",
-    "shops": []
+    "shops": [
+      {
+        "url": "https://militaria.pl/p/filtr-do-wody-sawyer-squeeze-water-filtration-system-2687278",
+        "price": 350,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      },
+      {
+        "url": "https://militaria.pl/p/filtr-do-wody-sawyer-point-one-micro-squeeze-36793",
+        "price": 289,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      }
+    ]
   },
   {
     "id": "01KBJXJ16F5J1NYW6GZN2S906E",
@@ -227,7 +330,7 @@
     "description": "Filtr grawitacyjny idealny na biwak / obóz",
     "price_tier": "high",
     "quality": "high",
-    "weight": 0.0,
+    "weight": 0,
     "weight_unit": "g",
     "url": "https://www.katadyn.com/",
     "shops": []
@@ -241,7 +344,7 @@
     "description": "Prosty filtr słomkowy do oczyszczania wody w terenie",
     "price_tier": "low",
     "quality": "medium",
-    "weight": 46.0,
+    "weight": 46,
     "weight_unit": "g",
     "url": "https://www.lifestraw.com/products/lifestraw-personal-water-filter",
     "image_filename": "lifestraw-personal.png",
@@ -256,18 +359,28 @@
     "description": "Butelka z wbudowanym filtrem do wody, wygodna w użyciu. Mikrofiltr membranowy pozwala na przefiltrowanie do 4000 litrów wody.",
     "price_tier": "medium",
     "quality": "high",
-    "weight": 247.0,
+    "weight": 247,
     "weight_unit": "g",
     "url": "https://www.lifestraw.com/products/lifestraw-go",
     "image_filename": "lifestraw-go-2.png",
     "shops": [
       {
         "url": "https://militaria.pl/p/butelka-z-filtrem-lifestraw-go-2-0-tritan-650-ml-polar-white-1950957?pref_q=butelka+z+filtrem+lifestraw+go+2.0+tritan+650+ml+-+polar+white",
-        "variant": "polar white"
+        "variant": "polar white",
+        "price": 219,
+        "currency": "PLN"
       },
       {
         "url": "https://militaria.pl/p/butelka-z-filtrem-lifestraw-go-2-0-tritan-650-ml-nordic-noir-1950955?pref_q=butelka+z+filtrem+lifestraw+go+2.0+tritan+650+ml+-+nordic+noir",
-        "variant": "nordic noir"
+        "variant": "nordic noir",
+        "price": 219,
+        "currency": "PLN"
+      },
+      {
+        "url": "https://militaria.pl/p/butelka-z-filtrem-lifestraw-go-2-0-tritan-650-ml-terrace-green-1950962",
+        "variant": "terrace green",
+        "price": 219,
+        "currency": "PLN"
       }
     ]
   },
@@ -280,7 +393,7 @@
     "description": "Lekki tarp do wielu konfiguracji schronienia",
     "price_tier": "medium",
     "quality": "high",
-    "weight": 875.0,
+    "weight": 875,
     "weight_unit": "g",
     "url": "https://www.ddhammocks.com/product/3x3-tarp",
     "image_filename": "DD-Hammocks-3×3-Tarp.png",
@@ -299,7 +412,14 @@
     "weight_unit": "kg",
     "url": "https://www.snugpak.com/outdoor/stratosphere",
     "image_filename": "Snugpak-Stratosphere.png",
-    "shops": []
+    "shops": [
+      {
+        "url": "https://militaria.pl/p/namiot-1-osobowy-norka-snugpak-bivi-stratosphere-oliwkowy-222917",
+        "price": 979,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      }
+    ]
   },
   {
     "id": "01KBJXJDA0BW8V8C8NCFGVM8BQ",
@@ -324,7 +444,7 @@
     "description": "Kompaktowa latarka EDC",
     "price_tier": "medium",
     "quality": "high",
-    "weight": 60.0,
+    "weight": 60,
     "weight_unit": "g",
     "url": "https://www.olightstore.com/i5r-eos",
     "shops": []
@@ -338,7 +458,7 @@
     "description": "Czołówka outdoorowa z mocnym światłem, odporna na warunki",
     "price_tier": "medium",
     "quality": "high",
-    "weight": 92.0,
+    "weight": 92,
     "weight_unit": "g",
     "url": "https://www.blackdiamondequipment.com/en_US/headlamps-and-lanterns/storm-450-headlamp-BD620625.html",
     "image_filename": "black-diamond-storm-450-black.png",
@@ -353,7 +473,7 @@
     "description": "Taktyczna latarka o dużej mocy i zasięgu",
     "price_tier": "high",
     "quality": "high",
-    "weight": 0.0,
+    "weight": 0,
     "weight_unit": "g",
     "url": "https://www.fenixlighting.com/product/pd35-v3-flashlight/",
     "image_filename": "fenix_pd35v3_flashlight.webp",
@@ -368,7 +488,7 @@
     "description": "Izraelski opatrunek do tamowania krwotoków",
     "price_tier": "medium",
     "quality": "high",
-    "weight": 0.0,
+    "weight": 0,
     "weight_unit": "g",
     "url": "https://www.emergencybandage.com/",
     "shops": []
@@ -382,7 +502,7 @@
     "description": "Profesjonalna staza uciskowa",
     "price_tier": "high",
     "quality": "high",
-    "weight": 0.0,
+    "weight": 0,
     "weight_unit": "g",
     "url": "https://www.cat-tourniquets.com/products/c-a-t-gen-7",
     "image_filename": "CAT-GEN7-Tourniquet.png",
@@ -397,7 +517,7 @@
     "description": "Kieszeń organizer-pouch, dobra do EDC",
     "price_tier": "low",
     "quality": "medium",
-    "weight": 0.0,
+    "weight": 0,
     "weight_unit": "g",
     "url": "https://www.condoroutdoor.com/",
     "image_filename": "Condor-MA36-Admin-Pouch.png",
@@ -412,11 +532,24 @@
     "description": "Solidny plecak EDC/outdoor z systemem MOLLE",
     "price_tier": "medium",
     "quality": "high",
-    "weight": 0.0,
+    "weight": 0,
     "weight_unit": "g",
     "url": "https://www.maxpedition.com/",
     "image_filename": "maxpedition-falcon-ii-backpack.png",
-    "shops": []
+    "shops": [
+      {
+        "url": "https://militaria.pl/p/buty-taktyczne-garmont-t8-falcon-regular-coyote-2840469"
+      },
+      {
+        "url": "https://militaria.pl/p/buty-columbia-firecamp-ii-stone-green-2797590"
+      },
+      {
+        "url": "https://militaria.pl/p/koszulka-termoaktywna-helikon-us-lvl-2-long-sleeve-olive-green-158178"
+      },
+      {
+        "url": "https://militaria.pl/p/bielizna-termoaktywna-helikon-us-lvl-2-olive-green-komplet-96783"
+      }
+    ]
   },
   {
     "id": "01KBJXK1P9Z7DJ0TYR3AN5YRWS",
@@ -442,7 +575,7 @@
     "description": "Energetyczny baton do szybkiego zastrzyku kalorii",
     "price_tier": "low",
     "quality": "medium",
-    "weight": 68.0,
+    "weight": 68,
     "weight_unit": "g",
     "url": "https://www.clifbar.com/products/clif-bar/chocolate-chip",
     "shops": []
@@ -456,7 +589,7 @@
     "description": "Liofilizowany posiłek turystyczny",
     "price_tier": "high",
     "quality": "high",
-    "weight": 0.0,
+    "weight": 0,
     "weight_unit": "g",
     "url": "https://www.lyofood.pl/produkty/beef-stroganoff",
     "shops": []
@@ -470,7 +603,7 @@
     "description": "Lekka menażka do gotowania w terenie",
     "price_tier": "medium",
     "quality": "high",
-    "weight": 0.0,
+    "weight": 0,
     "weight_unit": "g",
     "url": "https://www.primusequipment.com/",
     "shops": []
@@ -484,11 +617,30 @@
     "description": "Wysokokaloryczne racje żywnościowe survivalowe",
     "price_tier": "medium",
     "quality": "high",
-    "weight": 500.0,
+    "weight": 500,
     "weight_unit": "g",
     "url": "https://www.nrg5.com/",
     "image_filename": "NRG-5.png",
-    "shops": []
+    "shops": [
+      {
+        "url": "https://militaria.pl/p/racja-zywnosciowa-katadyn-nrg-5-emergency-food-ration-229029",
+        "price": 37.99,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      },
+      {
+        "url": "https://militaria.pl/p/racja-zywnosciowa-katadyn-nrg-5-zero-emergency-food-ration-229028",
+        "price": 44.99,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      },
+      {
+        "url": "https://militaria.pl/p/racja-zywnosciowa-trek-n-eat-nrg-5-emergency-food-ration-125-g-2850346",
+        "price": 24.95,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      }
+    ]
   },
   {
     "id": "01KBJXKF6RS91JXKZQ0NBVFEVB",
@@ -499,7 +651,7 @@
     "description": "Notes odporny na wodę — idealny na wyprawy",
     "price_tier": "low",
     "quality": "medium",
-    "weight": 0.0,
+    "weight": 0,
     "weight_unit": "g",
     "url": "https://riteintherain.com/products/all-weather-notebook",
     "image_filename": "rite-in-rain-notebook.png",
@@ -514,7 +666,7 @@
     "description": "Precyzyjny kompas terenowy",
     "price_tier": "medium",
     "quality": "high",
-    "weight": 0.0,
+    "weight": 0,
     "weight_unit": "g",
     "url": "https://www.suunto.com/en-us/Products/Compasses/Suunto-MC-2/",
     "image_filename": "Suunto-MC-2-Compass.png",
@@ -543,7 +695,7 @@
     "description": "Duży powerbank przydatny w terenie",
     "price_tier": "medium",
     "quality": "high",
-    "weight": 356.0,
+    "weight": 356,
     "weight_unit": "g",
     "url": "https://www.anker.com/",
     "image_filename": "anker_powercore_20100.png",
@@ -558,7 +710,7 @@
     "description": "Lekka folia ratunkowa / koc termoizolacyjny – przydatna do ochrony przed wychłodzeniem lub jako awaryjne schronienie.",
     "price_tier": "low",
     "quality": "medium",
-    "weight": 50.0,
+    "weight": 50,
     "weight_unit": "g",
     "url": "https://www.mil-tec.com/",
     "shops": []
@@ -572,7 +724,7 @@
     "description": "Składana, lekka butelka na wodę – dobra do noszenia przefiltrowanej wody lub transportu wody pitnej.",
     "price_tier": "low",
     "quality": "medium",
-    "weight": 40.0,
+    "weight": 40,
     "weight_unit": "g",
     "url": "https://cnocoutdoors.com/products/vecto-collapsible-water-container",
     "shops": []
@@ -586,7 +738,7 @@
     "description": "Tabletki do chemicznego uzdatniania wody – backup lub alternatywa do filtra.",
     "price_tier": "low",
     "quality": "medium",
-    "weight": 30.0,
+    "weight": 30,
     "weight_unit": "g",
     "url": "https://www.aquamira.com/",
     "shops": []
@@ -600,7 +752,7 @@
     "description": "Metalowy kubek / menażka – do gotowania wody lub posiłków w terenie.",
     "price_tier": "low",
     "quality": "medium",
-    "weight": 150.0,
+    "weight": 150,
     "weight_unit": "g",
     "url": "https://www.gsioutdoors.com/",
     "shops": []
@@ -614,7 +766,7 @@
     "description": "Wodoodporne, wiatroszczelne zapałki – dobre zabezpieczenie awaryjne dla ognia.",
     "price_tier": "low",
     "quality": "medium",
-    "weight": 25.0,
+    "weight": 25,
     "weight_unit": "g",
     "url": "https://www.ucogear.com/",
     "shops": []
@@ -628,7 +780,7 @@
     "description": "Uniwersalna taśma naprawcza – przydatna do napraw, improwizacji, uszczelniania, zabezpieczeń.",
     "price_tier": "low",
     "quality": "medium",
-    "weight": 100.0,
+    "weight": 100,
     "weight_unit": "g",
     "url": "https://www.amazon.com/s?k=duct+tape+10m",
     "shops": []
@@ -642,7 +794,7 @@
     "description": "Składana łyżko-widelec – lekki element do jedzenia / gotowania w terenie.",
     "price_tier": "low",
     "quality": "medium",
-    "weight": 25.0,
+    "weight": 25,
     "weight_unit": "g",
     "url": "https://www.amazon.com/s?k=titanium+spork",
     "shops": []
@@ -656,7 +808,7 @@
     "description": "Lekki wodoodporny poncho – zabezpieczenie przed deszczem / wilgocią, może służyć jako prowizoryczne schronienie.",
     "price_tier": "low",
     "quality": "medium",
-    "weight": 120.0,
+    "weight": 120,
     "weight_unit": "g",
     "url": "https://www.amazon.com/s?k=emergency+poncho",
     "shops": []
@@ -670,7 +822,7 @@
     "description": "Ponczo przeciwdeszczowe z praktycznym kapturem ze ściągaczem. To lekki, wytrzymały i wielofunkcyjny ekwipunek, który warto mieć zawsze pod ręką. Sprawdzi się zarówno w leśnej głuszy, jak i w samochodowym schowku czy rowerowej sakwie, gotowe na deszczową pogodę.",
     "price_tier": "medium",
     "quality": "medium",
-    "weight": 254.0,
+    "weight": 254,
     "weight_unit": "g",
     "url": "https://www.amazon.com/s?k=emergency+poncho",
     "shops": [
@@ -688,21 +840,39 @@
     "description": "Mała, niezawodna latarka EDC na jedną baterię AAA (180 lm, momentary tail switch).",
     "price_tier": "medium",
     "quality": "high",
-    "price": 25.0,
-    "price_currency": "USD",
-    "weight": 40.0,
+    "weight": 40,
     "weight_unit": "g",
     "url": "https://www.olightstore.com/i3t-eos",
     "image_filename": "olight-i3T-2-EOS.jpg.png",
     "color": "Black",
     "shops": [
       {
-        "url": "https://militaria.pl/p/latarka-olight-i3t-2-eos-black-300-lumenow-2237331?pref_q=latarka+olight+i3t+2+eos+black+-+300+lumen%c3%b3w",
-        "variant": "black"
+        "url": "https://militaria.pl/p/latarka-olight-i3t-2-eos-black-300-lumenow-2237331",
+        "variant": "black",
+        "price": 99.95,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
       },
       {
-        "url": "https://militaria.pl/p/latarka-olight-i3t-2-eos-od-green-300-lumenow-2808151?pref_q=latarka+olight+i3t+2+eos+od+green+-+300+lumen%c3%b3w",
-        "variant": "green"
+        "url": "https://militaria.pl/p/latarka-olight-i3t-2-eos-od-green-300-lumenow-2808151",
+        "variant": "green",
+        "price": 89.99,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      },
+      {
+        "url": "https://militaria.pl/p/latarka-olight-i3t-2-eos-orange-300-lumenow-2841250",
+        "variant": "orange",
+        "price": 99.95,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      },
+      {
+        "url": "https://militaria.pl/p/latarka-olight-i3t-2-eos-midnight-blue-300-lumenow-2843613",
+        "variant": "midnight blue",
+        "price": 89.99,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
       }
     ]
   },
@@ -715,9 +885,7 @@
     "description": "Klasyczny scyzoryk z piłką, nożyczkami i ostrzem — świetny do EDC i outdoor.",
     "price_tier": "medium",
     "quality": "high",
-    "price": 45.0,
-    "price_currency": "USD",
-    "weight": 97.0,
+    "weight": 97,
     "weight_unit": "g",
     "url": "https://www.victorinox.com/global/en/products/Swiss-Army-Knives/Medium-Pocket-Knives/Huntsman/p/1.3713",
     "image_filename": "Victorinox-Huntsman.png",
@@ -725,11 +893,17 @@
     "shops": [
       {
         "url": "https://militaria.pl/p/scyzoryk-victorinox-huntsman-red-10025?pref_q=scyzoryk+victorinox+huntsman+-+red",
-        "variant": "red"
+        "variant": "red",
+        "price": 169.95,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
       },
       {
         "url": "https://militaria.pl/p/scyzoryk-victorinox-huntsman-black-18746?pref_q=scyzoryk+victorinox+huntsman+-+black",
-        "variant": "black"
+        "variant": "black",
+        "price": 169.95,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
       }
     ]
   },
@@ -742,12 +916,14 @@
     "description": "Standardowy ferro rod 8 mm — lekka alternatywa do większych prętów.",
     "price_tier": "low",
     "quality": "medium",
-    "price": 8.0,
-    "price_currency": "USD",
-    "weight": 35.0,
+    "weight": 35,
     "weight_unit": "g",
     "url": "https://www.amazon.com",
-    "shops": []
+    "shops": [
+      {
+        "url": "https://militaria.pl/p/krzesiwo-badger-outdoor-fire-rod-20712"
+      }
+    ]
   },
   {
     "id": "01KBQ9MKG60801WW461XE4JJA6",
@@ -758,9 +934,7 @@
     "description": "Notes wodoodporny — działa w deszczu, śniegu, błocie; klasyk w survivalu.",
     "price_tier": "low",
     "quality": "medium",
-    "price": 6.0,
-    "price_currency": "USD",
-    "weight": 70.0,
+    "weight": 70,
     "weight_unit": "g",
     "url": "https://riteintherain.com/products/top-spiral-notepad-3x5",
     "color": "Yellow",
@@ -779,9 +953,7 @@
     "description": "Marker permanentny — podpisywanie, notatki awaryjne, oznaczanie sprzętu.",
     "price_tier": "low",
     "quality": "medium",
-    "price": 2.0,
-    "price_currency": "USD",
-    "weight": 9.0,
+    "weight": 9,
     "weight_unit": "g",
     "url": "https://www.sharpie.com",
     "color": "Black",
@@ -796,9 +968,7 @@
     "description": "Ultra-lekka latarka AAA, idealna jako backup.",
     "price_tier": "medium",
     "quality": "high",
-    "price": 20.0,
-    "price_currency": "USD",
-    "weight": 13.0,
+    "weight": 13,
     "weight_unit": "g",
     "url": "https://www.fenixlighting.com/product/e01-v2-flashlight/",
     "image_filename": "fenix-e01-v2.png",

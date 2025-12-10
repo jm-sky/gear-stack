@@ -308,6 +308,9 @@ class CatalogueShop(BaseModel):
     url: str
     name: str | None = None
     variant: str | None = None
+    price: float | None = Field(None, ge=0)
+    currency: str | None = Field(None, max_length=10)
+    updatedAt: str | None = Field(None, alias="updated_at", serialization_alias="updatedAt")
 
     model_config = {"populate_by_name": True}
 

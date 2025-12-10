@@ -9,6 +9,9 @@ export interface ICatalogueShop {
   url: string
   name?: string
   variant?: string
+  price?: number
+  currency?: string
+  updatedAt?: TDateTime
 }
 
 // Global catalogue item (template for creating gear items)
@@ -23,8 +26,6 @@ export interface IGlobalCatalogueItem {
   brand?: string | null
   model?: string | null
   priceTier?: TCataloguePriceTier | null
-  price?: number | null
-  currency?: string | null
   quality?: TGearItemQuality | null
   url?: string | null
   color?: string | null

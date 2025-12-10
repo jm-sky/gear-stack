@@ -834,6 +834,7 @@ export const gearEn = {
       shopsTitle: 'Where to buy',
       shopLink: 'Shop link',
       openShop: 'Open shop',
+      priceDate: 'Approximate price as of {date}',
     },
   },
 }
@@ -1676,6 +1677,7 @@ export const gearPl = {
       shopsTitle: 'Gdzie kupić',
       shopLink: 'Link do sklepu',
       openShop: 'Otwórz sklep',
+      priceDate: 'Cena orientacyjna na dzień {date}',
     },
   },
 }
