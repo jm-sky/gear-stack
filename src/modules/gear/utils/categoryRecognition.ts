@@ -38,8 +38,8 @@ export const CATEGORY_KEYWORDS: Record<TGearItemCategory, string[]> = {
   blades: [
     // English
     'knife', 'knives', 'blade', 'blades', 'machete', 'machetes', 'axe', 'axes', 'hatchet', 'hatchets', 'sword', 'swords', 'dagger', 'daggers', 'cleaver', 'cleavers',
-    // Polish
-    'nóż', 'noże', 'ostrze', 'ostrza', 'maczeta', 'maczety', 'siekiera', 'siekery', 'toporek', 'toporki', 'miecz', 'miecze', 'sztylet', 'sztylety', 'tasak', 'tasaki',
+    // Polish (including normalized versions without Polish diacritics)
+    'nóż', 'noz', 'noże', 'noze', 'ostrze', 'ostrza', 'maczeta', 'maczety', 'siekiera', 'siekery', 'toporek', 'toporki', 'miecz', 'miecze', 'sztylet', 'sztylety', 'tasak', 'tasaki',
   ],
   tools: [
     // English

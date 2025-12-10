@@ -348,7 +348,22 @@
     "weight_unit": "g",
     "url": "https://www.lifestraw.com/products/lifestraw-personal-water-filter",
     "image_filename": "lifestraw-personal.png",
-    "shops": []
+    "shops": [
+      {
+        "url": "https://militaria.pl/p/filtr-do-wody-lifestraw-peak-personal-dark-gray-351115",
+        "variant": "dark gray",
+        "price": 169.95,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      },
+      {
+        "url": "https://militaria.pl/p/filtr-do-wody-lifestraw-peak-personal-mountain-blue-351114",
+        "variant": "mountain blue",
+        "price": 169.95,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      }
+    ]
   },
   {
     "id": "01KBJXJ60YKWVB026N8YJ9TYPE",
@@ -978,5 +993,156 @@
         "url": "https://militaria.pl/p/latarka-fenix-e01-v2-0-black-100-lumenow-2839708?pref_q=latarka+fenix+e01+v2.0+black+-+100+lumen%c3%b3w"
       }
     ]
+  },
+  {
+    "id": "01KBJXKQ1M2N3P4Q5R6S7T8U9V0",
+    "name": "Morakniv Companion",
+    "category": "blades",
+    "brand": "Morakniv",
+    "model": "Companion",
+    "description": "Klasyczny nóż z stałym ostrzem, niezawodny i niedrogi. Idealny do podstawowych zadań outdoor.",
+    "price_tier": "low",
+    "quality": "high",
+    "weight": 120,
+    "weight_unit": "g",
+    "url": "https://www.morakniv.com/en/product/companion/",
+    "image_filename": "morakniv-companion.png",
+    "shops": [
+      {
+        "url": "https://militaria.pl/p/noz-mora-companion-stainless-military-green-5769?pref_q=n%c3%b3%c5%bc+mora+companion+stainless+-+military+green",
+        "variant": "green",
+        "price": 69.95,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      }
+    ]
+  },
+  {
+    "id": "01KBJXKR2N3O4P5Q6R7S8T9U0V1",
+    "name": "ESEE Izula",
+    "category": "blades",
+    "brand": "ESEE",
+    "model": "Izula",
+    "description": "Kompaktowy nóż z stałym ostrzem, idealny do EDC i survival. Wytrzymała konstrukcja z 1095 carbon steel.",
+    "price_tier": "medium",
+    "quality": "high",
+    "weight": 85,
+    "weight_unit": "g",
+    "url": "https://www.eseeknives.com/izula.htm",
+    "shops": []
+  },
+  {
+    "id": "01KBJXKS3O4P5Q6R7S8T9U0V1W2",
+    "name": "Opinel No. 8",
+    "category": "blades",
+    "brand": "Opinel",
+    "model": "No. 8",
+    "description": "Klasyczny francuski nóż składany, lekki i praktyczny. Idealny do codziennego użytku.",
+    "price_tier": "low",
+    "quality": "medium",
+    "weight": 60,
+    "weight_unit": "g",
+    "url": "https://www.opinel.com/en/classic-knife-no-8",
+    "shops": [
+      {
+        "url": "https://militaria.pl/p/noz-opinel-no-8-carbon-12001",
+        "variant": "carbon",
+        "price": 45.99,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      },
+      {
+        "url": "https://militaria.pl/p/noz-opinel-no-8-inox-12002",
+        "variant": "inox",
+        "price": 49.99,
+        "currency": "PLN",
+        "updated_at": "2025-12-10"
+      }
+    ]
+  },
+  {
+    "id": "01KBJXKT4P5Q6R7S8T9U0V1W2X3",
+    "name": "Ka-Bar Becker BK2",
+    "category": "blades",
+    "brand": "Ka-Bar",
+    "model": "Becker BK2",
+    "description": "Solidny nóż survivalowy z grubym ostrzem. Wytrzymały i niezawodny w ekstremalnych warunkach.",
+    "price_tier": "high",
+    "quality": "high",
+    "weight": 595,
+    "weight_unit": "g",
+    "url": "https://www.kabar.com/",
+    "image_filename": "kabar-becker-bk2.png",
+    "shops": [
+      {
+        "url": "https://militaria.pl/p/noz-ka-bar-bk2-becker-campanion-14260",
+        "price": 684,
+        "currency": "PLN"
+      }
+    ]
+  },
+  {
+    "id": "01KBJXKU5Q6R7S8T9U0V1W2X3Y4",
+    "name": "Cold Steel SRK",
+    "category": "blades",
+    "brand": "Cold Steel",
+    "model": "SRK",
+    "description": "Nóż survivalowy o długości ostrza 6 cali. Wytrzymały i wszechstronny do zadań outdoor.",
+    "price_tier": "medium",
+    "quality": "high",
+    "weight": 340,
+    "weight_unit": "g",
+    "url": "https://www.coldsteel.com/",
+    "shops": []
+  },
+  {
+    "id": "01KBJXKV6R7S8T9U0V1W2X3Y4Z5",
+    "name": "Ontario SP2 Air Force",
+    "category": "blades",
+    "brand": "Ontario",
+    "model": "SP2 Air Force",
+    "description": "Nóż taktyczny zaprojektowany dla US Air Force. Kompaktowy i niezawodny.",
+    "price_tier": "medium",
+    "quality": "high",
+    "weight": 357,
+    "weight_unit": "g",
+    "url": "https://www.ontarioknife.com/",
+    "shops": []
+  },
+  {
+    "id": "01KBJXKW7S8T9U0V1W2X3Y4Z5A6",
+    "name": "Benchmade Griptilian",
+    "category": "blades",
+    "brand": "Benchmade",
+    "model": "Griptilian",
+    "description": "Wysokiej jakości nóż składany z systemem Axis Lock. Precyzyjny i niezawodny.",
+    "price_tier": "high",
+    "quality": "high",
+    "weight": 91,
+    "weight_unit": "g",
+    "url": "https://www.benchmade.com/",
+    "image_filename": "benchmade-griptilian.png",
+    "shops": [
+      {
+        "url": "https://militaria.pl/p/noz-skladany-benchmade-griptilian-cpm-s30v-black-noryl-gtx-859641",
+        "variant": "Black",
+        "price": 639,
+        "currency": "PLN"
+      }
+    ]
+  },
+  {
+    "id": "01KBJXKX8T9U0V1W2X3Y4Z5A6B7",
+    "name": "Spyderco Delica 4",
+    "category": "blades",
+    "brand": "Spyderco",
+    "model": "Delica 4",
+    "description": "Popularny nóż składany EDC z charakterystycznym otworem Spydiehole. Lekki i praktyczny.",
+    "price_tier": "medium",
+    "quality": "high",
+    "weight": 70,
+    "weight_unit": "g",
+    "url": "https://www.spyderco.com/",
+    "shops": []
   }
 ]

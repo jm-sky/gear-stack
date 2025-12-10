@@ -17,8 +17,8 @@
       },
       "category": {
         "type": "string",
-        "enum": ["fire", "tools", "water", "shelter", "light", "firstAid", "other", "food", "navigation", "communication"],
-        "description": "Product category"
+        "enum": ["water", "food", "shelter", "fire", "firstAid", "blades", "tools", "light", "navigation", "communication", "clothing", "hygiene", "other"],
+        "description": "Product category. Should match TGearItemCategory from frontend."
       },
       "brand": {
         "type": "string",

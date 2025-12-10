@@ -32,17 +32,24 @@ export interface CatalogueItem {
   shops?: CatalogueItemShop[]
 }
 
+/**
+ * Catalogue item category.
+ * Should match TGearItemCategory from src/modules/gear/types/gear.types.ts
+ */
 export type CatalogueItemCategory =
-  | 'fire'
-  | 'tools'
   | 'water'
-  | 'shelter'
-  | 'light'
-  | 'firstAid'
-  | 'other'
   | 'food'
+  | 'shelter'
+  | 'fire'
+  | 'firstAid'
+  | 'blades'
+  | 'tools'
+  | 'light'
   | 'navigation'
   | 'communication'
+  | 'clothing'
+  | 'hygiene'
+  | 'other'
 
 export type PriceTier = 'low' | 'medium' | 'high'
 
