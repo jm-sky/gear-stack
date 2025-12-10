@@ -152,15 +152,6 @@ const handleAddToContainer = () => {
         </template>
       </CommonPageHeader>
 
-      <!-- Primary Image -->
-      <div v-if="item.primaryImageUrl" class="flex items-center justify-center overflow-hidden rounded-lg border bg-muted">
-        <img
-          :src="item.primaryImageUrl"
-          :alt="item.name"
-          class="max-h-96 w-full object-contain"
-        />
-      </div>
-
       <!-- Badges -->
       <div class="flex flex-wrap gap-2">
         <Badge variant="secondary">
@@ -180,92 +171,104 @@ const handleAddToContainer = () => {
         </Badge>
       </div>
 
-      <!-- Details -->
-      <div class="space-y-4 rounded-lg border bg-card p-6">
-        <h2 class="text-lg font-semibold">
-          {{ t('gear.item.details') }}
-        </h2>
+      <!-- Details and Primary Image Side by Side -->
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <!-- Details -->
+        <div class="space-y-4 rounded-lg border bg-card p-6">
+          <h2 class="text-lg font-semibold">
+            {{ t('gear.item.details') }}
+          </h2>
 
-        <template v-if="hasDetails">
-          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div v-if="item.model">
-              <div class="mb-1 text-sm text-muted-foreground">
-                {{ t('gear.catalogue.model') }}
+          <template v-if="hasDetails">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div v-if="item.model">
+                <div class="mb-1 text-sm text-muted-foreground">
+                  {{ t('gear.catalogue.model') }}
+                </div>
+                <div class="font-medium">
+                  {{ item.model }}
+                </div>
               </div>
-              <div class="font-medium">
-                {{ item.model }}
+              <div v-if="item.weight">
+                <div class="mb-1 text-sm text-muted-foreground">
+                  {{ t('gear.item.weight') }}
+                </div>
+                <div class="font-medium">
+                  {{ item.weight }}{{ item.weightUnit }}
+                </div>
+              </div>
+              <div v-if="item.brand">
+                <div class="mb-1 text-sm text-muted-foreground">
+                  {{ t('gear.item.brand') }}
+                </div>
+                <div class="font-medium">
+                  {{ item.brand }}
+                </div>
+              </div>
+              <div v-if="item.color">
+                <div class="mb-1 text-sm text-muted-foreground">
+                  {{ t('gear.item.color') }}
+                </div>
+                <div class="flex items-center gap-2">
+                  <div
+                    class="size-4 shrink-0 rounded-full border border-border"
+                    :style="{
+                      backgroundColor: getColorHex(item.color) ?? DEFAULT_COLOR,
+                    }"
+                  />
+                  <span class="font-medium">{{ item.color }}</span>
+                </div>
+              </div>
+              <div v-if="item.url">
+                <div class="mb-1 text-sm text-muted-foreground">
+                  {{ t('gear.item.url') }}
+                </div>
+                <div>
+                  <a
+                    :href="item.url"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="font-medium text-primary hover:underline"
+                  >
+                    {{ urlDisplay }}
+                  </a>
+                </div>
+              </div>
+              <div v-if="item.createdBy">
+                <div class="mb-1 text-sm text-muted-foreground">
+                  {{ t('gear.catalogue.createdBy') }}
+                </div>
+                <div class="font-medium">
+                  {{ createdByDisplay }}
+                </div>
               </div>
             </div>
-            <div v-if="item.weight">
-              <div class="mb-1 text-sm text-muted-foreground">
-                {{ t('gear.item.weight') }}
-              </div>
-              <div class="font-medium">
-                {{ item.weight }}{{ item.weightUnit }}
-              </div>
-            </div>
-            <div v-if="item.brand">
-              <div class="mb-1 text-sm text-muted-foreground">
-                {{ t('gear.item.brand') }}
-              </div>
-              <div class="font-medium">
-                {{ item.brand }}
-              </div>
-            </div>
-            <div v-if="item.color">
-              <div class="mb-1 text-sm text-muted-foreground">
-                {{ t('gear.item.color') }}
-              </div>
-              <div class="flex items-center gap-2">
-                <div
-                  class="size-4 shrink-0 rounded-full border border-border"
-                  :style="{
-                    backgroundColor: getColorHex(item.color) ?? DEFAULT_COLOR,
-                  }"
-                />
-                <span class="font-medium">{{ item.color }}</span>
-              </div>
-            </div>
-            <div v-if="item.url">
-              <div class="mb-1 text-sm text-muted-foreground">
-                {{ t('gear.item.url') }}
-              </div>
-              <div>
-                <a
-                  :href="item.url"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="font-medium text-primary hover:underline"
-                >
-                  {{ urlDisplay }}
-                </a>
-              </div>
-            </div>
-            <div v-if="item.createdBy">
-              <div class="mb-1 text-sm text-muted-foreground">
-                {{ t('gear.catalogue.createdBy') }}
-              </div>
-              <div class="font-medium">
-                {{ createdByDisplay }}
-              </div>
-            </div>
-          </div>
 
-          <div v-if="item.description" class="border-t pt-4">
-            <div class="mb-2 text-sm text-muted-foreground">
-              {{ t('gear.container.description') }}
+            <div v-if="item.description" class="border-t pt-4">
+              <div class="mb-2 text-sm text-muted-foreground">
+                {{ t('gear.container.description') }}
+              </div>
+              <MarkdownRenderer :content="item.description" class="text-sm" />
             </div>
-            <MarkdownRenderer :content="item.description" class="text-sm" />
-          </div>
-        </template>
+          </template>
 
-        <template v-else>
-          <div class="py-4 text-center text-muted-foreground">
-            <p class="text-sm">
-              {{ t('gear.item.noDetails') }}
-            </p>
-          </div>
-        </template>
+          <template v-else>
+            <div class="py-4 text-center text-muted-foreground">
+              <p class="text-sm">
+                {{ t('gear.item.noDetails') }}
+              </p>
+            </div>
+          </template>
+        </div>
+
+        <!-- Primary Image -->
+        <div v-if="item.primaryImageUrl" class="flex items-center justify-center overflow-hidden rounded-lg border bg-muted">
+          <img
+            :src="item.primaryImageUrl"
+            :alt="item.name"
+            class="max-h-96 w-full object-contain"
+          />
+        </div>
       </div>
 
       <!-- Shops -->
