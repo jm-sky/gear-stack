@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n'
-import Button from '@/components/ui/button/Button.vue'
 import { cn } from '@/lib/utils'
-import { getActionIcon } from '@/modules/gear/utils/actionIcons'
+import BackButton from './BackButton.vue'
 import type { Component, HTMLAttributes } from 'vue'
 
 const { icon, label, description } = defineProps<{
@@ -12,10 +10,6 @@ const { icon, label, description } = defineProps<{
   iconClass?: HTMLAttributes['class']
   withBackButton?: boolean
 }>()
-
-const { t } = useI18n()
-
-const BackIcon = getActionIcon('back')
 
 const emit = defineEmits<{
   back: []
@@ -28,15 +22,10 @@ const emit = defineEmits<{
     <div v-if="$slots.above || withBackButton" class="flex items-center justify-between gap-3">
       <slot name="above">
         <slot name="back-button">
-          <Button
+          <BackButton
             v-if="withBackButton"
-            variant="ghost"
-            size="sm"
             @click="emit('back')"
-          >
-            <BackIcon class="size-4" />
-            {{ t('common.back') }}
-          </Button>
+          />
         </slot>
         <slot name="top-actions" />
         <slot name="dropdown" />
@@ -48,6 +37,7 @@ const emit = defineEmits<{
       <!-- Left: icon, title, description -->
       <div class="flex-1 min-w-0">
         <div class="flex items-center gap-3">
+          <slot name="before-icon" />
           <component
             :is="icon"
             v-if="icon"
