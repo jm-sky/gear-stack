@@ -13,8 +13,12 @@ import {
   GRAMS_PER_KILOGRAM,
   PERCENTAGE_MULTIPLIER,
 } from '../utils/constants'
+import {
+  calculateReadinessPercentageSync,
+  calculateTotalWeightSync,
+  calculateWeightLimitPercentageSync,
+} from '../utils/containerCalculations'
 import { getAllNestedContainers, getRootContainers, wouldCreateCircularReference } from '../utils/containerNesting'
-import { convertToGrams } from '../utils/formatWeight'
 import { getAllItems } from '../utils/getAllItems'
 import { isSet } from '../utils/helpers'
 import type { TUUID } from '@/shared/types/base.type'
@@ -196,54 +200,45 @@ class GearContainerLocalService {
 
   // ========== Business Logic ==========
 
+  /**
+   * M3 FIX: Refactored to use centralized calculation utility
+   * Delegates to calculateTotalWeightSync() from utils/containerCalculations.ts
+   */
   async calculateTotalWeight(containerId: TUUID): Promise<number> {
     const container = this.store.getContainerById(containerId)
     if (!container) {
       return Promise.resolve(0)
     }
 
-    let totalWeight = 0
-    if (isSet(container.weight) && isSet(container.weightUnit)) {
-      totalWeight = convertToGrams(container.weight, container.weightUnit)
-    }
-
-    for (const item of container.items) {
-      if (item.containerId) {
-        const nestedContainerWeight = await this.calculateTotalWeight(item.containerId)
-        totalWeight += nestedContainerWeight * item.quantity
-      } else {
-        const weightInGrams = convertToGrams(item.weight, item.weightUnit ?? 'g')
-        totalWeight += weightInGrams * item.quantity
-      }
-    }
-
-    return Promise.resolve(totalWeight)
+    const allContainers = this.store.getAllContainers
+    return Promise.resolve(calculateTotalWeightSync(container, allContainers))
   }
 
+  /**
+   * M3 FIX: Refactored to use centralized calculation utility
+   * Delegates to calculateReadinessPercentageSync() from utils/containerCalculations.ts
+   */
   async calculateReadinessPercentage(containerId: TUUID): Promise<number> {
     const container = this.store.getContainerById(containerId)
-    if (!container || container.items.length === 0) {
+    if (!container) {
       return 0
     }
 
-    const ownedItems = container.items.filter(item => item.status === 'owned').length
-    return Promise.resolve(Math.round((ownedItems / container.items.length) * PERCENTAGE_MULTIPLIER))
+    return Promise.resolve(calculateReadinessPercentageSync(container))
   }
 
+  /**
+   * M3 FIX: Refactored to use centralized calculation utility
+   * Delegates to calculateWeightLimitPercentageSync() from utils/containerCalculations.ts
+   */
   async calculateWeightLimitPercentage(containerId: TUUID): Promise<number | null> {
     const container = this.store.getContainerById(containerId)
-    if (!container || !container.maxWeight) {
+    if (!container) {
       return null
     }
 
-    const totalWeight = await this.calculateTotalWeight(containerId)
-    const maxWeightInGrams = convertToGrams(container.maxWeight, container.maxWeightUnit ?? 'g')
-
-    if (maxWeightInGrams === 0) {
-      return Promise.resolve(0)
-    }
-
-    return Promise.resolve(Math.round((totalWeight / maxWeightInGrams) * PERCENTAGE_MULTIPLIER))
+    const allContainers = this.store.getAllContainers
+    return Promise.resolve(calculateWeightLimitPercentageSync(container, allContainers))
   }
 
   async isWeightLimitExceeded(containerId: TUUID): Promise<boolean> {

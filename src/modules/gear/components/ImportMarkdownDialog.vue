@@ -42,6 +42,8 @@ const { handleError } = useHandleError()
 
 const markdownContent = ref('')
 const importing = ref(false)
+const parsing = ref(false) // M5 FIX: Track parsing progress
+const parseProgress = ref(0) // M5 FIX: Parse progress percentage (0-100)
 const importMode = ref<'create' | 'update'>('update') // Default to update mode
 const recognizeFromName = ref(false) // Option to recognize brand and color from item name
 const previewResult = ref<ReturnType<typeof markdownImportService.parseMarkdown> | null>(null)
@@ -79,25 +81,43 @@ const handleClose = () => {
   emit('update:open', false)
 }
 
+/**
+ * M5 FIX: Use async parsing with progress indicator
+ * Prevents UI freezing on large markdown files
+ */
 const handlePreview = async () => {
   if (!markdownContent.value.trim()) {
     toast.error(t('gear.import.emptyContent'))
     return
   }
 
-  const result = markdownImportService.parseMarkdown(markdownContent.value, {
-    recognizeFromName: recognizeFromName.value,
-    customBrands: customBrands.value,
-  })
-  previewResult.value = result
+  parsing.value = true
+  parseProgress.value = 0
 
-  if (result.containers.length === 0) {
-    toast.warning(t('gear.import.noContainersFound'))
-  } else {
-    toast.success(t('gear.import.previewSuccess', { count: result.containers.length }))
-    // Scroll to preview section after DOM update
-    await nextTick()
-    previewRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  try {
+    const result = await markdownImportService.parseMarkdownAsync(markdownContent.value, {
+      recognizeFromName: recognizeFromName.value,
+      customBrands: customBrands.value,
+      onProgress: (percent) => {
+        parseProgress.value = percent
+      },
+    })
+    previewResult.value = result
+
+    if (result.containers.length === 0) {
+      toast.warning(t('gear.import.noContainersFound'))
+    } else {
+      toast.success(t('gear.import.previewSuccess', { count: result.containers.length }))
+      // Scroll to preview section after DOM update
+      await nextTick()
+      previewRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  } catch (error) {
+    console.error('Parse error:', error)
+    handleError(error)
+  } finally {
+    parsing.value = false
+    parseProgress.value = 0
   }
 }
 
@@ -283,6 +303,17 @@ const handleImport = async () => {
 <template>
   <Dialog :open="props.open" @update:open="handleClose">
     <DialogContent class="min-w-full md:min-w-2xl max-w-screen md:max-w-6xl min-h-[70vh] max-h-[90vh] flex flex-col">
+      <!-- M5 FIX: Progress overlay for parsing -->
+      <DialogProgressOverlay
+        :visible="parsing"
+        :progress-percentage="parseProgress"
+        :title="t('gear.import.parsing', 'Parsing markdown...')"
+        :progress-text="t('gear.import.parseProgress', 'Parse progress')"
+        :current-item-text="''"
+        :current="parseProgress"
+        :total="100"
+      />
+      <!-- Import progress overlay -->
       <DialogProgressOverlay
         :visible="importing"
         :progress-percentage="importProgressPercentage"
@@ -299,7 +330,7 @@ const handleImport = async () => {
         </DialogDescription>
       </DialogHeader>
 
-      <div class="flex flex-col flex-1 overflow-y-auto space-y-4" :class="{ 'opacity-50': importing }">
+      <div class="flex flex-col flex-1 overflow-y-auto space-y-4" :class="{ 'opacity-50': importing || parsing }">
         <!-- Markdown Input -->
         <div class="flex flex-col flex-1">
           <label class="text-sm font-medium mb-2 block">
@@ -308,7 +339,7 @@ const handleImport = async () => {
           <Textarea
             v-model="markdownContent"
             :placeholder="t('gear.import.placeholder')"
-            :disabled="importing"
+            :disabled="importing || parsing"
             rows="12"
             class="flex flex-1 min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-mono"
           />
@@ -340,7 +371,8 @@ const handleImport = async () => {
           <Button
             type="button"
             :variant="previewResult ? 'outline' : 'default'"
-            :disabled="markdownContent.trim().length < 4"
+            :disabled="markdownContent.trim().length < 4 || parsing || importing"
+            :loading="parsing"
             @click="handlePreview"
           >
             <FileText class="size-4" />
@@ -349,7 +381,7 @@ const handleImport = async () => {
           <Button
             type="button"
             :variant="previewResult ? 'default' : 'outline'"
-            :disabled="!previewResult || previewResult.containers.length === 0 || importing"
+            :disabled="!previewResult || previewResult.containers.length === 0 || importing || parsing"
             :loading="importing"
             @click="handleImport"
           >

@@ -1,14 +1,11 @@
 import { defineStore } from 'pinia'
+import { computed, ref } from 'vue'
 import { CONTAINERS_STORAGE_KEY } from '@/shared/config/config'
+import { logger } from '@/shared/utils/logger'
 import type { IGearContainer } from '../types/gear.types'
 import type { TUUID } from '@/shared/types/base.type'
 
-interface IGearStoreState {
-  containers: IGearContainer[]
-  isInitialized: boolean
-}
-
-// H5 FIX: Helper do ładowania z localStorage (synchronous for backward compatibility)
+// H5 FIX: Helper for loading from localStorage (synchronous for backward compatibility)
 function loadFromStorageSync(): IGearContainer[] {
   const stored = localStorage.getItem(CONTAINERS_STORAGE_KEY)
   if (stored) {
@@ -23,7 +20,7 @@ function loadFromStorageSync(): IGearContainer[] {
         })),
       }))
     } catch (error) {
-      console.error('Error loading from storage:', error)
+      logger.error('Error loading from storage:', error)
     }
   }
   return []
@@ -40,93 +37,160 @@ async function loadFromStorageAsync(): Promise<IGearContainer[]> {
   })
 }
 
-export const useGearStore = defineStore('gear', {
-  state: (): IGearStoreState => {
-    return {
-      containers: [],
-      isInitialized: false,
+/**
+ * Gear Store (Setup Style)
+ *
+ * M2 FIX: Converted from Options API to Setup style for consistency with useGearSettingsStore
+ *
+ * Benefits of Setup style:
+ * - Better TypeScript inference
+ * - More flexible composition
+ * - Consistent with Vue 3 Composition API
+ * - Matches pattern in useGearSettingsStore
+ */
+export const useGearStore = defineStore('gear', () => {
+  // ========== State ==========
+  const containers = ref<IGearContainer[]>([])
+  const isInitialized = ref<boolean>(false)
+
+  // ========== Getters (Computed) ==========
+
+  /**
+   * Get container by ID
+   */
+  const getContainerById = computed(() => {
+    return (id: TUUID): IGearContainer | undefined => {
+      return containers.value.find(c => c.id === id)
     }
-  },
+  })
 
-  getters: {
-    // Proste getters do dostępu do danych
-    getContainerById: (state) => (id: TUUID): IGearContainer | undefined => {
-      return state.containers.find(c => c.id === id)
-    },
+  /**
+   * Get all containers
+   */
+  const getAllContainers = computed<IGearContainer[]>(() => {
+    return containers.value
+  })
 
-    getAllContainers: (state): IGearContainer[] => {
-      return state.containers
-    },
-
-    // Find container ID by item ID (O(1) lookup for performance)
-    getContainerIdByItemId: (state) => (itemId: TUUID): TUUID | undefined => {
-      for (const container of state.containers) {
+  /**
+   * Find container ID by item ID (O(n) lookup)
+   */
+  const getContainerIdByItemId = computed(() => {
+    return (itemId: TUUID): TUUID | undefined => {
+      for (const container of containers.value) {
         if (container.items.some(item => item.id === itemId)) {
           return container.id
         }
       }
       return undefined
-    },
+    }
+  })
 
-    // Find container by item ID (returns full container)
-    getContainerByItemId: (state) => (itemId: TUUID): IGearContainer | undefined => {
-      return state.containers.find(container =>
-        container.items.some(item => item.id === itemId)
+  /**
+   * Find container by item ID (returns full container)
+   */
+  const getContainerByItemId = computed(() => {
+    return (itemId: TUUID): IGearContainer | undefined => {
+      return containers.value.find(container =>
+        container.items.some(item => item.id === itemId),
       )
-    },
-  },
+    }
+  })
 
-  actions: {
-    // Tylko operacje na state - bez logiki biznesowej
-    setContainers(containers: IGearContainer[]): void {
-      this.containers = containers
-      this.saveToStorage()
-    },
+  // ========== Actions ==========
 
-    addContainer(container: IGearContainer): void {
-      this.containers.push(container)
-      this.saveToStorage()
-    },
+  /**
+   * Save containers to localStorage
+   */
+  function saveToStorage(): void {
+    try {
+      localStorage.setItem(CONTAINERS_STORAGE_KEY, JSON.stringify(containers.value))
+    } catch (error) {
+      logger.error('Error saving to storage:', error)
+    }
+  }
 
-    updateContainer(container: IGearContainer): void {
-      const index = this.containers.findIndex(c => c.id === container.id)
-      if (index !== -1) {
-        this.containers[index] = container
-        this.saveToStorage()
-      }
-    },
+  /**
+   * Set all containers (replaces current state)
+   */
+  function setContainers(newContainers: IGearContainer[]): void {
+    containers.value = newContainers
+    saveToStorage()
+  }
 
-    removeContainer(id: TUUID): void {
-      this.containers = this.containers.filter(c => c.id !== id)
-      this.saveToStorage()
-    },
+  /**
+   * Add a new container
+   */
+  function addContainer(container: IGearContainer): void {
+    containers.value.push(container)
+    saveToStorage()
+  }
 
-    clearAllContainers(): void {
-      this.containers = []
-      this.saveToStorage()
-    },
+  /**
+   * Update an existing container
+   */
+  function updateContainer(container: IGearContainer): void {
+    const index = containers.value.findIndex(c => c.id === container.id)
+    if (index !== -1) {
+      containers.value[index] = container
+      saveToStorage()
+    }
+  }
 
-    // H5 FIX: Asynchronous initialization to avoid blocking main thread
-    async initialize(): Promise<void> {
-      if (this.isInitialized) return
+  /**
+   * Remove a container by ID
+   */
+  function removeContainer(id: TUUID): void {
+    containers.value = containers.value.filter(c => c.id !== id)
+    saveToStorage()
+  }
 
-      this.containers = await loadFromStorageAsync()
-      this.isInitialized = true
-    },
+  /**
+   * Clear all containers
+   */
+  function clearAllContainers(): void {
+    containers.value = []
+    saveToStorage()
+  }
 
-    // Synchronous loading (for backward compatibility, prefer initialize() for better performance)
-    loadFromStorage(): void {
-      this.containers = loadFromStorageSync()
-      this.isInitialized = true
-    },
+  /**
+   * H5 FIX: Asynchronous initialization to avoid blocking main thread
+   */
+  async function initialize(): Promise<void> {
+    if (isInitialized.value) return
 
-    saveToStorage(): void {
-      try {
-        localStorage.setItem(CONTAINERS_STORAGE_KEY, JSON.stringify(this.containers))
-      } catch (error) {
-        console.error('Error saving to storage:', error)
-      }
-    },
-  },
+    containers.value = await loadFromStorageAsync()
+    isInitialized.value = true
+  }
+
+  /**
+   * Synchronous loading (for backward compatibility, prefer initialize() for better performance)
+   */
+  function loadFromStorage(): void {
+    containers.value = loadFromStorageSync()
+    isInitialized.value = true
+  }
+
+  // ========== Return Public API ==========
+  return {
+    // State
+    containers,
+    isInitialized,
+
+    // Getters
+    getContainerById,
+    getAllContainers,
+    getContainerIdByItemId,
+    getContainerByItemId,
+
+    // Actions
+    setContainers,
+    addContainer,
+    updateContainer,
+    removeContainer,
+    clearAllContainers,
+    initialize,
+    loadFromStorage,
+    saveToStorage,
+  }
 })
 
