@@ -106,6 +106,76 @@ export class GearItemLocalService implements IGearItemService {
     throw new Error(`Item with id ${itemId} not found`)
   }
 
+  /**
+   * Update item and all its linked items (localStorage-specific)
+   *
+   * For localStorage mode, we need to manually update all linked items.
+   * The backend API handles this automatically, so this method is only used for localStorage.
+   *
+   * How it works:
+   * 1. Find the "master" item (the item that others link to via linkedItemId)
+   * 2. Find all items in the link group (master + all items that reference it)
+   * 3. Update all items in the group with the same data
+   *
+   * @param itemId - ID of the item to update
+   * @param data - Update data to apply
+   * @returns The updated item corresponding to itemId
+   */
+  async updateLinkedItems(itemId: TUUID, data: IUpdateItemDto): Promise<IGearItem> {
+    const allContainers = this.store.getAllContainers
+
+    // Step 1: Find the master item ID
+    let masterItemId: TUUID | null = null
+
+    for (const container of allContainers) {
+      const found = container.items.find(item => item.id === itemId)
+      if (found) {
+        masterItemId = (found.linkedItemId as TUUID | null) ?? found.id
+        break
+      }
+    }
+
+    // Fallback: if not found in store, try to get from getItem
+    if (!masterItemId) {
+      try {
+        const current = await this.getItem(itemId)
+        masterItemId = (current.linkedItemId as TUUID | null) ?? current.id
+      } catch {
+        // If we can't find it, just update the single item
+        return await this.updateItem(itemId, data)
+      }
+    }
+
+    // Step 2: Find all items in the link group
+    const targetIds = new Set<TUUID>()
+
+    for (const container of allContainers) {
+      for (const item of container.items) {
+        // Include:
+        // - The master item itself (id === masterItemId)
+        // - All items that link to the master (linkedItemId === masterItemId)
+        if (item.id === masterItemId || item.linkedItemId === masterItemId) {
+          targetIds.add(item.id)
+        }
+      }
+    }
+
+    // If no linked items found, update only the target item
+    if (targetIds.size === 0 || (targetIds.size === 1 && targetIds.has(itemId))) {
+      return await this.updateItem(itemId, data)
+    }
+
+    // Step 3: Update all linked items with the same data
+    const updatedItems: IGearItem[] = []
+    for (const targetId of targetIds) {
+      const updated = await this.updateItem(targetId, data)
+      updatedItems.push(updated)
+    }
+
+    // Return the item corresponding to the original itemId
+    return updatedItems.find(item => item.id === itemId) ?? updatedItems[0]!
+  }
+
   private async updateItemInContainer(containerId: TUUID, itemId: TUUID, data: IUpdateItemDto): Promise<IGearItem> {
     const container = this.store.getContainerById(containerId)
     if (!container) {

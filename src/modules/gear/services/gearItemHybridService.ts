@@ -157,6 +157,22 @@ export class GearItemHybridService implements IGearItemService {
     return this.gearItemApiService.getItemFromContainer(containerId, itemId)
   }
 
+  /**
+   * Update item and all its linked items
+   *
+   * For API mode, the backend automatically handles linked items,
+   * so we just delegate to updateItem().
+   * This method exists for interface compatibility with GearItemLocalService.
+   *
+   * @param itemId - ID of the item to update
+   * @param data - Update data to apply
+   * @returns The updated item
+   */
+  async updateLinkedItems(itemId: TULID, data: IUpdateItemDto): Promise<IGearItem> {
+    // Backend automatically propagates changes to all linked items
+    return this.updateItem(itemId, data)
+  }
+
   // Batch update order
   async batchUpdateOrder(items: IGearItem[]): Promise<IGearItem[]> {
     const store = useGearStore()
