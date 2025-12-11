@@ -46,3 +46,4 @@ export async function initializeStores(): Promise<void> {
   const gearStore = useGearStore()
   await gearStore.initialize()
 }
+
