@@ -61,7 +61,7 @@ export const config = {
       enabled: import.meta.env.VITE_ENABLE_AI === 'true',
     },
     inlineEditing: {
-      enabled: import.meta.env.VITE_ENABLE_INLINE_EDITING === 'true',
+      enabled: !(import.meta.env.VITE_ENABLE_INLINE_EDITING === 'false'),
     },
   },
   defaults: {
