@@ -30,6 +30,7 @@ from .schemas import (
     GlobalCatalogueItemSearchParams,
     GlobalCatalogueItemUpdate,
     ItemCreate,
+    ItemMoveRequest,
     ItemResponse,
     ItemUpdate,
     ShareTokenCreate,
@@ -430,6 +431,46 @@ async def update_item(
             detail="Item not found",
         )
     return item
+
+
+@router.patch(
+    "/items/{item_id}/move",
+    response_model=ItemResponse,
+    summary="Move an item to a different container",
+)
+async def move_item(
+    item_id: str,
+    data: ItemMoveRequest,
+    current_user: CurrentUser,
+    service: GearServiceDep,
+) -> ItemResponse:
+    """Move a gear item to a different container.
+
+    Args:
+        item_id: Item ID to move
+        data: Move request with target container ID
+        current_user: Authenticated user
+        service: Gear service instance
+
+    Returns:
+        Updated item with new container
+
+    Raises:
+        HTTPException: If item not found or target container invalid
+    """
+    try:
+        item = await service.move_item(item_id, current_user.id, data.targetContainerId)
+        if not item:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Item not found",
+            )
+        return item
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
 
 
 @router.delete(

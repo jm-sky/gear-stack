@@ -45,13 +45,14 @@ export function useGear() {
     getRootContainers: containerOps.getRootContainers,
     getNestedContainers: containerOps.getNestedContainers,
 
-    // Item Operations (4)
+    // Item Operations (5)
     createItem: itemOps.createItem,
     updateItem: itemOps.updateItem,
     deleteItem: itemOps.deleteItem,
     getItemById: itemOps.getItemById,
+    moveItem: itemOps.moveItem,
 
-    // Calculations (8)
+    // Calculations (7)
     calculateTotalWeight: calculations.calculateTotalWeight,
     calculateReadinessPercentage: calculations.calculateReadinessPercentage,
     calculateWeightLimitPercentage: calculations.calculateWeightLimitPercentage,
@@ -59,7 +60,6 @@ export function useGear() {
     getItemsByStatus: calculations.getItemsByStatus,
     getExpiredItems: calculations.getExpiredItems,
     getExpiringSoonItems: calculations.getExpiringSoonItems,
-    moveItem: calculations.moveItem,
 
     // Import/Export/Clone (3)
     exportData: importExport.exportData,

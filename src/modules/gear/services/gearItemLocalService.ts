@@ -232,6 +232,58 @@ export class GearItemLocalService implements IGearItemService {
     return Promise.resolve(updatedItem)
   }
 
+  async moveItem(itemId: TUUID, targetContainerId: TUUID): Promise<IGearItem> {
+    const allContainers = this.store.getAllContainers
+
+    // Find source container and item
+    let sourceContainer: IGearContainer | null = null
+    let itemToMove: IGearItem | null = null
+
+    for (const container of allContainers) {
+      const found = container.items.find(item => item.id === itemId)
+      if (found) {
+        sourceContainer = container
+        itemToMove = found
+        break
+      }
+    }
+
+    if (!itemToMove || !sourceContainer) {
+      throw new Error(`Item with id ${itemId} not found`)
+    }
+
+    // Find target container
+    const targetContainer = this.store.getContainerById(targetContainerId)
+    if (!targetContainer) {
+      throw new Error(`Target container with id ${targetContainerId} not found`)
+    }
+
+    // Remove item from source container
+    const updatedSourceContainer: IGearContainer = {
+      ...sourceContainer,
+      items: sourceContainer.items.filter(i => i.id !== itemId),
+      updatedAt: new Date().toISOString(),
+    }
+
+    // Add item to target container with updated timestamp
+    const movedItem: IGearItem = {
+      ...itemToMove,
+      updatedAt: new Date().toISOString(),
+    }
+
+    const updatedTargetContainer: IGearContainer = {
+      ...targetContainer,
+      items: [...targetContainer.items, movedItem],
+      updatedAt: new Date().toISOString(),
+    }
+
+    // Save both containers
+    this.store.updateContainer(updatedSourceContainer)
+    this.store.updateContainer(updatedTargetContainer)
+
+    return Promise.resolve(movedItem)
+  }
+
   async deleteItem(itemId: TUUID): Promise<void> {
     const allContainers = this.store.getAllContainers
     for (const container of allContainers) {

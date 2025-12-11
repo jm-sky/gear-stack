@@ -237,6 +237,14 @@ class ItemUpdate(BaseModel):
     model_config = {"populate_by_name": True}
 
 
+class ItemMoveRequest(BaseModel):
+    """Schema for moving an item to a different container."""
+
+    targetContainerId: str = Field(..., alias="targetContainerId", description="Target container ID to move the item to")
+
+    model_config = {"populate_by_name": True}
+
+
 class ItemOrderUpdate(BaseModel):
     """Schema for updating a single item's order."""
 

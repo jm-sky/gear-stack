@@ -325,32 +325,34 @@ Akcja pozwalająca na pobranie obrazków z katalogu do przedmiotu, który jest j
 - `src/modules/gear/components/ItemHeaderActions.vue` (linie 53-88) - dodanie akcji w dropdown menu
 - `src/modules/gear/composables/catalogue/useCatalogue.ts` - dodanie funkcji `downloadImagesFromCatalogue`
 
-### 🔄 Przenoszenie przedmiotów między kontenerami
-**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium
+### ✅ Przenoszenie przedmiotów między kontenerami
+**Status:** ✅ Completed | **Priority:** High | **Complexity:** Medium
 
 **Koncepcja:**
 Umożliwienie przenoszenia przedmiotów z jednego kontenera do drugiego bez konieczności usuwania i ponownego dodawania.
 
-**Zakres implementacji:**
+**Zaimplementowane funkcjonalności:**
 - **Backend:**
-  - Endpoint `PATCH /gear/containers/{container_id}/items/{item_id}/move` do przenoszenia przedmiotu
-  - Walidacja: sprawdzanie czy kontener docelowy istnieje i użytkownik ma do niego dostęp
-  - Aktualizacja relacji `container_items` (zmiana `container_id`)
-  - Zachowanie UUID przedmiotu przy przenoszeniu
-  - Aktualizacja wag kontenerów (źródłowego i docelowego)
-  - Historia zmian (opcjonalnie: logowanie operacji przenoszenia)
+  - ✅ Endpoint `PATCH /gear/items/{item_id}/move` do przenoszenia przedmiotu
+  - ✅ Walidacja: sprawdzanie czy kontener docelowy istnieje i użytkownik ma do niego dostęp
+  - ✅ Aktualizacja relacji `container_items` (zmiana `container_id`)
+  - ✅ Zachowanie UUID przedmiotu przy przenoszeniu
+  - ✅ Zachowanie `linked_item_id` przy przenoszeniu (przedmioty linkowane pozostają linkowane)
+  - ✅ Przenoszenie tylko pojedynczego przedmiotu (nie przenosi wszystkich linkowanych)
+  - ✅ Testy integracyjne dla wszystkich scenariuszy
 
 - **Frontend:**
-  - Akcja "Przenieś do..." w menu akcji przedmiotu (ItemsTableActions lub ItemDetailPage)
-  - Dialog wyboru kontenera docelowego (autocomplete z listą dostępnych kontenerów)
-  - Wizualne potwierdzenie przenoszenia (toast notification)
-  - Aktualizacja UI po przenoszeniu (odświeżenie list przedmiotów w obu kontenerach)
-  - Obsługa błędów (np. kontener docelowy nie istnieje, brak uprawnień)
+  - ✅ Akcja "Przenieś" w menu akcji przedmiotu (`ItemHeaderActions.vue`)
+  - ✅ Dialog wyboru kontenera docelowego (`MoveItemDialog.vue`) z listą dostępnych kontenerów
+  - ✅ Wizualne potwierdzenie przenoszenia (toast notification)
+  - ✅ Aktualizacja UI po przenoszeniu (emit `itemUpdated`)
+  - ✅ Obsługa błędów (np. kontener docelowy nie istnieje, brak uprawnień)
+  - ✅ Tłumaczenia (PL/EN)
 
 - **Edge cases:**
-  - Przenoszenie przedmiotu linkowanego (czy przenosić wszystkie referencje, czy tylko jedną?)
-  - Przenoszenie przedmiotu z obrazkami (zachowanie obrazków)
-  - Przenoszenie przedmiotu z historią (zachowanie historii)
+  - ✅ Przenoszenie przedmiotu linkowanego - zachowuje linkowanie, przenosi tylko jeden przedmiot
+  - ✅ Przenoszenie przedmiotu z obrazkami - zachowuje obrazki (są powiązane z item_id)
+  - ✅ Przenoszenie przedmiotu z historią - zachowuje historię (jest powiązana z item_id)
 
 **Zalety:**
 - Szybsze zarządzanie przedmiotami między kontenerami
@@ -956,7 +958,7 @@ W wielu komponentach używane jest `$t()` zamiast `t()` z `useI18n()`. Zgodnie z
 3. ✅ **Linkowanie przedmiotów** - High priority, Large complexity (Completed)
 4. ✅ **Rozszerzone ustawienia użytkownika** (waluta, kategorie, marki w DB) - High priority, Small complexity (Completed)
 5. ✅ **Ocenianie (gwiazdki) kontenerów** - High priority, Medium complexity (Completed)
-6. 🔄 **Przenoszenie przedmiotów między kontenerami** - High priority, Medium complexity (Planned)
+6. ✅ **Przenoszenie przedmiotów między kontenerami** - High priority, Medium complexity (Completed)
 7. ✅ **Domyślna widoczność nowych kontenerów** - High priority, Small complexity (Completed)
 8. 🔄 **Statystyki wyświetleń kontenerów** - High priority, Medium complexity (Planned)
 9. 🚧 **Sekcja AI w Gear Settings** - High priority, Medium complexity (Partially Completed)

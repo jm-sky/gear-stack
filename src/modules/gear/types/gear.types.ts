@@ -324,6 +324,7 @@ export interface IGearItemService {
   getItem(itemId: TUUID): Promise<IGearItem>
   getItemFromContainer(containerId: TUUID, itemId: TUUID): Promise<IGearItem | undefined>
   updateItem(itemId: TUUID, data: IUpdateItemDto): Promise<IGearItem>
+  moveItem(itemId: TUUID, targetContainerId: TUUID): Promise<IGearItem>
   deleteItem(itemId: TUUID): Promise<void>
   batchUpdateOrder(items: IGearItem[]): Promise<IGearItem[]>
 }

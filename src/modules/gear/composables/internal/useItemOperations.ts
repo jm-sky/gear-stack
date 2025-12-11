@@ -39,10 +39,15 @@ export function useItemOperations() {
     return await gearItemService().getItemFromContainer(containerId, itemId)
   }
 
+  const moveItem = async (itemId: TUUID, targetContainerId: TUUID): Promise<IGearItem> => {
+    return await gearItemService().moveItem(itemId, targetContainerId)
+  }
+
   return {
     createItem,
     updateItem,
     deleteItem,
     getItemById,
+    moveItem,
   }
 }

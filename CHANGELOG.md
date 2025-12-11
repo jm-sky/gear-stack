@@ -21,6 +21,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.34.0] - 2025-12-11
+
+### Added
+- **Move Items Between Containers**: Complete functionality for moving items between containers
+  - Backend endpoint `PATCH /gear/items/{item_id}/move` for moving items to different containers
+  - Repository and service layer implementation with validation
+  - Preserves item UUID, linked_item_id relationships, and all item data (images, history)
+  - Comprehensive integration tests covering all edge cases
+  - Frontend `MoveItemDialog` component with container selection
+  - "Move" action in item header actions menu (`ItemHeaderActions.vue`)
+  - Full i18n support (PL/EN) for move functionality
+  - Toast notifications for success/error feedback
+  - Automatic UI refresh after successful move operation
+
+### Changed
+- **Gear Item Service**: Added `moveItem` method to `IGearItemService` interface
+- **Gear Composables**: Moved `moveItem` from `useContainerCalculations` to `useItemOperations` (proper separation of concerns)
+- **Roadmap**: Updated ROADMAP.md and ROADMAP_ONLINE.md to mark move items feature as completed
+
+---
+
 ## [2.33.0] - 2025-12-09
 
 ### Added

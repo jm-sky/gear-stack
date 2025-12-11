@@ -556,3 +556,165 @@ class TestItemValidation:
 
         # Assert
         assert item is None  # Service should return None for invalid container
+
+
+class TestItemMove:
+    """Tests for moving items between containers."""
+
+    @pytest.mark.asyncio
+    async def test_move_item_to_different_container(
+        self,
+        gear_service: GearService,
+        test_user: UserDB,
+    ) -> None:
+        """Test moving an item from one container to another."""
+        # Arrange - Create two containers and an item in first container
+        container1 = await create_test_container(gear_service, test_user.id, "Backpack 1")
+        container2 = await create_test_container(gear_service, test_user.id, "Backpack 2")
+        item = await create_test_item(gear_service, test_user.id, container1["id"], "Water Bottle")
+
+        # Act - Move item to second container
+        moved_item = await gear_service.move_item(item["id"], test_user.id, container2["id"])
+
+        # Assert
+        assert moved_item is not None
+        assert moved_item.container is not None
+        assert moved_item.container.id == container2["id"]
+
+        # Verify item is no longer in first container
+        items_in_container1 = await gear_service.get_items(container1["id"], test_user.id)
+        assert len(items_in_container1) == 0
+
+        # Verify item is in second container
+        items_in_container2 = await gear_service.get_items(container2["id"], test_user.id)
+        assert len(items_in_container2) == 1
+        assert items_in_container2[0].id == item["id"]
+
+    @pytest.mark.asyncio
+    async def test_move_item_invalid_target_container(
+        self,
+        gear_service: GearService,
+        test_user: UserDB,
+    ) -> None:
+        """Test moving item to non-existent container raises ValueError."""
+        # Arrange
+        container = await create_test_container(gear_service, test_user.id, "Backpack")
+        item = await create_test_item(gear_service, test_user.id, container["id"], "Water Bottle")
+
+        # Act & Assert
+        with pytest.raises(ValueError, match="Target container not found"):
+            await gear_service.move_item(item["id"], test_user.id, "non-existent-container-id")
+
+    @pytest.mark.asyncio
+    async def test_move_item_not_found(
+        self,
+        gear_service: GearService,
+        test_user: UserDB,
+    ) -> None:
+        """Test moving non-existent item returns None."""
+        # Arrange
+        container = await create_test_container(gear_service, test_user.id, "Backpack")
+
+        # Act
+        result = await gear_service.move_item("non-existent-item-id", test_user.id, container["id"])
+
+        # Assert
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_move_item_preserves_linked_item_id(
+        self,
+        gear_service: GearService,
+        test_user: UserDB,
+    ) -> None:
+        """Test that moving item preserves linked_item_id relationship."""
+        # Arrange - Create master item and linked item in different containers
+        container1 = await create_test_container(gear_service, test_user.id, "Backpack 1")
+        container2 = await create_test_container(gear_service, test_user.id, "Backpack 2")
+        container3 = await create_test_container(gear_service, test_user.id, "Backpack 3")
+
+        # Create master item
+        master_data = ItemCreate(
+            name="Master Water Bottle",
+            category="water",
+            weight=500.0,
+        )
+        master_item = await gear_service.create_item(container1["id"], test_user.id, master_data)
+
+        # Create linked item
+        linked_data = ItemCreate(
+            name="Linked Water Bottle",
+            category="water",
+            weight=500.0,
+            linkedItemId=master_item.id,
+        )
+        linked_item = await gear_service.create_item(container2["id"], test_user.id, linked_data)
+
+        # Verify initial setup
+        assert linked_item.linkedItemId == master_item.id
+
+        # Act - Move linked item to third container
+        moved_item = await gear_service.move_item(linked_item.id, test_user.id, container3["id"])
+
+        # Assert - linked_item_id is preserved
+        assert moved_item is not None
+        assert moved_item.linkedItemId == master_item.id
+        assert moved_item.container is not None
+        assert moved_item.container.id == container3["id"]
+
+    @pytest.mark.asyncio
+    async def test_move_item_only_affects_single_item(
+        self,
+        gear_service: GearService,
+        test_user: UserDB,
+    ) -> None:
+        """Test that moving item only moves that specific item, not linked items."""
+        # Arrange - Create master item and two linked items in different containers
+        container1 = await create_test_container(gear_service, test_user.id, "Backpack 1")
+        container2 = await create_test_container(gear_service, test_user.id, "Backpack 2")
+        container3 = await create_test_container(gear_service, test_user.id, "Backpack 3")
+        container4 = await create_test_container(gear_service, test_user.id, "Backpack 4")
+
+        # Create master item
+        master_data = ItemCreate(
+            name="Master Item",
+            category="tools",
+            weight=100.0,
+        )
+        master_item = await gear_service.create_item(container1["id"], test_user.id, master_data)
+
+        # Create two linked items in different containers
+        linked_data1 = ItemCreate(
+            name="Linked Item 1",
+            category="tools",
+            weight=100.0,
+            linkedItemId=master_item.id,
+        )
+        linked_item1 = await gear_service.create_item(container2["id"], test_user.id, linked_data1)
+
+        linked_data2 = ItemCreate(
+            name="Linked Item 2",
+            category="tools",
+            weight=100.0,
+            linkedItemId=master_item.id,
+        )
+        linked_item2 = await gear_service.create_item(container3["id"], test_user.id, linked_data2)
+
+        # Act - Move master item to fourth container
+        moved_item = await gear_service.move_item(master_item.id, test_user.id, container4["id"])
+
+        # Assert - Only master item moved
+        assert moved_item is not None
+        assert moved_item.container is not None
+        assert moved_item.container.id == container4["id"]
+
+        # Verify linked items stayed in their original containers
+        fetched_linked1 = await gear_service.get_item(linked_item1.id, test_user.id)
+        assert fetched_linked1 is not None
+        assert fetched_linked1.container is not None
+        assert fetched_linked1.container.id == container2["id"]
+
+        fetched_linked2 = await gear_service.get_item(linked_item2.id, test_user.id)
+        assert fetched_linked2 is not None
+        assert fetched_linked2.container is not None
+        assert fetched_linked2.container.id == container3["id"]

@@ -645,6 +645,36 @@ class GearService:
         # Container is already loaded via get_item in repository.update_item
         return self._map_item_to_response(item, primary_image_url, container=item.container)
 
+    async def move_item(self, item_id: str, user_id: str, target_container_id: str) -> ItemResponse | None:
+        """Move a gear item to a different container.
+
+        Args:
+            item_id: Item ID to move
+            user_id: Owner user ID
+            target_container_id: Target container ID
+
+        Returns:
+            Updated item response if found and moved, None if item not found
+
+        Raises:
+            ValueError: If target container not found or doesn't belong to user
+        """
+        item = await self.repository.move_item(item_id, user_id, target_container_id)
+        if not item:
+            return None
+
+        # Get primary image URL (if exists)
+        primary_image = await self._image_repository.get_primary_image(item_id)
+        primary_image_url = None
+        if primary_image:
+            if primary_image.external_url:
+                primary_image_url = primary_image.external_url
+            else:
+                primary_image_url = await self._storage.get_url(primary_image.file_path)
+
+        # Container is already loaded via move_item in repository
+        return self._map_item_to_response(item, primary_image_url, container=item.container)
+
     async def delete_item(self, item_id: str, user_id: str) -> bool:
         """Delete a gear item.
 

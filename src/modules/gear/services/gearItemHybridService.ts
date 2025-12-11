@@ -174,6 +174,51 @@ export class GearItemHybridService implements IGearItemService {
   }
 
   // Batch update order
+  async moveItem(itemId: TULID, targetContainerId: TULID): Promise<IGearItem> {
+    const store = useGearStore()
+    // CRITICAL FIX: Get container ID BEFORE move to prevent race condition
+    const containerId = store.getContainerIdByItemId(itemId)
+
+    if (!containerId) {
+      logger.warn('Container not found for item, falling back to localStorage', itemId)
+      return this.gearItemLocalService.moveItem(itemId, targetContainerId)
+    }
+
+    // H6 FIX: Save previous item state for rollback
+    const previousItem = store.getContainerById(containerId)?.items.find(item => item.id === itemId)
+
+    try {
+      // H6 FIX: Transaction boundary - Phase 1: Move item on API
+      const movedItem = await this.gearItemApiService.moveItem(itemId, targetContainerId)
+
+      try {
+        // H6 FIX: Transaction boundary - Phase 2: Sync both containers with API
+        const sourceContainer = await gearContainerApiService.getContainer(containerId)
+        const targetContainer = await gearContainerApiService.getContainer(targetContainerId)
+        store.updateContainer(sourceContainer)
+        store.updateContainer(targetContainer)
+        // Store automatically saves to localStorage via saveToStorage()
+
+        return movedItem
+      } catch (syncError) {
+        // H6 FIX: Sync failed after move - rollback by moving item back
+        logger.error('Failed to sync store after item move, rolling back', syncError)
+        if (previousItem) {
+          try {
+            await this.gearItemApiService.moveItem(itemId, containerId)
+          } catch (rollbackError) {
+            logger.error('Rollback failed - data inconsistency detected', rollbackError)
+          }
+        }
+        throw syncError
+      }
+    } catch (error) {
+      // Fallback to localStorage on API error or rollback failure
+      logger.warn('API failed, falling back to localStorage', error)
+      return this.gearItemLocalService.moveItem(itemId, targetContainerId)
+    }
+  }
+
   async batchUpdateOrder(items: IGearItem[]): Promise<IGearItem[]> {
     const store = useGearStore()
     // CRITICAL FIX: Get container ID BEFORE batch update to prevent race condition

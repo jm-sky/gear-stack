@@ -42,10 +42,6 @@ export function useContainerCalculations() {
     return await gearContainerService().getExpiringSoonItems(containerId, days)
   }
 
-  const moveItem = async (containerId: TUUID, itemId: TUUID, newContainerId: TUUID): Promise<void> => {
-    await gearContainerService().moveItem(containerId, itemId, newContainerId)
-  }
-
   return {
     calculateTotalWeight,
     calculateReadinessPercentage,
@@ -54,6 +50,5 @@ export function useContainerCalculations() {
     getItemsByStatus,
     getExpiredItems,
     getExpiringSoonItems,
-    moveItem,
   }
 }

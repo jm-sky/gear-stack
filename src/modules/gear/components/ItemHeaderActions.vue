@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BookIcon, ImageIcon, Link2Off, MoreHorizontalIcon, Sparkles } from 'lucide-vue-next'
+import { BookIcon, ImageIcon, Link2Off, MoreHorizontalIcon, MoveIcon, Sparkles } from 'lucide-vue-next'
 import { computed, defineAsyncComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
@@ -8,16 +8,20 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import DropdownMenuSeparator from '@/components/ui/dropdown-menu/DropdownMenuSeparator.vue'
 import type { IGearItem } from '../types/gear.types'
 import { useCatalogue } from '../composables/catalogue/useCatalogue'
+import { useGear } from '../composables/useGear'
 import { getActionIcon } from '../utils/actionIcons'
+import MoveItemDialog from './MoveItemDialog.vue'
 
 // Lazy load dialog to reduce initial bundle size
 const UpdateFromCatalogueDialog = defineAsyncComponent(() => import('./catalogue/UpdateFromCatalogueDialog.vue'))
 
 const { t } = useI18n()
 const { fetchImagesFromCatalogue, unlinkItemFromCatalogue, isFetchingImages, isUnlinking } = useCatalogue()
+const { moveItem } = useGear()
 
 const matchDialogOpen = defineModel<boolean>('matchDialogOpen', { default: false })
 const updateDialogOpen = ref(false)
+const moveDialogOpen = ref(false)
 
 const { item } = defineProps<{
   item: IGearItem
@@ -68,6 +72,21 @@ const handleUnlinkFromCatalogue = async () => {
   }
 }
 
+const handleMoveItem = () => {
+  moveDialogOpen.value = true
+}
+
+const handleMoveConfirm = async (targetContainerId: string) => {
+  try {
+    await moveItem(item.id, targetContainerId)
+    toast.success(t('gear.actions.moved') || 'Item moved successfully')
+    emit('itemUpdated')
+  } catch (error) {
+    console.error('Failed to move item:', error)
+    toast.error(t('common.error'))
+  }
+}
+
 const isCatalogueActionLoading = computed(() => isFetchingImages.value || isUnlinking.value)
 
 const isLinkedToCatalogue = computed(() => !!item.catalogueItemId)
@@ -114,6 +133,11 @@ const isLinkedToCatalogue = computed(() => !!item.catalogueItemId)
         {{ t('gear.catalogue.unlinkFromCatalogue') }}
       </DropdownMenuItem>
       <DropdownMenuSeparator />
+      <DropdownMenuItem @click="handleMoveItem">
+        <MoveIcon class="size-4" />
+        {{ t('gear.actions.move') }}
+      </DropdownMenuItem>
+      <DropdownMenuSeparator />
       <DropdownMenuItem
         class="text-destructive hover:text-destructive! hover:bg-destructive/4!"
         @click="emit('delete')"
@@ -129,5 +153,13 @@ const isLinkedToCatalogue = computed(() => !!item.catalogueItemId)
     v-model:open="updateDialogOpen"
     :item
     @item-updated="emit('itemUpdated')"
+  />
+
+  <!-- Move Item Dialog -->
+  <MoveItemDialog
+    v-model:open="moveDialogOpen"
+    :item-id="item.id"
+    :current-container-id="item.container?.id ?? ''"
+    @move="handleMoveConfirm"
   />
 </template>

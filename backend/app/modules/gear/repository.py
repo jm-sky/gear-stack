@@ -465,6 +465,46 @@ class GearRepository(SearchMixin):
             updated_item = reload_result.unique().scalar_one()
         return updated_item
 
+    async def move_item(self, item_id: str, user_id: str, target_container_id: str) -> GearItemDB | None:
+        """Move a gear item to a different container.
+
+        Only moves the single specified item, not linked items.
+        The item's linked_item_id relationship is preserved.
+
+        Args:
+            item_id: Item ID to move
+            user_id: Owner user ID
+            target_container_id: Target container ID
+
+        Returns:
+            Updated item if found and moved, None if item not found
+
+        Raises:
+            ValueError: If target container not found or doesn't belong to user
+        """
+        # Get and verify item ownership
+        item = await self.get_item(item_id, user_id)
+        if not item:
+            return None
+
+        # Verify target container exists and belongs to user
+        target_container = await self.get_container(target_container_id, user_id)
+        if not target_container:
+            raise ValueError("Target container not found or access denied")
+
+        # Update container_id
+        item.container_id = target_container_id
+
+        await self.db.commit()
+        await self.db.refresh(item)
+
+        # Reload with container relationship
+        reload_stmt = select(GearItemDB).where(GearItemDB.id == item.id).options(joinedload(GearItemDB.container))
+        reload_result = await self.db.execute(reload_stmt)
+        updated_item = reload_result.unique().scalar_one()
+
+        return updated_item
+
     async def delete_item(self, item_id: str, user_id: str) -> bool:
         """Delete a gear item.
 

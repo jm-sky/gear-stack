@@ -52,6 +52,13 @@ export class GearItemApiService implements IGearItemService {
     return response.data
   }
 
+  async moveItem(itemId: TULID, targetContainerId: TULID): Promise<IGearItem> {
+    const response = await apiClient.patch<IGearItem>(`/gear/items/${itemId}/move`, {
+      targetContainerId,
+    })
+    return response.data
+  }
+
   async deleteItem(itemId: TULID): Promise<void> {
     await apiClient.delete(`/gear/items/${itemId}`)
   }

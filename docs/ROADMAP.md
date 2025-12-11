@@ -91,10 +91,10 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - Użycie parametru `from` zamiast `router.back()` dla przewidywalnej nawigacji
    - Status: ✅ Completed | Priority: High | Complexity: Small
 
-2. **Przenoszenie przedmiotów między kontenerami**
-   - 📍 Lokalizacja: [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md)
-   - Modal do przenoszenia itemów
-   - Status: 🔄 Planned | Priority: Medium | Complexity: Medium
+2. ✅ **Przenoszenie przedmiotów między kontenerami** - Zakończone
+   - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-przenoszenie-przedmiotów-między-kontenerami)
+   - Dialog wyboru kontenera docelowego, endpoint API, pełna implementacja backend + frontend
+   - Status: ✅ Completed | Priority: High | Complexity: Medium
 
 3. **Kasowanie obrazków z S3**
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md)
@@ -194,7 +194,7 @@ Funkcjonalności wymagające **backendu, bazy danych i/lub autoryzacji** (online
 - ✅ Integracja z Sentry (backend + frontend) - completed
 - 🔄 Multi-device synchronization (automatyczna) - planowane
 - ✅ Global item catalog - completed
-- 🔄 Przenoszenie przedmiotów między kontenerami - planowane
+- ✅ Przenoszenie przedmiotów między kontenerami - completed
 - 🔄 Statystyki wyświetleń kontenerów - planowane
 - 🔄 System zaproszeń - planowane
 - 🔄 Szablony kontenerów - planowane
