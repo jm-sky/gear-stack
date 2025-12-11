@@ -105,14 +105,10 @@ class GearItemDBV2(Base):
 
     # Identity
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
-    user_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("users.id"), nullable=False, index=True
-    )
+    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), nullable=False, index=True)
 
     # TYPE DISCRIMINATOR
-    item_type: Mapped[str] = mapped_column(
-        String(20), default="item", nullable=False, index=True
-    )
+    item_type: Mapped[str] = mapped_column(String(20), default="item", nullable=False, index=True)
 
     # UNIFIED NESTING (self-referential FK)
     parent_item_id: Mapped[str | None] = mapped_column(
@@ -138,40 +134,22 @@ class GearItemDBV2(Base):
     container_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
     max_weight: Mapped[float | None] = mapped_column(Float, nullable=True)
     max_weight_unit: Mapped[str | None] = mapped_column(String(5), nullable=True)
-    hide_when_nested: Mapped[bool | None] = mapped_column(
-        Boolean, nullable=True, default=False
-    )
-    is_public: Mapped[bool | None] = mapped_column(
-        Boolean, nullable=True, default=False, index=True
-    )
-    favorite: Mapped[bool | None] = mapped_column(
-        Boolean, nullable=True, default=False, index=True
-    )
-    show_item_images: Mapped[bool | None] = mapped_column(
-        Boolean, nullable=True, default=False
-    )
+    hide_when_nested: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
+    is_public: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False, index=True)
+    favorite: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False, index=True)
+    show_item_images: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
 
     # Item-specific fields (nullable for containers)
     category: Mapped[str | None] = mapped_column(String(50), nullable=True)
     quantity: Mapped[int | None] = mapped_column(Integer, nullable=True, default=1)
-    status: Mapped[str | None] = mapped_column(
-        String(20), nullable=True, default="owned"
-    )
-    priority: Mapped[str | None] = mapped_column(
-        String(20), nullable=True, default="medium"
-    )
-    expiration_date: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
+    status: Mapped[str | None] = mapped_column(String(20), nullable=True, default="owned")
+    priority: Mapped[str | None] = mapped_column(String(20), nullable=True, default="medium")
+    expiration_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     quality: Mapped[str | None] = mapped_column(String(20), nullable=True)
     wearable: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
-    consumable: Mapped[bool | None] = mapped_column(
-        Boolean, nullable=True, default=False
-    )
+    consumable: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
     order_index: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    show_on_container: Mapped[bool | None] = mapped_column(
-        Boolean, nullable=True, default=False
-    )
+    show_on_container: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
 
     # Linking fields
     linked_item_id: Mapped[str | None] = mapped_column(
@@ -188,9 +166,7 @@ class GearItemDBV2(Base):
     )
 
     # Metadata
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(UTC),
@@ -238,18 +214,3 @@ class GearContainerDBV2(GearItemDBV2):
 
     def __repr__(self) -> str:
         return f"<GearContainerDBV2(id={self.id}, name={self.name}, type={self.container_type})>"
-
-
-class GearRegularItemDBV2(GearItemDBV2):
-    """Regular item-specific subclass (item_type='item').
-
-    This subclass provides type-specific behavior for regular items.
-    It's optional but useful for polymorphic queries and type hints.
-    """
-
-    __mapper_args__ = {
-        "polymorphic_identity": "item",
-    }
-
-    def __repr__(self) -> str:
-        return f"<GearRegularItemDBV2(id={self.id}, name={self.name}, category={self.category})>"

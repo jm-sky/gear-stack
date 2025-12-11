@@ -7,7 +7,6 @@
  * @module gear/services/v2/api
  */
 
-import type { TUUID } from '@/shared/types/base.type'
 import { apiClient } from '@/shared/services/apiClient'
 import type {
   IBatchOrderUpdateItem,
@@ -17,6 +16,7 @@ import type {
   IGearItemV2,
   IUpdateGearItemV2Dto,
 } from '../types/gear.types.v2'
+import type { TUUID } from '@/shared/types/base.type'
 
 /**
  * API service implementation for unified gear items (V2)

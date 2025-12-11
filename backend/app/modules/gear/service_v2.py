@@ -88,9 +88,7 @@ class GearServiceV2:
         Returns:
             List of items matching filters
         """
-        return await self.repository.get_items(
-            user_id, item_type, parent_item_id, is_public, favorite
-        )
+        return await self.repository.get_items(user_id, item_type, parent_item_id, is_public, favorite)
 
     async def get_items_with_children(
         self,
@@ -108,13 +106,9 @@ class GearServiceV2:
         Returns:
             List of items with children loaded
         """
-        return await self.repository.get_items_with_children(
-            user_id, item_type, parent_item_id
-        )
+        return await self.repository.get_items_with_children(user_id, item_type, parent_item_id)
 
-    async def get_children(
-        self, parent_item_id: str, user_id: str
-    ) -> Sequence[GearItemDBV2]:
+    async def get_children(self, parent_item_id: str, user_id: str) -> Sequence[GearItemDBV2]:
         """Get all children of a parent item.
 
         Args:
@@ -128,9 +122,7 @@ class GearServiceV2:
 
     # Update operations
 
-    async def update_item(
-        self, item_id: str, user_id: str, data: GearItemUpdateV2
-    ) -> GearItemDBV2 | None:
+    async def update_item(self, item_id: str, user_id: str, data: GearItemUpdateV2) -> GearItemDBV2 | None:
         """Update a gear item.
 
         Args:
@@ -155,9 +147,7 @@ class GearServiceV2:
 
         return await self.repository.update_item(item_id, user_id, data)
 
-    async def batch_update_order(
-        self, items: list[dict], user_id: str
-    ) -> Sequence[GearItemDBV2]:
+    async def batch_update_order(self, items: list[dict], user_id: str) -> Sequence[GearItemDBV2]:
         """Batch update order_index for multiple items.
 
         Args:
@@ -187,9 +177,7 @@ class GearServiceV2:
 
     # Move operation
 
-    async def move_item(
-        self, item_id: str, user_id: str, target_parent_id: str | None
-    ) -> GearItemDBV2 | None:
+    async def move_item(self, item_id: str, user_id: str, target_parent_id: str | None) -> GearItemDBV2 | None:
         """Move an item to a different parent.
 
         Args:

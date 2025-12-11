@@ -8,7 +8,6 @@
  */
 
 import { computed } from 'vue'
-import type { TUUID } from '@/shared/types/base.type'
 import { useBackend } from '@/shared/composables/useBackend'
 import type {
   IBatchOrderUpdateItem,
@@ -17,9 +16,10 @@ import type {
   IGearItemV2,
   IUpdateGearItemV2Dto,
 } from '../types/gear.types.v2'
-import { useGearStoreV2 } from '../store/useGearStoreV2'
 import { gearItemApiServiceV2 } from '../services/gearItemApiServiceV2'
 import { gearItemLocalServiceV2 } from '../services/gearItemLocalServiceV2'
+import { useGearStoreV2 } from '../store/useGearStoreV2'
+import type { TUUID } from '@/shared/types/base.type'
 
 export function useGearV2() {
   const store = useGearStoreV2()

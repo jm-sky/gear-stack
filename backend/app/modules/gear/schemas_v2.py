@@ -302,9 +302,7 @@ class GearItemBatchUpdateOrderV2(BaseModel):
 class GearItemFiltersV2(BaseModel):
     """Query filters for fetching gear items."""
 
-    itemType: Literal["container", "item", "all"] | None = Field(
-        "all", alias="itemType"
-    )
+    itemType: Literal["container", "item", "all"] | None = Field("all", alias="itemType")
     parentItemId: str | None = Field(None, alias="parentItemId")
     isPublic: bool | None = Field(None, alias="isPublic")
     favorite: bool | None = None

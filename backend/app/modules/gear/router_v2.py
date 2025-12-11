@@ -59,9 +59,7 @@ GearServiceV2Dep = Annotated[GearServiceV2, Depends(get_gear_service_v2)]
 # ===== Create Operations =====
 
 
-@router.post(
-    "/items", response_model=GearItemResponseV2, status_code=status.HTTP_201_CREATED
-)
+@router.post("/items", response_model=GearItemResponseV2, status_code=status.HTTP_201_CREATED)
 async def create_item(
     data: GearItemCreateV2,
     current_user: CurrentUser,
@@ -106,19 +104,11 @@ async def create_item(
 async def get_items(
     current_user: CurrentUser,
     service: GearServiceV2Dep,
-    item_type: Literal["container", "item", "all"] = Query(
-        "all", alias="itemType", description="Filter by item type"
-    ),
-    parent_item_id: str | None = Query(
-        None, alias="parentItemId", description="Filter by parent item ID"
-    ),
-    is_public: bool | None = Query(
-        None, alias="isPublic", description="Filter by public visibility"
-    ),
+    item_type: Literal["container", "item", "all"] = Query("all", alias="itemType", description="Filter by item type"),
+    parent_item_id: str | None = Query(None, alias="parentItemId", description="Filter by parent item ID"),
+    is_public: bool | None = Query(None, alias="isPublic", description="Filter by public visibility"),
     favorite: bool | None = Query(None, description="Filter by favorite status"),
-    include_children: bool = Query(
-        False, alias="includeChildren", description="Eagerly load children"
-    ),
+    include_children: bool = Query(False, alias="includeChildren", description="Eagerly load children"),
 ) -> list[GearItemResponseV2]:
     """Get gear items with optional filters.
 
@@ -146,13 +136,9 @@ async def get_items(
         GET /gear/v2/items?itemType=container&favorite=true
     """
     if include_children:
-        items = await service.get_items_with_children(
-            current_user.id, item_type, parent_item_id
-        )
+        items = await service.get_items_with_children(current_user.id, item_type, parent_item_id)
     else:
-        items = await service.get_items(
-            current_user.id, item_type, parent_item_id, is_public, favorite
-        )
+        items = await service.get_items(current_user.id, item_type, parent_item_id, is_public, favorite)
     return list(items)
 
 
@@ -265,9 +251,9 @@ async def batch_update_order(
 @router.patch("/items/{item_id}/move", response_model=GearItemResponseV2)
 async def move_item(
     item_id: str,
+    current_user: CurrentUser,
+    service: GearServiceV2Dep,
     target_parent_id: str | None = Query(None, alias="targetParentId"),
-    current_user: CurrentUser = Depends(),
-    service: GearServiceV2Dep = Depends(),
 ) -> GearItemResponseV2:
     """Move an item to a different parent.
 

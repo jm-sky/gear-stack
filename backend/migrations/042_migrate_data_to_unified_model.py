@@ -64,9 +64,7 @@ async def upgrade() -> None:
         items_v2_exist = await table_exists(conn, "gear_items_v2")
 
         if not items_v2_exist:
-            print(
-                "❌ Error: gear_items_v2 table does not exist. Run migration 041 first."
-            )
+            print("❌ Error: gear_items_v2 table does not exist. Run migration 041 first.")
             sys.exit(1)
 
         if not containers_exist or not items_exist:
@@ -81,9 +79,7 @@ async def upgrade() -> None:
         # Check if already migrated
         v2_count = await get_row_count(conn, "gear_items_v2")
         if v2_count > 0:
-            print(
-                f"⚠️  Warning: gear_items_v2 already contains {v2_count} rows. Skipping migration."
-            )
+            print(f"⚠️  Warning: gear_items_v2 already contains {v2_count} rows. Skipping migration.")
             return
 
         # Step 1: Migrate containers → gear_items_v2 (item_type='container')
@@ -204,39 +200,27 @@ async def upgrade() -> None:
             print(f"❌ Error: Migration failed!")
             print(f"   Expected: {expected_count} rows")
             print(f"   Got: {v2_count} rows")
-            raise Exception(
-                f"Migration integrity check failed: expected {expected_count} rows, got {v2_count}"
-            )
+            raise Exception(f"Migration integrity check failed: expected {expected_count} rows, got {v2_count}")
 
         # Verify containers
-        v2_container_count = await conn.execute(
-            text("SELECT COUNT(*) FROM gear_items_v2 WHERE item_type = 'container';")
-        )
+        v2_container_count = await conn.execute(text("SELECT COUNT(*) FROM gear_items_v2 WHERE item_type = 'container';"))
         v2_container_count = v2_container_count.scalar()
         if v2_container_count != container_count:
             print(f"❌ Error: Container count mismatch!")
             print(f"   Expected: {container_count} containers")
             print(f"   Got: {v2_container_count} containers")
-            raise Exception(
-                f"Container migration failed: expected {container_count}, got {v2_container_count}"
-            )
+            raise Exception(f"Container migration failed: expected {container_count}, got {v2_container_count}")
 
         # Verify items
-        v2_item_count = await conn.execute(
-            text("SELECT COUNT(*) FROM gear_items_v2 WHERE item_type = 'item';")
-        )
+        v2_item_count = await conn.execute(text("SELECT COUNT(*) FROM gear_items_v2 WHERE item_type = 'item';"))
         v2_item_count = v2_item_count.scalar()
         if v2_item_count != item_count:
             print(f"❌ Error: Item count mismatch!")
             print(f"   Expected: {item_count} items")
             print(f"   Got: {v2_item_count} items")
-            raise Exception(
-                f"Item migration failed: expected {item_count}, got {v2_item_count}"
-            )
+            raise Exception(f"Item migration failed: expected {item_count}, got {v2_item_count}")
 
-        print(
-            f"✓ Migration verified: {v2_container_count} containers + {v2_item_count} items = {v2_count} total rows"
-        )
+        print(f"✓ Migration verified: {v2_container_count} containers + {v2_item_count} items = {v2_count} total rows")
         print("✓ Data migration completed successfully!")
 
 
@@ -261,9 +245,7 @@ async def downgrade() -> None:
 async def main() -> None:
     """Run migration based on command line argument."""
     if len(sys.argv) < 2:
-        print(
-            "Usage: python migrations/042_migrate_data_to_unified_model.py [upgrade|downgrade]"
-        )
+        print("Usage: python migrations/042_migrate_data_to_unified_model.py [upgrade|downgrade]")
         sys.exit(1)
 
     command = sys.argv[1].lower()
@@ -273,9 +255,7 @@ async def main() -> None:
         await downgrade()
     else:
         print(f"Unknown command: {command}")
-        print(
-            "Usage: python migrations/042_migrate_data_to_unified_model.py [upgrade|downgrade]"
-        )
+        print("Usage: python migrations/042_migrate_data_to_unified_model.py [upgrade|downgrade]")
         sys.exit(1)
 
 

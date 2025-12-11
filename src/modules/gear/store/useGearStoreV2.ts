@@ -14,11 +14,11 @@
  * @module gear/store/v2
  */
 
-import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import type { TUUID } from '@/shared/types/base.type'
+import { computed, ref } from 'vue'
 import type { IGearItemV2 } from '../types/gear.types.v2'
 import { isContainer } from '../types/gear.types.v2'
+import type { TUUID } from '@/shared/types/base.type'
 
 const STORAGE_KEY = 'gear-stack:items-v2'
 

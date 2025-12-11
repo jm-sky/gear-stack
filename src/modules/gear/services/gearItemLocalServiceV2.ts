@@ -7,7 +7,6 @@
  * @module gear/services/v2/local
  */
 
-import type { TUUID } from '@/shared/types/base.type'
 import { generateId } from '@/shared/utils/idGenerator'
 import type {
   IBatchOrderUpdateItem,
@@ -18,6 +17,7 @@ import type {
   IUpdateGearItemV2Dto,
 } from '../types/gear.types.v2'
 import { useGearStoreV2 } from '../store/useGearStoreV2'
+import type { TUUID } from '@/shared/types/base.type'
 
 /**
  * Local storage service implementation for unified gear items (V2)
