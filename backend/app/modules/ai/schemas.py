@@ -123,28 +123,32 @@ class AiHistoryItem(BaseModel):
     """AI history item (list view)."""
 
     id: UUID = Field(..., description="History ID")
-    operation_type: str = Field(..., description="Operation type (chat, classify, etc.)")
+    operation_type: str = Field(..., description="Operation type (chat, classify, etc.)", serialization_alias="operationType")
     model: str = Field(..., description="Model used")
-    total_tokens: int = Field(..., description="Total tokens used")
-    cost_usd: float | None = Field(None, description="Cost in USD")
-    created_at: datetime = Field(..., description="Creation timestamp")
+    total_tokens: int = Field(..., description="Total tokens used", serialization_alias="totalTokens")
+    cost_usd: float | None = Field(None, description="Cost in USD", serialization_alias="costUsd")
+    created_at: datetime = Field(..., description="Creation timestamp", serialization_alias="createdAt")
+
+    model_config = {"populate_by_name": True}
 
 
 class AiHistoryDetail(BaseModel):
     """AI history detail (single view)."""
 
     id: UUID = Field(..., description="History ID")
-    user_id: str = Field(..., description="User ID")
-    operation_type: str = Field(..., description="Operation type")
+    user_id: str = Field(..., description="User ID", serialization_alias="userId")
+    operation_type: str = Field(..., description="Operation type", serialization_alias="operationType")
     model: str = Field(..., description="Model used")
-    prompt_tokens: int = Field(..., description="Prompt tokens")
-    completion_tokens: int = Field(..., description="Completion tokens")
-    total_tokens: int = Field(..., description="Total tokens")
-    cost_usd: float | None = Field(None, description="Cost in USD")
-    input_data: dict[str, Any] = Field(..., description="Input data")
-    output_data: dict[str, Any] = Field(..., description="Output data")
+    prompt_tokens: int = Field(..., description="Prompt tokens", serialization_alias="promptTokens")
+    completion_tokens: int = Field(..., description="Completion tokens", serialization_alias="completionTokens")
+    total_tokens: int = Field(..., description="Total tokens", serialization_alias="totalTokens")
+    cost_usd: float | None = Field(None, description="Cost in USD", serialization_alias="costUsd")
+    input_data: dict[str, Any] = Field(..., description="Input data", serialization_alias="inputData")
+    output_data: dict[str, Any] = Field(..., description="Output data", serialization_alias="outputData")
     metadata: dict[str, Any] | None = Field(None, description="Additional metadata")
-    created_at: datetime = Field(..., description="Creation timestamp")
+    created_at: datetime = Field(..., description="Creation timestamp", serialization_alias="createdAt")
+
+    model_config = {"populate_by_name": True}
 
 
 class AiHistoryListResponse(BaseModel):

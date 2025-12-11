@@ -29,7 +29,7 @@ const emit = defineEmits<{
 
 const formattedDate = computed(() => {
   if (!props.item) return ''
-  const date = new Date(props.item.created_at)
+  const date = new Date(props.item.createdAt)
   return date.toLocaleString()
 })
 
@@ -84,12 +84,12 @@ const handleDelete = (): void => {
               {{ item.provider }}
             </div>
           </div>
-          <div>
+          <div v-if="item.operationType">
             <div class="text-sm font-medium mb-1">
               {{ t('ai.history.operationType') }}
             </div>
             <Badge variant="outline" class="text-xs">
-              {{ item.operationType }}
+              {{ t(`ai.history.operationTypes.${item.operationType}`) }}
             </Badge>
           </div>
           <div v-if="item.durationMs">

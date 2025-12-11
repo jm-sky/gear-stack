@@ -217,6 +217,7 @@ onMounted(async () => {
         v-model:operation-type="operationType"
         :loading="isLoading"
         @clear-filters="handleClearFilters"
+        @refresh="loadHistoryData"
       />
 
       <!-- History List -->

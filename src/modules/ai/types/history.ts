@@ -17,7 +17,7 @@ export interface IAiHistoryItem {
   cost: IAiCost
   durationMs?: number
   usedOwnToken: boolean
-  created_at: string
+  createdAt: string
 }
 
 export interface IAiHistoryListResponse {

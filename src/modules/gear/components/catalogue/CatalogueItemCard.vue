@@ -50,7 +50,7 @@ const qualityLabel = computed(() => {
 
       <CardContent class="flex flex-1 flex-col gap-3 px-6 pb-4 text-card-foreground">
         <!-- Primary Image -->
-        <div class="flex items-center justify-center overflow-hidden rounded-md bg-muted h-48">
+        <div class="flex items-center justify-center overflow-hidden rounded-md border border-border h-48">
           <img
             v-if="item.primaryImageUrl"
             :src="item.primaryImageUrl"

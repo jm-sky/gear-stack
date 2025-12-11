@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import Badge from '@/components/ui/badge/Badge.vue'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import Separator from '@/components/ui/separator/Separator.vue'
 import type { IAiHistoryItem } from '../types/history'
 import AiCostDisplay from './AiCostDisplay.vue'
 
@@ -21,7 +22,7 @@ const emit = defineEmits<{
 }>()
 
 const formattedDate = computed(() => {
-  const date = new Date(props.item.created_at)
+  const date = new Date(props.item.createdAt)
   return date.toLocaleString()
 })
 
@@ -49,7 +50,7 @@ const handleViewDetails = (): void => {
 
 <template>
   <Card class="hover:shadow-md transition-shadow">
-    <CardHeader class="pb-3">
+    <CardHeader>
       <div class="flex items-start justify-between gap-2">
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2 mb-2">
@@ -57,8 +58,8 @@ const handleViewDetails = (): void => {
             <CardTitle class="text-base truncate">
               {{ item.model }}
             </CardTitle>
-            <Badge variant="outline" class="text-xs">
-              {{ item.operationType }}
+            <Badge v-if="item.operationType" variant="outline" class="text-xs">
+              {{ t(`ai.history.operationTypes.${item.operationType}`) }}
             </Badge>
           </div>
           <CardDescription class="text-xs text-muted-foreground">
@@ -87,8 +88,11 @@ const handleViewDetails = (): void => {
         class="text-xs"
       />
 
+
+      <Separator class="my-4" />
+
       <!-- Actions -->
-      <div class="flex items-center justify-between gap-2 pt-2 border-t">
+      <div class="flex items-center justify-between gap-2">
         <div class="text-xs text-muted-foreground">
           {{ formattedDate }}
         </div>
@@ -110,6 +114,7 @@ const handleViewDetails = (): void => {
           <Button
             variant="ghost"
             size="sm"
+            class="hover:text-destructive"
             @click="handleDelete"
           >
             <Trash2 class="size-4" />

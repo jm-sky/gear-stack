@@ -3,7 +3,7 @@
   Displays a single chat message with markdown support
 -->
 <script setup lang="ts">
-import { CheckIcon, XIcon } from 'lucide-vue-next'
+import { EyeIcon, EyeOffIcon } from 'lucide-vue-next'
 import { computed, ref, } from 'vue'
 import Button from '@/components/ui/button/Button.vue'
 import { usePermissions } from '@/shared/composables/usePermissions'
@@ -43,8 +43,8 @@ const shouldShowDebug = computed<boolean>(() => {
         size="xs"
         @click="debugPromptMessage = !debugPromptMessage"
       >
-        <CheckIcon v-if="debugPromptMessage" class="size-3" />
-        <XIcon v-if="!debugPromptMessage" class="size-3" />
+        <EyeIcon v-if="debugPromptMessage" class="size-3" />
+        <EyeOffIcon v-if="!debugPromptMessage" class="size-3" />
         Prompt
       </Button>
       <Button
@@ -52,8 +52,8 @@ const shouldShowDebug = computed<boolean>(() => {
         size="xs"
         @click="debugStructuredOutputMessage = !debugStructuredOutputMessage"
       >
-        <CheckIcon v-if="debugStructuredOutputMessage" class="size-3" />
-        <XIcon v-if="!debugStructuredOutputMessage" class="size-3" />
+        <EyeIcon v-if="debugStructuredOutputMessage" class="size-3" />
+        <EyeOffIcon v-if="!debugStructuredOutputMessage" class="size-3" />
         Output
       </Button>
     </div>

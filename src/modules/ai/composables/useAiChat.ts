@@ -132,7 +132,7 @@ export function useAiChat() {
           id: `user-restored-${historyItem.id}`,
           role: 'user',
           content: historyItem.finalPrompt,
-          created_at: historyItem.created_at,
+          created_at: historyItem.createdAt,
         })
       }
 
@@ -149,7 +149,7 @@ export function useAiChat() {
           content: assistantContent,
           tokens: historyItem.tokens,
           cost: historyItem.cost,
-          created_at: historyItem.created_at,
+          created_at: historyItem.createdAt,
         })
       }
 

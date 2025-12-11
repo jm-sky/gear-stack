@@ -34,7 +34,7 @@ const isEmpty = computed(() => !props.loading && props.items.length === 0)
       </div>
     </div>
 
-    <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-2">
       <AiHistoryItem
         v-for="item in items"
         :key="item.id"

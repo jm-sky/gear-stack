@@ -3,14 +3,25 @@ import { CalendarPlus, CalendarSync, ExternalLink, Link2, RefreshCcw } from 'luc
 import { computed, defineAsyncComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import DropdownMenuSeparator from '@/components/ui/dropdown-menu/DropdownMenuSeparator.vue'
 import { useAi } from '@/modules/ai/composables/useAi'
 import { useBackend } from '@/shared/composables/useBackend'
+import { useHandleError } from '@/shared/composables/useHandleError'
 import { smallDateTime } from '@/shared/utils/smallDateTime'
 import type { IGearContainer } from '../types/gear.types'
+import { useGear } from '../composables/useGear'
 import { GearRoutePath } from '../routes'
 import { getActionIcon } from '../utils/actionIcons'
 import { formatWeight } from '../utils/formatWeight'
@@ -41,6 +52,7 @@ const ExportToCSVIcon = getActionIcon('exportToCSV')
 const ImportIcon = getActionIcon('import')
 const RecognizeParametersAllIcon = getActionIcon('recognizeParametersAll')
 const AiIcon = getActionIcon('ai')
+const DeleteIcon = getActionIcon('delete')
 
 const props = defineProps<{
   container: IGearContainer
@@ -63,8 +75,12 @@ const router = useRouter()
 const { t } = useI18n()
 const { canUseAi } = useAi()
 const { shouldUseAPI } = useBackend()
+const { deleteContainer } = useGear()
+const { handleError } = useHandleError()
 
 const isCloneDialogOpen = ref(false)
+const isDeleteDialogOpen = ref(false)
+const isDeleting = ref(false)
 
 const backTo = computed<string>(() => {
   const from = getFrom(route)
@@ -109,6 +125,27 @@ const handleExportToCSV = () => {
 
 const handleBack = () => {
   router.push(backTo.value)
+}
+
+const handleDelete = () => {
+  isDeleteDialogOpen.value = true
+}
+
+const handleDeleteConfirm = async () => {
+  if (isDeleting.value) return
+
+  try {
+    isDeleting.value = true
+    await deleteContainer(props.container.id)
+    toast.success(t('common.success'))
+    router.push(GearRoutePath.Containers)
+  } catch (error) {
+    console.error('Error deleting container:', error)
+    handleError(error, { fallbackMessage: t('common.error') })
+  } finally {
+    isDeleting.value = false
+    isDeleteDialogOpen.value = false
+  }
 }
 </script>
 
@@ -274,6 +311,14 @@ const handleBack = () => {
                 <Link2 class="size-4" />
                 {{ t('gear.actions.manageShareTokens') }}
               </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                class="text-destructive focus:text-destructive"
+                @click="handleDelete"
+              >
+                <DeleteIcon class="size-4" />
+                {{ t('gear.container.delete') }}
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -287,5 +332,35 @@ const handleBack = () => {
       v-model:open="isCloneDialogOpen"
       :container="container"
     />
+
+    <!-- Delete Confirmation Dialog -->
+    <Dialog :open="isDeleteDialogOpen" @update:open="(open) => { isDeleteDialogOpen = open }">
+      <DialogContent class="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>
+            {{ t('gear.container.delete') }}
+          </DialogTitle>
+          <DialogDescription>
+            {{ t('gear.container.deleteConfirm') }}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter class="flex-col sm:flex-row gap-2">
+          <Button
+            variant="outline"
+            :disabled="isDeleting"
+            @click="isDeleteDialogOpen = false"
+          >
+            {{ t('common.cancel') }}
+          </Button>
+          <Button
+            variant="destructive"
+            :disabled="isDeleting"
+            @click="handleDeleteConfirm"
+          >
+            {{ isDeleting ? t('common.loading') : t('common.delete') }}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   </div>
 </template>

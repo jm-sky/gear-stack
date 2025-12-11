@@ -261,7 +261,7 @@ const handleAddToContainer = () => {
         </div>
 
         <!-- Primary Image -->
-        <div class="flex items-center justify-center overflow-hidden rounded-lg border bg-muted">
+        <div class="flex items-center justify-center overflow-hidden rounded-lg border" :class="item.primaryImageUrl ? 'bg-white' : 'bg-muted'">
           <img
             v-if="item.primaryImageUrl"
             :src="item.primaryImageUrl"
