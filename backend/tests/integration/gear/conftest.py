@@ -43,7 +43,9 @@ async def async_db_session() -> AsyncGenerator[AsyncSession, None]:
         await conn.run_sync(Base.metadata.create_all)
 
     # Create session
-    async_session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    async_session_maker = async_sessionmaker(
+        engine, class_=AsyncSession, expire_on_commit=False
+    )
 
     async with async_session_maker() as session:
         yield session
@@ -96,7 +98,7 @@ def sample_container_data() -> ContainerCreate:
         type="backpack",
         color="coyote",
         weight=500.0,
-        weight_unit="g",
+        weightUnit="g",
         brand="TestBrand",
         price=99.99,
     )
@@ -145,9 +147,9 @@ async def create_test_container(
     data = ContainerCreate(
         name=name,
         type=container_type,
-        parent_container_id=parent_id,
+        parentContainerId=parent_id,
         weight=weight,
-        weight_unit=weight_unit,
+        weightUnit=weight_unit,
     )
     container = await service.create_container(user_id, data)
     return container.model_dump()
@@ -197,13 +199,17 @@ async def create_test_item(
 
 async def get_container_count(session: AsyncSession, user_id: str) -> int:
     """Get total number of containers for a user."""
-    result = await session.execute(select(GearContainerDB).where(GearContainerDB.user_id == user_id))
+    result = await session.execute(
+        select(GearContainerDB).where(GearContainerDB.user_id == user_id)
+    )
     containers = result.scalars().all()
     return len(containers)
 
 
 async def get_item_count(session: AsyncSession, container_id: str) -> int:
     """Get total number of items in a container."""
-    result = await session.execute(select(GearItemDB).where(GearItemDB.container_id == container_id))
+    result = await session.execute(
+        select(GearItemDB).where(GearItemDB.container_id == container_id)
+    )
     items = result.scalars().all()
     return len(items)
