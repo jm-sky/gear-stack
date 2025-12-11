@@ -7,7 +7,6 @@
  * @module gear/services/v2/local
  */
 
-import { generateId } from '@/shared/utils/idGenerator'
 import type {
   IBatchOrderUpdateItem,
   ICreateGearItemV2Dto,
@@ -29,7 +28,7 @@ export const gearItemLocalServiceV2: IGearItemServiceV2 = {
     const store = useGearStoreV2()
 
     const item: IGearItemV2 = {
-      id: data.id || generateId(),
+      id: data.id ?? crypto.randomUUID(),
       userId: 'local-user', // localStorage doesn't have real user IDs
       itemType: data.itemType,
       parentItemId: data.parentItemId,
@@ -140,9 +139,14 @@ export const gearItemLocalServiceV2: IGearItemServiceV2 = {
       throw new Error(`Item not found: ${id}`)
     }
 
+    // Filter out undefined and null values from update data
+    const updates = Object.fromEntries(
+      Object.entries(data).filter(([_, value]) => value !== undefined && value !== null),
+    )
+
     const updatedItem: IGearItemV2 = {
       ...existingItem,
-      ...data,
+      ...updates,
       updatedAt: new Date().toISOString(),
     }
 

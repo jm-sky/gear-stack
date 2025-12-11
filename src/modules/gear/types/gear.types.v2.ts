@@ -14,6 +14,21 @@
  */
 
 import type { TDateTime, TUUID } from '@/shared/types/base.type'
+import type {
+  TContainerColor,
+  TGearContainerType,
+  TGearItemCategory,
+  TGearItemPriority,
+  TGearItemQuality,
+  TGearItemStatus,
+  TGearWeightUnit,
+  TRatingType,
+  TRatingValue,
+} from './gear.types'
+import {
+  GEAR_ITEM_CATEGORIES,
+  GEAR_ITEM_QUALITIES,
+} from './gear.types'
 
 // Re-export common types from V1 (unchanged)
 export type {
@@ -26,12 +41,12 @@ export type {
   TGearWeightUnit,
   TRatingType,
   TRatingValue,
-} from './gear.types'
+}
 
 export {
   GEAR_ITEM_CATEGORIES,
   GEAR_ITEM_QUALITIES,
-} from './gear.types'
+}
 
 // Type discriminator for unified model
 export type TGearItemType = 'container' | 'item'

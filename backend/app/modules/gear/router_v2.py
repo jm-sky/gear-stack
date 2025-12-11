@@ -89,7 +89,7 @@ async def create_item(
     """
     try:
         item = await service.create_item(current_user.id, data)
-        return item
+        return GearItemResponseV2.model_validate(item)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -139,7 +139,7 @@ async def get_items(
         items = await service.get_items_with_children(current_user.id, item_type, parent_item_id)
     else:
         items = await service.get_items(current_user.id, item_type, parent_item_id, is_public, favorite)
-    return list(items)
+    return [GearItemResponseV2.model_validate(item) for item in items]
 
 
 @router.get("/items/{item_id}", response_model=GearItemResponseV2)
@@ -165,7 +165,7 @@ async def get_item(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Item not found",
         )
-    return item
+    return GearItemResponseV2.model_validate(item)
 
 
 @router.get("/items/{item_id}/children", response_model=list[GearItemResponseV2])
@@ -183,7 +183,7 @@ async def get_item_children(
         List of child items
     """
     children = await service.get_children(item_id, current_user.id)
-    return list(children)
+    return [GearItemResponseV2.model_validate(child) for child in children]
 
 
 # ===== Update Operations =====
@@ -216,7 +216,7 @@ async def update_item(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Item not found",
             )
-        return item
+        return GearItemResponseV2.model_validate(item)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -245,7 +245,7 @@ async def batch_update_order(
         }
     """
     items = await service.batch_update_order(data.items, current_user.id)
-    return list(items)
+    return [GearItemResponseV2.model_validate(item) for item in items]
 
 
 @router.patch("/items/{item_id}/move", response_model=GearItemResponseV2)
@@ -282,7 +282,7 @@ async def move_item(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Item not found",
             )
-        return item
+        return GearItemResponseV2.model_validate(item)
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
