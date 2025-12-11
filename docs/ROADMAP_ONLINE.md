@@ -608,6 +608,9 @@ System śledzenia wyświetleń kontenerów (publicznych i udostępnionych) z ~~d
   - ✅ Powrót do konwersacji (restore conversation from history - załadowanie wiadomości z historii do chat window) - Completed
   - ✅ Kasowanie historii (UI do usuwania pojedynczych wpisów i całej historii) - Completed
   - ✅ Historia viewer page (strona z listą historii, szczegóły konwersacji) - Completed
+- 🔄 **Sprawdzenie i poprawa działania strony AiHistory** - planowane
+  - 🔄 Przywracanie konwersacji nie działa - do wyjaśnienia i naprawy
+  - 🔄 Sprawdzenie innych funkcjonalności strony (filtrowanie, wyszukiwanie, paginacja)
 - 🔄 Mechanizm limitu historii (domyślnie 100 wpisów) + automatyczne usuwanie najstarszych - planowane
 
 **Cache:**
