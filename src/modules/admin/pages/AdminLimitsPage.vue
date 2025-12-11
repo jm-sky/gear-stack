@@ -105,7 +105,7 @@ onMounted(() => {
           <CardHeader>
             <div class="flex items-center justify-between">
               <div>
-                <CardTitle>{{ roleLabels[limit.role] || limit.role }}</CardTitle>
+                <CardTitle>{{ roleLabels[limit.role] ?? limit.role }}</CardTitle>
                 <CardDescription v-if="limit.description">
                   {{ limit.description }}
                 </CardDescription>

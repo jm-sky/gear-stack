@@ -7,6 +7,7 @@
  * @module gear/services/v2/api
  */
 
+import { HttpStatusCode, isAxiosError } from 'axios'
 import { apiClient } from '@/shared/services/apiClient'
 import type {
   IBatchOrderUpdateItem,
@@ -38,7 +39,7 @@ export const gearItemApiServiceV2: IGearItemServiceV2 = {
       params.append('itemType', filters.itemType)
     }
     if (filters?.parentItemId !== undefined) {
-      params.append('parentItemId', filters.parentItemId || '')
+      params.append('parentItemId', filters.parentItemId ?? '')
     }
     if (filters?.isPublic !== undefined) {
       params.append('isPublic', String(filters.isPublic))
@@ -64,8 +65,8 @@ export const gearItemApiServiceV2: IGearItemServiceV2 = {
     try {
       const response = await apiClient.get<IGearItemV2>(`/gear/v2/items/${id}`)
       return response.data
-    } catch (error: any) {
-      if (error.response?.status === 404) {
+    } catch (error: unknown) {
+      if (isAxiosError(error) && error.response?.status === HttpStatusCode.NotFound) {
         return undefined
       }
       throw error

@@ -12,8 +12,8 @@ export function useItem(containerId?: TUUID, itemId?: TUUID) {
   const { updateItem, deleteItem } = useGear()
 
   // Pobierz ID z route jeśli nie podano
-  const containerIdValue = computed<TUUID>(() => containerId || (route.params.containerId as string))
-  const itemIdValue = computed<TUUID>(() => itemId || (route.params.itemId as string))
+  const containerIdValue = computed<TUUID>(() => containerId ?? (route.params.containerId as string))
+  const itemIdValue = computed<TUUID>(() => itemId ?? (route.params.itemId as string))
 
   // Item data - use store directly for synchronous access in computed
   const item = computed<IGearItem | undefined>(() => {

@@ -59,7 +59,7 @@ const selectedCatalogueItemId = ref<string | null>(null)
 
 const selectedCatalogueItem = computed<IGlobalCatalogueItem | null>(() => {
   if (!selectedCatalogueItemId.value) return null
-  return catalogueItems.value.find(item => item.id === selectedCatalogueItemId.value) || null
+  return catalogueItems.value.find(item => item.id === selectedCatalogueItemId.value) ?? null
 })
 
 // Reset when dialog opens
@@ -100,7 +100,7 @@ const canSubmit = computed<boolean>(() => {
 
 // Filter items to exclude already matched ones (optional)
 const filteredCatalogueItems = computed<IGlobalCatalogueItem[]>(() => {
-  return catalogueItems.value.filter(item => item.isActive || true)
+  return catalogueItems.value.filter(item => item.isActive ?? true)
 })
 </script>
 

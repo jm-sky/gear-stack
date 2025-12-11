@@ -40,7 +40,7 @@ export async function errorResponseInterceptor(error: AxiosError) {
   // Don't show login modal if user is already on login page
   const AUTH_PREFIX = `${AUTH_BASE_PATH}/`
   const isOnAuthPage = typeof window !== 'undefined' && window.location.pathname.startsWith(AUTH_PREFIX)
-  const isAuthRequest = originalRequest?.url?.includes(AUTH_PREFIX) || false
+  const isAuthRequest = originalRequest?.url?.includes(AUTH_PREFIX) ?? false
 
   // Handle 401 Unauthorized errors
   if (

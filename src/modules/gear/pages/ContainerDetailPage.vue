@@ -193,7 +193,7 @@ const handleMoveConfirm = async (targetContainerId: string) => {
 
   try {
     await moveItem(itemToMove.value.id, targetContainerId)
-    toast.success(t('gear.actions.moved') || 'Item moved successfully')
+    toast.success(t('gear.actions.moved') ?? 'Item moved successfully')
   } catch (error) {
     console.error('Failed to move item:', error)
     toast.error(t('common.error'))

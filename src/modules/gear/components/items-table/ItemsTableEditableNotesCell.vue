@@ -35,7 +35,7 @@ async function handleBlur() {
   const originalNotes = props.item.notes?.trim() ?? ''
 
   if (trimmedNotes !== originalNotes) {
-    const updated = await save({ notes: trimmedNotes || null })
+    const updated = await save({ notes: trimmedNotes ?? null })
     if (updated) {
       emit('update', updated)
     }
@@ -48,7 +48,7 @@ async function handleEnter() {
   const originalNotes = props.item.notes?.trim() ?? ''
 
   if (trimmedNotes !== originalNotes) {
-    const updated = await save({ notes: trimmedNotes || null })
+    const updated = await save({ notes: trimmedNotes ?? null })
     if (updated) {
       emit('update', updated)
     }

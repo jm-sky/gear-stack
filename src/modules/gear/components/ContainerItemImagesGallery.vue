@@ -44,7 +44,7 @@ async function getItemImage(itemId: string): Promise<IItemImage | null> {
 
     // Only return primary image
     const primaryImage = images.find(img => img.isPrimary)
-    return primaryImage || null
+    return primaryImage ?? null
   } catch (error) {
     console.error(`Failed to load images for item ${itemId}:`, error)
     imageLoadErrors.value.add(itemId)

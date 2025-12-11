@@ -138,7 +138,7 @@ export function useAiChat() {
 
       // Add assistant response
       const assistantContent = responsePreview
-        || (historyItem.responseData && typeof historyItem.responseData.message === 'string'
+        ?? (historyItem.responseData && typeof historyItem.responseData.message === 'string'
           ? historyItem.responseData.message
           : JSON.stringify(historyItem.responseData))
 

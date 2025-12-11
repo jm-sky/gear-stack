@@ -10,7 +10,7 @@ const localStorageMock = (() => {
     clear: () => {
       store = {}
     },
-    getItem: (key: string) => store[key] || null,
+    getItem: (key: string) => store[key] ?? null,
     removeItem: (key: string) => {
       delete store[key]
     },

@@ -89,7 +89,7 @@ const emit = defineEmits<{
 
 // State
 const sorting = ref<SortingState>([])
-const globalFilter = ref(globalFilterModel.value || '')
+const globalFilter = ref(globalFilterModel.value ?? '')
 // Use model value if provided, otherwise use internal ref
 const columnVisibility = ref<VisibilityState>({ ...(columnVisibilityModel.value ?? {}) })
 
@@ -221,9 +221,9 @@ const table = useVueTable({
 // Sync globalFilterModel with internal ref (after table is created)
 watch(globalFilterModel, (newValue) => {
   if (globalFilter.value !== newValue) {
-    globalFilter.value = newValue || ''
+    globalFilter.value = newValue ?? ''
     if (props.enableFiltering) {
-      table.setGlobalFilter(newValue || '')
+      table.setGlobalFilter(newValue ?? '')
     }
   }
 })

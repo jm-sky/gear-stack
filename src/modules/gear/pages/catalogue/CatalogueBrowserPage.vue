@@ -90,9 +90,9 @@ watch(
   [searchQuery, selectedCategory, brandFilter, priceTierFilter, qualityFilter],
   () => {
     updateSearchParams({
-      query: searchQuery.value || null,
+      query: searchQuery.value ?? null,
       category: selectedCategory.value,
-      brand: brandFilter.value || null,
+      brand: brandFilter.value ?? null,
       priceTier: priceTierFilter.value,
       quality: qualityFilter.value,
       skip: 0,

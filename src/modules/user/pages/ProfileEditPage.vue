@@ -52,7 +52,7 @@ onMounted(() => {
   if (profile.value) {
     setValues({
       name: profile.value.name,
-      avatarUrl: profile.value.avatarUrl || '',
+      avatarUrl: profile.value.avatarUrl ?? '',
     })
   }
 })
@@ -84,7 +84,7 @@ const onSubmit = handleSubmit(
     }
   },
   () => {
-    toast.error(t('user.edit.validation_error') || 'Validation failed')
+    toast.error(t('user.edit.validation_error') ?? 'Validation failed')
   }
 )
 
@@ -95,17 +95,17 @@ const handleCancel = () => {
 const handleGenerateGravatar = () => {
   const email = profile.value?.email
   if (!email || !email.trim()) {
-    toast.error(t('user.edit.email_required_for_gravatar') || 'Email is required to generate Gravatar URL')
+    toast.error(t('user.edit.email_required_for_gravatar') ?? 'Email is required to generate Gravatar URL')
     return
   }
 
   try {
     const gravatarUrl = generateGravatarUrl(email)
     avatarUrlValue.value = gravatarUrl
-    toast.success(t('user.edit.gravatar_generated') || 'Gravatar URL generated')
+    toast.success(t('user.edit.gravatar_generated') ?? 'Gravatar URL generated')
   } catch (error) {
     console.error('Gravatar generation failed:', error)
-    toast.error(t('user.edit.gravatar_generation_failed') || 'Failed to generate Gravatar URL')
+    toast.error(t('user.edit.gravatar_generation_failed') ?? 'Failed to generate Gravatar URL')
   }
 }
 </script>
@@ -193,7 +193,7 @@ const handleGenerateGravatar = () => {
                     type="button"
                     variant="outline"
                     size="icon"
-                    :aria-label="t('user.edit.generate_gravatar') || 'Generate Gravatar URL from email'"
+                    :aria-label="t('user.edit.generate_gravatar') ?? 'Generate Gravatar URL from email'"
                     @click="handleGenerateGravatar"
                   >
                     <GravatarIcon class="size-4" />

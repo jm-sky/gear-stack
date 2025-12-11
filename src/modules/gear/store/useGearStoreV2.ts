@@ -120,7 +120,7 @@ export const useGearStoreV2 = defineStore('gearV2', () => {
     itemsByParentId.value.clear()
 
     for (const item of itemsById.value.values()) {
-      const parentId = item.parentItemId || null
+      const parentId = item.parentItemId ?? null
       if (!itemsByParentId.value.has(parentId)) {
         itemsByParentId.value.set(parentId, [])
       }

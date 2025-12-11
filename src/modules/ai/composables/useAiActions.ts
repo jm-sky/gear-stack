@@ -102,10 +102,10 @@ export function useAiActions() {
     }
 
     // Determine category - use provided category, recognize from name, or default to 'other'
-    let category: string = (data.category as string) || ''
+    let category: string = (data.category as string) ?? ''
     if (!category) {
       const recognized = recognizeCategory(name)
-      category = recognized || 'other'
+      category = recognized ?? 'other'
     }
 
     // Build item from AI data with all required fields

@@ -40,7 +40,7 @@ const priceDate = computed<string | null>(() => {
     return null
   }
   const dateStr = props.shop.updatedAt ?? props.itemCreatedAt
-  return dateStr || null
+  return dateStr ?? null
 })
 
 // Format date in Polish locale

@@ -82,11 +82,11 @@ const loadItem = async () => {
       // Load container to check ownership
       const containerService = gearContainerService()
       const containerData = await store.getContainerById(containerId) || await containerService.getContainer(containerId)
-      container.value = containerData || null
+      container.value = containerData ?? null
     } else {
       // Load from localStorage
       const containerData = store.getContainerById(containerId)
-      container.value = containerData || null
+      container.value = containerData ?? null
       const foundItem = containerData?.items.find(i => i.id === itemId)
 
       if (!foundItem) {

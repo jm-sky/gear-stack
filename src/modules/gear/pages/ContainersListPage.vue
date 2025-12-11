@@ -70,9 +70,9 @@ function loadFiltersFromStorage(): { searchQuery: string; showOnlyRootContainers
 const urlFilters = loadFiltersFromURL()
 const storedFilters = loadFiltersFromStorage()
 
-const searchQueryRaw = ref(urlFilters.searchQuery || storedFilters?.searchQuery || '')
-const searchQuery = refDebounced(searchQueryRaw, 300)
-const showOnlyRootContainers = ref(urlFilters.showOnlyRootContainers || storedFilters?.showOnlyRootContainers || false)
+const searchQueryRaw = ref<string>(urlFilters.searchQuery ?? storedFilters?.searchQuery ?? '')
+const searchQuery = refDebounced<string>(searchQueryRaw, 300)
+const showOnlyRootContainers = ref<boolean>(urlFilters.showOnlyRootContainers ?? storedFilters?.showOnlyRootContainers ?? false)
 
 // Update URL when filters change
 watch([searchQueryRaw, showOnlyRootContainers], ([newSearch, newRootOnly]) => {

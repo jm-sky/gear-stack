@@ -46,13 +46,13 @@ onMounted(() => {
 const renderedContent = computed<string>(() => {
   if (!mdInstance.value || !props.content) {
     // Fallback: return plain text if markdown-it is not loaded yet
-    return props.content || ''
+    return props.content ?? ''
   }
   return mdInstance.value.render(props.content)
 })
 
 const contentClasses = computed<string>(() => {
-  return props.class || 'prose prose-sm dark:prose-invert max-w-none'
+  return props.class ?? 'prose prose-sm dark:prose-invert max-w-none'
 })
 </script>
 

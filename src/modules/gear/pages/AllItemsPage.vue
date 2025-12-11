@@ -97,13 +97,13 @@ const urlFilters = loadFiltersFromURL()
 const storedFilters = loadFiltersFromStorage()
 
 // Filter type: 'all' | 'containers' | 'items'
-const filterType = ref<'all' | 'containers' | 'items'>(urlFilters.filterType || storedFilters?.filterType || 'all')
+const filterType = ref<'all' | 'containers' | 'items'>(urlFilters.filterType ?? storedFilters?.filterType ?? 'all')
 
 // Image filter: 'all' | 'withImage' | 'withoutImage'
-const hasImageFilter = ref<'all' | 'withImage' | 'withoutImage'>(urlFilters.hasImageFilter || storedFilters?.hasImageFilter || 'all')
+const hasImageFilter = ref<'all' | 'withImage' | 'withoutImage'>(urlFilters.hasImageFilter ?? storedFilters?.hasImageFilter ?? 'all')
 
 // Global filter (search) for DataTable
-const globalFilter = ref(urlFilters.globalFilter || storedFilters?.globalFilter || '')
+const globalFilter = ref(urlFilters.globalFilter ?? storedFilters?.globalFilter ?? '')
 
 // Pagination state
 const page = ref(urlFilters.page)

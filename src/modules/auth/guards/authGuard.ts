@@ -75,7 +75,7 @@ export async function authGuard(
         // Handle 2FA verification requirement
         // Backend returns 401 with detail about 2FA when user has 2FA enabled but token doesn't have tfaVerified=true
         if (error.response?.status === 401) {
-          const detail = error.response.data?.detail || ''
+          const detail = error.response.data?.detail ?? ''
           if (detail.includes('2FA verification required') || detail.includes('two-factor authentication')) {
             // User has 2FA enabled but token doesn't have tfaVerified=true
             // This should not happen if 2FA flow is working correctly

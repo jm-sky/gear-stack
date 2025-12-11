@@ -97,7 +97,7 @@ class UserApiService {
     return {
       id: response.id,
       name: response.name,
-      email: response.email || '',
+      email: response.email ?? '',
       avatarUrl: response.avatarUrl,
       isAdmin: response.isAdmin,
       isOwner: response.isOwner,

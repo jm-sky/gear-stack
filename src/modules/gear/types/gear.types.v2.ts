@@ -13,7 +13,6 @@
  * @module gear/types/v2
  */
 
-import type { TDateTime, TUUID } from '@/shared/types/base.type'
 import type {
   TContainerColor,
   TGearContainerType,
@@ -29,6 +28,7 @@ import {
   GEAR_ITEM_CATEGORIES,
   GEAR_ITEM_QUALITIES,
 } from './gear.types'
+import type { TDateTime, TUUID } from '@/shared/types/base.type'
 
 // Re-export common types from V1 (unchanged)
 export type {

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { HttpStatusCode, isAxiosError } from 'axios'
 import { Package, User } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -53,10 +54,9 @@ onMounted(async () => {
     containers.value = containersResponse.data
   } catch (err: unknown) {
     console.error('Failed to load public user profile:', err)
-    const errorResponse = err as { response?: { status?: number } }
-    if (errorResponse.response?.status === 404) {
+    if (isAxiosError(err) && err.response?.status === HttpStatusCode.NotFound) {
       error.value = t('user.publicProfile.not_found')
-    } else if (errorResponse.response?.status === 403) {
+    } else if (isAxiosError(err) && err.response?.status === HttpStatusCode.Forbidden) {
       error.value = t('user.publicProfile.not_public')
     } else {
       error.value = t('user.publicProfile.error')

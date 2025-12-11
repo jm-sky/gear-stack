@@ -83,7 +83,7 @@ export function useLogin(service?: IAuthService) {
         // Set user from login response (map avatarUrl to avatar)
         authStore.setUser({
           ...data.user,
-          avatarUrl: (data.user as any).avatarUrl || data.user.avatarUrl,
+          avatarUrl: (data.user as any).avatarUrl ?? data.user.avatarUrl,
         })
 
         // Invalidate and refetch user data to ensure consistency
