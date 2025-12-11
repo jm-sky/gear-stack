@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { BackpackIcon } from 'lucide-vue-next'
 import { RouterLink, useRoute } from 'vue-router'
 import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
+import ContainerIcon from '@/modules/gear/components/ContainerIcon.vue'
 import { GearRoutePath } from '@/modules/gear/routes'
-import { COLOR_TEXT_CLASSES } from '@/modules/gear/utils/containerColors'
 import type { IGearContainer } from '@/modules/gear/types/gear.types'
 
 defineProps<{
@@ -25,7 +24,7 @@ const isActive = (containerId: string): boolean => {
   <SidebarMenuItem>
     <SidebarMenuButton :is-active="isActive(container.id)" as-child>
       <RouterLink :to="GearRoutePath.ContainerDetailById(container.id)">
-        <BackpackIcon :class="COLOR_TEXT_CLASSES[container.color ?? 'default']" />
+        <ContainerIcon :type="container.type" :color="container.color" :size="4" />
         <span>{{ container.name }}</span>
       </RouterLink>
     </SidebarMenuButton>
