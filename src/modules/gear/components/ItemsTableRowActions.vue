@@ -5,6 +5,7 @@ import {
   Eye,
   Link2Off,
   MoreHorizontal,
+  MoveIcon,
   ShoppingCart,
   Trash2,
 } from 'lucide-vue-next'
@@ -25,6 +26,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   edit: [item: IGearItem]
   delete: [item: IGearItem]
+  move: [item: IGearItem]
   statusChange: [status: TGearItemStatus]
   viewContainer: [item: IGearItem]
   recognizeParameters: [item: IGearItem]
@@ -95,6 +97,11 @@ const isLinkedToCatalogue = computed(() => {
         <DropdownMenuItem @click="emit('starItem', row, row.priority === 'critical' ? 'medium' : 'critical')">
           <StarItemIcon :class="['size-4 mr-2', { 'fill-yellow-400': row.priority === 'critical' }]" />
           {{ t('gear.actions.starItem') }}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem @click="emit('move', row)">
+          <MoveIcon class="size-4 mr-2" />
+          {{ t('gear.actions.move') }}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem

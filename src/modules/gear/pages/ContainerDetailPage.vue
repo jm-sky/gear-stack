@@ -31,6 +31,7 @@ const ItemsTable = defineAsyncComponent(() => import('../components/ItemsTable.v
 const AddNestedContainerDialog = defineAsyncComponent(() => import('../components/AddNestedContainerDialog.vue'))
 const ExportToPromptDialog = defineAsyncComponent(() => import('../components/ExportToPromptDialog.vue'))
 const ExportToCSVDialog = defineAsyncComponent(() => import('../components/ExportToCSVDialog.vue'))
+const MoveItemDialog = defineAsyncComponent(() => import('../components/MoveItemDialog.vue'))
 
 // Lazy load CategoryPieChart - not critical for initial render
 const CategoryPieChart = defineAsyncComponent(() => import('../components/CategoryPieChart.vue'))
@@ -45,7 +46,7 @@ const { t } = useI18n()
 const store = useGearStore()
 const { shouldUseAPI } = useBackend()
 const { container } = useContainer()
-const { deleteItem, updateItem, updateContainer, createItem, getContainerById } = useGear()
+const { deleteItem, updateItem, updateContainer, createItem, getContainerById, moveItem } = useGear()
 const { user, isAuthenticated } = useAuth()
 const { canUseAi } = useAi()
 const { setTitle } = usePageTitle()
@@ -90,6 +91,8 @@ const isAddContainerDialogOpen = ref(false)
 const isExportToPromptDialogOpen = ref(false)
 const isExportToCSVDialogOpen = ref(false)
 const isAiDialogOpen = ref(false)
+const isMoveItemDialogOpen = ref(false)
+const itemToMove = ref<IGearItem | null>(null)
 
 // Rating section moved to ContainerRatingSection.vue component
 
@@ -176,6 +179,23 @@ const handleUnlinkFromCatalogue = async (item: IGearItem) => {
     await unlinkItemFromCatalogue(item.id)
     toast.success(t('gear.catalogue.unlinkedSuccess'))
   } catch {
+    toast.error(t('common.error'))
+  }
+}
+
+const handleMoveItem = (item: IGearItem) => {
+  itemToMove.value = item
+  isMoveItemDialogOpen.value = true
+}
+
+const handleMoveConfirm = async (targetContainerId: string) => {
+  if (!itemToMove.value) return
+
+  try {
+    await moveItem(itemToMove.value.id, targetContainerId)
+    toast.success(t('gear.actions.moved') || 'Item moved successfully')
+  } catch (error) {
+    console.error('Failed to move item:', error)
     toast.error(t('common.error'))
   }
 }
@@ -364,6 +384,7 @@ if (!container.value) {
         @reorder="handleReorder"
         @sorting-change="handleSortingChange"
         @unlink-from-catalogue="handleUnlinkFromCatalogue"
+        @move="handleMoveItem"
       />
 
       <!-- Container Item Images Gallery -->
@@ -405,6 +426,14 @@ if (!container.value) {
         v-if="canUseAi"
         v-model:open="isAiDialogOpen"
         :context="{ container_ids: [containerId] }"
+      />
+
+      <MoveItemDialog
+        v-if="itemToMove"
+        v-model:open="isMoveItemDialogOpen"
+        :item-id="itemToMove.id"
+        :current-container-id="containerId"
+        @move="handleMoveConfirm"
       />
     </div>
   </AuthenticatedLayout>

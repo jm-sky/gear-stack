@@ -119,6 +119,7 @@ const pageSizeModel = computed({
 const emit = defineEmits<{
   edit: [item: IGearItem]
   delete: [item: IGearItem]
+  move: [item: IGearItem]
   statusChange: [item: IGearItem, status: IGearItem['status']]
   recognizeParameters: [item: IGearItem]
   reorder: [items: IGearItem[]]
@@ -703,6 +704,7 @@ async function handleStarItem(item: IGearItem, newPriority: TGearItemPriority) {
           @upload-photo="handleUploadPhoto"
           @star-item="handleStarItem"
           @unlink-from-catalogue="emit('unlinkFromCatalogue', row.original)"
+          @move="emit('move', row.original)"
         />
       </div>
     </template>
