@@ -5,7 +5,7 @@ import { getContainerIcon } from '../utils/containerIcons'
 import ColorDot from './ColorDot.vue'
 
 const { type, size = 16 } = defineProps<{
-  color?: TContainerColor
+  color?: TContainerColor | null
   type: TGearContainerType
   size?: number
 }>()

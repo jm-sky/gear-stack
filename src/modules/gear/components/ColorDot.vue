@@ -5,7 +5,7 @@ import { COLOR_DOT_CLASSES, COLOR_TEXT_CLASSES } from '../utils/containerColors'
 import type { Component } from 'vue'
 
 const props = withDefaults(defineProps<{
-  color?: TContainerColor
+  color?: TContainerColor | null
   icon?: Component | null
   size?: number
 }>(), {
