@@ -5,13 +5,14 @@ import { RouterLink } from 'vue-router'
 import Button from '@/components/ui/button/Button.vue'
 import Card from '@/components/ui/card/Card.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import { GearRoutePath } from '@/modules/gear/routes'
 import { usePermissions } from '@/shared/composables/usePermissions'
 import { AdminRoutePaths } from '../routes'
 
 const { t } = useI18n()
-const { isAdmin } = usePermissions()
+const { canAccessAdminPanel } = usePermissions()
 
-if (!isAdmin.value) {
+if (!canAccessAdminPanel.value) {
   // Redirect will be handled by router guard
 }
 </script>
@@ -99,6 +100,24 @@ if (!isAdmin.value) {
             <RouterLink :to="AdminRoutePaths.limits">
               <Button class="w-full">
                 {{ t('admin.dashboard.limits.button', 'Manage Limits') }}
+              </Button>
+            </RouterLink>
+          </div>
+        </Card>
+
+        <Card class="p-6">
+          <div class="flex flex-col gap-4">
+            <div>
+              <h3 class="text-lg font-semibold">
+                {{ t('gear.catalogue.title', 'Global Catalogue') }}
+              </h3>
+              <p class="text-sm text-muted-foreground">
+                {{ t('gear.catalogue.subtitle', 'Browse and add items from the global catalogue') }}
+              </p>
+            </div>
+            <RouterLink :to="GearRoutePath.CatalogueManage">
+              <Button class="w-full">
+                {{ t('gear.actions.manage', 'Manage') }}
               </Button>
             </RouterLink>
           </div>

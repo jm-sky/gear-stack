@@ -797,7 +797,7 @@ class GearService:
         # Get URLs for all primary images
         image_urls: dict[str, str] = {}
         for item_id, image in primary_images.items():
-            url = await self._storage.get_url(image.file_path)
+            url = image.external_url or await self._storage.get_url(image.file_path)
             image_urls[item_id] = url
 
         # Map items to responses with primary image URLs
@@ -833,7 +833,7 @@ class GearService:
         # Get URL for primary image if exists
         primary_image_url = None
         if primary_image:
-            primary_image_url = await self._storage.get_url(primary_image.file_path)
+            primary_image_url = primary_image.external_url or await self._storage.get_url(primary_image.file_path)
 
         # Create response with image URL
         item_dict = GlobalCatalogueItemResponse.model_validate(item).model_dump()

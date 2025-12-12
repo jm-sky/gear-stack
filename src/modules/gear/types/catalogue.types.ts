@@ -26,6 +26,8 @@ export interface IGlobalCatalogueItem {
   brand?: string | null
   model?: string | null
   priceTier?: TCataloguePriceTier | null
+  price?: number | null
+  currency?: string | null
   quality?: TGearItemQuality | null
   url?: string | null
   color?: TContainerColor | null

@@ -22,6 +22,11 @@ export class CatalogueApiService {
    * Public endpoint - no auth required
    */
   async getCatalogueItems(params?: ICatalogueSearchParams): Promise<IGlobalCatalogueItem[]> {
+    const isActive =
+      params?.isActive === undefined
+        ? true
+        : params.isActive
+
     const response = await apiClient.get<IGlobalCatalogueItem[]>('/gear/catalogue/items', {
       params: {
         query: params?.query,
@@ -29,7 +34,8 @@ export class CatalogueApiService {
         brand: params?.brand,
         priceTier: params?.priceTier,
         quality: params?.quality,
-        isActive: params?.isActive ?? true,
+        // Important: allow `null` to mean "no filter" (show all)
+        isActive,
         skip: params?.skip ?? 0,
         limit: params?.limit ?? 100,
       },
