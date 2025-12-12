@@ -1038,9 +1038,7 @@ async def update_catalogue_item(
         HTTPException: If item not found or user doesn't have permission
     """
     # Check if user is admin/owner
-    is_admin = (current_user.isAdmin if hasattr(current_user, "isAdmin") else False) or (
-        current_user.isOwner if hasattr(current_user, "isOwner") else False
-    )
+    is_admin = (current_user.isAdmin if hasattr(current_user, "isAdmin") else False) or (current_user.isOwner if hasattr(current_user, "isOwner") else False)
     item = await service.update_catalogue_item(
         item_id,
         current_user.id,
@@ -1078,9 +1076,7 @@ async def delete_catalogue_item(
         HTTPException: If item not found or user doesn't have permission
     """
     # Check if user is admin/owner
-    is_admin = (current_user.isAdmin if hasattr(current_user, "isAdmin") else False) or (
-        current_user.isOwner if hasattr(current_user, "isOwner") else False
-    )
+    is_admin = (current_user.isAdmin if hasattr(current_user, "isAdmin") else False) or (current_user.isOwner if hasattr(current_user, "isOwner") else False)
     deleted = await service.delete_catalogue_item(
         item_id,
         current_user.id,

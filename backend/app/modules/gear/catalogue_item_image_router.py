@@ -84,4 +84,3 @@ async def upload_catalogue_item_image_from_url(
 ) -> dict:
     service = CatalogueItemImageUploadService(db)
     return await service.upload_image_from_url(data.url, catalogue_item_id, current_user.id, data.isPrimary, data.hostLocally)
-
