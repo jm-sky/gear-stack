@@ -21,6 +21,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.35.0] - 2025-12-12
+
+### Added
+- **Catalogue Management Page**: Complete management interface for global catalogue items
+  - New DataTable-based management page with filters (search, category, brand, isActive status)
+  - Dropdown actions menu in table rows with: Show, Edit, Activate/Deactivate, Delete
+  - Admin/owner permission checks and lazy loading for code splitting
+  - Integrated with existing catalogue API and composables
+- **i18n Translations**: Added missing translations for catalogue management
+  - `gear.actions.manage` (EN: "Manage", PL: "Zarządzaj")
+  - `gear.fileUpload.imageGallery.previousImage` (EN: "Previous image", PL: "Poprzedni obrazek")
+  - `gear.fileUpload.imageGallery.nextImage` (EN: "Next image", PL: "Następny obrazek")
+
+### Changed
+- **Catalogue Manage Page**: Replaced card-based view with DataTable for better management experience
+  - Consistent with other admin management pages (AdminItemsPage, AdminContainersPage)
+  - Better sorting, filtering, and pagination support
+  - Improved UX with dropdown actions menu instead of inline buttons
+
+---
+
 ## [2.34.0] - 2025-12-11
 
 ### Added
