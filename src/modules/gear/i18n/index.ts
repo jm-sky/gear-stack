@@ -294,6 +294,7 @@ export const gearEn = {
       disableInlineEditing: 'Disable Inline Editing',
       uploadPhoto: 'Upload Photo',
       starItem: 'Star Item',
+      manage: 'Manage',
       saving: 'Saving...',
     },
     imageSearch: {
@@ -330,6 +331,8 @@ export const gearEn = {
           dragToReorder: 'Drag to reorder',
           deleteImage: 'Delete image',
         },
+        previousImage: 'Previous image',
+        nextImage: 'Next image',
       },
     },
     sorting: {
@@ -1141,6 +1144,7 @@ export const gearPl = {
       disableInlineEditing: 'Wyłącz edycję inline',
       uploadPhoto: 'Dodaj zdjęcie',
       starItem: 'Oznacz jako ulubiony',
+      manage: 'Zarządzaj',
       saving: 'Zapisywanie...',
     },
     imageSearch: {
@@ -1177,6 +1181,8 @@ export const gearPl = {
           dragToReorder: 'Przeciągnij, aby zmienić kolejność',
           deleteImage: 'Usuń obrazek',
         },
+        previousImage: 'Poprzedni obrazek',
+        nextImage: 'Następny obrazek',
       },
     },
     sorting: {
