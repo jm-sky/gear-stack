@@ -34,8 +34,8 @@ if (!canAccessAdminPanel.value) {
       <!-- Quick Links -->
       <div class="grid gap-4 md:grid-cols-3">
         <Card class="p-6">
-          <div class="flex flex-col gap-4">
-            <div>
+          <div class="flex flex-col gap-4 flex-1">
+            <div class="flex-1">
               <h3 class="text-lg font-semibold">
                 {{ t('admin.dashboard.users.title', 'Users') }}
               </h3>
@@ -52,8 +52,8 @@ if (!canAccessAdminPanel.value) {
         </Card>
 
         <Card class="p-6">
-          <div class="flex flex-col gap-4">
-            <div>
+          <div class="flex flex-col gap-4 flex-1">
+            <div class="flex-1">
               <h3 class="text-lg font-semibold">
                 {{ t('admin.dashboard.containers.title', 'Containers') }}
               </h3>
@@ -70,8 +70,8 @@ if (!canAccessAdminPanel.value) {
         </Card>
 
         <Card class="p-6">
-          <div class="flex flex-col gap-4">
-            <div>
+          <div class="flex flex-col gap-4 flex-1">
+            <div class="flex-1">
               <h3 class="text-lg font-semibold">
                 {{ t('admin.dashboard.items.title', 'Items') }}
               </h3>
@@ -88,8 +88,8 @@ if (!canAccessAdminPanel.value) {
         </Card>
 
         <Card class="p-6">
-          <div class="flex flex-col gap-4">
-            <div>
+          <div class="flex flex-col gap-4 flex-1">
+            <div class="flex-1">
               <h3 class="text-lg font-semibold">
                 {{ t('admin.dashboard.limits.title', 'Feature Limits') }}
               </h3>
@@ -106,8 +106,8 @@ if (!canAccessAdminPanel.value) {
         </Card>
 
         <Card class="p-6">
-          <div class="flex flex-col gap-4">
-            <div>
+          <div class="flex flex-col gap-4 flex-1">
+            <div class="flex-1">
               <h3 class="text-lg font-semibold">
                 {{ t('gear.catalogue.title', 'Global Catalogue') }}
               </h3>
