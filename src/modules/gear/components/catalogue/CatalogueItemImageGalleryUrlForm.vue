@@ -4,8 +4,6 @@ import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
 import Button from '@/components/ui/button/Button.vue'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { useCatalogueItemImage } from '@/modules/gear/composables/catalogue/useCatalogueItemImage'
 import { useHandleError } from '@/shared/composables/useHandleError'
 import type { ICatalogueItemImage } from '@/modules/gear/types/catalogueItemImage.types'
@@ -23,7 +21,6 @@ const { catalogueItemId } = defineProps<{
 }>()
 
 const imageUrl = ref('')
-const hostOption = ref<'local' | 'external'>('local')
 const isSubmittingUrl = ref(false)
 const urlInputRef = ref<InstanceType<typeof Input> | null>(null)
 
@@ -56,13 +53,12 @@ async function handleAddFromUrl() {
   try {
     isSubmittingUrl.value = true
     const hasPrimary = images.value.some(img => img.isPrimary)
-    const hostLocally = hostOption.value === 'local'
-    const newImage = await uploadImageFromUrl(catalogueItemId, url, !hasPrimary, hostLocally)
+    // SECURITY: catalogue images from URL are stored as external URLs (no server-side fetching)
+    const newImage = await uploadImageFromUrl(catalogueItemId, url, !hasPrimary, false)
     images.value.push(newImage)
     imageLoadErrors.value.delete(newImage.id)
     toast.success(t('gear.fileUpload.imageGallery.messages.uploadSuccess'))
     imageUrl.value = ''
-    hostOption.value = 'local'
     emit('hide')
   } catch (error: unknown) {
     handleError(error, { fallbackMessage: t('gear.fileUpload.imageGallery.messages.uploadFailed') })
@@ -83,25 +79,6 @@ async function handleAddFromUrl() {
       class="w-full"
       @update:model-value="value => (imageUrl = (value as string))"
     />
-    <div class="flex flex-col gap-2">
-      <Label class="text-sm font-medium">
-        {{ t('gear.fileUpload.imageGallery.hostOption') }}
-      </Label>
-      <RadioGroup v-model="hostOption" class="flex gap-4">
-        <div class="flex items-center gap-2">
-          <RadioGroupItem id="host-locally" value="local" />
-          <Label for="host-locally" class="text-sm font-normal cursor-pointer">
-            {{ t('gear.fileUpload.imageGallery.hostLocally') }}
-          </Label>
-        </div>
-        <div class="flex items-center gap-2">
-          <RadioGroupItem id="host-externally" value="external" />
-          <Label for="host-externally" class="text-sm font-normal cursor-pointer">
-            {{ t('gear.fileUpload.imageGallery.hostExternally') }}
-          </Label>
-        </div>
-      </RadioGroup>
-    </div>
     <div class="flex gap-2 justify-end pt-2">
       <Button
         variant="outline"

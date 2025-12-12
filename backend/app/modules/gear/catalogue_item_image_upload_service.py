@@ -7,7 +7,6 @@ import uuid
 from io import BytesIO
 from urllib.parse import urlparse
 
-import httpx
 from fastapi import HTTPException, UploadFile, status
 from PIL import Image
 from sqlalchemy import select
@@ -288,78 +287,56 @@ class CatalogueItemImageUploadService:
         # Always validate URL for SSRF protection
         self._validate_url_for_ssrf(image_url)
 
-        if not host_locally:
-            if is_primary:
-                await self.repository.unset_primary_for_catalogue_item(catalogue_item_id)
-            else:
-                existing_primary = await self.repository.get_primary_image(catalogue_item_id)
-                if not existing_primary:
-                    is_primary = True
-
-            original_filename = image_url.rsplit("/", 1)[-1] or "remote-image"
-            image_record = await self.repository.create(
-                {
-                    "catalogue_item_id": catalogue_item_id,
-                    "user_id": user_id,
-                    "storage_type": "external",
-                    "file_path": "",
-                    "file_name": original_filename,
-                    "file_size": 0,
-                    "mime_type": "image/*",
-                    "width": None,
-                    "height": None,
-                    "is_primary": is_primary,
-                    "order": await self.repository.get_next_order(catalogue_item_id),
-                    "is_processed": False,
-                    "original_file_size": None,
-                    "external_url": image_url,
-                }
-            )
-            return {
-                "id": image_record.id,
-                "catalogueItemId": catalogue_item_id,
-                "userId": user_id,
-                "url": image_url,
-                "fileName": original_filename,
-                "fileSize": 0,
-                "mimeType": "image/*",
-                "width": None,
-                "height": None,
-                "isPrimary": is_primary,
-                "order": image_record.order,
-                "createdAt": image_record.created_at.isoformat(),
-                "updatedAt": image_record.updated_at.isoformat(),
-            }
-
-        # host locally: download then store
-        try:
-            async with httpx.AsyncClient(timeout=15.0) as client:
-                response = await client.get(image_url)
-                response.raise_for_status()
-                content = response.content
-        except httpx.HTTPError as exc:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to download image from URL") from exc
-
-        max_file_size = await self._get_max_file_size_for_user(user_id)
-        if len(content) > max_file_size:
+        if host_locally:
+            # SECURITY:
+            # We intentionally do NOT fetch arbitrary remote URLs server-side for catalogue items,
+            # to prevent SSRF (CodeQL: py/full-ssrf). Use file upload instead.
             raise HTTPException(
-                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                detail=f"File size exceeds maximum allowed size of {max_file_size / 1024 / 1024:.1f} MB",
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Hosting catalogue images locally from URL is disabled. Please upload a file instead.",
             )
 
-        if settings.storage.type == "local":
-            available_space = await self.storage.get_available_space()
-            if available_space and available_space < len(content):
-                raise HTTPException(status_code=status.HTTP_507_INSUFFICIENT_STORAGE, detail="Insufficient storage space")
+        if is_primary:
+            await self.repository.unset_primary_for_catalogue_item(catalogue_item_id)
+        else:
+            existing_primary = await self.repository.get_primary_image(catalogue_item_id)
+            if not existing_primary:
+                is_primary = True
 
         original_filename = image_url.rsplit("/", 1)[-1] or "remote-image"
-        return await self._process_and_store_image(
-            content=content,
-            catalogue_item_id=catalogue_item_id,
-            user_id=user_id,
-            original_filename=original_filename,
-            is_primary=is_primary,
+        image_record = await self.repository.create(
+            {
+                "catalogue_item_id": catalogue_item_id,
+                "user_id": user_id,
+                "storage_type": "external",
+                "file_path": "",
+                "file_name": original_filename,
+                "file_size": 0,
+                "mime_type": "image/*",
+                "width": None,
+                "height": None,
+                "is_primary": is_primary,
+                "order": await self.repository.get_next_order(catalogue_item_id),
+                "is_processed": False,
+                "original_file_size": None,
+                "external_url": image_url,
+            }
         )
+        return {
+            "id": image_record.id,
+            "catalogueItemId": catalogue_item_id,
+            "userId": user_id,
+            "url": image_url,
+            "fileName": original_filename,
+            "fileSize": 0,
+            "mimeType": "image/*",
+            "width": None,
+            "height": None,
+            "isPrimary": is_primary,
+            "order": image_record.order,
+            "createdAt": image_record.created_at.isoformat(),
+            "updatedAt": image_record.updated_at.isoformat(),
+        }
 
     async def _process_and_store_image(
         self,
