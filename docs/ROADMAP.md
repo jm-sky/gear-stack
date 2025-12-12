@@ -68,7 +68,13 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - ✅ Limit: 20 MB (zwykli użytkownicy), 50 MB (admin) - konfigurowalny przez zmienne środowiskowe
    - Status: ✅ Completed | Priority: High | Complexity: Medium
 
-8. **Unifikacja modeli kontenerów i przedmiotów**
+8. **DataTable - Pinned Columns**
+   - 📍 Lokalizacja: [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-datatable---pinned-columns-pin-right-dla-kolumny-akcji)
+   - Dodanie wsparcia dla pinned columns (pin-right dla kolumny akcji) w komponencie DataTable
+   - Kolumna akcji zawsze widoczna podczas poziomego przewijania
+   - Status: 🔄 Planned | Priority: Medium | Complexity: Small
+
+9. **Unifikacja modeli kontenerów i przedmiotów**
    - 📍 Analiza: [UNIFIED_MODEL_ANALYSIS.md](./analysis/UNIFIED_MODEL_ANALYSIS.md)
    - Połączenie modeli `IGearContainer` i `IGearItem` w jeden model `IGearEntity` z flagą `isContainer`
    - Uproszczenie zagnieżdżania (plecak → kubek → pudełko → zapałki) - jeden mechanizm `parentId`
@@ -77,7 +83,7 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - Status: 🔄 Analysis Complete | Priority: High | Complexity: Large
    - **Uwaga:** Wymaga migracji danych i refaktoryzacji ~80-150 plików (2-4 tygodnie pracy)
 
-9. **Pełna analiza backend i frontend + refaktoryzacja**
+10. **Pełna analiza backend i frontend + refaktoryzacja**
    - Pełna analiza architektury backend i frontend
    - Identyfikacja problemów i obszarów do poprawy
    - Refaktoryzacja kodu zgodnie z najlepszymi praktykami

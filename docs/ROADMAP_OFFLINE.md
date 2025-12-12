@@ -216,6 +216,39 @@ W komponencie `ContainerColorPicker.vue` dodać funkcjonalności ułatwiające w
 - Lepsza dostępność (nazwy widoczne bez hover)
 - Lepsze UX dla użytkowników, którzy nie pamiętają, jak wygląda dany kolor
 
+### 🔄 DataTable - Pinned Columns (Pin-right dla kolumny akcji)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+
+**Koncepcja:**
+Dodanie wsparcia dla pinned columns w komponencie `DataTable`, szczególnie pin-right dla kolumny akcji, aby była zawsze widoczna podczas poziomego przewijania tabeli.
+
+**Problema:**
+- Kolumna akcji (dropdown menu) może być niewidoczna podczas scrollowania poziomego
+- Utrudnia to dostęp do akcji bez konieczności przewijania w prawo
+- Szczególnie istotne w tabelach z wieloma kolumnami (np. CatalogueManagePage)
+
+**Implementacja:**
+1. **Rozszerzenie DataTable.vue:**
+   - Dodanie wsparcia dla `meta.pinned: 'left' | 'right'` w definicji kolumny (TanStack Table v8)
+   - Stylowanie pinned columns z `position: sticky` i odpowiednim `right`/`left`
+   - Ustawienie odpowiedniego `z-index` i `background-color` dla sticky columns
+   - Obsługa kolejności kolumn (pinned columns na początku/końcu)
+
+2. **Użycie w CatalogueManagePage:**
+   - Dodanie `meta: { pinned: 'right' }` do kolumny akcji
+   - Kolumna akcji będzie zawsze widoczna po prawej stronie podczas scrollowania
+
+3. **Użycie w innych miejscach:**
+   - `AdminItemsPage.vue` - kolumna akcji
+   - `AdminContainersPage.vue` - kolumna akcji
+   - `AllItemsPage.vue` - jeśli ma kolumnę akcji
+   - Inne strony używające DataTable z kolumną akcji
+
+**Zalety:**
+- Lepsze UX - akcje zawsze dostępne bez przewijania
+- Spójność z nowoczesnymi tabelami (np. Google Sheets, Notion)
+- Możliwość użycia również dla pin-left (np. dla kolumny z nazwą)
+
 ### 🔄 Obrazek kontenera jako okrągły avatar w liście kontenerów
 **Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
 
