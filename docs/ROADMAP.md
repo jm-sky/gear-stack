@@ -89,6 +89,16 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - Refaktoryzacja kodu zgodnie z najlepszymi praktykami
    - Status: 🚧 In Progress | Priority: High | Complexity: Large
 
+11. **Loading state przed wczytaniem JavaScript w index.html**
+   - Dodanie stanu ładowania w `index.html` przed załadowaniem aplikacji Vue
+   - Zapobieganie białemu ekranowi podczas inicjalizacji aplikacji
+   - Status: 🔄 Planned | Priority: High | Complexity: Small
+
+12. **Welcome back message and links on landing page for already logged in users**
+   - Dodanie komunikatu powitalnego na stronie głównej dla zalogowanych użytkowników
+   - Linki do głównych sekcji aplikacji (np. kontenery, ustawienia)
+   - Status: 🔄 Planned | Priority: High | Complexity: Small
+
 ### Średni priorytet
 
 1. ✅ **Nawigacja przycisku "Wróć"** - Zakończone
