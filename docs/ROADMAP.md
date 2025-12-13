@@ -101,7 +101,8 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
 
 13. **Nie działa zmiana ilości wierszy przedmiotów (limit) na stronie Container Details**
    - Naprawa funkcjonalności zmiany limitu wierszy w tabeli przedmiotów na stronie szczegółów kontenera
-   - Status: 🔄 Planned | Priority: High | Complexity: Small
+   - Problem: Zmiana pageSize nie propaguje się w górę do parent component (brak emit w client-side mode)
+   - Status: 🚧 In Progress | Priority: High | Complexity: Small
 
 ### Średni priorytet
 
