@@ -228,6 +228,19 @@ watch(globalFilterModel, (newValue) => {
   }
 })
 
+// Sync pageSize with table state (when changed externally)
+watch(pageSize, (newValue) => {
+  if (currentPageSize.value !== newValue) {
+    currentPageSize.value = newValue
+    if (!isServerSide.value && props.enablePagination) {
+      table.setPageSize(newValue)
+      // Reset to page 1 when page size changes
+      currentPage.value = 1
+      table.setPageIndex(0)
+    }
+  }
+})
+
 // Computed values
 const totalRows = computed(() => isServerSide.value ? (props.total ?? 0) : props.data.length)
 const isEmpty = computed(() => table.getRowModel().rows.length === 0)

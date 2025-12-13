@@ -99,6 +99,10 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - Linki do głównych sekcji aplikacji (np. kontenery, ustawienia)
    - Status: 🔄 Planned | Priority: High | Complexity: Small
 
+13. **Nie działa zmiana ilości wierszy przedmiotów (limit) na stronie Container Details**
+   - Naprawa funkcjonalności zmiany limitu wierszy w tabeli przedmiotów na stronie szczegółów kontenera
+   - Status: 🔄 Planned | Priority: High | Complexity: Small
+
 ### Średni priorytet
 
 1. ✅ **Nawigacja przycisku "Wróć"** - Zakończone
