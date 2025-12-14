@@ -322,6 +322,7 @@ export default {
   landing: {
     title: 'Gear Stack',
     subtitle: 'Organize and manage your survival gear and bug-out bag equipment',
+    welcomeBack: 'Welcome back, {name}!',
     feature1: {
       title: 'Organize',
       description: 'Keep track of all your gear in organized containers',

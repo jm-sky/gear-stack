@@ -7,7 +7,8 @@ import LocalContainersStats from '@/components/layout/LocalContainersStats.vue'
 import TotalsStats from '@/components/layout/TotalsStats.vue'
 import WelcomeQuickActions from '@/components/layout/WelcomeQuickActions.vue'
 import LandingLayout from '@/layouts/LandingLayout.vue'
-import { useAuthStore } from '@/modules/auth/store/useAuthStore'
+import { useAuth } from '@/modules/auth/composables/useAuth'
+import { GearRouteName } from '@/modules/gear/routes'
 import { hasLocalData } from '@/modules/gear/services/dataMigrationService'
 import { useGearStore } from '@/modules/gear/store/useGearStore'
 import { PublicRouteNames } from '@/router/publicRoutes'
@@ -15,18 +16,18 @@ import { config } from '@/shared/config/config'
 
 const { t } = useI18n()
 const router = useRouter()
-const authStore = useAuthStore()
+const { isAuthenticated, user } = useAuth()
 const gearStore = useGearStore()
 
 // Check if user is not logged in but has containers in localStorage
 const hasLocalContainers = computed(() => {
-  if (authStore.isAuthenticated) return false
+  if (isAuthenticated.value) return false
   return hasLocalData()
 })
 
 // Load containers from localStorage if not authenticated
 onMounted(() => {
-  if (!authStore.isAuthenticated) {
+  if (!isAuthenticated.value) {
     gearStore.loadFromStorage()
   }
 })
@@ -49,6 +50,9 @@ if (!config.backend.enabled) {
 
       <!-- Heading -->
       <div class="space-y-4">
+        <p v-if="isAuthenticated && user" class="text-2xl font-semibold text-muted-foreground">
+          {{ t('landing.welcomeBack', { name: user.name }) }}
+        </p>
         <h1 class="text-5xl font-bold tracking-tight">
           {{ t('landing.title', 'Gear Stack') }}
         </h1>
@@ -98,7 +102,10 @@ if (!config.backend.enabled) {
       <WelcomeQuickActions class="max-w-md mx-auto" />
 
       <!-- Info Links -->
-      <div v-if="authStore.isAuthenticated" class="flex flex-wrap justify-center gap-4 text-sm">
+      <div v-if="isAuthenticated" class="flex flex-wrap justify-center gap-4 text-sm">
+        <RouterLink :to="{ name: GearRouteName.Containers }" class="text-muted-foreground hover:text-primary transition-colors">
+          {{ t('gear.page.viewContainers', 'View Containers') }}
+        </RouterLink>
         <RouterLink :to="{ name: PublicRouteNames.about }" class="text-muted-foreground hover:text-primary transition-colors">
           {{ t('common.pages.about', 'About') }}
         </RouterLink>
