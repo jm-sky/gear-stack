@@ -20,10 +20,13 @@ try:
 except ImportError:
     HAS_MAGIC = False
     logger = logging.getLogger(__name__)
-    logger.warning("python-magic not available, will use Pillow for MIME type detection")
+    logger.warning(
+        "python-magic not available, will use Pillow for MIME type detection"
+    )
 
 from app.common.id_utils import generate_id
 from app.core.config import settings
+from app.core.storage.exceptions import CorruptedImageError
 from app.core.storage.factory import get_storage_adapter
 from app.core.storage.image_processor import ImageProcessor
 from app.modules.auth.db_models import UserDB
@@ -139,7 +142,9 @@ class ImageUploadService:
         # Resolve hostname to IP address and check if it's private
         try:
             # Use getaddrinfo to resolve hostname (handles both IPv4 and IPv6)
-            addr_info = socket.getaddrinfo(hostname, None, socket.AF_UNSPEC, socket.SOCK_STREAM)
+            addr_info = socket.getaddrinfo(
+                hostname, None, socket.AF_UNSPEC, socket.SOCK_STREAM
+            )
             if not addr_info:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -254,14 +259,20 @@ class ImageUploadService:
             ImageProcessor instance configured for user's mode
         """
         # Get user settings
-        result = await self.db.execute(select(UserSettingsDB).where(UserSettingsDB.user_id == user_id))
+        result = await self.db.execute(
+            select(UserSettingsDB).where(UserSettingsDB.user_id == user_id)
+        )
         user_settings = result.scalars().first()
 
         # Get processing mode (default to 'balanced' if not set)
-        processing_mode = (user_settings.image_processing_mode if user_settings else None) or "balanced"
+        processing_mode = (
+            user_settings.image_processing_mode if user_settings else None
+        ) or "balanced"
 
         # Get configuration for mode
-        mode_config = IMAGE_PROCESSING_MODES.get(processing_mode, IMAGE_PROCESSING_MODES["balanced"])
+        mode_config = IMAGE_PROCESSING_MODES.get(
+            processing_mode, IMAGE_PROCESSING_MODES["balanced"]
+        )
 
         # Create processor with user's settings
         return ImageProcessor(
@@ -271,7 +282,9 @@ class ImageUploadService:
             convert_to_webp=settings.storage.convert_to_webp,
         )
 
-    async def validate_upload(self, file: UploadFile, item_id: str, user_id: str) -> None:
+    async def validate_upload(
+        self, file: UploadFile, item_id: str, user_id: str
+    ) -> None:
         """
         Validate file upload constraints.
 
@@ -319,7 +332,9 @@ class ImageUploadService:
                     detail="Insufficient storage space",
                 )
 
-    async def upload_image(self, file: UploadFile, item_id: str, user_id: str, is_primary: bool = False) -> dict:
+    async def upload_image(
+        self, file: UploadFile, item_id: str, user_id: str, is_primary: bool = False
+    ) -> dict:
         """
         Upload and process image with transaction safety.
 
@@ -624,7 +639,9 @@ class ImageUploadService:
                     "webp": "image/webp",
                     "gif": "image/gif",
                 }
-                detected_mime = format_to_mime.get(format_lower) if format_lower else None
+                detected_mime = (
+                    format_to_mime.get(format_lower) if format_lower else None
+                )
                 if not detected_mime:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
@@ -657,14 +674,39 @@ class ImageUploadService:
 
         # Process image if enabled
         if settings.storage.enable_processing:
-            content, detected_mime, width, height = await processor.process_image(content, detected_mime)
-            processed_size = len(content)
+            try:
+                content, detected_mime, width, height = await processor.process_image(
+                    content, detected_mime
+                )
+                processed_size = len(content)
+            except CorruptedImageError as e:
+                # Handle corrupted/truncated images gracefully
+                logger.warning(f"Corrupted image file uploaded: {e}")
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Image file is corrupted or truncated. Please upload a valid image file.",
+                ) from e
         else:
             # Get dimensions without processing (run in thread pool)
             import asyncio
 
-            img = await asyncio.to_thread(Image.open, BytesIO(content))
-            width, height = img.size
+            try:
+                img = await asyncio.to_thread(Image.open, BytesIO(content))
+                img.load()  # Load image to detect truncation
+                width, height = img.size
+            except OSError as e:
+                # Handle truncated/corrupted images
+                error_msg = str(e).lower()
+                if "truncated" in error_msg or "cannot identify" in error_msg:
+                    logger.warning(f"Corrupted image file uploaded: {e}")
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Image file is corrupted or truncated. Please upload a valid image file.",
+                    ) from e
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid image file. Please upload a valid image file.",
+                ) from e
             processed_size = original_size
 
         # Generate unique filename
@@ -711,7 +753,9 @@ class ImageUploadService:
                     "is_primary": is_primary,
                     "order": await self.repository.get_next_order(item_id),
                     "is_processed": settings.storage.enable_processing,
-                    "original_file_size": (original_size if settings.storage.enable_processing else None),
+                    "original_file_size": (
+                        original_size if settings.storage.enable_processing else None
+                    ),
                 }
             )
 

@@ -13,10 +13,13 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.core.storage.exceptions import CorruptedImageError
 from app.core.storage.factory import get_storage_adapter
 from app.core.storage.image_processor import ImageProcessor
 from app.modules.auth.db_models import UserDB
-from app.modules.gear.catalogue_item_image_repository import CatalogueItemImageRepository
+from app.modules.gear.catalogue_item_image_repository import (
+    CatalogueItemImageRepository,
+)
 from app.modules.gear.db_models import GlobalCatalogueItemDB
 from app.modules.settings.db_models import UserSettingsDB
 
@@ -68,23 +71,37 @@ class CatalogueItemImageUploadService:
         self.repository = CatalogueItemImageRepository(db)
 
     async def _ensure_catalogue_item_exists(self, catalogue_item_id: str) -> None:
-        result = await self.db.execute(select(GlobalCatalogueItemDB).where(GlobalCatalogueItemDB.id == catalogue_item_id))
+        result = await self.db.execute(
+            select(GlobalCatalogueItemDB).where(
+                GlobalCatalogueItemDB.id == catalogue_item_id
+            )
+        )
         item = result.scalars().first()
         if not item:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Catalogue item not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Catalogue item not found"
+            )
 
     def _validate_url_for_ssrf(self, url: str) -> None:
         """Validate URL to prevent SSRF (copy of ImageUploadService logic)."""
         try:
             parsed = urlparse(url)
         except Exception as exc:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid URL format") from exc
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid URL format"
+            ) from exc
 
         if parsed.scheme not in ("http", "https"):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Only HTTP and HTTPS URLs are allowed")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Only HTTP and HTTPS URLs are allowed",
+            )
 
         if not parsed.netloc:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid URL format: missing hostname")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid URL format: missing hostname",
+            )
 
         hostname = parsed.netloc.split(":")[0].lower()
 
@@ -96,12 +113,20 @@ class CatalogueItemImageUploadService:
             "[::1]",
         }
         if hostname in blocked_hostnames:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Localhost URLs are not allowed")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Localhost URLs are not allowed",
+            )
 
         try:
-            addr_info = socket.getaddrinfo(hostname, None, socket.AF_UNSPEC, socket.SOCK_STREAM)
+            addr_info = socket.getaddrinfo(
+                hostname, None, socket.AF_UNSPEC, socket.SOCK_STREAM
+            )
             if not addr_info:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Could not resolve hostname")
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Could not resolve hostname",
+                )
 
             for family, _, _, _, sockaddr in addr_info:
                 if family == socket.AF_INET:
@@ -117,15 +142,30 @@ class CatalogueItemImageUploadService:
                     continue
 
                 if ip.is_private:
-                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Private IP addresses are not allowed")
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Private IP addresses are not allowed",
+                    )
                 if ip.is_link_local:
-                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Link-local addresses are not allowed")
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Link-local addresses are not allowed",
+                    )
                 if ip.is_loopback:
-                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Loopback addresses are not allowed")
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Loopback addresses are not allowed",
+                    )
                 if ip.is_reserved:
-                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Reserved IP addresses are not allowed")
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Reserved IP addresses are not allowed",
+                    )
         except socket.gaierror as exc:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Could not resolve hostname") from exc
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Could not resolve hostname",
+            ) from exc
 
     async def _get_max_file_size_for_user(self, user_id: str) -> int:
         """Reuse feature-limits logic used for item images."""
@@ -155,10 +195,16 @@ class CatalogueItemImageUploadService:
         return settings.storage.max_file_size
 
     async def _get_user_image_processor(self, user_id: str) -> ImageProcessor:
-        result = await self.db.execute(select(UserSettingsDB).where(UserSettingsDB.user_id == user_id))
+        result = await self.db.execute(
+            select(UserSettingsDB).where(UserSettingsDB.user_id == user_id)
+        )
         user_settings = result.scalars().first()
-        processing_mode = (user_settings.image_processing_mode if user_settings else None) or "balanced"
-        mode_config = IMAGE_PROCESSING_MODES.get(processing_mode, IMAGE_PROCESSING_MODES["balanced"])
+        processing_mode = (
+            user_settings.image_processing_mode if user_settings else None
+        ) or "balanced"
+        mode_config = IMAGE_PROCESSING_MODES.get(
+            processing_mode, IMAGE_PROCESSING_MODES["balanced"]
+        )
         return ImageProcessor(
             max_width=mode_config["max_width"],
             max_height=mode_config["max_height"],
@@ -166,7 +212,9 @@ class CatalogueItemImageUploadService:
             convert_to_webp=settings.storage.convert_to_webp,
         )
 
-    async def validate_upload(self, file: UploadFile, catalogue_item_id: str, user_id: str) -> None:
+    async def validate_upload(
+        self, file: UploadFile, catalogue_item_id: str, user_id: str
+    ) -> None:
         await self._ensure_catalogue_item_exists(catalogue_item_id)
 
         file.file.seek(0, 2)
@@ -186,7 +234,9 @@ class CatalogueItemImageUploadService:
                 detail=f"File type {file.content_type} not allowed. Allowed types: {', '.join(self.allowed_mime_types)}",
             )
 
-        existing_count = await self.repository.count_by_catalogue_item(catalogue_item_id)
+        existing_count = await self.repository.count_by_catalogue_item(
+            catalogue_item_id
+        )
         if existing_count >= settings.storage.max_files_per_item:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -196,9 +246,18 @@ class CatalogueItemImageUploadService:
         if settings.storage.type == "local":
             available_space = await self.storage.get_available_space()
             if available_space and available_space < file_size:
-                raise HTTPException(status_code=status.HTTP_507_INSUFFICIENT_STORAGE, detail="Insufficient storage space")
+                raise HTTPException(
+                    status_code=status.HTTP_507_INSUFFICIENT_STORAGE,
+                    detail="Insufficient storage space",
+                )
 
-    async def upload_image(self, file: UploadFile, catalogue_item_id: str, user_id: str, is_primary: bool = False) -> dict:
+    async def upload_image(
+        self,
+        file: UploadFile,
+        catalogue_item_id: str,
+        user_id: str,
+        is_primary: bool = False,
+    ) -> dict:
         content = await file.read()
         original_filename = file.filename or "uploaded-image"
         return await self._process_and_store_image(
@@ -247,17 +306,23 @@ class CatalogueItemImageUploadService:
             )
         return result
 
-    async def reorder_images(self, catalogue_item_id: str, image_orders: list[dict]) -> None:
+    async def reorder_images(
+        self, catalogue_item_id: str, image_orders: list[dict]
+    ) -> None:
         await self._ensure_catalogue_item_exists(catalogue_item_id)
         for order_update in image_orders:
-            await self.repository.update(order_update["id"], {"order": order_update["order"]})
+            await self.repository.update(
+                order_update["id"], {"order": order_update["order"]}
+            )
 
     async def toggle_primary_image(self, catalogue_item_id: str, image_id: str) -> bool:
         await self._ensure_catalogue_item_exists(catalogue_item_id)
 
         image = await self.repository.get_by_id(image_id)
         if not image:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Image not found"
+            )
 
         if image.is_primary:
             await self.repository.update(image_id, {"is_primary": False})
@@ -277,7 +342,9 @@ class CatalogueItemImageUploadService:
     ) -> dict:
         await self._ensure_catalogue_item_exists(catalogue_item_id)
 
-        existing_count = await self.repository.count_by_catalogue_item(catalogue_item_id)
+        existing_count = await self.repository.count_by_catalogue_item(
+            catalogue_item_id
+        )
         if existing_count >= settings.storage.max_files_per_item:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -299,7 +366,9 @@ class CatalogueItemImageUploadService:
         if is_primary:
             await self.repository.unset_primary_for_catalogue_item(catalogue_item_id)
         else:
-            existing_primary = await self.repository.get_primary_image(catalogue_item_id)
+            existing_primary = await self.repository.get_primary_image(
+                catalogue_item_id
+            )
             if not existing_primary:
                 is_primary = True
 
@@ -365,29 +434,68 @@ class CatalogueItemImageUploadService:
                     "webp": "image/webp",
                     "gif": "image/gif",
                 }
-                detected_mime = format_to_mime.get(format_lower) if format_lower else None
+                detected_mime = (
+                    format_to_mime.get(format_lower) if format_lower else None
+                )
                 if not detected_mime:
-                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to detect file type")
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Failed to detect file type",
+                    )
             except HTTPException:
                 raise
             except Exception as exc:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to detect file type") from exc
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Failed to detect file type",
+                ) from exc
 
         if detected_mime not in self.allowed_mime_types:
-            raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail=f"Invalid file type. Detected: {detected_mime}")
+            raise HTTPException(
+                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+                detail=f"Invalid file type. Detected: {detected_mime}",
+            )
 
         processor = await self._get_user_image_processor(user_id)
         if not await processor.validate_image(content):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or corrupted image file")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid or corrupted image file",
+            )
 
         original_size = len(content)
 
         if settings.storage.enable_processing:
-            content, detected_mime, width, height = await processor.process_image(content, detected_mime)
-            processed_size = len(content)
+            try:
+                content, detected_mime, width, height = await processor.process_image(
+                    content, detected_mime
+                )
+                processed_size = len(content)
+            except CorruptedImageError as e:
+                # Handle corrupted/truncated images gracefully
+                logger.warning(f"Corrupted image file uploaded: {e}")
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Image file is corrupted or truncated. Please upload a valid image file.",
+                ) from e
         else:
-            img = Image.open(BytesIO(content))
-            width, height = img.size
+            try:
+                img = Image.open(BytesIO(content))
+                img.load()  # Load image to detect truncation
+                width, height = img.size
+            except OSError as e:
+                # Handle truncated/corrupted images
+                error_msg = str(e).lower()
+                if "truncated" in error_msg or "cannot identify" in error_msg:
+                    logger.warning(f"Corrupted image file uploaded: {e}")
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Image file is corrupted or truncated. Please upload a valid image file.",
+                    ) from e
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid image file. Please upload a valid image file.",
+                ) from e
             processed_size = original_size
 
         file_ext = MIME_TO_EXTENSION.get(detected_mime, ".jpg")
@@ -408,9 +516,13 @@ class CatalogueItemImageUploadService:
             )
 
             if is_primary:
-                await self.repository.unset_primary_for_catalogue_item(catalogue_item_id)
+                await self.repository.unset_primary_for_catalogue_item(
+                    catalogue_item_id
+                )
             else:
-                existing_primary = await self.repository.get_primary_image(catalogue_item_id)
+                existing_primary = await self.repository.get_primary_image(
+                    catalogue_item_id
+                )
                 if not existing_primary:
                     is_primary = True
 
@@ -428,7 +540,9 @@ class CatalogueItemImageUploadService:
                     "is_primary": is_primary,
                     "order": await self.repository.get_next_order(catalogue_item_id),
                     "is_processed": settings.storage.enable_processing,
-                    "original_file_size": (original_size if settings.storage.enable_processing else None),
+                    "original_file_size": (
+                        original_size if settings.storage.enable_processing else None
+                    ),
                     "external_url": None,
                 }
             )
@@ -462,4 +576,7 @@ class CatalogueItemImageUploadService:
                     await self.storage.delete(stored_path)
                 except Exception:
                     pass
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to upload image") from exc
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to upload image",
+            ) from exc
