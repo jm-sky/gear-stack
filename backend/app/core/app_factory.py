@@ -24,6 +24,36 @@ def init_sentry() -> None:
         from sentry_sdk.integrations.logging import LoggingIntegration
         from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 
+        def before_send(event: dict, hint: dict) -> dict | None:
+            """Filter out expected errors that shouldn't be reported to Sentry."""
+            # Get the exception from hint
+            exc_info = hint.get("exc_info")
+            if exc_info:
+                exc_type, exc_value, _ = exc_info
+
+                # Filter out expected authentication errors
+                from app.modules.auth.exceptions import (
+                    ExpiredTokenError,
+                    InvalidCredentialsError,
+                    InvalidTokenError,
+                )
+
+                # Don't send expected auth errors to Sentry
+                # These are normal business logic errors (expired tokens, invalid credentials)
+                if isinstance(exc_value, (ExpiredTokenError, InvalidTokenError, InvalidCredentialsError)):
+                    return None
+
+            # Check exception type from event data (fallback for cases where exc_info might not be available)
+            if event.get("exception"):
+                values = event["exception"].get("values", [])
+                for value in values:
+                    exc_type_name = value.get("type", "")
+                    # Filter out JWT expiration and invalid token errors
+                    if exc_type_name in ("ExpiredTokenError", "InvalidTokenError", "InvalidCredentialsError"):
+                        return None
+
+            return event
+
         sentry_sdk.init(
             dsn=settings.sentry.dsn,
             environment=settings.sentry.environment or settings.app.environment.value,
@@ -37,7 +67,7 @@ def init_sentry() -> None:
             ],
             # Set user context in middleware or route handlers
             send_default_pii=False,  # Don't send PII by default
-            before_send=lambda event, hint: event,  # Can filter events here
+            before_send=before_send,  # Filter out expected errors
         )
     except ImportError:
         import logging
@@ -151,10 +181,28 @@ def register_exception_handlers(app: FastAPI) -> None:
         import logging
 
         logger = logging.getLogger(__name__)
-        logger.exception("Unhandled exception occurred")
+
+        # Skip Sentry reporting for expected authentication errors
+        from app.modules.auth.exceptions import (
+            ExpiredTokenError,
+            InvalidCredentialsError,
+            InvalidTokenError,
+        )
+
+        # These are expected business logic errors, not bugs
+        is_expected_auth_error = isinstance(
+            exc, (ExpiredTokenError, InvalidTokenError, InvalidCredentialsError)
+        )
+
+        if not is_expected_auth_error:
+            logger.exception("Unhandled exception occurred")
+        else:
+            # Log expected auth errors at debug level (not error)
+            logger.debug(f"Expected authentication error: {type(exc).__name__}: {exc}")
 
         # Sentry will automatically capture exceptions, but we can add context
-        if settings.sentry.enabled:
+        # Skip Sentry for expected auth errors (they're filtered in before_send, but avoid unnecessary processing)
+        if settings.sentry.enabled and not is_expected_auth_error:
             try:
                 import sentry_sdk
 
