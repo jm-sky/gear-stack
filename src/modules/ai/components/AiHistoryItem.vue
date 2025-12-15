@@ -26,13 +26,35 @@ const formattedDate = computed(() => {
   return date.toLocaleString()
 })
 
-const preview = computed(() => {
+const promptTitle = computed(() => {
   const prompt = props.item.finalPrompt
   if (!prompt) return t('ai.history.noPreview')
 
-  return prompt.length > 150
-    ? prompt.substring(0, 150) + '...'
-    : prompt
+  // Try to extract first sentence (up to 100 chars)
+  const firstSentenceMatch = prompt.match(/^[^.!?\n]{1,100}[.!?]?/)
+  if (firstSentenceMatch) {
+    const firstSentence = firstSentenceMatch[0].trim()
+    if (firstSentence.length <= 100) {
+      return firstSentence
+    }
+  }
+
+  // Fallback to first 100 chars
+  return prompt.length > 100
+    ? prompt.substring(0, 100).trim() + '...'
+    : prompt.trim()
+})
+
+const promptPreview = computed(() => {
+  const prompt = props.item.finalPrompt
+  if (!prompt) return null
+
+  // Show more of the prompt if it's longer than the title
+  if (prompt.length > 100) {
+    return prompt.substring(100).trim()
+  }
+
+  return null
 })
 
 const handleRestore = (): void => {
@@ -53,32 +75,39 @@ const handleViewDetails = (): void => {
     <CardHeader>
       <div class="flex items-start justify-between gap-2">
         <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-2 mb-2">
-            <MessageSquare class="size-4 text-muted-foreground shrink-0" />
-            <CardTitle class="text-base truncate">
-              {{ item.model }}
-            </CardTitle>
-            <Badge v-if="item.operationType" variant="outline" class="text-xs">
-              {{ t(`ai.history.operationTypes.${item.operationType}`) }}
-            </Badge>
-          </div>
-          <CardDescription class="text-xs text-muted-foreground">
-            <div class="flex items-center gap-2 flex-wrap">
-              <span>{{ item.provider }}</span>
-              <span v-if="item.durationMs" class="flex items-center gap-1">
-                <Clock class="size-3" />
-                {{ item.durationMs }}ms
-              </span>
+          <div class="flex items-start gap-2 mb-2">
+            <MessageSquare class="size-4 text-muted-foreground shrink-0 mt-0.5" />
+            <div class="flex-1 min-w-0">
+              <CardTitle class="text-base font-semibold line-clamp-2 mb-1">
+                {{ promptTitle }}
+              </CardTitle>
+              <CardDescription class="text-xs text-muted-foreground">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span>{{ item.model }}</span>
+                  <span class="text-muted-foreground/70">•</span>
+                  <span>{{ item.provider }}</span>
+                  <template v-if="item.durationMs">
+                    <span class="text-muted-foreground/70">•</span>
+                    <span class="flex items-center gap-1">
+                      <Clock class="size-3" />
+                      {{ item.durationMs }}ms
+                    </span>
+                  </template>
+                  <Badge v-if="item.operationType" variant="outline" class="text-xs">
+                    {{ t(`ai.history.operationTypes.${item.operationType}`) }}
+                  </Badge>
+                </div>
+              </CardDescription>
             </div>
-          </CardDescription>
+          </div>
         </div>
       </div>
     </CardHeader>
 
     <CardContent class="pt-0 space-y-3">
-      <!-- Preview -->
-      <div class="text-sm text-muted-foreground line-clamp-2">
-        {{ preview }}
+      <!-- Extended Preview (if prompt is longer than title) -->
+      <div v-if="promptPreview" class="text-sm text-muted-foreground line-clamp-2">
+        {{ promptPreview }}
       </div>
 
       <!-- Cost and Tokens -->

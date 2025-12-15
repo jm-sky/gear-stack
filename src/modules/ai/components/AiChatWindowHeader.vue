@@ -1,9 +1,17 @@
 <script setup lang="ts">
-import { History, HourglassIcon, Settings, Trash2, X } from 'lucide-vue-next'
+import { History, HourglassIcon, MoreVertical, Settings, Trash2, X } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
 import DialogTitle from '@/components/ui/dialog/DialogTitle.vue'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import DropdownMenuItemLink from '@/components/ui/dropdown-menu/DropdownMenuItemLink.vue'
 import { useAiChat } from '../composables/useAiChat'
 import { AiRoutePath } from '../routes'
 import AiModelSelector from './AiModelSelector.vue'
@@ -25,6 +33,7 @@ const emit = defineEmits<{
       {{ t('ai.chat.title') }}
     </h2>
     <div class="flex flex-col md:flex-row items-center gap-2 -my-1">
+      <!-- Desktop actions -->
       <div class="hidden md:flex flex-row items-center gap-2">
         <AiModelSelector />
         <Button
@@ -61,6 +70,44 @@ const emit = defineEmits<{
           <HourglassIcon class="size-4" />
         </ButtonLink>
       </div>
+
+      <!-- Mobile menu -->
+      <div class="flex md:hidden flex-row items-center gap-2">
+        <div class="hidden sm:block">
+          <AiModelSelector />
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger as-child>
+            <Button
+              variant="ghost"
+              size="sm"
+            >
+              <MoreVertical class="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem @click="showContextConfig = !showContextConfig">
+              <Settings class="size-4 mr-2" />
+              {{ t('ai.chat.context') }}
+            </DropdownMenuItem>
+            <DropdownMenuItem @click="clearMessages">
+              <Trash2 class="size-4 mr-2" />
+              {{ t('ai.chat.clearMessages') }}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem @click="showHistorySidebar = true">
+              <History class="size-4 mr-2" />
+              {{ t('ai.chat.history.openHistory') }}
+            </DropdownMenuItem>
+            <DropdownMenuItemLink :to="AiRoutePath.History">
+              <HourglassIcon class="size-4 mr-2" />
+              {{ t('ai.history.title') }}
+            </DropdownMenuItemLink>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <!-- Close button -->
       <Button
         v-tooltip.bottom="t('common.close')"
         variant="ghost"
