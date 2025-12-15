@@ -21,6 +21,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.36.0] - 2025-12-15
+
+### Added
+- **AI Chat Enhancements**: Extended AI chat functionality with improved history management
+  - Added `container_ids` field to AI history model for efficient filtering
+  - Database migration to populate `container_ids` from existing history entries
+  - Chat from Containers List page with automatic inclusion of filtered containers
+  - Resume chat functionality from AI History Page with automatic navigation
+  - Chat history sidebar panel using Sheet component (accessible from chat window header)
+  - Filter history by `container_ids` and `operationType` in sidebar
+  - Automatic navigation logic: single container → Container Detail, multiple/no containers → Containers List
+  - Query parameter `restoreHistoryId` support for restoring conversations
+- **Unit Tests**: Added comprehensive test coverage for new AI chat features
+  - Tests for `useAiHistory` composable with container filtering
+  - Tests for history sidebar filtering logic
+  - Tests for navigation logic based on container IDs
+
+### Changed
+- **AI History**: Enhanced history model to include `container_ids` for better filtering and organization
+- **AI Chat Window**: Added history sidebar panel with Sheet component integration
+- **AI History Page**: Added "Resume Chat" button with smart navigation based on container context
+
+### Fixed
+- Fixed TypeScript type definitions for `IAiHistoryDetail` to include all backend fields
+- Fixed undefined `containerIds` handling in history filtering logic
+
+---
+
 ## [2.35.0] - 2025-12-12
 
 ### Added

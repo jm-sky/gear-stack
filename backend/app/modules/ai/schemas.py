@@ -127,6 +127,7 @@ class AiHistoryItem(BaseModel):
     model: str = Field(..., description="Model used")
     total_tokens: int = Field(..., description="Total tokens used", serialization_alias="totalTokens")
     cost_usd: float | None = Field(None, description="Cost in USD", serialization_alias="costUsd")
+    container_ids: list[str] | None = Field(None, description="Container IDs associated with this history entry", serialization_alias="containerIds")
     created_at: datetime = Field(..., description="Creation timestamp", serialization_alias="createdAt")
 
     model_config = {"populate_by_name": True}
@@ -146,6 +147,7 @@ class AiHistoryDetail(BaseModel):
     input_data: dict[str, Any] = Field(..., description="Input data", serialization_alias="inputData")
     output_data: dict[str, Any] = Field(..., description="Output data", serialization_alias="outputData")
     metadata: dict[str, Any] | None = Field(None, description="Additional metadata")
+    container_ids: list[str] | None = Field(None, description="Container IDs associated with this history entry", serialization_alias="containerIds")
     created_at: datetime = Field(..., description="Creation timestamp", serialization_alias="createdAt")
 
     model_config = {"populate_by_name": True}

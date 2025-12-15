@@ -110,11 +110,10 @@ export function useAiChat() {
       // Clear current messages
       clearMessages()
 
-      // Try to get full history detail to get responsePreview
-      let responsePreview: string | undefined
+      // Try to get full history detail to get complete data
+      let detail: import('../types/history').IAiHistoryDetail | null = null
       try {
-        const detail = await aiApiService.getHistoryDetail(historyItem.id)
-        responsePreview = detail.responsePreview
+        detail = await aiApiService.getHistoryDetail(historyItem.id)
       } catch (error) {
         // If detail fetch fails, continue with basic restoration
         console.warn('Failed to fetch history detail:', error)
@@ -123,24 +122,26 @@ export function useAiChat() {
       // Reconstruct messages from history
       const restoredMessages: IAiChatMessage[] = []
 
-      // Extract user message from finalPrompt
-      // Note: This is simplified - finalPrompt contains the full prompt with context
-      // In a real scenario, we'd need to parse the prompt to extract individual messages
-      // For now, we'll use the finalPrompt as the last user message
-      if (historyItem.finalPrompt) {
+      // Extract user message from finalPrompt or inputData.message
+      const userMessageContent = historyItem.finalPrompt
+        || (detail?.inputData && typeof detail.inputData.message === 'string' ? detail.inputData.message : '')
+      
+      if (userMessageContent) {
         restoredMessages.push({
           id: `user-restored-${historyItem.id}`,
           role: 'user',
-          content: historyItem.finalPrompt,
+          content: userMessageContent,
           created_at: historyItem.createdAt,
         })
       }
 
       // Add assistant response
-      const assistantContent = responsePreview
+      const assistantContent = (detail?.outputData && typeof detail.outputData.message === 'string'
+        ? detail.outputData.message
+        : null)
         || (historyItem.responseData && typeof historyItem.responseData.message === 'string'
           ? historyItem.responseData.message
-          : JSON.stringify(historyItem.responseData))
+          : JSON.stringify(historyItem.responseData || {}))
 
       if (assistantContent) {
         restoredMessages.push({

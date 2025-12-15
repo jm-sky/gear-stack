@@ -94,6 +94,13 @@ class ChatService:
         # Calculate cost
         cost = calculate_cost(model, response.prompt_tokens, response.completion_tokens)
 
+        # Extract container_ids from context keys (context is a dict where keys are container IDs)
+        container_ids: list[str] | None = None
+        if request.context and isinstance(request.context, dict):
+            container_ids = [str(key) for key in request.context.keys() if key]
+            if not container_ids:
+                container_ids = None
+
         # Save to history
         await self.history_repo.create(
             user_id=user_id,
@@ -105,6 +112,7 @@ class ChatService:
             cost_usd=cost,
             input_data={"message": request.message, "context": request.context},
             output_data={"message": cleaned_message, "structured_output": structured.model_dump() if structured else None},
+            container_ids=container_ids,
         )
 
         # Cache result if enabled

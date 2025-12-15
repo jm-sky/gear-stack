@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { HourglassIcon, Settings, Trash2, X } from 'lucide-vue-next'
+import { History, HourglassIcon, Settings, Trash2, X } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
@@ -12,6 +12,7 @@ const { t } = useI18n()
 const { clearMessages } = useAiChat()
 
 const showContextConfig = defineModel<boolean>('showContextConfig', { required: true })
+const showHistorySidebar = defineModel<boolean>('showHistorySidebar', { required: true })
 
 const emit = defineEmits<{
   close: []
@@ -42,6 +43,14 @@ const emit = defineEmits<{
           @click="clearMessages"
         >
           <Trash2 class="size-4" />
+        </Button>
+        <Button
+          v-tooltip.bottom="t('ai.chat.history.openHistory')"
+          variant="ghost"
+          size="sm"
+          @click="showHistorySidebar = true"
+        >
+          <History class="size-4" />
         </Button>
         <ButtonLink
           v-tooltip.bottom="t('ai.history.title')"

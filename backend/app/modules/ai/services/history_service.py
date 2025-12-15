@@ -30,6 +30,7 @@ class HistoryService:
         input_data: dict,
         output_data: dict,
         metadata: dict | None = None,
+        container_ids: list[str] | None = None,
     ) -> AIHistoryDB:
         """Create new history entry.
 
@@ -44,6 +45,7 @@ class HistoryService:
             input_data: Input data
             output_data: Output data
             metadata: Optional metadata
+            container_ids: Optional list of container IDs
 
         Returns:
             Created history entry
@@ -59,6 +61,7 @@ class HistoryService:
             input_data=input_data,
             output_data=output_data,
             metadata=metadata,
+            container_ids=container_ids,
         )
 
     async def get_history_list(self, user_id: str, limit: int = 50, offset: int = 0, operation_type: str | None = None) -> AiHistoryListResponse:
@@ -133,6 +136,7 @@ class HistoryService:
             model=entry.model,
             total_tokens=entry.total_tokens,
             cost_usd=entry.cost_usd,
+            container_ids=entry.container_ids,
             created_at=entry.created_at,
         )
 
@@ -157,5 +161,6 @@ class HistoryService:
             input_data=entry.input_data,
             output_data=entry.output_data,
             metadata=entry.metadata_,
+            container_ids=entry.container_ids,
             created_at=entry.created_at,
         )

@@ -113,6 +113,17 @@ const importDialogOpen = ref(false)
 const isExportToPromptDialogOpen = ref(false)
 const isExportToCSVDialogOpen = ref(false)
 const isAiDialogOpen = ref(false)
+const restoreHistoryId = ref<string | null>(null)
+
+// Watch for restoreHistoryId query param
+watch(() => route.query.restoreHistoryId, (historyId) => {
+  if (typeof historyId === 'string' && historyId) {
+    restoreHistoryId.value = historyId
+    isAiDialogOpen.value = true
+    // Remove query param from URL
+    router.replace({ query: { ...route.query, restoreHistoryId: undefined } })
+  }
+}, { immediate: true })
 
 // Check for import query parameter and open dialog, and load containers from API
 onMounted(async () => {
@@ -379,6 +390,8 @@ const handleAiChat = () => {
     <AiChatDialog
       v-if="canUseAi"
       v-model:open="isAiDialogOpen"
+      :context="{ container_ids: filteredContainers.map(c => c.id) }"
+      :restore-history-id="restoreHistoryId"
     />
   </AuthenticatedLayout>
 </template>

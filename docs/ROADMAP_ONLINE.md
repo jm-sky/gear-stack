@@ -614,6 +614,11 @@ System śledzenia wyświetleń kontenerów (publicznych i udostępnionych) z ~~d
   - 🔄 Przywracanie konwersacji nie działa - do wyjaśnienia i naprawy
   - 🔄 Sprawdzenie innych funkcjonalności strony (filtrowanie, wyszukiwanie, paginacja)
 - 🔄 Mechanizm limitu historii (domyślnie 100 wpisów) + automatyczne usuwanie najstarszych - planowane
+- ✅ **Rozszerzenie funkcjonalności czatu AI** - zaimplementowane - [FEATURE-AI-CHAT-ENHANCEMENTS.md](../features/FEATURE-AI-CHAT-ENHANCEMENTS.md)
+  - ✅ Dodanie pola container_ids do modelu historii
+  - ✅ Czat z poziomu Listy Kontenerów z załączaniem przefiltrowanych kontenerów
+  - ✅ Resume chat z AI History Page z automatycznym przekierowaniem
+  - ✅ Panel historii w oknie czatu używając Sheet component
 
 **Cache:**
 - ✅ Cache dla powtarzalnych operacji (klasyfikacje, embeddingi) - zaimplementowane (PostgreSQL cache)
