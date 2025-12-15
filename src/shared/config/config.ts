@@ -34,6 +34,8 @@ export const config = {
     companyName: import.meta.env.VITE_COMPANY_NAME ?? 'DEV Made IT',
     companyWebsite: import.meta.env.VITE_COMPANY_WEBSITE ?? 'https://dev-made.it',
     email: import.meta.env.VITE_CONTACT_EMAIL ?? 'contact@dev-made.it',
+    officialCompanyName: import.meta.env.VITE_OFFICIAL_COMPANY_NAME ?? 'SAVA GROUP sp. z o.o.',
+    officialCompanyWebsite: import.meta.env.VITE_OFFICIAL_COMPANY_WEBSITE ?? 'https://sava-group.pl',
   },
   backend: {
     enabled: import.meta.env.VITE_ENABLE_BACKEND === 'true',
