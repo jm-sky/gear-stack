@@ -10,19 +10,22 @@ import { useBackend } from '@/shared/composables/useBackend'
 import { usePageTitle } from '@/shared/composables/usePageTitle'
 import { config } from '@/shared/config/config'
 import type { IGearItem } from '../types/gear.types'
+import type { IGearItemV2, TContainerColor } from '../types/gear.types.v2'
 import ContainerHeader from '../components/ContainerHeader.vue'
 import ContainerItemImagesGallery from '../components/ContainerItemImagesGallery.vue'
 import ContainerRatingSection from '../components/ContainerRatingSection.vue'
 import SortConfirmationAlert from '../components/SortConfirmationAlert.vue'
 import { useCatalogue } from '../composables/catalogue/useCatalogue'
-import { useContainer } from '../composables/useContainer'
+import { useContainerV2 } from '../composables/useContainerV2'
 import { useGear } from '../composables/useGear'
+import { useGearV2 } from '../composables/useGearV2'
 import { useItemsParamRecognition } from '../composables/useItemsParamRecognition'
 import { useJsonImportExport } from '../composables/useJsonImportExport'
 import { useSearchPaginationUrl } from '../composables/useSearchPaginationUrl'
 import { GearRoutePath } from '../routes'
 import { gearItemService } from '../services/gearItemService'
 import { useGearStore } from '../store/useGearStore'
+import { useGearStoreV2 } from '../store/useGearStoreV2'
 import { COLOR_BORDER_CLASSES, COLOR_TEXT_CLASSES } from '../utils/containerColors'
 import { createNavigationQuery } from '../utils/navigationParams'
 
@@ -44,9 +47,11 @@ const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 const store = useGearStore()
+const storeV2 = useGearStoreV2()
 const { shouldUseAPI } = useBackend()
-const { container } = useContainer()
+const { container } = useContainerV2()
 const { deleteItem, updateItem, updateContainer, createItem, getContainerById, moveItem } = useGear()
+const { updateItem: updateItemV2, deleteItem: deleteItemV2, createItem: createItemV2, moveItem: moveItemV2 } = useGearV2()
 const { user, isAuthenticated } = useAuth()
 const { canUseAi } = useAi()
 const { setTitle } = usePageTitle()
@@ -57,7 +62,8 @@ const containerId = route.params.id as string
 const cardClass = computed(() => {
   if (!container.value?.color) return ''
   if (container.value.color === 'default') return ''
-  return `${COLOR_TEXT_CLASSES[container.value.color]} border ${COLOR_BORDER_CLASSES[container.value.color]} outline-2 outline-current/15`
+  const color = container.value.color as TContainerColor
+  return `${COLOR_TEXT_CLASSES[color]} border ${COLOR_BORDER_CLASSES[color]} outline-2 outline-current/15`
 })
 
 // Set dynamic page title
@@ -109,8 +115,13 @@ watch(() => route.query.restoreHistoryId, (historyId) => {
 
 // File operations handled in handleImport
 
-// Items
-const items = computed<IGearItem[]>(() => container.value?.items ?? [])
+// Items - use V2 store to get children, but still return V1 types for now (ItemsTable uses V1)
+const items = computed<IGearItem[]>(() => {
+  if (!container.value) return []
+  const children = storeV2.getChildrenOfItem(container.value.id)
+  // TODO: ItemsTable still uses V1 types - will be updated in next phase
+  return children.filter(child => child.itemType === 'item') as any
+})
 
 // Search and pagination state synchronized with URL
 const { search, page, pageSize } = useSearchPaginationUrl({
@@ -333,7 +344,8 @@ const handleExportToCSV = () => {
   isExportToCSVDialogOpen.value = true
 }
 
-const { handleRecognizeParameters, handleRecognizeParametersAll } = useItemsParamRecognition(container, items)
+// TODO: useItemsParamRecognition still uses V1 types
+const { handleRecognizeParameters, handleRecognizeParametersAll } = useItemsParamRecognition(container as any, items)
 
 const handleManageShareTokens = () => {
   router.push(GearRoutePath.ContainerShareTokensById(containerId))
@@ -350,6 +362,10 @@ const handleRefresh = async () => {
   }
 }
 
+// TODO: Remove these wrappers once all child components are migrated to V2
+// Temporary wrapper for components still using V1 types
+const containerV1 = computed(() => container.value as any)
+
 // Redirect if container not found
 if (!container.value) {
   router.push(GearRoutePath.Containers)
@@ -359,8 +375,9 @@ if (!container.value) {
 <template>
   <AuthenticatedLayout :card-class="cardClass">
     <div v-if="container" class="space-y-6 w-full max-w-full text-card-foreground">
+      <!-- TODO: ContainerHeader still uses V1 types -->
       <ContainerHeader
-        :container="container"
+        :container="containerV1"
         @export="handleJsonExport"
         @import="handleJsonImport"
         @add-container="handleAddContainer"
@@ -408,10 +425,12 @@ if (!container.value) {
       />
 
       <!-- Category Pie Chart -->
-      <CategoryPieChart :container="container" />
+      <!-- TODO: CategoryPieChart still uses V1 types -->
+      <CategoryPieChart :container="containerV1" />
 
       <!-- Rating Section -->
-      <ContainerRatingSection v-if="container" :container="container" />
+      <!-- TODO: ContainerRatingSection still uses V1 types -->
+      <ContainerRatingSection v-if="container" :container="containerV1" />
 
       <!-- Add Nested Container Dialog -->
       <AddNestedContainerDialog
