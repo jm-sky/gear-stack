@@ -63,28 +63,28 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 - ✅ Aktualizacja walidacji (zod schemas) - dodanie oz i lb do enum
 - ✅ Wszystkie wyświetlane wagi będą konwertowane do preferowanej jednostki (w tym oz/lb)
 
-### 🔄 Automatyczny wybór jednostki wagi (auto) i formatowanie z separatorem tysięcznym
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+### ✅ Automatyczny wybór jednostki wagi (auto) i formatowanie z separatorem tysięcznym
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Small
 
-- 🔄 Dodanie opcji `auto` dla preferowanej jednostki wagi w ustawieniach
-- 🔄 Logika automatycznego wyboru jednostki:
+- ✅ Dodanie opcji `auto` dla preferowanej jednostki wagi w ustawieniach (`auto-g-kg`, `auto-oz-lb`)
+- ✅ Logika automatycznego wyboru jednostki:
   - Jeśli waga < 1 kg → wyświetlanie w `g` (dla systemu metrycznego) lub `oz` (dla systemu imperialnego)
   - Jeśli waga ≥ 1 kg → wyświetlanie w `kg` (dla systemu metrycznego) lub `lb` (dla systemu imperialnego)
-- 🔄 Obsługa dwóch wariantów auto:
+- ✅ Obsługa dwóch wariantów auto:
   - `auto g/kg` - automatyczny wybór między gramami a kilogramami
   - `auto oz/lb` - automatyczny wybór między uncjami a funtami
-- 🔄 Formatowanie liczby z separatorem tysięcznym:
+- ✅ Formatowanie liczby z separatorem tysięcznym:
   - Dodanie separatorów tysięcy w wyświetlanych wagach (np. `1 500 g` zamiast `1500 g`)
   - Uwzględnienie lokalizacji użytkownika (separator zależny od ustawień języka)
-- 🔄 Aktualizacja funkcji `formatWeight.ts` - dodanie logiki auto i formatowania
-- 🔄 Aktualizacja ustawień użytkownika - dodanie opcji `auto g/kg` i `auto oz/lb`
-- 🔄 Aktualizacja tłumaczeń (PL/EN) dla nowych opcji
-- 🔄 **Backend/API wymagania** (zobacz [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-automatyczny-wybór-jednostki-wagi-auto-i-formatowanie)):
-  - 🔄 Rozszerzenie typu `TGearWeightUnit` w backendzie o `'auto_g_kg'` i `'auto_oz_lb'`
-  - 🔄 Aktualizacja schematów walidacji (Pydantic) w backendzie - dodanie nowych wartości do enum
-  - 🔄 Aktualizacja modelu `GearSettingsDB` w bazie danych - obsługa nowych wartości jednostki wagi
-  - 🔄 Aktualizacja endpointów API (`/me/gear-settings`) - walidacja i zapis nowych opcji
-  - 🔄 Migracja bazy danych (jeśli wymagana) - rozszerzenie kolumny jednostki wagi
+- ✅ Aktualizacja funkcji `formatWeight.ts` - dodanie logiki auto i formatowania
+- ✅ Aktualizacja ustawień użytkownika - dodanie opcji `auto g/kg` i `auto oz/lb`
+- ✅ Aktualizacja tłumaczeń (PL/EN) dla nowych opcji
+- ✅ **Backend/API wymagania** (zobacz [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-automatyczny-wybór-jednostki-wagi-auto-i-formatowanie)):
+  - ✅ Rozszerzenie typu `TGearWeightUnit` w backendzie o `'auto-g-kg'` i `'auto-oz-lb'`
+  - ✅ Aktualizacja schematów walidacji (Pydantic) w backendzie - dodanie nowych wartości do enum
+  - ✅ Aktualizacja modelu `GearSettingsDB` w bazie danych - obsługa nowych wartości jednostki wagi
+  - ✅ Aktualizacja endpointów API (`/me/gear-settings`) - walidacja i zapis nowych opcji
+  - ✅ Migracja bazy danych – zwiększenie długości kolumny `preferred_weight_unit` do VARCHAR(10)
 
 ### Przeniesienie ustawiania atrybutu lang do inicjalizacji aplikacji
 **Status:** ✅ Completed | **Priority:** Low | **Complexity:** Small

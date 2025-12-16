@@ -11,6 +11,7 @@ import CatalogueItemImageGallery from '@/modules/gear/components/catalogue/Catal
 import { useCatalogue } from '@/modules/gear/composables/catalogue/useCatalogue'
 import { GearRoutePath } from '@/modules/gear/routes'
 import { type CatalogueItemFormData, catalogueItemSchema } from '@/modules/gear/utils/catalogueValidation'
+import { toBasicWeightUnit } from '@/modules/gear/utils/weightUnits'
 import { useHandleError } from '@/shared/composables/useHandleError'
 import { usePageTitle } from '@/shared/composables/usePageTitle'
 import type { IGlobalCatalogueItemCreate, IGlobalCatalogueItemUpdate } from '@/modules/gear/types/catalogue.types'
@@ -54,7 +55,7 @@ const getInitialValues = (): CatalogueItemFormData => {
       name: item.value.name,
       category: item.value.category,
       weight: item.value.weight,
-      weightUnit: item.value.weightUnit,
+      weightUnit: toBasicWeightUnit(item.value.weightUnit),
       description: item.value.description ?? '',
       brand: item.value.brand ?? '',
       model: item.value.model ?? '',

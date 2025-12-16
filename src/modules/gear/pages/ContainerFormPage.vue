@@ -21,6 +21,7 @@ import { recognizeContainerType } from '../utils/containerTypeRecognition'
 import { createNavigationQuery, getFrom } from '../utils/navigationParams'
 import { recognizeParameters } from '../utils/parameterRecognition'
 import { type ContainerFormData, containerSchema } from '../utils/validation'
+import { toBasicWeightUnit } from '../utils/weightUnits'
 
 const router = useRouter()
 const route = useRoute()
@@ -55,9 +56,9 @@ const getInitialValues = (): ContainerFormData => {
       brand: container.value.brand ?? '',
       price: container.value.price ?? undefined,
       weight: container.value.weight ?? undefined,
-      weightUnit: container.value.weightUnit ?? 'kg',
+      weightUnit: toBasicWeightUnit(container.value.weightUnit) ?? 'kg',
       maxWeight: container.value.maxWeight ?? undefined,
-      maxWeightUnit: container.value.maxWeightUnit ?? 'kg',
+      maxWeightUnit: toBasicWeightUnit(container.value.maxWeightUnit) ?? 'kg',
       url: container.value.url ?? '',
       showItemImages: container.value.showItemImages ?? false,
     }

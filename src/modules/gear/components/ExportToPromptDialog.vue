@@ -36,7 +36,7 @@ const props = defineProps<{
   containers?: IGearContainer[]
 }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const store = useGearStore()
 const { defaultCurrency } = useGearSettings()
 const copied = ref(false)
@@ -82,6 +82,7 @@ const markdown = computed<string>(() => {
     showNotes: showNotes.value,
     descriptionFormat: descriptionFormat.value,
     defaultCurrency: defaultCurrency.value,
+    locale: locale.value,
   }
 
   if (props.container) {

@@ -29,6 +29,7 @@ import { recognizeCategory } from '../utils/categoryRecognition'
 import { getDefaultItemValues } from '../utils/defaultValues'
 import { recognizeParameters } from '../utils/parameterRecognition'
 import { type ItemFormData, itemSchema } from '../utils/validation'
+import { toBasicWeightUnit } from '../utils/weightUnits'
 
 const router = useRouter()
 const route = useRoute()
@@ -75,7 +76,7 @@ const getInitialValues = (): ItemFormData => {
       category: item.value.category,
       quantity: item.value.quantity,
       weight: item.value.weight,
-      weightUnit: item.value.weightUnit ?? config.defaults.preferredWeightUnit,
+      weightUnit: toBasicWeightUnit(item.value.weightUnit) ?? config.defaults.preferredWeightUnit,
       notes: item.value.notes ?? '',
       expirationDate: item.value.expirationDate ?? '',
       priority: item.value.priority,
@@ -145,7 +146,7 @@ const loadItem = async () => {
         category: loadedItem.category,
         quantity: loadedItem.quantity,
         weight: loadedItem.weight,
-        weightUnit: loadedItem.weightUnit ?? 'g',
+        weightUnit: toBasicWeightUnit(loadedItem.weightUnit) ?? 'g',
         notes: loadedItem.notes ?? '',
         expirationDate: loadedItem.expirationDate ?? '',
         priority: loadedItem.priority,
@@ -206,7 +207,7 @@ const handleCatalogItemSelect = (selectedItem: IItemWithContainer) => {
   setFieldValue('category', selectedItem.category)
   setFieldValue('quantity', selectedItem.quantity)
   setFieldValue('weight', selectedItem.weight)
-  setFieldValue('weightUnit', selectedItem.weightUnit)
+      setFieldValue('weightUnit', toBasicWeightUnit(selectedItem.weightUnit))
   setFieldValue('notes', selectedItem.expirationDate ? '' : '') // Reset notes for linked items
   setFieldValue('expirationDate', selectedItem.expirationDate ?? '')
   setFieldValue('priority', selectedItem.priority)

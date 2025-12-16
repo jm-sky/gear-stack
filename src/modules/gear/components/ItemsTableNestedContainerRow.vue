@@ -15,7 +15,7 @@ import ColorDot from './ColorDot.vue'
 import ItemPriorityBadge from './ItemPriorityBadge.vue'
 import ItemStatusBadge from './ItemStatusBadge.vue'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const router = useRouter()
 const store = useGearStore()
 const { settings: gearSettings } = useGearSettings()
@@ -103,7 +103,7 @@ function getNestedContainerIcon(item: IGearItem) {
               {{ nestedItem.quantity }}
             </div>
             <div class="text-muted-foreground text-end px-4 min-w-0 md:min-w-[80px]">
-              {{ formatItemWeight(nestedItem, true, preferredWeightUnit) }}
+              {{ formatItemWeight(nestedItem, true, preferredWeightUnit, undefined, locale) }}
             </div>
             <div class="min-w-0 md:min-w-26">
               <ItemPriorityBadge :priority="nestedItem.priority" />

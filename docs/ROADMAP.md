@@ -125,13 +125,13 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - Automatyczne usuwanie z S3 po usunięciu konta użytkownika
    - Status: 🔄 Planned | Priority: Medium | Complexity: Medium
 
-4. **Automatyczny wybór jednostki wagi (auto) i formatowanie z separatorem tysięcznym**
+4. ✅ **Automatyczny wybór jednostki wagi (auto) i formatowanie z separatorem tysięcznym** - Zakończone
    - 📍 Lokalizacja: [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-automatyczny-wybór-jednostki-wagi-auto-i-formatowanie-z-separatorem-tysięcznym) | [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-ustawienia-użytkownika-wymagające-db)
    - Opcje `auto g/kg` i `auto oz/lb` dla preferowanej jednostki wagi
    - Automatyczny wybór jednostki w zależności od wartości wagi (< 1 kg → g/oz, ≥ 1 kg → kg/lb)
    - Formatowanie liczby z separatorem tysięcznym (np. `1 500 g`)
-   - Wymaga aktualizacji backendu (API, walidacja, baza danych)
-   - Status: 🔄 Planned | Priority: Medium | Complexity: Small
+   - Aktualizacja backendu (API, walidacja, baza danych) i migracja kolumny `preferred_weight_unit`
+   - Status: ✅ Completed | Priority: Medium | Complexity: Small
 
 ### Obniżony priorytet (trudne zadania)
 

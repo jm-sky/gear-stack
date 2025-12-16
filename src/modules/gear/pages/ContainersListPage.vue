@@ -345,7 +345,7 @@ const handleAiChat = () => {
         <p class="text-muted-foreground mb-6 max-w-md">
           {{ t('gear.container.emptyDescription') }}
         </p>
-        <div class="flex flex-col items-center justify-center flex-wrap gap-2">
+        <div class="flex flex-col items-center justify-center flex-wrap gap-3">
           <Button @click="handleCreate">
             <CreateIcon class="size-4" />
             {{ t('gear.container.create.title') }}

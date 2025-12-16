@@ -86,6 +86,7 @@ export const settingsEn = {
       title: 'Gear Preferences',
       description: 'Manage your gear-specific preferences and settings',
       save: 'Save',
+      saved: 'Saved',
       preferredWeightUnit: {
         label: 'Preferred Weight Unit',
         subtitle: 'Default unit for displaying weights throughout the application',
@@ -95,6 +96,8 @@ export const settingsEn = {
           kg: 'Kilograms (kg)',
           oz: 'Ounces (oz)',
           lb: 'Pounds (lb)',
+          'auto-g-kg': 'Auto (g/kg)',
+          'auto-oz-lb': 'Auto (oz/lb)',
         },
       },
       defaultCurrency: {

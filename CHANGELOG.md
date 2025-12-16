@@ -21,6 +21,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.37.0] - 2025-12-16
+
+### Added
+- **Automatic Weight Unit Selection**: Added support for automatic weight unit preferences and locale-aware formatting
+  - New preferred weight unit options: `auto-g-kg` and `auto-oz-lb`
+  - Automatic unit selection based on total weight (< 1 kg → g/oz, ≥ 1 kg → kg/lb)
+  - Thousand-separator formatting for all weight displays using user locale
+  - Integration with Gear Settings, containers, items, catalogue items, and export-to-prompt flow
+
+### Changed
+- Updated weight formatting utilities to support auto modes and locale-aware number formatting
+- Updated gear forms and settings to safely map auto units to basic units for validation and backend compatibility
+
+---
+
 ## [2.36.0] - 2025-12-15
 
 ### Added

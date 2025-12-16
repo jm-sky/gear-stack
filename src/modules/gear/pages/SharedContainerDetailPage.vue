@@ -22,7 +22,7 @@ import { formatWeightToPreferredUnit } from '../utils/formatWeight'
 
 const route = useRoute()
 const router = useRouter()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const store = useGearStore()
 const { settings: gearSettings } = useGearSettings()
 
@@ -71,7 +71,7 @@ const readinessPercentage = computed<number>(() => {
   return calculateReadinessPercentageSync(container.value)
 })
 
-const formattedWeight = computed<string>(() => formatWeightToPreferredUnit(totalWeight.value, settings.value.preferredWeightUnit))
+const formattedWeight = computed<string>(() => formatWeightToPreferredUnit(totalWeight.value, settings.value.preferredWeightUnit, locale.value))
 
 const handleBack = () => {
   router.push(GearRoutePath.PublicContainers)

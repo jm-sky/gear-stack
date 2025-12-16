@@ -77,7 +77,7 @@ const rootContainers = computed<IGearContainer[]>(() => {
 
 <template>
   <Sidebar collapsible="icon">
-    <SidebarContent class="overflow-x-hidden">
+    <SidebarContent class="overflow-x-hidden max-h-[90vh] overflow-y-auto">
       <!-- Sekcja: Mój sprzęt -->
       <SidebarGroup>
         <SidebarGroupLabel>{{ t('navigation.myGear', 'My Gear') }}</SidebarGroupLabel>
@@ -129,7 +129,7 @@ const rootContainers = computed<IGearContainer[]>(() => {
       <SidebarSeparator class="group-data-[collapsible=icon]:w-auto!" />
 
       <!-- Sekcja: Lista kontenerów -->
-      <SidebarGroup>
+      <SidebarGroup class="max-h-[50vh] overflow-y-auto">
         <SidebarGroupLabel>{{ t('gear.page.containers', 'Containers') }}</SidebarGroupLabel>
         <SidebarGroupContent>
           <SidebarMenu v-if="rootContainers.length > 0">
