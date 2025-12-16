@@ -460,37 +460,42 @@ async def _get_users_from_db(detailed: bool = False) -> list[dict[str, Any]]:
     from sqlalchemy import select
 
     from app.core.database import get_db
-    from app.modules.auth.repositories import UserRepository
+    from app.modules.auth.db_models import UserDB
     from app.modules.two_factor.db_models import PasskeyDB, TotpConfigDB
 
     async for db in get_db():
-        repo = UserRepository(db)
-        users = await repo.get_all_users()
+        # Query database directly to avoid Pydantic email validation errors
+        # This allows us to handle users with invalid emails (e.g., soft-deleted users)
+        stmt = select(UserDB)
+        result = await db.execute(stmt)
+        users_db = result.scalars().all()
 
         # Convert to dict for display
-        result = []
-        for user in users:
+        result_list = []
+        for user_db in users_db:
+            # Build user dict directly from database model
+            # This avoids Pydantic validation which would fail on invalid emails
             user_dict = {
-                "id": user.id,
-                "email": user.email,
-                "name": user.name,
-                "isActive": user.isActive,
-                "isAdmin": user.isAdmin,
-                "isOwner": user.isOwner,
-                "isPremium": user.isPremium,
-                "createdAt": user.createdAt,
+                "id": user_db.id,
+                "email": user_db.email,  # May contain invalid emails (e.g., deleted_xxx@deleted.local)
+                "name": user_db.name,
+                "isActive": user_db.is_active,
+                "isAdmin": user_db.is_admin,
+                "isOwner": user_db.is_owner,
+                "isPremium": user_db.is_premium,
+                "createdAt": user_db.created_at,
             }
 
             if detailed:
                 # Get email verification status
-                user_dict["isEmailVerified"] = user.isEmailVerified
+                user_dict["isEmailVerified"] = user_db.is_email_verified
 
                 # Check 2FA status (TOTP or Passkey)
                 has_2fa = False
 
                 # Check TOTP
                 totp_stmt = select(TotpConfigDB).where(
-                    TotpConfigDB.user_id == user.id,
+                    TotpConfigDB.user_id == user_db.id,
                     TotpConfigDB.is_enabled.is_(True),
                 )
                 totp_result = await db.execute(totp_stmt)
@@ -501,7 +506,7 @@ async def _get_users_from_db(detailed: bool = False) -> list[dict[str, Any]]:
                 # Check Passkeys if TOTP not enabled
                 if not has_2fa:
                     passkey_stmt = select(PasskeyDB).where(
-                        PasskeyDB.user_id == user.id,
+                        PasskeyDB.user_id == user_db.id,
                         PasskeyDB.is_enabled.is_(True),
                     )
                     passkey_result = await db.execute(passkey_stmt)
@@ -511,9 +516,9 @@ async def _get_users_from_db(detailed: bool = False) -> list[dict[str, Any]]:
 
                 user_dict["has2FA"] = has_2fa
 
-            result.append(user_dict)
+            result_list.append(user_dict)
 
-        return result
+        return result_list
 
     return []
 
@@ -841,5 +846,169 @@ async def _toggle_owner_in_db(user_id: str, is_owner: bool) -> None:
 
         # Update owner status
         user.isOwner = is_owner
+        await repo.update_user(user)
+        break  # Ensure we only process first iteration
+
+
+@users_app.command("set-role")
+def users_set_role(
+    identifier: str | None = typer.Argument(None, help="User email or ID"),
+    role: str | None = typer.Option(
+        None,
+        "--role",
+        "-r",
+        help="Role to set: user, premium, admin, or owner",
+    ),
+    yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation prompt"),
+) -> None:
+    """Set user role (user, premium, admin, or owner).
+
+    Examples:
+        # Interactive mode (will prompt for email/ID and role)
+        python -m cli users set-role
+
+        # Set role by email
+        python -m cli users set-role user@example.com --role admin
+
+        # Set role by ID without confirmation
+        python -m cli users set-role 01HQX... --role user --yes
+    """
+    asyncio.run(_users_set_role_async(identifier, role, yes))
+
+
+async def _users_set_role_async(identifier: str | None, role: str | None, yes: bool) -> None:
+    """Async implementation of set role."""
+    from rich.console import Console
+
+    console = Console()
+
+    # Valid roles
+    VALID_ROLES = ["user", "premium", "admin", "owner"]
+    ROLE_DISPLAY_NAMES = {
+        "user": "[dim]User[/dim]",
+        "premium": "[cyan]Premium[/cyan]",
+        "admin": "[yellow]Admin[/yellow]",
+        "owner": "[bold magenta]Owner[/bold magenta]",
+    }
+
+    try:
+        # Get identifier if not provided
+        if not identifier:
+            identifier = Prompt.ask("[cyan]Enter user email or ID[/cyan]")
+
+        # Find user
+        with console.status("[bold green]Finding user...", spinner="dots"):
+            user = await _find_user(identifier)
+
+        if not user:
+            console.print(f"\n[red]User not found:[/red] {identifier}\n")
+            return
+
+        # Get role if not provided
+        if not role:
+            console.print("\n[bold cyan]Available roles:[/bold cyan]\n")
+            for i, role_option in enumerate(VALID_ROLES, 1):
+                console.print(f"  {i}. {ROLE_DISPLAY_NAMES[role_option]}")
+            console.print()
+
+            while True:
+                role_input = (
+                    Prompt.ask(
+                        "[cyan]Select role[/cyan] (1-4 or name)",
+                        default="",
+                    )
+                    .strip()
+                    .lower()
+                )
+
+                # Try to parse as number
+                if role_input.isdigit():
+                    role_num = int(role_input)
+                    if 1 <= role_num <= len(VALID_ROLES):
+                        role = VALID_ROLES[role_num - 1]
+                        break
+                    else:
+                        console.print(f"[red]Invalid number. Please enter 1-{len(VALID_ROLES)}[/red]")
+                        continue
+
+                # Try to parse as role name
+                if role_input in VALID_ROLES:
+                    role = role_input
+                    break
+
+                console.print(f"[red]Invalid role. Please enter 1-{len(VALID_ROLES)} or one of: {', '.join(VALID_ROLES)}[/red]")
+        else:
+            # Validate provided role
+            role = role.lower().strip()
+            if role not in VALID_ROLES:
+                console.print(f"\n[red]Invalid role:[/red] {role}\n")
+                console.print(f"[yellow]Valid roles are:[/yellow] {', '.join(VALID_ROLES)}\n")
+                raise typer.Exit(1)
+
+        # Determine current and new role display
+        current_role_display = "Owner" if user.get("isOwner") else ("Administrator" if user.get("isAdmin") else ("Premium" if user.get("isPremium") else "User"))
+
+        new_role_display = role.capitalize()
+
+        # Determine flags for new role
+        is_admin = role == "admin"
+        is_owner = role == "owner"
+        is_premium = role == "premium"
+
+        # Show user info
+        console.print(f"\n[bold cyan]User to modify:[/bold cyan]\n")
+
+        user_info = f"""[bold]ID:[/bold] {user['id']}
+[bold]Email:[/bold] {user['email']}
+[bold]Name:[/bold] {user['name']}
+[bold]Current Role:[/bold] {current_role_display}
+[bold]New Role:[/bold] {new_role_display}"""
+
+        panel = Panel(user_info, border_style="cyan")
+        console.print(panel)
+
+        # Confirm change
+        if not yes:
+            console.print()
+            if not Confirm.ask(f"Are you sure you want to set role to {new_role_display}?", default=True):
+                console.print("[yellow]Cancelled[/yellow]")
+                return
+
+        # Update role
+        with console.status(f"[bold green]Updating user role...", spinner="dots"):
+            await _set_role_in_db(user["id"], is_admin, is_owner, is_premium)
+
+        console.print(f"\n[bold green]✓[/bold green] User role set to {new_role_display} successfully\n")
+
+    except Exception as e:
+        console.print(f"\n[red]Error setting user role:[/red] {e}\n")
+        raise typer.Exit(1)
+
+
+async def _set_role_in_db(user_id: str, is_admin: bool, is_owner: bool, is_premium: bool) -> None:
+    """Set user role in database.
+
+    Args:
+        user_id: User ID to update
+        is_admin: Whether user is admin
+        is_owner: Whether user is owner
+        is_premium: Whether user is premium
+    """
+    from app.core.database import get_db
+    from app.modules.auth.repositories import UserRepository
+
+    async for db in get_db():
+        repo = UserRepository(db)
+
+        # Get user
+        user = await repo.get_user_by_id(user_id)
+        if not user:
+            raise ValueError(f"User with id {user_id} not found")
+
+        # Update role flags
+        user.isAdmin = is_admin
+        user.isOwner = is_owner
+        user.isPremium = is_premium
+
         await repo.update_user(user)
         break  # Ensure we only process first iteration
