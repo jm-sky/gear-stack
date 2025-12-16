@@ -1,4 +1,5 @@
 import { computed, type ComputedRef, type MaybeRefOrGetter, toValue } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { IGearItem, TGearWeightUnit } from '../types/gear.types'
 import type { IItemWithContainer } from '../utils/allItemsColumns'
 import { formatWeightWithPreferredUnit } from '../utils/formatWeight'
@@ -20,6 +21,7 @@ export function useFormattedItemWeight(
   fallback: MaybeRefOrGetter<string> = '-',
 ): { formattedWeight: ComputedRef<string> } {
   const { settings: gearSettings } = useGearSettings()
+  const { locale } = useI18n()
   const preferredWeightUnit = computed(() => gearSettings.value.preferredWeightUnit)
 
   const formattedWeight = computed<string>(() => {
@@ -43,6 +45,7 @@ export function useFormattedItemWeight(
         totalWeight,
         item.weightUnit ?? 'g',
         preferredWeightUnit.value,
+        locale.value,
       )
     }
 
@@ -53,7 +56,7 @@ export function useFormattedItemWeight(
       return fallbackValue
     }
 
-    return formatWeightWithPreferredUnit(weight, unit, preferredWeightUnit.value)
+    return formatWeightWithPreferredUnit(weight, unit, preferredWeightUnit.value, locale.value)
   })
 
   return { formattedWeight }
@@ -71,6 +74,7 @@ export function formatItemWeight(
   includeQuantity: boolean = true,
   preferredWeightUnit: TGearWeightUnit,
   fallback: string = '-',
+  locale?: string,
 ): string {
   if (!item || !item.weight) {
     return fallback
@@ -81,6 +85,7 @@ export function formatItemWeight(
     totalWeight,
     item.weightUnit ?? 'g',
     preferredWeightUnit,
+    locale,
   )
 }
 

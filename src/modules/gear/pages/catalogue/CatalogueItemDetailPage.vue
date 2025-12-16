@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ImageIcon } from 'lucide-vue-next'
+import { ImageIcon, MoreHorizontal } from 'lucide-vue-next'
 import { computed, defineAsyncComponent, ref, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -7,6 +7,8 @@ import { toast } from 'vue-sonner'
 import CommonPageHeader from '@/components/layout/CommonPageHeader.vue'
 import { Badge } from '@/components/ui/badge'
 import Button from '@/components/ui/button/Button.vue'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import DropdownMenuSeparator from '@/components/ui/dropdown-menu/DropdownMenuSeparator.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import CatalogueShopCard from '@/modules/gear/components/catalogue/CatalogueShopCard.vue'
 import MarkdownRenderer from '@/modules/gear/components/MarkdownRenderer.vue'
@@ -14,9 +16,11 @@ import { useCatalogue } from '@/modules/gear/composables/catalogue/useCatalogue'
 import { useCategoryLabel } from '@/modules/gear/composables/useCategoryLabel'
 import { usePriceTierLabel } from '@/modules/gear/composables/usePriceTierLabel'
 import { GearRoutePath } from '@/modules/gear/routes'
+import { getActionIcon } from '@/modules/gear/utils/actionIcons'
 import { getCategoryIcon } from '@/modules/gear/utils/categoryIcons'
 import { DEFAULT_COLOR, getColorHex } from '@/modules/gear/utils/suggestedValues'
 import { usePageTitle } from '@/shared/composables/usePageTitle'
+import { usePermissions } from '@/shared/composables/usePermissions'
 import { COLOR_TEXT_CLASSES } from '../../utils/containerColors'
 
 // Lazy load dialog to reduce initial bundle size
@@ -30,7 +34,8 @@ const { getCategoryLabel } = useCategoryLabel()
 const { getPriceTierLabel } = usePriceTierLabel()
 
 const catalogueItemId = route.params.id as string
-const { getCatalogueItem } = useCatalogue()
+const { deleteCatalogueItem, getCatalogueItem, isDeleting } = useCatalogue()
+const { canAccessAdminPanel, user } = usePermissions()
 
 const {
   data: item,
@@ -39,6 +44,16 @@ const {
 } = getCatalogueItem(catalogueItemId)
 
 const showAddDialog = ref(false)
+const showActions = computed<boolean>(() => {
+  // Backend: creator OR admin/owner can update/delete
+  return !!(
+    canAccessAdminPanel.value
+    || (user.value?.id && item.value?.createdBy && user.value.id === item.value.createdBy)
+  )
+})
+
+const EditIcon = getActionIcon('edit')
+const DeleteIcon = getActionIcon('delete')
 
 // Set dynamic page title
 watchEffect(() => {
@@ -126,6 +141,25 @@ const goBack = () => {
 const handleAddToContainer = () => {
   showAddDialog.value = true
 }
+
+const handleEdit = () => {
+  router.push(GearRoutePath.CatalogueItemEditById(catalogueItemId))
+}
+
+const handleDelete = async () => {
+  if (!confirm(t('gear.catalogue.deleteConfirm'))) {
+    return
+  }
+
+  try {
+    await deleteCatalogueItem(catalogueItemId)
+    toast.success(t('common.success'))
+    router.push(GearRoutePath.CatalogueManage)
+  } catch (error) {
+    console.error('Failed to delete catalogue item:', error)
+    toast.error(t('common.error'))
+  }
+}
 </script>
 
 <template>
@@ -145,9 +179,34 @@ const handleAddToContainer = () => {
         @back="goBack"
       >
         <template #top-actions>
-          <Button size="sm" @click="handleAddToContainer">
-            {{ t('gear.catalogue.addToContainer') }}
-          </Button>
+          <div class="flex items-center gap-2">
+            <Button size="sm" @click="handleAddToContainer">
+              {{ t('gear.catalogue.addToContainer') }}
+            </Button>
+
+            <DropdownMenu v-if="showActions">
+              <DropdownMenuTrigger as-child>
+                <Button size="sm" variant="ghost" :aria-label="t('gear.actions.moreActions')">
+                  <MoreHorizontal class="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem @click="handleEdit">
+                  <EditIcon class="size-4 mr-2" />
+                  {{ t('gear.actions.edit') }}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  class="text-destructive hover:text-destructive! hover:bg-destructive/4!"
+                  :disabled="isDeleting"
+                  @click="handleDelete"
+                >
+                  <DeleteIcon class="size-4 mr-2" />
+                  {{ t('gear.actions.delete') }}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </template>
       </CommonPageHeader>
 

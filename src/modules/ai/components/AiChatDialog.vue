@@ -15,6 +15,7 @@ const props = defineProps<{
     container_ids?: string[]
     fields?: string[]
   }
+  restoreHistoryId?: string | null
 }>()
 
 const emits = defineEmits<{
@@ -29,13 +30,17 @@ const handleOpenChange = (value: boolean): void => {
 <template>
   <Dialog :open="props.open" @update:open="handleOpenChange">
     <DialogContent
-      class="sm:max-w-4xl h-[80vh] flex flex-col p-0"
+      class="sm:max-w-4xl h-[85vh] flex flex-col p-0"
       :show-close-button="false"
     >
       <DialogDescription class="sr-only">
         {{ t('ai.chat.description') }}
       </DialogDescription>
-      <AiChatWindow :container-ids="props.context?.container_ids" @close="handleOpenChange(false)" />
+      <AiChatWindow
+        :container-ids="props.context?.container_ids"
+        :restore-history-id="props.restoreHistoryId"
+        @close="handleOpenChange(false)"
+      />
     </DialogContent>
   </Dialog>
 </template>

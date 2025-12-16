@@ -22,7 +22,7 @@ const props = defineProps<{
   showTotalPrice?: boolean
 }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const store = useGearStore()
 const { settings: gearSettings, defaultCurrency } = useGearSettings()
 const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
@@ -33,7 +33,7 @@ const itemsCount = computed<number>(() => props.container.items.length)
 const totalPriceByCurrency = computed<Record<string, number>>(() => calculateTotalPriceSync(props.container, store.getAllContainers, defaultCurrency.value))
 
 // Format weight (totalWeight is in grams)
-const formattedWeight = computed<string>(() => formatWeightToPreferredUnit(totalWeight.value, settings.value.preferredWeightUnit))
+const formattedWeight = computed<string>(() => formatWeightToPreferredUnit(totalWeight.value, settings.value.preferredWeightUnit, locale.value))
 
 // Readiness color
 const readinessColor = computed<string>(() => {
@@ -60,7 +60,8 @@ const formattedMaxWeight = computed<string>(() => {
   if (!props.container.maxWeight || !props.container.maxWeightUnit) return ''
   return formatWeightToPreferredUnit(
     convertToGrams(props.container.maxWeight, props.container.maxWeightUnit),
-    settings.value.preferredWeightUnit
+    settings.value.preferredWeightUnit,
+    locale.value
   )
 })
 </script>

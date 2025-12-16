@@ -86,6 +86,7 @@ export const settingsPl = {
       title: 'Preferencje Sprzętu',
       description: 'Zarządzaj preferencjami i ustawieniami dotyczącymi sprzętu',
       save: 'Zapisz',
+      saved: 'Zapisano',
       preferredWeightUnit: {
         label: 'Preferowana Jednostka Wagi',
         subtitle: 'Domyślna jednostka wyświetlania wag w całej aplikacji',
@@ -95,6 +96,8 @@ export const settingsPl = {
           kg: 'Kilogramy (kg)',
           oz: 'Uncje (oz)',
           lb: 'Funty (lb)',
+          'auto-g-kg': 'Auto (g/kg)',
+          'auto-oz-lb': 'Auto (oz/lb)',
         },
       },
       defaultCurrency: {

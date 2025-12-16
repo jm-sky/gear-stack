@@ -72,7 +72,7 @@ const emit = defineEmits<{
 
 const route = useRoute()
 const router = useRouter()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { canUseAi } = useAi()
 const { shouldUseAPI } = useBackend()
 const { deleteContainer } = useGear()
@@ -227,7 +227,7 @@ const handleDeleteConfirm = async () => {
               {{ container.brand }}
             </Badge>
             <Badge v-if="isSet(container.weight) && isSet(container.weightUnit)" variant="secondary">
-              {{ formatWeight(container.weight, container.weightUnit) }}
+              {{ formatWeight(container.weight, container.weightUnit, locale) }}
             </Badge>
             <WeightLimitBadge :container />
             <ContainerRatingBadge :container />

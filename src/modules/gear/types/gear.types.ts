@@ -27,7 +27,7 @@ export type TGearItemPriority = 'critical' | 'high' | 'medium' | 'low'
 export type TGearItemQuality = 'low' | 'medium' | 'high'
 
 // Jednostka wagi
-export type TGearWeightUnit = 'g' | 'kg' | 'oz' | 'lb'
+export type TGearWeightUnit = 'g' | 'kg' | 'oz' | 'lb' | 'auto-g-kg' | 'auto-oz-lb'
 
 // Rating type (1-5)
 export type TRatingValue = 1 | 2 | 3 | 4 | 5

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent, ref, watchEffect } from 'vue'
+import { computed, defineAsyncComponent, ref, watch, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -93,6 +93,17 @@ const isExportToCSVDialogOpen = ref(false)
 const isAiDialogOpen = ref(false)
 const isMoveItemDialogOpen = ref(false)
 const itemToMove = ref<IGearItem | null>(null)
+const restoreHistoryId = ref<string | null>(null)
+
+// Watch for restoreHistoryId query param
+watch(() => route.query.restoreHistoryId, (historyId) => {
+  if (typeof historyId === 'string' && historyId) {
+    restoreHistoryId.value = historyId
+    isAiDialogOpen.value = true
+    // Remove query param from URL
+    router.replace({ query: { ...route.query, restoreHistoryId: undefined } })
+  }
+}, { immediate: true })
 
 // Rating section moved to ContainerRatingSection.vue component
 
@@ -426,6 +437,7 @@ if (!container.value) {
         v-if="canUseAi"
         v-model:open="isAiDialogOpen"
         :context="{ container_ids: [containerId] }"
+        :restore-history-id="restoreHistoryId"
       />
 
       <MoveItemDialog

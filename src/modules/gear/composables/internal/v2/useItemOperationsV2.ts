@@ -1,6 +1,6 @@
-import type { TUUID } from '@/shared/types/base.type'
-import { useGearV2 } from '../../useGearV2'
 import type { ICreateGearItemV2Dto, IGearItemV2, IUpdateGearItemV2Dto } from '../../../types/gear.types.v2'
+import { useGearV2 } from '../../useGearV2'
+import type { TUUID } from '@/shared/types/base.type'
 
 /**
  * Composable for V2 item operations

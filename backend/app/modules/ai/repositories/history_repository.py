@@ -31,6 +31,7 @@ class HistoryRepository:
         input_data: dict,
         output_data: dict,
         metadata: dict | None = None,
+        container_ids: list[str] | None = None,
     ) -> AIHistoryDB:
         """Create new history entry.
 
@@ -45,6 +46,7 @@ class HistoryRepository:
             input_data: Input data
             output_data: Output data
             metadata: Optional metadata
+            container_ids: Optional list of container IDs
 
         Returns:
             Created history entry
@@ -60,6 +62,7 @@ class HistoryRepository:
             input_data=input_data,
             output_data=output_data,
             metadata_=metadata,
+            container_ids=container_ids,
         )
         self.db.add(history)
         await self.db.commit()

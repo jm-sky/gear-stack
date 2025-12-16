@@ -19,7 +19,10 @@ export const GearRouteName = {
   ContainerShareTokens: 'gear-container-share-tokens',
   Settings: 'gear-settings',
   CatalogueBrowser: 'gear-catalogue-browser',
+  CatalogueManage: 'gear-catalogue-manage',
   CatalogueItemDetail: 'gear-catalogue-item-detail',
+  CatalogueItemNew: 'gear-catalogue-item-new',
+  CatalogueItemEdit: 'gear-catalogue-item-edit',
 }
 
 export const GearRoutePath = {
@@ -48,8 +51,12 @@ export const GearRoutePath = {
   ContainerShareTokensById: (id: string) => `/gear/${id}/share-tokens`,
   Settings: '/gear/settings',
   CatalogueBrowser: '/gear/catalogue',
+  CatalogueManage: '/gear/catalogue/manage',
   CatalogueItemDetail: '/gear/catalogue/:id',
   CatalogueItemDetailById: (id: string) => `/gear/catalogue/${id}`,
+  CatalogueItemNew: '/gear/catalogue/new',
+  CatalogueItemEdit: '/gear/catalogue/:id/edit',
+  CatalogueItemEditById: (id: string) => `/gear/catalogue/${id}/edit`,
 }
 
 export const GearRouteIcon: Partial<Record<keyof typeof GearRouteName, Component>> = {
@@ -158,10 +165,28 @@ export const gearRoutes: RouteRecordRaw[] = [
     meta: { layout: 'authenticated', title: 'gear.catalogue.title' },
   },
   {
+    path: GearRoutePath.CatalogueManage,
+    name: GearRouteName.CatalogueManage,
+    component: () => import('@/modules/gear/pages/catalogue/CatalogueManagePage.vue'),
+    meta: { layout: 'authenticated', requiresAuth: true, requiresAdmin: true, title: 'gear.catalogue.title' },
+  },
+  {
+    path: GearRoutePath.CatalogueItemNew,
+    name: GearRouteName.CatalogueItemNew,
+    component: () => import('@/modules/gear/pages/catalogue/CatalogueItemFormPage.vue'),
+    meta: { layout: 'authenticated', requiresAuth: true, requiresAdmin: true, title: 'gear.catalogue.create.title' },
+  },
+  {
     path: GearRoutePath.CatalogueItemDetail,
     name: GearRouteName.CatalogueItemDetail,
     component: () => import('@/modules/gear/pages/catalogue/CatalogueItemDetailPage.vue'),
     meta: { layout: 'authenticated', title: 'gear.catalogue.itemDetail' },
+  },
+  {
+    path: GearRoutePath.CatalogueItemEdit,
+    name: GearRouteName.CatalogueItemEdit,
+    component: () => import('@/modules/gear/pages/catalogue/CatalogueItemFormPage.vue'),
+    meta: { layout: 'authenticated', requiresAuth: true, requiresAdmin: true, title: 'gear.catalogue.edit.title' },
   },
 ]
 

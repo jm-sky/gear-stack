@@ -29,6 +29,12 @@ const { t } = useI18n()
       <SelectItem value="lb">
         {{ t('settings.preferences.preferredWeightUnit.options.lb') }}
       </SelectItem>
+      <SelectItem value="auto-g-kg">
+        {{ t('settings.preferences.preferredWeightUnit.options.auto-g-kg') }}
+      </SelectItem>
+      <SelectItem value="auto-oz-lb">
+        {{ t('settings.preferences.preferredWeightUnit.options.auto-oz-lb') }}
+      </SelectItem>
     </SelectContent>
   </Select>
 </template>

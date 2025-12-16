@@ -18,11 +18,71 @@ def init_sentry() -> None:
 
     try:
         import logging
+        from typing import Any
 
         import sentry_sdk
         from sentry_sdk.integrations.fastapi import FastApiIntegration
         from sentry_sdk.integrations.logging import LoggingIntegration
         from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+
+        def before_send(event: Any, hint: dict[str, Any]) -> Any:
+            """Filter out expected errors that shouldn't be reported to Sentry."""
+            # Get the exception from hint
+            exc_info = hint.get("exc_info")
+            if exc_info:
+                exc_type, exc_value, _ = exc_info
+
+                # Filter out expected authentication errors
+                from app.modules.auth.exceptions import (
+                    ExpiredTokenError,
+                    InvalidCredentialsError,
+                    InvalidTokenError,
+                )
+
+                # Filter out expected image processing errors
+                from app.core.storage.exceptions import CorruptedImageError
+
+                # Don't send expected auth errors to Sentry
+                # These are normal business logic errors (expired tokens, invalid credentials)
+                if isinstance(
+                    exc_value,
+                    (ExpiredTokenError, InvalidTokenError, InvalidCredentialsError),
+                ):
+                    return None
+
+                # Don't send corrupted image errors to Sentry
+                # These are expected when users upload corrupted/truncated files
+                if isinstance(exc_value, CorruptedImageError):
+                    return None
+
+                # Filter out OSError for truncated images (PIL raises this)
+                if isinstance(exc_value, OSError):
+                    error_msg = str(exc_value).lower()
+                    if "truncated" in error_msg or "cannot identify" in error_msg:
+                        return None
+
+            # Check exception type from event data (fallback for cases where exc_info might not be available)
+            if event.get("exception"):
+                values = event["exception"].get("values", [])
+                for value in values:
+                    exc_type_name = value.get("type", "")
+                    # Filter out JWT expiration and invalid token errors
+                    if exc_type_name in (
+                        "ExpiredTokenError",
+                        "InvalidTokenError",
+                        "InvalidCredentialsError",
+                    ):
+                        return None
+                    # Filter out corrupted image errors
+                    if exc_type_name == "CorruptedImageError":
+                        return None
+                    # Filter out OSError for truncated images
+                    if exc_type_name == "OSError":
+                        exc_value_str = str(value.get("value", "")).lower()
+                        if "truncated" in exc_value_str or "cannot identify" in exc_value_str:
+                            return None
+
+            return event
 
         sentry_sdk.init(
             dsn=settings.sentry.dsn,
@@ -37,7 +97,7 @@ def init_sentry() -> None:
             ],
             # Set user context in middleware or route handlers
             send_default_pii=False,  # Don't send PII by default
-            before_send=lambda event, hint: event,  # Can filter events here
+            before_send=before_send,  # Filter out expected errors
         )
     except ImportError:
         import logging
@@ -151,10 +211,35 @@ def register_exception_handlers(app: FastAPI) -> None:
         import logging
 
         logger = logging.getLogger(__name__)
-        logger.exception("Unhandled exception occurred")
+
+        # Skip Sentry reporting for expected authentication errors
+        from app.modules.auth.exceptions import (
+            ExpiredTokenError,
+            InvalidCredentialsError,
+            InvalidTokenError,
+        )
+
+        # Skip Sentry reporting for expected image processing errors
+        from app.core.storage.exceptions import CorruptedImageError
+
+        # These are expected business logic errors, not bugs
+        is_expected_auth_error = isinstance(exc, (ExpiredTokenError, InvalidTokenError, InvalidCredentialsError))
+
+        # Corrupted images are expected when users upload bad files
+        is_expected_image_error = isinstance(exc, CorruptedImageError) or (isinstance(exc, OSError) and ("truncated" in str(exc).lower() or "cannot identify" in str(exc).lower()))
+
+        if not is_expected_auth_error and not is_expected_image_error:
+            logger.exception("Unhandled exception occurred")
+        elif is_expected_auth_error:
+            # Log expected auth errors at debug level (not error)
+            logger.debug(f"Expected authentication error: {type(exc).__name__}: {exc}")
+        elif is_expected_image_error:
+            # Log expected image errors at warning level (user uploaded bad file)
+            logger.warning(f"Corrupted image file: {type(exc).__name__}: {exc}")
 
         # Sentry will automatically capture exceptions, but we can add context
-        if settings.sentry.enabled:
+        # Skip Sentry for expected errors (they're filtered in before_send, but avoid unnecessary processing)
+        if settings.sentry.enabled and not is_expected_auth_error and not is_expected_image_error:
             try:
                 import sentry_sdk
 

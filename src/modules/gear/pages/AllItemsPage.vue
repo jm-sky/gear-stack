@@ -36,7 +36,7 @@ import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 
 const router = useRouter()
 const route = useRoute()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { containers } = useGear()
 const { getCategoryLabel } = useCategoryLabel()
 const { settings: gearSettings } = useGearSettings()
@@ -419,7 +419,7 @@ const globalFilterFn = (row: IItemWithContainer, filterValue: string) => {
         </template>
 
         <template #weight="{ row }">
-          {{ formatItemWeight(row.original, true, settings.preferredWeightUnit ?? config.defaults.preferredWeightUnit) }}
+          {{ formatItemWeight(row.original, true, settings.preferredWeightUnit ?? config.defaults.preferredWeightUnit, undefined, locale) }}
         </template>
 
         <template #status="{ row }">

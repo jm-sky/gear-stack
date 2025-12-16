@@ -1,7 +1,6 @@
 import { computed, type ComputedRef } from 'vue'
-import type { TUUID } from '@/shared/types/base.type'
-import { useGearStoreV2 } from '../../../store/useGearStoreV2'
 import type { IGearItemV2 } from '../../../types/gear.types.v2'
+import { useGearStoreV2 } from '../../../store/useGearStoreV2'
 import {
   calculateItemsByPriorityV2,
   calculatePriceByCategoryV2,
@@ -12,6 +11,7 @@ import {
   calculateWeightLimitPercentageSyncV2,
   type WeightBreakdown,
 } from '../../../utils/containerCalculationsV2'
+import type { TUUID } from '@/shared/types/base.type'
 
 /**
  * Composable for V2 container calculations

@@ -130,9 +130,23 @@ const filteredHistory = computed(() => {
 const handleRestore = async (item: IAiHistoryItem): Promise<void> => {
   try {
     await restoreFromHistory(item)
-    toast.success(t('ai.history.restore'))
-    // TODO: Open chat dialog or navigate to chat page
-    // For now, just show success message
+
+    // Determine navigation target based on container_ids
+    const containerIds = item.containerIds || (item.contextData ? Object.keys(item.contextData) : [])
+
+    if (containerIds.length === 1) {
+      // Single container - navigate to Container Detail Page
+      router.push({
+        path: `/gear/${containerIds[0]}`,
+        query: { restoreHistoryId: item.id },
+      })
+    } else {
+      // Multiple or no containers - navigate to Containers List Page
+      router.push({
+        path: '/gear',
+        query: { restoreHistoryId: item.id },
+      })
+    }
   } catch (error) {
     handleError(error)
   }
@@ -194,10 +208,7 @@ onMounted(async () => {
   <AuthenticatedLayout>
     <div class="w-full max-w-full space-y-6">
       <!-- Header -->
-      <CommonPageHeader
-        :icon="History"
-        :label="t('ai.history.title')"
-      >
+      <CommonPageHeader :icon="History" :label="t('ai.history.title')">
         <template #actions>
           <Button
             variant="destructive"

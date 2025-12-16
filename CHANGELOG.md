@@ -21,6 +21,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.37.0] - 2025-12-16
+
+### Added
+- **Automatic Weight Unit Selection**: Added support for automatic weight unit preferences and locale-aware formatting
+  - New preferred weight unit options: `auto-g-kg` and `auto-oz-lb`
+  - Automatic unit selection based on total weight (< 1 kg → g/oz, ≥ 1 kg → kg/lb)
+  - Thousand-separator formatting for all weight displays using user locale
+  - Integration with Gear Settings, containers, items, catalogue items, and export-to-prompt flow
+
+### Changed
+- Updated weight formatting utilities to support auto modes and locale-aware number formatting
+- Updated gear forms and settings to safely map auto units to basic units for validation and backend compatibility
+
+---
+
+## [2.36.0] - 2025-12-15
+
+### Added
+- **AI Chat Enhancements**: Extended AI chat functionality with improved history management
+  - Added `container_ids` field to AI history model for efficient filtering
+  - Database migration to populate `container_ids` from existing history entries
+  - Chat from Containers List page with automatic inclusion of filtered containers
+  - Resume chat functionality from AI History Page with automatic navigation
+  - Chat history sidebar panel using Sheet component (accessible from chat window header)
+  - Filter history by `container_ids` and `operationType` in sidebar
+  - Automatic navigation logic: single container → Container Detail, multiple/no containers → Containers List
+  - Query parameter `restoreHistoryId` support for restoring conversations
+- **Unit Tests**: Added comprehensive test coverage for new AI chat features
+  - Tests for `useAiHistory` composable with container filtering
+  - Tests for history sidebar filtering logic
+  - Tests for navigation logic based on container IDs
+
+### Changed
+- **AI History**: Enhanced history model to include `container_ids` for better filtering and organization
+- **AI Chat Window**: Added history sidebar panel with Sheet component integration
+- **AI History Page**: Added "Resume Chat" button with smart navigation based on container context
+
+### Fixed
+- Fixed TypeScript type definitions for `IAiHistoryDetail` to include all backend fields
+- Fixed undefined `containerIds` handling in history filtering logic
+
+---
+
+## [2.35.0] - 2025-12-12
+
+### Added
+- **Catalogue Management Page**: Complete management interface for global catalogue items
+  - New DataTable-based management page with filters (search, category, brand, isActive status)
+  - Dropdown actions menu in table rows with: Show, Edit, Activate/Deactivate, Delete
+  - Admin/owner permission checks and lazy loading for code splitting
+  - Integrated with existing catalogue API and composables
+- **i18n Translations**: Added missing translations for catalogue management
+  - `gear.actions.manage` (EN: "Manage", PL: "Zarządzaj")
+  - `gear.fileUpload.imageGallery.previousImage` (EN: "Previous image", PL: "Poprzedni obrazek")
+  - `gear.fileUpload.imageGallery.nextImage` (EN: "Next image", PL: "Następny obrazek")
+
+### Changed
+- **Catalogue Manage Page**: Replaced card-based view with DataTable for better management experience
+  - Consistent with other admin management pages (AdminItemsPage, AdminContainersPage)
+  - Better sorting, filtering, and pagination support
+  - Improved UX with dropdown actions menu instead of inline buttons
+
+---
+
 ## [2.34.0] - 2025-12-11
 
 ### Added

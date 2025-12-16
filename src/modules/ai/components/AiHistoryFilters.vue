@@ -36,14 +36,15 @@ const handleClearFilters = (): void => {
 
 <template>
   <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-    <div class="flex flex-row gap-2 items-center flex-1">
-      <SearchInput
-        id="history-search"
-        v-model="searchQuery"
-        name="history-search"
-        :placeholder="t('ai.history.filters.search')"
-        class="min-w-96"
-      />
+    <SearchInput
+      id="history-search"
+      v-model="searchQuery"
+      name="history-search"
+      :placeholder="t('ai.history.filters.search')"
+      class="min-w-full md:min-w-96"
+    />
+
+    <div class="flex flex-row items-center justify-end gap-2">
       <Select v-model="operationType">
         <SelectTrigger id="operation-type-filter" class="min-w-32">
           <SelectValue :placeholder="t('ai.history.filters.all')" />
@@ -57,9 +58,7 @@ const handleClearFilters = (): void => {
           </SelectItem>
         </SelectContent>
       </Select>
-    </div>
 
-    <div class="flex flex-row items-center justify-end gap-2">
       <!-- Clear Filters Button -->
       <Button
         v-if="hasActiveFilters"

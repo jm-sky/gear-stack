@@ -37,12 +37,15 @@ from .schemas import (
     ShareTokenResponse,
 )
 from .service import GearService
+from .catalogue_item_image_router import router as catalogue_item_image_router
 from .item_image_router import router as item_image_router
 
 router = APIRouter(prefix="/gear", tags=["gear"])
 
 # Include item images router
 router.include_router(item_image_router)
+# Include catalogue item images router
+router.include_router(catalogue_item_image_router)
 
 
 def get_gear_repository(db: AsyncSession = Depends(get_db)) -> GearRepository:
@@ -1034,8 +1037,8 @@ async def update_catalogue_item(
     Raises:
         HTTPException: If item not found or user doesn't have permission
     """
-    # Check if user is admin
-    is_admin = current_user.isAdmin if hasattr(current_user, "isAdmin") else False
+    # Check if user is admin/owner
+    is_admin = (current_user.isAdmin if hasattr(current_user, "isAdmin") else False) or (current_user.isOwner if hasattr(current_user, "isOwner") else False)
     item = await service.update_catalogue_item(
         item_id,
         current_user.id,
@@ -1072,8 +1075,8 @@ async def delete_catalogue_item(
     Raises:
         HTTPException: If item not found or user doesn't have permission
     """
-    # Check if user is admin
-    is_admin = current_user.isAdmin if hasattr(current_user, "isAdmin") else False
+    # Check if user is admin/owner
+    is_admin = (current_user.isAdmin if hasattr(current_user, "isAdmin") else False) or (current_user.isOwner if hasattr(current_user, "isOwner") else False)
     deleted = await service.delete_catalogue_item(
         item_id,
         current_user.id,

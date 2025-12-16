@@ -68,7 +68,13 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - ✅ Limit: 20 MB (zwykli użytkownicy), 50 MB (admin) - konfigurowalny przez zmienne środowiskowe
    - Status: ✅ Completed | Priority: High | Complexity: Medium
 
-8. **Unifikacja modeli kontenerów i przedmiotów**
+8. **DataTable - Pinned Columns**
+   - 📍 Lokalizacja: [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-datatable---pinned-columns-pin-right-dla-kolumny-akcji)
+   - Dodanie wsparcia dla pinned columns (pin-right dla kolumny akcji) w komponencie DataTable
+   - Kolumna akcji zawsze widoczna podczas poziomego przewijania
+   - Status: 🔄 Planned | Priority: Medium | Complexity: Small
+
+9. **Unifikacja modeli kontenerów i przedmiotów**
    - 📍 Analiza: [UNIFIED_MODEL_ANALYSIS.md](./analysis/UNIFIED_MODEL_ANALYSIS.md)
    - Połączenie modeli `IGearContainer` i `IGearItem` w jeden model `IGearEntity` z flagą `isContainer`
    - Uproszczenie zagnieżdżania (plecak → kubek → pudełko → zapałki) - jeden mechanizm `parentId`
@@ -77,11 +83,26 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - Status: 🔄 Analysis Complete | Priority: High | Complexity: Large
    - **Uwaga:** Wymaga migracji danych i refaktoryzacji ~80-150 plików (2-4 tygodnie pracy)
 
-9. **Pełna analiza backend i frontend + refaktoryzacja**
+10. **Pełna analiza backend i frontend + refaktoryzacja**
    - Pełna analiza architektury backend i frontend
    - Identyfikacja problemów i obszarów do poprawy
    - Refaktoryzacja kodu zgodnie z najlepszymi praktykami
    - Status: 🚧 In Progress | Priority: High | Complexity: Large
+
+11. **Loading state przed wczytaniem JavaScript w index.html**
+   - Dodanie stanu ładowania w `index.html` przed załadowaniem aplikacji Vue
+   - Zapobieganie białemu ekranowi podczas inicjalizacji aplikacji
+   - Status: 🔄 Planned | Priority: High | Complexity: Small
+
+12. **Welcome back message and links on landing page for already logged in users**
+   - Dodanie komunikatu powitalnego na stronie głównej dla zalogowanych użytkowników
+   - Linki do głównych sekcji aplikacji (np. kontenery, ustawienia)
+   - Status: 🔄 Planned | Priority: High | Complexity: Small
+
+13. **Nie działa zmiana ilości wierszy przedmiotów (limit) na stronie Container Details**
+   - Naprawa funkcjonalności zmiany limitu wierszy w tabeli przedmiotów na stronie szczegółów kontenera
+   - Problem: Zmiana pageSize nie propaguje się w górę do parent component (brak emit w client-side mode)
+   - Status: 🚧 In Progress | Priority: High | Complexity: Small
 
 ### Średni priorytet
 
@@ -104,13 +125,13 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - Automatyczne usuwanie z S3 po usunięciu konta użytkownika
    - Status: 🔄 Planned | Priority: Medium | Complexity: Medium
 
-4. **Automatyczny wybór jednostki wagi (auto) i formatowanie z separatorem tysięcznym**
+4. ✅ **Automatyczny wybór jednostki wagi (auto) i formatowanie z separatorem tysięcznym** - Zakończone
    - 📍 Lokalizacja: [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-automatyczny-wybór-jednostki-wagi-auto-i-formatowanie-z-separatorem-tysięcznym) | [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-ustawienia-użytkownika-wymagające-db)
    - Opcje `auto g/kg` i `auto oz/lb` dla preferowanej jednostki wagi
    - Automatyczny wybór jednostki w zależności od wartości wagi (< 1 kg → g/oz, ≥ 1 kg → kg/lb)
    - Formatowanie liczby z separatorem tysięcznym (np. `1 500 g`)
-   - Wymaga aktualizacji backendu (API, walidacja, baza danych)
-   - Status: 🔄 Planned | Priority: Medium | Complexity: Small
+   - Aktualizacja backendu (API, walidacja, baza danych) i migracja kolumny `preferred_weight_unit`
+   - Status: ✅ Completed | Priority: Medium | Complexity: Small
 
 ### Obniżony priorytet (trudne zadania)
 

@@ -294,6 +294,7 @@ export const gearEn = {
       disableInlineEditing: 'Disable Inline Editing',
       uploadPhoto: 'Upload Photo',
       starItem: 'Star Item',
+      manage: 'Manage',
       saving: 'Saving...',
     },
     imageSearch: {
@@ -330,6 +331,8 @@ export const gearEn = {
           dragToReorder: 'Drag to reorder',
           deleteImage: 'Delete image',
         },
+        previousImage: 'Previous image',
+        nextImage: 'Next image',
       },
     },
     sorting: {
@@ -546,6 +549,11 @@ export const gearEn = {
       modeCreateDesc: 'Always create new containers/items, ignore UUIDs',
       recognizeFromName: 'Recognize brand and color from name',
       recognizeFromNameDesc: 'Automatically detect brand and color from item names (same as when creating items manually)',
+      parsing: 'Parsing markdown...',
+      parseProgress: 'Parse progress',
+      importing: 'Importing...',
+      progress: 'Progress',
+      importingItem: 'Importing item',
     },
     sampleSet: {
       generate: 'Generate Sample Set',
@@ -1141,6 +1149,7 @@ export const gearPl = {
       disableInlineEditing: 'Wyłącz edycję inline',
       uploadPhoto: 'Dodaj zdjęcie',
       starItem: 'Oznacz jako ulubiony',
+      manage: 'Zarządzaj',
       saving: 'Zapisywanie...',
     },
     imageSearch: {
@@ -1177,6 +1186,8 @@ export const gearPl = {
           dragToReorder: 'Przeciągnij, aby zmienić kolejność',
           deleteImage: 'Usuń obrazek',
         },
+        previousImage: 'Poprzedni obrazek',
+        nextImage: 'Następny obrazek',
       },
     },
     sorting: {
@@ -1393,6 +1404,11 @@ export const gearPl = {
       modeCreateDesc: 'Zawsze twórz nowe kontenery/przedmioty, ignoruj UUID',
       recognizeFromName: 'Rozpoznawaj markę i kolor z nazwy',
       recognizeFromNameDesc: 'Automatycznie wykrywaj markę i kolor z nazw przedmiotów (tak jak przy zwykłym tworzeniu)',
+      parsing: 'Parsowanie markdown...',
+      parseProgress: 'Postęp parsowania',
+      importing: 'Importowanie...',
+      progress: 'Postęp',
+      importingItem: 'Importowanie przedmiotu',
     },
     sampleSet: {
       generate: 'Generuj przykładowy zestaw',

@@ -64,6 +64,7 @@ class AIHistoryDB(Base):
     input_data: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
     output_data: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
     metadata_: Mapped[dict[str, Any] | None] = mapped_column("metadata", JSONB, nullable=True)
+    container_ids: Mapped[list[str] | None] = mapped_column(JSONB, nullable=True)
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False, index=True)

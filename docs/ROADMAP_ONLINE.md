@@ -375,16 +375,16 @@ Umożliwienie przenoszenia przedmiotów z jednego kontenera do drugiego bez koni
   - ✅ **Frontend:** Możliwość nadpisania domyślnego ustawienia w formularzu kontenera - zaimplementowane
   - ✅ **Zachowanie:** Jeśli użytkownik nie ma ustawienia, domyślnie `false` (prywatne) - zaimplementowane
 - ✅ Preferowana jednostka wagi (zapisywana w DB, nie tylko localStorage) - zaimplementowane
-- 🔄 **Automatyczny wybór jednostki wagi (auto) i formatowanie z separatorem tysięcznym** - planowane
-  - 🔄 Rozszerzenie typu jednostki wagi o opcje `auto_g_kg` i `auto_oz_lb`
-  - 🔄 Aktualizacja schematów walidacji (Pydantic) - dodanie nowych wartości do enum `TGearWeightUnit`
-  - 🔄 Aktualizacja modelu `GearSettingsDB` w bazie danych - obsługa nowych wartości jednostki wagi
-  - 🔄 Aktualizacja endpointów API (`/me/gear-settings`) - walidacja i zapis nowych opcji auto
-  - 🔄 Migracja bazy danych (jeśli wymagana) - rozszerzenie kolumny jednostki wagi
-  - 🔄 Logika automatycznego wyboru jednostki (frontend):
+- ✅ **Automatyczny wybór jednostki wagi (auto) i formatowanie z separatorem tysięcznym** - zaimplementowane
+  - ✅ Rozszerzenie typu jednostki wagi o opcje `auto-g-kg` i `auto-oz-lb`
+  - ✅ Aktualizacja schematów walidacji (Pydantic) - dodanie nowych wartości do enum `TGearWeightUnit`
+  - ✅ Aktualizacja modelu `GearSettingsDB` w bazie danych - obsługa nowych wartości jednostki wagi
+  - ✅ Aktualizacja endpointów API (`/me/gear-settings`) - walidacja i zapis nowych opcji auto
+  - ✅ Migracja bazy danych – zwiększenie długości kolumny `preferred_weight_unit` do VARCHAR(10)
+  - ✅ Logika automatycznego wyboru jednostki (frontend):
     - Jeśli waga < 1 kg → wyświetlanie w `g` (dla systemu metrycznego) lub `oz` (dla systemu imperialnego)
     - Jeśli waga ≥ 1 kg → wyświetlanie w `kg` (dla systemu metrycznego) lub `lb` (dla systemu imperialnego)
-  - 🔄 Formatowanie liczby z separatorem tysięcznym w wyświetlanych wagach
+  - ✅ Formatowanie liczby z separatorem tysięcznym w wyświetlanych wagach
   - 📍 Szczegóły implementacji: [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-automatyczny-wybór-jednostki-wagi-auto-i-formatowanie-z-separatorem-tysięcznym)
 - ✅ **Dodawanie nowych kategorii** (zapisywane w DB) - zaimplementowane
 - ✅ **Dodawanie firm / marek (brand)** - zapisywane w DB - zaimplementowane
@@ -614,6 +614,11 @@ System śledzenia wyświetleń kontenerów (publicznych i udostępnionych) z ~~d
   - 🔄 Przywracanie konwersacji nie działa - do wyjaśnienia i naprawy
   - 🔄 Sprawdzenie innych funkcjonalności strony (filtrowanie, wyszukiwanie, paginacja)
 - 🔄 Mechanizm limitu historii (domyślnie 100 wpisów) + automatyczne usuwanie najstarszych - planowane
+- ✅ **Rozszerzenie funkcjonalności czatu AI** - zaimplementowane - [FEATURE-AI-CHAT-ENHANCEMENTS.md](../features/FEATURE-AI-CHAT-ENHANCEMENTS.md)
+  - ✅ Dodanie pola container_ids do modelu historii
+  - ✅ Czat z poziomu Listy Kontenerów z załączaniem przefiltrowanych kontenerów
+  - ✅ Resume chat z AI History Page z automatycznym przekierowaniem
+  - ✅ Panel historii w oknie czatu używając Sheet component
 
 **Cache:**
 - ✅ Cache dla powtarzalnych operacji (klasyfikacje, embeddingi) - zaimplementowane (PostgreSQL cache)

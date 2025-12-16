@@ -22,6 +22,7 @@ interface ExportOptions {
   showNotes?: boolean // Whether to show notes/descriptions in export (default: true)
   descriptionFormat?: 'off' | 'inline' | 'newline' // Description format (default: 'off')
   defaultCurrency?: string // Default currency to use when item/container doesn't have currency
+  locale?: string // Locale for formatting numbers (default: 'pl-PL')
 }
 
 /**
@@ -148,11 +149,11 @@ function formatItem(
     if (item.containerId && options.calculateTotalWeight) {
       const containerWeightInGrams = options.calculateTotalWeight(item.containerId)
       totalWeight = containerWeightInGrams * item.quantity
-      weightText = formatWeightFromGrams(totalWeight)
+      weightText = formatWeightFromGrams(totalWeight, options.locale)
     } else {
       // Regular item weight
       totalWeight = item.weight * item.quantity
-      weightText = formatWeight(totalWeight, item.weightUnit ?? 'g')
+      weightText = formatWeight(totalWeight, item.weightUnit ?? 'g', options.locale)
     }
 
     parts.push(`- ${weightText}`)
@@ -241,10 +242,10 @@ function formatItem(
       if (item.containerId && options.calculateTotalWeight) {
         const containerWeightInGrams = options.calculateTotalWeight(item.containerId)
         totalWeight = containerWeightInGrams * item.quantity
-        weightText = formatWeightFromGrams(totalWeight)
+        weightText = formatWeightFromGrams(totalWeight, options.locale)
       } else {
         totalWeight = item.weight * item.quantity
-        weightText = formatWeight(totalWeight, item.weightUnit ?? 'g')
+        weightText = formatWeight(totalWeight, item.weightUnit ?? 'g', options.locale)
       }
 
       firstLineParts.push(`- ${weightText}`)
@@ -437,7 +438,7 @@ export function exportContainerToPrompt(
 
   // Add weight if provided
   if (isSet(container.weight) && isSet(container.weightUnit)) {
-    const weightText = formatWeight(container.weight, container.weightUnit)
+    const weightText = formatWeight(container.weight, container.weightUnit, options.locale)
     // Extract just the number and unit (e.g., "1.50 kg" -> "1.50kg" or "500 g" -> "500g")
     const weightValue = weightText.replace(/\s/g, '')
     containerHeaderParts.push(`- ${weightValue}`)

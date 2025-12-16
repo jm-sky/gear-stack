@@ -119,8 +119,9 @@ const currentPage = computed({
   get: () => isServerSide.value ? page.value : page.value,
   set: (value) => {
     page.value = value
+    // Always emit update:page to propagate changes to parent (needed for v-model sync)
+    emit('update:page', value)
     if (isServerSide.value) {
-      emit('update:page', value)
       props.onPageChange?.(value)
     }
   }
@@ -129,8 +130,9 @@ const currentPageSize = computed({
   get: () => isServerSide.value ? pageSize.value : pageSize.value,
   set: (value) => {
     pageSize.value = value
+    // Always emit update:pageSize to propagate changes to parent (needed for v-model sync)
+    emit('update:pageSize', value)
     if (isServerSide.value) {
-      emit('update:pageSize', value)
       props.onPageSizeChange?.(value)
     }
   }
@@ -224,6 +226,19 @@ watch(globalFilterModel, (newValue) => {
     globalFilter.value = newValue ?? ''
     if (props.enableFiltering) {
       table.setGlobalFilter(newValue ?? '')
+    }
+  }
+})
+
+// Sync pageSize with table state (when changed externally)
+watch(pageSize, (newValue) => {
+  if (currentPageSize.value !== newValue) {
+    currentPageSize.value = newValue
+    if (!isServerSide.value && props.enablePagination) {
+      table.setPageSize(newValue)
+      // Reset to page 1 when page size changes
+      currentPage.value = 1
+      table.setPageIndex(0)
     }
   }
 })

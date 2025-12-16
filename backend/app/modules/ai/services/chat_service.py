@@ -94,7 +94,17 @@ class ChatService:
         # Calculate cost
         cost = calculate_cost(model, response.prompt_tokens, response.completion_tokens)
 
-        # Save to history
+        # Extract container_ids from context keys (context is a dict where keys are container IDs)
+        container_ids: list[str] | None = None
+        if request.context and isinstance(request.context, dict):
+            container_ids = [str(key) for key in request.context.keys() if key]
+            if not container_ids:
+                container_ids = None
+
+        # Extract provider name from model (e.g., "openai/gpt-4o-mini" -> "openai")
+        provider_name = model.split("/")[0] if "/" in model else "unknown"
+
+        # Save to history with metadata
         await self.history_repo.create(
             user_id=user_id,
             operation_type="chat",
@@ -105,6 +115,8 @@ class ChatService:
             cost_usd=cost,
             input_data={"message": request.message, "context": request.context},
             output_data={"message": cleaned_message, "structured_output": structured.model_dump() if structured else None},
+            metadata={"provider": provider_name, "used_own_token": user_settings.use_own_token},
+            container_ids=container_ids,
         )
 
         # Cache result if enabled

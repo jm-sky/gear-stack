@@ -113,6 +113,17 @@ const importDialogOpen = ref(false)
 const isExportToPromptDialogOpen = ref(false)
 const isExportToCSVDialogOpen = ref(false)
 const isAiDialogOpen = ref(false)
+const restoreHistoryId = ref<string | null>(null)
+
+// Watch for restoreHistoryId query param
+watch(() => route.query.restoreHistoryId, (historyId) => {
+  if (typeof historyId === 'string' && historyId) {
+    restoreHistoryId.value = historyId
+    isAiDialogOpen.value = true
+    // Remove query param from URL
+    router.replace({ query: { ...route.query, restoreHistoryId: undefined } })
+  }
+}, { immediate: true })
 
 // Check for import query parameter and open dialog, and load containers from API
 onMounted(async () => {
@@ -334,7 +345,7 @@ const handleAiChat = () => {
         <p class="text-muted-foreground mb-6 max-w-md">
           {{ t('gear.container.emptyDescription') }}
         </p>
-        <div class="flex flex-col items-center justify-center flex-wrap gap-2">
+        <div class="flex flex-col items-center justify-center flex-wrap gap-3">
           <Button @click="handleCreate">
             <CreateIcon class="size-4" />
             {{ t('gear.container.create.title') }}
@@ -379,6 +390,8 @@ const handleAiChat = () => {
     <AiChatDialog
       v-if="canUseAi"
       v-model:open="isAiDialogOpen"
+      :context="{ container_ids: filteredContainers.map(c => c.id) }"
+      :restore-history-id="restoreHistoryId"
     />
   </AuthenticatedLayout>
 </template>

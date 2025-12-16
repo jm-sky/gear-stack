@@ -30,6 +30,12 @@ export const aiEn = {
           prompt: 'What would you add to my bag?',
         },
       },
+      history: {
+        title: 'History',
+        empty: 'No history',
+        restore: 'Restore',
+        openHistory: 'Open history',
+      },
     },
     model: {
       selectPlaceholder: 'Select model',
@@ -91,6 +97,8 @@ export const aiEn = {
       operationType: 'Operation type',
       preview: 'Preview',
       noPreview: 'No preview available',
+      resumeChat: 'Resume chat',
+      viewAll: 'View all',
     },
   },
 }
@@ -126,6 +134,12 @@ export const aiPl = {
           label: 'Co byś dodał?',
           prompt: 'Co byś dodał do mojego bagu?',
         },
+      },
+      history: {
+        title: 'Historia',
+        empty: 'Brak historii',
+        restore: 'Przywróć',
+        openHistory: 'Otwórz historię',
       },
     },
     model: {
@@ -188,6 +202,8 @@ export const aiPl = {
       operationType: 'Typ operacji',
       preview: 'Podgląd',
       noPreview: 'Brak podglądu',
+      resumeChat: 'Wznów czat',
+      viewAll: 'Zobacz wszystkie',
     },
   },
 }

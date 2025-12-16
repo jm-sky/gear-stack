@@ -24,6 +24,7 @@ except ImportError:
 
 from app.common.id_utils import generate_id
 from app.core.config import settings
+from app.core.storage.exceptions import CorruptedImageError
 from app.core.storage.factory import get_storage_adapter
 from app.core.storage.image_processor import ImageProcessor
 from app.modules.auth.db_models import UserDB
@@ -657,14 +658,37 @@ class ImageUploadService:
 
         # Process image if enabled
         if settings.storage.enable_processing:
-            content, detected_mime, width, height = await processor.process_image(content, detected_mime)
-            processed_size = len(content)
+            try:
+                content, detected_mime, width, height = await processor.process_image(content, detected_mime)
+                processed_size = len(content)
+            except CorruptedImageError as e:
+                # Handle corrupted/truncated images gracefully
+                logger.warning(f"Corrupted image file uploaded: {e}")
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Image file is corrupted or truncated. Please upload a valid image file.",
+                ) from e
         else:
             # Get dimensions without processing (run in thread pool)
             import asyncio
 
-            img = await asyncio.to_thread(Image.open, BytesIO(content))
-            width, height = img.size
+            try:
+                img = await asyncio.to_thread(Image.open, BytesIO(content))
+                img.load()  # Load image to detect truncation
+                width, height = img.size
+            except OSError as e:
+                # Handle truncated/corrupted images
+                error_msg = str(e).lower()
+                if "truncated" in error_msg or "cannot identify" in error_msg:
+                    logger.warning(f"Corrupted image file uploaded: {e}")
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Image file is corrupted or truncated. Please upload a valid image file.",
+                    ) from e
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid image file. Please upload a valid image file.",
+                ) from e
             processed_size = original_size
 
         # Generate unique filename

@@ -17,6 +17,7 @@ export interface IAiHistoryItem {
   cost: IAiCost
   durationMs?: number
   usedOwnToken: boolean
+  containerIds?: string[]
   createdAt: string
 }
 
@@ -29,6 +30,27 @@ export interface IAiHistoryListResponse {
 
 export interface IAiHistoryDetail extends IAiHistoryItem {
   responsePreview?: string
+  // Additional fields from backend API
+  userId?: string
+  promptTokens?: number
+  completionTokens?: number
+  totalTokens?: number
+  costUsd?: number | null
+  inputData?: {
+    message?: string
+    context?: Record<string, unknown>
+    [key: string]: unknown
+  }
+  outputData?: {
+    message?: string
+    [key: string]: unknown
+  }
+  metadata?: {
+    provider?: string
+    durationMs?: number
+    usedOwnToken?: boolean
+    [key: string]: unknown
+  } | null
 }
 
 export interface IAiHistoryQuery {

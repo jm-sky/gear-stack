@@ -24,8 +24,8 @@ const { version, buildDate } = useAppVersion()
             {{ config.contact.companyName }}
           </HoverLinkExternal>
           <span class="mx-1">|</span>
-          <HoverLinkExternal href="https://sava-group.pl">
-            SAVA GROUP sp. z o.o.
+          <HoverLinkExternal :href="config.contact.officialCompanyWebsite">
+            {{ config.contact.officialCompanyName }}
           </HoverLinkExternal>
         </div>
         <div class="text-sm">
@@ -58,7 +58,7 @@ const { version, buildDate } = useAppVersion()
           </HoverLinkExternal>
         </nav>
       </div>
-      
+
       <RecaptchaNotice />
     </div>
   </footer>

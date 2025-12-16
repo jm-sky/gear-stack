@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
-import { Settings } from 'lucide-vue-next'
+import { refAutoReset } from '@vueuse/core'
+import { CheckCircleIcon, Settings } from 'lucide-vue-next'
 import { useForm } from 'vee-validate'
 import { watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -11,7 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import Separator from '@/components/ui/separator/Separator.vue'
 import { useGearSettings } from '@/modules/gear/composables/useGearSettings'
-import { weightUnitEnum } from '@/modules/gear/utils/weightUnits'
+import { preferredWeightUnitEnum } from '@/modules/gear/utils/weightUnits'
 import { useSettings } from '@/modules/settings/composables/useSettings'
 import { config } from '@/shared/config/config'
 import CurrencySelect from './inputs/CurrencySelect.vue'
@@ -20,8 +21,10 @@ import type { TGearWeightUnit } from '@/modules/gear/types/gear.types'
 
 const { t } = useI18n()
 
+const didSucceed = refAutoReset(false, 3000)
+
 const settingsSchema = z.object({
-  preferredWeightUnit: weightUnitEnum,
+  preferredWeightUnit: preferredWeightUnitEnum,
   defaultCurrency: z.string().optional(),
   defaultContainersPublic: z.boolean().optional(),
 })
@@ -67,6 +70,8 @@ const onSubmit = handleSubmit(async (values) => {
   await updateAppSettings({
     defaultContainersPublic: values.defaultContainersPublic,
   })
+
+  didSucceed.value = true
 })
 </script>
 
@@ -142,7 +147,20 @@ const onSubmit = handleSubmit(async (values) => {
         </FormField>
 
 
-        <div class="flex justify-end">
+        <div class="flex justify-end gap-4">
+          <Transition
+            enter-from-class="opacity-0 -translate-y-2"
+            enter-to-class="opacity-100 translate-y-0"
+            enter-active-class="transition-all duration-300"
+            leave-from-class="opacity-100 translate-y-0"
+            leave-to-class="opacity-0 translate-y-2"
+            leave-active-class="transition-all duration-300"
+          >
+            <div v-if="didSucceed" class="flex items-center gap-2 text-success">
+              <CheckCircleIcon class="size-4" />
+              {{ t('settings.preferences.saved') }}
+            </div>
+          </Transition>
           <Button type="submit" :loading="isSubmitting">
             {{ t('settings.preferences.save') }}
           </Button>

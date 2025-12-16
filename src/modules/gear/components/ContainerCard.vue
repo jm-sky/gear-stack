@@ -39,7 +39,7 @@ const emit = defineEmits<{
 }>()
 
 const router = useRouter()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const store = useGearStore()
 const { settings: gearSettings } = useGearSettings()
 const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
@@ -54,7 +54,7 @@ const readinessPercentage = computed<number>(() => {
 const itemsCount = computed<number>(() => props.container.items.length)
 
 // Format weight (totalWeight is in grams)
-const formattedWeight = computed<string>(() => formatWeightToPreferredUnit(totalWeight.value, settings.value.preferredWeightUnit))
+const formattedWeight = computed<string>(() => formatWeightToPreferredUnit(totalWeight.value, settings.value.preferredWeightUnit, locale.value))
 
 // Readiness color
 const readinessColor = computed<string>(() => {

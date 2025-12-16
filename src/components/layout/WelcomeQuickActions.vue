@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FileInput, LogInIcon, Plus, UserPlusIcon } from 'lucide-vue-next'
+import { BackpackIcon, FileInput, LogInIcon, Plus, UserPlusIcon } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/modules/auth/composables/useAuth'
@@ -25,6 +25,16 @@ const props = defineProps<{
     <ButtonLink size="lg" class="w-full sm:w-auto" :to="GearRoutePath.ContainerNew">
       <Plus class="size-5" />
       {{ t('gear.container.create.title', 'Create Container') }}
+    </ButtonLink>
+
+    <ButtonLink
+      variant="outline"
+      size="lg"
+      class="w-full sm:w-auto"
+      :to="GearRoutePath.Containers"
+    >
+      <BackpackIcon class="size-5" />
+      {{ t('gear.page.viewContainers', 'View Containers') }}
     </ButtonLink>
 
     <div class="flex items-center gap-2 text-muted-foreground">

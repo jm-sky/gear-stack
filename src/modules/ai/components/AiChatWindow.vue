@@ -6,10 +6,13 @@
 import { Loader2 } from 'lucide-vue-next'
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { useAiActions } from '../composables/useAiActions'
 import { useAiChat } from '../composables/useAiChat'
 import { useAiContext } from '../composables/useAiContext'
+import { useAiHistory } from '../composables/useAiHistory'
 import { useAiStore } from '../store/useAiStore'
+import AiChatHistorySidebar from './AiChatHistorySidebar.vue'
 import AiChatInputSection from './AiChatInputSection.vue'
 import AiChatMessage from './AiChatMessage.vue'
 import AiChatTemplateMsgButton from './AiChatTemplateMsgButton.vue'
@@ -20,16 +23,19 @@ const { t } = useI18n()
 
 const props = defineProps<{
   containerIds?: string[]
+  restoreHistoryId?: string | null
 }>()
 
 const aiStore = useAiStore()
-const { messages, isLoading, lastPrompt, lastStructuredOutput, sendMessage, hasMessages } = useAiChat()
+const { messages, isLoading, lastPrompt, lastStructuredOutput, sendMessage, hasMessages, restoreFromHistory } = useAiChat()
 const { buildContextData } = useAiContext()
 const { executeAction } = useAiActions()
+const { getHistoryItemById } = useAiHistory()
 
 const userMessage = ref('')
 const showContextConfig = ref(false)
 const includeContainerData = ref(true)
+const showHistorySidebar = ref(false)
 
 const emit = defineEmits<{
   close: []
@@ -42,6 +48,47 @@ onMounted(async () => {
   }
   if (aiStore.availableModels.length === 0) {
     await aiStore.loadModels()
+  }
+
+  // Restore history if restoreHistoryId is provided
+  if (props.restoreHistoryId) {
+    try {
+      let historyItem = getHistoryItemById(props.restoreHistoryId)
+      if (!historyItem) {
+        // If not in store, try to load history detail from API
+        const { aiApiService } = await import('../services/aiApiService')
+        const detail = await aiApiService.getHistoryDetail(props.restoreHistoryId)
+        // Transform detail to IAiHistoryItem format
+        historyItem = {
+          id: detail.id,
+          operationType: detail.operationType as import('../types/chat').AiOperationType,
+          finalPrompt: detail.inputData?.message || '',
+          contextData: detail.inputData?.context,
+          responseData: detail.outputData || {},
+          model: detail.model,
+          provider: detail.metadata?.provider || '',
+          tokens: {
+            input: detail.promptTokens || 0,
+            output: detail.completionTokens || 0,
+            total: detail.totalTokens || 0,
+          },
+          cost: {
+            input: 0,
+            output: 0,
+            total: detail.costUsd || 0,
+          },
+          durationMs: detail.metadata?.durationMs,
+          usedOwnToken: detail.metadata?.usedOwnToken || false,
+          containerIds: detail.containerIds,
+          createdAt: detail.createdAt,
+        }
+      }
+      if (historyItem) {
+        await restoreFromHistory(historyItem)
+      }
+    } catch (error) {
+      console.error('Failed to restore history:', error)
+    }
   }
 })
 
@@ -66,18 +113,50 @@ const handleSend = async (): Promise<void> => {
 const onTemplatePrompt = (prompt: string) => {
   userMessage.value = prompt
 }
+
+const handleRestoreFromSidebar = async (item: import('../types/history').IAiHistoryItem): Promise<void> => {
+  try {
+    await restoreFromHistory(item)
+    showHistorySidebar.value = false
+  } catch (error) {
+    console.error('Failed to restore history from sidebar:', error)
+  }
+}
 </script>
 
 <template>
-  <div class="flex flex-col h-full">
+  <div class="flex flex-col h-full relative">
+    <!-- History Sidebar Sheet -->
+    <Sheet v-model:open="showHistorySidebar">
+      <SheetContent side="left" class="w-[400px] sm:w-[540px] p-0">
+        <AiChatHistorySidebar
+          :container-ids="props.containerIds"
+          @restore="handleRestoreFromSidebar"
+        />
+      </SheetContent>
+    </Sheet>
+
     <!-- Header with model selector -->
     <AiChatWindowHeader
       v-model:show-context-config="showContextConfig"
+      v-model:show-history-sidebar="showHistorySidebar"
       @close="emit('close')"
     />
 
     <!-- Context config (collapsible) -->
-    <AiContextConfig v-if="showContextConfig" />
+    <Transition
+      enter-from-class="opacity-0 -translate-y-2"
+      enter-active-class="transition-all duration-300"
+      enter-to-class="opacity-100 translate-y-0"
+      leave-from-class="opacity-100 translate-y-0"
+      leave-active-class="transition-all duration-300"
+      leave-to-class="opacity-0 -translate-y-2"
+    >
+      <AiContextConfig
+        v-if="showContextConfig"
+        @close="showContextConfig = false"
+      />
+    </Transition>
 
     <!-- Messages -->
     <div class="relative flex-1 overflow-y-auto p-2 md:p-4 space-y-4">

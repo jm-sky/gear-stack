@@ -1,8 +1,8 @@
 import type { IGearItemV2, TGearItemPriority } from '../types/gear.types.v2'
-import type { TUUID } from '@/shared/types/base.type'
 import { getCurrency } from './currencyFormatter'
 import { convertToGrams } from './formatWeight'
 import { isSet } from './helpers'
+import type { TUUID } from '@/shared/types/base.type'
 
 /**
  * V2 calculation utilities for unified model
