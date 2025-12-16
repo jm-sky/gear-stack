@@ -30,7 +30,7 @@ const handleOpenChange = (value: boolean): void => {
 <template>
   <Dialog :open="props.open" @update:open="handleOpenChange">
     <DialogContent
-      class="sm:max-w-4xl h-[80vh] flex flex-col p-0"
+      class="sm:max-w-4xl h-[85vh] flex flex-col p-0"
       :show-close-button="false"
     >
       <DialogDescription class="sr-only">

@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { History, HourglassIcon, MoreVertical, Settings, Trash2, X } from 'lucide-vue-next'
+import { History, MoreVertical, Settings, Trash2, X } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
-import { ButtonLink } from '@/components/ui/button-link'
 import DialogTitle from '@/components/ui/dialog/DialogTitle.vue'
 import {
   DropdownMenu,
@@ -11,9 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import DropdownMenuItemLink from '@/components/ui/dropdown-menu/DropdownMenuItemLink.vue'
 import { useAiChat } from '../composables/useAiChat'
-import { AiRoutePath } from '../routes'
 import AiModelSelector from './AiModelSelector.vue'
 
 const { t } = useI18n()
@@ -32,7 +29,7 @@ const emit = defineEmits<{
     <h2 class="text-lg font-semibold">
       {{ t('ai.chat.title') }}
     </h2>
-    <div class="flex flex-col md:flex-row items-center gap-2 -my-1">
+    <div class="flex flex-row items-center gap-2 -my-1">
       <!-- Desktop actions -->
       <div class="hidden md:flex flex-row items-center gap-2">
         <AiModelSelector />
@@ -61,14 +58,6 @@ const emit = defineEmits<{
         >
           <History class="size-4" />
         </Button>
-        <ButtonLink
-          v-tooltip.bottom="t('ai.history.title')"
-          variant="ghost"
-          size="sm"
-          :to="AiRoutePath.History"
-        >
-          <HourglassIcon class="size-4" />
-        </ButtonLink>
       </div>
 
       <!-- Mobile menu -->
@@ -99,10 +88,6 @@ const emit = defineEmits<{
               <History class="size-4 mr-2" />
               {{ t('ai.chat.history.openHistory') }}
             </DropdownMenuItem>
-            <DropdownMenuItemLink :to="AiRoutePath.History">
-              <HourglassIcon class="size-4 mr-2" />
-              {{ t('ai.history.title') }}
-            </DropdownMenuItemLink>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

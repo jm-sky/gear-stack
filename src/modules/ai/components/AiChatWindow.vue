@@ -144,7 +144,19 @@ const handleRestoreFromSidebar = async (item: import('../types/history').IAiHist
     />
 
     <!-- Context config (collapsible) -->
-    <AiContextConfig v-if="showContextConfig" />
+    <Transition
+      enter-from-class="opacity-0 -translate-y-2"
+      enter-active-class="transition-all duration-300"
+      enter-to-class="opacity-100 translate-y-0"
+      leave-from-class="opacity-100 translate-y-0"
+      leave-active-class="transition-all duration-300"
+      leave-to-class="opacity-0 -translate-y-2"
+    >
+      <AiContextConfig
+        v-if="showContextConfig"
+        @close="showContextConfig = false"
+      />
+    </Transition>
 
     <!-- Messages -->
     <div class="relative flex-1 overflow-y-auto p-2 md:p-4 space-y-4">
