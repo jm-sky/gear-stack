@@ -71,7 +71,8 @@ const defaultCoreLinks = computed<Link[]>(() => [
   }
 ])
 
-const coreLinksList = computed<Link[]>(() => props.coreLinks ?? defaultCoreLinks.value.filter((link) => !link.hidden))
+const coreLinksList = computed<Link[]>(() => props.coreLinks ?? defaultCoreLinks.value)
+const coreLinksFiltered = computed<Link[]>(() => coreLinksList.value.filter((link) => !link.hidden))
 const initials = computed<string>(() => getInitials(props.userName ?? props.userEmail ?? 'U'))
 
 const avatarUrl = computed<string | undefined>(() =>{
@@ -93,9 +94,7 @@ const handleLogout = () => {
 
 <template>
   <DropdownMenu>
-    <DropdownMenuTrigger
-      as-child
-    >
+    <DropdownMenuTrigger as-child>
       <Avatar
         role="button"
         :aria-label="t('user.menu.title', 'User menu')"
@@ -154,7 +153,7 @@ const handleLogout = () => {
       <!-- Profile/Settings slot -->
       <slot name="menu-items">
         <DropdownMenuItemLink
-          v-for="link in coreLinksList"
+          v-for="link in coreLinksFiltered"
           v-show="!link.hidden"
           :key="link.to"
           :to="link.to"
