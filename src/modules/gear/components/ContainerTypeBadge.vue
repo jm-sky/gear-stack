@@ -22,7 +22,7 @@ const { typeLabel } = useContainerTypeLabel(computed(() => props.container.conta
     ]"
   >
     <ContainerIcon
-      :color="(container.color ?? undefined) as TContainerColor | undefined"
+      :color="(container.color as TContainerColor | undefined)"
       :type="container.containerType ?? 'other'"
       :size="4"
       class="mr-0.5"
