@@ -101,7 +101,10 @@ class ChatService:
             if not container_ids:
                 container_ids = None
 
-        # Save to history
+        # Extract provider name from model (e.g., "openai/gpt-4o-mini" -> "openai")
+        provider_name = model.split("/")[0] if "/" in model else "unknown"
+
+        # Save to history with metadata
         await self.history_repo.create(
             user_id=user_id,
             operation_type="chat",
@@ -112,6 +115,7 @@ class ChatService:
             cost_usd=cost,
             input_data={"message": request.message, "context": request.context},
             output_data={"message": cleaned_message, "structured_output": structured.model_dump() if structured else None},
+            metadata={"provider": provider_name, "used_own_token": user_settings.use_own_token},
             container_ids=container_ids,
         )
 

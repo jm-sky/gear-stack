@@ -124,9 +124,15 @@ class AiHistoryItem(BaseModel):
 
     id: UUID = Field(..., description="History ID")
     operation_type: str = Field(..., description="Operation type (chat, classify, etc.)", serialization_alias="operationType")
+    final_prompt: str = Field(..., description="Final prompt sent to AI", serialization_alias="finalPrompt")
+    context_data: dict[str, Any] | None = Field(None, description="Context data", serialization_alias="contextData")
+    response_data: dict[str, Any] = Field(..., description="Response data", serialization_alias="responseData")
     model: str = Field(..., description="Model used")
-    total_tokens: int = Field(..., description="Total tokens used", serialization_alias="totalTokens")
-    cost_usd: float | None = Field(None, description="Cost in USD", serialization_alias="costUsd")
+    provider: str = Field(..., description="Provider name")
+    tokens: dict[str, int] = Field(..., description="Token usage (input, output, total)")
+    cost: dict[str, float] = Field(..., description="Cost breakdown (input, output, total)", serialization_alias="cost")
+    duration_ms: int | None = Field(None, description="Duration in milliseconds", serialization_alias="durationMs")
+    used_own_token: bool = Field(..., description="Whether user's own token was used", serialization_alias="usedOwnToken")
     container_ids: list[str] | None = Field(None, description="Container IDs associated with this history entry", serialization_alias="containerIds")
     created_at: datetime = Field(..., description="Creation timestamp", serialization_alias="createdAt")
 

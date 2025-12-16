@@ -72,36 +72,30 @@ const handleViewDetails = (): void => {
 
 <template>
   <Card class="hover:shadow-md transition-shadow">
-    <CardHeader>
-      <div class="flex items-start justify-between gap-2">
-        <div class="flex-1 min-w-0">
-          <div class="flex items-start gap-2 mb-2">
-            <MessageSquare class="size-4 text-muted-foreground shrink-0 mt-0.5" />
-            <div class="flex-1 min-w-0">
-              <CardTitle class="text-base font-semibold line-clamp-2 mb-1">
-                {{ promptTitle }}
-              </CardTitle>
-              <CardDescription class="text-xs text-muted-foreground">
-                <div class="flex items-center gap-2 flex-wrap">
-                  <span>{{ item.model }}</span>
-                  <span class="text-muted-foreground/70">•</span>
-                  <span>{{ item.provider }}</span>
-                  <template v-if="item.durationMs">
-                    <span class="text-muted-foreground/70">•</span>
-                    <span class="flex items-center gap-1">
-                      <Clock class="size-3" />
-                      {{ item.durationMs }}ms
-                    </span>
-                  </template>
-                  <Badge v-if="item.operationType" variant="outline" class="text-xs">
-                    {{ t(`ai.history.operationTypes.${item.operationType}`) }}
-                  </Badge>
-                </div>
-              </CardDescription>
-            </div>
-          </div>
-        </div>
+    <CardHeader class="flex flex-col items-start justify-between gap-2">
+      <div class="flex flex-row items-center gap-2">
+        <MessageSquare class="size-4 text-muted-foreground" />
+        <CardTitle class="text-base font-semibold line-clamp-1">
+          {{ promptTitle }}
+        </CardTitle>
       </div>
+      <CardDescription class="text-xs text-muted-foreground">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span>{{ item.model }}</span>
+          <span class="text-muted-foreground/70">•</span>
+          <span>{{ item.provider }}</span>
+          <template v-if="item.durationMs">
+            <span class="text-muted-foreground/70">•</span>
+            <span class="flex items-center gap-1">
+              <Clock class="size-3" />
+              {{ item.durationMs }}ms
+            </span>
+          </template>
+          <Badge v-if="item.operationType" variant="outline" class="text-xs">
+            {{ t(`ai.history.operationTypes.${item.operationType}`) }}
+          </Badge>
+        </div>
+      </CardDescription>
     </CardHeader>
 
     <CardContent class="pt-0 space-y-3">
@@ -117,15 +111,14 @@ const handleViewDetails = (): void => {
         class="text-xs"
       />
 
-
       <Separator class="my-4" />
 
       <!-- Actions -->
-      <div class="flex items-center justify-between gap-2">
+      <div class="flex items-center justify-between gap-2 flex-wrap">
         <div class="text-xs text-muted-foreground">
           {{ formattedDate }}
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
           <Button
             variant="outline"
             size="sm"

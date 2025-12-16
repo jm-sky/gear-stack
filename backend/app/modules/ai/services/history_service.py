@@ -5,6 +5,7 @@ from uuid import UUID
 from app.modules.ai.db_models import AIHistoryDB
 from app.modules.ai.repositories import HistoryRepository
 from app.modules.ai.schemas import AiHistoryDetail, AiHistoryItem, AiHistoryListResponse
+from app.modules.ai.utils.models_config import calculate_cost, get_model_by_id
 
 
 class HistoryService:
@@ -130,12 +131,64 @@ class HistoryService:
         Returns:
             History list item
         """
+        # Extract final_prompt from input_data
+        # Support both old format (final_prompt) and new format (message)
+        input_data = entry.input_data or {}
+        final_prompt = input_data.get("message") or input_data.get("final_prompt") or ""
+
+        # Extract context_data
+        context_data = input_data.get("context") or input_data.get("context_data")
+
+        # Extract response_data
+        response_data = entry.output_data or {}
+
+        # Extract metadata
+        metadata = entry.metadata_ or {}
+        provider = metadata.get("provider") or (entry.model.split("/")[0] if "/" in entry.model else "unknown")
+        duration_ms = metadata.get("duration_ms")
+        used_own_token = metadata.get("used_own_token", False)
+
+        # Build tokens object
+        tokens = {
+            "input": entry.prompt_tokens,
+            "output": entry.completion_tokens,
+            "total": entry.total_tokens,
+        }
+
+        # Build cost object
+        # Calculate input/output costs if we have model info, otherwise use total cost
+        cost_input = 0.0
+        cost_output = 0.0
+        if entry.cost_usd is not None:
+            model_config = get_model_by_id(entry.model)
+            if model_config:
+                # Calculate costs based on token counts
+                cost_input = (entry.prompt_tokens / 1_000_000) * model_config["cost_per_1m_input"]
+                cost_output = (entry.completion_tokens / 1_000_000) * model_config["cost_per_1m_output"]
+            else:
+                # Fallback: split total cost proportionally
+                if entry.total_tokens > 0:
+                    cost_input = entry.cost_usd * (entry.prompt_tokens / entry.total_tokens)
+                    cost_output = entry.cost_usd * (entry.completion_tokens / entry.total_tokens)
+
+        cost = {
+            "input": float(round(cost_input, 6)),
+            "output": float(round(cost_output, 6)),
+            "total": float(entry.cost_usd) if entry.cost_usd is not None else 0.0,
+        }
+
         return AiHistoryItem(
             id=entry.id,
             operation_type=entry.operation_type,
+            final_prompt=final_prompt,
+            context_data=context_data,
+            response_data=response_data,
             model=entry.model,
-            total_tokens=entry.total_tokens,
-            cost_usd=entry.cost_usd,
+            provider=provider,
+            tokens=tokens,
+            cost=cost,
+            duration_ms=duration_ms,
+            used_own_token=used_own_token,
             container_ids=entry.container_ids,
             created_at=entry.created_at,
         )

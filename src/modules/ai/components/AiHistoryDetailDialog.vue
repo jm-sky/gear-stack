@@ -54,7 +54,7 @@ const handleDelete = (): void => {
 
 <template>
   <Dialog :open="props.open" @update:open="handleClose">
-    <DialogContent class="max-w-3xl max-h-[90vh] overflow-y-auto">
+    <DialogContent class="max-w-3xl">
       <DialogHeader>
         <DialogTitle class="flex items-center gap-2">
           <MessageSquare class="size-5" />
@@ -65,7 +65,7 @@ const handleDelete = (): void => {
         </DialogDescription>
       </DialogHeader>
 
-      <div v-if="item" class="space-y-6">
+      <div v-if="item" class="space-y-6 max-h-[80vh] overflow-y-auto -mx-4 px-4">
         <!-- Metadata -->
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
@@ -119,7 +119,7 @@ const handleDelete = (): void => {
           <div class="text-sm font-medium mb-2">
             Final Prompt
           </div>
-          <div class="p-3 bg-muted rounded-md text-sm font-mono whitespace-pre-wrap break-words">
+          <div class="p-3 bg-muted rounded-md text-sm font-mono whitespace-pre-wrap wrap-break-word">
             {{ item.finalPrompt }}
           </div>
         </div>
@@ -130,7 +130,7 @@ const handleDelete = (): void => {
             Context Data
           </div>
           <div class="p-3 bg-muted rounded-md text-sm">
-            <pre class="whitespace-pre-wrap break-words">{{ JSON.stringify(item.contextData, null, 2) }}</pre>
+            <pre class="whitespace-pre-wrap wrap-break-word">{{ JSON.stringify(item.contextData, null, 2) }}</pre>
           </div>
         </div>
 
@@ -140,26 +140,26 @@ const handleDelete = (): void => {
             Response Data
           </div>
           <div class="p-3 bg-muted rounded-md text-sm">
-            <pre class="whitespace-pre-wrap break-words">{{ JSON.stringify(item.responseData, null, 2) }}</pre>
+            <pre class="whitespace-pre-wrap wrap-break-word">{{ JSON.stringify(item.responseData, null, 2) }}</pre>
           </div>
         </div>
+      </div>
 
-        <!-- Actions -->
-        <div class="flex items-center justify-end gap-2 pt-4 border-t">
-          <Button
-            variant="outline"
-            @click="handleRestore"
-          >
-            {{ t('ai.history.restore') }}
-          </Button>
-          <Button
-            variant="destructive"
-            @click="handleDelete"
-          >
-            <Trash2 class="size-4" />
-            {{ t('ai.history.delete') }}
-          </Button>
-        </div>
+      <!-- Actions -->
+      <div class="flex items-center justify-end gap-2 pt-4 border-t">
+        <Button
+          variant="outline"
+          @click="handleRestore"
+        >
+          {{ t('ai.history.restore') }}
+        </Button>
+        <Button
+          variant="destructive"
+          @click="handleDelete"
+        >
+          <Trash2 class="size-4" />
+          {{ t('ai.history.delete') }}
+        </Button>
       </div>
     </DialogContent>
   </Dialog>
