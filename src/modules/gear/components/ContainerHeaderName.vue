@@ -4,15 +4,15 @@ import { nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
 import Button from '@/components/ui/button/Button.vue'
-import type { IGearContainer } from '../types/gear.types'
-import { useGear } from '../composables/useGear'
+import type { IGearItemV2 } from '../types/gear.types.v2'
+import { useGearV2 } from '../composables/useGearV2'
 import ContainerNameInput from './inputs/ContainerNameInput.vue'
 
 const props = defineProps<{
-  container: IGearContainer
+  container: IGearItemV2
 }>()
 
-const { updateContainer } = useGear()
+const { updateItem } = useGearV2()
 const { t } = useI18n()
 
 // Inline editing state
@@ -45,7 +45,7 @@ const saveName = async () => {
 
   try {
     isSavingName.value = true
-    await updateContainer(props.container.id, { name: editingName.value.trim() })
+    await updateItem(props.container.id, { name: editingName.value.trim() })
     toast.success(t('common.success'))
     isEditingName.value = false
   } catch (error) {

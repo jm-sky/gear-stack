@@ -21,6 +21,7 @@ import { useBackend } from '@/shared/composables/useBackend'
 import { useHandleError } from '@/shared/composables/useHandleError'
 import { smallDateTime } from '@/shared/utils/smallDateTime'
 import type { IGearContainer } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import { useGear } from '../composables/useGear'
 import { GearRoutePath } from '../routes'
 import { getActionIcon } from '../utils/actionIcons'
@@ -55,7 +56,7 @@ const AiIcon = getActionIcon('ai')
 const DeleteIcon = getActionIcon('delete')
 
 const props = defineProps<{
-  container: IGearContainer
+  container: IGearItemV2
 }>()
 
 const emit = defineEmits<{

@@ -1,36 +1,39 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { IGearContainer } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import { useGearSettings } from '../composables/useGearSettings'
-import { useGearStore } from '../store/useGearStore'
+import { useGearStoreV2 } from '../store/useGearStoreV2'
 import {
   READINESS_EXCELLENT_THRESHOLD,
   READINESS_GOOD_THRESHOLD,
 } from '../utils/constants'
 import {
-  calculateReadinessPercentageSync,
-  calculateTotalPriceSync,
-  calculateTotalWeightSync,
-  calculateWeightLimitPercentageSync,
-} from '../utils/containerCalculations'
+  calculateReadinessPercentageSyncV2,
+  calculateTotalPriceSyncV2,
+  calculateTotalWeightSyncV2,
+  calculateWeightLimitPercentageSyncV2,
+} from '../utils/containerCalculationsV2'
 import { formatCurrency } from '../utils/currencyFormatter'
 import { convertToGrams, formatWeightToPreferredUnit } from '../utils/formatWeight'
 
 const props = defineProps<{
-  container: IGearContainer
+  container: IGearItemV2
   showTotalPrice?: boolean
 }>()
 
 const { t, locale } = useI18n()
-const store = useGearStore()
+const store = useGearStoreV2()
 const { settings: gearSettings, defaultCurrency } = useGearSettings()
 const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
 
-const totalWeight = computed<number>(() => calculateTotalWeightSync(props.container, store.getAllContainers))
-const readinessPercentage = computed<number>(() => calculateReadinessPercentageSync(props.container))
-const itemsCount = computed<number>(() => props.container.items.length)
-const totalPriceByCurrency = computed<Record<string, number>>(() => calculateTotalPriceSync(props.container, store.getAllContainers, defaultCurrency.value))
+const totalWeight = computed<number>(() => calculateTotalWeightSyncV2(props.container.id, store.getItemById, store.getChildrenOfItem))
+const readinessPercentage = computed<number>(() => calculateReadinessPercentageSyncV2(props.container.id, store.getItemById, store.getChildrenOfItem))
+const itemsCount = computed<number>(() => {
+  const children = store.getChildrenOfItem(props.container.id)
+  return children.filter(child => child.itemType === 'item').length
+})
+const totalPriceByCurrency = computed<Record<string, number>>(() => calculateTotalPriceSyncV2(props.container.id, store.getItemById, store.getChildrenOfItem, defaultCurrency.value))
 
 // Format weight (totalWeight is in grams)
 const formattedWeight = computed<string>(() => formatWeightToPreferredUnit(totalWeight.value, settings.value.preferredWeightUnit, locale.value))
@@ -44,7 +47,7 @@ const readinessColor = computed<string>(() => {
 
 // Weight limit
 const weightLimitPercentage = computed<number | null>(() => {
-  return calculateWeightLimitPercentageSync(props.container, store.getAllContainers)
+  return calculateWeightLimitPercentageSyncV2(props.container.id, store.getItemById, store.getChildrenOfItem)
 })
 
 const hasWeightLimit = computed<boolean>(() => weightLimitPercentage.value !== null)

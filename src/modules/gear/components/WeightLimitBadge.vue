@@ -2,19 +2,19 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Badge } from '@/components/ui/badge'
-import type { IGearContainer } from '../types/gear.types'
-import { useGearStore } from '../store/useGearStore'
-import { calculateWeightLimitPercentageSync } from '../utils/containerCalculations'
+import type { IGearItemV2 } from '../types/gear.types.v2'
+import { useGearStoreV2 } from '../store/useGearStoreV2'
+import { calculateWeightLimitPercentageSyncV2 } from '../utils/containerCalculationsV2'
 
 const props = defineProps<{
-  container: IGearContainer
+  container: IGearItemV2
 }>()
 
 const { t } = useI18n()
-const store = useGearStore()
+const store = useGearStoreV2()
 
 const weightLimitPercentage = computed<number | null>(() =>
-  calculateWeightLimitPercentageSync(props.container, store.getAllContainers)
+  calculateWeightLimitPercentageSyncV2(props.container.id, store.getItemById, store.getChildrenOfItem)
 )
 
 const hasWeightLimit = computed<boolean>(() => weightLimitPercentage.value !== null)
