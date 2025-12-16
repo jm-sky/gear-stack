@@ -10,7 +10,7 @@ import { useBackend } from '@/shared/composables/useBackend'
 import { usePageTitle } from '@/shared/composables/usePageTitle'
 import { config } from '@/shared/config/config'
 import type { IGearItem } from '../types/gear.types'
-import type { IGearItemV2, TContainerColor } from '../types/gear.types.v2'
+import type { TContainerColor } from '../types/gear.types.v2'
 import ContainerHeader from '../components/ContainerHeader.vue'
 import ContainerItemImagesGallery from '../components/ContainerItemImagesGallery.vue'
 import ContainerRatingSection from '../components/ContainerRatingSection.vue'
@@ -18,7 +18,6 @@ import SortConfirmationAlert from '../components/SortConfirmationAlert.vue'
 import { useCatalogue } from '../composables/catalogue/useCatalogue'
 import { useContainerV2 } from '../composables/useContainerV2'
 import { useGear } from '../composables/useGear'
-import { useGearV2 } from '../composables/useGearV2'
 import { useItemsParamRecognition } from '../composables/useItemsParamRecognition'
 import { useJsonImportExport } from '../composables/useJsonImportExport'
 import { useSearchPaginationUrl } from '../composables/useSearchPaginationUrl'
@@ -51,7 +50,6 @@ const storeV2 = useGearStoreV2()
 const { shouldUseAPI } = useBackend()
 const { container } = useContainerV2()
 const { deleteItem, updateItem, updateContainer, createItem, getContainerById, moveItem } = useGear()
-const { updateItem: updateItemV2, deleteItem: deleteItemV2, createItem: createItemV2, moveItem: moveItemV2 } = useGearV2()
 const { user, isAuthenticated } = useAuth()
 const { canUseAi } = useAi()
 const { setTitle } = usePageTitle()
