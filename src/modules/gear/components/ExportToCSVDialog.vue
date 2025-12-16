@@ -17,20 +17,20 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import Separator from '@/components/ui/separator/Separator.vue'
 import { useLocale } from '@/shared/i18n/composables/useLocale'
 import { downloadBlob } from '@/shared/utils/downloadBlob'
-import type { IGearContainer } from '../types/gear.types'
-import { useGearStore } from '../store/useGearStore'
+import type { IGearItemV2 } from '../types/gear.types.v2'
+import { useGearStoreV2 } from '../store/useGearStoreV2'
 import { exportContainersToCSV, exportContainerToCSV, generateAllContainersCSVFileName, generateCSVFileName, getDefaultSeparator } from '../utils/exportToCSV'
 
 const open = defineModel<boolean>('open', { required: true })
 
 const props = defineProps<{
-  container?: IGearContainer
-  containers?: IGearContainer[]
+  container?: IGearItemV2
+  containers?: IGearItemV2[]
 }>()
 
 const { t } = useI18n()
 const { currentLocale } = useLocale()
-const store = useGearStore()
+const store = useGearStoreV2()
 
 // Available columns with categories (computed for reactivity)
 // Basic: standardowo widoczne kolumny
@@ -68,15 +68,14 @@ const includeNestedContainers = ref(true)
 // Calculate item count
 const itemCount = computed(() => {
   if (props.container) {
-    let count = props.container.items.length
+    const children = store.getChildrenOfItem(props.container.id)
+    let count = children.filter(child => child.itemType === 'item').length
 
     if (includeNestedContainers.value) {
-      props.container.items.forEach(item => {
-        if (item.containerId) {
-          const nestedContainer = store.getContainerById(item.containerId)
-          if (nestedContainer) {
-            count += nestedContainer.items.length
-          }
+      children.forEach(child => {
+        if (child.itemType === 'container') {
+          const nestedChildren = store.getChildrenOfItem(child.id)
+          count += nestedChildren.filter(nc => nc.itemType === 'item').length
         }
       })
     }
@@ -85,14 +84,14 @@ const itemCount = computed(() => {
   } else if (props.containers && props.containers.length > 0) {
     let totalCount = 0
     props.containers.forEach(container => {
-      totalCount += container.items.length
+      const children = store.getChildrenOfItem(container.id)
+      totalCount += children.filter(child => child.itemType === 'item').length
+
       if (includeNestedContainers.value) {
-        container.items.forEach(item => {
-          if (item.containerId) {
-            const nestedContainer = store.getContainerById(item.containerId)
-            if (nestedContainer) {
-              totalCount += nestedContainer.items.length
-            }
+        children.forEach(child => {
+          if (child.itemType === 'container') {
+            const nestedChildren = store.getChildrenOfItem(child.id)
+            totalCount += nestedChildren.filter(nc => nc.itemType === 'item').length
           }
         })
       }
@@ -134,9 +133,10 @@ const handleExport = () => {
     let fileName: string
 
     if (props.container) {
+      // TODO: Update export utilities to use V2 types
       csv = exportContainerToCSV(
-        props.container,
-        store.getAllContainers,
+        props.container as any,
+        [] as any,
         {
           columns: selectedColumns.value,
           separator: selectedSeparator.value,
@@ -146,9 +146,10 @@ const handleExport = () => {
       )
       fileName = generateCSVFileName(props.container.name)
     } else if (props.containers && props.containers.length > 0) {
+      // TODO: Update export utilities to use V2 types
       csv = exportContainersToCSV(
-        props.containers,
-        store.getAllContainers,
+        props.containers as any,
+        [] as any,
         {
           columns: selectedColumns.value,
           separator: selectedSeparator.value,

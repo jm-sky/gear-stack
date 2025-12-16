@@ -4,38 +4,40 @@ import { computed } from 'vue'
 import { Badge } from '@/components/ui/badge'
 import ButtonLink from '@/components/ui/button-link/ButtonLink.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
-import type { IGearContainer } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { GearRoutePath } from '../routes'
-import { useGearStore } from '../store/useGearStore'
+import { useGearStoreV2 } from '../store/useGearStoreV2'
 import PublicContainerAuthorBadge from './PublicContainerAuthorBadge.vue'
 
 const props = defineProps<{
-  container: IGearContainer
+  container: IGearItemV2
   withAuthor?: boolean
 }>()
 
-const store = useGearStore()
+const store = useGearStoreV2()
 const { isAuthenticated } = useAuth()
-const { typeLabel } = useContainerTypeLabel(computed(() => props.container.type))
+const { typeLabel } = useContainerTypeLabel(computed(() => props.container.containerType || 'backpack'))
 
 // Find all containers that contain this container as an item
-const parentContainers = computed<IGearContainer[]>(() => {
-  const parents: IGearContainer[] = []
+const parentContainers = computed<IGearItemV2[]>(() => {
+  const parents: IGearItemV2[] = []
   const containerId = props.container.id
 
   // Add direct parent if exists
-  if (props.container.parentContainerId) {
-    const directParent = store.getContainerById(props.container.parentContainerId)
+  if (props.container.parentItemId) {
+    const directParent = store.getItemById(props.container.parentItemId)
     if (directParent) {
       parents.push(directParent)
     }
   }
 
-  // Find all containers that have this container as an item
-  for (const container of store.getAllContainers) {
+  // Find all containers that have this container as a child
+  const allContainers = store.getAllItems.filter((item: IGearItemV2) => item.itemType === 'container')
+  for (const container of allContainers) {
     if (container.id === containerId) continue // Skip self
-    if (container.items.some(item => item.containerId === containerId)) {
+    const children = store.getChildrenOfItem(container.id)
+    if (children.some(child => child.id === containerId)) {
       // Avoid duplicates
       if (!parents.some(p => p.id === container.id)) {
         parents.push(container)
@@ -47,7 +49,7 @@ const parentContainers = computed<IGearContainer[]>(() => {
 })
 
 // Get first parent container
-const firstParentContainer = computed<IGearContainer | undefined>(() => {
+const firstParentContainer = computed<IGearItemV2 | undefined>(() => {
   return parentContainers.value[0]
 })
 

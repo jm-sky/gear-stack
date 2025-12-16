@@ -16,13 +16,13 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useHandleError } from '@/shared/composables/useHandleError'
-import type { IGearContainer } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import { useGear } from '../composables/useGear'
 import { GearRoutePath } from '../routes'
 
 const props = defineProps<{
   open: boolean
-  container: IGearContainer | null
+  container: IGearItemV2 | null
 }>()
 
 const emit = defineEmits<{

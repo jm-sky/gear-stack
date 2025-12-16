@@ -12,7 +12,7 @@ import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useAi } from '@/modules/ai/composables/useAi'
 import { CONTAINERS_LIST_PAGE_FILTERS_KEY } from '@/shared/config/config'
 import { config } from '@/shared/config/config'
-import type { IGearContainer } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import ContainerCard from '../components/ContainerCard.vue'
 import ContainersFilters from '../components/ContainersFilters.vue'
 import ContainersListPageDropdown from '../components/ContainersListPageDropdown.vue'
@@ -24,11 +24,9 @@ const ExportToPromptDialog = defineAsyncComponent(() => import('../components/Ex
 const ImportMarkdownDialog = defineAsyncComponent(() => import('../components/ImportMarkdownDialog.vue'))
 const AiChatDialog = defineAsyncComponent(() => import('@/modules/ai/components/AiChatDialog.vue'))
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
-import { useGear } from '../composables/useGear'
+import { useGearV2 } from '../composables/useGearV2'
 import { GearRouteIcon, GearRoutePath } from '../routes'
-import { gearContainerService } from '../services/gearContainerService'
 import { getActionIcon } from '../utils/actionIcons'
-import { getRootContainers as getRootContainersUtil } from '../utils/containerNesting'
 import type { TUUID } from '@/shared/types/base.type'
 
 // Action icons
@@ -39,7 +37,7 @@ const AiIcon = getActionIcon('ai')
 const router = useRouter()
 const route = useRoute()
 const { t } = useI18n()
-const { containers, deleteContainer } = useGear()
+const { containers, rootContainers, deleteItem, refreshAll } = useGearV2()
 const { getContainerTypeLabel } = useContainerTypeLabel()
 const { canUseAi } = useAi()
 
@@ -137,7 +135,7 @@ onMounted(async () => {
   if (config.backend.enabled) {
     try {
       loading.value = true
-      await gearContainerService().getContainers()
+      await refreshAll({ itemType: 'container' })
     } catch (error) {
       console.error('Failed to load containers from API:', error)
       // Fallback to localStorage is handled by store initialization
@@ -157,15 +155,15 @@ watch(() => route.query.import, (shouldImport) => {
 })
 
 // Filtered containers
-const filteredContainers = computed<IGearContainer[]>(() => {
+const filteredContainers = computed<IGearItemV2[]>(() => {
   // First filter by root containers if enabled
   let baseContainers = containers.value
   if (showOnlyRootContainers.value) {
-    baseContainers = getRootContainersUtil(containers.value)
+    baseContainers = rootContainers.value
   } else {
-    // Hide containers with hideWhenNested=true AND parentContainerId set
+    // Hide containers with hideWhenNested=true AND parentItemId set
     baseContainers = baseContainers.filter(container => {
-      if (container.hideWhenNested && container.parentContainerId) {
+      if (container.hideWhenNested && container.parentItemId) {
         return false // Hide this container
       }
       return true
@@ -180,7 +178,7 @@ const filteredContainers = computed<IGearContainer[]>(() => {
       return (
         container.name.toLowerCase().includes(query) ||
         container.description?.toLowerCase().includes(query) ||
-        getContainerTypeLabel(container.type).toLowerCase().includes(query)
+        getContainerTypeLabel(container.containerType || 'backpack').toLowerCase().includes(query)
       )
     })
   }
@@ -191,7 +189,7 @@ const filteredContainers = computed<IGearContainer[]>(() => {
     if (a.favorite && !b.favorite) return -1
     if (!a.favorite && b.favorite) return 1
     // Then by creation date (newest first)
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    return new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime()
   })
 })
 
@@ -208,7 +206,7 @@ const handleRefresh = async () => {
   if (config.backend.enabled) {
     try {
       loading.value = true
-      await gearContainerService().getContainers()
+      await refreshAll({ itemType: 'container' })
       toast.success(t('common.refresh'))
     } catch (error) {
       console.error('Failed to refresh containers:', error)
@@ -226,7 +224,7 @@ const handleImportComplete = () => {
 const handleDelete = async (id: TUUID) => {
   if (confirm(t('gear.container.deleteConfirm'))) {
     try {
-      await deleteContainer(id)
+      await deleteItem(id)
       toast.success(t('common.success'))
     } catch {
       toast.error(t('common.error'))

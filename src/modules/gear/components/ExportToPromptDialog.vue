@@ -21,23 +21,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { IGearContainer } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { useGearSettings } from '../composables/useGearSettings'
-import { useGearStore } from '../store/useGearStore'
-import { calculateTotalWeightSync } from '../utils/containerCalculations'
+import { useGearStoreV2 } from '../store/useGearStoreV2'
+import { calculateTotalWeightSyncV2 } from '../utils/containerCalculationsV2'
 import { exportContainersToPrompt, exportContainerToPrompt } from '../utils/exportToPrompt'
 import GuidelinesDialog from './GuidelinesDialog.vue'
 
 const open = defineModel<boolean>('open', { required: true })
 
 const props = defineProps<{
-  container?: IGearContainer
-  containers?: IGearContainer[]
+  container?: IGearItemV2
+  containers?: IGearItemV2[]
 }>()
 
 const { t, locale } = useI18n()
-const store = useGearStore()
+const store = useGearStoreV2()
 const { defaultCurrency } = useGearSettings()
 const copied = ref(false)
 const isGuidelinesDialogOpen = ref(false)
@@ -55,14 +55,12 @@ const descriptionFormat = ref<'off' | 'inline' | 'newline'>('off')
 const { getContainerTypeLabel } = useContainerTypeLabel()
 
 // Sync helpers for computed
-const getContainerById = (id: string): IGearContainer | undefined => {
-  return store.getContainerById(id)
+const getContainerById = (id: string): IGearItemV2 | undefined => {
+  return store.getItemById(id)
 }
 
 const calculateTotalWeight = (containerId: string): number => {
-  const container = store.getContainerById(containerId)
-  if (!container) return 0
-  return calculateTotalWeightSync(container, store.getAllContainers)
+  return calculateTotalWeightSyncV2(containerId, store.getItemById, store.getChildrenOfItem)
 }
 
 // Generate markdown based on current options
@@ -86,9 +84,11 @@ const markdown = computed<string>(() => {
   }
 
   if (props.container) {
-    return exportContainerToPrompt(props.container, exportOptions)
+    // TODO: Update export utilities to use V2 types
+    return exportContainerToPrompt(props.container as any, exportOptions as any)
   } else if (props.containers && props.containers.length > 0) {
-    return exportContainersToPrompt(props.containers, exportOptions)
+    // TODO: Update export utilities to use V2 types
+    return exportContainersToPrompt(props.containers as any, exportOptions as any)
   }
   return ''
 })

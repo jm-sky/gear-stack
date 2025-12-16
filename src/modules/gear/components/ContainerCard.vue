@@ -6,18 +6,18 @@ import { useRouter } from 'vue-router'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import CardContent from '@/components/ui/card/CardContent.vue'
-import type { IGearContainer } from '../types/gear.types'
+import type { IGearItemV2, TContainerColor } from '../types/gear.types.v2'
 import { useGearSettings } from '../composables/useGearSettings'
 import { GearRoutePath } from '../routes'
-import { useGearStore } from '../store/useGearStore'
+import { useGearStoreV2 } from '../store/useGearStoreV2'
 import {
   READINESS_EXCELLENT_THRESHOLD,
   READINESS_GOOD_THRESHOLD,
 } from '../utils/constants'
 import {
-  calculateReadinessPercentageSync,
-  calculateTotalWeightSync,
-} from '../utils/containerCalculations'
+  calculateReadinessPercentageSyncV2,
+  calculateTotalWeightSyncV2,
+} from '../utils/containerCalculationsV2'
 import { COLOR_BORDER_CLASSES, COLOR_TEXT_CLASSES } from '../utils/containerColors'
 import { getContainerIcon } from '../utils/containerIcons'
 import { formatWeightToPreferredUnit } from '../utils/formatWeight'
@@ -31,7 +31,7 @@ import FavoriteContainerButton from './FavoriteContainerButton.vue'
 import MarkdownRenderer from './MarkdownRenderer.vue'
 
 const props = defineProps<{
-  container: IGearContainer
+  container: IGearItemV2
 }>()
 
 const emit = defineEmits<{
@@ -40,18 +40,21 @@ const emit = defineEmits<{
 
 const router = useRouter()
 const { t, locale } = useI18n()
-const store = useGearStore()
+const store = useGearStoreV2()
 const { settings: gearSettings } = useGearSettings()
 const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
 
 // Computed properties - use sync helpers for computed
 const totalWeight = computed<number>(() => {
-  return calculateTotalWeightSync(props.container, store.getAllContainers)
+  return calculateTotalWeightSyncV2(props.container.id, store.getItemById, store.getChildrenOfItem)
 })
 const readinessPercentage = computed<number>(() => {
-  return calculateReadinessPercentageSync(props.container)
+  return calculateReadinessPercentageSyncV2(props.container.id, store.getItemById, store.getChildrenOfItem)
 })
-const itemsCount = computed<number>(() => props.container.items.length)
+const itemsCount = computed<number>(() => {
+  const children = store.getChildrenOfItem(props.container.id)
+  return children.filter(child => child.itemType === 'item').length
+})
 
 // Format weight (totalWeight is in grams)
 const formattedWeight = computed<string>(() => formatWeightToPreferredUnit(totalWeight.value, settings.value.preferredWeightUnit, locale.value))
@@ -65,11 +68,11 @@ const readinessColor = computed<string>(() => {
 
 // Check if container is nested
 const isNested = computed<boolean>(() => {
-  return !!props.container.parentContainerId
+  return !!props.container.parentItemId
 })
 
 // Get container icon based on type
-const ContainerIcon = computed(() => getContainerIcon(props.container.type))
+const ContainerIcon = computed(() => getContainerIcon(props.container.containerType || 'backpack'))
 
 // Navigate to container detail
 const handleShow = () => {
@@ -81,15 +84,15 @@ const handleShow = () => {
   <Card
     class="gap-2 hover:shadow-lg hover:bg-current/5 hover:scale-102 hover:-translate-y-1 transition-all duration-300 cursor-pointer"
     :class="[
-      container.color ? COLOR_BORDER_CLASSES[container.color] : '',
-      container.color ? COLOR_TEXT_CLASSES[container.color] : '',
+      container.color ? COLOR_BORDER_CLASSES[container.color as TContainerColor] : '',
+      container.color ? COLOR_TEXT_CLASSES[container.color as TContainerColor] : '',
       container.color && container.color !== 'default' ? 'outline-2 outline-current/15' : '',
     ]"
     @click="handleShow"
   >
     <CardHeader class="h-8 text-card-foreground flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <ColorDot :color="container.color ?? undefined" :icon="ContainerIcon" />
+        <ColorDot :color="(container.color ?? undefined) as TContainerColor | undefined" :icon="ContainerIcon" />
         <CardTitle>{{ container.name }}</CardTitle>
         <Badge v-if="isNested" variant="outline" class="ml-auto text-xs">
           <Box :size="12" class="mr-1" />

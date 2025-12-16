@@ -11,14 +11,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import type { IGearContainer } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import { GearRoutePath } from '../routes'
 
 // Lazy load dialog to reduce initial bundle size
 const CloneContainerDialog = defineAsyncComponent(() => import('./CloneContainerDialog.vue'))
 
 const props = defineProps<{
-  container: IGearContainer
+  container: IGearItemV2
 }>()
 
 const emit = defineEmits<{
