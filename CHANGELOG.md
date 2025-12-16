@@ -21,6 +21,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.37.1] - 2025-12-16
+
+### Fixed
+- **Pagination**: Fixed page size not persisting in URL and not applying correctly to DataTable
+  - `Pagination` component now uses `computed` for `totalPages` to react to `pageSize` changes
+  - `DataTable` no longer allows TanStack Table to reset `pageSize` with stale internal state
+  - Added watch with `immediate: true` to sync TanStack Table with external `pageSize` changes (e.g., from URL)
+  - Removed redundant `currentPage`/`currentPageSize` computed properties in favor of direct `defineModel` usage
+
+---
+
 ## [2.37.0] - 2025-12-16
 
 ### Added
