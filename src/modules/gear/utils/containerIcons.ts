@@ -4,7 +4,7 @@ import {
   Box,          // box
   Briefcase,    // case
   Car,          // vehicle
-  CookingPot,     // naczynie
+  CookingPot,   // naczynie
   Layers,       // shelf
   Luggage,      // trunk
   Package,      // other (default)
@@ -35,7 +35,7 @@ export const CONTAINER_ICONS: Record<string, Component> = {
  * @param type - Container type key
  * @returns Icon component, defaults to Package icon for unknown types
  */
-export function getContainerIcon(type: TGearContainerType): Component {
-  return CONTAINER_ICONS[type] ?? (CONTAINER_ICONS.other as Component)
+export function getContainerIcon(type: TGearContainerType | null | undefined): Component {
+  return CONTAINER_ICONS[type ?? 'other'] ?? (CONTAINER_ICONS.other as Component)
 }
 

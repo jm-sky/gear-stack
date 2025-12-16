@@ -72,7 +72,7 @@ const isNested = computed<boolean>(() => {
 })
 
 // Get container icon based on type
-const ContainerIcon = computed(() => getContainerIcon(props.container.containerType || 'backpack'))
+const ContainerIcon = computed(() => getContainerIcon(props.container.containerType))
 
 // Navigate to container detail
 const handleShow = () => {
@@ -92,7 +92,7 @@ const handleShow = () => {
   >
     <CardHeader class="h-8 text-card-foreground flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <ColorDot :color="(container.color ?? undefined) as TContainerColor | undefined" :icon="ContainerIcon" />
+        <ColorDot :color="(container.color as TContainerColor | undefined)" :icon="ContainerIcon" />
         <CardTitle>{{ container.name }}</CardTitle>
         <Badge v-if="isNested" variant="outline" class="ml-auto text-xs">
           <Box :size="12" class="mr-1" />

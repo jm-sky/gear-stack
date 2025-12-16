@@ -40,7 +40,7 @@ const itemsCount = computed(() => {
     >
       <CardHeader class="h-8 text-card-foreground flex items-center justify-between">
         <div class="flex items-center gap-2">
-          <ColorDot :color="(container.color ?? undefined) as TContainerColor | undefined" :icon="ContainerIcon" />
+          <ColorDot :color="(container.color as TContainerColor | undefined)" :icon="ContainerIcon" />
           <CardTitle>{{ container.name }}</CardTitle>
         </div>
       </CardHeader>

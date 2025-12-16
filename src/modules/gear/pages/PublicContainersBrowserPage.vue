@@ -7,7 +7,7 @@ import { toast } from 'vue-sonner'
 import CommonPageHeader from '@/components/layout/CommonPageHeader.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { PUBLIC_CONTAINERS_BROWSER_PAGE_FILTERS_KEY } from '@/shared/config/config'
-import type { IGearContainer } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import ContainersFilters from '../components/ContainersFilters.vue'
 import PublicContainerCard from '../components/PublicContainerCard.vue'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
@@ -17,7 +17,7 @@ import { publicContainersService } from '../services/publicContainersService'
 const { t } = useI18n()
 const { getContainerTypeLabel } = useContainerTypeLabel()
 
-const containers = ref<IGearContainer[]>([])
+const containers = ref<IGearItemV2[]>([])
 const loading = ref(true)
 
 // Search filter
@@ -65,7 +65,7 @@ watch(searchQueryRaw, () => {
 })
 
 // Filtered containers
-const filteredContainers = computed<IGearContainer[]>(() => {
+const filteredContainers = computed<IGearItemV2[]>(() => {
   if (!searchQuery.value.trim()) {
     return containers.value
   }
@@ -75,7 +75,7 @@ const filteredContainers = computed<IGearContainer[]>(() => {
     return (
       container.name.toLowerCase().includes(query) ||
       container.description?.toLowerCase().includes(query) ||
-      getContainerTypeLabel(container.type).toLowerCase().includes(query) ||
+      getContainerTypeLabel(container.containerType || 'backpack').toLowerCase().includes(query) ||
       container.authorName?.toLowerCase().includes(query)
     )
   })
@@ -84,7 +84,9 @@ const filteredContainers = computed<IGearContainer[]>(() => {
 const loadContainers = async () => {
   loading.value = true
   try {
-    containers.value = await publicContainersService.getPublicContainers()
+    // TODO: Backend API still returns V1 format - cast to V2 for now
+    const publicContainers = await publicContainersService.getPublicContainers()
+    containers.value = publicContainers as any
   } catch (error) {
     toast.error(t('common.error'))
     console.error('Failed to load public containers:', error)
