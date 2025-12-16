@@ -113,7 +113,6 @@ export function useSearchPaginationUrl(config: SearchPaginationUrlConfig = {}) {
       if (isUpdatingFromUrl) return
 
       const newQuery = buildQuery()
-
       router.replace({ query: newQuery }).catch(() => {
         // Ignore navigation errors
       })

@@ -113,30 +113,8 @@ watch(columnVisibilityModel, (newValue) => {
   }
 }, { immediate: true, deep: true })
 
-// Pagination state (client-side or server-side)
+// Pagination state
 const isServerSide = computed(() => props.total !== undefined)
-const currentPage = computed({
-  get: () => isServerSide.value ? page.value : page.value,
-  set: (value) => {
-    page.value = value
-    // Always emit update:page to propagate changes to parent (needed for v-model sync)
-    emit('update:page', value)
-    if (isServerSide.value) {
-      props.onPageChange?.(value)
-    }
-  }
-})
-const currentPageSize = computed({
-  get: () => isServerSide.value ? pageSize.value : pageSize.value,
-  set: (value) => {
-    pageSize.value = value
-    // Always emit update:pageSize to propagate changes to parent (needed for v-model sync)
-    emit('update:pageSize', value)
-    if (isServerSide.value) {
-      props.onPageSizeChange?.(value)
-    }
-  }
-})
 
 // Table instance
 const table = useVueTable({
@@ -185,11 +163,14 @@ const table = useVueTable({
   onPaginationChange: props.enablePagination && !isServerSide.value
     ? (updater) => {
         const newPagination = typeof updater === 'function'
-          ? updater({ pageIndex: currentPage.value - 1, pageSize: currentPageSize.value })
+          ? updater({ pageIndex: page.value - 1, pageSize: pageSize.value })
           : updater
 
-        currentPage.value = newPagination.pageIndex + 1
-        currentPageSize.value = newPagination.pageSize
+        // Only update page index here - pageSize is controlled by handlePageSizeChange
+        // This prevents TanStack Table from resetting pageSize with stale internal state
+        if (page.value !== newPagination.pageIndex + 1) {
+          page.value = newPagination.pageIndex + 1
+        }
       }
     : undefined,
   state: {
@@ -199,8 +180,8 @@ const table = useVueTable({
     get rowSelection() { return props.enableRowSelection ? rowSelection.value : undefined },
     get pagination() {
       return props.enablePagination ? {
-        pageIndex: currentPage.value - 1,
-        pageSize: currentPageSize.value,
+        pageIndex: page.value - 1,
+        pageSize: pageSize.value,
       } : undefined
     },
   },
@@ -208,7 +189,7 @@ const table = useVueTable({
     ...(props.enablePagination ? {
       pagination: {
         pageIndex: 0,
-        pageSize: currentPageSize.value,
+        pageSize: pageSize.value,
       },
     } : {}),
     ...(props.enableColumnVisibility && Object.keys(columnVisibility.value).length > 0 ? {
@@ -230,18 +211,15 @@ watch(globalFilterModel, (newValue) => {
   }
 })
 
-// Sync pageSize with table state (when changed externally)
+// Sync pageSize with TanStack Table when changed externally (e.g., from URL)
 watch(pageSize, (newValue) => {
-  if (currentPageSize.value !== newValue) {
-    currentPageSize.value = newValue
-    if (!isServerSide.value && props.enablePagination) {
+  if (!isServerSide.value && props.enablePagination) {
+    const currentTablePageSize = table.getState().pagination.pageSize
+    if (currentTablePageSize !== newValue) {
       table.setPageSize(newValue)
-      // Reset to page 1 when page size changes
-      currentPage.value = 1
-      table.setPageIndex(0)
     }
   }
-})
+}, { immediate: true })
 
 // Computed values
 const totalRows = computed(() => isServerSide.value ? (props.total ?? 0) : props.data.length)
@@ -250,17 +228,17 @@ const selectedRowsCount = computed(() => Object.keys(rowSelection.value).length)
 
 // Event handlers
 const handlePageChange = (newPage: number) => {
-  currentPage.value = newPage
+  page.value = newPage
   if (!isServerSide.value) {
     table.setPageIndex(newPage - 1)
   }
 }
 
 const handlePageSizeChange = (newPageSize: number) => {
-  currentPageSize.value = newPageSize
+  pageSize.value = newPageSize
   if (!isServerSide.value) {
     table.setPageSize(newPageSize)
-    currentPage.value = 1
+    page.value = 1
     table.setPageIndex(0)
   }
 }
@@ -385,16 +363,16 @@ const handlePageSizeChange = (newPageSize: number) => {
     <slot
       name="pagination"
       :table="table"
-      :page="currentPage"
-      :page-size="currentPageSize"
+      :page="page"
+      :page-size="pageSize"
       :total="totalRows"
       :handle-page-change="handlePageChange"
       :handle-page-size-change="handlePageSizeChange"
     >
       <Pagination
         v-if="enablePagination"
-        :page="currentPage"
-        :page-size="currentPageSize"
+        :page="page"
+        :page-size="pageSize"
         :total="totalRows"
         :page-size-options="pageSizeOptions"
         @update:page="handlePageChange"
