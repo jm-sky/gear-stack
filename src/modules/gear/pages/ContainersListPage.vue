@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import { refDebounced } from '@vueuse/core'
-import { FileInput, Package, RefreshCcw } from 'lucide-vue-next'
+import { FileInput, Package } from 'lucide-vue-next'
 import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
+import Pagination from '@/components/data-table/Pagination.vue'
 import CommonPageHeader from '@/components/layout/CommonPageHeader.vue'
 import { Button } from '@/components/ui/button'
 import ButtonLink from '@/components/ui/button-link/ButtonLink.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useAi } from '@/modules/ai/composables/useAi'
+import { useBackend } from '@/shared/composables/useBackend'
 import { CONTAINERS_LIST_PAGE_FILTERS_KEY } from '@/shared/config/config'
-import { config } from '@/shared/config/config'
 import type { IGearContainer } from '../types/gear.types'
 import ContainerCard from '../components/ContainerCard.vue'
 import ContainersFilters from '../components/ContainersFilters.vue'
@@ -42,6 +43,7 @@ const { t } = useI18n()
 const { containers, deleteContainer } = useGear()
 const { getContainerTypeLabel } = useContainerTypeLabel()
 const { canUseAi } = useAi()
+const { shouldUseAPI } = useBackend()
 
 // Filters - using refs that will be bound to ContainersFilters via v-model
 const loading = ref(false)
@@ -73,6 +75,11 @@ const storedFilters = loadFiltersFromStorage()
 const searchQueryRaw = ref(urlFilters.searchQuery || storedFilters?.searchQuery || '')
 const searchQuery = refDebounced(searchQueryRaw, 300)
 const showOnlyRootContainers = ref(urlFilters.showOnlyRootContainers || storedFilters?.showOnlyRootContainers || false)
+
+// Pagination state
+const DEFAULT_PAGE_SIZE = 12
+const page = ref<number>(1)
+const pageSize = ref<number>(DEFAULT_PAGE_SIZE)
 
 // Update URL when filters change
 watch([searchQueryRaw, showOnlyRootContainers], ([newSearch, newRootOnly]) => {
@@ -133,8 +140,8 @@ onMounted(async () => {
     router.replace({ query: { ...route.query, import: undefined } })
   }
 
-  // Load containers from API on mount (when backend is enabled)
-  if (config.backend.enabled) {
+  // Load containers from API on mount (when backend is enabled AND user is authenticated)
+  if (shouldUseAPI.value) {
     try {
       loading.value = true
       await gearContainerService().getContainers()
@@ -195,6 +202,18 @@ const filteredContainers = computed<IGearContainer[]>(() => {
   })
 })
 
+// Paginated containers
+const paginatedContainers = computed<IGearContainer[]>(() => {
+  const start = (page.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return filteredContainers.value.slice(start, end)
+})
+
+// Reset to first page when filters change
+watch([searchQuery, showOnlyRootContainers], () => {
+  page.value = 1
+})
+
 // Actions
 const handleCreate = () => {
   router.push(GearRoutePath.ContainerNew)
@@ -205,17 +224,16 @@ const handleImport = () => {
 }
 
 const handleRefresh = async () => {
-  if (config.backend.enabled) {
-    try {
-      loading.value = true
-      await gearContainerService().getContainers()
-      toast.success(t('common.refresh'))
-    } catch (error) {
-      console.error('Failed to refresh containers:', error)
-      toast.error(t('common.error'))
-    } finally {
-      loading.value = false
-    }
+  // Button is only visible when shouldUseAPI is true, so no need to check again
+  try {
+    loading.value = true
+    await gearContainerService().getContainers()
+    toast.success(t('common.refresh'))
+  } catch (error) {
+    console.error('Failed to refresh containers:', error)
+    toast.error(t('common.error'))
+  } finally {
+    loading.value = false
   }
 }
 
@@ -268,18 +286,6 @@ const handleAiChat = () => {
       >
         <template #actions>
           <Button
-            v-if="config.backend.enabled"
-            v-tooltip.bottom="t('common.refresh')"
-            variant="ghost"
-            size="sm"
-            class="shrink-0"
-            :aria-label="t('common.refresh')"
-            :disabled="loading"
-            @click="handleRefresh"
-          >
-            <RefreshCcw class="size-4" :class="{ 'animate-spin': loading }" />
-          </Button>
-          <Button
             v-if="canUseAi"
             v-tooltip.bottom="t('gear.actions.aiAssistant')"
             variant="ghost"
@@ -322,17 +328,27 @@ const handleAiChat = () => {
         v-model:show-only-root-containers="showOnlyRootContainers"
         root-containers-filter
         :loading
+        @refresh="handleRefresh"
       />
 
       <!-- Containers Grid -->
       <div v-if="filteredContainers.length > 0" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
         <ContainerCard
-          v-for="container in filteredContainers"
+          v-for="container in paginatedContainers"
           :key="container.id"
           :container="container"
           @delete="handleDelete"
         />
       </div>
+
+      <!-- Pagination -->
+      <Pagination
+        v-if="filteredContainers.length > 0"
+        v-model:page="page"
+        v-model:page-size="pageSize"
+        :total="filteredContainers.length"
+        :page-size-options="[6, 12, 24, 48, 100]"
+      />
 
       <!-- Empty State -->
       <div v-else class="flex flex-col items-center justify-center py-12 text-center">
@@ -349,7 +365,7 @@ const handleAiChat = () => {
           <Button @click="handleCreate">
             <CreateIcon class="size-4" />
             {{ t('gear.container.create.title') }}
-          </Button>
+          </Button> -
 
           <div class="flex items-center gap-2 text-muted-foreground">
             <span>{{ t('common.or', 'or') }}</span>

@@ -34,6 +34,7 @@ const emit = defineEmits<{
       <Button
         variant="ghost"
         size="sm"
+        class="w-9"
         :loading
         :aria-label="t('gear.filters.refresh', 'Refresh containers')"
         @click="emit('refresh')"

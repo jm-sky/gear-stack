@@ -304,6 +304,12 @@ const handleAddNestedContainer = async (nestedContainerId: string) => {
       return
     }
 
+    // Update the nested container's parentContainerId to establish the relationship
+    // This ensures hideWhenNested works correctly for containers nested via item reference
+    await updateContainer(nestedContainerId, {
+      parentContainerId: containerId,
+    })
+
     // Create an item that references the nested container
     // Use container name as item name
     await createItem(containerId, {
