@@ -183,3 +183,17 @@ class ItemImageRepository:
         result = await self.db.execute(stmt)
         total = result.scalar()
         return total or 0
+
+    async def get_all_by_user(self, user_id: str) -> Sequence[ItemImageDB]:
+        """
+        Get all images for a user (across all items).
+
+        Args:
+            user_id: User ID
+
+        Returns:
+            List of all images for the user
+        """
+        stmt = select(ItemImageDB).where(ItemImageDB.user_id == user_id)
+        result = await self.db.execute(stmt)
+        return result.scalars().all()

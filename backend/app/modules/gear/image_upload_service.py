@@ -376,6 +376,39 @@ class ImageUploadService:
 
         return True
 
+    async def delete_all_item_images(self, item_id: str) -> int:
+        """
+        Delete all images for an item (used when item is deleted).
+
+        Args:
+            item_id: Item ID
+
+        Returns:
+            Number of images deleted
+        """
+        images = await self.repository.get_by_item(item_id)
+        deleted_count = 0
+
+        for image in images:
+            # Delete from storage only if not external URL (continue even if this fails)
+            if image.storage_type != "external" and image.file_path:
+                try:
+                    await self.storage.delete(image.file_path)
+                except Exception as e:
+                    logger.error(f"Failed to delete image file from storage (item_id={item_id}, image_id={image.id}): {e}")
+
+            # Delete from database
+            try:
+                await self.repository.delete(image.id)
+                deleted_count += 1
+            except Exception as e:
+                logger.error(f"Failed to delete image record from database (item_id={item_id}, image_id={image.id}): {e}")
+
+        if deleted_count > 0:
+            logger.info(f"Deleted {deleted_count} image(s) for item {item_id}")
+
+        return deleted_count
+
     async def reorder_images(self, item_id: str, image_orders: list[dict]) -> bool:
         """
         Reorder images for an item.

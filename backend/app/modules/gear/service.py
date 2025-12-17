@@ -76,6 +76,76 @@ class GearService:
         self._image_repository = ItemImageRepository(repository.db)
         self._storage = get_storage_adapter()
 
+    async def _delete_all_item_images(self, item_id: str) -> int:
+        """Delete all images for an item from storage and database.
+
+        This is a helper method used when deleting items.
+        It deletes images from storage (S3/local) and database.
+
+        Args:
+            item_id: Item ID
+
+        Returns:
+            Number of images deleted
+        """
+        images = await self._image_repository.get_by_item(item_id)
+        deleted_count = 0
+
+        for image in images:
+            # Delete from storage only if not external URL (continue even if this fails)
+            if image.storage_type != "external" and image.file_path:
+                try:
+                    await self._storage.delete(image.file_path)
+                except Exception as e:
+                    logger.error(f"Failed to delete image file from storage (item_id={item_id}, image_id={image.id}): {e}")
+
+            # Delete from database (cascade delete will handle this, but we do it explicitly for logging)
+            try:
+                await self._image_repository.delete(image.id)
+                deleted_count += 1
+            except Exception as e:
+                logger.error(f"Failed to delete image record from database (item_id={item_id}, image_id={image.id}): {e}")
+
+        if deleted_count > 0:
+            logger.info(f"Deleted {deleted_count} image(s) for item {item_id}")
+
+        return deleted_count
+
+    async def delete_all_user_images(self, user_id: str) -> int:
+        """Delete all images for a user from storage and database.
+
+        This method is used when deleting a user account.
+        It deletes all images belonging to the user across all items.
+
+        Args:
+            user_id: User ID
+
+        Returns:
+            Number of images deleted
+        """
+        images = await self._image_repository.get_all_by_user(user_id)
+        deleted_count = 0
+
+        for image in images:
+            # Delete from storage only if not external URL (continue even if this fails)
+            if image.storage_type != "external" and image.file_path:
+                try:
+                    await self._storage.delete(image.file_path)
+                except Exception as e:
+                    logger.error(f"Failed to delete image file from storage (user_id={user_id}, image_id={image.id}): {e}")
+
+            # Delete from database
+            try:
+                await self._image_repository.delete(image.id)
+                deleted_count += 1
+            except Exception as e:
+                logger.error(f"Failed to delete image record from database (user_id={user_id}, image_id={image.id}): {e}")
+
+        if deleted_count > 0:
+            logger.info(f"Deleted {deleted_count} image(s) for user {user_id}")
+
+        return deleted_count
+
     def _map_item_to_response(
         self,
         item: GearItemDB,
@@ -536,6 +606,20 @@ class GearService:
         Returns:
             True if deleted, False if not found
         """
+        # Get container with items to delete images before deletion
+        container = await self.repository.get_container(container_id, user_id)
+        if not container:
+            return False
+
+        # Get all items in the container (including nested containers' items)
+        items = await self.repository.get_items(container_id, user_id, skip=0, limit=10000)
+        item_ids = [item.id for item in items]
+
+        # Delete images for all items
+        for item_id in item_ids:
+            await self._delete_all_item_images(item_id)
+
+        # Delete container (cascade delete will handle items and images in database)
         return await self.repository.delete_container(container_id, user_id)
 
     async def delete_all_containers(self, user_id: str) -> int:
@@ -547,6 +631,22 @@ class GearService:
         Returns:
             Number of deleted containers
         """
+        # Get all containers with items to delete images before deletion
+        # Use a high limit to get all containers (or fetch in batches if needed)
+        containers = await self.repository.get_containers(user_id, skip=0, limit=10000)
+
+        # Collect all item IDs from all containers
+        all_item_ids = []
+        for container in containers:
+            # Get items for this container (use high limit to get all items)
+            items = await self.repository.get_items(container.id, user_id, skip=0, limit=10000)
+            all_item_ids.extend([item.id for item in items])
+
+        # Delete images for all items
+        for item_id in all_item_ids:
+            await self._delete_all_item_images(item_id)
+
+        # Delete containers (cascade delete will handle items and images in database)
         return await self.repository.delete_all_containers(user_id)
 
     async def create_item(self, container_id: str, user_id: str, data: ItemCreate) -> ItemResponse | None:
@@ -728,6 +828,10 @@ class GearService:
         Returns:
             True if deleted, False if not found
         """
+        # Delete all item images from storage before deleting the item
+        # (database records will be deleted by cascade, but we need to clean up storage)
+        await self._delete_all_item_images(item_id)
+
         return await self.repository.delete_item(item_id, user_id)
 
     async def batch_update_item_order(self, user_id: str, data: BatchOrderUpdateRequest) -> list[ItemResponse]:
