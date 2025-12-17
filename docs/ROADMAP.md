@@ -94,10 +94,10 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - Zapobieganie białemu ekranowi podczas inicjalizacji aplikacji
    - Status: 🔄 Planned | Priority: High | Complexity: Small
 
-12. **Welcome back message and links on landing page for already logged in users**
+12. ✅ **Welcome back message and links on landing page for already logged in users**
    - Dodanie komunikatu powitalnego na stronie głównej dla zalogowanych użytkowników
    - Linki do głównych sekcji aplikacji (np. kontenery, ustawienia)
-   - Status: 🔄 Planned | Priority: High | Complexity: Small
+   - Status: ✅ Completed | Priority: High | Complexity: Small
 
 13. **Nie działa zmiana ilości wierszy przedmiotów (limit) na stronie Container Details**
    - Naprawa funkcjonalności zmiany limitu wierszy w tabeli przedmiotów na stronie szczegółów kontenera
