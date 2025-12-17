@@ -4,7 +4,7 @@
 
 import type { IGearItemV2 } from '../types/gear.types.v2'
 import { formatCurrency, getCurrency } from './currencyFormatter'
-import { formatWeight, formatWeightFromGrams } from './formatWeight'
+import { formatWeight } from './formatWeight'
 import { isSet } from './helpers'
 
 interface ExportOptionsV2 {
@@ -57,16 +57,6 @@ function formatNotesAsIndentedBlock(notes: string, indent: number): string {
   const noteIndent = '  ' // 2 spaces for note indentation
   const lines = notes.split('\n')
   return lines.map(line => `${indentStr}${noteIndent}${line}`).join('\n')
-}
-
-/**
- * Check if item is a nested container reference
- */
-function isNestedContainerReference(item: IGearItemV2, getItemById?: (id: string) => IGearItemV2 | undefined): boolean {
-  // In V2, an item can reference another container if it's an item with a specific pattern
-  // For now, we check if there's a container with the same name (simplified logic)
-  // This might need refinement based on actual nested container implementation
-  return false // TODO: Implement nested container detection for V2
 }
 
 /**

@@ -16,7 +16,7 @@ import type { TUUID } from '@/shared/types/base.type'
  */
 export function useContainerOperationsV2() {
   const {
-    items,
+    items: _items,
     containers,
     rootContainers,
     createItem,

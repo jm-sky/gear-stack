@@ -1,5 +1,5 @@
 import type { IGearContainer, IGearItem } from '../types/gear.types'
-import type { ICreateGearItemV2Dto, IGearItemV2 } from '../types/gear.types.v2'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 
 /**
  * V1 to V2 Data Migration Service

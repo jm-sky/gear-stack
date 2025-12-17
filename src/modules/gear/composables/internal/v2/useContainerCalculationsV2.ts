@@ -1,4 +1,3 @@
-import { computed, type ComputedRef } from 'vue'
 import type { IGearItemV2 } from '../../../types/gear.types.v2'
 import { useGearStoreV2 } from '../../../store/useGearStoreV2'
 import {

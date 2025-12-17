@@ -17,9 +17,9 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type { IGearItemV2 } from '../types/gear.types.v2'
+import { migrateV1ToV2 } from '../services/v1ToV2Migration'
 import { isContainer } from '../types/gear.types.v2'
 import type { TUUID } from '@/shared/types/base.type'
-import { migrateV1ToV2 } from '../services/v1ToV2Migration'
 
 const STORAGE_KEY = 'gear-stack:items-v2'
 
