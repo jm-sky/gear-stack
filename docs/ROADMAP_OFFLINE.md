@@ -216,8 +216,8 @@ W komponencie `ContainerColorPicker.vue` dodać funkcjonalności ułatwiające w
 - Lepsza dostępność (nazwy widoczne bez hover)
 - Lepsze UX dla użytkowników, którzy nie pamiętają, jak wygląda dany kolor
 
-### 🔄 DataTable - Pinned Columns (Pin-right dla kolumny akcji)
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
+### ✅ DataTable - Pinned Columns (Pin-right dla kolumny akcji)
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Small
 
 **Koncepcja:**
 Dodanie wsparcia dla pinned columns w komponencie `DataTable`, szczególnie pin-right dla kolumny akcji, aby była zawsze widoczna podczas poziomego przewijania tabeli.
@@ -228,13 +228,16 @@ Dodanie wsparcia dla pinned columns w komponencie `DataTable`, szczególnie pin-
 - Szczególnie istotne w tabelach z wieloma kolumnami (np. CatalogueManagePage)
 
 **Implementacja:**
-1. **Rozszerzenie DataTable.vue:**
-   - Dodanie wsparcia dla `meta.pinned: 'left' | 'right'` w definicji kolumny (TanStack Table v8)
-   - Stylowanie pinned columns z `position: sticky` i odpowiednim `right`/`left`
-   - Ustawienie odpowiedniego `z-index` i `background-color` dla sticky columns
-   - Obsługa kolejności kolumn (pinned columns na początku/końcu)
+1. ✅ **Rozszerzenie DataTable.vue:**
+   - ✅ Dodanie wsparcia dla `meta.pinned: 'left' | 'right'` w definicji kolumny (TanStack Table v8)
+   - ✅ Stylowanie pinned columns z `position: sticky` i odpowiednim `right`/`left`
+   - ✅ Ustawienie odpowiedniego `z-index` i `background-color` dla sticky columns
+   - ✅ Obsługa kolejności kolumn (pinned columns na początku/końcu)
+   - ✅ Synchronizacja cienia pinned columns z horizontal scroll state (cień pojawia się tylko gdy jest scroll)
+   - ✅ Transition dla płynnego pojawiania się/znikania cienia (200ms)
+   - ✅ Composable `useHorizontalScroll` do śledzenia stanu scrolla (reusable)
 
-2. **Użycie w CatalogueManagePage:**
+2. ✅ **Użycie w CatalogueManagePage:**
    - Dodanie `meta: { pinned: 'right' }` do kolumny akcji
    - Kolumna akcji będzie zawsze widoczna po prawej stronie podczas scrollowania
 
@@ -245,9 +248,10 @@ Dodanie wsparcia dla pinned columns w komponencie `DataTable`, szczególnie pin-
    - Inne strony używające DataTable z kolumną akcji
 
 **Zalety:**
-- Lepsze UX - akcje zawsze dostępne bez przewijania
-- Spójność z nowoczesnymi tabelami (np. Google Sheets, Notion)
-- Możliwość użycia również dla pin-left (np. dla kolumny z nazwą)
+- ✅ Lepsze UX - akcje zawsze dostępne bez przewijania
+- ✅ Spójność z nowoczesnymi tabelami (np. Google Sheets, Notion)
+- ✅ Możliwość użycia również dla pin-left (np. dla kolumny z nazwą)
+- ✅ Inteligentny cień - pojawia się tylko gdy jest scroll, z płynnym transition
 
 ### 🔄 Obrazek kontenera jako okrągły avatar w liście kontenerów
 **Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small
