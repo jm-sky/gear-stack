@@ -113,6 +113,7 @@ class GearService:
             weightUnit=cast(WeightUnit, item.weight_unit),
             notes=item.notes,
             expirationDate=item.expiration_date,
+            shelfLife=item.shelf_life,
             priority=cast(Priority, item.priority),
             status=cast(ItemStatus, item.status),
             containerId=item.nested_container_id,  # Reference to nested container if item is a container

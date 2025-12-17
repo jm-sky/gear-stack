@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import ShelfLifeInput from '@/components/ui/shelf-life-input/ShelfLifeInput.vue'
 import WeightInputWithUnitPicker from '@/components/ui/weight-input/WeightInputWithUnitPicker.vue'
 import type { IGearItem } from '../types/gear.types'
 import { useGearSettings } from '../composables/useGearSettings'
@@ -28,6 +29,7 @@ const emit = defineEmits<{
   cancel: []
   nameBlur: []
   recognizeParameters: []
+  setExpirationDate: []
 }>()
 
 const { t } = useI18n()
@@ -43,6 +45,7 @@ nextTick(() => {
 const handleCancel = () => {
   emit('cancel')
 }
+
 </script>
 
 <template>
@@ -126,17 +129,56 @@ const handleCancel = () => {
       </FormField>
     </div>
 
-    <!-- Expiration Date -->
-    <FormField v-slot="{ componentField }" name="expirationDate">
-      <FormItem>
-        <FormLabel :label="t('gear.item.expirationDate')" />
-        <Input
-          v-bind="componentField"
-          type="date"
-          :placeholder="t('gear.item.expirationDate')"
-        />
-        <FormMessage />
-      </FormItem>
+    <!-- Expiration Date and Shelf Life -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <!-- Expiration Date -->
+      <FormField v-slot="{ componentField }" name="expirationDate">
+        <FormItem>
+          <FormLabel :label="t('gear.item.expirationDate')" />
+          <Input
+            v-bind="componentField"
+            type="date"
+            :placeholder="t('gear.item.expirationDate')"
+          />
+          <FormMessage />
+        </FormItem>
+      </FormField>
+
+      <!-- Shelf Life -->
+      <FormField v-slot="{ value: shelfLifeValue, handleChange: handleShelfLifeValueChange }" name="shelfLifeValue">
+        <FormField v-slot="{ value: shelfLifeUnit, handleChange: handleShelfLifeUnitChange }" name="shelfLifeUnit">
+          <FormItem>
+            <FormLabel :label="t('gear.item.shelfLife')" />
+            <ShelfLifeInput
+              :model-value="shelfLifeValue"
+              :unit="shelfLifeUnit"
+              :placeholder="t('gear.item.shelfLifePlaceholder')"
+              @update:model-value="handleShelfLifeValueChange"
+              @update:unit="handleShelfLifeUnitChange"
+            />
+            <FormMessage />
+          </FormItem>
+        </FormField>
+      </FormField>
+    </div>
+
+    <!-- Set Expiration Date Button -->
+    <FormField v-slot="{ value: shelfLifeValue }" name="shelfLifeValue">
+      <FormField v-slot="{ value: shelfLifeUnit }" name="shelfLifeUnit">
+        <div v-if="shelfLifeValue && shelfLifeUnit">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            @click="$emit('setExpirationDate')"
+          >
+            {{ t('gear.actions.setExpirationDate') }}
+          </Button>
+          <p class="text-sm text-muted-foreground mt-2">
+            {{ t('gear.item.shelfLifeDescription') }}
+          </p>
+        </div>
+      </FormField>
     </FormField>
 
     <!-- Notes -->

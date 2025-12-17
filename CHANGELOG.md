@@ -21,6 +21,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.39.0] - 2025-01-21
+
+### Added
+- **Shelf Life (Okres Przydatności) for Items**: New feature to define shelf life period for items before purchase
+  - New `shelfLife` field in gear items: `{ value: number, unit: 'days' | 'months' | 'years' }`
+  - `ShelfLifeInput` component - unified input for value and unit (similar to weight input)
+  - "Set Expiration Date" button to automatically calculate expiration date from shelf life (Today + Shelf Life)
+  - Shelf life display on item detail page with quick action button
+  - Backend support: `shelf_life` JSONB column in `gear_items` table
+  - Database migration `044_add_shelf_life_to_gear_items.py`
+  - Default unit: years
+  - UI: Expiration date and shelf life displayed side-by-side in form (responsive grid)
+
+### Changed
+- Item form layout: Expiration date and shelf life now displayed in a single row (grid layout)
+- Improved UX: Shelf life input uses unified component with contextual label
+
+---
+
 ## [2.38.0] - 2025-01-21
 
 ### Added

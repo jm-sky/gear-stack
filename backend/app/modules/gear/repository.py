@@ -302,6 +302,7 @@ class GearRepository(SearchMixin):
             weight_unit=data.weightUnit,
             notes=data.notes,
             expiration_date=data.expirationDate,
+            shelf_life=data.shelfLife,
             priority=data.priority,
             status=data.status,
             nested_container_id=data.containerId,
@@ -435,6 +436,7 @@ class GearRepository(SearchMixin):
         field_mapping = {
             "weightUnit": "weight_unit",
             "expirationDate": "expiration_date",
+            "shelfLife": "shelf_life",
             "containerId": "nested_container_id",
             "linkedItemId": "linked_item_id",
             "catalogueItemId": "catalogue_item_id",

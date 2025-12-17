@@ -117,6 +117,7 @@ class ItemResponse(BaseModel):
     weightUnit: GearWeightUnit
     notes: str | None = None
     expirationDate: datetime | None = None
+    shelfLife: dict[str, Any] | None = Field(None, alias="shelfLife", description="Shelf life period: {value: int, unit: 'days'|'months'|'years'}")
     priority: GearItemPriority
     status: GearItemStatus
     containerId: str | None = Field(None, alias="containerId")
@@ -190,6 +191,7 @@ class ItemCreate(BaseModel):
     weightUnit: GearWeightUnit = Field(default="g")
     notes: str | None = None
     expirationDate: datetime | None = Field(None, alias="expirationDate")
+    shelfLife: dict[str, Any] | None = Field(None, alias="shelfLife", description="Shelf life period: {value: int, unit: 'days'|'months'|'years'}")
     priority: GearItemPriority = Field(default="medium")
     status: GearItemStatus = Field(default="owned")
     containerId: str | None = Field(None, alias="containerId")
@@ -219,6 +221,7 @@ class ItemUpdate(BaseModel):
     weightUnit: GearWeightUnit | None = None
     notes: str | None = None
     expirationDate: datetime | None = Field(None, alias="expirationDate")
+    shelfLife: dict[str, Any] | None = Field(None, alias="shelfLife", description="Shelf life period: {value: int, unit: 'days'|'months'|'years'}")
     priority: GearItemPriority | None = None
     status: GearItemStatus | None = None
     containerId: str | None = Field(None, alias="containerId")

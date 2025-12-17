@@ -7,6 +7,7 @@ Designed to work with async SQLAlchemy sessions.
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import Any
 
 from sqlalchemy import (
     Boolean,
@@ -121,6 +122,7 @@ class GearItemDB(Base):
     weight_unit: Mapped[str] = mapped_column(String(5), nullable=False, default="g")
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     expiration_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    shelf_life: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
     priority: Mapped[str] = mapped_column(String(20), nullable=False, default="medium")
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="owned")
     nested_container_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("gear_containers.id"), nullable=True)

@@ -3,6 +3,7 @@ import { computed, defineAsyncComponent, onMounted, ref, watchEffect } from 'vue
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
+import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { useBackend } from '@/shared/composables/useBackend'
@@ -22,6 +23,7 @@ import { gearContainerService } from '../services/gearContainerService'
 import { gearItemService } from '../services/gearItemService'
 import { useGearStore } from '../store/useGearStore'
 import { getFrom } from '../utils/navigationParams'
+import { calculateExpirationDate, formatShelfLife } from '../utils/shelfLife'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 
 const ItemImageGallery = defineAsyncComponent(() => import('../components/ItemImageGallery.vue'))
@@ -49,6 +51,7 @@ watchEffect(() => {
 })
 
 const { isExpired, isExpiringSoon } = useExpiration(item)
+const { updateItem } = useGear()
 
 // Check if user is admin
 const isAdmin = computed(() => user.value?.isAdmin ?? false)
@@ -175,6 +178,7 @@ const hasDetails = computed<boolean>(() => {
     item.value.brand
     || item.value.color
     || item.value.expirationDate
+    || item.value.shelfLife
     || item.value.url
     || item.value.notes
   )
@@ -194,6 +198,24 @@ const urlDomain = computed<string>(() => {
   if (!item.value?.url) return ''
   return getUrlDomain(item.value.url)
 })
+
+// Handle set expiration date from shelf life
+const handleSetExpirationDate = async () => {
+  if (!item.value?.shelfLife) {
+    toast.error(t('gear.item.shelfLife'))
+    return
+  }
+
+  try {
+    const expirationDate = calculateExpirationDate(item.value.shelfLife)
+    await updateItem(item.value.id, { expirationDate })
+    toast.success(t('common.success'))
+    await loadItem()
+  } catch (error) {
+    console.error('Failed to set expiration date:', error)
+    toast.error(t('common.error'))
+  }
+}
 </script>
 
 <template>
@@ -285,6 +307,24 @@ const urlDomain = computed<string>(() => {
               </div>
               <div class="font-medium" :class="{ 'text-destructive': isExpired, 'text-yellow-600': isExpiringSoon }">
                 {{ new Date(item.expirationDate).toLocaleDateString() }}
+              </div>
+            </div>
+            <div v-if="item.shelfLife">
+              <div class="mb-1 text-sm text-muted-foreground">
+                {{ t('gear.item.shelfLife') }}
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="font-medium">
+                  {{ formatShelfLife(item.shelfLife) }}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  @click="handleSetExpirationDate"
+                >
+                  {{ t('gear.actions.setExpirationDate') }}
+                </Button>
               </div>
             </div>
             <div v-if="item.url">
