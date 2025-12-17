@@ -21,6 +21,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.40.0] - 2025-12-17
+
+### Added
+- **Automatic Image Deletion**: Automatic cleanup of images when associated entities are deleted
+  - Images are automatically deleted when user accounts are deleted, ensuring no residual data remains
+  - Images are automatically deleted when items are deleted, including graceful error handling
+  - Enhanced GearService with methods to delete images from both storage and database
+  - Improved data management and compliance with automatic cleanup
+
+### Changed
+- Updated roadmap to reflect completion of automatic image deletion features
+
+---
+
 ## [2.39.0] - 2025-01-21
 
 ### Added
