@@ -27,6 +27,7 @@ import { useGearStore } from '../store/useGearStore'
 import { useGearStoreV2 } from '../store/useGearStoreV2'
 import { COLOR_BORDER_CLASSES, COLOR_TEXT_CLASSES } from '../utils/containerColors'
 import { createNavigationQuery } from '../utils/navigationParams'
+import { convertV2ContainerToV1, convertV2ItemsArrayToV1 } from '../utils/typeConverters'
 
 // Lazy load dialogs - only loaded when user opens them
 const ItemsTable = defineAsyncComponent(() => import('../components/ItemsTable.vue'))
@@ -113,12 +114,12 @@ watch(() => route.query.restoreHistoryId, (historyId) => {
 
 // File operations handled in handleImport
 
-// Items - use V2 store to get children, but still return V1 types for now (ItemsTable uses V1)
+// Items - use V2 store to get children, but convert to V1 types for ItemsTable
 const items = computed<IGearItem[]>(() => {
   if (!container.value) return []
   const children = storeV2.getChildrenOfItem(container.value.id)
-  // TODO: ItemsTable still uses V1 types - will be updated in next phase
-  return children.filter(child => child.itemType === 'item') as any
+  // Convert V2 items to V1 format (ItemsTable uses V1 types - will be migrated in future)
+  return convertV2ItemsArrayToV1(children)
 })
 
 // Search and pagination state synchronized with URL
@@ -348,8 +349,9 @@ const handleExportToCSV = () => {
   isExportToCSVDialogOpen.value = true
 }
 
-// TODO: useItemsParamRecognition still uses V1 types
-const { handleRecognizeParameters, handleRecognizeParametersAll } = useItemsParamRecognition(container as any, items)
+// Convert container to V1 for useItemsParamRecognition (composable uses V1 types - will be migrated in future)
+const containerV1ForParamRecognition = computed(() => container.value ? convertV2ContainerToV1(container.value) : undefined)
+const { handleRecognizeParameters, handleRecognizeParametersAll } = useItemsParamRecognition(containerV1ForParamRecognition, items)
 
 const handleManageShareTokens = () => {
   router.push(GearRoutePath.ContainerShareTokensById(containerId))
@@ -366,9 +368,8 @@ const handleRefresh = async () => {
   }
 }
 
-// TODO: Remove these wrappers once all child components are migrated to V2
-// Temporary wrapper for components still using V1 types
-const containerV1 = computed(() => container.value as any)
+// Temporary wrapper for components still using V1 types (will be removed once all components migrate to V2)
+const containerV1 = computed(() => container.value ? convertV2ContainerToV1(container.value) : undefined)
 
 // Redirect if container not found
 if (!container.value) {
@@ -379,9 +380,9 @@ if (!container.value) {
 <template>
   <AuthenticatedLayout :card-class="cardClass">
     <div v-if="container" class="space-y-6 w-full max-w-full text-card-foreground">
-      <!-- TODO: ContainerHeader still uses V1 types -->
+      <!-- ContainerHeader uses V2 types -->
       <ContainerHeader
-        :container="containerV1"
+        :container="container"
         @export="handleJsonExport"
         @import="handleJsonImport"
         @add-container="handleAddContainer"
@@ -430,11 +431,11 @@ if (!container.value) {
 
       <!-- Category Pie Chart -->
       <!-- TODO: CategoryPieChart still uses V1 types -->
-      <CategoryPieChart :container="containerV1" />
+      <CategoryPieChart :container="containerV1!" />
 
       <!-- Rating Section -->
       <!-- TODO: ContainerRatingSection still uses V1 types -->
-      <ContainerRatingSection v-if="container" :container="containerV1" />
+      <ContainerRatingSection v-if="container" :container="containerV1!" />
 
       <!-- Add Nested Container Dialog -->
       <AddNestedContainerDialog

@@ -26,7 +26,7 @@ import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { useGearSettings } from '../composables/useGearSettings'
 import { useGearStoreV2 } from '../store/useGearStoreV2'
 import { calculateTotalWeightSyncV2 } from '../utils/containerCalculationsV2'
-import { exportContainersToPrompt, exportContainerToPrompt } from '../utils/exportToPrompt'
+import { exportContainersToPromptV2, exportContainerToPromptV2 } from '../utils/exportToPromptV2'
 import GuidelinesDialog from './GuidelinesDialog.vue'
 
 const open = defineModel<boolean>('open', { required: true })
@@ -68,7 +68,8 @@ const markdown = computed<string>(() => {
   const exportOptions = {
     t,
     getContainerTypeLabel,
-    getContainerById,
+    getItemById: getContainerById,
+    getChildrenOfItem: store.getChildrenOfItem,
     calculateTotalWeight,
     showUuid: showUuid.value,
     showWeight: showWeight.value,
@@ -84,11 +85,9 @@ const markdown = computed<string>(() => {
   }
 
   if (props.container) {
-    // TODO: Update export utilities to use V2 types
-    return exportContainerToPrompt(props.container as any, exportOptions as any)
+    return exportContainerToPromptV2(props.container, exportOptions)
   } else if (props.containers && props.containers.length > 0) {
-    // TODO: Update export utilities to use V2 types
-    return exportContainersToPrompt(props.containers as any, exportOptions as any)
+    return exportContainersToPromptV2(props.containers, exportOptions)
   }
   return ''
 })

@@ -19,7 +19,7 @@ import { useLocale } from '@/shared/i18n/composables/useLocale'
 import { downloadBlob } from '@/shared/utils/downloadBlob'
 import type { IGearItemV2 } from '../types/gear.types.v2'
 import { useGearStoreV2 } from '../store/useGearStoreV2'
-import { exportContainersToCSV, exportContainerToCSV, generateAllContainersCSVFileName, generateCSVFileName, getDefaultSeparator } from '../utils/exportToCSV'
+import { exportContainersToCSVV2, exportContainerToCSVV2, generateAllContainersCSVFileName, generateCSVFileName, getDefaultSeparator } from '../utils/exportToCSVV2'
 
 const open = defineModel<boolean>('open', { required: true })
 
@@ -133,28 +133,26 @@ const handleExport = () => {
     let fileName: string
 
     if (props.container) {
-      // TODO: Update export utilities to use V2 types
-      csv = exportContainerToCSV(
-        props.container as any,
-        [] as any,
+      csv = exportContainerToCSVV2(
+        props.container,
         {
           columns: selectedColumns.value,
           separator: selectedSeparator.value,
           useBOM: useBOM.value,
           includeNestedContainers: includeNestedContainers.value,
+          getChildrenOfItem: store.getChildrenOfItem,
         },
       )
       fileName = generateCSVFileName(props.container.name)
     } else if (props.containers && props.containers.length > 0) {
-      // TODO: Update export utilities to use V2 types
-      csv = exportContainersToCSV(
-        props.containers as any,
-        [] as any,
+      csv = exportContainersToCSVV2(
+        props.containers,
         {
           columns: selectedColumns.value,
           separator: selectedSeparator.value,
           useBOM: useBOM.value,
           includeNestedContainers: includeNestedContainers.value,
+          getChildrenOfItem: store.getChildrenOfItem,
         },
       )
       fileName = generateAllContainersCSVFileName()

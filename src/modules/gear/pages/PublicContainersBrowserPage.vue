@@ -13,6 +13,7 @@ import PublicContainerCard from '../components/PublicContainerCard.vue'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { GearRouteIcon } from '../routes'
 import { publicContainersService } from '../services/publicContainersService'
+import { convertV1ContainerToV2 } from '../utils/typeConverters'
 
 const { t } = useI18n()
 const { getContainerTypeLabel } = useContainerTypeLabel()
@@ -84,9 +85,9 @@ const filteredContainers = computed<IGearItemV2[]>(() => {
 const loadContainers = async () => {
   loading.value = true
   try {
-    // TODO: Backend API still returns V1 format - cast to V2 for now
-    const publicContainers = await publicContainersService.getPublicContainers()
-    containers.value = publicContainers as any
+    // Backend API returns V1 format - convert to V2 (backend will be updated to return V2 in future)
+    const publicContainersV1 = await publicContainersService.getPublicContainers()
+    containers.value = publicContainersV1.map(container => convertV1ContainerToV2(container))
   } catch (error) {
     toast.error(t('common.error'))
     console.error('Failed to load public containers:', error)

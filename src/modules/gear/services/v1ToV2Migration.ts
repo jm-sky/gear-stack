@@ -78,14 +78,14 @@ function transformContainerToV2(
 
     // Basic info
     name: container.name,
-    description: container.description,
+    description: container.description || null,
 
     // Container-specific (V1: type → V2: containerType)
     containerType: container.type || 'backpack',
 
     // Organization
     category: null, // Containers don't have categories in V1
-    orderIndex: container.order ?? null,
+    orderIndex: null, // V1 containers don't have order
 
     // Status & Priority
     status: 'owned', // Containers are always owned
@@ -104,7 +104,7 @@ function transformContainerToV2(
     wearable: false,
     consumable: false,
     favorite: container.favorite ?? false,
-    hideWhenNested: false,
+    hideWhenNested: container.hideWhenNested ?? false,
 
     // Purchase info
     price: container.price ?? null,
@@ -114,7 +114,6 @@ function transformContainerToV2(
 
     // Visual
     color: container.color ?? null,
-    image: container.image ?? null,
 
     // Dates
     expirationDate: null,
@@ -130,7 +129,7 @@ function transformContainerToV2(
 
     // Quality & Notes
     quality: null,
-    notes: container.notes ?? null,
+    notes: null, // V1 containers don't have notes
   }
 
   return v2Item
@@ -155,7 +154,7 @@ function transformItemToV2(
 
     // Basic info
     name: item.name,
-    description: item.description ?? null,
+    description: item.notes ?? null, // V2 uses description, V1 uses notes
 
     // Container-specific (not applicable for items)
     containerType: null,
@@ -191,7 +190,6 @@ function transformItemToV2(
 
     // Visual
     color: item.color ?? null,
-    image: item.image ?? null,
 
     // Dates
     expirationDate: item.expirationDate ?? null,

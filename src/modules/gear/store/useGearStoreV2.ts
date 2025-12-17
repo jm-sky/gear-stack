@@ -19,6 +19,7 @@ import { computed, ref } from 'vue'
 import type { IGearItemV2 } from '../types/gear.types.v2'
 import { isContainer } from '../types/gear.types.v2'
 import type { TUUID } from '@/shared/types/base.type'
+import { migrateV1ToV2 } from '../services/v1ToV2Migration'
 
 const STORAGE_KEY = 'gear-stack:items-v2'
 
@@ -234,8 +235,18 @@ export const useGearStoreV2 = defineStore('gearV2', () => {
 
   // ===== Initialization =====
 
-  // Auto-load on store creation
-  loadFromStorage()
+  // Run V1→V2 migration before loading (transparent, runs once)
+  migrateV1ToV2().then(result => {
+    if (result.success && (result.containersMigrated > 0 || result.itemsMigrated > 0)) {
+      console.log(`[Gear Store V2] Migration successful: ${result.containersMigrated} containers, ${result.itemsMigrated} items`)
+    }
+    // Load V2 data after migration
+    loadFromStorage()
+  }).catch(error => {
+    console.error('[Gear Store V2] Migration failed:', error)
+    // Still attempt to load V2 data even if migration fails
+    loadFromStorage()
+  })
 
   // ===== Return =====
 
