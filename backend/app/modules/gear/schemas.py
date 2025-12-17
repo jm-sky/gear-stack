@@ -134,6 +134,7 @@ class ItemResponse(BaseModel):
     order: int | None = Field(None, ge=0)
     showOnContainer: bool | None = Field(None, alias="showOnContainer")
     primaryImageUrl: str | None = Field(None, alias="primaryImageUrl")
+    promoteCount: int = Field(0, alias="promote_count", serialization_alias="promoteCount")
     createdAt: datetime
     updatedAt: datetime
 
@@ -400,6 +401,7 @@ class GlobalCatalogueItemResponse(GlobalCatalogueItemBase):
     version: int
     isActive: bool = Field(alias="is_active", serialization_alias="isActive")
     createdBy: str | None = Field(None, alias="created_by", serialization_alias="createdBy")
+    creatorName: str | None = Field(None, description="Creator name if profile is public, otherwise None", serialization_alias="creatorName")
     createdAt: datetime = Field(alias="created_at", serialization_alias="createdAt")
     updatedAt: datetime = Field(alias="updated_at", serialization_alias="updatedAt")
     primaryImageUrl: str | None = Field(None, alias="primaryImageUrl", serialization_alias="primaryImageUrl")
@@ -418,5 +420,30 @@ class GlobalCatalogueItemSearchParams(BaseModel):
     isActive: bool | None = Field(True, alias="isActive")
     skip: int = Field(0, ge=0)
     limit: int = Field(100, ge=1, le=1000)
+
+    model_config = {"populate_by_name": True}
+
+
+# Item promotion schemas
+class ItemPromotionStatus(BaseModel):
+    """Schema for item promotion status response."""
+
+    promote_count: int = Field(..., description="Current number of promotions", alias="promoteCount", serialization_alias="promoteCount")
+    threshold: int = Field(..., description="Required number of promotions to add to catalogue")
+    remaining: int = Field(..., description="Remaining promotions needed")
+    percentage: float = Field(..., description="Percentage progress (0-100)")
+    in_catalogue: bool = Field(..., description="Whether item is already in catalogue", alias="inCatalogue", serialization_alias="inCatalogue")
+    user_promoted: bool = Field(..., description="Whether current user has already promoted this item", alias="userPromoted", serialization_alias="userPromoted")
+    can_promote: bool = Field(..., description="Whether current user can promote this item", alias="canPromote", serialization_alias="canPromote")
+
+    model_config = {"populate_by_name": True}
+
+
+class PromoteItemResponse(BaseModel):
+    """Schema for promote item response."""
+
+    success: bool = Field(..., description="Whether promotion was successful")
+    promote_count: int = Field(..., description="Updated promotion count")
+    message: str = Field(..., description="Response message")
 
     model_config = {"populate_by_name": True}

@@ -21,6 +21,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.38.0] - 2025-01-21
+
+### Added
+- **Item Promotion to Catalogue**: Community-driven promotion system for items to global catalogue
+  - New `promote_count` field in gear items to track promotion votes
+  - `ItemPromotionDB` model to track which users promoted which items
+  - Promotion threshold configuration (default: 10 promotions required)
+  - API endpoints:
+    - `POST /gear/items/{item_id}/promote` - Promote an item to catalogue
+    - `GET /gear/items/{item_id}/promotion-status` - Get promotion status
+    - `POST /gear/items/{item_id}/add-to-catalogue` - Admin override to directly add item
+  - Promotion requirements:
+    - Only registered users with accounts older than 1 month can promote
+    - Admin/app owner users can promote regardless of account age
+    - Items must be in public containers
+    - Users can only promote an item once
+  - Automatic addition to catalogue when promotion threshold is reached
+  - Frontend promotion UI (`ItemPromotionCard`) with progress bar and promotion button
+  - Creator name display in catalogue items (shows name if profile is public, "User" otherwise)
+
+### Changed
+- Catalogue items now display creator information based on public profile settings
+- Admin promotion actions now correctly set item owner as catalogue item creator (not admin)
+
+---
+
 ## [2.37.1] - 2025-12-16
 
 ### Fixed

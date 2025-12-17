@@ -5,8 +5,8 @@ import type { IItemWithContainerId } from '../../types/shopping.types'
 import { useCategoryLabel } from '../../composables/useCategoryLabel'
 import { formatItemPrice } from '../../composables/useFormattedItemPrice'
 import { useGearSettings } from '../../composables/useGearSettings'
+import ItemPriorityBadge from '../badges/ItemPriorityBadge.vue'
 import CategoryIcon from '../CategoryIcon.vue'
-import ItemPriorityBadge from '../ItemPriorityBadge.vue'
 
 const { t } = useI18n()
 

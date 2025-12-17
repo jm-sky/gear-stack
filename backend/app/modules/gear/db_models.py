@@ -140,6 +140,7 @@ class GearItemDB(Base):
     consumable: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
     order: Mapped[int | None] = mapped_column(Integer, nullable=True)
     show_on_container: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
+    promote_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -507,4 +508,57 @@ GlobalCatalogueItemDB.images = relationship(
     back_populates="catalogue_item",
     cascade="all, delete-orphan",
     order_by="CatalogueItemImageDB.order",
+)
+
+
+class ItemPromotionDB(Base):
+    """SQLAlchemy model for item promotions to catalogue.
+
+    Tracks which users have promoted which items to be added to the global catalogue.
+    Each user can promote an item only once.
+
+    Attributes:
+        id: Unique identifier (ULID format, 36 chars)
+        item_id: Promoted item ID
+        user_id: User who promoted the item
+        created_at: Promotion timestamp
+    """
+
+    __tablename__ = "item_promotions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    item_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("gear_items.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    user_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    # Relationships
+    item: Mapped["GearItemDB"] = relationship("GearItemDB", back_populates="promotions")
+    user: Mapped["UserDB"] = relationship("UserDB")
+
+    # Unique constraint: user can promote item only once
+    __table_args__ = (UniqueConstraint("item_id", "user_id", name="unique_item_user_promotion"),)
+
+    def __repr__(self) -> str:
+        return f"<ItemPromotionDB(id={self.id}, item_id={self.item_id}, user_id={self.user_id})>"
+
+
+# Add promotions relationship to GearItemDB
+GearItemDB.promotions = relationship(
+    "ItemPromotionDB",
+    back_populates="item",
+    cascade="all, delete-orphan",
 )

@@ -8,6 +8,7 @@ import {
   FileInput,
   FileOutput,
   FileSpreadsheet,
+  Globe,
   Image,
   Plus,
   Sparkles,
@@ -46,6 +47,7 @@ export const ACTION_ICONS: Record<string, Component> = {
   clone: Copy,
   delete: Trash2,
   deleteAll: Trash2,
+  publish: Globe, // Publish container (make public)
 
   // Import/Export
   export: Download,

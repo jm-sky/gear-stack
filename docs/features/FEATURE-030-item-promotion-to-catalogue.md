@@ -1,6 +1,6 @@
 # FEATURE-030: Item Promotion to Catalogue (Promocja Przedmiotu do Katalogu)
 
-**Status:** 🔄 Planned  
+**Status:** ✅ Completed  
 **Priority:** Medium  
 **Category:** 🗂️ Global Catalogue / Community  
 **Related:** ROADMAP_ONLINE.md - Promocja przedmiotu do katalogu globalnego

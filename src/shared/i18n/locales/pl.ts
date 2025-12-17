@@ -20,6 +20,7 @@ export default {
     confirm: 'Potwierdź',
     search: 'Szukaj',
     refresh: 'Odśwież',
+    refreshed: 'Odświeżono',
     filter: 'Filtruj',
     sort: 'Sortuj',
     actions: 'Akcje',

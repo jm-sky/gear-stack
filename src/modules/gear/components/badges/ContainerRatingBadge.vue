@@ -3,7 +3,7 @@ import { StarIcon } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import Badge from '@/components/ui/badge/Badge.vue'
 import { useBackend } from '@/shared/composables/useBackend'
-import type { IGearContainer } from '../types/gear.types'
+import type { IGearContainer } from '../../types/gear.types'
 
 const { t } = useI18n()
 const { shouldUseAPI } = useBackend()

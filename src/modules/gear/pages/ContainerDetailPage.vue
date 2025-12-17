@@ -349,7 +349,7 @@ const handleRefresh = async () => {
   if (!container.value) return
   try {
     await getContainerById(container.value.id)
-    toast.success(t('common.refresh'))
+    toast.success(t('common.refreshed'))
   } catch (error) {
     console.error('Failed to refresh container:', error)
     toast.error(t('common.error'))

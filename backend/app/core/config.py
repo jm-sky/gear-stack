@@ -46,6 +46,13 @@ class AppSettings(BaseSettings):
         description="Environment (local, development, test, production)",
     )
 
+    item_promotion_threshold: int = Field(
+        default=10,
+        validation_alias="ITEM_PROMOTION_THRESHOLD",
+        description="Number of promotions required to add item to global catalogue",
+        gt=0,
+    )
+
     @field_validator("environment")
     @classmethod
     def validate_environment(cls, v: Environment) -> Environment:

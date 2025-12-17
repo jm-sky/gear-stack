@@ -34,6 +34,7 @@ export interface IGlobalCatalogueItem {
   shops?: ICatalogueShop[]
   isActive: boolean
   createdBy?: TUUID | null
+  creatorName?: string | null
   createdAt: TDateTime
   updatedAt: TDateTime
   primaryImageUrl?: string | null

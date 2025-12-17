@@ -92,6 +92,9 @@ const columns = computed<ColumnDef<IAdminContainer>[]>(() => [
     id: 'actions',
     header: () => t('admin.containers.columns.actions', 'Actions'),
     enableSorting: false,
+    meta: {
+      pinned: 'right',
+    },
   },
 ])
 

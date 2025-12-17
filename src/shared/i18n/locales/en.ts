@@ -20,6 +20,7 @@ export default {
     confirm: 'Confirm',
     search: 'Search',
     refresh: 'Refresh',
+    refreshed: 'Refreshed',
     filter: 'Filter',
     sort: 'Sort',
     actions: 'Actions',

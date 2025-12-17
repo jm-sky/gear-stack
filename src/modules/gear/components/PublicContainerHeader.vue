@@ -13,8 +13,8 @@ import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { useIsContainerOwner } from '../composables/useIsContainerOwner'
 import { GearRoutePath } from '../routes'
 import { getActionIcon } from '../utils/actionIcons'
+import PublicContainerAuthorBadge from './badges/PublicContainerAuthorBadge.vue'
 import MarkdownRenderer from './MarkdownRenderer.vue'
-import PublicContainerAuthorBadge from './PublicContainerAuthorBadge.vue'
 
 const props = defineProps<{
   container: IGearContainer

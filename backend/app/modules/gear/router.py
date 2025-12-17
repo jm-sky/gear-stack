@@ -12,7 +12,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.modules.auth.dependencies import CurrentUser
+from app.modules.auth.dependencies import AdminUser, CurrentUser
 from app.modules.auth.models import User
 from app.modules.auth.repositories import get_user_repository
 from app.modules.auth.types.repository import UserRepositoryInterface
@@ -31,8 +31,10 @@ from .schemas import (
     GlobalCatalogueItemUpdate,
     ItemCreate,
     ItemMoveRequest,
+    ItemPromotionStatus,
     ItemResponse,
     ItemUpdate,
+    PromoteItemResponse,
     ShareTokenCreate,
     ShareTokenResponse,
 )
@@ -1283,3 +1285,111 @@ async def unlink_item_from_catalogue(
             detail="Item not found or you don't have permission to modify it",
         )
     return item
+
+
+@router.post(
+    "/items/{item_id}/promote",
+    response_model=PromoteItemResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Promote item to catalogue",
+    description="Promote an item from a public container to the global catalogue. Requires authenticated user with account older than 1 month.",
+)
+async def promote_item(
+    item_id: str,
+    current_user: CurrentUser,
+    service: GearServiceDep,
+) -> PromoteItemResponse:
+    """Promote an item to catalogue.
+
+    Args:
+        item_id: Item ID to promote
+        current_user: Authenticated user
+        service: Gear service instance
+
+    Returns:
+        Promotion response with updated count
+
+    Raises:
+        HTTPException: If promotion is not allowed or item not found
+    """
+    try:
+        item = await service.promote_item(item_id, current_user.id)
+        return PromoteItemResponse(
+            success=True,
+            promote_count=item.promoteCount,
+            message="Item promoted successfully",
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        ) from e
+
+
+@router.get(
+    "/items/{item_id}/promotion-status",
+    response_model=ItemPromotionStatus,
+    summary="Get item promotion status",
+    description="Get promotion status for an item. Public endpoint, but includes user-specific info if authenticated.",
+)
+async def get_promotion_status(
+    item_id: str,
+    service: GearServiceDep,
+    current_user: OptionalUser = None,
+) -> ItemPromotionStatus:
+    """Get promotion status for an item.
+
+    Args:
+        item_id: Item ID
+        current_user: Optional authenticated user (for user-specific info)
+        service: Gear service instance
+
+    Returns:
+        Promotion status
+
+    Raises:
+        HTTPException: If item not found
+    """
+    try:
+        user_id = current_user.id if current_user else None
+        return await service.get_promotion_status(item_id, user_id)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        ) from e
+
+
+@router.post(
+    "/items/{item_id}/add-to-catalogue",
+    response_model=GlobalCatalogueItemResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Add item to catalogue (admin)",
+    description="Add an item to the global catalogue directly (admin override - bypasses promotion threshold).",
+)
+async def add_item_to_catalogue(
+    item_id: str,
+    admin_user: AdminUser,
+    service: GearServiceDep,
+) -> GlobalCatalogueItemResponse:
+    """Add an item to catalogue (admin override).
+
+    Args:
+        item_id: Item ID to add to catalogue
+        admin_user: Authenticated admin user
+        service: Gear service instance
+
+    Returns:
+        Created catalogue item
+
+    Raises:
+        HTTPException: If item not found or already in catalogue
+    """
+    try:
+        catalogue_item = await service.add_item_to_catalogue(item_id, admin_user.id)
+        return catalogue_item
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        ) from e

@@ -27,14 +27,15 @@ import { getActionIcon } from '../utils/actionIcons'
 import { formatWeight } from '../utils/formatWeight'
 import { isSet } from '../utils/helpers'
 import { getFrom } from '../utils/navigationParams'
+import ContainerRatingBadge from './badges/ContainerRatingBadge.vue'
+import ContainerTypeBadge from './badges/ContainerTypeBadge.vue'
+import PublicContainerBadge from './badges/PublicContainerBadge.vue'
+import WeightLimitBadge from './badges/WeightLimitBadge.vue'
 import ContainerHeaderName from './ContainerHeaderName.vue'
 import ContainerHeaderStats from './ContainerHeaderStats.vue'
-import ContainerRatingBadge from './ContainerRatingBadge.vue'
-import ContainerTypeBadge from './ContainerTypeBadge.vue'
 import FavoriteContainerButton from './FavoriteContainerButton.vue'
 import ItemsTableEditModeToggle from './ItemsTableEditModeToggle.vue'
 import MarkdownRenderer from './MarkdownRenderer.vue'
-import WeightLimitBadge from './WeightLimitBadge.vue'
 
 // Lazy load dialog to reduce initial bundle size
 const CloneContainerDialog = defineAsyncComponent(() => import('./CloneContainerDialog.vue'))
@@ -53,6 +54,7 @@ const ImportIcon = getActionIcon('import')
 const RecognizeParametersAllIcon = getActionIcon('recognizeParametersAll')
 const AiIcon = getActionIcon('ai')
 const DeleteIcon = getActionIcon('delete')
+const PublishIcon = getActionIcon('publish')
 
 const props = defineProps<{
   container: IGearContainer
@@ -75,7 +77,7 @@ const router = useRouter()
 const { t, locale } = useI18n()
 const { canUseAi } = useAi()
 const { shouldUseAPI } = useBackend()
-const { deleteContainer } = useGear()
+const { deleteContainer, updateContainer } = useGear()
 const { handleError } = useHandleError()
 
 const isCloneDialogOpen = ref(false)
@@ -147,6 +149,17 @@ const handleDeleteConfirm = async () => {
     isDeleteDialogOpen.value = false
   }
 }
+
+const handlePublish = async () => {
+  try {
+    await updateContainer(props.container.id, { isPublic: true })
+    toast.success(t('common.success'))
+    emit('refresh')
+  } catch (error) {
+    console.error('Error publishing container:', error)
+    handleError(error, { fallbackMessage: t('common.error') })
+  }
+}
 </script>
 
 <template>
@@ -207,6 +220,7 @@ const handleDeleteConfirm = async () => {
           </div>
           <div class="flex items-center gap-2 flex-wrap">
             <ContainerTypeBadge :container />
+            <PublicContainerBadge v-if="container.isPublic" />
             <Badge
               v-tooltip.bottom="t('common.created')"
               variant="secondary"
@@ -307,7 +321,14 @@ const handleDeleteConfirm = async () => {
                 {{ t('gear.actions.recognizeParametersAll') }}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem @click="$emit('manageShareTokens')">
+              <DropdownMenuItem
+                v-if="!container.isPublic && shouldUseAPI"
+                @click="handlePublish"
+              >
+                <PublishIcon class="size-4" />
+                {{ t('gear.actions.publishContainer') }}
+              </DropdownMenuItem>
+              <DropdownMenuItem v-if="shouldUseAPI" @click="$emit('manageShareTokens')">
                 <Link2 class="size-4" />
                 {{ t('gear.actions.manageShareTokens') }}
               </DropdownMenuItem>

@@ -395,7 +395,7 @@ Umożliwienie przenoszenia przedmiotów z jednego kontenera do drugiego bez koni
 - Zachowanie danych przedmiotu (UUID, historia, obrazki)
 
 ### Promocja przedmiotu do katalogu globalnego
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium
 
 **Koncepcja:**
 Mechanizm pozwalający użytkownikom na promowanie swoich przedmiotów do globalnego katalogu, gdzie mogą być używane przez innych użytkowników.
