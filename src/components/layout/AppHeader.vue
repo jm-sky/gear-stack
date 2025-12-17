@@ -54,7 +54,7 @@ const coreLinks = computed<Link[]>(() => [
     to: AdminRoutePaths.dashboard,
     label: t('admin.dashboard.title', 'Admin Dashboard'),
     icon: ShieldIcon,
-    hidden: !isAdmin,
+    hidden: !isAdmin.value,
   }
 ])
 

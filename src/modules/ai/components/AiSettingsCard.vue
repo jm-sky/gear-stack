@@ -24,6 +24,11 @@ const { models, loadModels } = useAiModels()
 const { loadProfile } = useUser()
 
 onMounted(async () => {
+  // Only load AI settings if user is authenticated
+  if (!isAuthenticated.value) {
+    return
+  }
+
   await aiStore.loadSettings()
   if (models.value.length === 0) {
     await loadModels()

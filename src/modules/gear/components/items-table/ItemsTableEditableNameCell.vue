@@ -70,7 +70,7 @@ function handleReset() {
 </script>
 
 <template>
-  <div class="flex items-center gap-1">
+  <div class="flex items-center gap-1 min-w-48">
     <!-- Move up/down buttons -->
     <ItemsTableMoveButtons
       v-if="canMoveUp !== undefined && canMoveDown !== undefined"
@@ -86,7 +86,7 @@ function handleReset() {
         v-tooltip="isExpiringSoon ? t('gear.item.expiration.expiringSoon') : ''"
         :name="`item-name-${item.id}`"
         :aria-label="t('gear.item.name')"
-        class="pl-2 pr-8 py-1! h-[2.1rem]!"
+        class="pl-2 py-1! h-[2.1rem]!"
         :class="[textClass, isExpiringSoon ? 'border border-yellow-600' : 'border-transparent']"
         :disabled="isSaving"
         @keydown.enter.prevent="handleEnter"

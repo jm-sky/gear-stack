@@ -33,12 +33,12 @@ const emit = defineEmits<{
   'update:pageSize': [pageSize: number]
 }>()
 
-const totalPages = Math.ceil(props.total / props.pageSize)
+const totalPages = computed<number>(() => Math.ceil(props.total / props.pageSize))
 const canPreviousPage = computed<boolean>(() => props.page > 1)
-const canNextPage = computed<boolean>(() => props.page < totalPages)
+const canNextPage = computed<boolean>(() => props.page < totalPages.value)
 
 const goToPage = (page: number) => {
-  if (page >= 1 && page <= totalPages) {
+  if (page >= 1 && page <= totalPages.value) {
     emit('update:page', page)
   }
 }

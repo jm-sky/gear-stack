@@ -101,12 +101,7 @@ const pageModel = computed({
 })
 
 const pageSizeModel = computed({
-  get: () => {
-    if (props.pageSize !== undefined) {
-      return props.pageSize
-    }
-    return internalPageSize.value
-  },
+  get: () => props.pageSize !== undefined ? props.pageSize : internalPageSize.value,
   set: (value: number) => {
     if (props.pageSize !== undefined) {
       emit('update:pageSize', value)
@@ -532,7 +527,6 @@ async function handleStarItem(item: IGearItem, newPriority: TGearItemPriority) {
     :enable-filtering="true"
     :enable-pagination="true"
     :enable-column-visibility="true"
-    :initial-page-size="10"
     :aria-label="t('gear.items.table.title', 'Items table')"
     :class="{ 'items-table-edit-mode': editMode && !publicMode }"
   >

@@ -147,6 +147,41 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - Lepsze doświadczenie użytkowników (brak obraźliwych treści)
 - Bezpieczeństwo (ochrona przed spamem i złośliwymi linkami)
 
+### Zgłaszanie nieodpowiednich treści (raportowanie)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+
+**Koncepcja:**
+System raportowania nieodpowiednich treści przez użytkowników, umożliwiający społecznościowe moderowanie treści w aplikacji.
+
+**Zakres implementacji:**
+- **Backend:**
+  - Tabela `content_reports` w bazie danych (reported_item_id, reported_container_id, reporter_user_id, reason, status, created_at, reviewed_at, reviewed_by)
+  - Endpoint `POST /gear/items/{item_id}/report` do zgłaszania przedmiotów
+  - Endpoint `POST /gear/containers/{container_id}/report` do zgłaszania kontenerów
+  - Endpoint `GET /admin/reports` do przeglądania zgłoszeń (tylko dla adminów)
+  - Endpoint `PATCH /admin/reports/{report_id}` do aktualizacji statusu zgłoszenia (pending, reviewed, dismissed, action_taken)
+  - Powiadomienia dla adminów o nowych zgłoszeniach
+  - Automatyczne blokowanie treści po przekroczeniu progu zgłoszeń (opcjonalnie)
+
+- **Frontend:**
+  - Przycisk "Zgłoś" w menu akcji przedmiotu/kontenera
+  - Dialog zgłaszania z wyborem powodu (spam, obraźliwa treść, nieprawidłowe informacje, inne)
+  - Pole tekstowe na dodatkowe informacje (opcjonalnie)
+  - Potwierdzenie zgłoszenia (toast notification)
+  - Informacja o statusie zgłoszenia dla użytkownika (jeśli dostępne)
+  - Panel admina do przeglądania i zarządzania zgłoszeniami
+
+- **Walidacja:**
+  - Ograniczenie liczby zgłoszeń per użytkownik (zapobieganie nadużyciom)
+  - Sprawdzanie czy użytkownik już zgłosił daną treść
+  - Weryfikacja czy zgłaszana treść istnieje
+
+**Zalety:**
+- Społecznościowa moderacja treści
+- Szybsze wykrywanie nieodpowiednich treści
+- Lepsze doświadczenie użytkowników
+- Wsparcie dla adminów w moderowaniu treści
+
 ---
 
 ## 💾 Synchronizacja i przechowywanie danych
@@ -358,6 +393,80 @@ Umożliwienie przenoszenia przedmiotów z jednego kontenera do drugiego bez koni
 - Szybsze zarządzanie przedmiotami między kontenerami
 - Lepsze UX (nie trzeba usuwać i dodawać ponownie)
 - Zachowanie danych przedmiotu (UUID, historia, obrazki)
+
+### Promocja przedmiotu do katalogu globalnego
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+
+**Koncepcja:**
+Mechanizm pozwalający użytkownikom na promowanie swoich przedmiotów do globalnego katalogu, gdzie mogą być używane przez innych użytkowników.
+
+**Zakres implementacji:**
+- **Backend:**
+  - Pole `promote_count` w tabeli `items` (licznik promocji)
+  - Endpoint `POST /gear/items/{item_id}/promote` do promowania przedmiotu
+  - Walidacja: tylko zarejestrowani użytkownicy z kontem starszym niż 1 miesiąc mogą promować
+  - Automatyczne dodanie do katalogu po osiągnięciu progu promocji (np. 10 promocji)
+  - Endpoint `GET /gear/items/{item_id}/promote-status` do sprawdzania statusu promocji
+  - Historia promocji (kto i kiedy promował przedmiot)
+
+- **Frontend:**
+  - Przycisk "Promuj do katalogu" w menu akcji przedmiotu
+  - Wyświetlanie licznika promocji (`promote_count`) w szczegółach przedmiotu
+  - Informacja o wymaganiach (konto > 1 miesiąc)
+  - Wizualne oznaczenie przedmiotów w katalogu (pochodzących z promocji)
+  - Progress bar pokazujący postęp do progu promocji (np. "7/10 promocji")
+
+- **Wymagania:**
+  - Tylko zarejestrowani użytkownicy mogą promować
+  - Konto musi być starsze niż 1 miesiąc
+  - Użytkownik może promować tylko swoje przedmioty
+  - Ograniczenie: jeden użytkownik może promować dany przedmiot tylko raz
+
+**Zalety:**
+- Rozbudowa globalnego katalogu przez społeczność
+- Weryfikacja jakości przedmiotów przez społeczność (promocje)
+- Zachęta do tworzenia wysokiej jakości przedmiotów
+- Lepsze wykorzystanie katalogu przez użytkowników
+
+---
+
+## 💳 Limity kont i subskrypcje
+
+### Limity przedmiotów i kontenerów dla kont free/premium
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+
+**Koncepcja:**
+System limitów liczby przedmiotów i kontenerów w zależności od typu konta (free/premium), z możliwością opcjonalnego uwzględnienia wykorzystanej przestrzeni w bazie danych.
+
+**Zakres implementacji:**
+- **Backend:**
+  - Pole `account_tier` w tabeli `users` (free, premium)
+  - Konfiguracja limitów:
+    - Free: 500 przedmiotów, 10 kontenerów (lub zależnie od wykorzystanej przestrzeni DB)
+    - Premium: 1000 przedmiotów, 50 kontenerów (lub zależnie od wykorzystanej przestrzeni DB)
+  - Endpoint `GET /me/limits` do sprawdzania limitów i wykorzystania
+  - Walidacja limitów przy tworzeniu przedmiotów/kontenerów
+  - Endpoint `GET /me/storage-usage` do sprawdzania wykorzystanej przestrzeni (opcjonalnie)
+  - Obliczanie wykorzystanej przestrzeni DB per użytkownik (rozmiar danych w tabelach)
+
+- **Frontend:**
+  - Wyświetlanie informacji o limitach w ustawieniach użytkownika
+  - Progress bar pokazujący wykorzystanie limitów (np. "450/500 przedmiotów")
+  - Ostrzeżenia przy zbliżaniu się do limitu (np. przy 80% wykorzystania)
+  - Blokada tworzenia nowych przedmiotów/kontenerów po przekroczeniu limitu
+  - Komunikat zachęcający do upgrade do premium przy osiągnięciu limitu
+  - Informacja o wykorzystanej przestrzeni DB (jeśli implementowane)
+
+- **Opcje implementacji:**
+  - **Opcja 1:** Proste limity liczbowe (500/1000 przedmiotów)
+  - **Opcja 2:** Limity zależne od wykorzystanej przestrzeni DB (bardziej elastyczne)
+  - **Opcja 3:** Hybrydowe podejście (limity liczbowe + monitoring przestrzeni DB)
+
+**Zalety:**
+- Kontrola wykorzystania zasobów serwera
+- Zachęta do upgrade do premium
+- Przewidywalne koszty infrastruktury
+- Lepsze zarządzanie przestrzenią w bazie danych
 
 ---
 
