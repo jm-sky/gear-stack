@@ -141,20 +141,24 @@ const contentClasses = computed<string>(() => {
 }
 
 .prose :deep(ul) {
-  list-style-type: disc;
-  list-style-position: outside;
-  padding-left: 1.5rem;
+  list-style-type: disc !important;
+  list-style-position: outside !important;
+  padding-left: 1.5rem !important;
+  margin-left: 0 !important;
 }
 
 .prose :deep(ol) {
-  list-style-type: decimal;
-  list-style-position: outside;
-  padding-left: 1.5rem;
+  list-style-type: decimal !important;
+  list-style-position: outside !important;
+  padding-left: 1.5rem !important;
+  margin-left: 0 !important;
 }
 
 .prose :deep(li) {
   margin-bottom: 0.25rem;
-  display: list-item;
+  display: list-item !important;
+  list-style-position: outside;
+  padding-left: 0.5rem;
 }
 
 /* Nested lists */

@@ -309,10 +309,7 @@ const urlDomain = computed<string>(() => {
             <div class="mb-2 text-sm text-muted-foreground">
               {{ t('gear.item.notes') }}
             </div>
-            <MarkdownRenderer
-              :content="item.notes"
-              class="text-sm"
-            />
+            <MarkdownRenderer :content="item.notes" />
           </div>
         </template>
 
