@@ -75,25 +75,26 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - 📝 **Status**: Fully functional end-to-end with Google OAuth
 
 ### 🔐 Zarządzanie tokenami i sesjami
-**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium
+**Status:** 🚧 Partially Completed | **Priority:** High | **Complexity:** Medium
 
-- 🔄 **Unieważnienie tokena przy wylogowaniu**
+- ✅ **Unieważnienie tokena przy wylogowaniu** - Completed
   - Plik: `backend/app/modules/auth/router.py`
-  - Linia: 204
+  - Linia: 204-237
   - Opis: Dodanie funkcjonalności unieważniania tokena JWT przy wylogowaniu użytkownika
-  - Implementacja: Blacklist tokenów w Redis lub bazie danych, weryfikacja przy każdym żądaniu
+  - Implementacja: Blacklist tokenów w Redis (TokenBlacklistService), weryfikacja przy każdym żądaniu
+  - Status: ✅ Zaimplementowane - endpoint `/logout` blacklistuje aktualny token używając `TokenBlacklistService`
 
-- 🔄 **Unieważnienie wszystkich sesji/tokenów przy usunięciu konta**
-  - Plik: `backend/app/modules/auth/service.py`
-  - Linia: 452
+- 🔄 **Unieważnienie wszystkich sesji/tokenów przy usunięciu konta** - Częściowo zaimplementowane
+  - Plik: `backend/app/modules/auth/router.py`, `backend/app/modules/auth/service.py`
   - Opis: Unieważnienie wszystkich sesji i tokenów użytkownika podczas usuwania konta
-  - Implementacja: Masowe unieważnienie wszystkich tokenów użytkownika w systemie
+  - Status: ⚠️ Częściowo - aktualny token jest blacklistowany przy usuwaniu konta, ale `blacklist_all_user_tokens` jest placeholder (wymaga trackingu tokenów per user w Redis)
+  - Uwaga: `TokenBlacklistService.blacklist_all_user_tokens()` istnieje ale nie jest zaimplementowana (zwraca 0, wymaga trackingu user_id → tokens mapping)
 
-- 🔄 **Usunięcie powiązanych danych przy usuwaniu konta**
-  - Plik: `backend/app/modules/auth/service.py`
-  - Linia: 453
+- ✅ **Usunięcie powiązanych danych przy usuwaniu konta** - Completed
+  - Plik: `backend/app/modules/*/db_models.py` (SQLAlchemy models)
   - Opis: Usunięcie danych 2FA, passkeys i innych powiązanych danych przy usuwaniu konta
-  - Implementacja: Cascade delete dla wszystkich powiązanych danych użytkownika (2FA, passkeys, sesje, tokeny)
+  - Implementacja: Cascade delete dla wszystkich powiązanych danych użytkownika (2FA, passkeys, gear_items, ai_settings, itp.)
+  - Status: ✅ Zaimplementowane - SQLAlchemy models mają `ondelete="CASCADE"` dla powiązanych tabel (two_factor, gear_items, ai_settings, itp.)
 
 ### 🔐 Ulepszenia WebAuthn / Passkeys
 **Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium

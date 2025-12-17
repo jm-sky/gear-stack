@@ -102,10 +102,10 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - Linki do głównych sekcji aplikacji (np. kontenery, ustawienia)
    - Status: ✅ Completed | Priority: High | Complexity: Small
 
-13. **Nie działa zmiana ilości wierszy przedmiotów (limit) na stronie Container Details**
+13. ✅ **Nie działa zmiana ilości wierszy przedmiotów (limit) na stronie Container Details** - Zakończone
    - Naprawa funkcjonalności zmiany limitu wierszy w tabeli przedmiotów na stronie szczegółów kontenera
    - Problem: Zmiana pageSize nie propaguje się w górę do parent component (brak emit w client-side mode)
-   - Status: 🚧 In Progress | Priority: High | Complexity: Small
+   - Status: ✅ Completed | Priority: High | Complexity: Small
 
 ### Średni priorytet
 
