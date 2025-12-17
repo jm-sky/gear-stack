@@ -201,3 +201,4 @@ class TestDefaultLocale:
         # DEFAULT_LOCALE should be a valid SupportedLocale
         locale: SupportedLocale = DEFAULT_LOCALE
         assert locale in ("pl", "en")
+
