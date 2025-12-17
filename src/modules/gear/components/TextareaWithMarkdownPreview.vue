@@ -77,10 +77,9 @@ const isPreview = computed<boolean>(() => mode.value === 'preview')
     </div>
 
     <!-- Preview mode -->
-    <div v-else :class="cn('min-h-[80px] w-full px-3 py-2 text-sm', props.class)">
+    <div v-else :class="cn('min-h-[80px] w-full px-3 py-2', props.class)">
       <MarkdownRenderer
         :content="String(modelValue ?? '')"
-        class="text-sm"
       />
     </div>
 
