@@ -48,7 +48,6 @@ const showBrand = ref(true)
 const showNestedContainer = ref(true)
 const showLegend = ref(true)
 const showPrices = ref(false)
-const showNotes = ref(true)
 const descriptionFormat = ref<'off' | 'inline' | 'newline'>('off')
 
 // Get container type label helper
@@ -79,7 +78,6 @@ const markdown = computed<string>(() => {
     showNestedContainer: showNestedContainer.value,
     showLegend: showLegend.value,
     showPrices: showPrices.value,
-    showNotes: showNotes.value,
     descriptionFormat: descriptionFormat.value,
     defaultCurrency: defaultCurrency.value,
     locale: locale.value,
@@ -95,7 +93,19 @@ const markdown = computed<string>(() => {
 
 const handleCopy = async () => {
   try {
-    await navigator.clipboard.writeText(markdown.value)
+    // Add non-breaking spaces to preserve double blank lines when pasting into ChatGPT
+    // This preserves visual spacing while separators (---) provide semantic structure
+    const textForChatGPT = markdown.value.replace(/\n\n+/g, (match) => {
+      // For multiple blank lines, add non-breaking space to preserve them
+      const blankLineCount = match.length - 1
+      if (blankLineCount > 0) {
+        // Use non-breaking space + newline for each blank line
+        return '\n' + '\u00A0\n'.repeat(blankLineCount)
+      }
+      return match
+    })
+    
+    await navigator.clipboard.writeText(textForChatGPT)
     copied.value = true
     toast.success(t('gear.actions.exportToPromptSuccess'))
     setTimeout(() => {
@@ -171,12 +181,6 @@ const handleOpenGuidelines = () => {
             <Checkbox id="showPrices" v-model="showPrices" />
             <Label for="showPrices" class="text-sm font-normal cursor-pointer">
               {{ t('gear.export.showPrices', 'Show prices') }}
-            </Label>
-          </div>
-          <div class="flex items-center space-x-2">
-            <Checkbox id="showNotes" v-model="showNotes" />
-            <Label for="showNotes" class="text-sm font-normal cursor-pointer">
-              {{ t('gear.export.showNotes', 'Show notes/descriptions') }}
             </Label>
           </div>
         </div>

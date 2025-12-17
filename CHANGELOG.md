@@ -21,6 +21,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.41.0] - 2025-12-17
+
+### Changed
+- **Export to Markdown dialog improvements**:
+  - Removed redundant "Show notes/descriptions" checkbox - format dropdown now controls visibility
+  - Added semantic separators (`---`) in markdown export for better structure and readability
+  - Improved clipboard copy to preserve blank lines when pasting into ChatGPT (using non-breaking spaces)
+  - Export logic now uses `descriptionFormat` as single source of truth for showing descriptions
+
+### Fixed
+- Fixed export dialog confusion where checkbox was checked by default but format was set to 'off', causing nothing to export
+
+---
+
 ## [2.40.0] - 2025-12-17
 
 ### Added
