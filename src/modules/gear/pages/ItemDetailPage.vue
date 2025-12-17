@@ -11,6 +11,7 @@ import { config } from '@/shared/config/config'
 import type { IGearContainer, IGearItem } from '../types/gear.types'
 import ItemHeader from '../components/ItemHeader.vue'
 import MarkdownRenderer from '../components/MarkdownRenderer.vue'
+import ItemPromotionCard from '../components/promotion/ItemPromotionCard.vue'
 import SearchImagesButton from '../components/SearchImagesButton.vue'
 import { useExpiration } from '../composables/useExpiration'
 import { useFormattedItemPrice } from '../composables/useFormattedItemPrice'
@@ -339,6 +340,12 @@ const urlDomain = computed<string>(() => {
           </template>
         </ItemImageGallery>
       </div>
+
+      <!-- Promotion Card (only for public containers, only when using API) -->
+      <ItemPromotionCard
+        v-if="shouldUseAPI && container?.isPublic && !item.catalogueItemId"
+        :item-id="itemId"
+      />
     </div>
   </AuthenticatedLayout>
 </template>

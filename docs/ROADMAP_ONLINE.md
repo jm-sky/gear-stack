@@ -148,39 +148,48 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - Bezpieczeństwo (ochrona przed spamem i złośliwymi linkami)
 
 ### Zgłaszanie nieodpowiednich treści (raportowanie)
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium | **Plan:** [CONTENT_REPORTING_IMPLEMENTATION_PLAN.md](./plans/CONTENT_REPORTING_IMPLEMENTATION_PLAN.md)
 
 **Koncepcja:**
-System raportowania nieodpowiednich treści przez użytkowników, umożliwiający społecznościowe moderowanie treści w aplikacji.
+System raportowania nieodpowiednich treści dla publicznych kontenerów przez zalogowanych użytkowników, z automatycznym ukrywaniem z widoków publicznych po osiągnięciu ≥3 zgłoszeń oraz panelem administracyjnym do weryfikacji.
 
 **Zakres implementacji:**
 - **Backend:**
-  - Tabela `content_reports` w bazie danych (reported_item_id, reported_container_id, reporter_user_id, reason, status, created_at, reviewed_at, reviewed_by)
-  - Endpoint `POST /gear/items/{item_id}/report` do zgłaszania przedmiotów
-  - Endpoint `POST /gear/containers/{container_id}/report` do zgłaszania kontenerów
-  - Endpoint `GET /admin/reports` do przeglądania zgłoszeń (tylko dla adminów)
+  - Tabela `content_reports` w bazie danych (container_id, reporter_user_id, reason, additional_info, status, created_at, reviewed_at, reviewed_by)
+  - Pole `is_hidden_by_reports` w tabeli `gear_containers` (flaga ukrycia kontenera)
+  - Endpoint `POST /gear/containers/{container_id}/report` do zgłaszania publicznych kontenerów (tylko dla zalogowanych użytkowników)
+  - Endpoint `GET /admin/reports` do przeglądania zgłoszeń (tylko dla adminów) z filtrami i agregacją liczby raportów per kontener
   - Endpoint `PATCH /admin/reports/{report_id}` do aktualizacji statusu zgłoszenia (pending, reviewed, dismissed, action_taken)
-  - Powiadomienia dla adminów o nowych zgłoszeniach
-  - Automatyczne blokowanie treści po przekroczeniu progu zgłoszeń (opcjonalnie)
+  - Automatyczne ukrywanie kontenera z widoków publicznych po osiągnięciu ≥3 aktywnych zgłoszeń (pending + action_taken)
+  - Automatyczne przywracanie widoczności publicznej po weryfikacji przez admina (gdy wszystkie zgłoszenia są dismissed/reviewed)
+  - Filtrowanie ukrytych kontenerów w publicznych endpointach (`GET /gear/public/containers`, `GET /gear/public/containers/{id}`)
 
 - **Frontend:**
-  - Przycisk "Zgłoś" w menu akcji przedmiotu/kontenera
-  - Dialog zgłaszania z wyborem powodu (spam, obraźliwa treść, nieprawidłowe informacje, inne)
-  - Pole tekstowe na dodatkowe informacje (opcjonalnie)
+  - Przycisk "Zgłoś" w widokach publicznych kontenerów (galeria, szczegóły publicznego kontenera) - widoczny tylko dla zalogowanych użytkowników
+  - Dialog zgłaszania (`ReportContentDialog.vue`) z wyborem kategorii powodu:
+    - Spam / Oszustwa
+    - Przemoc (mowa nienawiści, groźby, nawoływanie do przemocy)
+    - Treści seksualne
+    - Wulgaryzmy
+    - Inne (z opcjonalnym polem tekstowym "Dodatkowe informacje")
   - Potwierdzenie zgłoszenia (toast notification)
-  - Informacja o statusie zgłoszenia dla użytkownika (jeśli dostępne)
-  - Panel admina do przeglądania i zarządzania zgłoszeniami
+  - Alert dla właściciela kontenera ukrytego przez raporty (informacja o ukryciu z widoków publicznych)
+  - Panel admina (`ContentReportsPage.vue`) do przeglądania i zarządzania zgłoszeniami:
+    - Tabela raportów z filtrowaniem po statusie
+    - Agregacja liczby raportów per kontener
+    - Akcje zmiany statusu raportów (reviewed, dismissed, action_taken)
 
 - **Walidacja:**
-  - Ograniczenie liczby zgłoszeń per użytkownik (zapobieganie nadużyciom)
-  - Sprawdzanie czy użytkownik już zgłosił daną treść
-  - Weryfikacja czy zgłaszana treść istnieje
+  - Sprawdzanie czy użytkownik już zgłosił dany kontener (unique constraint: container_id + reporter_user_id)
+  - Weryfikacja czy zgłaszany kontener istnieje i jest publiczny
+  - Wymagany zalogowany użytkownik (brak możliwości raportowania przez gości)
 
 **Zalety:**
-- Społecznościowa moderacja treści
-- Szybsze wykrywanie nieodpowiednich treści
-- Lepsze doświadczenie użytkowników
-- Wsparcie dla adminów w moderowaniu treści
+- Społecznościowa moderacja treści publicznych kontenerów
+- Szybsze wykrywanie nieodpowiednich treści przez społeczność
+- Automatyczna ochrona przed spamem i nieodpowiednimi treściami (auto-hide po 3 zgłoszeniach)
+- Wsparcie dla adminów w moderowaniu treści (panel administracyjny)
+- Lepsze doświadczenie użytkowników (brak nieodpowiednich treści w publicznych widokach)
 
 ---
 
@@ -395,7 +404,7 @@ Umożliwienie przenoszenia przedmiotów z jednego kontenera do drugiego bez koni
 - Zachowanie danych przedmiotu (UUID, historia, obrazki)
 
 ### Promocja przedmiotu do katalogu globalnego
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium
 
 **Koncepcja:**
 Mechanizm pozwalający użytkownikom na promowanie swoich przedmiotów do globalnego katalogu, gdzie mogą być używane przez innych użytkowników.

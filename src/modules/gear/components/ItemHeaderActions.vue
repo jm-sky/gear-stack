@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { BookIcon, ImageIcon, Link2Off, MoreHorizontalIcon, MoveIcon, Sparkles } from 'lucide-vue-next'
+import { BookIcon, ImageIcon, Link2Off, MoreHorizontalIcon, MoveIcon, Sparkles, ThumbsUp } from 'lucide-vue-next'
 import { computed, defineAsyncComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import DropdownMenuSeparator from '@/components/ui/dropdown-menu/DropdownMenuSeparator.vue'
+import { useAuth } from '@/modules/auth/composables/useAuth'
 import type { IGearItem } from '../types/gear.types'
 import { useCatalogue } from '../composables/catalogue/useCatalogue'
+import { useItemPromotion } from '../composables/promotion/useItemPromotion'
 import { useGear } from '../composables/useGear'
 import { getActionIcon } from '../utils/actionIcons'
 import MoveItemDialog from './MoveItemDialog.vue'
@@ -16,8 +18,10 @@ import MoveItemDialog from './MoveItemDialog.vue'
 const UpdateFromCatalogueDialog = defineAsyncComponent(() => import('./catalogue/UpdateFromCatalogueDialog.vue'))
 
 const { t } = useI18n()
+const { user } = useAuth()
 const { fetchImagesFromCatalogue, unlinkItemFromCatalogue, isFetchingImages, isUnlinking } = useCatalogue()
 const { moveItem } = useGear()
+const { addToCatalogue, isAddingToCatalogue } = useItemPromotion(computed(() => item.id))
 
 const matchDialogOpen = defineModel<boolean>('matchDialogOpen', { default: false })
 const updateDialogOpen = ref(false)
@@ -33,6 +37,17 @@ const emit = defineEmits<{
 }>()
 
 const DeleteIcon = getActionIcon('delete')
+
+const isAdmin = computed(() => user.value?.isAdmin ?? false)
+
+const handleAddToCatalogue = async () => {
+  try {
+    await addToCatalogue()
+    emit('itemUpdated')
+  } catch (error) {
+    console.error('Failed to add item to catalogue:', error)
+  }
+}
 
 const handleMatchWithCatalogue = () => {
   matchDialogOpen.value = true
@@ -131,6 +146,15 @@ const isLinkedToCatalogue = computed(() => !!item.catalogueItemId)
       >
         <Link2Off class="size-4" />
         {{ t('gear.catalogue.unlinkFromCatalogue') }}
+      </DropdownMenuItem>
+      <!-- Admin: Add to catalogue (bypass threshold) -->
+      <DropdownMenuItem
+        v-if="isAdmin && !item.catalogueItemId"
+        :disabled="isAddingToCatalogue"
+        @click="handleAddToCatalogue"
+      >
+        <ThumbsUp class="size-4" />
+        {{ t('gear.promotion.addToCatalogueAdmin') }}
       </DropdownMenuItem>
       <DropdownMenuSeparator />
       <DropdownMenuItem @click="handleMoveItem">

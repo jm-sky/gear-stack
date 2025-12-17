@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Badge } from '@/components/ui/badge'
-import type { IGearItemV2, TContainerColor } from '../types/gear.types.v2'
-import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
-import { COLOR_BORDER_CLASSES, COLOR_TEXT_CLASSES } from '../utils/containerColors'
-import ContainerIcon from './ContainerIcon.vue'
+import type { IGearItemV2, TContainerColor } from '../../types/gear.types.v2'
+import { useContainerTypeLabel } from '../../composables/useContainerTypeLabel'
+import { COLOR_BORDER_CLASSES, COLOR_TEXT_CLASSES } from '../../utils/containerColors'
+import ContainerIcon from '../ContainerIcon.vue'
 
 const props = defineProps<{
   container: IGearItemV2

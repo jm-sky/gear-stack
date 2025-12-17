@@ -7,10 +7,16 @@ including validation, calculations, and orchestration of repository operations.
 import asyncio
 import logging
 import secrets
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any, Literal, Sequence, cast
 
+from sqlalchemy import and_, select
+from sqlalchemy.orm import joinedload
+
+from app.core.config import get_settings
 from app.core.storage.factory import get_storage_adapter
+from app.modules.auth.db_models import UserDB
+from app.modules.settings.db_models import UserSettingsDB
 
 from .item_image_repository import ItemImageRepository
 from .repository import GearRepository
@@ -25,10 +31,11 @@ from .schemas import (
     GlobalCatalogueItemSearchParams,
     GlobalCatalogueItemUpdate,
     ItemCreate,
+    ItemPromotionStatus,
     ItemResponse,
     ItemUpdate,
 )
-from .db_models import GearContainerDB, GearItemDB
+from .db_models import GearContainerDB, GearItemDB, GlobalCatalogueItemDB, ItemPromotionDB
 
 
 logger = logging.getLogger(__name__)
@@ -123,6 +130,7 @@ class GearService:
             order=item.order,
             showOnContainer=item.show_on_container,
             primaryImageUrl=primary_image_url,
+            promote_count=item.promote_count,
             createdAt=item.created_at,
             updatedAt=item.updated_at,
         )
@@ -195,6 +203,29 @@ class GearService:
             updatedAt=container.updated_at,
         )
 
+    async def _get_catalogue_item_creator_name(self, item: GlobalCatalogueItemDB) -> str | None:
+        """Get creator name for catalogue item if profile is public.
+
+        Args:
+            item: Catalogue item with creator relationship loaded
+
+        Returns:
+            Creator name if profile is public, None otherwise
+        """
+        if not hasattr(item, "creator") or not item.creator:
+            return None
+
+        creator = item.creator
+        # Check if creator has public profile
+        settings_stmt = select(UserSettingsDB).where(UserSettingsDB.user_id == creator.id)
+        settings_result = await self.repository.db.execute(settings_stmt)
+        user_settings = settings_result.scalar_one_or_none()
+
+        if user_settings and user_settings.is_public_profile:
+            return creator.name
+
+        return None
+
     async def _map_container_to_response_with_author(self, container: GearContainerDB, ratings_data: dict[str, Any] | None = None) -> ContainerResponse:
         """Map database container to response schema with author name.
 
@@ -234,11 +265,17 @@ class GearService:
 
         # Get author name and ID from user relationship
         # For public containers, user relationship is always loaded via joinedload
+        # Respect user's public profile settings: only expose author info if profile is public
         author_name = None
         author_id = None
         if hasattr(container, "user") and container.user:
-            author_name = container.user.name
-            author_id = container.user.id
+            settings_stmt = select(UserSettingsDB).where(UserSettingsDB.user_id == container.user.id)
+            settings_result = await self.repository.db.execute(settings_stmt)
+            user_settings = settings_result.scalar_one_or_none()
+
+            if user_settings and user_settings.is_public_profile:
+                author_name = container.user.name
+                author_id = container.user.id
 
         # Map rating fields if provided
         owner_rating = None
@@ -359,8 +396,13 @@ class GearService:
         containers = await self.repository.get_public_containers(skip, limit)
         results = []
         for container in containers:
-            ratings_data = await self.repository.get_container_ratings_data(container.id, requesting_user_id=requesting_user_id, is_owner=False)
-            results.append(await self._map_container_to_response_with_author(container, dict(ratings_data) if ratings_data else None))
+            try:
+                ratings_data = await self.repository.get_container_ratings_data(container.id, requesting_user_id=requesting_user_id, is_owner=False)
+                mapped = await self._map_container_to_response_with_author(container, dict(ratings_data) if ratings_data else None)
+                results.append(mapped)
+            except Exception as e:
+                # Log error but continue - one container error shouldn't prevent others from being returned
+                logger.error(f"Failed to map public container {container.id} to response: {e}", exc_info=True)
         return results
 
     async def get_public_container(self, container_id: str, requesting_user_id: str | None = None) -> ContainerResponse | None:
@@ -800,11 +842,14 @@ class GearService:
             url = image.external_url or await self._storage.get_url(image.file_path)
             image_urls[item_id] = url
 
-        # Map items to responses with primary image URLs
+        # Map items to responses with primary image URLs and creator names
         results = []
         for item in items:
             item_dict = GlobalCatalogueItemResponse.model_validate(item).model_dump()
             item_dict["primaryImageUrl"] = image_urls.get(item.id)
+            # Get creator name if profile is public
+            creator_name = await self._get_catalogue_item_creator_name(item)
+            item_dict["creatorName"] = creator_name
             results.append(GlobalCatalogueItemResponse(**item_dict))
 
         return results
@@ -835,9 +880,12 @@ class GearService:
         if primary_image:
             primary_image_url = primary_image.external_url or await self._storage.get_url(primary_image.file_path)
 
-        # Create response with image URL
+        # Create response with image URL and creator name
         item_dict = GlobalCatalogueItemResponse.model_validate(item).model_dump()
         item_dict["primaryImageUrl"] = primary_image_url
+        # Get creator name if profile is public
+        creator_name = await self._get_catalogue_item_creator_name(item)
+        item_dict["creatorName"] = creator_name
         return GlobalCatalogueItemResponse(**item_dict)
 
     async def create_catalogue_item(
@@ -855,7 +903,17 @@ class GearService:
             Created catalogue item
         """
         item = await self.repository.create_catalogue_item(user_id, data)
-        return GlobalCatalogueItemResponse.model_validate(item)
+        # Reload item with creator relationship
+        from sqlalchemy.orm import joinedload
+
+        reload_stmt = select(GlobalCatalogueItemDB).where(GlobalCatalogueItemDB.id == item.id).options(joinedload(GlobalCatalogueItemDB.creator))
+        reload_result = await self.repository.db.execute(reload_stmt)
+        item_with_creator = reload_result.unique().scalar_one()
+        # Map to response with creator name
+        item_dict = GlobalCatalogueItemResponse.model_validate(item_with_creator).model_dump()
+        creator_name = await self._get_catalogue_item_creator_name(item_with_creator)
+        item_dict["creatorName"] = creator_name
+        return GlobalCatalogueItemResponse(**item_dict)
 
     async def update_catalogue_item(
         self,
@@ -878,7 +936,17 @@ class GearService:
         item = await self.repository.update_catalogue_item(item_id, user_id, data, is_admin)
         if not item:
             return None
-        return GlobalCatalogueItemResponse.model_validate(item)
+        # Reload item with creator relationship
+        from sqlalchemy.orm import joinedload
+
+        reload_stmt = select(GlobalCatalogueItemDB).where(GlobalCatalogueItemDB.id == item.id).options(joinedload(GlobalCatalogueItemDB.creator))
+        reload_result = await self.repository.db.execute(reload_stmt)
+        item_with_creator = reload_result.unique().scalar_one()
+        # Map to response with creator name
+        item_dict = GlobalCatalogueItemResponse.model_validate(item_with_creator).model_dump()
+        creator_name = await self._get_catalogue_item_creator_name(item_with_creator)
+        item_dict["creatorName"] = creator_name
+        return GlobalCatalogueItemResponse(**item_dict)
 
     async def delete_catalogue_item(
         self,
@@ -1198,3 +1266,390 @@ class GearService:
         # Clear catalogue_item_id
         update_data = ItemUpdate(catalogueItemId=None)  # type: ignore[call-arg]
         return await self.update_item(item_id, user_id, update_data)
+
+    # Item promotion methods
+    def _can_user_promote(self, user: UserDB) -> tuple[bool, str]:
+        """Check if user can promote items.
+
+        Args:
+            user: User database model
+
+        Returns:
+            Tuple of (can_promote: bool, reason: str)
+        """
+        if not user.created_at:
+            return False, "User account creation date not found"
+
+        # Check if account is older than 1 month
+        one_month_ago = datetime.now(UTC) - timedelta(days=30)
+        if user.created_at > one_month_ago:
+            return False, "Account must be at least 1 month old"
+
+        return True, ""
+
+    async def _is_item_or_container_reported(self, item_id: str, container_id: str) -> bool:
+        """Check if item or container has been reported for inappropriate content.
+
+        This is a placeholder for future content reporting mechanism.
+        Once reporting is implemented, this method should check if the item
+        or its container has active reports.
+
+        Args:
+            item_id: Item ID to check
+            container_id: Container ID to check
+
+        Returns:
+            True if item or container is reported, False otherwise
+        """
+        # TODO: Implement content reporting mechanism
+        # This should check if item_id or container_id has active reports
+        # Example:
+        #   reports = await self.repository.get_active_reports(item_id, container_id)
+        #   return len(reports) > 0
+        return False
+
+    async def can_promote_item(self, item_id: str, user_id: str) -> tuple[bool, str]:
+        """Check if user can promote a specific item.
+
+        Args:
+            item_id: Item ID to promote
+            user_id: User ID who wants to promote
+
+        Returns:
+            Tuple of (can_promote: bool, reason: str)
+        """
+        # Get user
+        from sqlalchemy import select
+        from app.modules.auth.db_models import UserDB as UserDBModel
+
+        user_stmt = select(UserDBModel).where(UserDBModel.id == user_id)
+        user_result = await self.repository.db.execute(user_stmt)
+        user = user_result.scalar_one_or_none()
+        if not user:
+            return False, "User not found"
+
+        # Get item with container - try with user_id first, if not found, try without ownership check
+        item = await self.repository.get_item(item_id, user_id)
+        if not item:
+            # Try to get item without ownership check (might be public container from another user)
+            item_stmt = select(GearItemDB).where(GearItemDB.id == item_id)
+            item_result = await self.repository.db.execute(item_stmt)
+            item = item_result.scalar_one_or_none()
+            if not item:
+                return False, "Item not found"
+
+        # Load container to check if it's public
+        container_stmt = select(GearContainerDB).where(GearContainerDB.id == item.container_id)
+        container_result = await self.repository.db.execute(container_stmt)
+        container = container_result.scalar_one_or_none()
+        if not container:
+            return False, "Container not found"
+
+        # Check if user is admin or owner (app owner role)
+        is_admin_or_owner = getattr(user, "is_admin", False) or getattr(user, "is_owner", False)
+
+        # Check user account age (skip if admin or owner)
+        if not is_admin_or_owner:
+            can_promote, reason = self._can_user_promote(user)
+            if not can_promote:
+                return False, reason
+
+        # Check if container is public
+        if not container.is_public:
+            return False, "Item must be in a public container to be promoted"
+
+        # Check if container/item owner has account older than 1 month (skip if user is admin or owner)
+        if not is_admin_or_owner:
+            container_owner_stmt = select(UserDBModel).where(UserDBModel.id == container.user_id)
+            container_owner_result = await self.repository.db.execute(container_owner_stmt)
+            container_owner = container_owner_result.scalar_one_or_none()
+            if not container_owner:
+                return False, "Container owner not found"
+
+            owner_can_promote, owner_reason = self._can_user_promote(container_owner)
+            if not owner_can_promote:
+                return False, f"Item owner account must be at least 1 month old to allow promotions"
+
+        # Check if item or container is reported for inappropriate content
+        is_reported = await self._is_item_or_container_reported(item_id, container.id)
+        if is_reported:
+            return False, "Item or container has been reported and cannot be promoted"
+
+        # Check if item is already in catalogue
+        if item.catalogue_item_id:
+            return False, "Item is already in the catalogue"
+
+        # Check if user already promoted this item
+        existing_promotion = await self.repository.get_promotion_by_item_and_user(item_id, user_id)
+        if existing_promotion:
+            return False, "You have already promoted this item"
+
+        return True, ""
+
+    async def promote_item(self, item_id: str, user_id: str) -> ItemResponse:
+        """Promote an item to catalogue.
+
+        Args:
+            item_id: Item ID to promote
+            user_id: User ID who is promoting
+
+        Returns:
+            Updated item response
+
+        Raises:
+            ValueError: If promotion is not allowed
+        """
+        # Check if user can promote
+        can_promote, reason = await self.can_promote_item(item_id, user_id)
+        if not can_promote:
+            raise ValueError(reason)
+
+        # Get item - try with user_id first, if not found, try without ownership check
+        item = await self.repository.get_item(item_id, user_id)
+        if not item:
+            # Try to get item without ownership check (might be public container from another user)
+            item_stmt = select(GearItemDB).where(GearItemDB.id == item_id).options(joinedload(GearItemDB.container))
+            item_result = await self.repository.db.execute(item_stmt)
+            item = item_result.unique().scalar_one_or_none()
+        if not item:
+            raise ValueError("Item not found")
+
+        # Create promotion record
+        await self.repository.create_promotion(item_id, user_id)
+
+        # Increment promote_count
+        item.promote_count += 1
+        await self.repository.db.commit()
+        await self.repository.db.refresh(item)
+
+        # Check if threshold reached
+        settings = get_settings()
+        threshold = settings.app.item_promotion_threshold
+        if item.promote_count >= threshold:
+            # Add to catalogue automatically
+            await self._add_item_to_catalogue(item_id, user_id)
+
+        # Return updated item
+        return self._map_item_to_response(item)
+
+    async def get_promotion_status(self, item_id: str, user_id: str | None = None) -> ItemPromotionStatus:
+        """Get promotion status for an item.
+
+        Args:
+            item_id: Item ID
+            user_id: Optional user ID to check if user already promoted
+
+        Returns:
+            ItemPromotionStatus with promotion status
+        """
+        # Get item - try to get as user's item first, then as public
+        item = None
+        if user_id:
+            item = await self.repository.get_item(item_id, user_id)
+        if not item:
+            # Try to get from public container
+            from sqlalchemy import select
+
+            item_stmt = select(GearItemDB).join(GearContainerDB, GearItemDB.container_id == GearContainerDB.id).where(and_(GearItemDB.id == item_id, GearContainerDB.is_public == True))  # noqa: E712
+            item_result = await self.repository.db.execute(item_stmt)
+            item = item_result.scalar_one_or_none()
+
+        if not item:
+            raise ValueError("Item not found")
+
+        settings = get_settings()
+        threshold = settings.app.item_promotion_threshold
+
+        # Check if user already promoted
+        user_promoted = False
+        if user_id:
+            existing_promotion = await self.repository.get_promotion_by_item_and_user(item_id, user_id)
+            user_promoted = existing_promotion is not None
+
+        # Check if user can promote
+        can_promote = False
+        if user_id:
+            can_promote, _ = await self.can_promote_item(item_id, user_id)
+
+        remaining = max(0, threshold - item.promote_count)
+        percentage = (item.promote_count / threshold * 100) if threshold > 0 else 0
+
+        return ItemPromotionStatus(
+            promoteCount=item.promote_count,
+            threshold=threshold,
+            remaining=remaining,
+            percentage=min(100, percentage),
+            inCatalogue=item.catalogue_item_id is not None,
+            userPromoted=user_promoted,
+            canPromote=can_promote,
+        )
+
+    async def add_item_to_catalogue(self, item_id: str, admin_user_id: str) -> GlobalCatalogueItemResponse:
+        """Add an item to catalogue (admin override - bypasses threshold).
+
+        Args:
+            item_id: Item ID to add to catalogue
+            admin_user_id: Admin user ID who is adding the item
+
+        Returns:
+            Created catalogue item response
+        """
+        # Get item - try with admin_user_id first, if not found, try without ownership check
+        item = await self.repository.get_item(item_id, admin_user_id)
+        if not item:
+            # Try to get item without ownership check (might be public container from another user)
+            item_stmt = select(GearItemDB).where(GearItemDB.id == item_id).options(joinedload(GearItemDB.container))
+            item_result = await self.repository.db.execute(item_stmt)
+            item = item_result.unique().scalar_one_or_none()
+        if not item:
+            raise ValueError("Item not found")
+
+        # Check if already in catalogue
+        if item.catalogue_item_id:
+            # Return existing catalogue item
+            catalogue_item = await self.repository.get_catalogue_item(item.catalogue_item_id)
+            if catalogue_item:
+                # Map to response with creator name
+                item_dict = GlobalCatalogueItemResponse.model_validate(catalogue_item).model_dump()
+                creator_name = await self._get_catalogue_item_creator_name(catalogue_item)
+                item_dict["creatorName"] = creator_name
+                return GlobalCatalogueItemResponse(**item_dict)
+            # If catalogue item was deleted but reference remains, continue to create new one
+
+        return await self._add_item_to_catalogue(item_id, admin_user_id)
+
+    async def _add_item_to_catalogue(self, item_id: str, user_id: str) -> GlobalCatalogueItemResponse:
+        """Internal method to add item to catalogue.
+
+        Args:
+            item_id: Item ID to add
+            user_id: User ID performing the action (for operations like copying images)
+
+        Returns:
+            Created catalogue item response
+
+        Note:
+            The created_by field in the catalogue item is set to the owner of the container,
+            not the user_id parameter (which may be an admin promoting the item).
+        """
+        # Get item with container to access container owner
+        from sqlalchemy import select
+        from sqlalchemy.orm import joinedload
+
+        item_stmt = select(GearItemDB).where(GearItemDB.id == item_id).options(joinedload(GearItemDB.container))
+        item_result = await self.repository.db.execute(item_stmt)
+        item = item_result.unique().scalar_one_or_none()
+        if not item:
+            raise ValueError("Item not found")
+
+        # Get container owner ID (this is the actual creator of the item)
+        container = item.container
+        if not container:
+            raise ValueError("Item container not found")
+
+        container_owner_id = container.user_id
+
+        # Create catalogue item from user item
+        from app.modules.gear.schemas import GearWeightUnit
+
+        catalogue_data_dict = {
+            "name": item.name,
+            "category": item.category,
+            "weight": item.weight,
+            "weight_unit": cast(GearWeightUnit, item.weight_unit) if item.weight_unit else "g",
+            "description": item.notes,
+            "brand": item.brand,
+            "model": None,
+            "price_tier": None,
+            "price": None,
+            "currency": None,
+            "quality": cast(Quality | None, item.quality),
+            "url": item.url,
+            "color": item.color,
+        }
+        catalogue_data = GlobalCatalogueItemCreate.model_validate(catalogue_data_dict)
+
+        # Create catalogue item with container owner as creator
+        catalogue_item = await self.repository.create_catalogue_item(container_owner_id, catalogue_data)
+
+        # Link item to catalogue - use direct update to work with items from any user's public containers
+        # (update_item requires ownership, but admin should be able to link items from public containers)
+        from sqlalchemy import update as sql_update
+
+        update_stmt = sql_update(GearItemDB).where(GearItemDB.id == item_id).values(catalogue_item_id=catalogue_item.id)
+        await self.repository.db.execute(update_stmt)
+        await self.repository.db.commit()
+        # Refresh item to get updated catalogue_item_id
+        await self.repository.db.refresh(item)
+
+        # Copy images from item to catalogue item if they exist
+        try:
+            await self._copy_item_images_to_catalogue(item_id, catalogue_item.id, user_id)
+        except Exception as e:
+            logger.warning(f"Failed to copy images to catalogue item: {e}")
+
+        # Reload catalogue item with creator relationship
+        from sqlalchemy.orm import joinedload
+
+        reload_stmt = select(GlobalCatalogueItemDB).where(GlobalCatalogueItemDB.id == catalogue_item.id).options(joinedload(GlobalCatalogueItemDB.creator))
+        reload_result = await self.repository.db.execute(reload_stmt)
+        item_with_creator = reload_result.unique().scalar_one()
+        # Map to response with creator name
+        item_dict = GlobalCatalogueItemResponse.model_validate(item_with_creator).model_dump()
+        creator_name = await self._get_catalogue_item_creator_name(item_with_creator)
+        item_dict["creatorName"] = creator_name
+        return GlobalCatalogueItemResponse(**item_dict)
+
+    async def _copy_item_images_to_catalogue(self, item_id: str, catalogue_item_id: str, user_id: str) -> None:
+        """Copy images from user item to catalogue item.
+
+        Args:
+            item_id: Source item ID
+            catalogue_item_id: Target catalogue item ID
+            user_id: User ID (for image ownership)
+        """
+        from app.modules.gear.catalogue_item_image_repository import CatalogueItemImageRepository
+        from app.modules.gear.item_image_repository import ItemImageRepository
+
+        # Get item images
+        item_image_repo = ItemImageRepository(self.repository.db)
+        item_images = await item_image_repo.get_by_item(item_id)
+
+        if not item_images:
+            return
+
+        # Copy images to catalogue
+        catalogue_image_repo = CatalogueItemImageRepository(self.repository.db)
+        for idx, item_image in enumerate(item_images):
+            # Download image from storage
+            image_data = await self._storage.download(item_image.file_path)
+
+            # Upload to catalogue item images location
+            from app.common.id_utils import generate_id
+
+            catalogue_image_path = f"catalogue-items/{catalogue_item_id}/{item_image.file_name}"
+            await self._storage.upload(image_data, catalogue_image_path, item_image.mime_type)
+
+            # Create catalogue image record
+            from app.modules.gear.db_models import CatalogueItemImageDB
+
+            catalogue_image = CatalogueItemImageDB(
+                id=generate_id(),
+                catalogue_item_id=catalogue_item_id,
+                user_id=user_id,
+                storage_type=item_image.storage_type,
+                file_path=catalogue_image_path,
+                file_name=item_image.file_name,
+                file_size=item_image.file_size,
+                mime_type=item_image.mime_type,
+                width=item_image.width,
+                height=item_image.height,
+                is_primary=item_image.is_primary and idx == 0,  # First image is primary
+                order=idx,
+                is_processed=item_image.is_processed,
+                original_file_size=item_image.original_file_size,
+                external_url=item_image.external_url,
+            )
+            self.repository.db.add(catalogue_image)
+
+        await self.repository.db.commit()

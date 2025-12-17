@@ -10,8 +10,8 @@ import { useExpiration } from '../../composables/useExpiration'
 import { useFormattedItemPrice } from '../../composables/useFormattedItemPrice'
 import { useFormattedItemWeight } from '../../composables/useFormattedItemWeight'
 import { createItemEditPath } from '../../utils/navigationParams'
+import ItemPriorityBadge from '../badges/ItemPriorityBadge.vue'
 import CategoryIcon from '../CategoryIcon.vue'
-import ItemPriorityBadge from '../ItemPriorityBadge.vue'
 
 const { t } = useI18n()
 

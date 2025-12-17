@@ -8,7 +8,8 @@ import type { IGearItemV2 } from '../types/gear.types.v2'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { GearRoutePath } from '../routes'
 import { useGearStoreV2 } from '../store/useGearStoreV2'
-import PublicContainerAuthorBadge from './PublicContainerAuthorBadge.vue'
+import PublicContainerAuthorBadge from './badges/PublicContainerAuthorBadge.vue'
+import PublicContainerBadge from './badges/PublicContainerBadge.vue'
 
 const props = defineProps<{
   container: IGearItemV2
@@ -61,10 +62,11 @@ const additionalParentsCount = computed<number>(() => {
 
 <template>
   <div class="flex items-center justify-between gap-2 flex-wrap">
-    <div class="flex items-center gap-2">
+    <div class="flex items-center flex-wrap gap-2">
       <Badge class="h-5" variant="outline">
         {{ typeLabel }}
       </Badge>
+      <PublicContainerBadge v-if="container.isPublic" />
       <template v-if="withAuthor">
         <PublicContainerAuthorBadge
           v-if="container.authorName"

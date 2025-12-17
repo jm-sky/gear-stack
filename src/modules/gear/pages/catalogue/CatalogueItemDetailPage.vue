@@ -126,12 +126,15 @@ const urlDisplay = computed<string>(() => {
   return getUrlDisplay(item.value.url)
 })
 
-// Display author name or "Admin" for created by
+// Display creator name or "User" for created by
 const createdByDisplay = computed<string>(() => {
   if (!item.value?.createdBy) return ''
-  // For now, just show "Admin" since we don't have author profile info
-  // In the future, this could check if the author has a public profile
-  return t('gear.catalogue.admin')
+  // If creator name is available (public profile), show it
+  if (item.value.creatorName) {
+    return item.value.creatorName
+  }
+  // Otherwise show "User" (private profile)
+  return t('gear.catalogue.user')
 })
 
 const goBack = () => {

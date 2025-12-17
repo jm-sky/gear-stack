@@ -622,6 +622,10 @@ async def _find_user(identifier: str) -> dict[str, Any] | None:
                 "name": user.name,
                 "isActive": user.isActive,
                 "isAdmin": user.isAdmin,
+                "isOwner": user.isOwner,
+                "isPremium": user.isPremium,
+                "isEmailVerified": user.isEmailVerified,
+                "emailVerifiedAt": user.emailVerifiedAt,
                 "createdAt": user.createdAt,
             }
 
@@ -1012,3 +1016,218 @@ async def _set_role_in_db(user_id: str, is_admin: bool, is_owner: bool, is_premi
 
         await repo.update_user(user)
         break  # Ensure we only process first iteration
+
+
+@users_app.command("verify-email")
+def users_verify_email(
+    identifier: str | None = typer.Argument(None, help="User email or ID"),
+    show_link: bool = typer.Option(
+        False,
+        "--show-link",
+        "-l",
+        help="Show email verification link for the user",
+    ),
+    confirm_email: bool = typer.Option(
+        False,
+        "--confirm",
+        "-c",
+        help="Mark email as verified without using a link",
+    ),
+    yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation prompts"),
+) -> None:
+    """Manage email verification for a user.
+
+    Provides two options:
+    - Show verification link (for manual sending/debugging)
+    - Mark email as verified directly (without token)
+
+    Examples:
+        # Interactive mode (choose between link or direct verification)
+        python -m cli users verify-email
+
+        # Show verification link for user
+        python -m cli users verify-email user@example.com --show-link
+
+        # Mark email as verified (non-interactive)
+        python -m cli users verify-email user@example.com --confirm --yes
+    """
+    asyncio.run(_users_verify_email_async(identifier, show_link, confirm_email, yes))
+
+
+async def _users_verify_email_async(
+    identifier: str | None,
+    show_link: bool,
+    confirm_email: bool,
+    yes: bool,
+) -> None:
+    """Async implementation of email verification management."""
+    from rich.console import Console
+
+    console = Console()
+
+    # Validate options
+    if show_link and confirm_email:
+        console.print("\n[red]You cannot use --show-link and --confirm together. Choose one option.[/red]\n")
+        raise typer.Exit(1)
+
+    try:
+        # Get identifier if not provided
+        if not identifier:
+            identifier = Prompt.ask("[cyan]Enter user email or ID[/cyan]")
+
+        # Find user
+        with console.status("[bold green]Finding user...", spinner="dots"):
+            user = await _find_user(identifier)
+
+        if not user:
+            console.print(f"\n[red]User not found:[/red] {identifier}\n")
+            return
+
+        # Show user info
+        console.print("\n[bold cyan]User:[/bold cyan]\n")
+
+        email_verified_str = "Yes" if user.get("isEmailVerified") else "No"
+
+        user_info = f"""[bold]ID:[/bold] {user['id']}
+[bold]Email:[/bold] {user['email']}
+[bold]Name:[/bold] {user['name']}
+[bold]Role:[/bold] {'Owner' if user.get('isOwner') else ('Administrator' if user.get('isAdmin') else ('Premium' if user.get('isPremium') else 'User'))}
+[bold]Active:[/bold] {'Yes' if user['isActive'] else 'No'}
+[bold]Email verified:[/bold] {email_verified_str}"""
+
+        panel = Panel(user_info, border_style="cyan")
+        console.print(panel)
+
+        # Determine action (interactive if neither flag provided)
+        action: str | None = None
+        if show_link:
+            action = "show_link"
+        elif confirm_email:
+            action = "confirm"
+        else:
+            console.print("\n[bold cyan]Email verification options:[/bold cyan]\n")
+            console.print("  1. Show verification link")
+            console.print("  2. Mark email as verified (without link)")
+            console.print()
+
+            while True:
+                choice = Prompt.ask(
+                    "[cyan]Select option[/cyan] (1-2)",
+                    default="1",
+                ).strip()
+
+                if choice == "1":
+                    action = "show_link"
+                    break
+                if choice == "2":
+                    action = "confirm"
+                    break
+
+                console.print("[red]Invalid choice. Please enter 1 or 2.[/red]")
+
+        # Execute selected action
+        if action == "show_link":
+            with console.status("[bold green]Generating verification link...", spinner="dots"):
+                link, meta = await _generate_email_verification_link(user["id"])
+
+            console.print("\n[bold green]✓[/bold green] Verification link generated successfully\n")
+
+            link_info = f"""[bold]Verification link:[/bold]
+{link}
+
+[bold]Token:[/bold] {meta['token']}
+[bold]Expires in:[/bold] {meta['expires_hours']} hours"""
+
+            link_panel = Panel(link_info, title="[bold]Email Verification Link[/bold]", border_style="green")
+            console.print(link_panel)
+            console.print()
+
+        elif action == "confirm":
+            if user.get("isEmailVerified"):
+                console.print("\n[yellow]User email is already verified.[/yellow]\n")
+                if not yes:
+                    if not Confirm.ask("Mark as verified again anyway?", default=False):
+                        console.print("[yellow]Cancelled[/yellow]")
+                        return
+            else:
+                if not yes:
+                    console.print()
+                    if not Confirm.ask("Mark this email as verified?", default=True):
+                        console.print("[yellow]Cancelled[/yellow]")
+                        return
+
+            with console.status("[bold green]Marking email as verified...", spinner="dots"):
+                updated_user = await _mark_email_verified_in_db(user["id"])
+
+            console.print("\n[bold green]✓[/bold green] Email marked as verified successfully\n")
+
+            updated_info = f"""[bold]ID:[/bold] {updated_user.id}
+[bold]Email:[/bold] {updated_user.email}
+[bold]Name:[/bold] {updated_user.name}
+[bold]Email verified:[/bold] {'Yes' if updated_user.isEmailVerified else 'No'}
+[bold]Verified at:[/bold] {updated_user.emailVerifiedAt}"""
+
+            updated_panel = Panel(updated_info, title="[bold]Updated User[/bold]", border_style="green")
+            console.print(updated_panel)
+            console.print()
+
+    except Exception as e:
+        console.print(f"\n[red]Error managing email verification:[/red] {e}\n")
+        raise typer.Exit(1)
+
+
+async def _generate_email_verification_link(user_id: str) -> tuple[str, dict[str, Any]]:
+    """Generate and store email verification token, return verification link and metadata."""
+    from datetime import UTC, datetime
+
+    from app.core.config import settings
+    from app.core.database import get_db
+    from app.modules.auth.auth_utils import create_email_verification_token
+    from app.modules.auth.repositories import UserRepository
+
+    async for db in get_db():
+        repo = UserRepository(db)
+
+        user = await repo.get_user_by_id(user_id)
+        if not user:
+            raise ValueError(f"User with id {user_id} not found")
+
+        # Generate new token
+        token = create_email_verification_token({"sub": user.id, "email": user.email})
+
+        # Store token metadata
+        await repo.store_email_verification_token(user.id, token, datetime.now(UTC))
+
+        # Build verification link (same as in email service)
+        link = f"{settings.frontend_url}/auth/verify-email?token={token}"
+
+        meta: dict[str, Any] = {
+            "token": token,
+            "expires_hours": settings.security.email_verification_token_expires_hours,
+        }
+
+        return link, meta
+
+    # This should never be reached
+    raise RuntimeError("Database session not available")
+
+
+async def _mark_email_verified_in_db(user_id: str) -> Any:
+    """Mark user email as verified directly in database."""
+    from datetime import UTC, datetime
+
+    from app.core.database import get_db
+    from app.modules.auth.repositories import UserRepository
+
+    async for db in get_db():
+        repo = UserRepository(db)
+
+        user = await repo.get_user_by_id(user_id)
+        if not user:
+            raise ValueError(f"User with id {user_id} not found")
+
+        user.mark_email_verified(datetime.now(UTC))
+        return await repo.update_user(user)
+
+    # This should never be reached
+    raise RuntimeError("Database session not available")

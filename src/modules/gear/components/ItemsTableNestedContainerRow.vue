@@ -10,9 +10,9 @@ import { GearRoutePath } from '../routes'
 import { useGearStore } from '../store/useGearStore'
 import { COLOR_BORDER_CLASSES } from '../utils/containerColors'
 import { getContainerIcon } from '../utils/containerIcons'
+import ItemPriorityBadge from './badges/ItemPriorityBadge.vue'
 import CategoryIcon from './CategoryIcon.vue'
 import ColorDot from './ColorDot.vue'
-import ItemPriorityBadge from './ItemPriorityBadge.vue'
 import ItemStatusBadge from './ItemStatusBadge.vue'
 
 const { t, locale } = useI18n()

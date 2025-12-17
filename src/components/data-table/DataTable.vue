@@ -8,7 +8,7 @@ import {
   useVueTable,
 } from '@tanstack/vue-table'
 import { ArrowUpDown } from 'lucide-vue-next'
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/table'
 import { TableLoadingSkeleton } from '@/components/ui/table'
 import { valueUpdater } from '@/lib/utils'
+import { useHorizontalScroll } from '@/shared/composables/useHorizontalScroll'
 import DataTableEmpty from './DataTableEmpty.vue'
 import DataTableToolbar from './DataTableToolbar.vue'
 import Pagination from './Pagination.vue'
@@ -31,6 +32,8 @@ import type {
 } from '@tanstack/vue-table'
 
 // Props
+type ColumnPinnedPosition = 'left' | 'right' | false
+
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
@@ -127,6 +130,7 @@ const table = useVueTable({
   getCoreRowModel: getCoreRowModel(),
   enableRowSelection: props.enableRowSelection,
   enableMultiRowSelection: props.enableRowSelection,
+  enableColumnPinning: true,
   getSortedRowModel: props.enableSorting ? getSortedRowModel() : undefined,
   getFilteredRowModel: props.enableFiltering ? getFilteredRowModel() : undefined,
   getPaginationRowModel: props.enablePagination ? getPaginationRowModel() : undefined,
@@ -153,6 +157,10 @@ const table = useVueTable({
         isInternalUpdate = true
         columnVisibilityModel.value = { ...columnVisibility.value }
         emit('update:columnVisibility', columnVisibility.value)
+        // Recalculate horizontal scroll state after DOM/layout update
+        nextTick(() => {
+          updateScrollState()
+        })
       }
     : undefined,
   onRowSelectionChange: props.enableRowSelection
@@ -226,6 +234,62 @@ const totalRows = computed(() => isServerSide.value ? (props.total ?? 0) : props
 const isEmpty = computed(() => table.getRowModel().rows.length === 0)
 const selectedRowsCount = computed(() => Object.keys(rowSelection.value).length)
 
+// Horizontal scroll state for pinned column shadows
+const tableRef = useTemplateRef<InstanceType<typeof Table>>('tableRef')
+const scrollContainerRef = computed(() => tableRef.value?.tableContainerRef)
+const {
+  hasHorizontalScroll,
+  canScrollLeft,
+  canScrollRight,
+  updateScrollState,
+} = useHorizontalScroll(scrollContainerRef)
+
+function getPinnedClasses(
+  pinned: ColumnPinnedPosition,
+  canScrollLeftValue: boolean,
+  canScrollRightValue: boolean,
+) {
+  if (pinned === 'left') {
+    const base = 'sticky left-0 z-20 bg-background'
+    const shadowOpacity = hasHorizontalScroll.value && canScrollLeftValue ? 'before:opacity-100' : 'before:opacity-0'
+    const shadow = ' before:content-[" "] before:absolute before:top-0 before:right-0 before:w-full before:h-full before:bg-background before:z-[-1] before:shadow-lg before:transition-opacity before:duration-200'
+
+    return `${base} ${shadowOpacity}${shadow}`
+  }
+
+  if (pinned === 'right') {
+    const base = 'sticky right-0 z-20 bg-background'
+    const shadowOpacity = hasHorizontalScroll.value && canScrollRightValue ? 'before:opacity-100' : 'before:opacity-0'
+    const shadow = ' before:content-[" "] before:absolute before:top-0 before:left-0 before:w-full before:h-full before:bg-background before:z-[-1] before:shadow-lg before:transition-opacity before:duration-200'
+
+    return `${base} ${shadowOpacity}${shadow}`
+  }
+
+  return ''
+}
+
+// Apply initial column pinning based on columnDef.meta.pinned
+onMounted(() => {
+  const left: string[] = []
+  const right: string[] = []
+
+  table.getAllLeafColumns().forEach((column) => {
+    const meta = column.columnDef.meta as { pinned?: Exclude<ColumnPinnedPosition, false> } | undefined
+    if (meta?.pinned === 'left') {
+      left.push(column.id)
+    } else if (meta?.pinned === 'right') {
+      right.push(column.id)
+    }
+  })
+
+  if (left.length > 0 || right.length > 0) {
+    table.setColumnPinning({
+      left,
+      right,
+    })
+  }
+})
+
 // Event handlers
 const handlePageChange = (newPage: number) => {
   page.value = newPage
@@ -272,91 +336,106 @@ const handlePageSizeChange = (newPageSize: number) => {
 
     <!-- Table -->
     <div class="border rounded-md overflow-hidden relative">
-      <div class="overflow-x-auto">
-        <!-- Horizontal scroll indicator (gradient hint on right side for mobile) -->
-        <div class="absolute right-0 top-0 bottom-0 w-12 pointer-events-none z-10 bg-linear-to-l from-black/5 dark:from-muted/60 to-transparent md:hidden" aria-hidden="true" />
-        <Table
-          :aria-label
-          :aria-labelledby
-        >
-          <TableHeader>
-            <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
-              <TableHead v-for="header in headerGroup.headers" :key="header.id">
-                <slot
-                  :name="`header-${header.column.id}`"
-                  :header="header"
-                  :column="header.column"
-                >
-                  <!-- Default sortable header -->
-                  <template v-if="!header.isPlaceholder && enableSorting && header.column.getCanSort()">
-                    <Button
-                      variant="ghost"
-                      class="group -ml-3 h-8 data-[state=open]:bg-accent"
-                      @click="header.column.toggleSorting(header.column.getIsSorted() === 'asc')"
-                    >
-                      <FlexRender
-                        :render="header.column.columnDef.header"
-                        :props="header.getContext()"
-                      />
-                      <ArrowUpDown
-                        class="ml-2 size-4 group-hover:opacity-100 transition-opacity"
-                        :class="header.column.getIsSorted() ? 'opacity-60' : 'opacity-0'"
-                      />
-                    </Button>
-                  </template>
-                  <!-- Default non-sortable header -->
-                  <FlexRender
-                    v-else-if="!header.isPlaceholder"
-                    :render="header.column.columnDef.header"
-                    :props="header.getContext()"
-                  />
-                </slot>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <!-- Loading State -->
-            <template v-if="loading">
-              <slot name="loading" :table="table" :columns="columns">
-                <TableLoadingSkeleton :colspan="columns.length" />
-              </slot>
-            </template>
-            <!-- Data Rows -->
-            <template v-else-if="!isEmpty">
-              <template v-for="row in table.getRowModel().rows" :key="row.id">
-                <TableRow
-                  :data-state="row.getIsSelected() ? 'selected' : undefined"
-                >
-                  <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
-                    <slot
-                      :name="cell.column.columnDef.id"
-                      :row="row"
-                      :cell="cell"
-                    >
-                      <FlexRender
-                        :render="cell.column.columnDef.cell"
-                        :props="cell.getContext()"
-                      />
-                    </slot>
-                  </TableCell>
-                </TableRow>
-                <!-- Slot for content after each row (e.g., expandable content) -->
-                <slot name="row-after" :row="row" :columns="columns" />
-              </template>
-            </template>
-            <!-- Empty State -->
-            <template v-else>
-              <slot name="empty" :table="table" :columns="columns">
-                <DataTableEmpty
-                  :table="table"
-                  :columns="columns"
-                  @action="$emit('empty-action')"
+      <!-- Horizontal scroll indicator (gradient hint on right side for mobile) -->
+      <div class="absolute right-0 top-0 bottom-0 w-12 pointer-events-none z-10 bg-linear-to-l from-black/5 dark:from-muted/60 to-transparent md:hidden" aria-hidden="true" />
+      <Table
+        ref="tableRef"
+        :aria-label
+        :aria-labelledby
+      >
+        <TableHeader>
+          <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
+            <TableHead
+              v-for="header in headerGroup.headers"
+              :key="header.id"
+              :class="getPinnedClasses(
+                header.column.getIsPinned() as ColumnPinnedPosition,
+                canScrollLeft,
+                canScrollRight,
+              )"
+            >
+              <slot
+                :name="`header-${header.column.id}`"
+                :header="header"
+                :column="header.column"
+              >
+                <!-- Default sortable header -->
+                <template v-if="!header.isPlaceholder && enableSorting && header.column.getCanSort()">
+                  <Button
+                    variant="ghost"
+                    class="group -ml-3 h-8 data-[state=open]:bg-accent"
+                    @click="header.column.toggleSorting(header.column.getIsSorted() === 'asc')"
+                  >
+                    <FlexRender
+                      :render="header.column.columnDef.header"
+                      :props="header.getContext()"
+                    />
+                    <ArrowUpDown
+                      class="ml-2 size-4 group-hover:opacity-100 transition-opacity"
+                      :class="header.column.getIsSorted() ? 'opacity-60' : 'opacity-0'"
+                    />
+                  </Button>
+                </template>
+                <!-- Default non-sortable header -->
+                <FlexRender
+                  v-else-if="!header.isPlaceholder"
+                  :render="header.column.columnDef.header"
+                  :props="header.getContext()"
                 />
               </slot>
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <!-- Loading State -->
+          <template v-if="loading">
+            <slot name="loading" :table="table" :columns="columns">
+              <TableLoadingSkeleton :colspan="columns.length" />
+            </slot>
+          </template>
+          <!-- Data Rows -->
+          <template v-else-if="!isEmpty">
+            <template v-for="row in table.getRowModel().rows" :key="row.id">
+              <TableRow
+                :data-state="row.getIsSelected() ? 'selected' : undefined"
+              >
+                <TableCell
+                  v-for="cell in row.getVisibleCells()"
+                  :key="cell.id"
+                  :class="getPinnedClasses(
+                    cell.column.getIsPinned() as ColumnPinnedPosition,
+                    canScrollLeft,
+                    canScrollRight,
+                  )"
+                >
+                  <slot
+                    :name="cell.column.columnDef.id"
+                    :row="row"
+                    :cell="cell"
+                  >
+                    <FlexRender
+                      :render="cell.column.columnDef.cell"
+                      :props="cell.getContext()"
+                    />
+                  </slot>
+                </TableCell>
+              </TableRow>
+              <!-- Slot for content after each row (e.g., expandable content) -->
+              <slot name="row-after" :row="row" :columns="columns" />
             </template>
-          </TableBody>
-        </Table>
-      </div>
+          </template>
+          <!-- Empty State -->
+          <template v-else>
+            <slot name="empty" :table="table" :columns="columns">
+              <DataTableEmpty
+                :table="table"
+                :columns="columns"
+                @action="$emit('empty-action')"
+              />
+            </slot>
+          </template>
+        </TableBody>
+      </Table>
     </div>
 
     <!-- Pagination Slot -->

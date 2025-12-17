@@ -68,11 +68,14 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - ✅ Limit: 20 MB (zwykli użytkownicy), 50 MB (admin) - konfigurowalny przez zmienne środowiskowe
    - Status: ✅ Completed | Priority: High | Complexity: Medium
 
-8. **DataTable - Pinned Columns**
+8. ✅ **DataTable - Pinned Columns** - Zakończone
    - 📍 Lokalizacja: [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-datatable---pinned-columns-pin-right-dla-kolumny-akcji)
-   - Dodanie wsparcia dla pinned columns (pin-right dla kolumny akcji) w komponencie DataTable
-   - Kolumna akcji zawsze widoczna podczas poziomego przewijania
-   - Status: 🔄 Planned | Priority: Medium | Complexity: Small
+   - ✅ Dodanie wsparcia dla pinned columns (pin-right dla kolumny akcji) w komponencie DataTable
+   - ✅ Kolumna akcji zawsze widoczna podczas poziomego przewijania
+   - ✅ Synchronizacja cienia pinned columns z horizontal scroll state
+   - ✅ Transition dla płynnego pojawiania się/znikania cienia
+   - ✅ Composable `useHorizontalScroll` do śledzenia stanu scrolla
+   - Status: ✅ Completed | Priority: Medium | Complexity: Small
 
 9. **Unifikacja modeli kontenerów i przedmiotów**
    - 📍 Analiza: [UNIFIED_MODEL_ANALYSIS.md](./analysis/UNIFIED_MODEL_ANALYSIS.md)
@@ -94,10 +97,10 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - Zapobieganie białemu ekranowi podczas inicjalizacji aplikacji
    - Status: 🔄 Planned | Priority: High | Complexity: Small
 
-12. **Welcome back message and links on landing page for already logged in users**
+12. ✅ **Welcome back message and links on landing page for already logged in users**
    - Dodanie komunikatu powitalnego na stronie głównej dla zalogowanych użytkowników
    - Linki do głównych sekcji aplikacji (np. kontenery, ustawienia)
-   - Status: 🔄 Planned | Priority: High | Complexity: Small
+   - Status: ✅ Completed | Priority: High | Complexity: Small
 
 13. **Nie działa zmiana ilości wierszy przedmiotów (limit) na stronie Container Details**
    - Naprawa funkcjonalności zmiany limitu wierszy w tabeli przedmiotów na stronie szczegółów kontenera
@@ -278,5 +281,5 @@ Uwaga: Większość funkcji jest w ROADMAP_OFFLINE.md (offline-first approach)
 
 ---
 
-**Ostatnia aktualizacja:** 2025-11-28
+**Ostatnia aktualizacja:** 2025-12-17
 

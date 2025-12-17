@@ -24,6 +24,7 @@ from .db_models import (
     ContainerShareTokenDB,
     ContainerRatingDB,
     GlobalCatalogueItemDB,
+    ItemPromotionDB,
 )
 from .schemas import (
     BatchOrderUpdateRequest,
@@ -574,6 +575,59 @@ class GearRepository(SearchMixin):
 
         return list(items)
 
+    # Item promotion operations
+    async def get_promotion_by_item_and_user(self, item_id: str, user_id: str) -> ItemPromotionDB | None:
+        """Get promotion record by item and user.
+
+        Args:
+            item_id: Item ID
+            user_id: User ID
+
+        Returns:
+            Promotion record if found, None otherwise
+        """
+        stmt = select(ItemPromotionDB).where(
+            and_(
+                ItemPromotionDB.item_id == item_id,
+                ItemPromotionDB.user_id == user_id,
+            )
+        )
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def create_promotion(self, item_id: str, user_id: str) -> ItemPromotionDB:
+        """Create a new promotion record.
+
+        Args:
+            item_id: Item ID to promote
+            user_id: User ID who is promoting
+
+        Returns:
+            Created promotion record
+        """
+        promotion = ItemPromotionDB(
+            id=generate_id(),
+            item_id=item_id,
+            user_id=user_id,
+        )
+        self.db.add(promotion)
+        await self.db.commit()
+        await self.db.refresh(promotion)
+        return promotion
+
+    async def get_promotions_by_item(self, item_id: str) -> Sequence[ItemPromotionDB]:
+        """Get all promotions for an item.
+
+        Args:
+            item_id: Item ID
+
+        Returns:
+            List of promotion records
+        """
+        stmt = select(ItemPromotionDB).where(ItemPromotionDB.item_id == item_id).order_by(ItemPromotionDB.created_at.desc())
+        result = await self.db.execute(stmt)
+        return result.scalars().all()
+
     # Share token operations
     async def create_share_token(
         self,
@@ -887,11 +941,14 @@ class GearRepository(SearchMixin):
         # Order by name
         stmt = stmt.order_by(GlobalCatalogueItemDB.name.asc())
 
+        # Load creator relationship
+        stmt = stmt.options(joinedload(GlobalCatalogueItemDB.creator))
+
         # Pagination
         stmt = stmt.offset(skip).limit(limit)
 
         result = await self.db.execute(stmt)
-        return result.scalars().all()
+        return result.unique().scalars().all()
 
     async def get_catalogue_item(self, item_id: str) -> GlobalCatalogueItemDB | None:
         """Get a single catalogue item by ID.
@@ -900,11 +957,11 @@ class GearRepository(SearchMixin):
             item_id: Catalogue item ID
 
         Returns:
-            Catalogue item if found, None otherwise
+            Catalogue item if found, None otherwise (with creator relationship loaded)
         """
-        stmt = select(GlobalCatalogueItemDB).where(GlobalCatalogueItemDB.id == item_id)
+        stmt = select(GlobalCatalogueItemDB).where(GlobalCatalogueItemDB.id == item_id).options(joinedload(GlobalCatalogueItemDB.creator))
         result = await self.db.execute(stmt)
-        return result.scalar_one_or_none()
+        return result.unique().scalar_one_or_none()
 
     async def create_catalogue_item(
         self,

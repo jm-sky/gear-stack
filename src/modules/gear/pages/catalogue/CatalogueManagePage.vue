@@ -181,6 +181,9 @@ const columns = computed<ColumnDef<IGlobalCatalogueItem>[]>(() => [
     id: 'actions',
     header: () => t('gear.item.actions'),
     enableSorting: false,
+    meta: {
+      pinned: 'right',
+    },
   },
 ])
 

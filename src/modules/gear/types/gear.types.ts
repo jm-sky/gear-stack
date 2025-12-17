@@ -123,6 +123,7 @@ export interface IGearItem {
   order?: number | null // Manual order for items within container (lower numbers appear first)
   showOnContainer?: boolean | null // Show item image in container view gallery (Implementation postponed - use container.showItemImages instead)
   primaryImageUrl?: string | null // URL of the primary image for the item
+  promoteCount?: number // Number of promotions for this item (for promotion to catalogue)
   createdAt: TDateTime
   updatedAt: TDateTime
 }

@@ -8,10 +8,11 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import type { IGearItem } from '../types/gear.types'
+import ItemPriorityBadge from '../components/badges/ItemPriorityBadge.vue'
 import CategoryIcon from '../components/CategoryIcon.vue'
-import ItemPriorityBadge from '../components/ItemPriorityBadge.vue'
 import ItemStatusBadge from '../components/ItemStatusBadge.vue'
 import MarkdownRenderer from '../components/MarkdownRenderer.vue'
+import ItemPromotionCard from '../components/promotion/ItemPromotionCard.vue'
 import { useCategoryLabel } from '../composables/useCategoryLabel'
 import { useExpiration } from '../composables/useExpiration'
 import { useFormattedItemPrice } from '../composables/useFormattedItemPrice'
@@ -230,6 +231,12 @@ const hasDetails = computed<boolean>(() => {
           </div>
         </template>
       </div>
+
+      <!-- Promotion Card (only for items not already in catalogue) -->
+      <ItemPromotionCard
+        v-if="!item.catalogueItemId"
+        :item-id="itemId"
+      />
     </div>
   </AuthenticatedLayout>
 </template>

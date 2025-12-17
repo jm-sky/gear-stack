@@ -2,9 +2,9 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Badge } from '@/components/ui/badge'
-import type { IGearItemV2 } from '../types/gear.types.v2'
-import { useGearStoreV2 } from '../store/useGearStoreV2'
-import { calculateWeightLimitPercentageSyncV2 } from '../utils/containerCalculationsV2'
+import type { IGearItemV2 } from '../../types/gear.types.v2'
+import { useGearStoreV2 } from '../../store/useGearStoreV2'
+import { calculateWeightLimitPercentageSyncV2 } from '../../utils/containerCalculationsV2'
 
 const props = defineProps<{
   container: IGearItemV2

@@ -102,6 +102,9 @@ export function createItemsColumns(
       header: () => t('gear.item.actions'),
       enableSorting: false,
       enableHiding: false,
+      meta: {
+        pinned: 'right',
+      },
     },
   ]
 }
