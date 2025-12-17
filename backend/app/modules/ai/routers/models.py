@@ -5,15 +5,17 @@ from fastapi import APIRouter
 from app.modules.ai.dependencies import AdminUser
 from app.modules.ai.schemas import AiModel, AiModelsResponse
 from app.modules.ai.utils.models_config import MODELS
+from app.modules.auth.dependencies import CurrentUser
 
 router = APIRouter(prefix="/models", tags=["ai-models"])
 
 
 @router.get("", response_model=AiModelsResponse)
-async def get_models(current_user: AdminUser) -> AiModelsResponse:
+async def get_models(current_user: CurrentUser) -> AiModelsResponse:
     """Get list of available AI models.
 
-    Requires admin access.
+    Available to all authenticated users - allows users to see available models
+    when configuring their AI settings.
 
     Returns:
         List of configured models
