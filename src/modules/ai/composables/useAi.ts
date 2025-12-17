@@ -22,13 +22,14 @@ export const useAi = () => {
       return true
     }
 
-    // Regular user can only use AI if they have their own token
-    const hasOwnToken = aiStore.hasOwnToken
+    // Regular user: prioritize user features (from /me endpoint), fall back to store settings
     const userFeatures = userStore.user?.features
-    // Check from features (limit === null means unlimited = own token)
     const hasOwnTokenFromFeatures = userFeatures?.ai?.limit === null
 
-    return hasOwnToken || hasOwnTokenFromFeatures
+    // Store settings may not be loaded yet during app initialization
+    const hasOwnTokenFromStore = aiStore.settings?.has_token ?? false
+
+    return hasOwnTokenFromFeatures || hasOwnTokenFromStore
   })
 
   return {

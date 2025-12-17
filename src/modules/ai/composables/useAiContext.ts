@@ -39,7 +39,13 @@ export function useAiContext() {
   })
 
   const contextFields = computed<string[]>(() => {
-    return aiStore.settings?.context_fields ?? selectedFields.value
+    const settingsFields = aiStore.settings?.context_fields
+    // Convert Record<string, any> to string[] by taking the keys
+    if (settingsFields && typeof settingsFields === 'object' && !Array.isArray(settingsFields)) {
+      return Object.keys(settingsFields)
+    }
+    // Fallback to selectedFields if no settings or if it's already an array (backward compatibility)
+    return Array.isArray(settingsFields) ? settingsFields : selectedFields.value
   })
 
   const buildContext = (): IAiContext => {

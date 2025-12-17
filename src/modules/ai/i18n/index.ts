@@ -54,6 +54,7 @@ export const aiEn = {
     premium: {
       title: 'Premium Feature',
       description: 'AI settings are available for Premium users',
+      ownTokenOption: 'Alternatively, configure your own OpenRouter API token in Settings to use AI features for free.',
       modelSelectorDisabled: 'Model selection requires Premium',
       contextConfigDisabled: 'Context configuration requires Premium',
     },
@@ -159,6 +160,7 @@ export const aiPl = {
     premium: {
       title: 'Funkcja Premium',
       description: 'Ustawienia AI są dostępne dla użytkowników Premium',
+      ownTokenOption: 'Alternatywnie, skonfiguruj własny token API OpenRouter w Ustawieniach, aby korzystać z funkcji AI za darmo.',
       modelSelectorDisabled: 'Wybór modelu wymaga Premium',
       contextConfigDisabled: 'Konfiguracja kontekstu wymaga Premium',
     },

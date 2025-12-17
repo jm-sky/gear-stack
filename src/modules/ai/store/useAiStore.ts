@@ -27,7 +27,7 @@ export const useAiStore = defineStore('ai', () => {
     availableModels.value.find(m => m.id === settings.value?.selected_model),
   )
 
-  const hasOwnToken = computed<boolean>(() => settings.value?.use_own_token ?? false)
+  const hasOwnToken = computed<boolean>(() => settings.value?.has_token ?? false)
 
   const monthlyUsage = computed(() => ({
     tokens: settings.value?.monthly_tokens_used ?? 0,
