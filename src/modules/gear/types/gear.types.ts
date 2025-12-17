@@ -87,6 +87,15 @@ export const GEAR_ITEM_CATEGORIES: TGearItemCategory[] = [
 // Constants for item qualities
 export const GEAR_ITEM_QUALITIES: TGearItemQuality[] = ['low', 'medium', 'high']
 
+// Shelf life unit type
+export type TShelfLifeUnit = 'days' | 'months' | 'years'
+
+// Shelf life interface
+export interface IShelfLife {
+  value: number
+  unit: TShelfLifeUnit
+}
+
 // Container information included in item responses
 export interface IContainerInfo {
   id: TUUID
@@ -107,6 +116,7 @@ export interface IGearItem {
   weightUnit: TGearWeightUnit // jednostka wagi (g lub kg)
   notes?: string | null
   expirationDate?: TDateTime | null // ISO date string
+  shelfLife?: IShelfLife | null // Shelf life period (e.g., { value: 10, unit: 'years' })
   priority: TGearItemPriority
   status: TGearItemStatus
   containerId?: TUUID | null // Reference to a nested container (if this item is a container)
@@ -216,6 +226,7 @@ export interface ICreateItemDto {
   weightUnit: TGearWeightUnit
   notes?: string | null
   expirationDate?: TDateTime | null
+  shelfLife?: IShelfLife | null // Shelf life period (e.g., { value: 10, unit: 'years' })
   priority: TGearItemPriority
   status: TGearItemStatus
   containerId?: TUUID | null // Reference to a nested container (if this item is a container)
@@ -240,6 +251,7 @@ export interface IUpdateItemDto {
   weightUnit?: TGearWeightUnit | null
   notes?: string | null
   expirationDate?: TDateTime | null
+  shelfLife?: IShelfLife | null // Shelf life period (e.g., { value: 10, unit: 'years' })
   priority?: TGearItemPriority | null
   status?: TGearItemStatus | null
   containerId?: TUUID | null // Reference to a nested container (if this item is a container)

@@ -28,6 +28,7 @@ import { useGearStore } from '../store/useGearStore'
 import { recognizeCategory } from '../utils/categoryRecognition'
 import { getDefaultItemValues } from '../utils/defaultValues'
 import { recognizeParameters } from '../utils/parameterRecognition'
+import { calculateExpirationDate } from '../utils/shelfLife'
 import { type ItemFormData, itemSchema } from '../utils/validation'
 import { toBasicWeightUnit } from '../utils/weightUnits'
 
@@ -79,6 +80,8 @@ const getInitialValues = (): ItemFormData => {
       weightUnit: toBasicWeightUnit(item.value.weightUnit) ?? config.defaults.preferredWeightUnit,
       notes: item.value.notes ?? '',
       expirationDate: item.value.expirationDate ?? '',
+      shelfLifeValue: item.value.shelfLife?.value ?? undefined,
+      shelfLifeUnit: item.value.shelfLife?.unit ?? 'years',
       priority: item.value.priority,
       status: item.value.status,
       price: item.value.price ?? undefined,
@@ -147,9 +150,11 @@ const loadItem = async () => {
         quantity: loadedItem.quantity,
         weight: loadedItem.weight,
         weightUnit: toBasicWeightUnit(loadedItem.weightUnit) ?? 'g',
-        notes: loadedItem.notes ?? '',
-        expirationDate: loadedItem.expirationDate ?? '',
-        priority: loadedItem.priority,
+      notes: loadedItem.notes ?? '',
+      expirationDate: loadedItem.expirationDate ?? '',
+      shelfLifeValue: loadedItem.shelfLife?.value ?? undefined,
+      shelfLifeUnit: loadedItem.shelfLife?.unit ?? 'years',
+      priority: loadedItem.priority,
         status: loadedItem.status,
         price: loadedItem.price ?? undefined,
         currency: loadedItem.currency ?? undefined,
@@ -217,17 +222,51 @@ const handleCatalogItemSelect = (selectedItem: IItemWithContainer) => {
   // Note: We don't copy price, url, quality, wearable, consumable as these may differ per container
 }
 
+// Handle set expiration date from shelf life
+const handleSetExpirationDate = () => {
+  const shelfLifeValue = values.shelfLifeValue
+  const shelfLifeUnit = values.shelfLifeUnit
+
+  if (!shelfLifeValue || !shelfLifeUnit) {
+    toast.error(t('gear.item.shelfLife'))
+    return
+  }
+
+  const expirationDate = calculateExpirationDate({
+    value: shelfLifeValue,
+    unit: shelfLifeUnit,
+  })
+
+  setFieldValue('expirationDate', expirationDate)
+  toast.success(t('common.success'))
+}
+
 // Submit handler
-const onSubmit = handleSubmit(async (data: ICreateItemDto | IUpdateItemDto) => {
+const onSubmit = handleSubmit(async (data: ItemFormData) => {
   try {
+    // Convert form data to DTO
+    const dtoData: ICreateItemDto | IUpdateItemDto = {
+      ...data,
+      shelfLife: data.shelfLifeValue && data.shelfLifeUnit
+        ? {
+            value: data.shelfLifeValue,
+            unit: data.shelfLifeUnit,
+          }
+        : null,
+    }
+
+    // Remove form-specific fields
+    delete (dtoData as Record<string, unknown>).shelfLifeValue
+    delete (dtoData as Record<string, unknown>).shelfLifeUnit
+
     if (isEditMode && itemId) {
-      await updateItem(itemId, data as IUpdateItemDto)
+      await updateItem(itemId, dtoData as IUpdateItemDto)
       toast.success(t('common.success'))
       await navigateBackAndClean()
     } else {
       // Add linkedItemId if selecting from catalog
       const createData: ICreateItemDto = {
-        ...data as ICreateItemDto,
+        ...dtoData as ICreateItemDto,
         linkedItemId: tabMode.value === 'catalog' && selectedCatalogItemId.value ? selectedCatalogItemId.value : undefined,
       }
       await createItem(containerId, createData)
@@ -338,6 +377,7 @@ const handleRecognizeParameters = () => {
               @cancel="handleCancel"
               @name-blur="handleNameBlur"
               @recognize-parameters="handleRecognizeParameters"
+              @set-expiration-date="handleSetExpirationDate"
             />
           </form>
         </Tabs>
@@ -350,6 +390,7 @@ const handleRecognizeParameters = () => {
             @cancel="handleCancel"
             @name-blur="handleNameBlur"
             @recognize-parameters="handleRecognizeParameters"
+            @set-expiration-date="handleSetExpirationDate"
           />
         </form>
       </div>

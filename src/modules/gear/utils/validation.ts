@@ -33,6 +33,8 @@ export const itemSchema = z.object({
   weightUnit: weightUnitEnum,
   notes: z.string().optional(),
   expirationDate: z.string().optional(),
+  shelfLifeValue: z.number().int().min(1, 'Wartość okresu przydatności musi być większa od 0').optional(),
+  shelfLifeUnit: z.enum(['days', 'months', 'years']).optional(),
   priority: z.enum(['critical', 'high', 'medium', 'low']),
   status: z.enum(['owned', 'missing', 'toBuy']),
   containerId: z.union([z.string().uuid(), z.literal('')]).optional(), // Reference to nested container (empty string = no container)
