@@ -16,11 +16,10 @@ import DialogProgressOverlay from '@/components/ui/dialog/DialogProgressOverlay.
 import Textarea from '@/components/ui/textarea/Textarea.vue'
 import { useHandleError } from '@/shared/composables/useHandleError'
 import { logger } from '@/shared/utils/logger'
-import type { IGearContainer } from '../types/gear.types'
-import { useGear } from '../composables/useGear'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import { useGearSettings } from '../composables/useGearSettings'
 import { markdownImportService } from '../services/markdownImportService'
-import { useGearStore } from '../store/useGearStore'
+import { useGearStoreV2 } from '../store/useGearStoreV2'
 import { safeValidateContainer, safeValidateItem } from '../utils/validation'
 import GuidelinesDialog from './GuidelinesDialog.vue'
 import MarkdownImportOptions from './import-markdown/MarkdownImportOptions.vue'
@@ -36,8 +35,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const { createContainer, updateContainer, createItem, updateItem } = useGear()
-const store = useGearStore()
+const store = useGearStoreV2()
 const { customBrands } = useGearSettings()
 const { handleError } = useHandleError()
 
@@ -157,7 +155,7 @@ const handleImport = async () => {
     const containerIdMap = new Map<string, string>()
 
     // Phase 1: Create/update all containers first
-    const createdContainers: Array<{ containerData: typeof previewResult.value.containers[0]; container: IGearContainer }> = []
+    const createdContainers: Array<{ containerData: typeof previewResult.value.containers[0]; container: IGearItemV2 }> = []
 
     for (const containerData of previewResult.value.containers) {
       importProgress.value.currentItem = containerData.name
@@ -187,32 +185,112 @@ const handleImport = async () => {
 
       // Check if we should update existing container (has UUID and mode is update)
       if (importMode.value === 'update' && containerData.uuid) {
-        const existing = store.getContainerById(containerData.uuid)
-        if (existing) {
+        const existing = store.getItemById(containerData.uuid)
+        if (existing && existing.itemType === 'container') {
           // Update existing container with all parsed fields
-          container = await updateContainer(existing.id, {
+          store.upsertItem({
+            ...existing,
             name: validation.data.name,
-            description: validation.data.description,
-            weight: validation.data.weight,
-            weightUnit: validation.data.weightUnit,
-            url: validation.data.url,
-            price: validation.data.price,
-            currency: validation.data.currency,
-            favorite: validation.data.favorite,
+            description: validation.data.description || null,
+            weight: validation.data.weight ?? null,
+            weightUnit: validation.data.weightUnit ?? null,
+            url: validation.data.url ?? null,
+            price: validation.data.price ?? null,
+            currency: validation.data.currency ?? null,
+            favorite: validation.data.favorite ?? false,
+            updatedAt: new Date().toISOString(),
             // Keep existing type, color, brand, and other fields that aren't in markdown
           })
+          container = store.getItemById(existing.id)!
           updatedCount++
         } else {
           // UUID provided but container not found - create new with same UUID
-          container = await createContainer({
-            ...validation.data,
+          container = {
             id: containerData.uuid, // Use UUID from markdown export
-          })
+            userId: 'local-user',
+            itemType: 'container' as const,
+            parentItemId: null,
+            name: validation.data.name,
+            description: validation.data.description || null,
+            containerType: validation.data.type,
+            category: null,
+            orderIndex: null,
+            status: 'owned' as const,
+            priority: null,
+            weight: validation.data.weight ?? null,
+            weightUnit: validation.data.weightUnit ?? null,
+            maxWeight: null,
+            maxWeightUnit: null,
+            quantity: 1,
+            wearable: false,
+            consumable: false,
+            favorite: validation.data.favorite ?? false,
+            hideWhenNested: false,
+            price: validation.data.price ?? null,
+            currency: validation.data.currency ?? null,
+            url: validation.data.url ?? null,
+            brand: null,
+            color: null,
+            expirationDate: null,
+            quality: null,
+            notes: null,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            isPublic: false,
+            authorId: null,
+            authorName: null,
+            averageUserRating: null,
+            userRatingCount: undefined,
+            ownerRating: null,
+            userRating: null,
+            showItemImages: false,
+          }
+          store.upsertItem(container)
           importedCount++
         }
       } else {
         // Create new container
-        container = await createContainer(validation.data)
+        container = {
+          id: crypto.randomUUID(),
+          userId: 'local-user',
+          itemType: 'container' as const,
+          parentItemId: null,
+          name: validation.data.name,
+          description: validation.data.description || null,
+          containerType: validation.data.type,
+          category: null,
+          orderIndex: null,
+          status: 'owned' as const,
+          priority: null,
+          weight: validation.data.weight ?? null,
+          weightUnit: validation.data.weightUnit ?? null,
+          maxWeight: null,
+          maxWeightUnit: null,
+          quantity: 1,
+          wearable: false,
+          consumable: false,
+          favorite: validation.data.favorite ?? false,
+          hideWhenNested: false,
+          price: validation.data.price ?? null,
+          currency: validation.data.currency ?? null,
+          url: validation.data.url ?? null,
+          brand: null,
+          color: null,
+          expirationDate: null,
+          quality: undefined,
+          notes: null,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          isPublic: false,
+          authorId: null,
+          authorName: null,
+          averageUserRating: null,
+          userRatingCount: undefined,
+          ownerRating: null,
+          userRating: null,
+          showItemImages: false,
+        }
+        store.upsertItem(container)
         importedCount++
       }
 
@@ -233,12 +311,8 @@ const handleImport = async () => {
     // Phase 2: Create/update items with nested container resolution
     importProgress.value.phase = 'items'
     for (const { containerData, container } of createdContainers) {
-      // Fetch latest container from store to ensure we have up-to-date items
-      const latestContainer = store.getContainerById(container.id)
-      if (!latestContainer) {
-        logger.warn(`Container ${container.id} not found in store`)
-        continue
-      }
+      // Get children of container to check for existing items
+      const existingChildren = store.getChildrenOfItem(container.id)
 
       // Import/update items
       for (const itemData of containerData.items) {
@@ -266,23 +340,78 @@ const handleImport = async () => {
         }
 
         if (importMode.value === 'update' && itemUuid) {
-          // Try to find existing item by UUID in the latest container from store
-          const existingItem = latestContainer.items.find(i => i.id === itemUuid)
+          // Try to find existing item by UUID in the container's children
+          const existingItem = existingChildren.find(i => i.id === itemUuid && i.itemType === 'item')
           if (existingItem) {
             // Update existing item
-            await updateItem(existingItem.id, validation.data)
+            store.upsertItem({
+              ...existingItem,
+              ...validation.data,
+              updatedAt: new Date().toISOString(),
+            })
             itemUpdatedCount++
           } else {
             // UUID provided but item not found - create new with same UUID
-            await createItem(latestContainer.id, {
+            store.upsertItem({
               ...validation.data,
               id: itemUuid, // Use UUID from markdown export
+              userId: 'local-user',
+              itemType: 'item' as const,
+              parentItemId: container.id,
+              description: validation.data.notes || null,
+              containerType: null,
+              orderIndex: undefined,
+              status: validation.data.status || 'owned',
+              priority: validation.data.priority || null,
+              maxWeight: null,
+              maxWeightUnit: null,
+              hideWhenNested: false,
+              expirationDate: validation.data.expirationDate || null,
+              quality: validation.data.quality || null,
+              notes: validation.data.notes || null,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              isPublic: false,
+              authorId: null,
+              authorName: null,
+              averageUserRating: null,
+              userRatingCount: undefined,
+              ownerRating: null,
+              userRating: null,
+              showItemImages: false,
             })
             itemCount++
           }
         } else {
           // Create new item
-          await createItem(latestContainer.id, validation.data)
+          store.upsertItem({
+            ...validation.data,
+            id: crypto.randomUUID(),
+            userId: 'local-user',
+            itemType: 'item' as const,
+            parentItemId: container.id,
+            description: validation.data.notes || null,
+            containerType: null,
+            orderIndex: undefined,
+            status: validation.data.status || 'owned',
+            priority: validation.data.priority || null,
+            maxWeight: null,
+            maxWeightUnit: null,
+            hideWhenNested: false,
+            expirationDate: validation.data.expirationDate || null,
+            quality: validation.data.quality || undefined,
+            notes: validation.data.notes || null,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            isPublic: false,
+            authorId: null,
+            authorName: null,
+            averageUserRating: null,
+            userRatingCount: undefined,
+            ownerRating: null,
+            userRating: null,
+            showItemImages: false,
+          })
           itemCount++
         }
         importProgress.value.current++

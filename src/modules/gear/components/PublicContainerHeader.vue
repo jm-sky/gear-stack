@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import ButtonLink from '@/components/ui/button-link/ButtonLink.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { smallDateTime } from '@/shared/utils/smallDateTime'
-import type { IGearContainer } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { useIsContainerOwner } from '../composables/useIsContainerOwner'
 import { GearRoutePath } from '../routes'
@@ -17,7 +17,7 @@ import PublicContainerAuthorBadge from './badges/PublicContainerAuthorBadge.vue'
 import MarkdownRenderer from './MarkdownRenderer.vue'
 
 const props = defineProps<{
-  container: IGearContainer
+  container: IGearItemV2
   backPath?: string
 }>()
 
@@ -28,7 +28,7 @@ const emit = defineEmits<{
 const router = useRouter()
 const { t } = useI18n()
 const { isAuthenticated } = useAuth()
-const { typeLabel } = useContainerTypeLabel(computed(() => props.container.type))
+const { typeLabel } = useContainerTypeLabel(computed(() => props.container.containerType || 'backpack'))
 
 const EditIcon = getActionIcon('edit')
 

@@ -23,6 +23,7 @@ import {
   calculateTotalWeightSync,
 } from '../utils/containerCalculations'
 import { formatWeightToPreferredUnit } from '../utils/formatWeight'
+import { convertV1ContainerToV2 } from '../utils/typeConverters'
 
 const route = useRoute()
 const router = useRouter()
@@ -51,6 +52,11 @@ const isOwner = computed(() => {
 })
 const isPublic = computed(() => {
   return container.value?.isPublic ?? false
+})
+
+// Convert V1 container to V2 for components that use V2 types
+const containerV2 = computed(() => {
+  return container.value ? convertV1ContainerToV2(container.value) : null
 })
 
 const loadContainer = async () => {
@@ -150,7 +156,8 @@ const handleDeleteRating = async (type: TRatingType) => {
     <div v-else-if="container" class="space-y-6 w-full max-w-full overflow-hidden">
       <!-- Header -->
       <PublicContainerHeader
-        :container="container"
+        v-if="containerV2"
+        :container="containerV2"
         :back-path="GearRoutePath.PublicContainers"
         @back="handleBack"
       />
@@ -200,7 +207,8 @@ const handleDeleteRating = async (type: TRatingType) => {
         </CardHeader>
         <CardContent>
           <ContainerRatingCard
-            :container="container"
+            v-if="containerV2"
+            :container="containerV2"
             :is-owner="isOwner"
             :is-public="isPublic"
             :loading="isRatingLoading"
@@ -211,7 +219,7 @@ const handleDeleteRating = async (type: TRatingType) => {
       </Card>
 
       <!-- Category Pie Chart -->
-      <CategoryPieChart :container="container" />
+      <CategoryPieChart v-if="containerV2" :container="containerV2" />
     </div>
   </AuthenticatedLayout>
 </template>

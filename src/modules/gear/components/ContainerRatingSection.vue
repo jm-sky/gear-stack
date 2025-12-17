@@ -4,18 +4,19 @@ import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useBackend } from '@/shared/composables/useBackend'
-import type { IGearContainer, TRatingType, TRatingValue } from '../types/gear.types'
-import { useGear } from '../composables/useGear'
+import type { TRatingType, TRatingValue } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import { useIsContainerOwner } from '../composables/useIsContainerOwner'
 import { gearContainerApiService } from '../services/gearContainerApiService'
+import { useGearStoreV2 } from '../store/useGearStoreV2'
 import ContainerRatingCard from './ContainerRatingCard.vue'
 
 const { t } = useI18n()
 const { shouldUseAPI } = useBackend()
-const { getContainerById } = useGear()
+const store = useGearStoreV2()
 
 const props = defineProps<{
-  container: IGearContainer
+  container: IGearItemV2
 }>()
 
 // Rating state
@@ -34,10 +35,7 @@ const handleRate = async (rating: TRatingValue, type: TRatingType) => {
       rating,
       type
     )
-    // Refresh container data
-    if (shouldUseAPI.value) {
-      await getContainerById(props.container.id)
-    }
+    // Note: Parent component is responsible for refreshing container data
     toast.success(t('gear.container.ratingUpdated'))
   } catch (error) {
     console.error('Failed to rate container:', error)
@@ -56,10 +54,7 @@ const handleDeleteRating = async (type: TRatingType) => {
       props.container.id,
       type
     )
-    // Refresh container data
-    if (shouldUseAPI.value) {
-      await getContainerById(props.container.id)
-    }
+    // Note: Parent component is responsible for refreshing container data
     toast.success(t('gear.container.ratingDeleted'))
   } catch (error) {
     console.error('Failed to delete rating:', error)

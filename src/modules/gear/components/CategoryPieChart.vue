@@ -9,12 +9,12 @@ import {
   ChartTooltipContent,
   componentToString,
 } from '@/components/ui/chart'
-import type { IGearContainer, IGearItem, TGearItemPriority } from '../types/gear.types'
-import { useGear } from '../composables/useGear'
+import type { TGearItemPriority } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import { useGearSettings } from '../composables/useGearSettings'
 import { usePieChartGeometry } from '../composables/usePieChartGeometry'
-import { calculateItemsByPriority, calculatePriceByCategory, calculateWeightBreakdown } from '../utils/containerCalculations'
-import { getAllNestedContainers } from '../utils/containerNesting'
+import { useGearStoreV2 } from '../store/useGearStoreV2'
+import { calculateItemsByPriorityV2, calculatePriceByCategoryV2, calculateWeightBreakdownV2 } from '../utils/containerCalculationsV2'
 import { formatCurrency, getCurrency } from '../utils/currencyFormatter'
 import CategoryPieChartLabels from './CategoryPieChartLabels.vue'
 import CategoryPieChartLegend from './CategoryPieChartLegend.vue'
@@ -37,34 +37,49 @@ interface CategoryData {
 }
 
 const props = withDefaults(defineProps<{
-  container: IGearContainer
+  container: IGearItemV2
   includeNested?: boolean
 }>(), {
   includeNested: false,
 })
 
 const { t } = useI18n()
-const { containers } = useGear()
+const store = useGearStoreV2()
 const { defaultCurrency } = useGearSettings()
 
 const chartMode = ref<ChartMode>('weight')
 
 const categoryData = computed<CategoryData[]>(() => {
   // Get all items including nested containers if enabled
-  let allItems: IGearItem[] = [...props.container.items]
+  let allItems: IGearItemV2[] = store.getChildrenOfItem(props.container.id)
+    .filter(child => child.itemType === 'item')
 
   if (props.includeNested) {
-    const nestedContainers = getAllNestedContainers(props.container.id, containers.value)
-    for (const nestedContainer of nestedContainers) {
-      allItems = allItems.concat(nestedContainer.items)
+    // Get all nested containers recursively
+    const collectNestedItems = (containerId: string): IGearItemV2[] => {
+      const children = store.getChildrenOfItem(containerId)
+      let items: IGearItemV2[] = []
+
+      for (const child of children) {
+        if (child.itemType === 'item') {
+          items.push(child)
+        } else if (child.itemType === 'container') {
+          // Recursively collect items from nested containers
+          items = items.concat(collectNestedItems(child.id))
+        }
+      }
+
+      return items
     }
+
+    allItems = collectNestedItems(props.container.id)
   }
 
   const mode = chartMode.value
 
   // Handle weight-breakdown mode
   if (mode === 'weight-breakdown') {
-    const breakdown = calculateWeightBreakdown(props.container)
+    const breakdown = calculateWeightBreakdownV2(props.container.id, store.getItemById, store.getChildrenOfItem)
     const total = breakdown.total
 
     const breakdownData: CategoryData[] = [
@@ -96,8 +111,9 @@ const categoryData = computed<CategoryData[]>(() => {
   }
 
   // Handle price mode
+  // Note: V2 function already recurses into nested containers, so includeNested prop is not needed
   if (mode === 'price') {
-    const priceData = calculatePriceByCategory(allItems)
+    const priceData = calculatePriceByCategoryV2(props.container.id, store.getItemById, store.getChildrenOfItem)
     return priceData.map(({ category, totalPrice, percentage }) => ({
       category,
       weight: 0,
@@ -109,8 +125,9 @@ const categoryData = computed<CategoryData[]>(() => {
   }
 
   // Handle priority mode
+  // Note: V2 function already recurses into nested containers, so includeNested prop is not needed
   if (mode === 'priority') {
-    const priorityData = calculateItemsByPriority(allItems)
+    const priorityData = calculateItemsByPriorityV2(props.container.id, store.getItemById, store.getChildrenOfItem)
     return priorityData.map(({ priority, count, percentage }) => ({
       category: priority, // Use priority as category key for chart
       weight: 0,
@@ -129,15 +146,15 @@ const categoryData = computed<CategoryData[]>(() => {
   let totalQuantity = 0
 
   for (const item of allItems) {
-    const itemWeight = item.weight * item.quantity
+    const itemWeight = (item.weight ?? 0) * (item.quantity ?? 1)
     totalWeight += itemWeight
-    totalQuantity += item.quantity
+    totalQuantity += (item.quantity ?? 1)
 
     const category = item.category || 'other'
     const existing = categoryMap.get(category) || { weight: 0, quantity: 0 }
     categoryMap.set(category, {
       weight: existing.weight + itemWeight,
-      quantity: existing.quantity + item.quantity,
+      quantity: existing.quantity + (item.quantity ?? 1),
     })
   }
 
@@ -328,7 +345,10 @@ const valueFormatter = (value: number) => {
   }
   if (mode === 'price') {
     // Use first item's currency or default currency
-    const firstItem = props.container.items.find(item => item.price != null && item.price > 0)
+    const children = store.getChildrenOfItem(props.container.id)
+    const firstItem = children
+      .filter(child => child.itemType === 'item')
+      .find(item => item.price != null && item.price > 0)
     const currency = firstItem?.currency ? getCurrency(firstItem.currency, defaultCurrency.value) : defaultCurrency.value
     return formatCurrency(value, currency)
   }

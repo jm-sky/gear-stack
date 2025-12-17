@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { IGearContainer, TRatingType, TRatingValue } from '../types/gear.types'
+import type { TRatingType, TRatingValue } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import RatingStars from './RatingStars.vue'
 
 interface Props {
-  container: IGearContainer
+  container: IGearItemV2
   isOwner?: boolean
   isPublic?: boolean
   loading?: boolean

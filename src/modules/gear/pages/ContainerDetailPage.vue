@@ -430,12 +430,10 @@ if (!container.value) {
       />
 
       <!-- Category Pie Chart -->
-      <!-- TODO: CategoryPieChart still uses V1 types -->
-      <CategoryPieChart :container="containerV1!" />
+      <CategoryPieChart v-if="container" :container="container" />
 
       <!-- Rating Section -->
-      <!-- TODO: ContainerRatingSection still uses V1 types -->
-      <ContainerRatingSection v-if="container" :container="containerV1!" />
+      <ContainerRatingSection v-if="container" :container="container" />
 
       <!-- Add Nested Container Dialog -->
       <AddNestedContainerDialog

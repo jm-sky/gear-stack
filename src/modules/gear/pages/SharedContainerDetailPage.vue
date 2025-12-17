@@ -19,6 +19,7 @@ import {
   calculateTotalWeightSync,
 } from '../utils/containerCalculations'
 import { formatWeightToPreferredUnit } from '../utils/formatWeight'
+import { convertV1ContainerToV2 } from '../utils/typeConverters'
 
 const route = useRoute()
 const router = useRouter()
@@ -31,6 +32,11 @@ const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.prefe
 const token = route.params.token as string
 const container = ref<IGearContainer | null>(null)
 const isLoading = ref(true)
+
+// Convert V1 container to V2 for components that use V2 types
+const containerV2 = computed(() => {
+  return container.value ? convertV1ContainerToV2(container.value) : null
+})
 
 const loadContainer = async () => {
   try {
@@ -88,7 +94,8 @@ const handleBack = () => {
     <div v-else-if="container" class="space-y-6 w-full max-w-full overflow-hidden">
       <!-- Header -->
       <PublicContainerHeader
-        :container="container"
+        v-if="containerV2"
+        :container="containerV2"
         :back-path="GearRoutePath.PublicContainers"
         @back="handleBack"
       />
@@ -132,7 +139,7 @@ const handleBack = () => {
       />
 
       <!-- Category Pie Chart -->
-      <CategoryPieChart :container="container" />
+      <CategoryPieChart v-if="containerV2" :container="containerV2" />
     </div>
   </AuthenticatedLayout>
 </template>

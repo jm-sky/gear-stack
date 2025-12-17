@@ -1,8 +1,8 @@
 import { computed, type Reactive } from 'vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
-import type { IGearContainer } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 
-export const useIsContainerOwner = (container: Reactive<IGearContainer>, defaultValue: boolean) => {
+export const useIsContainerOwner = (container: Reactive<IGearItemV2>, defaultValue: boolean) => {
   const { user, isAuthenticated } = useAuth()
 
   const isOwner = computed(() => {
