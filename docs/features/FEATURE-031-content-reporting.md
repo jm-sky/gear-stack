@@ -1,6 +1,6 @@
 # FEATURE-031: Content Reporting (Zgłaszanie Nieodpowiednich Treści)
 
-**Status:** 🔄 Planned  
+**Status:** ✅ Completed  
 **Priority:** Medium  
 **Category:** 🔒 Security / Content Moderation  
 **Related:** ROADMAP_ONLINE.md - Zgłaszanie nieodpowiednich treści (raportowanie)
@@ -25,11 +25,14 @@ System raportowania nieodpowiednich treści przez użytkowników, umożliwiając
 
 ## 🔍 Current State
 
-### Brak implementacji
-- ❌ Brak systemu raportowania treści
-- ❌ Brak tabeli zgłoszeń w bazie danych
-- ❌ Brak endpointów API do zgłaszania
-- ❌ Brak panelu admina do zarządzania zgłoszeniami
+### ✅ Implementacja zakończona (v2.42.0)
+- ✅ System raportowania treści dla publicznych kontenerów
+- ✅ Tabela `content_reports` w bazie danych
+- ✅ Endpointy API do zgłaszania (`POST /gear/containers/{id}/report`)
+- ✅ Panel admina do zarządzania zgłoszeniami (`ContentReportsPage`)
+- ✅ Automatyczne ukrywanie kontenerów po ≥3 zgłoszeniach
+- ✅ Automatyczne przywracanie widoczności po weryfikacji
+- ✅ Frontend komponenty: `ReportContainerButton`, `ReportContentDialog`
 
 ---
 

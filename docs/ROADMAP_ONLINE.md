@@ -149,7 +149,7 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - Bezpieczeństwo (ochrona przed spamem i złośliwymi linkami)
 
 ### Zgłaszanie nieodpowiednich treści (raportowanie)
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium | **Plan:** [CONTENT_REPORTING_IMPLEMENTATION_PLAN.md](./plans/CONTENT_REPORTING_IMPLEMENTATION_PLAN.md)
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium | **Plan:** [CONTENT_REPORTING_IMPLEMENTATION_PLAN.md](./plans/CONTENT_REPORTING_IMPLEMENTATION_PLAN.md)
 
 **Koncepcja:**
 System raportowania nieodpowiednich treści dla publicznych kontenerów przez zalogowanych użytkowników, z automatycznym ukrywaniem z widoków publicznych po osiągnięciu ≥3 zgłoszeń oraz panelem administracyjnym do weryfikacji.

@@ -21,6 +21,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.42.0] - 2025-12-18
+
+### Added
+- **Content Reporting System**: Community-driven content moderation for public containers
+  - New `ContentReportDB` model and database table to track content reports
+  - `is_hidden_by_reports` field in containers to manage visibility based on report status
+  - API endpoints for reporting public containers (`POST /gear/containers/{id}/report`)
+  - Admin API endpoints for reviewing and managing reports (`GET /admin/reports`, `PATCH /admin/reports/{id}`)
+  - Automatic container hiding from public views after ≥3 active reports
+  - Automatic visibility restoration after admin review (when all reports are dismissed/reviewed)
+  - Frontend reporting UI components (`ReportContainerButton`, `ReportContentDialog`)
+  - Admin content reports page (`ContentReportsPage`) with filtering and status management
+  - Report categories: Spam/Fraud, Violence, Sexual Content, Profanity, Other
+  - User can only report a container once (unique constraint)
+  - Alert for container owners when their container is hidden due to reports
+
+### Changed
+- Public container endpoints now filter out containers hidden by reports
+- Enhanced admin dashboard with content reports management
+
+---
+
 ## [2.41.0] - 2025-12-17
 
 ### Changed
