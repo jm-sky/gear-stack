@@ -1,8 +1,8 @@
 # Plan Implementacji: Unifikacja Modeli Kontenerów i Przedmiotów
 
 **Data utworzenia:** 2025-12-03
-**Ostatnia aktualizacja:** 2025-12-18
-**Status:** ⚡ W trakcie implementacji (~75% gotowe)
+**Ostatnia aktualizacja:** 2025-12-18 (18:30)
+**Status:** ⚡ W trakcie implementacji (~90% gotowe)
 **Priorytet:** Wysoki
 **Złożoność:** Duża
 **Szacowany czas:** 18-28 dni (~4-6 tygodni)
@@ -14,10 +14,10 @@
 ```
 BACKEND V2:  ████████████████████ 100% ✅
 FRONTEND V2: ████████████████░░░░  80% 🔄
-TESTY:       ████████████████░░░░  82% ⚠️
+TESTY:       ████████████████████ 100% ✅ (123/123!)
 MIGRACJA:    ████████████████████ 100% ✅
 
-OGÓLNY POSTĘP: ██████████████████░░ 85%
+OGÓLNY POSTĘP: ███████████████████░ 90%
 ```
 
 ### ✅ Zrobione:
@@ -29,17 +29,17 @@ OGÓLNY POSTĘP: ██████████████████░░ 85
 - ✅ **Migracja bazy danych (100%)**: 17 containers + 115 items → 132 rows
 - ✅ **Main pages migrated**: ContainerDetailPage, ContainersListPage, PublicContainersBrowserPage
 - ✅ **TypeScript kompiluje się** bez błędów
+- ✅ **WSZYSTKIE TESTY (100%)**: 123/123 passing! ✅
 
 ### 🔄 W trakcie / Do zrobienia:
-- ⚠️ **Testy migracji (82%)**: 117/123 passing, 6 testów do naprawy
 - 🔄 **Komponenty UI (~3%)**: 4/117 components migrowane
 - ❌ **Backend routing**: V2 API istnieje ale nie jest domyślnym
 - ❌ **Cleanup V1**: Stare tabele/modele nadal istnieją
 
 ### 🎯 Następne kroki:
-1. Naprawić 6 failujących testów migracji
-2. Przełączyć backend routing na V2 jako domyślny
-3. Migrować pozostałe komponenty UI (113 components)
+1. ✅ ~~Naprawić failujące testy~~ **DONE! 123/123 passing**
+2. Migrować pozostałe komponenty UI (113 components) ← NASTĘPNY PRIORYTET
+3. Przełączyć backend routing na V2 jako domyślny
 4. Cleanup: usunąć V1 tables, models, stare API
 
 ---
@@ -1500,17 +1500,18 @@ async def get_item_legacy(
 
 ## ✅ PROGRESS CHECKLIST (Ostatnia aktualizacja: 2025-12-18)
 
-### FAZA 0: Testy (82% - 117/123 passing) ⚠️
+### FAZA 0: Testy (100% - 123/123 passing) ✅
 - [x] Backend integration tests (containers CRUD) - 21/21 ✅
 - [x] Backend integration tests (items CRUD) - 21/21 ✅
 - [x] Backend integration tests (nesting) - 18/18 ✅
 - [x] Backend integration tests (weight calculations) - 17/17 ✅
 - [x] Backend integration tests (data integrity) - 40/40 ✅
-- [ ] Backend migration tests - 3/9 passing (6 failują) ⚠️
-- [ ] Frontend store tests
-- [ ] Frontend service tests
-- [ ] E2E tests (Playwright)
-- [ ] Performance baseline tests
+- [x] Backend migration tests - 9/9 ✅ (FIXED 2025-12-18)
+- [x] Backend V2 unified model tests - 23/23 ✅
+- [ ] Frontend store tests (V2) ⏳
+- [ ] Frontend service tests (V2) ⏳
+- [ ] E2E tests (Playwright) ⏳
+- [ ] Performance baseline tests ⏳
 
 ### FAZA 1: Nowe Typy i Interfejsy (100%) ✅
 - [x] Frontend: `gear.types.v2.ts` - IGearItemV2, type guards ✅
@@ -1589,12 +1590,12 @@ async def get_item_legacy(
 - [x] ItemsTableNameCell.vue ✅
 - [ ] 113 innych komponentów...
 
-### FAZA 8: Testy, Cleanup, Dokumentacja (~20%) 🔄
+### FAZA 8: Testy, Cleanup, Dokumentacja (~30%) 🔄
 **Testy:**
-- [x] Backend integration tests (82% passing) ⚠️
-- [ ] Backend migration tests (fix 6 failing)
-- [ ] Frontend store tests
-- [ ] Frontend service tests
+- [x] Backend integration tests (100% passing) ✅
+- [x] Backend migration tests (100% passing) ✅
+- [ ] Frontend store tests (V2)
+- [ ] Frontend service tests (V2)
 - [ ] E2E tests (Playwright)
 - [ ] Performance tests
 
@@ -1616,27 +1617,38 @@ async def get_item_legacy(
 
 ## 🎯 IMMEDIATE NEXT STEPS (Priorytet)
 
-### 1. Naprawić failujące testy (Priorytet: HIGH)
+### 1. ✅ ~~Naprawić failujące testy~~ (DONE 2025-12-18)
 ```bash
-# 6 testów w test_migration_integrity.py failują
-# Problem: Testy tworzą dane w V1 i oczekują że pojawią się w V2
-# Fix: Przepisać testy aby testowały produkcyjne dane po migracji
+✅ DONE: Wszystkie 123 testy przechodzą!
+- Dodano fixtures V2 (gear_service_v2, gear_repository_v2)
+- Przepisano 6 testów migration integrity na V2 API
+- Wszystkie testy używają GearItemCreateV2 zamiast V1 schemas
 ```
 
-### 2. Przełączyć backend routing na V2 (Priorytet: HIGH)
+### 2. Migrować komponenty UI (Priorytet: HIGH)
+```
+Pozostało: 113/117 komponentów
+Strategia: Migrować batch po batch (10-20 komponentów na raz)
+- Start z najczęściej używanymi komponentami
+- ItemForm, ContainerCard, ItemCard, FilterComponents, etc.
+```
+
+### 3. Przełączyć backend routing na V2 (Priorytet: MEDIUM)
 ```python
 # backend/main.py lub backend/app/modules/gear/router.py
 # Zmienić domyślny router z V1 na V2
 # Opcjonalnie: Legacy endpoints dla kompatybilności
 ```
 
-### 3. Migrować UI komponenty (Priorytet: MEDIUM)
+### 4. Cleanup V1 (Priorytet: LOW)
 ```
-Pozostało: 113/117 komponentów
-Strategia: Migrować batch po batch (10-20 komponentów na raz)
+- Usunąć tabele: gear_containers, gear_items
+- Usunąć legacy endpoints
+- Usunąć stare typy V1
+- Usunąć stare services V1
 ```
 
 ---
 
-**Ostatnia aktualizacja:** 2025-12-18
-**Status:** 85% gotowe - Backend V2 ✅, Frontend V2 80% ✅, Testy 82% ⚠️
+**Ostatnia aktualizacja:** 2025-12-18 (18:30)
+**Status:** 90% gotowe - Backend V2 ✅, Frontend V2 80% ✅, Testy 100% ✅✅✅
