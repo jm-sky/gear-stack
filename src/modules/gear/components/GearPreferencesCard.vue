@@ -17,7 +17,7 @@ import { useSettings } from '@/modules/settings/composables/useSettings'
 import { config } from '@/shared/config/config'
 import CurrencySelect from './inputs/CurrencySelect.vue'
 import WeightUnitSelect from './inputs/WeightUnitSelect.vue'
-import type { TGearWeightUnit } from '@/modules/gear/types/gear.types'
+import type { TGearWeightUnit } from '@/modules/gear/types/gear.types.v2'
 
 const { t } = useI18n()
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import Badge from '@/components/ui/badge/Badge.vue'
-import type { TGearItemPriority } from '../../types/gear.types'
+import type { TGearItemPriority } from '../../types/gear.types.v2'
 import { getPriorityVariant } from '../../utils/badgeVariants'
 
 const { t } = useI18n()
