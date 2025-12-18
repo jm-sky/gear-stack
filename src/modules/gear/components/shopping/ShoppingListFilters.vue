@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ChevronRight } from 'lucide-vue-next'
-import { onMounted, ref, watch } from 'vue'
+import { onBeforeMount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -45,7 +45,7 @@ function toggleCollapse() {
 }
 
 // Load collapse state on mount
-onMounted(() => {
+onBeforeMount(() => {
   isCollapsed.value = loadCollapseState()
 })
 
