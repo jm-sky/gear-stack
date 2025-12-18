@@ -14,13 +14,18 @@ from app.modules.auth.repositories import (
     UserRepository as AuthUserRepository,
     get_user_repository as get_auth_user_repository,
 )
-from app.modules.auth.dependencies import AdminOrOwnerUser
+from app.modules.auth.dependencies import AdminOrOwnerUser, AdminUser
 from app.modules.users.repositories import UserRepository, get_user_repository
 from app.modules.users.schemas import UserUpdate
 
 from .repository import AdminRepository
 from .schemas import AdminUserResponse, AdminContainerResponse, AdminItemResponse
 from .service import AdminService
+
+# Import gear service for content reports
+from app.modules.gear.repository import GearRepository
+from app.modules.gear.service import GearService
+from app.modules.gear.schemas import ContentReportListResponse, ContentReportResponse, ContentReportUpdate, ReportStatus, ContainerUpdate
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -37,6 +42,16 @@ def get_admin_service(
 ) -> AdminService:
     """Dependency to get admin service instance."""
     return AdminService(repository, user_repository, auth_user_repository)
+
+
+def get_gear_repository(db: AsyncSession = Depends(get_db)) -> GearRepository:
+    """Dependency to get gear repository instance."""
+    return GearRepository(db)
+
+
+def get_gear_service(repository: GearRepository = Depends(get_gear_repository)) -> GearService:
+    """Dependency to get gear service instance."""
+    return GearService(repository)
 
 
 # Users endpoints
@@ -148,6 +163,29 @@ async def get_container_by_id(
     return container
 
 
+@router.patch(
+    "/containers/{container_id}",
+    response_model=AdminContainerResponse,
+    summary="Update container (admin only)",
+    description="Update a container (admin only)",
+)
+async def update_container(
+    container_id: str,
+    data: ContainerUpdate,
+    _: AdminOrOwnerUser,
+    service: Annotated[AdminService, Depends(get_admin_service)],
+) -> AdminContainerResponse:
+    """Update container (admin only)."""
+    update_data = data.model_dump(exclude_unset=True)
+    container = await service.update_container(container_id, update_data)
+    if not container:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Container {container_id} not found",
+        )
+    return container
+
+
 @router.delete(
     "/containers/{container_id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -224,3 +262,78 @@ async def delete_item(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Item {item_id} not found",
         )
+
+
+# Content reports endpoints
+@router.get(
+    "/reports",
+    response_model=ContentReportListResponse,
+    summary="Get content reports (admin only)",
+    description="Get list of content reports with optional filters",
+)
+async def get_reports(
+    admin_user: AdminUser,
+    gear_service: Annotated[GearService, Depends(get_gear_service)],
+    status: ReportStatus | None = Query(None, description="Filter by report status"),
+    container_id: str | None = Query(None, description="Filter by container ID"),
+    limit: int = Query(default=50, ge=1, le=1000, description="Max records to return"),
+    offset: int = Query(default=0, ge=0, description="Number of records to skip"),
+) -> ContentReportListResponse:
+    """Get content reports (admin only).
+
+    Args:
+        admin_user: Authenticated admin user
+        gear_service: Gear service instance
+        status: Filter by report status
+        container_id: Filter by container ID
+        limit: Maximum number of results
+        offset: Offset for pagination
+
+    Returns:
+        List of reports with pagination info
+    """
+    return await gear_service.get_reports(
+        status=status,
+        container_id=container_id,
+        limit=limit,
+        offset=offset,
+    )
+
+
+@router.patch(
+    "/reports/{report_id}",
+    response_model=ContentReportResponse,
+    summary="Update report status (admin only)",
+    description="Update the status of a content report",
+)
+async def update_report_status(
+    report_id: str,
+    update_data: ContentReportUpdate,
+    admin_user: AdminUser,
+    gear_service: Annotated[GearService, Depends(get_gear_service)],
+) -> ContentReportResponse:
+    """Update report status (admin only).
+
+    Args:
+        report_id: Report ID
+        update_data: Update data (status)
+        admin_user: Authenticated admin user
+        gear_service: Gear service instance
+
+    Returns:
+        Updated report
+
+    Raises:
+        HTTPException: If report not found
+    """
+    report = await gear_service.update_report_status(
+        report_id=report_id,
+        status=update_data.status,
+        reviewer_id=admin_user.id,
+    )
+    if not report:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Report {report_id} not found",
+        )
+    return report

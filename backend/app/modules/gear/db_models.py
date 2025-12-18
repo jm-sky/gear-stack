@@ -65,6 +65,7 @@ class GearContainerDB(Base):
     max_weight_unit: Mapped[str | None] = mapped_column(String(5), nullable=True)
     url: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_public: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
+    is_hidden_by_reports: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
     favorite: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
     show_item_images: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
@@ -562,5 +563,79 @@ class ItemPromotionDB(Base):
 GearItemDB.promotions = relationship(
     "ItemPromotionDB",
     back_populates="item",
+    cascade="all, delete-orphan",
+)
+
+
+class ContentReportDB(Base):
+    """SQLAlchemy model for content reports.
+
+    Represents reports of inappropriate content in public containers.
+    Supports automatic hiding of containers after reaching threshold of reports.
+
+    Attributes:
+        id: Unique identifier (ULID format, 36 chars)
+        container_id: Reported container ID
+        reporter_user_id: User who reported the content
+        reason: Reason for report (spam_fraud, violence, sexual_content, profanity, other)
+        additional_info: Optional additional information
+        status: Report status (pending, reviewed, dismissed, action_taken)
+        created_at: Report creation timestamp
+        reviewed_at: Review timestamp (when status was changed)
+        reviewed_by: Admin user ID who reviewed the report
+    """
+
+    __tablename__ = "content_reports"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    container_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("gear_containers.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    reporter_user_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    reason: Mapped[str] = mapped_column(String(50), nullable=False)
+    additional_info: Mapped[str | None] = mapped_column(Text, nullable=True)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="pending", index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    reviewed_by: Mapped[str | None] = mapped_column(
+        String(36),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+
+    # Unique constraint: one report per user per container
+    __table_args__ = (
+        UniqueConstraint("container_id", "reporter_user_id", name="unique_container_reporter"),
+        CheckConstraint(
+            "reason IN ('spam_fraud', 'violence', 'sexual_content', 'profanity', 'other')",
+            name="check_report_reason",
+        ),
+        CheckConstraint(
+            "status IN ('pending', 'reviewed', 'dismissed', 'action_taken')",
+            name="check_report_status",
+        ),
+    )
+
+    # Relationships
+    container: Mapped["GearContainerDB"] = relationship("GearContainerDB", foreign_keys=[container_id])
+    reporter: Mapped["UserDB"] = relationship("UserDB", foreign_keys=[reporter_user_id])
+    reviewer: Mapped["UserDB | None"] = relationship("UserDB", foreign_keys=[reviewed_by])
+
+    def __repr__(self) -> str:
+        return f"<ContentReportDB(id={self.id}, container_id={self.container_id}, reason={self.reason}, status={self.status})>"
+
+
+# Add reports relationship to GearContainerDB
+GearContainerDB.reports = relationship(
+    "ContentReportDB",
+    foreign_keys=[ContentReportDB.container_id],
     cascade="all, delete-orphan",
 )

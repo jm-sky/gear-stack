@@ -450,3 +450,54 @@ class PromoteItemResponse(BaseModel):
     message: str = Field(..., description="Response message")
 
     model_config = {"populate_by_name": True}
+
+
+# Content report schemas
+ReportReason = Literal["spam_fraud", "violence", "sexual_content", "profanity", "other"]
+ReportStatus = Literal["pending", "reviewed", "dismissed", "action_taken"]
+
+
+class ContentReportCreate(BaseModel):
+    """Schema for creating a content report."""
+
+    reason: ReportReason = Field(..., description="Reason for reporting the container")
+    additionalInfo: str | None = Field(None, max_length=1000, alias="additionalInfo", serialization_alias="additionalInfo", description="Optional additional information")
+
+    model_config = {"populate_by_name": True}
+
+
+class ContentReportResponse(BaseModel):
+    """Schema for content report response."""
+
+    id: str
+    containerId: str = Field(..., alias="container_id", serialization_alias="containerId")
+    containerName: str | None = Field(None, serialization_alias="containerName")
+    reporterUserId: str = Field(..., alias="reporter_user_id", serialization_alias="reporterUserId")
+    reporterName: str | None = Field(None, serialization_alias="reporterName")
+    reason: ReportReason
+    additionalInfo: str | None = Field(None, alias="additional_info", serialization_alias="additionalInfo")
+    status: ReportStatus
+    createdAt: datetime = Field(..., alias="created_at", serialization_alias="createdAt")
+    reviewedAt: datetime | None = Field(None, alias="reviewed_at", serialization_alias="reviewedAt")
+    reviewedBy: str | None = Field(None, alias="reviewed_by", serialization_alias="reviewedBy")
+
+    model_config = {"from_attributes": True, "populate_by_name": True}
+
+
+class ContentReportUpdate(BaseModel):
+    """Schema for updating a content report status."""
+
+    status: ReportStatus = Field(..., description="New status for the report")
+
+    model_config = {"populate_by_name": True}
+
+
+class ContentReportListResponse(BaseModel):
+    """Schema for list of content reports with pagination."""
+
+    reports: list[ContentReportResponse] = Field(..., description="List of reports")
+    total: int = Field(..., description="Total number of reports matching filters")
+    limit: int = Field(..., description="Limit used for pagination")
+    offset: int = Field(..., description="Offset used for pagination")
+
+    model_config = {"populate_by_name": True}

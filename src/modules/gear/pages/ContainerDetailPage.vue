@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { AlertTriangle } from 'lucide-vue-next'
 import { computed, defineAsyncComponent, ref, watch, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useAi } from '@/modules/ai/composables/useAi'
 import { useAuth } from '@/modules/auth/composables/useAuth'
@@ -377,6 +379,21 @@ if (!container.value) {
         @manage-share-tokens="handleManageShareTokens"
         @refresh="handleRefresh"
       />
+
+      <!-- Hidden by Reports Alert (for container owner) -->
+      <Alert
+        v-if="container?.isHiddenByReports && canEditContainer"
+        variant="destructive"
+        class="mb-4"
+      >
+        <AlertTriangle />
+        <AlertTitle>
+          {{ t('gear.container.hiddenByReports.title') }}
+        </AlertTitle>
+        <AlertDescription>
+          {{ t('gear.container.hiddenByReports.description') }}
+        </AlertDescription>
+      </Alert>
 
       <!-- Sort Confirmation Alert (always show when there are pending changes) -->
       <SortConfirmationAlert

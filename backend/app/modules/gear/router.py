@@ -25,6 +25,8 @@ from .schemas import (
     ContainerResponse,
     ContainerUpdate,
     ContainerRatingCreate,
+    ContentReportCreate,
+    ContentReportResponse,
     GlobalCatalogueItemCreate,
     GlobalCatalogueItemResponse,
     GlobalCatalogueItemSearchParams,
@@ -1393,3 +1395,115 @@ async def add_item_to_catalogue(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
         ) from e
+
+
+@router.post(
+    "/containers/{container_id}/report",
+    response_model=ContentReportResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Report a public container",
+    description="Report a public container for inappropriate content. Requires authentication.",
+)
+async def report_container(
+    container_id: str,
+    report_data: ContentReportCreate,
+    current_user: CurrentUser,
+    service: GearServiceDep,
+) -> ContentReportResponse:
+    """Report a public container for inappropriate content.
+
+    Args:
+        container_id: Container ID to report
+        report_data: Report data (reason and optional additional info)
+        current_user: Authenticated user
+        service: Gear service instance
+
+    Returns:
+        Created report
+
+    Raises:
+        HTTPException: If container not found, not public, or already reported by user
+    """
+    try:
+        report = await service.report_container(
+            container_id=container_id,
+            reporter_user_id=current_user.id,
+            reason=report_data.reason,
+            additional_info=report_data.additionalInfo,
+        )
+        return report
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        ) from e
+    except Exception as e:
+        # Handle IntegrityError (duplicate report)
+        if "unique" in str(e).lower() or "duplicate" in str(e).lower():
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="You have already reported this container",
+            ) from e
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create report",
+        ) from e
+
+
+@router.get(
+    "/containers/{container_id}/report/status",
+    summary="Get user's report status for a container",
+    description="Check if the current user has reported this container.",
+)
+async def get_report_status(
+    container_id: str,
+    current_user: CurrentUser,
+    service: GearServiceDep,
+) -> dict[str, bool]:
+    """Check if current user has reported a container.
+
+    Args:
+        container_id: Container ID
+        current_user: Authenticated user
+        service: Gear service instance
+
+    Returns:
+        Dictionary with hasReported boolean
+    """
+    has_reported = await service.get_user_report_status(
+        container_id=container_id,
+        user_id=current_user.id,
+    )
+    return {"hasReported": has_reported}
+
+
+@router.delete(
+    "/containers/{container_id}/report",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Withdraw a report",
+    description="Withdraw (delete) the current user's report for a container.",
+)
+async def withdraw_report(
+    container_id: str,
+    current_user: CurrentUser,
+    service: GearServiceDep,
+) -> None:
+    """Withdraw the current user's report for a container.
+
+    Args:
+        container_id: Container ID
+        current_user: Authenticated user
+        service: Gear service instance
+
+    Raises:
+        HTTPException: If report not found
+    """
+    deleted = await service.withdraw_report(
+        container_id=container_id,
+        user_id=current_user.id,
+    )
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Report not found",
+        )
