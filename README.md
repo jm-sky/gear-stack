@@ -78,17 +78,23 @@ Gear Stack is a full-stack application designed for outdoor enthusiasts, prepper
 ### 🔐 User Management & Security
 - **User Registration & Login** - Email/password authentication with secure password hashing
 - **OAuth Social Login** - Sign in with Google (GitHub support planned)
+- **OAuth Connections Management** - View and manage linked OAuth providers in settings
 - **Email Verification** - Confirm email addresses for account security
 - **Two-Factor Authentication (2FA)** - TOTP (authenticator apps) and WebAuthn (passkeys/security keys)
 - **Password Management** - Reset forgotten passwords, change password for authenticated users
 - **reCAPTCHA v3 Protection** - Invisible bot protection on login, registration, and password reset
 - **Session Management** - JWT tokens with automatic refresh, secure logout
+- **Token Blacklist** - Server-side token invalidation using Redis (prevents token reuse after logout)
+- **WebAuthn Challenge Storage** - Server-side challenge storage in Redis for security
 - **Account Deletion** - GDPR-compliant soft delete with confirmation
+- **Role System** - Owner, Premium, Admin, and User roles with appropriate permissions
 
 ### 👤 User Profile
 - **Profile Management** - Update name, email, and preferences
-- **Avatar Support** - OAuth providers automatically provide profile pictures
-- **Preferred Settings** - Weight units, language, theme preferences
+- **Avatar Support** - OAuth providers automatically provide profile pictures (Gravatar fallback)
+- **Public Profile** - Option to share profile publicly with user information and public containers
+- **Role Badges** - Visual role indicators (Owner, Premium, Admin) with icons and colors
+- **Preferred Settings** - Weight units (including auto modes), language, theme preferences
 - **Security Settings** - Manage 2FA methods, view security status
 
 ### 🌐 Multi-Language Support
@@ -116,21 +122,27 @@ Gear Stack is a full-stack application designed for outdoor enthusiasts, prepper
 - **Rich Item Data**:
   - Basic: Name, quantity, weight (with unit selection: g, kg, oz, lb)
   - Organization: Category, priority, status (owned/missing/to buy)
-  - Metadata: Brand, notes, expiration date
+  - Metadata: Brand, notes, expiration date, shelf life
   - Advanced: Consumable flag, worn flag, custom categories
 - **Smart Categorization** - Automatic category recognition based on item name (water, fire, food, shelter, first aid, tools, navigation, communication, clothing, hygiene, light, other)
 - **Status Tracking** - Mark items as owned, missing, or to buy
 - **Priority Levels** - Low, medium, high, critical
 - **Expiration Tracking** - Monitor consumables and replace before they expire
+- **Shelf Life Tracking** - Define shelf life period (days/months/years) with automatic expiration date calculation
+- **Inline Name Editing** - Quick edit item names directly on detail pages
+- **Item Linking** - Link items across containers with automatic change propagation
+- **Move Items** - Move items between containers while preserving all data
 
 ### 📊 Analytics & Insights
 - **Weight Calculations**:
   - Total pack weight with recursive calculation for nested containers
   - Category-based weight distribution
   - Base weight vs. consumables tracking
+  - Weight breakdown by type (Other/Worn/Consumable)
 - **Readiness Indicators** - Kit completeness percentage based on owned vs. missing items
-- **Donut Charts** - Visual breakdown of weight or quantity by category
+- **Donut Charts** - Visual breakdown of weight, quantity, price, or priority by category
 - **Item Statistics** - Count items by status, category, or priority
+- **Automatic Weight Unit Selection** - Auto modes (auto-g-kg, auto-oz-lb) with locale-aware formatting
 
 ### 🔍 Search & Filtering
 - **Smart Search** - Find items by name, brand, or notes across all containers
@@ -145,12 +157,19 @@ Gear Stack is a full-stack application designed for outdoor enthusiasts, prepper
   - Nested container support with calculated weights
   - Legend explaining data structure
   - One-click copy to clipboard
+  - Export options: description format, semantic separators, UUID support
+- **CSV Export** - Export containers to CSV format with column selection, separators, and UTF-8 BOM encoding
+- **UUID Import/Export** - UUID-based update workflow for containers and items
 - **Cross-Device Transfer** - Export from one device, import on another
 
 ### ⚡ Productivity Features
 - **Quick Item Entry** - Smart defaults and keyboard shortcuts
-- **Inline Editing** - Edit items directly in lists (planned)
-- **Drag & Drop Reordering** - Manual item ordering (planned)
+- **Inline Name Editing** - Edit item and container names directly on detail pages
+- **Item Ordering** - Manual item ordering within containers with batch save confirmation
+- **Dynamic Page Titles** - Automatic document title management with container/item names
+- **Sidebar Navigation** - Collapsible sidebar with container list and navigation links
+- **Markdown Support** - Full Markdown formatting in notes and descriptions with preview
+- **Drag & Drop Reordering** - Visual drag & drop interface (planned)
 - **Bulk Actions** - Mark multiple items as owned/missing (planned)
 - **Templates** - Save and reuse common gear configurations (planned)
 
@@ -164,11 +183,16 @@ Gear Stack is a full-stack application designed for outdoor enthusiasts, prepper
 - **Locale Detection** - Automatic language detection from browser settings with fallback to Polish
 - Manual language switching in settings (English/Polish)
 - HTML lang attribute automatically set based on detected language
+- **Polish Pluralization** - Proper pluralization rules for Polish language (0, 1, 2-4, 5+)
 
 #### 🎨 UI/UX
 - **Category Icons** - Dedicated icons for each item category (water, fire, food, shelter, first aid, tools, navigation, communication, clothing, hygiene, light, other)
-- **Container Colors** - Assign colors to containers for visual distinction (10 colors available)
-- **Donut Chart Analytics** - Pie chart showing category distribution by weight or quantity in containers
+- **Container Colors** - Assign colors to containers for visual distinction (10+ colors available)
+- **Donut Chart Analytics** - Pie chart showing category distribution by weight, quantity, price, or priority in containers
+- **Weight Breakdown Visualization** - Visual breakdown by type (Other/Worn/Consumable)
+- **Sidebar Navigation** - Collapsible sidebar with container list and navigation links (LighterPack-compatible design)
+- **Dynamic Page Titles** - Automatic document title management for all routes with container/item names
+- **Markdown Support** - Full Markdown formatting support for item notes and container descriptions with preview
 
 #### 🔗 Container Nesting
 - **Parent-Children Relationship** - Containers can contain other containers as items
@@ -182,6 +206,8 @@ Gear Stack is a full-stack application designed for outdoor enthusiasts, prepper
 - **Default Values** - New items have sensible defaults (0.1 kg weight, quantity 1, status "owned", priority "medium")
 - **Category Recognition** - Automatic category detection based on item name keywords (supports English and Polish)
 - Recognition triggered on blur event for immediate feedback
+- **Inline Name Editing** - Quick edit functionality for item and container names directly on detail pages
+- **Item Ordering** - Manual item ordering within containers with batch save confirmation
 
 #### 🚀 Export Features
 - **Export to AI Prompt** - Export container with all contents as markdown for AI processing
@@ -189,28 +215,51 @@ Gear Stack is a full-stack application designed for outdoor enthusiasts, prepper
 - Support for nested containers with calculated weights
 - Legend explaining data structure for AI
 - One-click copy to clipboard
+- **CSV Export** - Export containers to CSV format with column selection, separators, and UTF-8 BOM encoding
+- **UUID Support** - UUID-based update workflow for containers and items in markdown import/export
 
-### 🔄 Planned Features
+### ✅ Recently Completed Features
 
 #### High Priority
 - ✅ **All Items List Page** - Dedicated page showing all items from all containers with filtering and sorting
 - ✅ **Shopping Planning Page** - Page for managing items to buy and expiring soon, with shopping list functionality
 - ✅ **Container Cloning** - Duplicate containers with all items and nested containers
 - ✅ **Add Existing Items** - Add items from other containers using catalog selector
-- 🔄 **Inline Editing** - Quick edit items directly in the list without opening forms
-- 🔄 **Item Ordering** - Manual drag & drop reordering of items within containers
+- ✅ **Inline Name Editing** - Quick edit for item and container names directly on detail pages
+- ✅ **Item Ordering** - Manual item ordering within containers with batch save confirmation
+- ✅ **Move Items Between Containers** - Complete functionality for moving items between containers
+- ✅ **Content Reporting System** - Community-driven content moderation for public containers
+- ✅ **Item Promotion to Catalogue** - Community-driven promotion system for items to global catalogue
+- ✅ **Shelf Life Tracking** - Define shelf life period for items before purchase with automatic expiration date calculation
 
 #### Medium Priority
-- ✅ **Preferred Weight Unit** - User setting to display all weights in grams or kilograms consistently
+- ✅ **Preferred Weight Unit** - User setting with auto modes (auto-g-kg, auto-oz-lb) and locale-aware formatting
 - ✅ **Extended Fields** - Additional fields for items (price, URL, quality tier, brand, color)
 - ✅ **Extended Container Fields** - Brand and price fields for containers
 - ✅ **Max Weight Limit** - Set maximum weight for containers with visual warnings
 - ✅ **Parameter Recognition** - Automatic recognition of brand and color from item names
 - ✅ **404 Page** - User-friendly not found page with navigation suggestions
+- ✅ **Markdown Support** - Full Markdown formatting support for notes and descriptions
+- ✅ **CSV Export** - Export containers to CSV format with column selection
+- ✅ **UUID Import/Export** - UUID-based update workflow for containers and items
 
 #### Low Priority
 - ⏸️ **Brand Color Selection** - Choose primary brand color (on hold - current color is satisfactory)
 - ✅ **Footer & Legal Pages** - Cookie information, RODO compliance, privacy policy
+- ✅ **About Page** - Comprehensive About page with full application description
+- ✅ **AI Context Page** - Markdown-formatted description for AI assistants
+
+### 🔄 Planned Features
+
+#### High Priority
+- 🔄 **Full Inline Editing** - Quick edit all item fields directly in the list without opening forms
+- 🔄 **Drag & Drop Reordering** - Visual drag & drop interface for item ordering
+
+#### Backend Features
+- 🚧 **AI Features** - Chat interface, history management (partially completed)
+- 🚧 **Multi-Device Sync** - Automatic synchronization between devices (partially completed)
+- ✅ **Global Item Catalog** - Shared item database (completed)
+- ✅ **Public Container Sharing** - Public containers and token sharing (completed)
 
 ### 🔮 Future Roadmap
 
@@ -224,13 +273,17 @@ Gear Stack is a full-stack application designed for outdoor enthusiasts, prepper
 
 **Backend Features (see [ROADMAP_ONLINE.md](./docs/ROADMAP_ONLINE.md)):**
 - ✅ User authentication (OAuth, 2FA, reCAPTCHA) - Completed
-- Multi-device synchronization
-- Container sharing between users
-- Public container gallery
-- Global item catalog
-- Progressive Web App (PWA)
-- AI-powered features
-- Item photo uploads (requires S3 storage)
+- ✅ Token blacklist and WebAuthn challenge storage (Redis) - Completed
+- ✅ Role system (Owner, Premium, Admin, User) - Completed
+- 🚧 Multi-device synchronization - Partially completed
+- ✅ Container sharing (public containers, token sharing) - Completed
+- ✅ Public container gallery - Completed
+- ✅ Global item catalog with promotion system - Completed
+- ✅ Progressive Web App (PWA) - Completed
+- 🚧 AI-powered features (chat, history) - Partially completed
+- ✅ Item photo uploads (S3 storage) - Completed
+- ✅ Content reporting system - Completed
+- ✅ Feature limits management - Completed
 
 > 📋 **See also:**
 > - [ROADMAP.md](./docs/ROADMAP.md) - 📍 Roadmap index (start here)
