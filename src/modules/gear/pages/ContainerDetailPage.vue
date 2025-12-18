@@ -12,7 +12,7 @@ import { useBackend } from '@/shared/composables/useBackend'
 import { usePageTitle } from '@/shared/composables/usePageTitle'
 import { config } from '@/shared/config/config'
 import type { IGearItem } from '../types/gear.types'
-import type { IGearItemV2, TContainerColor } from '../types/gear.types.v2'
+import type { TContainerColor } from '../types/gear.types.v2'
 import ContainerHeader from '../components/ContainerHeader.vue'
 import ContainerItemImagesGallery from '../components/ContainerItemImagesGallery.vue'
 import ContainerRatingSection from '../components/ContainerRatingSection.vue'
@@ -369,9 +369,6 @@ const handleRefresh = async () => {
     toast.error(t('common.error'))
   }
 }
-
-// Temporary wrapper for components still using V1 types (will be removed once all components migrate to V2)
-const containerV1 = computed(() => container.value ? convertV2ContainerToV1(container.value) : undefined)
 
 // Redirect if container not found
 if (!container.value) {

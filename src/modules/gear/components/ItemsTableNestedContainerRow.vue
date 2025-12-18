@@ -8,7 +8,6 @@ import type { IGearItemV2 } from '../types/gear.types.v2'
 import { formatItemWeight } from '../composables/useFormattedItemWeight'
 import { useGearSettings } from '../composables/useGearSettings'
 import { GearRoutePath } from '../routes'
-import { useGearStoreV2 } from '../store/useGearStoreV2'
 import { COLOR_BORDER_CLASSES } from '../utils/containerColors'
 import { getContainerIcon } from '../utils/containerIcons'
 import ItemPriorityBadge from './badges/ItemPriorityBadge.vue'
@@ -18,7 +17,6 @@ import ItemStatusBadge from './ItemStatusBadge.vue'
 
 const { t, locale } = useI18n()
 const router = useRouter()
-const store = useGearStoreV2()
 const { settings: gearSettings } = useGearSettings()
 const preferredWeightUnit = computed(() => gearSettings.value.preferredWeightUnit)
 

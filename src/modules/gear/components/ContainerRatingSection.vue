@@ -8,12 +8,10 @@ import type { TRatingType, TRatingValue } from '../types/gear.types'
 import type { IGearItemV2 } from '../types/gear.types.v2'
 import { useIsContainerOwner } from '../composables/useIsContainerOwner'
 import { gearContainerApiService } from '../services/gearContainerApiService'
-import { useGearStoreV2 } from '../store/useGearStoreV2'
 import ContainerRatingCard from './ContainerRatingCard.vue'
 
 const { t } = useI18n()
 const { shouldUseAPI } = useBackend()
-const store = useGearStoreV2()
 
 const props = defineProps<{
   container: IGearItemV2
