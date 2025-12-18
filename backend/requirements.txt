@@ -65,3 +65,6 @@ aiocache>=0.12.0  # Async caching library
 
 # Redis (for token blacklist and challenge storage)
 redis>=5.0.1
+
+# Payment Processing (Stripe)
+stripe>=8.0.0
