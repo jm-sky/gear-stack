@@ -41,6 +41,12 @@ export const aiEn = {
       selectPlaceholder: 'Select model',
       selectTooltip: 'Select AI model',
     },
+    models: {
+      loadError: 'Failed to load AI models',
+    },
+    settings: {
+      loadError: 'Failed to load AI settings',
+    },
     context: {
       fields: 'Context Fields',
       description: 'Select which fields to include when sending data to AI',
@@ -146,6 +152,12 @@ export const aiPl = {
     model: {
       selectPlaceholder: 'Wybierz model',
       selectTooltip: 'Wybierz model AI',
+    },
+    models: {
+      loadError: 'Nie udało się załadować modeli AI',
+    },
+    settings: {
+      loadError: 'Nie udało się załadować ustawień AI',
     },
     context: {
       fields: 'Pola kontekstu',

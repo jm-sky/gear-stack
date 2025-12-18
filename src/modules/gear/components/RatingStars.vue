@@ -68,7 +68,7 @@ function handleStarLeave() {
 
 <template>
   <div class="flex items-center gap-1">
-    <div class="flex gap-0.5">
+    <div class="flex items-center gap-0.5">
       <button
         v-for="star in maxRating"
         :key="star"

@@ -13,6 +13,7 @@ import { AiRoutePath } from '@/modules/ai/config/routes'
 import { useAiStore } from '@/modules/ai/store/useAiStore'
 import { useUser } from '@/modules/user/composables/useUser'
 import { useUserStore } from '@/modules/user/store/useUserStore'
+import { useHandleError } from '@/shared/composables/useHandleError'
 import { usePermissions } from '@/shared/composables/usePermissions'
 import { useAi } from '../composables/useAi'
 
@@ -24,26 +25,52 @@ const userStore = useUserStore()
 const { canUseAi } = useAi()
 const { models, loadModels } = useAiModels()
 const { loadProfile } = useUser()
+const { handleError } = useHandleError()
 
-onMounted(async () => {
-  // Only load AI settings if user is authenticated
-  if (!isAuthenticated.value) {
-    return
+const loadAiSettings = async () => {
+  try {
+    await aiStore.loadSettings()
+  } catch (error) {
+    handleError(error, { fallbackMessage: t('ai.settings.loadError') })
+    console.warn('Failed to load AI settings:', error)
   }
+}
 
-  await aiStore.loadSettings()
-  if (models.value.length === 0) {
+const loadAiModels = async () => {
+  try {
     await loadModels()
+  } catch (error) {
+    handleError(error, { fallbackMessage: t('ai.models.loadError') })
+    console.warn('Failed to load AI models:', error)
   }
+}
+
+const loadUserProfile = async () => {
+  try {
+    await loadProfile()
+  } catch (error) {
+    // Silently fail if user profile can't be loaded
+    console.warn('Failed to load user profile for features:', error)
+  }
+}
+
+const initialize = async () => {
+  if (!isAuthenticated.value) return
+
+  await loadAiSettings()
+
+  if (models.value.length === 0) {
+    await loadAiModels()
+  }
+
   // Load user profile to get features if not already loaded
   if (!userStore.user?.features) {
-    try {
-      await loadProfile()
-    } catch (error) {
-      // Silently fail if user profile can't be loaded
-      console.warn('Failed to load user profile for features:', error)
-    }
+    await loadUserProfile()
   }
+}
+
+onMounted(async () => {
+  await initialize()
 })
 </script>
 
