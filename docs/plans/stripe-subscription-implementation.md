@@ -1,6 +1,6 @@
 # Stripe Subscription Implementation Plan
 
-**Status:** Planning Phase
+**Status:** ✅ Patterns Verified - Ready for Implementation
 **Created:** 2025-12-18
 **Last Updated:** 2025-12-18
 
@@ -8,20 +8,27 @@
 
 This document outlines the complete implementation plan for integrating Stripe subscription billing into Gear Stack. The system will transform the current boolean `is_premium` flag into a comprehensive three-tier subscription system (Free, Pro, Business) with monthly and annual billing options.
 
+**⚠️ IMPORTANT:** This plan has been verified against actual codebase patterns. See **[Pattern Verification Document](./stripe-pattern-verification.md)** for detailed pattern analysis.
+
+## Related Documents
+
+- **[Requirements](./stripe-subscription-requirements.md)** - Business requirements and feature specifications
+- **[Pattern Verification](./stripe-pattern-verification.md)** - Verified codebase patterns and conventions
+
 ## User Requirements
 
 ### Subscription Structure
-- **Free Tier:** Basic features with limited AI ($1) and storage (100MB)
+- **Free Tier:** Basic features with BYOK AI ($1) and storage (100MB)
 - **Pro Tier:** Enhanced features with $10 AI limit and 5GB storage
 - **Business Tier:** Advanced features with $50 AI limit and 50GB storage
 
 ### Billing Model
 - Monthly subscriptions for Pro and Business
-- Annual subscriptions with discount (e.g., 2 months free)
+- Annual subscriptions with 17% discount (2 months free)
 - No trial period
-- Placeholder pricing (to be finalized):
-  - Pro: $9.99/month or $99/year
-  - Business: $29.99/month or $299/year
+- **Final Pricing:**
+  - **Pro:** $4.99/month or $49/year
+  - **Business:** $14.99/month or $149/year
 
 ### Technical Approach
 - **Stripe Checkout (hosted):** Simplest implementation, PCI compliant
@@ -100,6 +107,7 @@ billing/
 | `current_period_end` | DateTime | Billing period end |
 | `cancel_at_period_end` | Boolean | Scheduled cancellation flag |
 | `canceled_at` | DateTime | Cancellation timestamp |
+| `is_grandfathered` | Boolean | Lifetime Pro access (migrated users) |
 | `created_at` | DateTime | Record creation |
 | `updated_at` | DateTime | Last update |
 
@@ -192,14 +200,21 @@ billing/
 │   ├── PricingPage.vue
 │   └── BillingPage.vue
 ├── services/
-│   └── billingService.ts
+│   └── billingApiService.ts
+├── store/
+│   └── useBillingStore.ts         # Optional client-side cache
 ├── types/
-│   └── subscription.type.ts
+│   └── billing.type.ts
+├── validation/
+│   └── subscription.schema.ts     # Zod schemas
+├── utils/
+│   └── queryUtils.ts              # Query keys & retry logic
 ├── routes.ts
 └── i18n/
+    ├── index.ts
     └── locales/
-        ├── en.json
-        └── pl.json
+        ├── en.ts                  # ⚠️ Use .ts, NOT .json
+        └── pl.ts
 ```
 
 ## Implementation Details
@@ -631,22 +646,22 @@ VITE_STRIPE_BUSINESS_ANNUAL_PRICE_ID=price_...
 For each product, create two prices:
 
 **Pro Monthly:**
-- Amount: $9.99 USD
+- Amount: $4.99 USD
 - Billing period: Monthly
 - ID: `price_promonthly...` (copy to env)
 
 **Pro Annual:**
-- Amount: $99 USD (or $119 with discount)
+- Amount: $49.00 USD (17% discount)
 - Billing period: Yearly
 - ID: `price_proannual...` (copy to env)
 
 **Business Monthly:**
-- Amount: $29.99 USD
+- Amount: $14.99 USD
 - Billing period: Monthly
 - ID: `price_businessmonthly...`
 
 **Business Annual:**
-- Amount: $299 USD (or $359 with discount)
+- Amount: $149.00 USD (17% discount)
 - Billing period: Yearly
 - ID: `price_businessannual...`
 
@@ -680,20 +695,23 @@ For each product, create two prices:
 
 **Key Steps:**
 
-1. Create `subscriptions` table
+1. Create `subscriptions` table (with `is_grandfathered` field)
 2. Create `stripe_webhook_events` table
 3. Create `subscription_history` table
 4. Create indexes
-5. Migrate existing premium users:
+5. **Migrate existing premium users to grandfathered Pro:**
    ```sql
-   INSERT INTO subscriptions (user_id, plan_tier, status, created_at, updated_at)
+   INSERT INTO subscriptions (user_id, plan_tier, status, is_grandfathered, created_at, updated_at)
    SELECT
        id,
-       CASE WHEN is_premium = TRUE THEN 'pro' ELSE 'free' END,
+       'pro',
        'active',
+       TRUE,  -- is_grandfathered for lifetime access
        created_at,
        NOW()
    FROM users
+   WHERE is_premium = TRUE
+   ON CONFLICT (user_id) DO NOTHING
    ```
 6. Update `feature_limits` constraint to include 'business' role
 7. Insert default limits for 'business' tier:
@@ -702,6 +720,7 @@ For each product, create two prices:
 8. Update 'premium' role limits (Pro tier):
    - AI limit: $10
    - Storage limit: 5GB (5,368,709,120 bytes)
+9. Add `openrouter_api_token` field to `users` table (for Free tier BYOK)
 
 ### Rollback Plan
 
@@ -1451,7 +1470,27 @@ This implementation plan provides a complete blueprint for integrating Stripe su
 
 ---
 
-**Document Version:** 1.0
+**Document Version:** 2.0
 **Last Updated:** 2025-12-18
 **Author:** Claude Code Assistant
-**Status:** Ready for Review
+**Status:** ✅ Patterns Verified & Aligned with Codebase - Ready for Implementation
+
+---
+
+## Critical Pattern Notes
+
+**⚠️ Before Implementation, Review:**
+- **[Pattern Verification Document](./stripe-pattern-verification.md)** - Detailed analysis of verified codebase patterns
+- **Key Changes from Initial Plan:**
+  - i18n uses `.ts` files (NOT `.json`)
+  - Database models use `DateTime(timezone=True)` and `datetime.now(UTC)`
+  - Added `is_grandfathered` field for lifetime Pro access
+  - Final pricing: Pro $4.99/mo, Business $14.99/mo
+  - Free tier requires BYOK (own OpenRouter token)
+
+---
+
+## Related Documents
+
+- **[Requirements](./stripe-subscription-requirements.md)** - Business requirements
+- **[Pattern Verification](./stripe-pattern-verification.md)** - Verified codebase patterns
