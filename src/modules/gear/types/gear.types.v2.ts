@@ -108,6 +108,9 @@ export interface IGearItemV2 {
   authorName?: string | null
   authorId?: TUUID | null
 
+  // Content moderation (only for public containers)
+  isHiddenByReports?: boolean | null
+
   // Item-specific fields (populated when itemType='item')
   category?: TGearItemCategory | null
   quantity?: number | null
