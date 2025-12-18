@@ -20,6 +20,7 @@ import { CONTAINER_COLORS } from '../utils/containerColors'
 import { recognizeContainerType } from '../utils/containerTypeRecognition'
 import { createNavigationQuery, getFrom } from '../utils/navigationParams'
 import { recognizeParameters } from '../utils/parameterRecognition'
+import { convertV1ContainerToV2 } from '../utils/typeConverters'
 import { type ContainerFormData, containerSchema } from '../utils/validation'
 import { toBasicWeightUnit } from '../utils/weightUnits'
 
@@ -282,7 +283,7 @@ const handleRecognizeParameters = () => {
       <div class="bg-card rounded-lg border p-6">
         <form @submit="onSubmit">
           <ContainerFormFields
-            :container="container"
+            :container="container ? convertV1ContainerToV2(container) : undefined"
             :loading="isSubmitting"
             @submit="handleSubmit"
             @cancel="handleCancel"

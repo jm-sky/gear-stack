@@ -6,7 +6,7 @@ import Badge from '@/components/ui/badge/Badge.vue'
 import { Button } from '@/components/ui/button'
 import { COLOR_TEXT_CLASSES } from '@/modules/gear/utils/containerColors'
 import ItemsTableMoveButtons from './ItemsTableMoveButtons.vue'
-import type { IGearContainer, IGearItem } from '@/modules/gear/types/gear.types'
+import type { IGearItemV2 } from '@/modules/gear/types/gear.types.v2'
 
 const { t } = useI18n()
 
@@ -21,7 +21,7 @@ const {
   canMoveDown,
   nestedContainer,
 } = defineProps<{
-  item: IGearItem
+  item: IGearItemV2
   publicMode: boolean
   isExpired: boolean
   isExpiringSoon: boolean
@@ -29,7 +29,7 @@ const {
   isRowExpanded: boolean
   canMoveUp: boolean
   canMoveDown: boolean
-  nestedContainer?: IGearContainer
+  nestedContainer?: IGearItemV2
 }>()
 
 const emit = defineEmits<{
@@ -51,7 +51,11 @@ const isLinkedItem = computed<boolean>(() => {
 })
 
 const containerColor = computed<string>(() => {
-  return COLOR_TEXT_CLASSES[nestedContainer?.color ?? 'default']
+  const color = nestedContainer?.color
+  if (color && color in COLOR_TEXT_CLASSES) {
+    return COLOR_TEXT_CLASSES[color as keyof typeof COLOR_TEXT_CLASSES]
+  }
+  return COLOR_TEXT_CLASSES.default
 })
 </script>
 

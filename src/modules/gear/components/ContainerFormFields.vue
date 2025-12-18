@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import WeightInputWithUnitPicker from '@/components/ui/weight-input/WeightInputWithUnitPicker.vue'
-import type { IGearContainer } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import { useGearSettings } from '../composables/useGearSettings'
 import BrandAutocomplete from './inputs/BrandAutocomplete.vue'
 import ContainerColorPicker from './inputs/ContainerColorPicker.vue'
@@ -16,7 +16,7 @@ import CurrencySelect from './inputs/CurrencySelect.vue'
 import TextareaWithMarkdownPreview from './TextareaWithMarkdownPreview.vue'
 
 const _props = defineProps<{
-  container?: IGearContainer
+  container?: IGearItemV2
   loading?: boolean
 }>()
 

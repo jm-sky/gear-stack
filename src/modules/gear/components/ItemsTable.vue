@@ -22,6 +22,7 @@ import { isExpiringSoon } from '../utils/isExpiringSoon'
 import { createItemsColumns } from '../utils/itemsColumns'
 import { createNavigationQuery } from '../utils/navigationParams'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
+import { convertV1ContainerToV2, convertV1ItemToV2 } from '../utils/typeConverters'
 import ItemPriorityBadge from './badges/ItemPriorityBadge.vue'
 import ItemsTableCategoryCell from './items-table/ItemsTableCategoryCell.vue'
 import ItemsTableEditableCategoryCell from './items-table/ItemsTableEditableCategoryCell.vue'
@@ -545,7 +546,7 @@ async function handleStarItem(item: IGearItem, newPriority: TGearItemPriority) {
       />
       <ItemsTableNameCell
         v-else
-        :item="row.original"
+        :item="convertV1ItemToV2(row.original, containerId || '')"
         :public-mode="publicMode"
         :is-expired="isExpired(row.original)"
         :is-expiring-soon="isExpiringSoon(row.original)"
@@ -553,7 +554,7 @@ async function handleStarItem(item: IGearItem, newPriority: TGearItemPriority) {
         :is-row-expanded="isRowExpanded(row.original.id)"
         :can-move-up="canMoveUp(row.original)"
         :can-move-down="canMoveDown(row.original)"
-        :nested-container="getNestedContainer(row.original)"
+        :nested-container="getNestedContainer(row.original) ? convertV1ContainerToV2(getNestedContainer(row.original)!) : undefined"
         @move-up="handleMoveUp(row.original)"
         @move-down="handleMoveDown(row.original)"
         @navigate="navigateToItem(row.original)"
@@ -707,9 +708,9 @@ async function handleStarItem(item: IGearItem, newPriority: TGearItemPriority) {
     <template #row-after="{ row }">
       <ItemsTableNestedContainerRow
         v-if="isNestedContainer(row.original) && isRowExpanded(row.original.id)"
-        :nested-items="getNestedContainerItems(row.original)"
+        :nested-items="getNestedContainerItems(row.original).map(item => convertV1ItemToV2(item, row.original.containerId || ''))"
         :columns-length="columns.length"
-        :container="getNestedContainer(row.original)"
+        :container="getNestedContainer(row.original) ? convertV1ContainerToV2(getNestedContainer(row.original)!) : undefined"
       />
     </template>
 
