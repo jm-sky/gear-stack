@@ -41,7 +41,7 @@ export const gearEn = {
       includePricesDescription: 'Copy prices for containers and items',
       totalWeight: 'Total Weight',
       readiness: 'Readiness',
-      itemsCount: '0 items | 1 item | {count} items',
+      itemsCount: '{count} items | {count} item | {count} items',
       itemsCountLabel: 'Items',
       itemImages: {
         title: 'Item Images',
@@ -960,7 +960,7 @@ export const gearPl = {
       includePricesDescription: 'Skopiuj ceny dla kontenerów i przedmiotów',
       totalWeight: 'Waga',
       readiness: 'Gotowość',
-      itemsCount: '0 przedmiotów | 1 przedmiot | {count} przedmioty(ów)',
+      itemsCount: '{count} przedmiotów | {count} przedmiot | {count} przedmioty | {count} przedmiotów',
       itemsCountLabel: 'Przedmiotów',
       itemImages: {
         title: 'Obrazki przedmiotów',
