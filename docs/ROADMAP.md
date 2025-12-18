@@ -92,20 +92,20 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - Refaktoryzacja kodu zgodnie z najlepszymi praktykami
    - Status: 🚧 In Progress | Priority: High | Complexity: Large
 
-11. **Loading state przed wczytaniem JavaScript w index.html**
+11. ✅ **Loading state przed wczytaniem JavaScript w index.html** - Zakończone
    - Dodanie stanu ładowania w `index.html` przed załadowaniem aplikacji Vue
    - Zapobieganie białemu ekranowi podczas inicjalizacji aplikacji
-   - Status: 🔄 Planned | Priority: High | Complexity: Small
+   - Status: ✅ Completed | Priority: High | Complexity: Small
 
 12. ✅ **Welcome back message and links on landing page for already logged in users**
    - Dodanie komunikatu powitalnego na stronie głównej dla zalogowanych użytkowników
    - Linki do głównych sekcji aplikacji (np. kontenery, ustawienia)
    - Status: ✅ Completed | Priority: High | Complexity: Small
 
-13. **Nie działa zmiana ilości wierszy przedmiotów (limit) na stronie Container Details**
+13. ✅ **Nie działa zmiana ilości wierszy przedmiotów (limit) na stronie Container Details** - Zakończone
    - Naprawa funkcjonalności zmiany limitu wierszy w tabeli przedmiotów na stronie szczegółów kontenera
    - Problem: Zmiana pageSize nie propaguje się w górę do parent component (brak emit w client-side mode)
-   - Status: 🚧 In Progress | Priority: High | Complexity: Small
+   - Status: ✅ Completed | Priority: High | Complexity: Small
 
 ### Średni priorytet
 
@@ -120,13 +120,13 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - Dialog wyboru kontenera docelowego, endpoint API, pełna implementacja backend + frontend
    - Status: ✅ Completed | Priority: High | Complexity: Medium
 
-3. **Kasowanie obrazków z S3**
+3. ✅ **Kasowanie obrazków z S3** - Zakończone
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md)
-   - Automatyczne usuwanie z S3 po usunięciu przedmiotu
-   - Automatyczne usuwanie z S3 po usunięciu kontenera
-   - Automatyczne usuwanie z S3 po usunięciu wszystkich kontenerów
-   - Automatyczne usuwanie z S3 po usunięciu konta użytkownika
-   - Status: 🔄 Planned | Priority: Medium | Complexity: Medium
+   - ✅ Automatyczne usuwanie z S3 po usunięciu przedmiotu
+   - ✅ Automatyczne usuwanie z S3 po usunięciu kontenera
+   - ✅ Automatyczne usuwanie z S3 po usunięciu wszystkich kontenerów
+   - ✅ Automatyczne usuwanie z S3 po usunięciu konta użytkownika
+   - Status: ✅ Completed | Priority: Medium | Complexity: Medium
 
 4. ✅ **Automatyczny wybór jednostki wagi (auto) i formatowanie z separatorem tysięcznym** - Zakończone
    - 📍 Lokalizacja: [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-automatyczny-wybór-jednostki-wagi-auto-i-formatowanie-z-separatorem-tysięcznym) | [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-ustawienia-użytkownika-wymagające-db)

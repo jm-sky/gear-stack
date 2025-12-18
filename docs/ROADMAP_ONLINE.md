@@ -75,25 +75,26 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 - 📝 **Status**: Fully functional end-to-end with Google OAuth
 
 ### 🔐 Zarządzanie tokenami i sesjami
-**Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium
+**Status:** 🚧 Partially Completed | **Priority:** High | **Complexity:** Medium
 
-- 🔄 **Unieważnienie tokena przy wylogowaniu**
+- ✅ **Unieważnienie tokena przy wylogowaniu** - Completed
   - Plik: `backend/app/modules/auth/router.py`
-  - Linia: 204
+  - Linia: 204-237
   - Opis: Dodanie funkcjonalności unieważniania tokena JWT przy wylogowaniu użytkownika
-  - Implementacja: Blacklist tokenów w Redis lub bazie danych, weryfikacja przy każdym żądaniu
+  - Implementacja: Blacklist tokenów w Redis (TokenBlacklistService), weryfikacja przy każdym żądaniu
+  - Status: ✅ Zaimplementowane - endpoint `/logout` blacklistuje aktualny token używając `TokenBlacklistService`
 
-- 🔄 **Unieważnienie wszystkich sesji/tokenów przy usunięciu konta**
-  - Plik: `backend/app/modules/auth/service.py`
-  - Linia: 452
+- 🔄 **Unieważnienie wszystkich sesji/tokenów przy usunięciu konta** - Częściowo zaimplementowane
+  - Plik: `backend/app/modules/auth/router.py`, `backend/app/modules/auth/service.py`
   - Opis: Unieważnienie wszystkich sesji i tokenów użytkownika podczas usuwania konta
-  - Implementacja: Masowe unieważnienie wszystkich tokenów użytkownika w systemie
+  - Status: ⚠️ Częściowo - aktualny token jest blacklistowany przy usuwaniu konta, ale `blacklist_all_user_tokens` jest placeholder (wymaga trackingu tokenów per user w Redis)
+  - Uwaga: `TokenBlacklistService.blacklist_all_user_tokens()` istnieje ale nie jest zaimplementowana (zwraca 0, wymaga trackingu user_id → tokens mapping)
 
-- 🔄 **Usunięcie powiązanych danych przy usuwaniu konta**
-  - Plik: `backend/app/modules/auth/service.py`
-  - Linia: 453
+- ✅ **Usunięcie powiązanych danych przy usuwaniu konta** - Completed
+  - Plik: `backend/app/modules/*/db_models.py` (SQLAlchemy models)
   - Opis: Usunięcie danych 2FA, passkeys i innych powiązanych danych przy usuwaniu konta
-  - Implementacja: Cascade delete dla wszystkich powiązanych danych użytkownika (2FA, passkeys, sesje, tokeny)
+  - Implementacja: Cascade delete dla wszystkich powiązanych danych użytkownika (2FA, passkeys, gear_items, ai_settings, itp.)
+  - Status: ✅ Zaimplementowane - SQLAlchemy models mają `ondelete="CASCADE"` dla powiązanych tabel (two_factor, gear_items, ai_settings, itp.)
 
 ### 🔐 Ulepszenia WebAuthn / Passkeys
 **Status:** 🔄 Planned | **Priority:** High | **Complexity:** Medium
@@ -371,6 +372,57 @@ Akcja pozwalająca na pobranie obrazków z katalogu do przedmiotu, który jest j
 
 ### ✅ Przenoszenie przedmiotów między kontenerami
 **Status:** ✅ Completed | **Priority:** High | **Complexity:** Medium
+
+### 🔄 Poprawa wyszukiwarki katalogu globalnego (lepsze dopasowanie)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+
+**Koncepcja:**
+Poprawa wyszukiwarki w tworzeniu połączenia przedmiotu z katalogiem globalnym (`MatchWithCatalogueDialog.vue`) - lepsze dopasowywanie wyników wyszukiwania.
+
+**Obecna implementacja:**
+- Backend używa prostego `ilike` z PostgreSQL (wzorzec `%query%`)
+- Wyszukiwanie w polach: `name`, `description`, `brand`, `model`
+- Brak rankingowania wyników
+
+**Proponowane ulepszenia:**
+1. **Full Text Search (PostgreSQL)**
+   - Użycie `to_tsvector` i `to_tsquery` dla lepszego wyszukiwania
+   - Ranking wyników na podstawie relevancy (ts_rank)
+   - Obsługa synonimów i stemming (dla języka angielskiego/polskiego)
+   - Indeksy GIN dla wydajności
+
+2. **Fuzzy Search (alternatywa)**
+   - Użycie `pg_trgm` extension (trigram matching)
+   - Funkcja `similarity()` do dopasowywania podobnych stringów
+   - Lepsze radzenie sobie z literówkami i wariantami nazw
+
+3. **Hybrydowe podejście**
+   - Kombinacja Full Text Search + Fuzzy Search
+   - Full Text Search dla dokładnych dopasowań
+   - Fuzzy Search jako fallback dla literówek
+   - Ranking uwzględniający oba metody
+
+**Zakres implementacji:**
+- **Backend:**
+  - Rozszerzenie metody `get_catalogue_items()` w `GearRepository`
+  - Dodanie migracji dla indeksów Full Text Search (jeśli wybrana opcja 1 lub 3)
+  - Ewentualna instalacja extension `pg_trgm` (jeśli wybrana opcja 2 lub 3)
+  - Ranking wyników wyszukiwania
+  - Optymalizacja wydajności (indeksy)
+
+- **Frontend:**
+  - Opcjonalnie: wizualne oznaczenie trafności wyników (jeśli ranking jest dostępny)
+  - Opcjonalnie: sortowanie wyników według relevancy
+
+**Zalety:**
+- Lepsze znajdowanie przedmiotów w katalogu (nawet przy literówkach)
+- Lepsze UX - użytkownik szybciej znajdzie pasujący przedmiot
+- Ranking wyników pomaga znaleźć najlepsze dopasowanie na górze listy
+
+**Uwagi:**
+- Full Text Search wymaga konfiguracji językowej (polski vs angielski)
+- pg_trgm wymaga extension PostgreSQL
+- Należy przetestować wydajność na większych zbiorach danych
 
 **Koncepcja:**
 Umożliwienie przenoszenia przedmiotów z jednego kontenera do drugiego bez konieczności usuwania i ponownego dodawania.
@@ -672,7 +724,7 @@ System śledzenia wyświetleń kontenerów (publicznych i udostępnionych) z ~~d
 ## 🎯 Szablony i presety
 
 ### Szablony kontenerów (predefiniowane zestawy)
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+**Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Medium
 
 - Predefiniowane szablony kontenerów (UL, bushcraft, EDC, itp.)
 - Możliwość tworzenia własnych szablonów
@@ -862,6 +914,54 @@ System śledzenia wyświetleń kontenerów (publicznych i udostępnionych) z ~~d
 - 🔄 Limity przestrzeni per użytkownik (nie zaimplementowane - future enhancement)
 - **Wsparcie:** Local storage (development) + S3 (production ready)
 
+### ✅ Kasowanie obrazków z S3
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium
+
+**Koncepcja:**
+Automatyczne usuwanie obrazków z S3 storage po usunięciu powiązanych danych (przedmiotów, kontenerów, kont użytkowników).
+
+**Zaimplementowane funkcjonalności:**
+- ✅ **Automatyczne usuwanie z S3 po usunięciu przedmiotu:**
+  - ✅ Metoda `_delete_all_item_images()` w `GearService` usuwa wszystkie obrazki przedmiotu
+  - ✅ Integracja z `delete_item()` - obrazy są usuwane przed usunięciem przedmiotu z bazy danych
+  - ✅ Obsługa błędów (logowanie, nie blokowanie usuwania przedmiotu jeśli obrazki nie mogą być usunięte)
+
+- ✅ **Automatyczne usuwanie z S3 po usunięciu kontenera:**
+  - ✅ Integracja z `delete_container()` - obrazy wszystkich przedmiotów w kontenerze są usuwane przed usunięciem kontenera
+  - ✅ Pobieranie wszystkich przedmiotów kontenera i usuwanie ich obrazków
+
+- ✅ **Automatyczne usuwanie z S3 po usunięciu wszystkich kontenerów:**
+  - ✅ Integracja z `delete_all_containers()` - obrazy wszystkich przedmiotów we wszystkich kontenerach są usuwane przed usunięciem kontenerów
+
+- ✅ **Automatyczne usuwanie z S3 po usunięciu konta użytkownika:**
+  - ✅ Metoda `delete_all_user_images()` w `GearService` usuwa wszystkie obrazy użytkownika
+  - ✅ Integracja z `delete_account` endpoint w `AuthService` - obrazy są usuwane przed usunięciem konta
+  - ✅ Metoda `get_all_by_user()` w `ItemImageRepository` do pobierania wszystkich obrazków użytkownika
+
+**Implementacja:**
+- ✅ **Backend:**
+  - ✅ Metoda `_delete_all_item_images()` w `GearService` - usuwa obrazy pojedynczego przedmiotu
+  - ✅ Metoda `delete_all_user_images()` w `GearService` - usuwa wszystkie obrazy użytkownika
+  - ✅ Metoda `get_all_by_user()` w `ItemImageRepository` - pobiera wszystkie obrazy użytkownika
+  - ✅ Integracja z `delete_item()`, `delete_container()`, `delete_all_containers()` w `GearService`
+  - ✅ Integracja z `delete_account` endpoint w `auth/router.py` - wywołanie `delete_all_user_images()` przed usunięciem konta
+  - ✅ Obsługa błędów - logowanie błędów, nie blokowanie głównej operacji jeśli usuwanie obrazków się nie powiedzie
+
+- **Edge cases:**
+  - Co jeśli obrazek nie istnieje w S3? (ignorowanie błędu 404)
+  - Co jeśli operacja usuwania z S3 się nie powiedzie? (logowanie, kontynuowanie operacji)
+  - Co z obrazkami używanymi przez wiele przedmiotów? (nie dotyczy - każdy przedmiot ma własne obrazy)
+
+**Zalety:**
+- Oszczędność przestrzeni w S3 (usuwanie nieużywanych obrazków)
+- Lepsze zarządzanie kosztami storage
+- Zgodność z RODO (usuwanie danych użytkownika)
+
+**Uwagi:**
+- Usuwanie obrazków powinno być non-blocking (nie blokować głównej operacji usuwania)
+- Należy rozważyć asynchroniczne usuwanie dla większych operacji (batch delete)
+- Logowanie wszystkich operacji usuwania dla audytu
+
 ### Przetwarzanie obrazków z ustawieniami użytkownika (3 tryby)
 **Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium | **Feature:** [FEATURE-025](./features/FEATURE-025-image-processing-modes.md)
 
@@ -926,7 +1026,7 @@ Po uploadzie obrazków automatyczne przetwarzanie (zmiana rozmiaru, kompresja) w
 - Spójność - te same ustawienia przetwarzania dla przedmiotów i kontenerów
 
 ### Automatyczne wyszukiwanie obrazków dla przedmiotów
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Large | **Feature:** [FEATURE-016](./features/FEATURE-016-automatic-item-image-fetching.md)
+**Status:** 🔄 Planned | **Priority:** Low | **Complexity:** Large | **Feature:** [FEATURE-016](./features/FEATURE-016-automatic-item-image-fetching.md)
 
 - Opcja przy tworzeniu przedmiotu "Wyszukaj obrazki w web"
 - Dodatkowa akcja na żądanie dla istniejących przedmiotów
@@ -1090,7 +1190,7 @@ W wielu komponentach używane jest `$t()` zamiast `t()` z `useI18n()`. Zgodnie z
 1. **Synchronizacja między urządzeniami** - Medium priority, Large complexity
 2. **Udostępnianie kontenerów** - Medium priority, Medium complexity
 3. **System zaproszeń** - Medium priority, Large complexity
-4. **Szablony kontenerów** - Medium priority, Medium complexity
+4. **Poprawa wyszukiwarki katalogu globalnego** - Medium priority, Medium complexity
 5. ✅ **PWA** - Medium priority, Medium complexity (Completed)
 6. ✅ **Galeria publiczna kontenerów** - Medium priority, Medium complexity (Completed)
 

@@ -37,8 +37,11 @@ class AiApiService {
   /**
    * Get AI settings
    */
-  async getSettings(): Promise<IAiSettings> {
-    const response = await apiClient.get<IAiSettings>('/ai/settings')
+  async getSettings(forceRefresh = false): Promise<IAiSettings> {
+    const url = forceRefresh
+      ? `/ai/settings?_t=${Date.now()}`
+      : '/ai/settings'
+    const response = await apiClient.get<IAiSettings>(url)
     return response.data
   }
 

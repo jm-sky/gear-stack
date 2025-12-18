@@ -19,7 +19,6 @@ interface ExportOptions {
   showNestedContainer?: boolean // Whether to show nested container reference [#id] (default: true)
   showLegend?: boolean // Whether to show legend at the end (default: true)
   showPrices?: boolean // Whether to show prices in export (default: false)
-  showNotes?: boolean // Whether to show notes/descriptions in export (default: true)
   descriptionFormat?: 'off' | 'inline' | 'newline' // Description format (default: 'off')
   defaultCurrency?: string // Default currency to use when item/container doesn't have currency
   locale?: string // Locale for formatting numbers (default: 'pl-PL')
@@ -74,8 +73,8 @@ function formatItem(
   parts.push(`**${item.name}**`)
 
   // Description in inline format (immediately after name, before other fields)
-  // Only if showNotes is true (default: true) and descriptionFormat is inline
-  if (item.notes && options.showNotes !== false && options.descriptionFormat === 'inline') {
+  // Only if descriptionFormat is inline
+  if (item.notes && options.descriptionFormat === 'inline') {
     parts.push(`*(${item.notes})*`)
   }
 
@@ -168,8 +167,8 @@ function formatItem(
   }
 
   // For newline format, split the line: name + metadata on first line, description alone on second line
-  // Only if showNotes is true (default: true) and descriptionFormat is newline
-  if (item.notes && options.showNotes !== false && options.descriptionFormat === 'newline') {
+  // Only if descriptionFormat is newline
+  if (item.notes && options.descriptionFormat === 'newline') {
     const namePart = `**${item.name}**`
 
     // Build first line with name and all metadata EXCEPT description and weight
@@ -300,8 +299,8 @@ function formatNestedContainer(
 
   lines.push(headerParts.join(' '))
 
-  // Add container description as indented block (if showNotes is enabled)
-  if (container.description && options.showNotes !== false) {
+  // Add container description as indented block (if description format is not off)
+  if (container.description && options.descriptionFormat !== 'off') {
     const formattedDescription = formatNotesAsIndentedBlock(container.description, indent)
     lines.push(formattedDescription)
   }
@@ -407,6 +406,8 @@ export function exportContainerToPrompt(
   lines.push(`# ${titleText}`)
   lines.push(descriptionText)
   lines.push('')
+  lines.push('---')
+  lines.push('')
 
   // Container header with ID and UUID
   const typeLabel = getContainerTypeLabel
@@ -454,8 +455,8 @@ export function exportContainerToPrompt(
 
   lines.push(containerHeaderParts.join(' '))
 
-  // Add container description as indented block (if showNotes is enabled)
-  if (container.description && options.showNotes !== false) {
+  // Add container description as indented block (if description format is not off)
+  if (container.description && options.descriptionFormat !== 'off') {
     const formattedDescription = formatNotesAsIndentedBlock(container.description, 0)
     lines.push(formattedDescription)
   }
@@ -561,12 +562,16 @@ export function exportContainersToPrompt(
   const titleText = t ? t('gear.export.title', 'Lista sprzętu') : 'Lista sprzętu'
   lines.push(`# ${titleText}`)
   lines.push('')
+  lines.push('---')
+  lines.push('')
 
   // Export each container without legend (legend will be added once at the end)
   const exportOptionsWithoutLegend = { ...options, showLegend: false }
 
   containers.forEach((container, index) => {
     if (index > 0) {
+      lines.push('')
+      lines.push('---')
       lines.push('')
     }
     const containerMarkdown = exportContainerToPrompt(container, exportOptionsWithoutLegend)

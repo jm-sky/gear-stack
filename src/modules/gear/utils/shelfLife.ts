@@ -1,5 +1,5 @@
-import type { TDateTime } from '@/shared/types/base.type'
 import type { IShelfLife } from '../types/gear.types'
+import type { TDateTime } from '@/shared/types/base.type'
 
 /**
  * Calculate expiration date based on shelf life

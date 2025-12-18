@@ -2,12 +2,15 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Label } from '@/components/ui/label'
+import { Progress } from '@/components/ui/progress'
+import { useAi } from '@/modules/ai/composables/useAi'
 import { useAiStore } from '@/modules/ai/store/useAiStore'
 import { useUserStore } from '@/modules/user/store/useUserStore'
 
 const { t } = useI18n()
 const aiStore = useAiStore()
 const userStore = useUserStore()
+const { canUseAi } = useAi()
 
 const monthlyUsage = computed(() => aiStore.monthlyUsage)
 const hasOwnToken = computed(() => aiStore.hasOwnToken)
@@ -36,23 +39,23 @@ const costProgressPercentage = computed(() => {
   return Math.min((monthlyUsage.value.cost / limit) * 100, 100)
 })
 
-const progressColor = computed(() => {
+const progressColorClass = computed(() => {
   const percentage = progressPercentage.value
-  if (percentage >= 90) return 'bg-red-500'
-  if (percentage >= 70) return 'bg-yellow-500'
-  return 'bg-green-500'
+  if (percentage >= 90) return '[&>div]:bg-red-500'
+  if (percentage >= 70) return '[&>div]:bg-yellow-500'
+  return '[&>div]:bg-green-500'
 })
 
-const costProgressColor = computed(() => {
+const costProgressColorClass = computed(() => {
   const percentage = costProgressPercentage.value
-  if (percentage >= 90) return 'bg-red-500'
-  if (percentage >= 70) return 'bg-yellow-500'
-  return 'bg-green-500'
+  if (percentage >= 90) return '[&>div]:bg-red-500'
+  if (percentage >= 70) return '[&>div]:bg-yellow-500'
+  return '[&>div]:bg-green-500'
 })
 </script>
 
 <template>
-  <div class="space-y-4">
+  <div class="space-y-4" :class="{ 'opacity-50 pointer-events-none': !canUseAi }">
     <div>
       <Label>
         {{ t('gear.settings.ai.usage.label') }}
@@ -68,7 +71,10 @@ const costProgressColor = computed(() => {
         <span class="text-muted-foreground">{{ t('gear.settings.ai.usage.tokens') }}</span>
         <span class="font-medium">
           {{ monthlyUsage.tokens.toLocaleString() }}
-          <span v-if="monthlyUsage.tokenLimit">
+          <span v-if="!canUseAi" class="text-muted-foreground">
+            ({{ t('gear.settings.ai.usage.unavailable') }})
+          </span>
+          <span v-else-if="monthlyUsage.tokenLimit">
             / {{ monthlyUsage.tokenLimit.toLocaleString() }}
           </span>
           <span v-else class="text-muted-foreground">
@@ -76,13 +82,11 @@ const costProgressColor = computed(() => {
           </span>
         </span>
       </div>
-      <div v-if="monthlyUsage.tokenLimit" class="h-2 w-full overflow-hidden rounded-full bg-muted">
-        <div
-          :class="progressColor"
-          class="h-full transition-all duration-300"
-          :style="{ width: `${progressPercentage}%` }"
-        />
-      </div>
+      <Progress
+        v-if="monthlyUsage.tokenLimit"
+        :model-value="progressPercentage"
+        :class="progressColorClass"
+      />
       <div v-else class="h-2 w-full rounded-full bg-green-500/20" />
     </div>
 
@@ -92,7 +96,10 @@ const costProgressColor = computed(() => {
         <span class="text-muted-foreground">{{ t('gear.settings.ai.usage.cost') }}</span>
         <span class="font-medium">
           ${{ monthlyUsage.cost.toFixed(4) }}
-          <span v-if="costLimit && costLimit > 0">
+          <span v-if="!canUseAi" class="text-muted-foreground">
+            ({{ t('gear.settings.ai.usage.unavailable') }})
+          </span>
+          <span v-else-if="costLimit && costLimit > 0">
             / ${{ costLimit.toFixed(4) }}
           </span>
           <span v-else-if="costLimit === 0" class="text-muted-foreground">
@@ -103,13 +110,11 @@ const costProgressColor = computed(() => {
           </span>
         </span>
       </div>
-      <div v-if="costLimit && costLimit > 0" class="h-2 w-full overflow-hidden rounded-full bg-muted">
-        <div
-          :class="costProgressColor"
-          class="h-full transition-all duration-300"
-          :style="{ width: `${costProgressPercentage}%` }"
-        />
-      </div>
+      <Progress
+        v-if="costLimit && costLimit > 0"
+        :model-value="costProgressPercentage"
+        :class="costProgressColorClass"
+      />
       <div v-else-if="costLimit === 0" class="h-2 w-full rounded-full bg-red-500/20" />
       <div v-else class="h-2 w-full rounded-full bg-green-500/20" />
     </div>

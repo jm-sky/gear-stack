@@ -81,30 +81,40 @@ class AiSettings(BaseModel):
     """AI user settings."""
 
     id: UUID = Field(..., description="Settings ID")
-    user_id: str = Field(..., description="User ID")
-    use_own_token: bool = Field(..., description="Whether user uses own API token")
-    has_token: bool = Field(..., description="Whether user has configured token")
-    selected_model: str = Field(..., description="Selected model ID")
-    context_fields: dict[str, Any] = Field(..., description="Context field configuration")
-    max_tokens: int | None = Field(None, description="Max tokens override")
+    user_id: str = Field(..., alias="userId", serialization_alias="userId")
+    use_own_token: bool = Field(..., alias="useOwnToken", serialization_alias="useOwnToken")
+    has_token: bool = Field(..., alias="hasToken", serialization_alias="hasToken")
+    selected_model: str = Field(..., alias="selectedModel", serialization_alias="selectedModel")
+    context_fields: dict[str, Any] = Field(..., alias="contextFields", serialization_alias="contextFields")
+    max_tokens: int | None = Field(None, alias="maxTokens", serialization_alias="maxTokens")
     temperature: float = Field(..., description="Temperature setting")
-    created_at: datetime = Field(..., description="Creation timestamp")
-    updated_at: datetime = Field(..., description="Last update timestamp")
+    monthly_token_limit: int | None = Field(None, alias="monthlyTokenLimit", serialization_alias="monthlyTokenLimit")
+    monthly_tokens_used: int = Field(default=0, alias="monthlyTokensUsed", serialization_alias="monthlyTokensUsed")
+    monthly_cost_limit: float | None = Field(None, alias="monthlyCostLimit", serialization_alias="monthlyCostLimit")
+    monthly_cost_used: float = Field(default=0.0, alias="monthlyCostUsed", serialization_alias="monthlyCostUsed")
+    created_at: datetime = Field(..., alias="createdAt", serialization_alias="createdAt")
+    updated_at: datetime = Field(..., alias="updatedAt", serialization_alias="updatedAt")
+
+    model_config = {"populate_by_name": True}
 
 
 class AiUpdateSettings(BaseModel):
     """Update AI settings request."""
 
-    selected_model: str | None = Field(None, description="Model to select")
-    context_fields: dict[str, Any] | None = Field(None, description="Context fields configuration")
-    max_tokens: int | None = Field(None, ge=1, le=4000, description="Max tokens override")
+    selected_model: str | None = Field(None, alias="selectedModel", serialization_alias="selectedModel", description="Model to select")
+    context_fields: dict[str, Any] | None = Field(None, alias="contextFields", serialization_alias="contextFields", description="Context fields configuration")
+    max_tokens: int | None = Field(None, alias="maxTokens", serialization_alias="maxTokens", ge=1, le=4000, description="Max tokens override")
     temperature: float | None = Field(None, ge=0.0, le=2.0, description="Temperature setting")
+
+    model_config = {"populate_by_name": True}
 
 
 class AiSetTokenRequest(BaseModel):
     """Set API token request."""
 
-    api_token: str = Field(..., min_length=10, max_length=500, description="OpenRouter API token")
+    api_token: str = Field(..., alias="apiToken", serialization_alias="apiToken", min_length=10, max_length=500, description="OpenRouter API token")
+
+    model_config = {"populate_by_name": True}
 
 
 class AiSetTokenResponse(BaseModel):

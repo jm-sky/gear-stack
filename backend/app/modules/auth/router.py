@@ -477,6 +477,20 @@ async def delete_account(
         locale = await determine_email_locale(db=db, user_id=current_user.id, accept_language=accept_language)
         translations = get_translations(locale)
 
+        # Delete all user images from storage (before account deletion)
+        try:
+            from app.modules.gear.repository import GearRepository
+            from app.modules.gear.service import GearService
+
+            gear_repository = GearRepository(db)
+            gear_service = GearService(gear_repository)
+            deleted_images_count = await gear_service.delete_all_user_images(current_user.id)
+            if deleted_images_count > 0:
+                logger.info(f"Deleted {deleted_images_count} image(s) for user {current_user.id} during account deletion")
+        except Exception as e:
+            # Log error but don't fail account deletion if image deletion fails
+            logger.error(f"Failed to delete user images during account deletion (user_id={current_user.id}): {e}")
+
         await auth_service.delete_account(
             user_id=current_user.id,
             password=request_data.password,
@@ -488,10 +502,11 @@ async def delete_account(
 
         # Blacklist current token after successful deletion
         payload = verify_token(token)
-        if payload.get("exp"):
+        expires_at = payload.get("exp")
+        if expires_at:
             await blacklist.blacklist_token(
                 token=token,
-                expires_at=payload["exp"],
+                expires_at=expires_at,
                 reason="account_deleted",
             )
             logger.info(f"Token blacklisted after account deletion: user_id={current_user.id}")

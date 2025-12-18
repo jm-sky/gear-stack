@@ -46,7 +46,7 @@ export function useAiChat() {
         message,
         history,
         context,
-        model: aiStore.settings?.selected_model,
+        model: aiStore.settings?.selectedModel,
       }
 
       const response = await aiApiService.chat(request)

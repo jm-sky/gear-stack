@@ -24,16 +24,16 @@ export const useAiStore = defineStore('ai', () => {
 
   // Computed
   const selectedModel = computed<IAiModel | undefined>(() =>
-    availableModels.value.find(m => m.id === settings.value?.selected_model),
+    availableModels.value.find(m => m.id === settings.value?.selectedModel),
   )
 
-  const hasOwnToken = computed<boolean>(() => settings.value?.use_own_token ?? false)
+  const hasOwnToken = computed<boolean>(() => settings.value?.hasToken ?? false)
 
   const monthlyUsage = computed(() => ({
-    tokens: settings.value?.monthly_tokens_used ?? 0,
-    cost: settings.value?.monthly_cost_used ?? 0,
-    tokenLimit: settings.value?.monthly_token_limit,
-    costLimit: settings.value?.monthly_cost_limit,
+    tokens: settings.value?.monthlyTokensUsed ?? 0,
+    cost: settings.value?.monthlyCostUsed ?? 0,
+    tokenLimit: settings.value?.monthlyTokenLimit,
+    costLimit: settings.value?.monthlyCostLimit,
   }))
 
   // Actions
@@ -66,13 +66,19 @@ export const useAiStore = defineStore('ai', () => {
   }
 
   const setApiToken = async (token: string): Promise<void> => {
-    await aiApiService.setApiToken({ api_token: token })
+    await aiApiService.setApiToken({ apiToken: token })
     await loadSettings()
   }
 
   const removeApiToken = async (): Promise<void> => {
     await aiApiService.removeApiToken()
-    await loadSettings()
+    // Force refresh to ensure we get updated data
+    isLoading.value = true
+    try {
+      settings.value = await aiApiService.getSettings(true)
+    } finally {
+      isLoading.value = false
+    }
   }
 
   const loadHistory = async (params?: LoadHistoryParams): Promise<void> => {

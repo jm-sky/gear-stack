@@ -43,7 +43,8 @@ class SettingsService:
         """
         settings = await self.repo.get_or_create(user_id)
 
-        update_dict = updates.model_dump(exclude_none=True)
+        # Use by_alias=False to get snake_case field names for database columns
+        update_dict = updates.model_dump(exclude_none=True, by_alias=False)
         settings = await self.repo.update(settings, **update_dict)
 
         return self._to_schema(settings)
@@ -95,15 +96,22 @@ class SettingsService:
         Returns:
             Settings schema
         """
-        return AiSettings(
-            id=settings.id,
-            user_id=settings.user_id,
-            use_own_token=settings.use_own_token,
-            has_token=bool(settings.encrypted_api_token),
-            selected_model=settings.selected_model,
-            context_fields=settings.context_fields,
-            max_tokens=settings.max_tokens,
-            temperature=settings.temperature,
-            created_at=settings.created_at,
-            updated_at=settings.updated_at,
+        # Use model_validate with dict to handle aliases automatically
+        return AiSettings.model_validate(
+            {
+                "id": settings.id,
+                "userId": settings.user_id,
+                "useOwnToken": settings.use_own_token,
+                "hasToken": bool(settings.encrypted_api_token),
+                "selectedModel": settings.selected_model,
+                "contextFields": settings.context_fields,
+                "maxTokens": settings.max_tokens,
+                "temperature": settings.temperature,
+                "monthlyTokenLimit": settings.monthly_token_limit,
+                "monthlyTokensUsed": settings.monthly_tokens_used,
+                "monthlyCostLimit": settings.monthly_cost_limit,
+                "monthlyCostUsed": settings.monthly_cost_used,
+                "createdAt": settings.created_at,
+                "updatedAt": settings.updated_at,
+            }
         )

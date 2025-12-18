@@ -19,7 +19,7 @@ export function useAiModels() {
   }
 
   const selectModel = async (modelId: string): Promise<void> => {
-    await aiStore.updateSettings({ selected_model: modelId })
+    await aiStore.updateSettings({ selectedModel: modelId })
   }
 
   const getModelById = (modelId: string): IAiModel | undefined => {
