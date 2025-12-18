@@ -19,6 +19,8 @@ from app.modules.gear.db_models import GearContainerDB, GearItemDB
 from app.modules.gear.repository import GearRepository
 from app.modules.gear.service import GearService
 from app.modules.gear.schemas import ContainerCreate, ItemCreate
+from app.modules.gear.repository_v2 import GearRepositoryV2
+from app.modules.gear.service_v2 import GearServiceV2
 
 
 @pytest_asyncio.fixture
@@ -85,6 +87,18 @@ async def gear_repository(async_db_session: AsyncSession) -> GearRepository:
 async def gear_service(gear_repository: GearRepository) -> GearService:
     """Create gear service instance."""
     return GearService(gear_repository)
+
+
+@pytest_asyncio.fixture
+async def gear_repository_v2(async_db_session: AsyncSession) -> GearRepositoryV2:
+    """Create gear repository V2 instance."""
+    return GearRepositoryV2(async_db_session)
+
+
+@pytest_asyncio.fixture
+async def gear_service_v2(gear_repository_v2: GearRepositoryV2) -> GearServiceV2:
+    """Create gear service V2 instance."""
+    return GearServiceV2(gear_repository_v2)
 
 
 @pytest.fixture
