@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { TGearItemQuality } from '../../types/gear.types'
+import type { TGearItemQuality } from '../../types/gear.types.v2'
 
 const { t } = useI18n()
 

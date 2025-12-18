@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import SearchInput from '@/components/ui/input/SearchInput.vue'
-import type { TContainerColor } from '../../types/gear.types'
+import type { TContainerColor } from '../../types/gear.types.v2'
 import { COLOR_DOT_CLASSES, COLOR_TEXT_CLASSES, CONTAINER_COLORS } from '../../utils/containerColors'
 
 const { t } = useI18n()

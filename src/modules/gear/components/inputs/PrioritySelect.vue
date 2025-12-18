@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { TGearItemPriority } from '../../types/gear.types'
+import type { TGearItemPriority } from '../../types/gear.types.v2'
 
 const { t } = useI18n()
 

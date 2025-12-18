@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import type { IGlobalCatalogueItem } from '../../types/catalogue.types'
-import type { TGearItemPriority, TGearItemStatus } from '../../types/gear.types'
+import type { TGearItemPriority, TGearItemStatus } from '../../types/gear.types.v2'
 import { useCatalogue } from '../../composables/catalogue/useCatalogue'
 import { useGear } from '../../composables/useGear'
 import { GearRoutePath } from '../../routes'
