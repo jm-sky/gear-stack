@@ -378,8 +378,8 @@ export default {
     },
     limits: {
       maxSize: 'maks. {size} MB',
-      maxFiles: '{count} plików',
-      maxFile: '{count} plik',
+      maxFiles: '{count} plików | {count} plik | {count} pliki | {count} plików',
+      maxFile: '{count} plików | {count} plik | {count} pliki | {count} plików',
     },
     errors: {
       tooManyFiles: 'Maksymalnie {max} plik(ów) dozwolone',

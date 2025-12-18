@@ -8,7 +8,7 @@ import logging
 from datetime import UTC, datetime
 from typing import Sequence
 
-from sqlalchemy import select, and_, or_, func
+from sqlalchemy import select, and_, or_, func, true
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload, joinedload
 
@@ -25,6 +25,7 @@ from .db_models import (
     ContainerRatingDB,
     GlobalCatalogueItemDB,
     ItemPromotionDB,
+    ContentReportDB,
 )
 from .schemas import (
     BatchOrderUpdateRequest,
@@ -151,7 +152,12 @@ class GearRepository(SearchMixin):
         """
         stmt = (
             select(GearContainerDB)
-            .where(GearContainerDB.is_public == True)  # noqa: E712
+            .where(
+                and_(
+                    GearContainerDB.is_public == True,  # noqa: E712
+                    GearContainerDB.is_hidden_by_reports == False,  # noqa: E712
+                )
+            )
             .options(
                 selectinload(GearContainerDB.items),  # type: ignore[attr-defined]
                 joinedload(GearContainerDB.user),  # type: ignore[attr-defined]
@@ -171,6 +177,35 @@ class GearRepository(SearchMixin):
 
         Returns:
             Container if found and public, None otherwise (with user relationship loaded)
+        """
+        stmt = (
+            select(GearContainerDB)
+            .where(
+                and_(
+                    GearContainerDB.id == container_id,
+                    GearContainerDB.is_public == True,  # noqa: E712
+                    GearContainerDB.is_hidden_by_reports == False,  # noqa: E712
+                )
+            )
+            .options(
+                selectinload(GearContainerDB.items),  # type: ignore[attr-defined]
+                joinedload(GearContainerDB.user),  # type: ignore[attr-defined]
+            )
+        )
+        result = await self.db.execute(stmt)
+        return result.unique().scalar_one_or_none()
+
+    async def get_public_container_for_reporting(self, container_id: str) -> GearContainerDB | None:
+        """Get a public container by ID for reporting purposes.
+
+        This method does NOT filter by is_hidden_by_reports, allowing reports
+        even on containers that are already hidden.
+
+        Args:
+            container_id: Container ID
+
+        Returns:
+            Container if found and public, None otherwise
         """
         stmt = (
             select(GearContainerDB)
@@ -1082,5 +1117,243 @@ class GearRepository(SearchMixin):
         # Soft delete
         item.is_active = False
         item.updated_at = datetime.now(UTC)
+        await self.db.commit()
+        return True
+
+    # Content report operations
+    async def create_container_report(
+        self,
+        container_id: str,
+        reporter_user_id: str,
+        reason: str,
+        additional_info: str | None = None,
+    ) -> ContentReportDB:
+        """Create a new content report for a container.
+
+        Args:
+            container_id: Container ID being reported
+            reporter_user_id: User ID reporting the container
+            reason: Reason for report (spam_fraud, violence, sexual_content, profanity, other)
+            additional_info: Optional additional information
+
+        Returns:
+            Created report
+
+        Raises:
+            IntegrityError: If report already exists (unique constraint violation)
+        """
+        report = ContentReportDB(
+            id=generate_id(),
+            container_id=container_id,
+            reporter_user_id=reporter_user_id,
+            reason=reason,
+            additional_info=additional_info,
+            status="pending",
+        )
+        self.db.add(report)
+        await self.db.commit()
+        await self.db.refresh(report)
+
+        # Reload with relationships
+        stmt = (
+            select(ContentReportDB)
+            .options(
+                joinedload(ContentReportDB.container),
+                joinedload(ContentReportDB.reporter),
+            )
+            .where(ContentReportDB.id == report.id)
+        )
+        result = await self.db.execute(stmt)
+        report_with_relations = result.unique().scalar_one()
+
+        return report_with_relations
+
+    async def get_reports_for_container(self, container_id: str) -> Sequence[ContentReportDB]:
+        """Get all reports for a container.
+
+        Args:
+            container_id: Container ID
+
+        Returns:
+            List of reports for the container
+        """
+        stmt = select(ContentReportDB).where(ContentReportDB.container_id == container_id).order_by(ContentReportDB.created_at.desc())
+        result = await self.db.execute(stmt)
+        return result.scalars().all()
+
+    async def count_active_reports_for_container(self, container_id: str) -> int:
+        """Count active reports (pending + action_taken) for a container.
+
+        Args:
+            container_id: Container ID
+
+        Returns:
+            Number of active reports
+        """
+        stmt = select(func.count(ContentReportDB.id)).where(
+            and_(
+                ContentReportDB.container_id == container_id,
+                or_(ContentReportDB.status == "pending", ContentReportDB.status == "action_taken"),
+            )
+        )
+        result = await self.db.execute(stmt)
+        return result.scalar() or 0
+
+    async def get_all_reports(
+        self,
+        status: str | None = None,
+        container_id: str | None = None,
+        reporter_user_id: str | None = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> tuple[Sequence[ContentReportDB], int]:
+        """Get all reports with optional filters.
+
+        Args:
+            status: Filter by status (pending, reviewed, dismissed, action_taken)
+            container_id: Filter by container ID
+            reporter_user_id: Filter by reporter user ID
+            limit: Maximum number of results
+            offset: Offset for pagination
+
+        Returns:
+            Tuple of (reports list, total count)
+        """
+        conditions = []
+        if status:
+            conditions.append(ContentReportDB.status == status)
+        if container_id:
+            conditions.append(ContentReportDB.container_id == container_id)
+        if reporter_user_id:
+            conditions.append(ContentReportDB.reporter_user_id == reporter_user_id)
+
+        where_clause = and_(*conditions) if conditions else true()
+
+        # Get total count
+        count_stmt = select(func.count(ContentReportDB.id)).where(where_clause)
+        count_result = await self.db.execute(count_stmt)
+        total = count_result.scalar() or 0
+
+        # Get reports with eager loading of relationships
+        stmt = (
+            select(ContentReportDB)
+            .options(
+                joinedload(ContentReportDB.container),
+                joinedload(ContentReportDB.reporter),
+            )
+            .where(where_clause)
+            .order_by(ContentReportDB.created_at.desc())
+            .limit(limit)
+            .offset(offset)
+        )
+        result = await self.db.execute(stmt)
+        reports = result.unique().scalars().all()
+
+        return reports, total
+
+    async def update_report_status(
+        self,
+        report_id: str,
+        status: str,
+        reviewed_by: str | None = None,
+    ) -> ContentReportDB | None:
+        """Update report status.
+
+        Args:
+            report_id: Report ID
+            status: New status (pending, reviewed, dismissed, action_taken)
+            reviewed_by: User ID who reviewed the report (for reviewed/action_taken statuses)
+
+        Returns:
+            Updated report if found, None otherwise
+        """
+        stmt = (
+            select(ContentReportDB)
+            .options(
+                joinedload(ContentReportDB.container),
+                joinedload(ContentReportDB.reporter),
+            )
+            .where(ContentReportDB.id == report_id)
+        )
+        result = await self.db.execute(stmt)
+        report = result.unique().scalar_one_or_none()
+
+        if not report:
+            return None
+
+        report.status = status
+        if reviewed_by:
+            report.reviewed_by = reviewed_by
+        if status in ("reviewed", "dismissed", "action_taken"):
+            report.reviewed_at = datetime.now(UTC)
+
+        await self.db.commit()
+        await self.db.refresh(report)
+        return report
+
+    async def set_container_hidden_by_reports(self, container_id: str, is_hidden: bool) -> GearContainerDB | None:
+        """Set is_hidden_by_reports flag for a container.
+
+        Args:
+            container_id: Container ID
+            is_hidden: Whether container should be hidden
+
+        Returns:
+            Updated container if found, None otherwise
+        """
+        stmt = select(GearContainerDB).where(GearContainerDB.id == container_id)
+        result = await self.db.execute(stmt)
+        container = result.scalar_one_or_none()
+
+        if not container:
+            return None
+
+        container.is_hidden_by_reports = is_hidden
+        container.updated_at = datetime.now(UTC)
+
+        await self.db.commit()
+        await self.db.refresh(container)
+        return container
+
+    async def get_report_by_container_and_user(
+        self,
+        container_id: str,
+        user_id: str,
+    ) -> ContentReportDB | None:
+        """Get report by container ID and user ID.
+
+        Args:
+            container_id: Container ID
+            user_id: Reporter user ID
+
+        Returns:
+            Report if found, None otherwise
+        """
+        stmt = select(ContentReportDB).where(
+            and_(
+                ContentReportDB.container_id == container_id,
+                ContentReportDB.reporter_user_id == user_id,
+            )
+        )
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def delete_report(self, report_id: str) -> bool:
+        """Delete a report.
+
+        Args:
+            report_id: Report ID
+
+        Returns:
+            True if deleted, False if not found
+        """
+        stmt = select(ContentReportDB).where(ContentReportDB.id == report_id)
+        result = await self.db.execute(stmt)
+        report = result.scalar_one_or_none()
+
+        if not report:
+            return False
+
+        await self.db.delete(report)
         await self.db.commit()
         return True

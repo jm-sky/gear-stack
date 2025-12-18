@@ -148,6 +148,7 @@ export interface IGearContainer {
   parentContainerId?: TUUID | null // Parent container ID (if this container is nested)
   hideWhenNested?: boolean | null // Hide from main list when nested in another container
   isPublic: boolean // Whether container is publicly visible
+  isHiddenByReports?: boolean | null // Whether container is hidden from public views due to reports
   favorite: boolean // Whether container is marked as favorite
   authorName?: string | null // Author name (only for public containers)
   authorId?: TUUID | null // Author user ID (only for public containers)

@@ -109,6 +109,32 @@ class AdminRepository:
         result = await self.db.execute(stmt)
         return result.unique().scalar_one_or_none()
 
+    async def update_container(self, container_id: str, data: dict) -> GearContainerDB | None:
+        """Update container by ID (admin only).
+
+        Args:
+            container_id: Container ID
+            data: Update data dictionary
+
+        Returns:
+            Updated container if found, None otherwise
+        """
+        stmt = select(GearContainerDB).where(GearContainerDB.id == container_id).options(selectinload(GearContainerDB.items), joinedload(GearContainerDB.user))  # type: ignore[attr-defined]
+        result = await self.db.execute(stmt)
+        container_db = result.unique().scalar_one_or_none()
+
+        if not container_db:
+            return None
+
+        # Update fields
+        for key, value in data.items():
+            if hasattr(container_db, key):
+                setattr(container_db, key, value)
+
+        await self.db.commit()
+        await self.db.refresh(container_db)
+        return container_db
+
     async def delete_container(self, container_id: str) -> bool:
         """Delete container by ID.
 

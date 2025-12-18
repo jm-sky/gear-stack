@@ -26,6 +26,10 @@ from .schemas import (
     ContainerInfo,
     ContainerResponse,
     ContainerUpdate,
+    ContentReportCreate,
+    ContentReportListResponse,
+    ContentReportResponse,
+    ContentReportUpdate,
     GlobalCatalogueItemCreate,
     GlobalCatalogueItemResponse,
     GlobalCatalogueItemSearchParams,
@@ -34,6 +38,8 @@ from .schemas import (
     ItemPromotionStatus,
     ItemResponse,
     ItemUpdate,
+    ReportReason,
+    ReportStatus,
 )
 from .db_models import GearContainerDB, GearItemDB, GlobalCatalogueItemDB, ItemPromotionDB
 
@@ -1758,3 +1764,227 @@ class GearService:
             self.repository.db.add(catalogue_image)
 
         await self.repository.db.commit()
+
+    # Content report operations
+    async def report_container(
+        self,
+        container_id: str,
+        reporter_user_id: str,
+        reason: ReportReason,
+        additional_info: str | None = None,
+    ) -> ContentReportResponse:
+        """Report a public container for inappropriate content.
+
+        Args:
+            container_id: Container ID being reported
+            reporter_user_id: User ID reporting the container
+            reason: Reason for report
+            additional_info: Optional additional information
+
+        Returns:
+            Created report
+
+        Raises:
+            ValueError: If container doesn't exist or is not public
+            IntegrityError: If report already exists (user already reported this container)
+        """
+        # Verify container exists and is public
+        # Use get_public_container_for_reporting to allow reporting even if container is already hidden
+        container = await self.repository.get_public_container_for_reporting(container_id)
+        if not container:
+            raise ValueError(f"Container {container_id} not found or is not public")
+
+        # Create report
+        report = await self.repository.create_container_report(
+            container_id=container_id,
+            reporter_user_id=reporter_user_id,
+            reason=reason,
+            additional_info=additional_info,
+        )
+
+        # Check if we need to auto-hide (≥3 active reports)
+        active_count = await self.repository.count_active_reports_for_container(container_id)
+        if active_count >= 3:
+            await self.repository.set_container_hidden_by_reports(container_id, is_hidden=True)
+            logger.info(f"Container {container_id} auto-hidden due to {active_count} active reports")
+
+        # Map report with container and reporter names
+        report_dict = {
+            "id": report.id,
+            "container_id": report.container_id,
+            "containerName": report.container.name if report.container else None,
+            "reporter_user_id": report.reporter_user_id,
+            "reporterName": report.reporter.name if report.reporter else None,
+            "reason": report.reason,
+            "additional_info": report.additional_info,
+            "status": report.status,
+            "created_at": report.created_at,
+            "reviewed_at": report.reviewed_at,
+            "reviewed_by": report.reviewed_by,
+        }
+
+        return ContentReportResponse.model_validate(report_dict)
+
+    async def get_reports(
+        self,
+        status: ReportStatus | None = None,
+        container_id: str | None = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> ContentReportListResponse:
+        """Get content reports with optional filters.
+
+        Args:
+            status: Filter by status
+            container_id: Filter by container ID
+            limit: Maximum number of results
+            offset: Offset for pagination
+
+        Returns:
+            List of reports with pagination info
+        """
+        reports, total = await self.repository.get_all_reports(
+            status=status,
+            container_id=container_id,
+            limit=limit,
+            offset=offset,
+        )
+
+        # Map reports with container and reporter names
+        report_responses = []
+        for report in reports:
+            report_dict = {
+                "id": report.id,
+                "container_id": report.container_id,
+                "containerName": report.container.name if report.container else None,
+                "reporter_user_id": report.reporter_user_id,
+                "reporterName": report.reporter.name if report.reporter else None,
+                "reason": report.reason,
+                "additional_info": report.additional_info,
+                "status": report.status,
+                "created_at": report.created_at,
+                "reviewed_at": report.reviewed_at,
+                "reviewed_by": report.reviewed_by,
+            }
+            report_responses.append(ContentReportResponse.model_validate(report_dict))
+
+        return ContentReportListResponse(
+            reports=report_responses,
+            total=total,
+            limit=limit,
+            offset=offset,
+        )
+
+    async def update_report_status(
+        self,
+        report_id: str,
+        status: ReportStatus,
+        reviewer_id: str,
+    ) -> ContentReportResponse | None:
+        """Update report status (admin only).
+
+        Args:
+            report_id: Report ID
+            status: New status
+            reviewer_id: Admin user ID reviewing the report
+
+        Returns:
+            Updated report if found, None otherwise
+        """
+        report = await self.repository.update_report_status(
+            report_id=report_id,
+            status=status,
+            reviewed_by=reviewer_id,
+        )
+
+        if not report:
+            return None
+
+        # Map report with container and reporter names
+        report_dict = {
+            "id": report.id,
+            "container_id": report.container_id,
+            "containerName": report.container.name if report.container else None,
+            "reporter_user_id": report.reporter_user_id,
+            "reporterName": report.reporter.name if report.reporter else None,
+            "reason": report.reason,
+            "additional_info": report.additional_info,
+            "status": report.status,
+            "created_at": report.created_at,
+            "reviewed_at": report.reviewed_at,
+            "reviewed_by": report.reviewed_by,
+        }
+
+        # If status is dismissed, check if we should auto-unhide
+        # (all reports for container are dismissed or reviewed, no pending/action_taken)
+        if status == "dismissed":
+            container_reports = await self.repository.get_reports_for_container(report.container_id)
+            # Check if all reports are dismissed or reviewed (no pending or action_taken)
+            all_resolved = all(r.status in ("dismissed", "reviewed") for r in container_reports)
+            if all_resolved:
+                await self.repository.set_container_hidden_by_reports(report.container_id, is_hidden=False)
+                logger.info(f"Container {report.container_id} auto-unhidden - all reports resolved")
+
+        return ContentReportResponse.model_validate(report_dict)
+
+    async def get_user_report_status(
+        self,
+        container_id: str,
+        user_id: str,
+    ) -> bool:
+        """Check if user has reported a container.
+
+        Args:
+            container_id: Container ID
+            user_id: User ID
+
+        Returns:
+            True if user has reported the container, False otherwise
+        """
+        report = await self.repository.get_report_by_container_and_user(
+            container_id=container_id,
+            user_id=user_id,
+        )
+        return report is not None
+
+    async def withdraw_report(
+        self,
+        container_id: str,
+        user_id: str,
+    ) -> bool:
+        """Withdraw (delete) a user's report for a container.
+
+        Args:
+            container_id: Container ID
+            user_id: User ID (reporter)
+
+        Returns:
+            True if report was deleted, False if not found
+
+        Note:
+            After withdrawal, checks if container should be auto-unhidden
+            (if active reports count falls below 3)
+        """
+        # Find the user's report
+        report = await self.repository.get_report_by_container_and_user(
+            container_id=container_id,
+            user_id=user_id,
+        )
+
+        if not report:
+            return False
+
+        # Delete the report
+        deleted = await self.repository.delete_report(report.id)
+
+        if deleted:
+            # Check if we should auto-unhide (< 3 active reports)
+            active_count = await self.repository.count_active_reports_for_container(container_id)
+            if active_count < 3:
+                # Get container to check if it's currently hidden
+                container = await self.repository.get_public_container_for_reporting(container_id)
+                if container and container.is_hidden_by_reports:
+                    await self.repository.set_container_hidden_by_reports(container_id, is_hidden=False)
+                    logger.info(f"Container {container_id} auto-unhidden - only {active_count} active reports")
+
+        return deleted

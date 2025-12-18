@@ -326,6 +326,55 @@ class AdminService:
             updatedAt=container_db.updated_at.isoformat(),
         )
 
+    async def update_container(self, container_id: str, data: dict) -> AdminContainerResponse | None:
+        """Update container by ID (admin only).
+
+        Args:
+            container_id: Container ID
+            data: Update data dictionary
+
+        Returns:
+            Updated admin container response or None if not found
+        """
+        # Map camelCase to snake_case
+        field_mapping = {
+            "parentContainerId": "parent_container_id",
+            "hideWhenNested": "hide_when_nested",
+            "weightUnit": "weight_unit",
+            "maxWeight": "max_weight",
+            "maxWeightUnit": "max_weight_unit",
+            "isPublic": "is_public",
+            "favorite": "favorite",
+            "showItemImages": "show_item_images",
+        }
+
+        update_data = {}
+        for key, value in data.items():
+            db_key = field_mapping.get(key, key)
+            update_data[db_key] = value
+
+        container_db = await self.repository.update_container(container_id, update_data)
+        if not container_db:
+            return None
+
+        author_name = container_db.user.name if hasattr(container_db, "user") and container_db.user else None
+        author_id = container_db.user.id if hasattr(container_db, "user") and container_db.user else None
+        items_count = len(container_db.items) if hasattr(container_db, "items") else 0
+
+        return AdminContainerResponse(
+            id=container_db.id,
+            name=container_db.name,
+            description=container_db.description,
+            type=container_db.type,
+            color=container_db.color,
+            isPublic=container_db.is_public,
+            authorId=author_id,
+            authorName=author_name,
+            itemCount=items_count,
+            createdAt=container_db.created_at.isoformat(),
+            updatedAt=container_db.updated_at.isoformat(),
+        )
+
     async def delete_container(self, container_id: str) -> bool:
         """Delete container and all its items.
 

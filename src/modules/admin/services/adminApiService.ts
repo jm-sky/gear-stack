@@ -1,5 +1,6 @@
 import { apiClient } from '@/shared/services/apiClient'
 import type { IAdminContainer, IAdminItem, IAdminUser } from '../types/admin.types'
+import type { IContentReport, IContentReportListResponse, IUpdateReportRequest, ReportStatus } from '@/modules/gear/types/reports.types'
 import type { TUUID } from '@/shared/types/base.type'
 
 /**
@@ -42,6 +43,11 @@ class AdminApiService {
     return response.data
   }
 
+  async updateContainer(id: TUUID, data: { isPublic?: boolean }): Promise<IAdminContainer> {
+    const response = await apiClient.patch<IAdminContainer>(`/admin/containers/${id}`, data)
+    return response.data
+  }
+
   async deleteContainer(id: TUUID): Promise<void> {
     await apiClient.delete(`/admin/containers/${id}`)
   }
@@ -61,6 +67,24 @@ class AdminApiService {
 
   async deleteItem(id: TUUID): Promise<void> {
     await apiClient.delete(`/admin/items/${id}`)
+  }
+
+  // Content reports management
+  async getReports(params: {
+    status?: ReportStatus
+    containerId?: TUUID
+    limit?: number
+    offset?: number
+  }): Promise<IContentReportListResponse> {
+    const response = await apiClient.get<IContentReportListResponse>('/admin/reports', {
+      params,
+    })
+    return response.data
+  }
+
+  async updateReportStatus(reportId: TUUID, data: IUpdateReportRequest): Promise<IContentReport> {
+    const response = await apiClient.patch<IContentReport>(`/admin/reports/${reportId}`, data)
+    return response.data
   }
 }
 

@@ -7,6 +7,7 @@ import type {
   TRatingType,
   TRatingValue,
 } from '@/modules/gear/types/gear.types'
+import type { IContentReport, ICreateReportRequest } from '@/modules/gear/types/reports.types'
 import type { TUUID } from '@/shared/types/base.type'
 
 /**
@@ -182,6 +183,46 @@ class GearContainerApiService {
       }
     )
     return response.data
+  }
+
+  /**
+   * Report a public container for inappropriate content.
+   *
+   * @param containerId - Container ID to report
+   * @param reportData - Report data (reason and optional additional info)
+   * @returns Created report
+   */
+  async reportPublicContainer(
+    containerId: string,
+    reportData: ICreateReportRequest
+  ): Promise<IContentReport> {
+    const response = await apiClient.post<IContentReport>(
+      `/gear/containers/${containerId}/report`,
+      reportData
+    )
+    return response.data
+  }
+
+  /**
+   * Get user's report status for a container
+   *
+   * @param containerId - Container ID
+   * @returns Object with hasReported boolean
+   */
+  async getReportStatus(containerId: string): Promise<{ hasReported: boolean }> {
+    const response = await apiClient.get<{ hasReported: boolean }>(
+      `/gear/containers/${containerId}/report/status`
+    )
+    return response.data
+  }
+
+  /**
+   * Withdraw (delete) user's report for a container
+   *
+   * @param containerId - Container ID
+   */
+  async withdrawReport(containerId: string): Promise<void> {
+    await apiClient.delete(`/gear/containers/${containerId}/report`)
   }
 }
 

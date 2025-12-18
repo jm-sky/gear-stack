@@ -66,7 +66,7 @@ export const settingsPl = {
         title: 'Klucze dostępu',
         enabled: 'Włączone',
         disabled: 'Nie skonfigurowane',
-        count: 'Nie zarejestrowano kluczy dostępu | Zarejestrowano {count} klucz dostępu | Zarejestrowano {count} klucze dostępu',
+        count: '{count} kluczy dostępu | {count} klucz dostępu | {count} klucze dostępu | {count} kluczy dostępu',
       },
       preferred_method: {
         title: 'Preferowana metoda 2FA',

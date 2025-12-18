@@ -426,3 +426,12 @@ Po implementacji zaktualizować:
 - `docs/ROADMAP_ONLINE.md` - zmienić status na "In Progress" / "Completed"
 - Dokumentacja API (jeśli istnieje) - dodać endpointy raportowania
 
+---
+
+## Dodatkowo:
+- Chcę aby niektórzy użytkownicy mogli wycofać się ze zgłoszenia kontenera, anulować swoje zgłoszenie.  
+  Kto? Ustalmy. 
+  - Na pewno user z rangą admin i owner (isAdmin, isOwner).
+  - Ktoś jeszcze?
+
+- Rozważmy, czy nie chcemy pokazać użytkownikom, że kontener był zgłoszony, np. zmieniając kolor flagi na czerwoną.
