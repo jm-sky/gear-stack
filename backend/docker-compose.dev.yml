@@ -11,7 +11,7 @@ services:
     volumes:
       - gear_stack_postgres_data:/var/lib/postgresql/data
     ports:
-      - "${DB_FORWARD_PORT:-5432}:5432"  # Exposed for development
+      - "127.0.0.1:${DB_FORWARD_PORT:-5432}:5432"  # Only localhost access
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-backend}"]
       interval: 10s
@@ -31,12 +31,17 @@ services:
     container_name: gear-stack-redis
     restart: unless-stopped
     ports:
-      - "${REDIS_FORWARD_PORT:-6379}:6379"
+      - "127.0.0.1:${REDIS_FORWARD_PORT:-6379}:6379"  # Only localhost access
     volumes:
       - gear_stack_redis_data:/data
-    command: redis-server --appendonly yes
+    command: >
+      redis-server
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD:-changeme}
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -68,7 +73,7 @@ services:
       - PROJECT_NAME=${PROJECT_NAME:-backend}
       - APP_PORT=${APP_PORT:-8000}
       - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-backend}:${POSTGRES_PASSWORD:-changeme}@db:5432/${POSTGRES_DB:-backend}
-      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-changeme}@redis:6379/0
       - SECRET_KEY=${SECRET_KEY}
       - LOG_LEVEL=${LOG_LEVEL:-DEBUG}
       - CORS_ORIGINS=${CORS_ORIGINS:-["http://localhost:3000"]}
@@ -93,7 +98,7 @@ services:
       - STORAGE_S3_ENDPOINT_URL=${STORAGE_S3_ENDPOINT_URL:-http://minio:9000}
       - STORAGE_S3_PUBLIC_ENDPOINT_URL=${STORAGE_S3_PUBLIC_ENDPOINT_URL}
     ports:
-      - "${APP_PORT:-8000}:8000"
+      - "127.0.0.1:${APP_PORT:-8000}:8000"  # Only localhost access (Caddy proxy)
     volumes:
       # Mount source code for hot reload
       # Paths are relative to docker-compose.dev.yml location (backend/ directory)
