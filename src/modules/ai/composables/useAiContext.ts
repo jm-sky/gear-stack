@@ -39,7 +39,7 @@ export function useAiContext() {
   })
 
   const contextFields = computed<string[]>(() => {
-    const settingsFields = aiStore.settings?.context_fields
+    const settingsFields = aiStore.settings?.contextFields
     // Convert Record<string, any> to string[] by taking the keys
     if (settingsFields && typeof settingsFields === 'object' && !Array.isArray(settingsFields)) {
       return Object.keys(settingsFields)

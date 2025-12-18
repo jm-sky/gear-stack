@@ -762,6 +762,10 @@ export const gearEn = {
           remove: 'Remove Token',
           configured: 'Token configured',
           encrypted: 'Token is encrypted and stored securely',
+          confirmRemove: {
+            title: 'Remove API Token',
+            description: 'Are you sure you want to remove your API token? You will need to configure it again to use AI features with your own token.',
+          },
         },
         usage: {
           label: 'Usage & Limits',
@@ -769,6 +773,8 @@ export const gearEn = {
           tokens: 'Tokens',
           cost: 'Cost',
           unlimited: 'Unlimited',
+          noLimit: 'No limit',
+          unavailable: 'Unavailable',
           ownTokenNote: 'You are using your own API token. Usage is unlimited.',
           systemTokenNote: 'You are using the system token. Limits apply.',
         },
@@ -1643,6 +1649,10 @@ export const gearPl = {
           remove: 'Usuń Token',
           configured: 'Token skonfigurowany',
           encrypted: 'Token jest szyfrowany i przechowywany bezpiecznie',
+          confirmRemove: {
+            title: 'Usuń Token API',
+            description: 'Czy na pewno chcesz usunąć swój token API? Będziesz musiał skonfigurować go ponownie, aby korzystać z funkcji AI z własnym tokenem.',
+          },
         },
         usage: {
           label: 'Użycie i Limity',
@@ -1650,6 +1660,8 @@ export const gearPl = {
           tokens: 'Tokeny',
           cost: 'Koszt',
           unlimited: 'Bez limitu',
+          noLimit: 'Brak limitu',
+          unavailable: 'Niedostępne',
           ownTokenNote: 'Używasz własnego tokena API. Użycie jest nieograniczone.',
           systemTokenNote: 'Używasz tokena systemowego. Obowiązują limity.',
         },

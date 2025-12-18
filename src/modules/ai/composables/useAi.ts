@@ -27,7 +27,7 @@ export const useAi = () => {
     const hasOwnTokenFromFeatures = userFeatures?.ai?.limit === null
 
     // Store settings may not be loaded yet during app initialization
-    const hasOwnTokenFromStore = aiStore.settings?.has_token ?? false
+    const hasOwnTokenFromStore = aiStore.settings?.hasToken ?? false
 
     return hasOwnTokenFromFeatures || hasOwnTokenFromStore
   })

@@ -34,6 +34,12 @@ class AIUserSettingsDB(Base):
     # Context Configuration
     context_fields: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict, nullable=False)
 
+    # Monthly Usage Tracking
+    monthly_token_limit: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    monthly_tokens_used: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    monthly_cost_limit: Mapped[float | None] = mapped_column(Float, nullable=True)
+    monthly_cost_used: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+
     # Metadata
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC), nullable=False)

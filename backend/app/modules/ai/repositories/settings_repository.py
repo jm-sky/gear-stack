@@ -58,9 +58,14 @@ class SettingsRepository:
         Returns:
             Updated settings
         """
+        # Fields that can be explicitly set to None
+        nullable_fields = {"encrypted_api_token"}
+
         for key, value in kwargs.items():
-            if hasattr(settings, key) and value is not None:
-                setattr(settings, key, value)
+            if hasattr(settings, key):
+                # Allow None for nullable fields, otherwise skip None values
+                if value is not None or key in nullable_fields:
+                    setattr(settings, key, value)
 
         await self.db.commit()
         await self.db.refresh(settings)

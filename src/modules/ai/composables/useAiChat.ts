@@ -46,7 +46,7 @@ export function useAiChat() {
         message,
         history,
         context,
-        model: aiStore.settings?.selected_model,
+        model: aiStore.settings?.selectedModel,
       }
 
       const response = await aiApiService.chat(request)
@@ -125,7 +125,7 @@ export function useAiChat() {
       // Extract user message from finalPrompt or inputData.message
       const userMessageContent = historyItem.finalPrompt
         || (detail?.inputData && typeof detail.inputData.message === 'string' ? detail.inputData.message : '')
-      
+
       if (userMessageContent) {
         restoredMessages.push({
           id: `user-restored-${historyItem.id}`,

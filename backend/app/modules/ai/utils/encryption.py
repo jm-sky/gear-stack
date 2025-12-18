@@ -21,11 +21,11 @@ def get_cipher() -> Fernet:
     if not key:
         raise EncryptionError("AI_TOKEN_ENCRYPTION_KEY not configured in settings")
 
-    # Handle both string and bytes
-    key_bytes = key.encode() if isinstance(key, str) else key
-
+    # Fernet accepts both string (base64) and bytes automatically
+    # - String from .env: base64-encoded key (e.g., "mAAv4ghCKiD80hSWadVIUdEUzVn6FF7MeJgSQF1Pnzs=")
+    # - Bytes: raw bytes from programmatic usage
     try:
-        return Fernet(key_bytes)
+        return Fernet(key)
     except Exception as e:
         raise EncryptionError(f"Invalid encryption key: {e}") from e
 

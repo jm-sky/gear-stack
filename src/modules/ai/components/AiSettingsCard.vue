@@ -14,12 +14,14 @@ import { useAiStore } from '@/modules/ai/store/useAiStore'
 import { useUser } from '@/modules/user/composables/useUser'
 import { useUserStore } from '@/modules/user/store/useUserStore'
 import { usePermissions } from '@/shared/composables/usePermissions'
+import { useAi } from '../composables/useAi'
 
 const { t } = useI18n()
 const { isAuthenticated } = usePermissions()
 
 const aiStore = useAiStore()
 const userStore = useUserStore()
+const { canUseAi } = useAi()
 const { models, loadModels } = useAiModels()
 const { loadProfile } = useUser()
 
@@ -59,7 +61,7 @@ onMounted(async () => {
     <CardContent class="space-y-6">
       <div :class="{ 'opacity-50 pointer-events-none': !isAuthenticated }">
         <!-- AI Model Selector -->
-        <AiModelSelector :is-authenticated />
+        <AiModelSelector :is-authenticated :class="{ 'opacity-50 pointer-events-none': !canUseAi }" />
 
         <Separator class="my-4" />
 
