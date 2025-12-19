@@ -302,15 +302,15 @@ class BillingService:
 
         plan_limits = limits.get(plan_tier, limits["free"])
 
-        # Type cast plan_tier to Literal and dict values to proper types
+        # Type cast plan_tier to Literal and dict bool values to proper types
         from typing import cast, Literal
 
         plan_tier_typed = cast(Literal["free", "pro", "business"], plan_tier)
 
         return SubscriptionLimitsResponse(
             planTier=plan_tier_typed,
-            aiMonthlyTokenLimit=cast(int, plan_limits["aiMonthlyTokenLimit"]),
-            storageLimit=cast(int, plan_limits["storageLimit"]),
+            aiMonthlyTokenLimit=plan_limits["aiMonthlyTokenLimit"],
+            storageLimit=plan_limits["storageLimit"],
             canExportData=cast(bool, plan_limits["canExportData"]),
             canUseAdvancedFeatures=cast(bool, plan_limits["canUseAdvancedFeatures"]),
             requiresByok=cast(bool, plan_limits["requiresByok"]),

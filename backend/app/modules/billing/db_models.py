@@ -120,7 +120,7 @@ class SubscriptionHistoryDB(Base):
     new_status: Mapped[str] = mapped_column(String(20), nullable=False)
     old_plan_tier: Mapped[str | None] = mapped_column(String(20), nullable=True)
     new_plan_tier: Mapped[str] = mapped_column(String(20), nullable=False)
-    metadata: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    event_metadata: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
 
     # Timestamp
     created_at: Mapped[datetime] = mapped_column(

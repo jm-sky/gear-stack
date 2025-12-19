@@ -63,9 +63,7 @@ class TestGetSubscription:
     """Tests for getting subscription details."""
 
     @pytest.mark.asyncio
-    async def test_get_subscription_success(
-        self, billing_service: BillingService, mock_repository: AsyncMock, sample_subscription: SubscriptionDB
-    ) -> None:
+    async def test_get_subscription_success(self, billing_service: BillingService, mock_repository: AsyncMock, sample_subscription: SubscriptionDB) -> None:
         """Test successful subscription retrieval."""
         mock_repository.get_subscription_by_user_id.return_value = sample_subscription
 
@@ -89,9 +87,7 @@ class TestCreateCheckoutSession:
     """Tests for creating checkout sessions."""
 
     @pytest.mark.asyncio
-    async def test_create_checkout_session_success(
-        self, billing_service: BillingService, mock_repository: AsyncMock, mock_stripe_client: AsyncMock
-    ) -> None:
+    async def test_create_checkout_session_success(self, billing_service: BillingService, mock_repository: AsyncMock, mock_stripe_client: AsyncMock) -> None:
         """Test successful checkout session creation."""
         mock_repository.get_subscription_by_user_id.return_value = None
 
@@ -126,9 +122,7 @@ class TestCreateCheckoutSession:
             assert response.sessionUrl == "https://checkout.stripe.com/test"
 
     @pytest.mark.asyncio
-    async def test_create_checkout_session_invalid_plan(
-        self, billing_service: BillingService, mock_repository: AsyncMock
-    ) -> None:
+    async def test_create_checkout_session_invalid_plan(self, billing_service: BillingService, mock_repository: AsyncMock) -> None:
         """Test checkout session with invalid plan tier."""
         with pytest.raises(InvalidPlanTierError):
             await billing_service.create_checkout_session(
@@ -140,9 +134,7 @@ class TestCreateCheckoutSession:
             )
 
     @pytest.mark.asyncio
-    async def test_create_checkout_session_invalid_interval(
-        self, billing_service: BillingService, mock_repository: AsyncMock
-    ) -> None:
+    async def test_create_checkout_session_invalid_interval(self, billing_service: BillingService, mock_repository: AsyncMock) -> None:
         """Test checkout session with invalid billing interval."""
         with pytest.raises(InvalidBillingIntervalError):
             await billing_service.create_checkout_session(
@@ -154,9 +146,7 @@ class TestCreateCheckoutSession:
             )
 
     @pytest.mark.asyncio
-    async def test_create_checkout_session_already_subscribed(
-        self, billing_service: BillingService, mock_repository: AsyncMock, sample_subscription: SubscriptionDB
-    ) -> None:
+    async def test_create_checkout_session_already_subscribed(self, billing_service: BillingService, mock_repository: AsyncMock, sample_subscription: SubscriptionDB) -> None:
         """Test checkout session when user already has active subscription."""
         mock_repository.get_subscription_by_user_id.return_value = sample_subscription
 
@@ -201,9 +191,7 @@ class TestCancelSubscription:
         mock_stripe_client.cancel_subscription.assert_called_once_with("sub_test123")
 
     @pytest.mark.asyncio
-    async def test_cancel_subscription_grandfathered(
-        self, billing_service: BillingService, mock_repository: AsyncMock, sample_subscription: SubscriptionDB
-    ) -> None:
+    async def test_cancel_subscription_grandfathered(self, billing_service: BillingService, mock_repository: AsyncMock, sample_subscription: SubscriptionDB) -> None:
         """Test cancellation of grandfathered subscription (should fail)."""
         sample_subscription.is_grandfathered = True
         mock_repository.get_subscription_by_user_id.return_value = sample_subscription
@@ -216,9 +204,7 @@ class TestGetSubscriptionLimits:
     """Tests for getting subscription limits."""
 
     @pytest.mark.asyncio
-    async def test_get_limits_free_tier(
-        self, billing_service: BillingService, mock_repository: AsyncMock, sample_subscription: SubscriptionDB
-    ) -> None:
+    async def test_get_limits_free_tier(self, billing_service: BillingService, mock_repository: AsyncMock, sample_subscription: SubscriptionDB) -> None:
         """Test limits for free tier."""
         sample_subscription.plan_tier = "free"
         mock_repository.get_subscription_by_user_id.return_value = sample_subscription
@@ -231,9 +217,7 @@ class TestGetSubscriptionLimits:
         assert response.canUseAdvancedFeatures is False
 
     @pytest.mark.asyncio
-    async def test_get_limits_pro_tier(
-        self, billing_service: BillingService, mock_repository: AsyncMock, sample_subscription: SubscriptionDB
-    ) -> None:
+    async def test_get_limits_pro_tier(self, billing_service: BillingService, mock_repository: AsyncMock, sample_subscription: SubscriptionDB) -> None:
         """Test limits for pro tier."""
         sample_subscription.plan_tier = "pro"
         mock_repository.get_subscription_by_user_id.return_value = sample_subscription
@@ -246,9 +230,7 @@ class TestGetSubscriptionLimits:
         assert response.canUseAdvancedFeatures is True
 
     @pytest.mark.asyncio
-    async def test_get_limits_business_tier(
-        self, billing_service: BillingService, mock_repository: AsyncMock, sample_subscription: SubscriptionDB
-    ) -> None:
+    async def test_get_limits_business_tier(self, billing_service: BillingService, mock_repository: AsyncMock, sample_subscription: SubscriptionDB) -> None:
         """Test limits for business tier."""
         sample_subscription.plan_tier = "business"
         mock_repository.get_subscription_by_user_id.return_value = sample_subscription

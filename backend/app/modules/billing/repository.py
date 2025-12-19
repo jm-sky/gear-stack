@@ -174,7 +174,7 @@ class BillingRepository:
         new_status: str,
         old_plan_tier: str | None,
         new_plan_tier: str,
-        metadata: dict | None = None,
+        event_metadata: dict | None = None,
     ) -> SubscriptionHistoryDB:
         """Create subscription history entry.
 
@@ -186,7 +186,7 @@ class BillingRepository:
             new_status: New status
             old_plan_tier: Previous plan tier
             new_plan_tier: New plan tier
-            metadata: Additional metadata
+            event_metadata: Additional metadata
 
         Returns:
             Created history entry
@@ -199,7 +199,7 @@ class BillingRepository:
             new_status=new_status,
             old_plan_tier=old_plan_tier,
             new_plan_tier=new_plan_tier,
-            metadata=metadata,
+            event_metadata=event_metadata,
         )
         self.db.add(history)
         await self.db.commit()
@@ -292,7 +292,7 @@ class BillingRepository:
             new_status=new_value,
             old_plan_tier=None,
             new_plan_tier=None,
-            metadata={"reason": reason} if reason else None,
+            event_metadata={"reason": reason} if reason else None,
         )
         self.db.add(history)
         await self.db.commit()
