@@ -21,6 +21,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.44.0] - 2025-12-19
+
+### Added
+- **Billing & Subscription UI Navigation**: Added billing link to user navigation menu
+  - Billing link with CreditCard icon in UserNav dropdown menu
+  - Link appears between Settings and Gear settings in user menu
+  - Uses i18n translations for both English and Polish
+
+### Changed
+- **Billing Pages Layout**: Refactored billing pages to use AuthenticatedLayout
+  - BillingPage and BillingSuccessPage now nested in AuthenticatedLayout component
+  - Consistent page structure using CommonPageHeader with CreditCard icon
+  - Follows same pattern as other authenticated pages (e.g., ContainersListPage)
+  - All text content now uses i18n translations
+
+### Fixed
+- Fixed billing link visibility in UserNav menu (links are passed via props from AppHeader)
+
+---
+
 ## [2.43.0] - 2025-12-18
 
 ### Added
