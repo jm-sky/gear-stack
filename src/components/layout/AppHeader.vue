@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BackpackIcon, GlobeIcon, PackageIcon, SettingsIcon, ShieldIcon, ShoppingCartIcon, UserIcon } from 'lucide-vue-next'
+import { BackpackIcon, CreditCard, GlobeIcon, PackageIcon, SettingsIcon, ShieldIcon, ShoppingCartIcon, UserIcon } from 'lucide-vue-next'
 import { type Component, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -10,6 +10,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar'
 import { AdminRoutePaths } from '@/modules/admin/routes'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { AuthRouteNames, AuthRoutePaths } from '@/modules/auth/config/routes'
+import { BillingRoutePaths } from '@/modules/billing/routes'
 import { GearRoutePath } from '@/modules/gear/routes'
 import { SettingsRoutePaths } from '@/modules/settings/routes'
 import { useUser } from '@/modules/user/composables/useUser'
@@ -35,7 +36,7 @@ interface Link {
 }
 
 const coreLinks = computed<Link[]>(() => [
-{
+  {
     to: UserRoutePaths.profile,
     label: t('user.profile.title', 'Profile'),
     icon: UserIcon,
@@ -44,6 +45,11 @@ const coreLinks = computed<Link[]>(() => [
     to: SettingsRoutePaths.settings,
     label: t('settings.page.title', 'Settings'),
     icon: SettingsIcon,
+  },
+  {
+    to: BillingRoutePaths.billing,
+    label: t('billing.title', 'Billing & Subscription'),
+    icon: CreditCard,
   },
   {
     to: GearRoutePath.Settings,
