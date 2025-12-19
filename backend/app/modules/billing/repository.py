@@ -2,7 +2,7 @@
 
 from datetime import UTC, datetime
 from typing import Any
-from uuid import UUID
+from uuid import UUID as PyUUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -27,9 +27,7 @@ class BillingRepository:
 
     # ==================== Subscription Operations ====================
 
-    async def get_subscription_by_user_id(
-        self, user_id: str
-    ) -> SubscriptionDB | None:
+    async def get_subscription_by_user_id(self, user_id: str) -> SubscriptionDB | None:
         """Get subscription by user ID.
 
         Args:
@@ -38,14 +36,10 @@ class BillingRepository:
         Returns:
             Subscription or None if not found
         """
-        result = await self.db.execute(
-            select(SubscriptionDB).where(SubscriptionDB.user_id == user_id)
-        )
+        result = await self.db.execute(select(SubscriptionDB).where(SubscriptionDB.user_id == user_id))
         return result.scalar_one_or_none()
 
-    async def get_subscription_by_stripe_id(
-        self, stripe_subscription_id: str
-    ) -> SubscriptionDB | None:
+    async def get_subscription_by_stripe_id(self, stripe_subscription_id: str) -> SubscriptionDB | None:
         """Get subscription by Stripe subscription ID.
 
         Args:
@@ -54,16 +48,10 @@ class BillingRepository:
         Returns:
             Subscription or None if not found
         """
-        result = await self.db.execute(
-            select(SubscriptionDB).where(
-                SubscriptionDB.stripe_subscription_id == stripe_subscription_id
-            )
-        )
+        result = await self.db.execute(select(SubscriptionDB).where(SubscriptionDB.stripe_subscription_id == stripe_subscription_id))
         return result.scalar_one_or_none()
 
-    async def get_subscription_by_customer_id(
-        self, stripe_customer_id: str
-    ) -> SubscriptionDB | None:
+    async def get_subscription_by_customer_id(self, stripe_customer_id: str) -> SubscriptionDB | None:
         """Get subscription by Stripe customer ID.
 
         Args:
@@ -72,11 +60,7 @@ class BillingRepository:
         Returns:
             Subscription or None if not found
         """
-        result = await self.db.execute(
-            select(SubscriptionDB).where(
-                SubscriptionDB.stripe_customer_id == stripe_customer_id
-            )
-        )
+        result = await self.db.execute(select(SubscriptionDB).where(SubscriptionDB.stripe_customer_id == stripe_customer_id))
         return result.scalar_one_or_none()
 
     async def create_subscription(self, **kwargs: Any) -> SubscriptionDB:
@@ -94,20 +78,21 @@ class BillingRepository:
         await self.db.refresh(subscription)
         return subscription
 
-    async def update_subscription(
-        self, subscription: SubscriptionDB, **kwargs: Any
-    ) -> SubscriptionDB:
+    async def update_subscription(self, subscription_id: PyUUID, **kwargs: Any) -> SubscriptionDB:
         """Update existing subscription.
 
         Args:
-            subscription: Subscription to update
+            subscription_id: Subscription ID to update
             **kwargs: Fields to update
 
         Returns:
             Updated subscription
         """
+        result = await self.db.execute(select(SubscriptionDB).where(SubscriptionDB.id == subscription_id))
+        subscription = result.scalar_one()
+
         for key, value in kwargs.items():
-            if hasattr(subscription, key) and value is not None:
+            if hasattr(subscription, key):
                 setattr(subscription, key, value)
 
         subscription.updated_at = datetime.now(UTC)
@@ -126,9 +111,7 @@ class BillingRepository:
 
     # ==================== Webhook Event Operations ====================
 
-    async def get_webhook_event_by_stripe_id(
-        self, stripe_event_id: str
-    ) -> StripeWebhookEventDB | None:
+    async def get_webhook_event_by_stripe_id(self, stripe_event_id: str) -> StripeWebhookEventDB | None:
         """Get webhook event by Stripe event ID.
 
         Args:
@@ -137,16 +120,10 @@ class BillingRepository:
         Returns:
             Webhook event or None if not found
         """
-        result = await self.db.execute(
-            select(StripeWebhookEventDB).where(
-                StripeWebhookEventDB.stripe_event_id == stripe_event_id
-            )
-        )
+        result = await self.db.execute(select(StripeWebhookEventDB).where(StripeWebhookEventDB.stripe_event_id == stripe_event_id))
         return result.scalar_one_or_none()
 
-    async def create_webhook_event(
-        self, stripe_event_id: str, event_type: str, payload: dict
-    ) -> StripeWebhookEventDB:
+    async def create_webhook_event(self, stripe_event_id: str, event_type: str, payload: dict) -> StripeWebhookEventDB:
         """Create webhook event record.
 
         Args:
@@ -167,9 +144,7 @@ class BillingRepository:
         await self.db.refresh(event)
         return event
 
-    async def mark_webhook_processed(
-        self, event: StripeWebhookEventDB, error: str | None = None
-    ) -> StripeWebhookEventDB:
+    async def mark_webhook_processed(self, event: StripeWebhookEventDB, error: str | None = None) -> StripeWebhookEventDB:
         """Mark webhook event as processed.
 
         Args:
@@ -192,7 +167,7 @@ class BillingRepository:
 
     async def create_history_entry(
         self,
-        subscription_id: UUID | None,
+        subscription_id: PyUUID | None,
         user_id: str,
         event_type: str,
         old_status: str | None,
@@ -231,9 +206,7 @@ class BillingRepository:
         await self.db.refresh(history)
         return history
 
-    async def get_user_history(
-        self, user_id: str, limit: int = 50
-    ) -> list[SubscriptionHistoryDB]:
+    async def get_user_history(self, user_id: str, limit: int = 50) -> list[SubscriptionHistoryDB]:
         """Get subscription history for user.
 
         Args:
@@ -243,10 +216,85 @@ class BillingRepository:
         Returns:
             List of history entries
         """
-        result = await self.db.execute(
-            select(SubscriptionHistoryDB)
-            .where(SubscriptionHistoryDB.user_id == user_id)
-            .order_by(SubscriptionHistoryDB.created_at.desc())
-            .limit(limit)
-        )
+        result = await self.db.execute(select(SubscriptionHistoryDB).where(SubscriptionHistoryDB.user_id == user_id).order_by(SubscriptionHistoryDB.created_at.desc()).limit(limit))
         return list(result.scalars().all())
+
+    # ==================== Aliases for webhook_handler.py compatibility ====================
+
+    async def get_subscription_by_stripe_customer_id(self, customer_id: str) -> SubscriptionDB | None:
+        """Alias for get_subscription_by_customer_id."""
+        return await self.get_subscription_by_customer_id(customer_id)
+
+    async def get_subscription_by_stripe_subscription_id(self, subscription_id: str) -> SubscriptionDB | None:
+        """Alias for get_subscription_by_stripe_id."""
+        return await self.get_subscription_by_stripe_id(subscription_id)
+
+    async def get_webhook_event_by_event_id(self, event_id: str) -> StripeWebhookEventDB | None:
+        """Alias for get_webhook_event_by_stripe_id."""
+        return await self.get_webhook_event_by_stripe_id(event_id)
+
+    async def mark_webhook_event_processed(self, event_id: PyUUID) -> StripeWebhookEventDB:
+        """Mark webhook event as processed.
+
+        Args:
+            event_id: Webhook event ID
+
+        Returns:
+            Updated webhook event
+        """
+        result = await self.db.execute(select(StripeWebhookEventDB).where(StripeWebhookEventDB.id == event_id))
+        event = result.scalar_one()
+        return await self.mark_webhook_processed(event)
+
+    async def mark_webhook_event_failed(self, event_id: PyUUID, error: str) -> StripeWebhookEventDB:
+        """Mark webhook event as failed.
+
+        Args:
+            event_id: Webhook event ID
+            error: Error message
+
+        Returns:
+            Updated webhook event
+        """
+        result = await self.db.execute(select(StripeWebhookEventDB).where(StripeWebhookEventDB.id == event_id))
+        event = result.scalar_one()
+        return await self.mark_webhook_processed(event, error=error)
+
+    async def create_subscription_history(
+        self,
+        subscription_id: PyUUID,
+        change_type: str,
+        old_value: str | None,
+        new_value: str,
+        reason: str | None = None,
+    ) -> SubscriptionHistoryDB:
+        """Create subscription history entry (simplified).
+
+        Args:
+            subscription_id: Subscription ID
+            change_type: Type of change
+            old_value: Old value
+            new_value: New value
+            reason: Reason for change
+
+        Returns:
+            Created history entry
+        """
+        # Get subscription to get user_id
+        result = await self.db.execute(select(SubscriptionDB).where(SubscriptionDB.id == subscription_id))
+        subscription = result.scalar_one()
+
+        history = SubscriptionHistoryDB(
+            subscription_id=subscription_id,
+            user_id=subscription.user_id,
+            event_type=change_type,
+            old_status=old_value,
+            new_status=new_value,
+            old_plan_tier=None,
+            new_plan_tier=None,
+            metadata={"reason": reason} if reason else None,
+        )
+        self.db.add(history)
+        await self.db.commit()
+        await self.db.refresh(history)
+        return history

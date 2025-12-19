@@ -1,6 +1,7 @@
 """Stripe SDK wrapper for billing operations."""
 
 import logging
+from typing import Any
 
 import stripe
 
@@ -22,9 +23,7 @@ class StripeClient:
 
     # ==================== Customer Operations ====================
 
-    async def create_customer(
-        self, email: str, name: str, user_id: str
-    ) -> stripe.Customer:
+    async def create_customer(self, email: str, name: str, user_id: str) -> stripe.Customer:
         """Create Stripe customer.
 
         Args:
@@ -62,9 +61,7 @@ class StripeClient:
             logger.error(f"Failed to retrieve customer {customer_id}: {e}")
             raise
 
-    async def update_customer(
-        self, customer_id: str, **kwargs
-    ) -> stripe.Customer:
+    async def update_customer(self, customer_id: str, **kwargs: Any) -> stripe.Customer:
         """Update Stripe customer.
 
         Args:
@@ -122,9 +119,7 @@ class StripeClient:
 
     # ==================== Billing Portal Operations ====================
 
-    async def create_portal_session(
-        self, customer_id: str, return_url: str
-    ) -> stripe.billing_portal.Session:
+    async def create_portal_session(self, customer_id: str, return_url: str) -> stripe.billing_portal.Session:
         """Create Stripe Billing Portal session.
 
         Args:
@@ -147,9 +142,7 @@ class StripeClient:
 
     # ==================== Subscription Operations ====================
 
-    async def get_subscription(
-        self, subscription_id: str
-    ) -> stripe.Subscription:
+    async def get_subscription(self, subscription_id: str) -> stripe.Subscription:
         """Get Stripe subscription by ID.
 
         Args:
@@ -164,9 +157,7 @@ class StripeClient:
             logger.error(f"Failed to retrieve subscription {subscription_id}: {e}")
             raise
 
-    async def cancel_subscription(
-        self, subscription_id: str, cancel_at_period_end: bool = True
-    ) -> stripe.Subscription:
+    async def cancel_subscription(self, subscription_id: str, cancel_at_period_end: bool = True) -> stripe.Subscription:
         """Cancel Stripe subscription.
 
         Args:
@@ -182,9 +173,7 @@ class StripeClient:
                     subscription_id,
                     cancel_at_period_end=True,
                 )
-                logger.info(
-                    f"Scheduled subscription {subscription_id} for cancellation at period end"
-                )
+                logger.info(f"Scheduled subscription {subscription_id} for cancellation at period end")
             else:
                 subscription = stripe.Subscription.cancel(subscription_id)
                 logger.info(f"Immediately canceled subscription {subscription_id}")
@@ -193,9 +182,7 @@ class StripeClient:
             logger.error(f"Failed to cancel subscription {subscription_id}: {e}")
             raise
 
-    async def update_subscription(
-        self, subscription_id: str, **kwargs
-    ) -> stripe.Subscription:
+    async def update_subscription(self, subscription_id: str, **kwargs: Any) -> stripe.Subscription:
         """Update Stripe subscription.
 
         Args:
@@ -213,9 +200,7 @@ class StripeClient:
 
     # ==================== Webhook Operations ====================
 
-    def construct_webhook_event(
-        self, payload: bytes, sig_header: str
-    ) -> stripe.Event:
+    def construct_webhook_event(self, payload: bytes, sig_header: str) -> stripe.Event:
         """Verify and construct webhook event.
 
         Args:
@@ -229,9 +214,7 @@ class StripeClient:
             stripe.error.SignatureVerificationError: If signature is invalid
         """
         try:
-            event = stripe.Webhook.construct_event(
-                payload, sig_header, self.webhook_secret
-            )
+            event = stripe.Webhook.construct_event(payload, sig_header, self.webhook_secret)
             logger.info(f"Verified webhook event {event.id} of type {event.type}")
             return event
         except ValueError as e:
@@ -240,6 +223,21 @@ class StripeClient:
         except stripe.error.SignatureVerificationError as e:
             logger.error(f"Invalid webhook signature: {e}")
             raise
+
+    async def verify_webhook_signature(self, payload: str, signature: str) -> stripe.Event:
+        """Verify webhook signature and construct event (async alias).
+
+        Args:
+            payload: Raw request body as string
+            signature: Stripe-Signature header value
+
+        Returns:
+            Verified Stripe Event object
+
+        Raises:
+            stripe.error.SignatureVerificationError: If signature is invalid
+        """
+        return self.construct_webhook_event(payload.encode(), signature)
 
     # ==================== Price Operations ====================
 
