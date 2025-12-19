@@ -63,6 +63,17 @@ class BillingRepository:
         result = await self.db.execute(select(SubscriptionDB).where(SubscriptionDB.stripe_customer_id == stripe_customer_id))
         return result.scalar_one_or_none()
 
+    async def get_subscription_by_id(self, subscription_id: PyUUID) -> SubscriptionDB | None:
+        """Get subscription by subscription ID.
+
+        Args:
+            subscription_id: Subscription UUID
+
+        Returns:
+            Subscription or None if not found
+        """
+        return await self.db.get(SubscriptionDB, subscription_id)
+
     async def create_subscription(self, **kwargs: Any) -> SubscriptionDB:
         """Create new subscription.
 

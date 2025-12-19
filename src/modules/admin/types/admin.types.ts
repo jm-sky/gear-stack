@@ -47,3 +47,47 @@ export interface IAdminItem {
   createdAt: TDateTime
   updatedAt: TDateTime
 }
+
+export type SubscriptionStatus = 'active' | 'canceled' | 'past_due' | 'unpaid' | 'incomplete'
+export type PlanTier = 'free' | 'pro' | 'business'
+export type BillingInterval = 'monthly' | 'annual'
+
+export interface IAdminSubscription {
+  id: TUUID
+  userId: TUUID
+  userName: string | null
+  userEmail: string | null
+  stripeCustomerId: string | null
+  stripeSubscriptionId: string | null
+  planTier: PlanTier
+  billingInterval: BillingInterval | null
+  status: SubscriptionStatus
+  currentPeriodStart: TDateTime | null
+  currentPeriodEnd: TDateTime | null
+  cancelAtPeriodEnd: boolean
+  isGrandfathered: boolean
+  createdAt: TDateTime
+  updatedAt: TDateTime
+}
+
+export interface IAdminSubscriptionStats {
+  totalUsers: number
+  totalSubscriptions: number
+  activeSubscriptions: number
+  canceledSubscriptions: number
+  pastDueSubscriptions: number
+  freeUsers: number
+  proUsers: number
+  businessUsers: number
+  grandfatheredUsers: number
+  monthlyRevenue: number
+  annualRevenue: number
+}
+
+export interface IAdminUpdateSubscriptionRequest {
+  planTier?: PlanTier
+  status?: SubscriptionStatus
+  isGrandfathered?: boolean
+  cancelAtPeriodEnd?: boolean
+  reason?: string
+}

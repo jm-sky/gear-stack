@@ -142,3 +142,72 @@ class SubscriptionHistoryResponse(BaseModel):
     createdAt: datetime
 
     model_config = {"from_attributes": True, "populate_by_name": True}
+
+
+# ---------------------------------------------------------
+# Admin Schemas
+# ---------------------------------------------------------
+
+
+class AdminSubscriptionResponse(BaseModel):
+    """Response schema for admin subscription details (includes user info)."""
+
+    id: str
+    userId: str
+    userName: str | None = None
+    userEmail: str | None = None
+    stripeCustomerId: str | None = None
+    stripeSubscriptionId: str | None = None
+    planTier: Literal["free", "pro", "business"]
+    billingInterval: Literal["monthly", "annual"] | None = None
+    status: Literal["active", "canceled", "past_due", "unpaid", "incomplete"]
+    currentPeriodStart: datetime | None = None
+    currentPeriodEnd: datetime | None = None
+    cancelAtPeriodEnd: bool = False
+    isGrandfathered: bool = False
+    createdAt: datetime
+    updatedAt: datetime
+
+    model_config = {"from_attributes": True, "populate_by_name": True}
+
+
+class AdminSubscriptionStatsResponse(BaseModel):
+    """Response schema for subscription statistics."""
+
+    totalUsers: int
+    totalSubscriptions: int
+    activeSubscriptions: int
+    canceledSubscriptions: int
+    pastDueSubscriptions: int
+    freeUsers: int
+    proUsers: int
+    businessUsers: int
+    grandfatheredUsers: int
+    monthlyRevenue: float
+    annualRevenue: float
+
+
+class AdminUpdateSubscriptionRequest(BaseModel):
+    """Request schema for admin subscription modifications."""
+
+    planTier: Literal["free", "pro", "business"] | None = Field(
+        None,
+        description="Update subscription plan tier",
+    )
+    status: Literal["active", "canceled", "past_due", "unpaid", "incomplete"] | None = Field(
+        None,
+        description="Update subscription status",
+    )
+    isGrandfathered: bool | None = Field(
+        None,
+        description="Mark subscription as grandfathered (lifetime Pro)",
+    )
+    cancelAtPeriodEnd: bool | None = Field(
+        None,
+        description="Set whether to cancel at period end",
+    )
+    reason: str | None = Field(
+        None,
+        max_length=500,
+        description="Reason for manual modification (for audit log)",
+    )

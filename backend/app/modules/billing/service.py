@@ -383,3 +383,222 @@ class BillingService:
             raise InvalidPlanTierError(f"Price ID not configured for {plan_tier}/{billing_interval}")
 
         return price_id
+
+    # ---------------------------------------------------------
+    # Admin Methods
+    # ---------------------------------------------------------
+
+    async def get_all_subscriptions(
+        self,
+        skip: int = 0,
+        limit: int = 100,
+    ) -> list[dict]:
+        """
+        Get all subscriptions with user information (admin only).
+
+        Args:
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+
+        Returns:
+            List of subscriptions with user details
+        """
+        from uuid import UUID as PyUUID
+
+        from app.modules.auth.db_models import UserDB
+        from sqlalchemy import select
+
+        from .db_models import SubscriptionDB
+
+        # Get all subscriptions with user info
+        subscriptions = await self.repository.db.execute(
+            select(SubscriptionDB)
+            .join(UserDB, SubscriptionDB.user_id == UserDB.id)
+            .offset(skip)
+            .limit(limit)
+        )
+
+        results = []
+        for sub in subscriptions.scalars().all():
+            # Get user details
+            user = await self.repository.db.get(UserDB, PyUUID(sub.user_id))
+
+            results.append(
+                {
+                    "id": str(sub.id),
+                    "userId": sub.user_id,
+                    "userName": user.name if user else None,
+                    "userEmail": user.email if user else None,
+                    "stripeCustomerId": sub.stripe_customer_id,
+                    "stripeSubscriptionId": sub.stripe_subscription_id,
+                    "planTier": sub.plan_tier,
+                    "billingInterval": sub.billing_interval,
+                    "status": sub.status,
+                    "currentPeriodStart": sub.current_period_start,
+                    "currentPeriodEnd": sub.current_period_end,
+                    "cancelAtPeriodEnd": sub.cancel_at_period_end,
+                    "isGrandfathered": sub.is_grandfathered,
+                    "createdAt": sub.created_at,
+                    "updatedAt": sub.updated_at,
+                }
+            )
+
+        return results
+
+    async def get_subscription_stats(self) -> dict:
+        """
+        Get subscription statistics (admin only).
+
+        Returns:
+            Dictionary with subscription statistics
+        """
+        from sqlalchemy import func, select
+
+        from .db_models import SubscriptionDB
+
+        # Get all subscriptions
+        subscriptions = (
+            await self.repository.db.execute(select(SubscriptionDB))
+        ).scalars().all()
+
+        total_subscriptions = len(subscriptions)
+
+        # Count by status
+        active_count = sum(1 for s in subscriptions if s.status == "active")
+        canceled_count = sum(1 for s in subscriptions if s.status == "canceled")
+        past_due_count = sum(1 for s in subscriptions if s.status == "past_due")
+
+        # Count by plan tier
+        free_count = sum(1 for s in subscriptions if s.plan_tier == "free")
+        pro_count = sum(1 for s in subscriptions if s.plan_tier == "pro")
+        business_count = sum(1 for s in subscriptions if s.plan_tier == "business")
+
+        # Count grandfathered users
+        grandfathered_count = sum(1 for s in subscriptions if s.is_grandfathered)
+
+        # Calculate revenue (rough estimate based on plan tiers and billing intervals)
+        monthly_revenue = 0.0
+        annual_revenue = 0.0
+
+        for sub in subscriptions:
+            if sub.status == "active" and not sub.is_grandfathered:
+                if sub.plan_tier == "pro":
+                    if sub.billing_interval == "monthly":
+                        monthly_revenue += 4.99
+                    elif sub.billing_interval == "annual":
+                        annual_revenue += 49.0
+                elif sub.plan_tier == "business":
+                    if sub.billing_interval == "monthly":
+                        monthly_revenue += 14.99
+                    elif sub.billing_interval == "annual":
+                        annual_revenue += 149.0
+
+        # Get total users count
+        from app.modules.auth.db_models import UserDB
+
+        total_users = (
+            await self.repository.db.execute(select(func.count(UserDB.id)))
+        ).scalar() or 0
+
+        return {
+            "totalUsers": total_users,
+            "totalSubscriptions": total_subscriptions,
+            "activeSubscriptions": active_count,
+            "canceledSubscriptions": canceled_count,
+            "pastDueSubscriptions": past_due_count,
+            "freeUsers": free_count,
+            "proUsers": pro_count,
+            "businessUsers": business_count,
+            "grandfatheredUsers": grandfathered_count,
+            "monthlyRevenue": monthly_revenue,
+            "annualRevenue": annual_revenue,
+        }
+
+    async def admin_update_subscription(
+        self,
+        subscription_id: str,
+        plan_tier: str | None = None,
+        status: str | None = None,
+        is_grandfathered: bool | None = None,
+        cancel_at_period_end: bool | None = None,
+        reason: str | None = None,
+    ):  # type: ignore
+        """
+        Admin method to manually update subscription (admin only).
+
+        Args:
+            subscription_id: Subscription ID
+            plan_tier: New plan tier
+            status: New status
+            is_grandfathered: Grandfathered flag
+            cancel_at_period_end: Cancel at period end flag
+            reason: Reason for manual modification
+
+        Returns:
+            Updated subscription
+
+        Raises:
+            SubscriptionNotFoundError: If subscription not found
+            InvalidPlanTierError: If plan tier is invalid
+        """
+        from uuid import UUID as PyUUID
+
+        from .db_models import SubscriptionDB
+
+        # Get subscription
+        subscription = await self.repository.get_subscription_by_id(PyUUID(subscription_id))
+        if not subscription:
+            raise SubscriptionNotFoundError(f"Subscription {subscription_id} not found")
+
+        # Track changes for audit log
+        changes = []
+
+        # Update fields
+        if plan_tier is not None and plan_tier != subscription.plan_tier:
+            if plan_tier not in ["free", "pro", "business"]:
+                raise InvalidPlanTierError(f"Invalid plan tier: {plan_tier}")
+            changes.append(("plan_tier", subscription.plan_tier, plan_tier))
+            subscription.plan_tier = plan_tier  # type: ignore
+
+        if status is not None and status != subscription.status:
+            changes.append(("status", subscription.status, status))
+            subscription.status = status  # type: ignore
+
+        if is_grandfathered is not None and is_grandfathered != subscription.is_grandfathered:
+            changes.append(
+                ("is_grandfathered", str(subscription.is_grandfathered), str(is_grandfathered))
+            )
+            subscription.is_grandfathered = is_grandfathered
+
+        if (
+            cancel_at_period_end is not None
+            and cancel_at_period_end != subscription.cancel_at_period_end
+        ):
+            changes.append(
+                (
+                    "cancel_at_period_end",
+                    str(subscription.cancel_at_period_end),
+                    str(cancel_at_period_end),
+                )
+            )
+            subscription.cancel_at_period_end = cancel_at_period_end
+
+        # Save changes
+        if changes:
+            updated_subscription = await self.repository.update_subscription(
+                subscription_id=subscription.id
+            )
+
+            # Log changes to history
+            for change_type, old_val, new_val in changes:
+                await self.repository.create_subscription_history(
+                    subscription_id=subscription.id,
+                    change_type=f"admin_update_{change_type}",
+                    old_value=old_val,
+                    new_value=new_val,
+                    reason=reason or "Manual admin modification",
+                )
+
+            return updated_subscription
+
+        return subscription

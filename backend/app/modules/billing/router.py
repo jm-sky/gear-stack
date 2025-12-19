@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.modules.auth.db_models import UserDB
-from app.modules.auth.dependencies import CurrentUser
+from app.modules.auth.dependencies import AdminUser, CurrentUser
 
 from ...core.config import settings
 from .dependencies import BillingRepositoryDep, BillingServiceDep, StripeClientDep
@@ -27,6 +27,9 @@ from .exceptions import (
     WebhookValidationError,
 )
 from .schemas import (
+    AdminSubscriptionResponse,
+    AdminSubscriptionStatsResponse,
+    AdminUpdateSubscriptionRequest,
     CheckoutSessionResponse,
     CreateCheckoutSessionRequest,
     CreatePortalSessionRequest,
@@ -426,4 +429,136 @@ async def stripe_webhook(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Webhook processing failed",
+        )
+
+
+# ---------------------------------------------------------
+# Admin Endpoints
+# ---------------------------------------------------------
+
+
+@router.get(
+    "/admin/subscriptions",
+    response_model=list[AdminSubscriptionResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Get all subscriptions (admin only)",
+    description="Get list of all subscriptions with user details",
+    tags=["Admin"],
+)
+async def get_all_subscriptions(
+    _: AdminUser,
+    billing_service: BillingServiceDep,
+    skip: int = 0,
+    limit: int = 100,
+) -> list[AdminSubscriptionResponse]:
+    """
+    Get all subscriptions with user details (admin only).
+
+    Returns:
+        List of subscriptions with user information
+    """
+    try:
+        subscriptions = await billing_service.get_all_subscriptions(skip=skip, limit=limit)
+        return [AdminSubscriptionResponse(**sub) for sub in subscriptions]
+    except BillingException as e:
+        logger.error(f"Failed to get all subscriptions: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve subscriptions",
+        )
+
+
+@router.get(
+    "/admin/subscriptions/stats",
+    response_model=AdminSubscriptionStatsResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get subscription statistics (admin only)",
+    description="Get subscription statistics and revenue information",
+    tags=["Admin"],
+)
+async def get_subscription_stats(
+    _: AdminUser,
+    billing_service: BillingServiceDep,
+) -> AdminSubscriptionStatsResponse:
+    """
+    Get subscription statistics (admin only).
+
+    Returns:
+        Subscription statistics including user counts and revenue
+    """
+    try:
+        stats = await billing_service.get_subscription_stats()
+        return AdminSubscriptionStatsResponse(**stats)
+    except BillingException as e:
+        logger.error(f"Failed to get subscription stats: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve statistics",
+        )
+
+
+@router.patch(
+    "/admin/subscriptions/{subscription_id}",
+    response_model=SubscriptionResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Update subscription (admin only)",
+    description="Manually update subscription details",
+    tags=["Admin"],
+)
+async def admin_update_subscription(
+    subscription_id: str,
+    request_data: AdminUpdateSubscriptionRequest,
+    _: AdminUser,
+    billing_service: BillingServiceDep,
+) -> SubscriptionResponse:
+    """
+    Admin endpoint to manually update subscription.
+
+    Args:
+        subscription_id: Subscription ID to update
+        request_data: Update request with new values
+
+    Returns:
+        Updated subscription details
+    """
+    try:
+        updated_subscription = await billing_service.admin_update_subscription(
+            subscription_id=subscription_id,
+            plan_tier=request_data.planTier,
+            status=request_data.status,
+            is_grandfathered=request_data.isGrandfathered,
+            cancel_at_period_end=request_data.cancelAtPeriodEnd,
+            reason=request_data.reason,
+        )
+
+        return SubscriptionResponse(
+            id=str(updated_subscription.id),
+            userId=updated_subscription.user_id,
+            stripeCustomerId=updated_subscription.stripe_customer_id,
+            stripeSubscriptionId=updated_subscription.stripe_subscription_id,
+            planTier=updated_subscription.plan_tier,
+            billingInterval=updated_subscription.billing_interval,
+            status=updated_subscription.status,
+            currentPeriodStart=updated_subscription.current_period_start,
+            currentPeriodEnd=updated_subscription.current_period_end,
+            cancelAtPeriodEnd=updated_subscription.cancel_at_period_end,
+            isGrandfathered=updated_subscription.is_grandfathered,
+            createdAt=updated_subscription.created_at,
+            updatedAt=updated_subscription.updated_at,
+        )
+    except SubscriptionNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Subscription not found",
+        )
+    except InvalidPlanTierError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+    except BillingException as e:
+        logger.error(f"Failed to update subscription: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update subscription",
         )
