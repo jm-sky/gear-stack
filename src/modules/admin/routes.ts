@@ -7,6 +7,7 @@ export const AdminRoutePaths = {
   items: '/admin/items',
   limits: '/admin/limits',
   reports: '/admin/reports',
+  subscriptions: '/admin/subscriptions',
 }
 
 export const AdminRouteNames = {
@@ -16,6 +17,7 @@ export const AdminRouteNames = {
   items: 'admin-items',
   limits: 'admin-limits',
   reports: 'admin-reports',
+  subscriptions: 'admin-subscriptions',
 }
 
 export const adminRoutes: RouteRecordRaw[] = [
@@ -54,5 +56,11 @@ export const adminRoutes: RouteRecordRaw[] = [
     name: AdminRouteNames.reports,
     component: () => import('@/modules/admin/pages/ContentReportsPage.vue'),
     meta: { layout: 'authenticated', requiresAuth: true, requiresAdmin: true, title: 'admin.reports.title' },
+  },
+  {
+    path: AdminRoutePaths.subscriptions,
+    name: AdminRouteNames.subscriptions,
+    component: () => import('@/modules/admin/pages/AdminSubscriptionsPage.vue'),
+    meta: { layout: 'authenticated', requiresAuth: true, requiresAdmin: true, title: 'admin.subscriptions.title' },
   },
 ]

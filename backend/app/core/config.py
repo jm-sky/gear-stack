@@ -672,6 +672,65 @@ class WebAuthnSettings(BaseSettings):
     )
 
 
+class StripeSettings(BaseSettings):
+    """Stripe billing configuration."""
+
+    model_config = _base_config
+
+    enabled: bool = Field(
+        default=False,
+        validation_alias="STRIPE_ENABLED",
+        description="Enable Stripe billing integration",
+    )
+    secret_key: str = Field(
+        default="",
+        validation_alias="STRIPE_SECRET_KEY",
+        description="Stripe secret API key",
+    )
+    publishable_key: str = Field(
+        default="",
+        validation_alias="STRIPE_PUBLISHABLE_KEY",
+        description="Stripe publishable API key",
+    )
+    webhook_secret: str = Field(
+        default="",
+        validation_alias="STRIPE_WEBHOOK_SECRET",
+        description="Stripe webhook signing secret",
+    )
+
+    # Price IDs (configured in Stripe Dashboard)
+    pro_monthly_price_id: str = Field(
+        default="",
+        validation_alias="STRIPE_PRO_MONTHLY_PRICE_ID",
+        description="Stripe price ID for Pro monthly subscription",
+    )
+    pro_annual_price_id: str = Field(
+        default="",
+        validation_alias="STRIPE_PRO_ANNUAL_PRICE_ID",
+        description="Stripe price ID for Pro annual subscription",
+    )
+    business_monthly_price_id: str = Field(
+        default="",
+        validation_alias="STRIPE_BUSINESS_MONTHLY_PRICE_ID",
+        description="Stripe price ID for Business monthly subscription",
+    )
+    business_annual_price_id: str = Field(
+        default="",
+        validation_alias="STRIPE_BUSINESS_ANNUAL_PRICE_ID",
+        description="Stripe price ID for Business annual subscription",
+    )
+
+    @field_validator("enabled", mode="before")
+    @classmethod
+    def parse_enabled(cls, v: str | bool) -> bool:
+        """Parse enabled field from string or bool."""
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, str):
+            return v.lower() in ("true", "1", "yes", "on")
+        return False
+
+
 class Settings(BaseSettings):
     """
     Main application settings composed of nested configuration classes.
@@ -697,6 +756,7 @@ class Settings(BaseSettings):
     ai: AISettings = Field(default_factory=AISettings)
     redis: RedisSettings = Field(default_factory=RedisSettings)
     webauthn: WebAuthnSettings = Field(default_factory=WebAuthnSettings)
+    stripe: StripeSettings = Field(default_factory=StripeSettings)
 
     # Legacy compatibility - still accessible at root level
     frontend_url: str = Field(
