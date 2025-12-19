@@ -2,6 +2,8 @@
 // Configurable route paths for billing module
 // This allows the billing module to be used in different apps with different route structures
 
+import { CreditCard } from 'lucide-vue-next'
+import type { Component } from 'vue'
 import type { RouteRecordRaw } from 'vue-router'
 
 export const BILLING_BASE_PATH = import.meta.env.VITE_BILLING_BASE_PATH ?? '/billing'
@@ -16,6 +18,11 @@ export const BillingRouteNames = {
   billing: 'Billing',
   success: 'BillingSuccess',
 } as const
+
+export const BillingRouteIcon: Record<keyof typeof BillingRouteNames, Component> = {
+  billing: CreditCard,
+  success: CreditCard,
+}
 
 export const billingRoutes: RouteRecordRaw[] = [
   {
