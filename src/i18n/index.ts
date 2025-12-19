@@ -9,6 +9,7 @@
 import { adminEn, adminPl } from '@/modules/admin/i18n'
 import { aiEn, aiPl } from '@/modules/ai/i18n'
 import { authEn, authPl } from '@/modules/auth/i18n'
+import { billingTranslations } from '@/modules/billing/i18n'
 import { gearEn, gearPl } from '@/modules/gear/i18n'
 import { settingsEn, settingsPl } from '@/modules/settings/i18n'
 import { userEn, userPl } from '@/modules/user/i18n'
@@ -22,8 +23,26 @@ import registryPl from '@/shared/i18n/locales/pl'
 // import appPl from './locales/pl'
 
 // Merge all messages together
-const en = { ...registryEn, ...adminEn, ...aiEn, ...authEn, ...gearEn, ...settingsEn, ...userEn }
-const pl = { ...registryPl, ...adminPl, ...aiPl, ...authPl, ...gearPl, ...settingsPl, ...userPl }
+const en = {
+  ...registryEn,
+  ...adminEn,
+  ...aiEn,
+  ...authEn,
+  ...billingTranslations.en,
+  ...gearEn,
+  ...settingsEn,
+  ...userEn,
+}
+const pl = {
+  ...registryPl,
+  ...adminPl,
+  ...aiPl,
+  ...authPl,
+  ...billingTranslations.pl,
+  ...gearPl,
+  ...settingsPl,
+  ...userPl,
+}
 
 // If you have app-specific messages, merge them here:
 // const en = { ...registryEn, ...appEn }
