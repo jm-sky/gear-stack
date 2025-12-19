@@ -109,18 +109,24 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
 
 ### Średni priorytet
 
-1. ✅ **Nawigacja przycisku "Wróć"** - Zakończone
+1. **Zabezpieczenie linków w markdown** - Do weryfikacji
+   - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md) (sekcja do dodania)
+   - 📋 **Plan implementacji:** [MARKDOWN_LINK_SECURITY_PLAN.md](./plans/MARKDOWN_LINK_SECURITY_PLAN.md)
+   - Walidacja zewnętrznych linków, ochrona przed homograph attacks, limity długości, blokowanie zewnętrznych obrazów, sanityzacja Unicode
+   - Status: 🔄 Planned | Priority: Medium | Complexity: Medium
+
+2. ✅ **Nawigacja przycisku "Wróć"** - Zakończone
    - 📍 Lokalizacja: [FEATURE-028-back-button-navigation.md](./features/FEATURE-028-back-button-navigation.md)
    - Naprawa nawigacji przycisku "Wróć" w różnych komponentach aplikacji
    - Użycie parametru `from` zamiast `router.back()` dla przewidywalnej nawigacji
    - Status: ✅ Completed | Priority: High | Complexity: Small
 
-2. ✅ **Przenoszenie przedmiotów między kontenerami** - Zakończone
+3. ✅ **Przenoszenie przedmiotów między kontenerami** - Zakończone
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-przenoszenie-przedmiotów-między-kontenerami)
    - Dialog wyboru kontenera docelowego, endpoint API, pełna implementacja backend + frontend
    - Status: ✅ Completed | Priority: High | Complexity: Medium
 
-3. ✅ **Kasowanie obrazków z S3** - Zakończone
+4. ✅ **Kasowanie obrazków z S3** - Zakończone
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md)
    - ✅ Automatyczne usuwanie z S3 po usunięciu przedmiotu
    - ✅ Automatyczne usuwanie z S3 po usunięciu kontenera
@@ -128,7 +134,7 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - ✅ Automatyczne usuwanie z S3 po usunięciu konta użytkownika
    - Status: ✅ Completed | Priority: Medium | Complexity: Medium
 
-4. ✅ **Automatyczny wybór jednostki wagi (auto) i formatowanie z separatorem tysięcznym** - Zakończone
+5. ✅ **Automatyczny wybór jednostki wagi (auto) i formatowanie z separatorem tysięcznym** - Zakończone
    - 📍 Lokalizacja: [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-automatyczny-wybór-jednostki-wagi-auto-i-formatowanie-z-separatorem-tysięcznym) | [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-ustawienia-użytkownika-wymagające-db)
    - Opcje `auto g/kg` i `auto oz/lb` dla preferowanej jednostki wagi
    - Automatyczny wybór jednostki w zależności od wartości wagi (< 1 kg → g/oz, ≥ 1 kg → kg/lb)
