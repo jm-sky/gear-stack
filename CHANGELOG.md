@@ -21,6 +21,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.45.0] - 2025-01-22
+
+### Added
+- **Markdown Link Security (Phase 1)**: Implemented basic link validation and sanitization for markdown content
+  - Frontend: Link security utilities with protocol validation and length limits
+  - Frontend: Post-processing of rendered markdown HTML to secure links
+  - Frontend: Automatic addition of `rel="noopener noreferrer"` to external links
+  - Frontend: Blocking of dangerous protocols (`javascript:`, `data:`, `vbscript:`, `file:`, `about:`, etc.)
+  - Frontend: Link length validation (max 2048 characters)
+  - Backend: Markdown content sanitization before saving to database
+  - Backend: Validators for `notes` and `description` fields in containers and items
+  - Backend: Automatic removal of dangerous protocol links from markdown content
+  - Security: Maximum markdown content length limit (50000 characters)
+  - Security: Visual indication of blocked links (disabled styling)
+
+### Security
+- **Markdown Link Protection**: Enhanced security for markdown content rendering
+  - Prevents XSS attacks through dangerous protocol links
+  - Validates link length to prevent DoS attacks
+  - Sanitizes markdown content before database storage
+  - Blocks external links from executing JavaScript or accessing local files
+
+---
+
 ## [2.44.1] - 2025-12-22
 
 ### Changed

@@ -109,11 +109,12 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
 
 ### Średni priorytet
 
-1. **Zabezpieczenie linków w markdown** - Do weryfikacji
-   - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md) (sekcja do dodania)
+1. **Zabezpieczenie linków w markdown** - Phase 1 Completed
+   - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#zabezpieczenie-linków-w-markdown)
    - 📋 **Plan implementacji:** [MARKDOWN_LINK_SECURITY_PLAN.md](./plans/MARKDOWN_LINK_SECURITY_PLAN.md)
-   - Walidacja zewnętrznych linków, ochrona przed homograph attacks, limity długości, blokowanie zewnętrznych obrazów, sanityzacja Unicode
-   - Status: 🔄 Planned | Priority: Medium | Complexity: Medium
+   - ✅ **Phase 1 (v2.45.0):** Walidacja protokołów, limity długości, rel="noopener noreferrer", sanityzacja przed zapisem
+   - 🔄 **Phase 2 (Planned):** Homograph detection, dialog potwierdzenia, blokowanie zewnętrznych obrazów
+   - Status: 🚧 Partially Completed (Phase 1) | Priority: Medium | Complexity: Medium
 
 2. ✅ **Nawigacja przycisku "Wróć"** - Zakończone
    - 📍 Lokalizacja: [FEATURE-028-back-button-navigation.md](./features/FEATURE-028-back-button-navigation.md)

@@ -121,6 +121,28 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 
 ## 🔒 Bezpieczeństwo i walidacja treści
 
+### ✅ Zabezpieczenie linków w markdown (Phase 1)
+**Status:** 🚧 Partially Completed (Phase 1) | **Priority:** Medium | **Complexity:** Medium | **Version:** v2.45.0
+
+**Phase 1 - Completed (v2.45.0):**
+- ✅ Frontend: Link security utilities with protocol validation and length limits
+- ✅ Frontend: Post-processing of rendered markdown HTML to secure links
+- ✅ Frontend: Automatic addition of `rel="noopener noreferrer"` to external links
+- ✅ Frontend: Blocking of dangerous protocols (`javascript:`, `data:`, `vbscript:`, `file:`, `about:`, etc.)
+- ✅ Frontend: Link length validation (max 2048 characters)
+- ✅ Backend: Markdown content sanitization before saving to database
+- ✅ Backend: Validators for `notes` and `description` fields in containers and items
+- ✅ Backend: Automatic removal of dangerous protocol links from markdown content
+- ✅ Security: Maximum markdown content length limit (50000 characters)
+- ✅ Security: Visual indication of blocked links (disabled styling)
+
+**Phase 2 - Planned:**
+- 🔄 Homograph detection and normalization
+- 🔄 Dialog confirmation for suspicious external links
+- 🔄 Blocking external images in markdown (or lazy loading with security)
+
+**📋 Plan implementacji:** [MARKDOWN_LINK_SECURITY_PLAN.md](./plans/MARKDOWN_LINK_SECURITY_PLAN.md)
+
 ### Zabezpieczenie przed obraźliwymi słowami i niebezpiecznymi URL
 **Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
 
