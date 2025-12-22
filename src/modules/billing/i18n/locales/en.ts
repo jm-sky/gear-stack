@@ -21,6 +21,9 @@ export const en = {
       title: 'Subscription Activated!',
       description: 'Your payment was successful and your subscription is now active.',
       message: 'You now have access to all premium features. Thank you for your purchase!',
+      planActivated: 'has been activated',
+      goToApp: 'Go to App',
+      manageBilling: 'Manage Billing',
       continue: 'Continue to Billing',
     },
     status: {

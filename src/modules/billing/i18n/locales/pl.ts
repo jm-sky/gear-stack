@@ -21,6 +21,9 @@ export const pl = {
       title: 'Subskrypcja Aktywowana!',
       description: 'Twoja płatność przebiegła pomyślnie i subskrypcja jest teraz aktywna.',
       message: 'Masz teraz dostęp do wszystkich funkcji premium. Dziękujemy za zakup!',
+      planActivated: 'został aktywowany',
+      goToApp: 'Przejdź do Aplikacji',
+      manageBilling: 'Zarządzaj Płatnościami',
       continue: 'Przejdź do Płatności',
     },
     status: {
