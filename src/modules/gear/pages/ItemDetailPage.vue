@@ -42,6 +42,7 @@ const itemId = route.params.itemId as string
 const item = ref<IGearItem | null>(null)
 const container = ref<IGearContainer | null>(null)
 const isLoading = ref(true)
+const imageGalleryRef = ref<InstanceType<typeof ItemImageGallery> | null>(null)
 
 // Set dynamic page title
 watchEffect(() => {
@@ -127,19 +128,27 @@ const handleItemUpdated = async () => {
         if (refreshedItem) {
           item.value = refreshedItem
           container.value = refreshedContainer
+          // Reload images in gallery
+          imageGalleryRef.value?.reload()
           return
         }
       }
       // Fallback to loading from API
       await loadItem()
+      // Reload images in gallery
+      imageGalleryRef.value?.reload()
     } catch (error) {
       console.error('Failed to refresh item:', error)
       // Fallback to loading from API
       await loadItem()
+      // Reload images in gallery
+      imageGalleryRef.value?.reload()
     }
   } else {
     // For localStorage, just reload from store
     await loadItem()
+    // Reload images in gallery
+    imageGalleryRef.value?.reload()
   }
 }
 
@@ -365,6 +374,7 @@ const handleSetExpirationDate = async () => {
       <!-- Image Gallery -->
       <div class="rounded-lg border bg-card p-6">
         <ItemImageGallery
+          ref="imageGalleryRef"
           :item-id="itemId"
           :editable="canManageImages"
         >

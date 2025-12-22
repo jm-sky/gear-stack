@@ -296,6 +296,11 @@ function handleImagePreview(imageId: TUUID) {
 onMounted(() => {
   loadImages()
 })
+
+// Expose reload method for parent components
+defineExpose({
+  reload: loadImages,
+})
 </script>
 
 <template>
