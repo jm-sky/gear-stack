@@ -365,8 +365,8 @@ Akcja pozwalająca na pobranie obrazków z katalogu do przedmiotu, który jest j
 ### ✅ Przenoszenie przedmiotów między kontenerami
 **Status:** ✅ Completed | **Priority:** High | **Complexity:** Medium
 
-### 🔄 Poprawa wyszukiwarki katalogu globalnego (lepsze dopasowanie)
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+### ✅ Poprawa wyszukiwarki katalogu globalnego (lepsze dopasowanie)
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium
 
 **Koncepcja:**
 Poprawa wyszukiwarki w tworzeniu połączenia przedmiotu z katalogiem globalnym (`MatchWithCatalogueDialog.vue`) - lepsze dopasowywanie wyników wyszukiwania.
@@ -485,8 +485,8 @@ Mechanizm pozwalający użytkownikom na promowanie swoich przedmiotów do global
 
 ## 💳 Limity kont i subskrypcje
 
-### Limity przedmiotów i kontenerów dla kont free/premium
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+### ✅ Limity przedmiotów i kontenerów dla kont free/premium
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium
 
 **Koncepcja:**
 System limitów liczby przedmiotów i kontenerów w zależności od typu konta (free/premium), z możliwością opcjonalnego uwzględnienia wykorzystanej przestrzeni w bazie danych.
