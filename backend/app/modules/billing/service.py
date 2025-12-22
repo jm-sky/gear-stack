@@ -40,18 +40,24 @@ class BillingService:
         """
         Get user's subscription details.
 
+        If subscription doesn't exist, automatically creates a FREE tier subscription.
+
         Args:
             user_id: User ID
 
         Returns:
             Subscription response
-
-        Raises:
-            SubscriptionNotFoundError: If subscription doesn't exist
         """
         subscription = await self.repository.get_subscription_by_user_id(user_id)
+
+        # Auto-create FREE subscription for new users
         if not subscription:
-            raise SubscriptionNotFoundError(f"Subscription not found for user {user_id}")
+            logger.info(f"Creating default FREE subscription for user {user_id}")
+            subscription = await self.repository.create_subscription(
+                user_id=user_id,
+                plan_tier="free",
+                status="active",
+            )
 
         return SubscriptionResponse.model_validate(subscription)
 
@@ -133,6 +139,9 @@ class BillingService:
                 success_url=success_url,
                 cancel_url=cancel_url,
             )
+
+            if not session.url:
+                raise StripeAPIError("Checkout session created but URL is missing")
 
             logger.info(f"Created checkout session {session.id} for user {user_id}")
             return CheckoutSessionResponse(sessionId=session.id, sessionUrl=session.url)
