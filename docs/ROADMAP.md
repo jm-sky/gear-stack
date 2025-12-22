@@ -53,7 +53,7 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
   - ✅ Backend endpoints do zarządzania historią (GET, DELETE)
   - ✅ Frontend composable do zarządzania historią
   - ✅ **Zarządzanie historią - UI:** przeglądanie historii chatów, powrót do konwersacji, kasowanie historii - Completed
-  - 🔄 **Sprawdzenie i poprawa działania strony AiHistory** - planowane (przywracanie konwersacji nie działa - do wyjaśnienia)
+  - ✅ **Sprawdzenie i poprawa działania strony AiHistory** - Completed (przywracanie konwersacji działa)
   - 🔄 Classification, embeddings, vision models - planowane
 
 6. ✅ **AI settings - Premium feature** - Zakończone

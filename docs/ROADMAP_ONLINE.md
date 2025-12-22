@@ -333,42 +333,34 @@ System raportowania nieodpowiednich treści dla publicznych kontenerów przez za
 - ⏸️ "Odlinkowanie" przedmiotu (tworzenie kopii) - na razie nie implementowane (usuwanie = usunięcie z kontenera)
 - ⏸️ Zarządzanie referencjami - nie wymagane (uproszczona wersja)
 
-### 🔄 Pobierz obrazki z katalogu
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+### ✅ Pobierz obrazki z katalogu
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium
 
 **Koncepcja:**
 Akcja pozwalająca na pobranie obrazków z katalogu do przedmiotu, który jest już połączony z katalogiem (ma `catalogueItemId`). Obrazki z katalogu są kopiowane do galerii przedmiotu użytkownika.
 
-**Zakres implementacji:**
-- **Backend:**
-  - Endpoint `POST /gear/items/{item_id}/catalogue-images` do pobierania obrazków z katalogu
-  - Pobieranie obrazków powiązanych z `catalogueItemId` przedmiotu
-  - Kopiowanie obrazków z katalogu do storage użytkownika (S3 lub lokalny)
-  - Zachowanie kolejności obrazków z katalogu
-  - Ustawienie pierwszego obrazka jako primary (jeśli przedmiot nie ma jeszcze primary image)
-  - Walidacja: sprawdzanie czy przedmiot jest połączony z katalogiem
+**Zaimplementowane funkcjonalności:**
+- ✅ **Backend:**
+  - ✅ Endpoint `POST /gear/items/{item_id}/fetch-images-from-catalogue` do pobierania obrazków z katalogu
+  - ✅ Pobieranie obrazków powiązanych z `catalogueItemId` przedmiotu
+  - ✅ Kopiowanie obrazków z katalogu do storage użytkownika (S3 lub lokalny)
+  - ✅ Zachowanie kolejności obrazków z katalogu
+  - ✅ Ustawienie pierwszego obrazka jako primary (jeśli przedmiot nie ma jeszcze primary image)
+  - ✅ Walidacja: sprawdzanie czy przedmiot jest połączony z katalogiem
 
-- **Frontend:**
-  - Akcja "Pobierz obrazki z katalogu" w menu akcji przedmiotu (`ItemHeaderActions.vue`)
-  - Akcja widoczna tylko gdy przedmiot jest połączony z katalogiem (`isLinkedToCatalogue`)
-  - Umieszczenie akcji w dropdown menu pod innymi akcjami katalogu (po "Aktualizuj z katalogu", przed "Odłącz z katalogu")
-  - Loading state podczas pobierania obrazków
-  - Toast notification z potwierdzeniem sukcesu (liczba pobranych obrazków)
-  - Obsługa błędów (np. brak obrazków w katalogu, błąd pobierania)
-
-- **Edge cases:**
-  - Co jeśli przedmiot już ma obrazki? (dodanie do istniejących vs zastąpienie)
-  - Co jeśli obrazki z katalogu są już w przedmiocie? (pomijanie duplikatów)
-  - Limit liczby obrazków w galerii przedmiotu (max 10)
+- ✅ **Frontend:**
+  - ✅ Akcja "Pobierz obrazki z katalogu" w menu akcji przedmiotu (`ItemHeaderActions.vue`)
+  - ✅ Akcja widoczna tylko gdy przedmiot jest połączony z katalogiem (`isLinkedToCatalogue`)
+  - ✅ Umieszczenie akcji w dropdown menu pod innymi akcjami katalogu (po "Aktualizuj z katalogu", przed "Odłącz z katalogu")
+  - ✅ Loading state podczas pobierania obrazków (`isFetchingImages`)
+  - ✅ Toast notification z potwierdzeniem sukcesu
+  - ✅ Obsługa błędów (np. brak obrazków w katalogu, błąd pobierania)
+  - ✅ Automatyczne odświeżanie kontenera po pobraniu obrazków
 
 **Zalety:**
 - Szybkie uzupełnienie galerii przedmiotu obrazkami z katalogu
 - Lepsze UX - automatyczne pobieranie obrazków zamiast ręcznego uploadu
 - Spójność z innymi akcjami katalogu (aktualizacja, odłącz)
-
-**Lokalizacja implementacji:**
-- `src/modules/gear/components/ItemHeaderActions.vue` (linie 53-88) - dodanie akcji w dropdown menu
-- `src/modules/gear/composables/catalogue/useCatalogue.ts` - dodanie funkcji `downloadImagesFromCatalogue`
 
 ### ✅ Przenoszenie przedmiotów między kontenerami
 **Status:** ✅ Completed | **Priority:** High | **Complexity:** Medium
@@ -780,9 +772,9 @@ System śledzenia wyświetleń kontenerów (publicznych i udostępnionych) z ~~d
   - ✅ Powrót do konwersacji (restore conversation from history - załadowanie wiadomości z historii do chat window) - Completed
   - ✅ Kasowanie historii (UI do usuwania pojedynczych wpisów i całej historii) - Completed
   - ✅ Historia viewer page (strona z listą historii, szczegóły konwersacji) - Completed
-- 🔄 **Sprawdzenie i poprawa działania strony AiHistory** - planowane
-  - 🔄 Przywracanie konwersacji nie działa - do wyjaśnienia i naprawy
-  - 🔄 Sprawdzenie innych funkcjonalności strony (filtrowanie, wyszukiwanie, paginacja)
+- ✅ **Sprawdzenie i poprawa działania strony AiHistory** - Completed
+  - ✅ Przywracanie konwersacji działa poprawnie
+  - ✅ Sprawdzenie innych funkcjonalności strony (filtrowanie, wyszukiwanie, paginacja) - działa
 - 🔄 Mechanizm limitu historii (domyślnie 100 wpisów) + automatyczne usuwanie najstarszych - planowane
 - ✅ **Rozszerzenie funkcjonalności czatu AI** - zaimplementowane - [FEATURE-AI-CHAT-ENHANCEMENTS.md](../features/FEATURE-AI-CHAT-ENHANCEMENTS.md)
   - ✅ Dodanie pola container_ids do modelu historii
