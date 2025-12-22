@@ -71,6 +71,10 @@ export default {
     supported: 'Markdown is supported',
     supportedHint: 'You can use markdown to format your text. Supported features: headings, bold, italic, lists, links, images, code blocks, tables, quotes, and more.',
     showingPreview: 'Showing preview',
+    linkSecurity: {
+      linkTooLong: 'Link is too long and has been blocked',
+      dangerousProtocolBlocked: 'Dangerous protocol has been blocked',
+    },
   },
   validation: {
     required: 'This field is required',

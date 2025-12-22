@@ -9,6 +9,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from .validators import MAX_MARKDOWN_LENGTH, sanitize_markdown_content
+
 
 # Type aliases matching frontend
 GearContainerType = str  # Allows custom types: 'backpack', 'bag', 'pouch', etc.
@@ -53,8 +55,17 @@ class ContainerCreate(BaseModel):
         description="Optional UUID for import/update workflow (when UUID is provided in markdown export)",
     )
     name: str = Field(..., min_length=1, max_length=255)
-    description: str | None = None
+    description: str | None = Field(None, max_length=MAX_MARKDOWN_LENGTH)
     type: GearContainerType
+
+    @field_validator("description")
+    @classmethod
+    def validate_description(cls, v: str | None) -> str | None:
+        """Sanitize markdown description content."""
+        if v is None:
+            return None
+        return sanitize_markdown_content(v)
+
     color: ContainerColor | None = "default"
     parentContainerId: str | None = Field(None, alias="parentContainerId")
     brand: str | None = Field(None, max_length=255)
@@ -76,8 +87,17 @@ class ContainerUpdate(BaseModel):
     """Schema for updating a gear container."""
 
     name: str | None = Field(None, min_length=1, max_length=255)
-    description: str | None = None
+    description: str | None = Field(None, max_length=MAX_MARKDOWN_LENGTH)
     type: GearContainerType | None = None
+
+    @field_validator("description")
+    @classmethod
+    def validate_description(cls, v: str | None) -> str | None:
+        """Sanitize markdown description content."""
+        if v is None:
+            return None
+        return sanitize_markdown_content(v)
+
     color: ContainerColor | None = None
     parentContainerId: str | None = Field(None, alias="parentContainerId")
     brand: str | None = Field(None, max_length=255)
@@ -189,7 +209,16 @@ class ItemCreate(BaseModel):
     quantity: int = Field(default=1, ge=1)
     weight: float = Field(..., ge=0)
     weightUnit: GearWeightUnit = Field(default="g")
-    notes: str | None = None
+    notes: str | None = Field(None, max_length=MAX_MARKDOWN_LENGTH)
+
+    @field_validator("notes")
+    @classmethod
+    def validate_notes(cls, v: str | None) -> str | None:
+        """Sanitize markdown notes content."""
+        if v is None:
+            return None
+        return sanitize_markdown_content(v)
+
     expirationDate: datetime | None = Field(None, alias="expirationDate")
     shelfLife: dict[str, Any] | None = Field(None, alias="shelfLife", description="Shelf life period: {value: int, unit: 'days'|'months'|'years'}")
     priority: GearItemPriority = Field(default="medium")
@@ -219,7 +248,16 @@ class ItemUpdate(BaseModel):
     quantity: int | None = Field(None, ge=1)
     weight: float | None = Field(None, ge=0)
     weightUnit: GearWeightUnit | None = None
-    notes: str | None = None
+    notes: str | None = Field(None, max_length=MAX_MARKDOWN_LENGTH)
+
+    @field_validator("notes")
+    @classmethod
+    def validate_notes(cls, v: str | None) -> str | None:
+        """Sanitize markdown notes content."""
+        if v is None:
+            return None
+        return sanitize_markdown_content(v)
+
     expirationDate: datetime | None = Field(None, alias="expirationDate")
     shelfLife: dict[str, Any] | None = Field(None, alias="shelfLife", description="Shelf life period: {value: int, unit: 'days'|'months'|'years'}")
     priority: GearItemPriority | None = None

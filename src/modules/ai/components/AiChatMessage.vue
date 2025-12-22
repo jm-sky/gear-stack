@@ -4,6 +4,7 @@
 -->
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { secureMarkdownHtml } from '@/shared/utils/markdownPostProcess'
 import type { IAiChatMessage, IAiStructuredOutput } from '../types'
 import AiChatMessageDebugPrompt from './AiChatMessageDebugPrompt.vue'
 import AiChatMessageDebugStructuredOutput from './AiChatMessageDebugStructuredOutput.vue'
@@ -52,7 +53,9 @@ const renderedContent = computed<string>(() => {
     // Fallback: return plain text if markdown-it is not loaded yet
     return message.content
   }
-  return mdInstance.value.render(message.content)
+  const rawHtml = mdInstance.value.render(message.content)
+  // Post-process HTML to secure links
+  return secureMarkdownHtml(rawHtml)
 })
 
 const messageClasses = computed<string>(() => {
@@ -175,5 +178,13 @@ const messageClasses = computed<string>(() => {
 
 .prose :deep(li) {
   margin-bottom: 0.25rem;
+}
+
+/* Disabled links styling */
+.prose :deep(a.link-disabled) {
+  color: hsl(var(--muted-foreground));
+  text-decoration: line-through;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 </style>

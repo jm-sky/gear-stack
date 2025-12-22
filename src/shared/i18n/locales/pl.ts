@@ -71,6 +71,10 @@ export default {
     supported: 'Markdown jest wspierany',
     supportedHint: 'Możesz używać markdown do formatowania swojego tekstu. Obsługiwane funkcje: nagłówki, pogrubienie, kursywa, listy, linki, obrazy, bloki kodu, tabele, cytaty i więcej.',
     showingPreview: 'Pokazywanie podglądu',
+    linkSecurity: {
+      linkTooLong: 'Link jest zbyt długi i został zablokowany',
+      dangerousProtocolBlocked: 'Niebezpieczny protokół został zablokowany',
+    },
   },
   validation: {
     required: 'To pole jest wymagane',
