@@ -21,6 +21,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.44.1] - 2025-12-22
+
+### Changed
+- **Documentation**: Updated ROADMAP_ONLINE.md with completed features
+  - Marked "Global catalogue search improvement" feature as completed
+  - Updated "Item and container limits for free/premium accounts" feature to completed status
+
+---
+
 ## [2.44.0] - 2025-12-19
 
 ### Added
