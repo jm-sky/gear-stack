@@ -43,21 +43,43 @@ async def handle_checkout_session_completed(
 
         # Get subscription details from Stripe
         stripe_sub = stripe.Subscription.retrieve(subscription_id)
-        price_id = stripe_sub["items"]["data"][0]["price"]["id"]
-        billing_interval = stripe_sub["items"]["data"][0]["price"]["recurring"]["interval"]
+
+        # Handle both dict and object access
+        if hasattr(stripe_sub, "items") and hasattr(stripe_sub.items, "data"):
+            price_id = stripe_sub.items.data[0].price.id
+            billing_interval = stripe_sub.items.data[0].price.recurring.interval
+        else:
+            price_id = stripe_sub["items"]["data"][0]["price"]["id"]
+            billing_interval = stripe_sub["items"]["data"][0]["price"]["recurring"]["interval"]
 
         # Map price_id to plan_tier
         plan_tier = _get_plan_tier_from_price_id(price_id)
+
+        # Get period dates - Stripe Subscription uses different fields
+        # Use billing_cycle_anchor or start_date for period start
+        period_start = stripe_sub.get("billing_cycle_anchor") or stripe_sub.get("start_date")
+
+        # Calculate period end based on billing interval
+        if period_start:
+            if billing_interval == "year":
+                period_end = period_start + (365 * 24 * 60 * 60)  # +1 year in seconds
+            else:  # month
+                period_end = period_start + (30 * 24 * 60 * 60)  # +30 days in seconds
+        else:
+            logger.warning(f"No period start found in subscription, using current time")
+            now = int(datetime.now(UTC).timestamp())
+            period_start = now
+            period_end = now + (30 * 24 * 60 * 60) if billing_interval == "month" else now + (365 * 24 * 60 * 60)
 
         # Update subscription in database
         updated_subscription = await repository.update_subscription(
             subscription.id,
             stripe_subscription_id=subscription_id,
             plan_tier=plan_tier,
-            billing_interval="annual" if billing_interval == "year" else "monthly",
+            billing_interval="year" if billing_interval == "year" else "month",
             status="active",
-            current_period_start=datetime.fromtimestamp(stripe_sub.current_period_start, UTC),
-            current_period_end=datetime.fromtimestamp(stripe_sub.current_period_end, UTC),
+            current_period_start=datetime.fromtimestamp(period_start, UTC),
+            current_period_end=datetime.fromtimestamp(period_end, UTC),
             cancel_at_period_end=False,
             updated_at=datetime.now(UTC),
         )
@@ -104,28 +126,52 @@ async def handle_customer_subscription_updated(
             logger.warning(f"Subscription {subscription_id} not found in database")
             return
 
-        # Extract subscription details
-        price_id = stripe_sub["items"]["data"][0]["price"]["id"]
-        billing_interval = stripe_sub["items"]["data"][0]["price"]["recurring"]["interval"]
+        # Extract subscription details - handle both dict and object access
+        if hasattr(stripe_sub, "items") and hasattr(stripe_sub.items, "data"):
+            # Object/attribute access (from webhook event)
+            price_id = stripe_sub.items.data[0].price.id
+            billing_interval = stripe_sub.items.data[0].price.recurring.interval
+        else:
+            # Dict access (from Stripe API)
+            price_id = stripe_sub["items"]["data"][0]["price"]["id"]
+            billing_interval = stripe_sub["items"]["data"][0]["price"]["recurring"]["interval"]
+
         plan_tier = _get_plan_tier_from_price_id(price_id)
 
         old_plan = subscription.plan_tier
         old_status = subscription.status
 
+        # Get period dates - use billing_cycle_anchor or start_date
+        period_start = stripe_sub.get("billing_cycle_anchor") or stripe_sub.get("start_date")
+
+        # Calculate period end based on billing interval
+        if period_start:
+            if billing_interval == "year":
+                period_end = period_start + (365 * 24 * 60 * 60)
+            else:
+                period_end = period_start + (30 * 24 * 60 * 60)
+        else:
+            now = int(datetime.now(UTC).timestamp())
+            period_start = now
+            period_end = now + (30 * 24 * 60 * 60) if billing_interval == "month" else now + (365 * 24 * 60 * 60)
+
+        sub_status = stripe_sub.get("status", "active")
+        cancel_at_end = stripe_sub.get("cancel_at_period_end", False)
+
         # Update subscription
         updated_subscription = await repository.update_subscription(
             subscription.id,
             plan_tier=plan_tier,
-            billing_interval="annual" if billing_interval == "year" else "monthly",
-            status=stripe_sub.status,
-            current_period_start=datetime.fromtimestamp(stripe_sub.current_period_start, UTC),
-            current_period_end=datetime.fromtimestamp(stripe_sub.current_period_end, UTC),
-            cancel_at_period_end=stripe_sub.cancel_at_period_end,
+            billing_interval="year" if billing_interval == "year" else "month",
+            status=sub_status,
+            current_period_start=datetime.fromtimestamp(period_start, UTC),
+            current_period_end=datetime.fromtimestamp(period_end, UTC),
+            cancel_at_period_end=cancel_at_end,
             updated_at=datetime.now(UTC),
         )
 
         # Log history
-        change_details = f"plan: {old_plan} -> {plan_tier}, status: {old_status} -> {stripe_sub.status}"
+        change_details = f"plan: {old_plan} -> {plan_tier}, status: {old_status} -> {sub_status}"
         await repository.create_subscription_history(
             subscription_id=subscription.id,
             change_type="subscription_updated",

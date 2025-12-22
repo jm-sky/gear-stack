@@ -11,17 +11,20 @@ export const BILLING_BASE_PATH = import.meta.env.VITE_BILLING_BASE_PATH ?? '/bil
 export const BillingRoutePaths = {
   billing: import.meta.env.VITE_BILLING_PATH ?? `${BILLING_BASE_PATH}`,
   success: import.meta.env.VITE_BILLING_SUCCESS_PATH ?? `${BILLING_BASE_PATH}/success`,
+  cancel: import.meta.env.VITE_BILLING_CANCEL_PATH ?? `${BILLING_BASE_PATH}/cancel`,
 } as const
 
 // Named route versions (when using Vue Router named routes)
 export const BillingRouteNames = {
   billing: 'Billing',
   success: 'BillingSuccess',
+  cancel: 'BillingCancel',
 } as const
 
 export const BillingRouteIcon: Record<keyof typeof BillingRouteNames, Component> = {
   billing: CreditCard,
   success: CreditCard,
+  cancel: CreditCard,
 }
 
 export const billingRoutes: RouteRecordRaw[] = [
@@ -43,6 +46,16 @@ export const billingRoutes: RouteRecordRaw[] = [
       layout: 'authenticated',
       requiresAuth: true,
       title: 'billing.success.title',
+    },
+  },
+  {
+    path: BillingRoutePaths.cancel,
+    name: BillingRouteNames.cancel,
+    component: () => import('./pages/BillingCancelPage.vue'),
+    meta: {
+      layout: 'authenticated',
+      requiresAuth: true,
+      title: 'billing.cancel.title',
     },
   },
 ]

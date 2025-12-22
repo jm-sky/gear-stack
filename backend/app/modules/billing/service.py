@@ -98,8 +98,27 @@ class BillingService:
 
         # Check if user already has a subscription
         subscription = await self.repository.get_subscription_by_user_id(user_id)
+
+        # If user has active paid subscription, cancel it first to allow upgrade/downgrade
         if subscription and subscription.plan_tier in ["pro", "pro_plus"] and subscription.status == "active":
-            raise SubscriptionAlreadyExistsError("User already has an active paid subscription")
+            logger.info(f"User {user_id} changing from {subscription.plan_tier} to {plan_tier}, canceling old subscription")
+
+            # Cancel old Stripe subscription if it exists
+            if subscription.stripe_subscription_id:
+                try:
+                    await self.stripe_client.cancel_subscription(subscription.stripe_subscription_id, cancel_at_period_end=False)  # Cancel immediately
+                    logger.info(f"Canceled Stripe subscription {subscription.stripe_subscription_id}")
+                except Exception as e:
+                    logger.warning(f"Failed to cancel old Stripe subscription: {e}")
+
+            # Downgrade to free in database (will be upgraded after successful payment)
+            await self.repository.update_subscription(
+                subscription.id,
+                plan_tier="free",
+                billing_interval=None,
+                status="active",
+                stripe_subscription_id=None,
+            )
 
         # Get or create Stripe customer
         if subscription and subscription.stripe_customer_id:
@@ -440,26 +459,26 @@ class BillingService:
 
         results = []
         for sub in subscriptions.scalars().all():
-            # Get user details
-            user = await self.repository.db.get(UserDB, PyUUID(sub.user_id))
+            # Get user details (user_id is ULID, not UUID)
+            user = await self.repository.db.get(UserDB, sub.user_id)
 
             results.append(
                 {
                     "id": str(sub.id),
-                    "userId": sub.user_id,
-                    "userName": user.name if user else None,
-                    "userEmail": user.email if user else None,
-                    "stripeCustomerId": sub.stripe_customer_id,
-                    "stripeSubscriptionId": sub.stripe_subscription_id,
-                    "planTier": sub.plan_tier,
-                    "billingInterval": sub.billing_interval,
+                    "user_id": sub.user_id,
+                    "user_name": user.name if user else None,
+                    "user_email": user.email if user else None,
+                    "stripe_customer_id": sub.stripe_customer_id,
+                    "stripe_subscription_id": sub.stripe_subscription_id,
+                    "plan_tier": sub.plan_tier,
+                    "billing_interval": sub.billing_interval,
                     "status": sub.status,
-                    "currentPeriodStart": sub.current_period_start,
-                    "currentPeriodEnd": sub.current_period_end,
-                    "cancelAtPeriodEnd": sub.cancel_at_period_end,
-                    "isGrandfathered": sub.is_grandfathered,
-                    "createdAt": sub.created_at,
-                    "updatedAt": sub.updated_at,
+                    "current_period_start": sub.current_period_start,
+                    "current_period_end": sub.current_period_end,
+                    "cancel_at_period_end": sub.cancel_at_period_end,
+                    "is_grandfathered": sub.is_grandfathered,
+                    "created_at": sub.created_at,
+                    "updated_at": sub.updated_at,
                 }
             )
 
@@ -608,6 +627,100 @@ class BillingService:
                     reason=reason or "Manual admin modification",
                 )
 
+            return SubscriptionResponse.model_validate(updated_subscription)
+
+        return SubscriptionResponse.model_validate(subscription)
+
+    async def admin_cancel_subscription(
+        self,
+        subscription_id: str,
+        reason: str | None = None,
+    ) -> SubscriptionResponse:
+        """
+        Admin method to cancel subscription immediately (admin only).
+
+        This method:
+        1. Cancels Stripe subscription if it exists
+        2. Changes plan tier to 'free'
+        3. Sets status to 'canceled'
+        4. Logs changes to history
+
+        Args:
+            subscription_id: Subscription ID
+            reason: Reason for cancellation (for audit log)
+
+        Returns:
+            Updated subscription
+
+        Raises:
+            SubscriptionNotFoundError: If subscription not found
+            StripeAPIError: If Stripe API call fails
+        """
+        from uuid import UUID as PyUUID
+
+        from .db_models import SubscriptionDB
+
+        # Try to get subscription - first try as UUID, then as user_id (ULID)
+        subscription = None
+
+        # Try as UUID first (normal case)
+        try:
+            subscription_uuid = PyUUID(subscription_id)
+            subscription = await self.repository.get_subscription_by_id(subscription_uuid)
+        except (ValueError, TypeError):
+            # Not a UUID, might be ULID (user_id) - try to find by user_id
+            subscription = await self.repository.get_subscription_by_user_id(subscription_id)
+
+        if not subscription:
+            logger.error(f"Subscription not found: {subscription_id} (tried as UUID and as user_id)")
+            raise SubscriptionNotFoundError(f"Subscription {subscription_id} not found")
+
+        # Cancel Stripe subscription if it exists
+        if subscription.stripe_subscription_id:
+            try:
+                # Cancel immediately (not at period end)
+                await self.stripe_client.cancel_subscription(
+                    subscription.stripe_subscription_id,
+                    cancel_at_period_end=False,
+                )
+                logger.info(f"Cancelled Stripe subscription {subscription.stripe_subscription_id} for admin action")
+            except Exception as e:
+                logger.warning(f"Failed to cancel Stripe subscription {subscription.stripe_subscription_id}: {e}")
+                # Continue with database update even if Stripe fails
+
+        # Track changes for audit log
+        changes = []
+
+        # Change plan to free
+        if subscription.plan_tier != "free":
+            changes.append(("plan_tier", subscription.plan_tier, "free"))
+            subscription.plan_tier = "free"
+
+        # Set status to canceled
+        if subscription.status != "canceled":
+            changes.append(("status", subscription.status, "canceled"))
+            subscription.status = "canceled"
+
+        # Set cancel_at_period_end to False (already canceled)
+        if subscription.cancel_at_period_end:
+            changes.append(("cancel_at_period_end", str(subscription.cancel_at_period_end), "False"))
+            subscription.cancel_at_period_end = False
+
+        # Save changes
+        if changes:
+            updated_subscription = await self.repository.update_subscription(subscription_id=subscription.id)
+
+            # Log changes to history
+            for change_type, old_val, new_val in changes:
+                await self.repository.create_subscription_history(
+                    subscription_id=subscription.id,
+                    change_type=f"admin_cancel_{change_type}",
+                    old_value=old_val,
+                    new_value=new_val,
+                    reason=reason or "Admin canceled subscription",
+                )
+
+            logger.info(f"Admin canceled subscription {subscription_id}")
             return SubscriptionResponse.model_validate(updated_subscription)
 
         return SubscriptionResponse.model_validate(subscription)

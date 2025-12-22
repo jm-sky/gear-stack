@@ -111,6 +111,13 @@ class AdminApiService {
     const response = await apiClient.patch<IAdminSubscription>(`/billing/admin/subscriptions/${subscriptionId}`, data)
     return response.data
   }
+
+  async cancelSubscription(subscriptionId: TUUID, reason?: string): Promise<IAdminSubscription> {
+    const response = await apiClient.post<IAdminSubscription>(`/billing/admin/subscriptions/${subscriptionId}/cancel`, {
+      reason,
+    })
+    return response.data
+  }
 }
 
 export const adminApiService = new AdminApiService()

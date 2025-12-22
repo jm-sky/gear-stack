@@ -69,6 +69,8 @@ export interface PlanFeatures {
   limits: {
     aiTokens: number
     storage: number
+    items: number
+    containers: number
   }
   popular?: boolean
 }
@@ -87,10 +89,14 @@ export const PLAN_FEATURES: Record<PlanTier, PlanFeatures> = {
       'Data export (JSON/Markdown)',
       'BYOK: Bring Your Own API Key (OpenRouter)',
       '100 MB storage',
+      '2,000 items limit',
+      '100 containers limit',
     ],
     limits: {
       aiTokens: 0, // BYOK required
       storage: 100 * 1024 * 1024, // 100 MB
+      items: 2000,
+      containers: 100,
     },
   },
   pro: {
@@ -107,10 +113,14 @@ export const PLAN_FEATURES: Record<PlanTier, PlanFeatures> = {
       '~$1 worth of AI tokens/month',
       'Advanced features',
       '5 GB storage',
+      '10,000 items limit',
+      '250 containers limit',
     ],
     limits: {
       aiTokens: 1_000_000,
       storage: 5 * 1024 * 1024 * 1024, // 5 GB
+      items: 10000,
+      containers: 250,
     },
     popular: true,
   },
@@ -128,10 +138,14 @@ export const PLAN_FEATURES: Record<PlanTier, PlanFeatures> = {
       '~$10 worth of AI tokens/month',
       'Premium support',
       '50 GB storage',
+      '50,000 items limit',
+      '500 containers limit',
     ],
     limits: {
       aiTokens: 10_000_000,
       storage: 50 * 1024 * 1024 * 1024, // 50 GB
+      items: 50000,
+      containers: 500,
     },
   },
 }

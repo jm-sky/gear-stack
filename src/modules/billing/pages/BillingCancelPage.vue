@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CheckCircle } from 'lucide-vue-next'
+import { XCircle } from 'lucide-vue-next'
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -28,7 +28,7 @@ const handleGoToApp = () => {
   router.push(GearRoutePath.Containers)
 }
 
-const handleManageBilling = () => {
+const handleTryAgain = () => {
   router.push(BillingRoutePaths.billing)
 }
 </script>
@@ -45,14 +45,14 @@ const handleManageBilling = () => {
       >
         <CardHeader class="text-center space-y-4">
           <div
-            class="mx-auto mb-2 flex size-20 items-center justify-center rounded-full bg-green-100 transition-all duration-500"
+            class="mx-auto mb-2 flex size-20 items-center justify-center rounded-full bg-red-100 transition-all duration-500"
             :class="{
               'scale-100 opacity-100': isAnimated,
               'scale-0 opacity-0': !isAnimated,
             }"
           >
-            <CheckCircle
-              class="size-12 text-green-600 transition-all duration-500 delay-200"
+            <XCircle
+              class="size-12 text-red-600 transition-all duration-500 delay-200"
               :class="{
                 'scale-100 opacity-100': isAnimated,
                 'scale-0 opacity-0': !isAnimated,
@@ -60,28 +60,29 @@ const handleManageBilling = () => {
             />
           </div>
           <CardTitle class="text-3xl font-bold">
-            {{ t('billing.success.title') }}
+            {{ t('billing.cancel.title') }}
           </CardTitle>
           <CardDescription class="text-base">
-            {{ t('billing.success.description') }}
+            {{ t('billing.cancel.description') }}
           </CardDescription>
         </CardHeader>
 
         <CardContent class="text-center space-y-4">
           <p class="text-base text-muted-foreground">
-            {{ t('billing.success.message') }}
+            {{ t('billing.cancel.message') }}
           </p>
         </CardContent>
 
         <CardFooter class="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-          <Button class="w-full sm:w-auto" @click="handleGoToApp">
-            {{ t('billing.success.goToApp') }}
+          <Button class="w-full sm:w-auto" @click="handleTryAgain">
+            {{ t('billing.cancel.tryAgain') }}
           </Button>
-          <Button variant="outline" class="w-full sm:w-auto" @click="handleManageBilling">
-            {{ t('billing.success.manageBilling') }}
+          <Button variant="outline" class="w-full sm:w-auto" @click="handleGoToApp">
+            {{ t('billing.cancel.goToApp') }}
           </Button>
         </CardFooter>
       </Card>
     </div>
   </AuthenticatedLayout>
 </template>
+

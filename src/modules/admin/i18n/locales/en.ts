@@ -28,6 +28,11 @@ export const adminEn = {
         description: 'Review and manage content reports',
         button: 'Manage Reports',
       },
+      subscriptions: {
+        title: 'Subscriptions',
+        description: 'Manage user subscriptions and billing plans',
+        button: 'Manage Subscriptions',
+      },
     },
     users: {
       title: 'Users Management',
@@ -229,6 +234,12 @@ export const adminEn = {
         confirm: 'Are you sure you want to {action}?',
         success: 'Grandfathered status updated',
         error: 'Failed to update status',
+      },
+      cancel: {
+        action: 'Cancel Subscription',
+        confirm: 'Are you sure you want to cancel {plan} subscription? This will immediately cancel the subscription, downgrade to Free, and cancel in Stripe if applicable.',
+        success: '{plan} subscription canceled successfully',
+        error: 'Failed to cancel subscription',
       },
       stats: {
         totalUsers: 'Total Users',

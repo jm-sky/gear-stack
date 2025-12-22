@@ -28,6 +28,11 @@ export const adminPl = {
         description: 'Przeglądaj i zarządzaj zgłoszeniami treści',
         button: 'Zarządzaj Zgłoszeniami',
       },
+      subscriptions: {
+        title: 'Subskrypcje',
+        description: 'Zarządzaj subskrypcjami użytkowników i planami płatności',
+        button: 'Zarządzaj Subskrypcjami',
+      },
     },
     users: {
       title: 'Zarządzanie Użytkownikami',
@@ -229,6 +234,12 @@ export const adminPl = {
         confirm: 'Czy na pewno chcesz {action}?',
         success: 'Status dożywotniego dostępu zaktualizowany',
         error: 'Nie udało się zaktualizować statusu',
+      },
+      cancel: {
+        action: 'Anuluj Subskrypcję',
+        confirm: 'Czy na pewno chcesz anulować subskrypcję {plan}? To natychmiast anuluje subskrypcję, obniży plan do Free i anuluje w Stripe, jeśli dotyczy.',
+        success: 'Subskrypcja {plan} została anulowana',
+        error: 'Nie udało się anulować subskrypcji',
       },
       stats: {
         totalUsers: 'Wszyscy Użytkownicy',

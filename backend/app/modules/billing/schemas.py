@@ -60,21 +60,24 @@ class UpdateOpenRouterTokenRequest(BaseModel):
 class SubscriptionResponse(BaseModel):
     """Response schema for subscription details."""
 
-    id: str = Field(alias="id")
-    userId: str = Field(alias="user_id")
-    stripeCustomerId: str | None = Field(None, alias="stripe_customer_id")
-    stripeSubscriptionId: str | None = Field(None, alias="stripe_subscription_id")
-    planTier: Literal["free", "pro", "pro_plus"] = Field(alias="plan_tier")
-    billingInterval: Literal["monthly", "annual"] | None = Field(None, alias="billing_interval")
-    status: Literal["active", "canceled", "past_due", "unpaid", "incomplete"] = Field(alias="status")
-    currentPeriodStart: datetime | None = Field(None, alias="current_period_start")
-    currentPeriodEnd: datetime | None = Field(None, alias="current_period_end")
-    cancelAtPeriodEnd: bool = Field(False, alias="cancel_at_period_end")
-    isGrandfathered: bool = Field(False, alias="is_grandfathered")
-    createdAt: datetime = Field(alias="created_at")
-    updatedAt: datetime = Field(alias="updated_at")
+    id: str = Field(alias="id", serialization_alias="id")
+    userId: str = Field(alias="user_id", serialization_alias="userId")
+    stripeCustomerId: str | None = Field(None, alias="stripe_customer_id", serialization_alias="stripeCustomerId")
+    stripeSubscriptionId: str | None = Field(None, alias="stripe_subscription_id", serialization_alias="stripeSubscriptionId")
+    planTier: Literal["free", "pro", "pro_plus"] = Field(alias="plan_tier", serialization_alias="planTier")
+    billingInterval: Literal["month", "year"] | None = Field(None, alias="billing_interval", serialization_alias="billingInterval")
+    status: Literal["active", "canceled", "past_due", "unpaid", "incomplete"] = Field(alias="status", serialization_alias="status")
+    currentPeriodStart: datetime | None = Field(None, alias="current_period_start", serialization_alias="currentPeriodStart")
+    currentPeriodEnd: datetime | None = Field(None, alias="current_period_end", serialization_alias="currentPeriodEnd")
+    cancelAtPeriodEnd: bool = Field(False, alias="cancel_at_period_end", serialization_alias="cancelAtPeriodEnd")
+    isGrandfathered: bool = Field(False, alias="is_grandfathered", serialization_alias="isGrandfathered")
+    createdAt: datetime = Field(alias="created_at", serialization_alias="createdAt")
+    updatedAt: datetime = Field(alias="updated_at", serialization_alias="updatedAt")
 
-    model_config = {"from_attributes": True, "populate_by_name": True}
+    model_config = {
+        "from_attributes": True,
+        "populate_by_name": True,
+    }
 
     @field_validator("id", mode="before")
     @classmethod
@@ -181,23 +184,26 @@ class SubscriptionHistoryResponse(BaseModel):
 class AdminSubscriptionResponse(BaseModel):
     """Response schema for admin subscription details (includes user info)."""
 
-    id: str = Field(alias="id")
-    userId: str = Field(alias="user_id")
-    userName: str | None = Field(None, alias="user_name")
-    userEmail: str | None = Field(None, alias="user_email")
-    stripeCustomerId: str | None = Field(None, alias="stripe_customer_id")
-    stripeSubscriptionId: str | None = Field(None, alias="stripe_subscription_id")
-    planTier: Literal["free", "pro", "pro_plus"] = Field(alias="plan_tier")
-    billingInterval: Literal["monthly", "annual"] | None = Field(None, alias="billing_interval")
-    status: Literal["active", "canceled", "past_due", "unpaid", "incomplete"] = Field(alias="status")
-    currentPeriodStart: datetime | None = Field(None, alias="current_period_start")
-    currentPeriodEnd: datetime | None = Field(None, alias="current_period_end")
-    cancelAtPeriodEnd: bool = Field(False, alias="cancel_at_period_end")
-    isGrandfathered: bool = Field(False, alias="is_grandfathered")
-    createdAt: datetime = Field(alias="created_at")
-    updatedAt: datetime = Field(alias="updated_at")
+    id: str = Field(alias="id", serialization_alias="id")
+    userId: str = Field(alias="user_id", serialization_alias="userId")
+    userName: str | None = Field(None, alias="user_name", serialization_alias="userName")
+    userEmail: str | None = Field(None, alias="user_email", serialization_alias="userEmail")
+    stripeCustomerId: str | None = Field(None, alias="stripe_customer_id", serialization_alias="stripeCustomerId")
+    stripeSubscriptionId: str | None = Field(None, alias="stripe_subscription_id", serialization_alias="stripeSubscriptionId")
+    planTier: Literal["free", "pro", "pro_plus"] = Field(alias="plan_tier", serialization_alias="planTier")
+    billingInterval: Literal["month", "year"] | None = Field(None, alias="billing_interval", serialization_alias="billingInterval")
+    status: Literal["active", "canceled", "past_due", "unpaid", "incomplete"] = Field(alias="status", serialization_alias="status")
+    currentPeriodStart: datetime | None = Field(None, alias="current_period_start", serialization_alias="currentPeriodStart")
+    currentPeriodEnd: datetime | None = Field(None, alias="current_period_end", serialization_alias="currentPeriodEnd")
+    cancelAtPeriodEnd: bool = Field(False, alias="cancel_at_period_end", serialization_alias="cancelAtPeriodEnd")
+    isGrandfathered: bool = Field(False, alias="is_grandfathered", serialization_alias="isGrandfathered")
+    createdAt: datetime = Field(alias="created_at", serialization_alias="createdAt")
+    updatedAt: datetime = Field(alias="updated_at", serialization_alias="updatedAt")
 
-    model_config = {"from_attributes": True, "populate_by_name": True}
+    model_config = {
+        "from_attributes": True,
+        "populate_by_name": True,
+    }
 
     @field_validator("id", mode="before")
     @classmethod
@@ -247,4 +253,14 @@ class AdminUpdateSubscriptionRequest(BaseModel):
         None,
         max_length=500,
         description="Reason for manual modification (for audit log)",
+    )
+
+
+class AdminCancelSubscriptionRequest(BaseModel):
+    """Request schema for admin subscription cancellation."""
+
+    reason: str | None = Field(
+        None,
+        max_length=500,
+        description="Reason for cancellation (for audit log)",
     )

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CreditCard, Crown, MoreHorizontal, Shield, User } from 'lucide-vue-next'
+import { CreditCard, Crown, MoreHorizontal, Shield, User, X } from 'lucide-vue-next'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
@@ -87,6 +87,38 @@ async function toggleGrandfathered(subscription: IAdminSubscription) {
   } catch (error) {
     console.error('Failed to update grandfathered status:', error)
     handleError(error, { fallbackMessage: t('admin.subscriptions.grandfathered.error', 'Failed to update status') })
+  }
+}
+
+async function cancelSubscription(subscription: IAdminSubscription) {
+  const planName = t(`admin.subscriptions.plans.${subscription.planTier}`, subscription.planTier)
+
+  if (
+    !confirm(
+      t(
+        'admin.subscriptions.cancel.confirm',
+        { plan: planName },
+        `Are you sure you want to cancel ${planName} subscription? This will immediately cancel the subscription, downgrade to Free, and cancel in Stripe if applicable.`,
+      ),
+    )
+  ) {
+    return
+  }
+
+  if (!subscription.id) {
+    handleError(new Error('Subscription ID is missing'), { fallbackMessage: t('admin.subscriptions.cancel.error', 'Failed to cancel subscription') })
+    return
+  }
+
+  try {
+    await adminApiService.cancelSubscription(subscription.id, `Admin canceled ${planName} subscription`)
+    toast.success(
+      t('admin.subscriptions.cancel.success', { plan: planName }, `${planName} subscription canceled successfully`),
+    )
+    await loadData()
+  } catch (error) {
+    console.error('Failed to cancel subscription:', error)
+    handleError(error, { fallbackMessage: t('admin.subscriptions.cancel.error', 'Failed to cancel subscription') })
   }
 }
 
@@ -251,6 +283,15 @@ onMounted(() => {
               >
                 <CreditCard class="size-4" />
                 <span>{{ t('admin.subscriptions.changeTo.pro_plus', 'Change to Pro Plus') }}</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <!-- Cancel Subscription -->
+              <DropdownMenuItem
+                :disabled="row.original.planTier === 'free' || row.original.status === 'canceled'"
+                @click="cancelSubscription(row.original)"
+              >
+                <X class="size-4" />
+                <span>{{ t('admin.subscriptions.cancel.action', 'Cancel Subscription') }}</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <!-- Toggle Grandfathered -->

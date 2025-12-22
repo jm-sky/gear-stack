@@ -10,6 +10,7 @@ import type {
   PlanTier,
   UpdateOpenRouterTokenRequest,
 } from '../types'
+import { BillingRoutePaths } from '../routes'
 import { billingService } from '../services/billingService'
 import { PLAN_FEATURES } from '../types'
 
@@ -110,8 +111,8 @@ export function useSubscription() {
   }
 
   const upgradeToPlan = async (planTier: Exclude<PlanTier, 'free'>, billingInterval: BillingInterval) => {
-    const successUrl = `${window.location.origin}/billing/success`
-    const cancelUrl = `${window.location.origin}/billing`
+    const successUrl = `${window.location.origin}${BillingRoutePaths.success}`
+    const cancelUrl = `${window.location.origin}${BillingRoutePaths.cancel}`
 
     await createCheckoutMutation.mutateAsync({
       planTier,

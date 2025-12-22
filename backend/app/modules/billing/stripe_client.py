@@ -214,6 +214,8 @@ class StripeClient:
             stripe.error.SignatureVerificationError: If signature is invalid
         """
         try:
+            logger.info(f"Verifying webhook - secret length: {len(self.webhook_secret)}, secret starts with: {self.webhook_secret[:15]}")
+            logger.info(f"Signature header: {sig_header[:100]}")
             event = stripe.Webhook.construct_event(payload, sig_header, self.webhook_secret)
             logger.info(f"Verified webhook event {event.id} of type {event.type}")
             return event

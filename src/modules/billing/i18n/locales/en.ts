@@ -26,6 +26,13 @@ export const en = {
       manageBilling: 'Manage Billing',
       continue: 'Continue to Billing',
     },
+    cancel: {
+      title: 'Payment Canceled',
+      description: 'Your payment was canceled and no charges were made.',
+      message: 'You can try again anytime. If you need help, please contact our support team.',
+      tryAgain: 'Try Again',
+      goToApp: 'Go to App',
+    },
     status: {
       active: 'Active',
       canceled: 'Canceled',
@@ -50,6 +57,8 @@ export const en = {
           dataExport: 'Data export (JSON/Markdown)',
           byok: 'BYOK: Bring Your Own API Key (OpenRouter)',
           storage: '100 MB storage',
+          itemsLimit: '2,000 items limit',
+          containersLimit: '100 containers limit',
         },
       },
       pro: {
@@ -62,6 +71,8 @@ export const en = {
           aiTokens: '~$1 worth of AI tokens/month',
           advancedFeatures: 'Advanced features',
           storage: '5 GB storage',
+          itemsLimit: '10,000 items limit',
+          containersLimit: '250 containers limit',
         },
       },
       pro_plus: {
@@ -74,6 +85,8 @@ export const en = {
           aiTokens: '~$10 worth of AI tokens/month',
           premiumSupport: 'Premium support',
           storage: '50 GB storage',
+          itemsLimit: '50,000 items limit',
+          containersLimit: '500 containers limit',
         },
       },
     },

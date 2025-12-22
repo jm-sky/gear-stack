@@ -26,6 +26,13 @@ export const pl = {
       manageBilling: 'Zarządzaj Płatnościami',
       continue: 'Przejdź do Płatności',
     },
+    cancel: {
+      title: 'Płatność Anulowana',
+      description: 'Twoja płatność została anulowana i nie zostały naliczone żadne opłaty.',
+      message: 'Możesz spróbować ponownie w dowolnym momencie. Jeśli potrzebujesz pomocy, skontaktuj się z naszym zespołem wsparcia.',
+      tryAgain: 'Spróbuj Ponownie',
+      goToApp: 'Przejdź do Aplikacji',
+    },
     status: {
       active: 'Aktywna',
       canceled: 'Anulowana',
@@ -50,6 +57,8 @@ export const pl = {
           dataExport: 'Eksport danych (JSON/Markdown)',
           byok: 'BYOK: Użyj własnego klucza API (OpenRouter)',
           storage: '100 MB przestrzeni',
+          itemsLimit: 'Limit 2 000 przedmiotów',
+          containersLimit: 'Limit 100 kontenerów',
         },
       },
       pro: {
@@ -62,6 +71,8 @@ export const pl = {
           aiTokens: '~$1 w tokenach AI/miesiąc',
           advancedFeatures: 'Zaawansowane funkcje',
           storage: '5 GB przestrzeni',
+          itemsLimit: 'Limit 10 000 przedmiotów',
+          containersLimit: 'Limit 250 kontenerów',
         },
       },
       pro_plus: {
@@ -74,6 +85,8 @@ export const pl = {
           aiTokens: '~$10 w tokenach AI/miesiąc',
           premiumSupport: 'Premium wsparcie',
           storage: '50 GB przestrzeni',
+          itemsLimit: 'Limit 50 000 przedmiotów',
+          containersLimit: 'Limit 500 kontenerów',
         },
       },
     },

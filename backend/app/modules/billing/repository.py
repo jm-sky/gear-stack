@@ -281,28 +281,44 @@ class BillingRepository:
     ) -> SubscriptionHistoryDB:
         """Create subscription history entry (simplified).
 
+        For subscription_activated events, old_value and new_value are plan tiers.
+        For other events, they are status values.
+
         Args:
             subscription_id: Subscription ID
             change_type: Type of change
-            old_value: Old value
-            new_value: New value
+            old_value: Old value (plan tier or status)
+            new_value: New value (plan tier or status)
             reason: Reason for change
 
         Returns:
             Created history entry
         """
-        # Get subscription to get user_id
+        # Get subscription to get user_id and current values
         result = await self.db.execute(select(SubscriptionDB).where(SubscriptionDB.id == subscription_id))
         subscription = result.scalar_one()
+
+        # For subscription_activated, values are plan tiers
+        if change_type == "subscription_activated":
+            old_plan = old_value or "free"
+            new_plan = new_value
+            old_status = "active"
+            new_status = "active"
+        else:
+            # For other events, values are statuses
+            old_plan = subscription.plan_tier
+            new_plan = subscription.plan_tier
+            old_status = old_value or subscription.status
+            new_status = new_value
 
         history = SubscriptionHistoryDB(
             subscription_id=subscription_id,
             user_id=subscription.user_id,
             event_type=change_type,
-            old_status=old_value,
-            new_status=new_value,
-            old_plan_tier=None,
-            new_plan_tier=None,
+            old_status=old_status,
+            new_status=new_status,
+            old_plan_tier=old_plan,
+            new_plan_tier=new_plan,
             event_metadata={"reason": reason} if reason else None,
         )
         self.db.add(history)
