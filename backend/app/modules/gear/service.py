@@ -396,17 +396,43 @@ class GearService:
             updatedAt=container.updated_at,
         )
 
-    async def create_container(self, user_id: str, data: ContainerCreate, default_public: bool = False) -> ContainerResponse:
+    async def create_container(
+        self,
+        user_id: str,
+        data: ContainerCreate,
+        default_public: bool = False,
+        billing_service: Any = None,
+    ) -> ContainerResponse:
         """Create a new gear container.
 
         Args:
             user_id: Owner user ID
             data: Container creation data
             default_public: Default public setting from user preferences
+            billing_service: Optional billing service for limit validation
 
         Returns:
             Created container response
+
+        Raises:
+            HTTPException: If container limit is reached
         """
+        # Check limits if billing service is provided
+        if billing_service:
+            try:
+                limits = await billing_service.get_subscription_limits(user_id)
+                containers_count = await self.repository.count_user_containers(user_id)
+                if containers_count >= limits.containersLimit:
+                    from fastapi import HTTPException
+
+                    raise HTTPException(
+                        status_code=403,
+                        detail=f"Container limit reached ({containers_count}/{limits.containersLimit}). Upgrade to premium for more containers.",
+                    )
+            except Exception as e:
+                # If limit check fails, log but don't block creation (graceful degradation)
+                logger.warning(f"Failed to check container limits: {e}")
+
         # Use default_public if isPublic is not explicitly set
         if data.isPublic is None:
             data.isPublic = default_public
@@ -655,17 +681,43 @@ class GearService:
         # Delete containers (cascade delete will handle items and images in database)
         return await self.repository.delete_all_containers(user_id)
 
-    async def create_item(self, container_id: str, user_id: str, data: ItemCreate) -> ItemResponse | None:
+    async def create_item(
+        self,
+        container_id: str,
+        user_id: str,
+        data: ItemCreate,
+        billing_service: Any = None,
+    ) -> ItemResponse | None:
         """Create a new gear item in a container.
 
         Args:
             container_id: Parent container ID
             user_id: Owner user ID
             data: Item creation data
+            billing_service: Optional billing service for limit validation
 
         Returns:
             Created item response if container exists, None otherwise
+
+        Raises:
+            HTTPException: If item limit is reached
         """
+        # Check limits if billing service is provided
+        if billing_service:
+            try:
+                limits = await billing_service.get_subscription_limits(user_id)
+                items_count = await self.repository.count_user_items(user_id)
+                if items_count >= limits.itemsLimit:
+                    from fastapi import HTTPException
+
+                    raise HTTPException(
+                        status_code=403,
+                        detail=f"Item limit reached ({items_count}/{limits.itemsLimit}). Upgrade to premium for more items.",
+                    )
+            except Exception as e:
+                # If limit check fails, log but don't block creation (graceful degradation)
+                logger.warning(f"Failed to check item limits: {e}")
+
         item = await self.repository.create_item(container_id, user_id, data)
         if not item:
             return None

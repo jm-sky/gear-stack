@@ -65,12 +65,8 @@ class SubscriptionResponse(BaseModel):
     stripeCustomerId: str | None = Field(None, alias="stripe_customer_id")
     stripeSubscriptionId: str | None = Field(None, alias="stripe_subscription_id")
     planTier: Literal["free", "pro", "pro_plus"] = Field(alias="plan_tier")
-    billingInterval: Literal["monthly", "annual"] | None = Field(
-        None, alias="billing_interval"
-    )
-    status: Literal["active", "canceled", "past_due", "unpaid", "incomplete"] = Field(
-        alias="status"
-    )
+    billingInterval: Literal["monthly", "annual"] | None = Field(None, alias="billing_interval")
+    status: Literal["active", "canceled", "past_due", "unpaid", "incomplete"] = Field(alias="status")
     currentPeriodStart: datetime | None = Field(None, alias="current_period_start")
     currentPeriodEnd: datetime | None = Field(None, alias="current_period_end")
     cancelAtPeriodEnd: bool = Field(False, alias="cancel_at_period_end")
@@ -86,7 +82,7 @@ class SubscriptionResponse(BaseModel):
         """Convert UUID to string for id field."""
         if isinstance(v, UUID):
             return str(v)
-        return v
+        return str(v)
 
 
 class CheckoutSessionResponse(BaseModel):
@@ -111,6 +107,8 @@ class SubscriptionLimitsResponse(BaseModel):
     canExportData: bool
     canUseAdvancedFeatures: bool
     requiresByok: bool
+    itemsLimit: int = Field(..., description="Maximum number of items allowed")
+    containersLimit: int = Field(..., description="Maximum number of containers allowed")
 
 
 class MessageResponse(BaseModel):
@@ -143,7 +141,7 @@ class StripeWebhookEventResponse(BaseModel):
         """Convert UUID to string for id field."""
         if isinstance(v, UUID):
             return str(v)
-        return v
+        return str(v)
 
 
 # ---------------------------------------------------------
@@ -172,7 +170,7 @@ class SubscriptionHistoryResponse(BaseModel):
         """Convert UUID to string for UUID fields."""
         if isinstance(v, UUID):
             return str(v)
-        return v
+        return str(v)
 
 
 # ---------------------------------------------------------
@@ -190,12 +188,8 @@ class AdminSubscriptionResponse(BaseModel):
     stripeCustomerId: str | None = Field(None, alias="stripe_customer_id")
     stripeSubscriptionId: str | None = Field(None, alias="stripe_subscription_id")
     planTier: Literal["free", "pro", "pro_plus"] = Field(alias="plan_tier")
-    billingInterval: Literal["monthly", "annual"] | None = Field(
-        None, alias="billing_interval"
-    )
-    status: Literal["active", "canceled", "past_due", "unpaid", "incomplete"] = Field(
-        alias="status"
-    )
+    billingInterval: Literal["monthly", "annual"] | None = Field(None, alias="billing_interval")
+    status: Literal["active", "canceled", "past_due", "unpaid", "incomplete"] = Field(alias="status")
     currentPeriodStart: datetime | None = Field(None, alias="current_period_start")
     currentPeriodEnd: datetime | None = Field(None, alias="current_period_end")
     cancelAtPeriodEnd: bool = Field(False, alias="cancel_at_period_end")
@@ -211,7 +205,7 @@ class AdminSubscriptionResponse(BaseModel):
         """Convert UUID to string for id field."""
         if isinstance(v, UUID):
             return str(v)
-        return v
+        return str(v)
 
 
 class AdminSubscriptionStatsResponse(BaseModel):
@@ -237,11 +231,9 @@ class AdminUpdateSubscriptionRequest(BaseModel):
         None,
         description="Update subscription plan tier",
     )
-    status: Literal["active", "canceled", "past_due", "unpaid", "incomplete"] | None = (
-        Field(
-            None,
-            description="Update subscription status",
-        )
+    status: Literal["active", "canceled", "past_due", "unpaid", "incomplete"] | None = Field(
+        None,
+        description="Update subscription status",
     )
     isGrandfathered: bool | None = Field(
         None,

@@ -501,3 +501,12 @@ class ContentReportListResponse(BaseModel):
     offset: int = Field(..., description="Offset used for pagination")
 
     model_config = {"populate_by_name": True}
+
+
+class UserLimitsResponse(BaseModel):
+    """Response schema for user account limits and usage."""
+
+    tier: Literal["free", "pro", "pro_plus"]
+    limits: dict[str, int] = Field(..., description="Account limits (items, containers)")
+    usage: dict[str, int] = Field(..., description="Current usage (items, containers)")
+    percentage: dict[str, float] = Field(..., description="Usage percentage (items, containers)")

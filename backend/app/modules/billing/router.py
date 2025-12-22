@@ -374,9 +374,9 @@ async def stripe_webhook(
 
     try:
         # Verify webhook signature and construct event
-        event = await stripe_client.verify_webhook_signature(
-            payload=payload.decode("utf-8"),
-            signature=sig_header,
+        event = stripe_client.construct_webhook_event(
+            payload=payload,
+            sig_header=sig_header,
         )
 
         # Log webhook event

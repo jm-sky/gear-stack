@@ -285,27 +285,41 @@ class BillingService:
         plan_tier = subscription.plan_tier
 
         # Define limits based on plan tier
+        # Limits are designed to protect database storage, not restrict normal usage
+        # Estimated size: ~1-2 KB per item, ~0.5-1 KB per container (with PostgreSQL overhead)
         limits: dict[str, dict[str, int | bool]] = {
             "free": {
                 "aiMonthlyTokenLimit": 0,  # 0 = BYOK required
-                "storageLimit": 100 * 1024 * 1024,  # 100 MB
+                "storageLimit": 100 * 1024 * 1024,  # 100 MB (for images/storage)
                 "canExportData": True,
                 "canUseAdvancedFeatures": False,
                 "requiresByok": True,
+                # Free tier: ~2-4 MB database space protection
+                # Enough for typical users (multiple gear lists), protects against abuse
+                "itemsLimit": 2000,  # ~2-4 MB database space
+                "containersLimit": 100,  # ~50-100 KB database space (containers are lightweight)
             },
             "pro": {
                 "aiMonthlyTokenLimit": 1_000_000,  # ~$1 worth
-                "storageLimit": 5 * 1024 * 1024 * 1024,  # 5 GB
+                "storageLimit": 5 * 1024 * 1024 * 1024,  # 5 GB (for images/storage)
                 "canExportData": True,
                 "canUseAdvancedFeatures": True,
                 "requiresByok": False,
+                # Pro tier: ~10-20 MB database space
+                # For power users with extensive gear collections
+                "itemsLimit": 10000,  # ~10-20 MB database space
+                "containersLimit": 250,  # ~125-250 KB database space
             },
             "pro_plus": {
                 "aiMonthlyTokenLimit": 10_000_000,  # ~$10 worth
-                "storageLimit": 50 * 1024 * 1024 * 1024,  # 50 GB
+                "storageLimit": 50 * 1024 * 1024 * 1024,  # 50 GB (for images/storage)
                 "canExportData": True,
                 "canUseAdvancedFeatures": True,
                 "requiresByok": False,
+                # Pro Plus tier: ~50-100 MB database space
+                # For professional users, gear shops, or very large collections
+                "itemsLimit": 50000,  # ~50-100 MB database space
+                "containersLimit": 500,  # ~250-500 KB database space
             },
         }
 
@@ -323,6 +337,8 @@ class BillingService:
             canExportData=cast(bool, plan_limits["canExportData"]),
             canUseAdvancedFeatures=cast(bool, plan_limits["canUseAdvancedFeatures"]),
             requiresByok=cast(bool, plan_limits["requiresByok"]),
+            itemsLimit=plan_limits["itemsLimit"],
+            containersLimit=plan_limits["containersLimit"],
         )
 
     async def check_ai_access(self, user_id: str, openrouter_token: str | None = None) -> bool:

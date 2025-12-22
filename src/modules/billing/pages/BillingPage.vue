@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import CommonPageHeader from '@/components/layout/CommonPageHeader.vue'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
+import AccountLimitsCard from '@/modules/gear/components/AccountLimitsCard.vue'
 import type { BillingInterval } from '../types'
 import PlanCard from '../components/PlanCard.vue'
 import SubscriptionCard from '../components/SubscriptionCard.vue'
@@ -31,7 +32,7 @@ const handleSelectPlan = async (planTier: 'pro' | 'pro_plus') => {
       />
 
       <div class="grid gap-8 lg:grid-cols-3">
-        <div class="lg:col-span-1">
+        <div class="lg:col-span-1 space-y-6">
           <SubscriptionCard />
         </div>
 
@@ -97,6 +98,8 @@ const handleSelectPlan = async (planTier: 'pro' | 'pro_plus') => {
           </div>
         </div>
       </div>
+
+      <AccountLimitsCard />
     </div>
   </AuthenticatedLayout>
 </template>

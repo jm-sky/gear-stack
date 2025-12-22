@@ -819,6 +819,20 @@ export const gearEn = {
         tokenSaveError: 'Failed to save API token',
         tokenRemoveError: 'Failed to remove API token',
       },
+      accountLimits: {
+        title: 'Account Limits',
+        description: 'Your account limits and current usage',
+        plan: 'Plan',
+        tier: {
+          free: 'Free',
+          pro: 'Pro',
+          proPlus: 'Pro Plus',
+        },
+        items: 'Items',
+        containers: 'Containers',
+        used: 'used',
+        upgradePrompt: 'You are approaching your account limits. Consider upgrading to Pro for more storage.',
+      },
     },
     catalogue: {
       title: 'Global Catalogue',
@@ -1739,6 +1753,20 @@ export const gearPl = {
         tokenRequired: 'Token API jest wymagany',
         tokenSaveError: 'Nie udało się zapisać tokena API',
         tokenRemoveError: 'Nie udało się usunąć tokena API',
+      },
+      accountLimits: {
+        title: 'Limity Konta',
+        description: 'Twoje limity konta i aktualne wykorzystanie',
+        plan: 'Plan',
+        tier: {
+          free: 'Darmowy',
+          pro: 'Pro',
+          proPlus: 'Pro Plus',
+        },
+        items: 'Przedmioty',
+        containers: 'Kontenery',
+        used: 'użyto',
+        upgradePrompt: 'Zbliżasz się do limitów swojego konta. Rozważ upgrade do Pro, aby uzyskać więcej miejsca.',
       },
     },
     catalogue: {
