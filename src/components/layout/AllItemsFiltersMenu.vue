@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MoreVertical } from 'lucide-vue-next'
+import { FilterIcon } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import Button from '@/components/ui/button/Button.vue'
 import {
@@ -33,7 +33,7 @@ function handleImageFilterChange(value: 'all' | 'withImage' | 'withoutImage') {
   <DropdownMenu>
     <DropdownMenuTrigger as-child>
       <Button variant="outline" size="icon" class="shrink-0">
-        <MoreVertical class="size-4" />
+        <FilterIcon class="size-4" />
         <span class="sr-only">{{ t('gear.allItems.filters.menu', 'More filters') }}</span>
       </Button>
     </DropdownMenuTrigger>
