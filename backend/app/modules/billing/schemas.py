@@ -1,9 +1,10 @@
 """Pydantic schemas for billing and subscription endpoints."""
 
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
+from uuid import UUID
 
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field, HttpUrl, field_validator
 
 
 # ---------------------------------------------------------
@@ -59,21 +60,33 @@ class UpdateOpenRouterTokenRequest(BaseModel):
 class SubscriptionResponse(BaseModel):
     """Response schema for subscription details."""
 
-    id: str
-    userId: str
-    stripeCustomerId: str | None = None
-    stripeSubscriptionId: str | None = None
-    planTier: Literal["free", "pro", "pro_plus"]
-    billingInterval: Literal["monthly", "annual"] | None = None
-    status: Literal["active", "canceled", "past_due", "unpaid", "incomplete"]
-    currentPeriodStart: datetime | None = None
-    currentPeriodEnd: datetime | None = None
-    cancelAtPeriodEnd: bool = False
-    isGrandfathered: bool = False
-    createdAt: datetime
-    updatedAt: datetime
+    id: str = Field(alias="id")
+    userId: str = Field(alias="user_id")
+    stripeCustomerId: str | None = Field(None, alias="stripe_customer_id")
+    stripeSubscriptionId: str | None = Field(None, alias="stripe_subscription_id")
+    planTier: Literal["free", "pro", "pro_plus"] = Field(alias="plan_tier")
+    billingInterval: Literal["monthly", "annual"] | None = Field(
+        None, alias="billing_interval"
+    )
+    status: Literal["active", "canceled", "past_due", "unpaid", "incomplete"] = Field(
+        alias="status"
+    )
+    currentPeriodStart: datetime | None = Field(None, alias="current_period_start")
+    currentPeriodEnd: datetime | None = Field(None, alias="current_period_end")
+    cancelAtPeriodEnd: bool = Field(False, alias="cancel_at_period_end")
+    isGrandfathered: bool = Field(False, alias="is_grandfathered")
+    createdAt: datetime = Field(alias="created_at")
+    updatedAt: datetime = Field(alias="updated_at")
 
     model_config = {"from_attributes": True, "populate_by_name": True}
+
+    @field_validator("id", mode="before")
+    @classmethod
+    def convert_uuid_to_str(cls, v: Any) -> str:
+        """Convert UUID to string for id field."""
+        if isinstance(v, UUID):
+            return str(v)
+        return v
 
 
 class CheckoutSessionResponse(BaseModel):
@@ -114,15 +127,23 @@ class MessageResponse(BaseModel):
 class StripeWebhookEventResponse(BaseModel):
     """Response schema for webhook event details."""
 
-    id: str
-    eventId: str
-    eventType: str
-    processed: bool
-    processedAt: datetime | None = None
-    error: str | None = None
-    createdAt: datetime
+    id: str = Field(alias="id")
+    eventId: str = Field(alias="stripe_event_id")
+    eventType: str = Field(alias="event_type")
+    processed: bool = Field(alias="processed")
+    processedAt: datetime | None = Field(None, alias="processed_at")
+    error: str | None = Field(None, alias="error_message")
+    createdAt: datetime = Field(alias="created_at")
 
     model_config = {"from_attributes": True, "populate_by_name": True}
+
+    @field_validator("id", mode="before")
+    @classmethod
+    def convert_uuid_to_str(cls, v: Any) -> str:
+        """Convert UUID to string for id field."""
+        if isinstance(v, UUID):
+            return str(v)
+        return v
 
 
 # ---------------------------------------------------------
@@ -133,15 +154,25 @@ class StripeWebhookEventResponse(BaseModel):
 class SubscriptionHistoryResponse(BaseModel):
     """Response schema for subscription history entry."""
 
-    id: str
-    subscriptionId: str
-    changeType: str
-    oldValue: str | None = None
-    newValue: str | None = None
-    reason: str | None = None
-    createdAt: datetime
+    id: str = Field(alias="id")
+    subscriptionId: str = Field(alias="subscription_id")
+    userId: str = Field(alias="user_id")
+    eventType: str = Field(alias="event_type")
+    oldStatus: str | None = Field(None, alias="old_status")
+    newStatus: str = Field(alias="new_status")
+    oldPlanTier: str | None = Field(None, alias="old_plan_tier")
+    newPlanTier: str = Field(alias="new_plan_tier")
+    createdAt: datetime = Field(alias="created_at")
 
     model_config = {"from_attributes": True, "populate_by_name": True}
+
+    @field_validator("id", "subscriptionId", mode="before")
+    @classmethod
+    def convert_uuid_to_str(cls, v: Any) -> str:
+        """Convert UUID to string for UUID fields."""
+        if isinstance(v, UUID):
+            return str(v)
+        return v
 
 
 # ---------------------------------------------------------
@@ -152,23 +183,35 @@ class SubscriptionHistoryResponse(BaseModel):
 class AdminSubscriptionResponse(BaseModel):
     """Response schema for admin subscription details (includes user info)."""
 
-    id: str
-    userId: str
-    userName: str | None = None
-    userEmail: str | None = None
-    stripeCustomerId: str | None = None
-    stripeSubscriptionId: str | None = None
-    planTier: Literal["free", "pro", "pro_plus"]
-    billingInterval: Literal["monthly", "annual"] | None = None
-    status: Literal["active", "canceled", "past_due", "unpaid", "incomplete"]
-    currentPeriodStart: datetime | None = None
-    currentPeriodEnd: datetime | None = None
-    cancelAtPeriodEnd: bool = False
-    isGrandfathered: bool = False
-    createdAt: datetime
-    updatedAt: datetime
+    id: str = Field(alias="id")
+    userId: str = Field(alias="user_id")
+    userName: str | None = Field(None, alias="user_name")
+    userEmail: str | None = Field(None, alias="user_email")
+    stripeCustomerId: str | None = Field(None, alias="stripe_customer_id")
+    stripeSubscriptionId: str | None = Field(None, alias="stripe_subscription_id")
+    planTier: Literal["free", "pro", "pro_plus"] = Field(alias="plan_tier")
+    billingInterval: Literal["monthly", "annual"] | None = Field(
+        None, alias="billing_interval"
+    )
+    status: Literal["active", "canceled", "past_due", "unpaid", "incomplete"] = Field(
+        alias="status"
+    )
+    currentPeriodStart: datetime | None = Field(None, alias="current_period_start")
+    currentPeriodEnd: datetime | None = Field(None, alias="current_period_end")
+    cancelAtPeriodEnd: bool = Field(False, alias="cancel_at_period_end")
+    isGrandfathered: bool = Field(False, alias="is_grandfathered")
+    createdAt: datetime = Field(alias="created_at")
+    updatedAt: datetime = Field(alias="updated_at")
 
     model_config = {"from_attributes": True, "populate_by_name": True}
+
+    @field_validator("id", mode="before")
+    @classmethod
+    def convert_uuid_to_str(cls, v: Any) -> str:
+        """Convert UUID to string for id field."""
+        if isinstance(v, UUID):
+            return str(v)
+        return v
 
 
 class AdminSubscriptionStatsResponse(BaseModel):
@@ -194,9 +237,11 @@ class AdminUpdateSubscriptionRequest(BaseModel):
         None,
         description="Update subscription plan tier",
     )
-    status: Literal["active", "canceled", "past_due", "unpaid", "incomplete"] | None = Field(
-        None,
-        description="Update subscription status",
+    status: Literal["active", "canceled", "past_due", "unpaid", "incomplete"] | None = (
+        Field(
+            None,
+            description="Update subscription status",
+        )
     )
     isGrandfathered: bool | None = Field(
         None,
