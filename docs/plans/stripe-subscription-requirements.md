@@ -5,7 +5,7 @@
 
 ## Podsumowanie
 
-Implementacja 3-poziomowego systemu subskrypcji (Free/Pro/Business) z wykorzystaniem Stripe Checkout i Billing Portal.
+Implementacja 3-poziomowego systemu subskrypcji (Free/Pro/Pro Plus) z wykorzystaniem Stripe Checkout i Billing Portal.
 
 ## Struktura Planów i Ceny
 
@@ -24,8 +24,8 @@ Implementacja 3-poziomowego systemu subskrypcji (Free/Pro/Business) z wykorzysta
 
 ### Pro Tier
 - **Cena:**
-  - **Monthly:** $4.99/miesiąc
-  - **Annual:** $49/rok (17% zniżki = 2 miesiące gratis)
+  - **Monthly:** $5.00/miesiąc
+  - **Annual:** $50/rok (17% zniżki = 2 miesiące gratis)
 - **AI Limit:** $10/miesiąc (bez potrzeby własnego tokenu)
 - **Storage Limit:** 5 GB (5,368,709,120 bytes)
 - **Funkcje:**
@@ -36,10 +36,10 @@ Implementacja 3-poziomowego systemu subskrypcji (Free/Pro/Business) z wykorzysta
   - Wybór wszystkich dostępnych modeli AI
   - Limity wystarczające dla użytkowników indywidualnych
 
-### Business Tier
+### Pro Plus Tier
 - **Cena:**
-  - **Monthly:** $14.99/miesiąc
-  - **Annual:** $149/rok (17% zniżki = 2 miesiące gratis)
+  - **Monthly:** $15.00/miesiąc
+  - **Annual:** $150/rok (17% zniżki = 2 miesiące gratis)
 - **AI Limit:** $50/miesiąc (bez potrzeby własnego tokenu)
 - **Storage Limit:** 50 GB (53,687,091,200 bytes)
 - **Funkcje:**
@@ -48,7 +48,7 @@ Implementacja 3-poziomowego systemu subskrypcji (Free/Pro/Business) z wykorzysta
   - Wybór wszystkich dostępnych modeli AI
   - **Brak ekskluzywnych funkcji** - tylko wyższe limity
 
-**Uwaga:** Business tier NIE ma ekskluzywnych funkcji typu API access, batch operations czy priority support. To wyłącznie tier z wyższymi limitami dla power users.
+**Uwaga:** Pro Plus tier NIE ma ekskluzywnych funkcji typu API access, batch operations czy priority support. To wyłącznie tier z wyższymi limitami dla power users.
 
 ## Stripe Configuration
 
@@ -59,19 +59,19 @@ Implementacja 3-poziomowego systemu subskrypcji (Free/Pro/Business) z wykorzysta
 - Description: "Enhanced features with higher AI and storage limits"
 - Statement descriptor: "GEARSTACK PRO"
 
-**Product 2: Business Plan**
-- Name: "Gear Stack Business"
+**Product 2: Pro Plus Plan**
+- Name: "Gear Stack Pro Plus"
 - Description: "Maximum AI and storage limits for power users"
-- Statement descriptor: "GEARSTACK BIZ"
+- Statement descriptor: "GEARSTACK PRO+"
 
 ### Prices w Stripe Dashboard
 
 | Plan | Interval | Amount | Price ID (do skopiowania) |
 |------|----------|--------|---------------------------|
-| Pro | Monthly | $4.99 USD | `STRIPE_PRO_MONTHLY_PRICE_ID` |
-| Pro | Annual | $49.00 USD | `STRIPE_PRO_ANNUAL_PRICE_ID` |
-| Business | Monthly | $14.99 USD | `STRIPE_BUSINESS_MONTHLY_PRICE_ID` |
-| Business | Annual | $149.00 USD | `STRIPE_BUSINESS_ANNUAL_PRICE_ID` |
+| Pro | Monthly | $5.00 USD | `STRIPE_PRO_MONTHLY_PRICE_ID` |
+| Pro | Annual | $50.00 USD | `STRIPE_PRO_ANNUAL_PRICE_ID` |
+| Pro Plus | Monthly | $15.00 USD | `STRIPE_PRO_PLUS_MONTHLY_PRICE_ID` |
+| Pro Plus | Annual | $150.00 USD | `STRIPE_PRO_PLUS_ANNUAL_PRICE_ID` |
 
 **Annual discount:** 17% (równowartość 2 miesięcy gratis)
 
@@ -91,18 +91,18 @@ Wymagane eventy w Stripe webhook endpoint:
   - User podaje token w Settings → AI Settings
   - Aplikacja używa tokenu usera do requestów
   - Limit $1/miesiąc (tracking po stronie usera)
-- **Pro/Business:** Bez własnego tokenu
+- **Pro/Pro Plus:** Bez własnego tokenu
   - Aplikacja używa własnego API key
   - Tracking usage w bazie danych
-  - Limity: Pro $10/mo, Business $50/mo
+  - Limity: Pro $10/mo, Pro Plus $50/mo
 
 ### Image Processing Quality
 - **Free:** Standard quality
-- **Pro/Business:** High quality mode
+- **Pro/Pro Plus:** High quality mode
 
 ### Image Search
 - **Free:** ❌ Niedostępne
-- **Pro/Business:** ✅ Dostępne
+- **Pro/Pro Plus:** ✅ Dostępne
 
 ### AI Models
 - **Wszystkie tiery:** Pełny wybór dostępnych modeli
@@ -129,7 +129,7 @@ Wymagane eventy w Stripe webhook endpoint:
    - ✅ Limity Pro tier (AI: $10, Storage: 5GB)
    - ✅ **Lifetime access** (na zawsze bezpłatny Pro)
    - ✅ Widoczne w admin panel jako "Grandfathered Pro"
-   - ❌ Nie mogą upgrade do Business (tylko przez nową subskrypcję paid)
+   - ❌ Nie mogą upgrade do Pro Plus (tylko przez nową subskrypcję paid)
    - ❌ Nie pojawiają się w Stripe Dashboard (tylko w aplikacji)
 
 3. Migration script:
@@ -178,14 +178,14 @@ Billing: Lifetime (no charges)
 |------|----------------|----------------------|-------------|
 | `user` | 1.00 | 104,857,600 | Free tier: 100MB, $1 AI (BYOK) |
 | `premium` | 10.00 | 5,368,709,120 | Pro tier: 5GB, $10 AI |
-| `business` | 50.00 | 53,687,091,200 | Business tier: 50GB, $50 AI |
+| `business` | 50.00 | 53,687,091,200 | Pro Plus tier: 50GB, $50 AI |
 | `admin` | NULL | NULL | Admin: unlimited |
 | `owner` | NULL | NULL | Owner: unlimited |
 
 **Mapping:**
 - Free tier → `user` role limits
 - Pro tier → `premium` role limits
-- Business tier → `business` role limits
+- Pro Plus tier → `business` role limits
 - Grandfathered → `premium` role limits (same as Pro)
 
 ## OpenRouter Token Management (Free Tier)
@@ -334,8 +334,8 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 # Price IDs
 STRIPE_PRO_MONTHLY_PRICE_ID=price_...
 STRIPE_PRO_ANNUAL_PRICE_ID=price_...
-STRIPE_BUSINESS_MONTHLY_PRICE_ID=price_...
-STRIPE_BUSINESS_ANNUAL_PRICE_ID=price_...
+STRIPE_PRO_PLUS_MONTHLY_PRICE_ID=price_...
+STRIPE_PRO_PLUS_ANNUAL_PRICE_ID=price_...
 
 # OpenRouter (app's key for Pro/Business)
 OPENROUTER_API_KEY=sk-or-v1-...
@@ -346,8 +346,8 @@ OPENROUTER_API_KEY=sk-or-v1-...
 VITE_STRIPE_PUBLISHABLE_KEY=pk_...
 VITE_STRIPE_PRO_MONTHLY_PRICE_ID=price_...
 VITE_STRIPE_PRO_ANNUAL_PRICE_ID=price_...
-VITE_STRIPE_BUSINESS_MONTHLY_PRICE_ID=price_...
-VITE_STRIPE_BUSINESS_ANNUAL_PRICE_ID=price_...
+VITE_STRIPE_PRO_PLUS_MONTHLY_PRICE_ID=price_...
+VITE_STRIPE_PRO_PLUS_ANNUAL_PRICE_ID=price_...
 ```
 
 ### Security Considerations
@@ -404,11 +404,11 @@ VITE_STRIPE_BUSINESS_ANNUAL_PRICE_ID=price_...
 ## Open Questions & Decisions Log
 
 ### Resolved ✅
-- ✅ Pricing finalized: Pro $4.99/mo, Business $14.99/mo
+- ✅ Pricing finalized: Pro $5.00/mo, Pro Plus $15.00/mo
 - ✅ Feature limits finalized: AI ($1/$10/$50), Storage (100MB/5GB/50GB)
 - ✅ Grandfathered strategy: Lifetime Pro for existing premium users
 - ✅ Free tier AI: BYOK (own OpenRouter token required)
-- ✅ Business tier: No exclusive features, only higher limits
+- ✅ Pro Plus tier: No exclusive features, only higher limits
 - ✅ Timeline: 6-8 weeks, all phases sequentially
 
 ### To Decide Later 🤔

@@ -2,7 +2,7 @@
  * TypeScript types for Stripe billing module
  */
 
-export type PlanTier = 'free' | 'pro' | 'business'
+export type PlanTier = 'free' | 'pro' | 'pro_plus'
 
 export type BillingInterval = 'monthly' | 'annual'
 
@@ -97,9 +97,9 @@ export const PLAN_FEATURES: Record<PlanTier, PlanFeatures> = {
     tier: 'pro',
     name: 'Pro',
     price: {
-      monthly: 4.99,
-      annual: 49,
-      annualMonthly: 4.08,
+      monthly: 5.0,
+      annual: 50,
+      annualMonthly: 4.17,
     },
     features: [
       'Everything in Free',
@@ -114,13 +114,13 @@ export const PLAN_FEATURES: Record<PlanTier, PlanFeatures> = {
     },
     popular: true,
   },
-  business: {
-    tier: 'business',
-    name: 'Business',
+  pro_plus: {
+    tier: 'pro_plus',
+    name: 'Pro Plus',
     price: {
-      monthly: 14.99,
-      annual: 149,
-      annualMonthly: 12.42,
+      monthly: 15.0,
+      annual: 150,
+      annualMonthly: 12.5,
     },
     features: [
       'Everything in Pro',

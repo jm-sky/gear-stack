@@ -709,15 +709,15 @@ class StripeSettings(BaseSettings):
         validation_alias="STRIPE_PRO_ANNUAL_PRICE_ID",
         description="Stripe price ID for Pro annual subscription",
     )
-    business_monthly_price_id: str = Field(
+    pro_plus_monthly_price_id: str = Field(
         default="",
-        validation_alias="STRIPE_BUSINESS_MONTHLY_PRICE_ID",
-        description="Stripe price ID for Business monthly subscription",
+        validation_alias="STRIPE_PRO_PLUS_MONTHLY_PRICE_ID",
+        description="Stripe price ID for Pro Plus monthly subscription",
     )
-    business_annual_price_id: str = Field(
+    pro_plus_annual_price_id: str = Field(
         default="",
-        validation_alias="STRIPE_BUSINESS_ANNUAL_PRICE_ID",
-        description="Stripe price ID for Business annual subscription",
+        validation_alias="STRIPE_PRO_PLUS_ANNUAL_PRICE_ID",
+        description="Stripe price ID for Pro Plus annual subscription",
     )
 
     @field_validator("enabled", mode="before")

@@ -198,7 +198,7 @@ export const adminEn = {
       plans: {
         free: 'Free',
         pro: 'Pro',
-        business: 'Business',
+        pro_plus: 'Pro Plus',
       },
       billing: {
         monthly: 'Monthly',
@@ -214,7 +214,7 @@ export const adminEn = {
       changeTo: {
         free: 'Change to Free',
         pro: 'Change to Pro',
-        business: 'Change to Business',
+        pro_plus: 'Change to Pro Plus',
       },
       changePlan: {
         confirm: 'Are you sure you want to change plan to {plan}?',

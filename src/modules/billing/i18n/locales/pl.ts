@@ -42,9 +42,9 @@ export const pl = {
         name: 'Pro',
         description: 'Idealny do użytku osobistego',
       },
-      business: {
-        name: 'Business',
-        description: 'Zaawansowane funkcje dla zespołów',
+      pro_plus: {
+        name: 'Pro Plus',
+        description: 'Maksymalne limity dla zaawansowanych użytkowników',
       },
     },
   },

@@ -49,7 +49,7 @@ export interface IAdminItem {
 }
 
 export type SubscriptionStatus = 'active' | 'canceled' | 'past_due' | 'unpaid' | 'incomplete'
-export type PlanTier = 'free' | 'pro' | 'business'
+export type PlanTier = 'free' | 'pro' | 'pro_plus'
 export type BillingInterval = 'monthly' | 'annual'
 
 export interface IAdminSubscription {
@@ -78,7 +78,7 @@ export interface IAdminSubscriptionStats {
   pastDueSubscriptions: number
   freeUsers: number
   proUsers: number
-  businessUsers: number
+  proPlusUsers: number
   grandfatheredUsers: number
   monthlyRevenue: number
   annualRevenue: number

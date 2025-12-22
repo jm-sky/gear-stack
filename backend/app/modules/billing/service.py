@@ -83,7 +83,7 @@ class BillingService:
             StripeAPIError: If Stripe API call fails
         """
         # Validate plan tier
-        if plan_tier not in ["pro", "business"]:
+        if plan_tier not in ["pro", "pro_plus"]:
             raise InvalidPlanTierError(f"Invalid plan tier: {plan_tier}")
 
         # Validate billing interval
@@ -92,7 +92,7 @@ class BillingService:
 
         # Check if user already has a subscription
         subscription = await self.repository.get_subscription_by_user_id(user_id)
-        if subscription and subscription.plan_tier in ["pro", "business"] and subscription.status == "active":
+        if subscription and subscription.plan_tier in ["pro", "pro_plus"] and subscription.status == "active":
             raise SubscriptionAlreadyExistsError("User already has an active paid subscription")
 
         # Get or create Stripe customer
@@ -291,7 +291,7 @@ class BillingService:
                 "canUseAdvancedFeatures": True,
                 "requiresByok": False,
             },
-            "business": {
+            "pro_plus": {
                 "aiMonthlyTokenLimit": 10_000_000,  # ~$10 worth
                 "storageLimit": 50 * 1024 * 1024 * 1024,  # 50 GB
                 "canExportData": True,
@@ -305,7 +305,7 @@ class BillingService:
         # Type cast plan_tier to Literal and dict bool values to proper types
         from typing import cast, Literal
 
-        plan_tier_typed = cast(Literal["free", "pro", "business"], plan_tier)
+        plan_tier_typed = cast(Literal["free", "pro", "pro_plus"], plan_tier)
 
         return SubscriptionLimitsResponse(
             planTier=plan_tier_typed,
@@ -335,7 +335,7 @@ class BillingService:
             return False
 
         # Paid tiers have AI access
-        if subscription.plan_tier in ["pro", "business"]:
+        if subscription.plan_tier in ["pro", "pro_plus"]:
             return True
 
         # Free tier requires BYOK
@@ -366,9 +366,9 @@ class BillingService:
                 "monthly": settings.stripe.pro_monthly_price_id,
                 "annual": settings.stripe.pro_annual_price_id,
             },
-            "business": {
-                "monthly": settings.stripe.business_monthly_price_id,
-                "annual": settings.stripe.business_annual_price_id,
+            "pro_plus": {
+                "monthly": settings.stripe.pro_plus_monthly_price_id,
+                "annual": settings.stripe.pro_plus_annual_price_id,
             },
         }
 
@@ -411,12 +411,7 @@ class BillingService:
         from .db_models import SubscriptionDB
 
         # Get all subscriptions with user info
-        subscriptions = await self.repository.db.execute(
-            select(SubscriptionDB)
-            .join(UserDB, SubscriptionDB.user_id == UserDB.id)
-            .offset(skip)
-            .limit(limit)
-        )
+        subscriptions = await self.repository.db.execute(select(SubscriptionDB).join(UserDB, SubscriptionDB.user_id == UserDB.id).offset(skip).limit(limit))
 
         results = []
         for sub in subscriptions.scalars().all():
@@ -457,9 +452,7 @@ class BillingService:
         from .db_models import SubscriptionDB
 
         # Get all subscriptions
-        subscriptions = (
-            await self.repository.db.execute(select(SubscriptionDB))
-        ).scalars().all()
+        subscriptions = (await self.repository.db.execute(select(SubscriptionDB))).scalars().all()
 
         total_subscriptions = len(subscriptions)
 
@@ -471,7 +464,7 @@ class BillingService:
         # Count by plan tier
         free_count = sum(1 for s in subscriptions if s.plan_tier == "free")
         pro_count = sum(1 for s in subscriptions if s.plan_tier == "pro")
-        business_count = sum(1 for s in subscriptions if s.plan_tier == "business")
+        pro_plus_count = sum(1 for s in subscriptions if s.plan_tier == "pro_plus")
 
         # Count grandfathered users
         grandfathered_count = sum(1 for s in subscriptions if s.is_grandfathered)
@@ -484,21 +477,19 @@ class BillingService:
             if sub.status == "active" and not sub.is_grandfathered:
                 if sub.plan_tier == "pro":
                     if sub.billing_interval == "monthly":
-                        monthly_revenue += 4.99
+                        monthly_revenue += 5.0
                     elif sub.billing_interval == "annual":
-                        annual_revenue += 49.0
-                elif sub.plan_tier == "business":
+                        annual_revenue += 50.0
+                elif sub.plan_tier == "pro_plus":
                     if sub.billing_interval == "monthly":
-                        monthly_revenue += 14.99
+                        monthly_revenue += 15.0
                     elif sub.billing_interval == "annual":
-                        annual_revenue += 149.0
+                        annual_revenue += 150.0
 
         # Get total users count
         from app.modules.auth.db_models import UserDB
 
-        total_users = (
-            await self.repository.db.execute(select(func.count(UserDB.id)))
-        ).scalar() or 0
+        total_users = (await self.repository.db.execute(select(func.count(UserDB.id)))).scalar() or 0
 
         return {
             "totalUsers": total_users,
@@ -508,7 +499,7 @@ class BillingService:
             "pastDueSubscriptions": past_due_count,
             "freeUsers": free_count,
             "proUsers": pro_count,
-            "businessUsers": business_count,
+            "proPlusUsers": pro_plus_count,
             "grandfatheredUsers": grandfathered_count,
             "monthlyRevenue": monthly_revenue,
             "annualRevenue": annual_revenue,
@@ -522,7 +513,7 @@ class BillingService:
         is_grandfathered: bool | None = None,
         cancel_at_period_end: bool | None = None,
         reason: str | None = None,
-    ):  # type: ignore
+    ) -> SubscriptionResponse:
         """
         Admin method to manually update subscription (admin only).
 
@@ -555,25 +546,20 @@ class BillingService:
 
         # Update fields
         if plan_tier is not None and plan_tier != subscription.plan_tier:
-            if plan_tier not in ["free", "pro", "business"]:
+            if plan_tier not in ["free", "pro", "pro_plus"]:
                 raise InvalidPlanTierError(f"Invalid plan tier: {plan_tier}")
             changes.append(("plan_tier", subscription.plan_tier, plan_tier))
-            subscription.plan_tier = plan_tier  # type: ignore
+            subscription.plan_tier = plan_tier
 
         if status is not None and status != subscription.status:
             changes.append(("status", subscription.status, status))
-            subscription.status = status  # type: ignore
+            subscription.status = status
 
         if is_grandfathered is not None and is_grandfathered != subscription.is_grandfathered:
-            changes.append(
-                ("is_grandfathered", str(subscription.is_grandfathered), str(is_grandfathered))
-            )
+            changes.append(("is_grandfathered", str(subscription.is_grandfathered), str(is_grandfathered)))
             subscription.is_grandfathered = is_grandfathered
 
-        if (
-            cancel_at_period_end is not None
-            and cancel_at_period_end != subscription.cancel_at_period_end
-        ):
+        if cancel_at_period_end is not None and cancel_at_period_end != subscription.cancel_at_period_end:
             changes.append(
                 (
                     "cancel_at_period_end",
@@ -585,9 +571,7 @@ class BillingService:
 
         # Save changes
         if changes:
-            updated_subscription = await self.repository.update_subscription(
-                subscription_id=subscription.id
-            )
+            updated_subscription = await self.repository.update_subscription(subscription_id=subscription.id)
 
             # Log changes to history
             for change_type, old_val, new_val in changes:
@@ -599,6 +583,6 @@ class BillingService:
                     reason=reason or "Manual admin modification",
                 )
 
-            return updated_subscription
+            return SubscriptionResponse.model_validate(updated_subscription)
 
-        return subscription
+        return SubscriptionResponse.model_validate(subscription)

@@ -33,6 +33,12 @@
 - ❌ User: "Does X support Y?" → You: *starts coding*
 - ✅ User: "Does X support Y?" → You: "No. Would you like me to add it?"
 
+**When user asks "Może lepiej...?" or "Should we...?" or similar questions:**
+- ✅ Answer the question first
+- ✅ Explain pros/cons if relevant
+- ✅ Ask: "Would you like me to implement this change?"
+- ❌ DO NOT start coding immediately
+
 ## Reka-ui / shadcn-vue Checkbox
 
 **CRITICAL:** In Reka-ui (shadcn-vue), Checkbox uses `model-value` / `v-model`, **NOT** `checked` / `v-model:checked`.

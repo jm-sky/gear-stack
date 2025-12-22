@@ -82,7 +82,7 @@ async def upgrade() -> None:
                         REFERENCES users(id)
                         ON DELETE CASCADE,
                     CONSTRAINT valid_plan_tier
-                        CHECK (plan_tier IN ('free', 'pro', 'business')),
+                        CHECK (plan_tier IN ('free', 'pro', 'pro_plus')),
                     CONSTRAINT valid_billing_interval
                         CHECK (billing_interval IN ('month', 'year')),
                     CONSTRAINT valid_status

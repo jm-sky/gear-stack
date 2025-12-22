@@ -14,9 +14,9 @@ from pydantic import BaseModel, Field, HttpUrl
 class CreateCheckoutSessionRequest(BaseModel):
     """Request schema for creating a Stripe Checkout session."""
 
-    planTier: Literal["pro", "business"] = Field(
+    planTier: Literal["pro", "pro_plus"] = Field(
         ...,
-        description="Subscription plan tier (pro or business)",
+        description="Subscription plan tier (pro or pro_plus)",
     )
     billingInterval: Literal["monthly", "annual"] = Field(
         ...,
@@ -63,7 +63,7 @@ class SubscriptionResponse(BaseModel):
     userId: str
     stripeCustomerId: str | None = None
     stripeSubscriptionId: str | None = None
-    planTier: Literal["free", "pro", "business"]
+    planTier: Literal["free", "pro", "pro_plus"]
     billingInterval: Literal["monthly", "annual"] | None = None
     status: Literal["active", "canceled", "past_due", "unpaid", "incomplete"]
     currentPeriodStart: datetime | None = None
@@ -92,7 +92,7 @@ class PortalSessionResponse(BaseModel):
 class SubscriptionLimitsResponse(BaseModel):
     """Response schema for subscription feature limits."""
 
-    planTier: Literal["free", "pro", "business"]
+    planTier: Literal["free", "pro", "pro_plus"]
     aiMonthlyTokenLimit: int
     storageLimit: int
     canExportData: bool
@@ -158,7 +158,7 @@ class AdminSubscriptionResponse(BaseModel):
     userEmail: str | None = None
     stripeCustomerId: str | None = None
     stripeSubscriptionId: str | None = None
-    planTier: Literal["free", "pro", "business"]
+    planTier: Literal["free", "pro", "pro_plus"]
     billingInterval: Literal["monthly", "annual"] | None = None
     status: Literal["active", "canceled", "past_due", "unpaid", "incomplete"]
     currentPeriodStart: datetime | None = None
@@ -181,7 +181,7 @@ class AdminSubscriptionStatsResponse(BaseModel):
     pastDueSubscriptions: int
     freeUsers: int
     proUsers: int
-    businessUsers: int
+    proPlusUsers: int
     grandfatheredUsers: int
     monthlyRevenue: float
     annualRevenue: float
@@ -190,7 +190,7 @@ class AdminSubscriptionStatsResponse(BaseModel):
 class AdminUpdateSubscriptionRequest(BaseModel):
     """Request schema for admin subscription modifications."""
 
-    planTier: Literal["free", "pro", "business"] | None = Field(
+    planTier: Literal["free", "pro", "pro_plus"] | None = Field(
         None,
         description="Update subscription plan tier",
     )

@@ -531,21 +531,7 @@ async def admin_update_subscription(
             reason=request_data.reason,
         )
 
-        return SubscriptionResponse(
-            id=str(updated_subscription.id),
-            userId=updated_subscription.user_id,
-            stripeCustomerId=updated_subscription.stripe_customer_id,
-            stripeSubscriptionId=updated_subscription.stripe_subscription_id,
-            planTier=updated_subscription.plan_tier,
-            billingInterval=updated_subscription.billing_interval,
-            status=updated_subscription.status,
-            currentPeriodStart=updated_subscription.current_period_start,
-            currentPeriodEnd=updated_subscription.current_period_end,
-            cancelAtPeriodEnd=updated_subscription.cancel_at_period_end,
-            isGrandfathered=updated_subscription.is_grandfathered,
-            createdAt=updated_subscription.created_at,
-            updatedAt=updated_subscription.updated_at,
-        )
+        return updated_subscription
     except SubscriptionNotFoundError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

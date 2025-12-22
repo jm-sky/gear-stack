@@ -42,9 +42,9 @@ export const en = {
         name: 'Pro',
         description: 'Perfect for personal use',
       },
-      business: {
-        name: 'Business',
-        description: 'Advanced features for teams',
+      pro_plus: {
+        name: 'Pro Plus',
+        description: 'Maximum limits for power users',
       },
     },
   },

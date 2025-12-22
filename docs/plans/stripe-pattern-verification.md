@@ -127,7 +127,7 @@ class SubscriptionDB(Base):
     # Constraints
     __table_args__ = (
         CheckConstraint(
-            "plan_tier IN ('free', 'pro', 'business')",
+            "plan_tier IN ('free', 'pro', 'pro_plus')",
             name="valid_plan_tier"
         ),
         CheckConstraint(
@@ -162,13 +162,13 @@ from pydantic import BaseModel, Field, field_validator
 # 1. Base Schema - shared fields
 class SubscriptionBase(BaseModel):
     """Base schema for subscription."""
-    plan_tier: str = Field(..., pattern="^(free|pro|business)$")
+    plan_tier: str = Field(..., pattern="^(free|pro|pro_plus)$")
     billing_interval: str | None = Field(None, pattern="^(month|year)$")
 
     @field_validator("plan_tier")
     @classmethod
     def validate_plan_tier(cls, v: str) -> str:
-        if v not in ['free', 'pro', 'business']:
+        if v not in ['free', 'pro', 'pro_plus']:
             raise ValueError("Invalid plan tier")
         return v
 
@@ -398,7 +398,7 @@ async def upgrade() -> None:
                         REFERENCES users(id)
                         ON DELETE CASCADE,
                     CONSTRAINT valid_plan_tier
-                        CHECK (plan_tier IN ('free', 'pro', 'business')),
+                        CHECK (plan_tier IN ('free', 'pro', 'pro_plus')),
                     CONSTRAINT valid_billing_interval
                         CHECK (billing_interval IN ('month', 'year')),
                     CONSTRAINT valid_status
@@ -596,7 +596,7 @@ src/modules/billing/
 import type { TULID, TDateTime } from '@/shared/types/base.type'
 
 // Union types at top
-export type PlanTier = 'free' | 'pro' | 'business'
+export type PlanTier = 'free' | 'pro' | 'pro_plus'
 export type BillingInterval = 'month' | 'year'
 export type SubscriptionStatus =
   | 'active'
@@ -766,7 +766,7 @@ export function useSubscription(service?: IBillingService) {
   // Computed helpers
   const isFreeTier = computed(() => subscription.value?.planTier === 'free')
   const isProTier = computed(() => subscription.value?.planTier === 'pro')
-  const isBusinessTier = computed(() => subscription.value?.planTier === 'business')
+  const isProPlusTier = computed(() => subscription.value?.planTier === 'pro_plus')
   const isGrandfathered = computed(() => subscription.value?.isGrandfathered === true)
 
   return {
@@ -781,7 +781,7 @@ export function useSubscription(service?: IBillingService) {
     // Computed
     isFreeTier,
     isProTier,
-    isBusinessTier,
+    isProPlusTier,
     isGrandfathered,
 
     // Mutations
@@ -920,8 +920,8 @@ export const billingEn = {
       },
       pro: {
         title: 'Pro',
-        price_monthly: '$4.99/month',
-        price_annual: '$49/year',
+        price_monthly: '$5.00/month',
+        price_annual: '$50/year',
         annual_savings: 'Save 17%',
         features: {
           ai: '$10 AI limit included',
@@ -932,10 +932,10 @@ export const billingEn = {
         },
         cta: 'Upgrade to Pro',
       },
-      business: {
-        title: 'Business',
-        price_monthly: '$14.99/month',
-        price_annual: '$149/year',
+      pro_plus: {
+        title: 'Pro Plus',
+        price_monthly: '$15.00/month',
+        price_annual: '$150/year',
         annual_savings: 'Save 17%',
         features: {
           ai: '$50 AI limit included',
@@ -944,7 +944,7 @@ export const billingEn = {
           processing: 'High quality image processing',
           search: 'Advanced image search',
         },
-        cta: 'Upgrade to Business',
+        cta: 'Upgrade to Pro Plus',
       },
     },
     subscription: {
@@ -990,7 +990,7 @@ export { billingPl } from './locales/pl'
 import { z } from 'zod'
 
 export const subscriptionCreateSchema = z.object({
-  planTier: z.enum(['free', 'pro', 'business']),
+  planTier: z.enum(['free', 'pro', 'pro_plus']),
   billingInterval: z.enum(['month', 'year']),
 })
 
@@ -1043,8 +1043,8 @@ class StripeSettings(BaseSettings):
     # Price IDs
     pro_monthly_price_id: str = Field(default="", validation_alias="STRIPE_PRO_MONTHLY_PRICE_ID")
     pro_annual_price_id: str = Field(default="", validation_alias="STRIPE_PRO_ANNUAL_PRICE_ID")
-    business_monthly_price_id: str = Field(default="", validation_alias="STRIPE_BUSINESS_MONTHLY_PRICE_ID")
-    business_annual_price_id: str = Field(default="", validation_alias="STRIPE_BUSINESS_ANNUAL_PRICE_ID")
+    pro_plus_monthly_price_id: str = Field(default="", validation_alias="STRIPE_PRO_PLUS_MONTHLY_PRICE_ID")
+    pro_plus_annual_price_id: str = Field(default="", validation_alias="STRIPE_PRO_PLUS_ANNUAL_PRICE_ID")
 
 class Settings(BaseSettings):
     """Application settings."""
@@ -1115,8 +1115,8 @@ pro_price = settings.stripe.pro_monthly_price_id
    - Include grandfathered migration logic
 
 4. **Pricing Updates:**
-   - Pro: $4.99/mo, $49/yr
-   - Business: $14.99/mo, $149/yr
+   - Pro: $5.00/mo, $50/yr
+   - Pro Plus: $15.00/mo, $150/yr
    - Free: BYOK for AI
 
 ### ✅ Confirmed Patterns:

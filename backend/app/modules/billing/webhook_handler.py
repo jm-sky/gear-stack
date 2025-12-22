@@ -314,8 +314,8 @@ def _get_plan_tier_from_price_id(price_id: str) -> str:
     price_map = {
         settings.stripe.pro_monthly_price_id: "pro",
         settings.stripe.pro_annual_price_id: "pro",
-        settings.stripe.business_monthly_price_id: "business",
-        settings.stripe.business_annual_price_id: "business",
+        settings.stripe.pro_plus_monthly_price_id: "pro_plus",
+        settings.stripe.pro_plus_annual_price_id: "pro_plus",
     }
 
     plan_tier = price_map.get(price_id)

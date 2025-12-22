@@ -7,7 +7,7 @@
 
 ## Executive Summary
 
-This document outlines the complete implementation plan for integrating Stripe subscription billing into Gear Stack. The system will transform the current boolean `is_premium` flag into a comprehensive three-tier subscription system (Free, Pro, Business) with monthly and annual billing options.
+This document outlines the complete implementation plan for integrating Stripe subscription billing into Gear Stack. The system will transform the current boolean `is_premium` flag into a comprehensive three-tier subscription system (Free, Pro, Pro Plus) with monthly and annual billing options.
 
 **⚠️ IMPORTANT:** This plan has been verified against actual codebase patterns. See **[Pattern Verification Document](./stripe-pattern-verification.md)** for detailed pattern analysis.
 
@@ -82,15 +82,15 @@ This document outlines the complete implementation plan for integrating Stripe s
 ### Subscription Structure
 - **Free Tier:** Basic features with BYOK AI ($1) and storage (100MB)
 - **Pro Tier:** Enhanced features with $10 AI limit and 5GB storage
-- **Business Tier:** Advanced features with $50 AI limit and 50GB storage
+- **Pro Plus Tier:** Advanced features with $50 AI limit and 50GB storage
 
 ### Billing Model
-- Monthly subscriptions for Pro and Business
+- Monthly subscriptions for Pro and Pro Plus
 - Annual subscriptions with 17% discount (2 months free)
 - No trial period
 - **Final Pricing:**
-  - **Pro:** $4.99/month or $49/year
-  - **Business:** $14.99/month or $149/year
+  - **Pro:** $5.00/month or $50/year
+  - **Pro Plus:** $15.00/month or $150/year
 
 ### Technical Approach
 - **Stripe Checkout (hosted):** Simplest implementation, PCI compliant
@@ -228,14 +228,14 @@ Map subscription tiers to feature limit roles:
 
 - `free` → `user` role limits
 - `pro` → `premium` role limits
-- `business` → new `business` role limits
+- `pro_plus` → new `business` role limits
 - `admin`/`owner` → unlimited (unchanged)
 
 #### With `auth` Module
 
 - Maintain `UserDB.is_premium` for backward compatibility
 - Auto-sync based on subscription status:
-  - `is_premium = true` if `plan_tier IN ('pro', 'business')` AND `status = 'active'`
+  - `is_premium = true` if `plan_tier IN ('pro', 'pro_plus')` AND `status = 'active'`
   - `is_premium = false` otherwise
 
 #### With `users` Module
@@ -467,7 +467,7 @@ Payment failed (card declined, insufficient funds, etc.).
 #### TypeScript Types
 
 ```typescript
-export type PlanTier = 'free' | 'pro' | 'business'
+export type PlanTier = 'free' | 'pro' | 'pro_plus'
 export type BillingInterval = 'month' | 'year'
 export type SubscriptionStatus =
   | 'active'
@@ -532,8 +532,8 @@ export function useSubscription() {
   // Computed properties
   const isFreeTier = computed(() => subscription.value?.planTier === 'free')
   const isProTier = computed(() => subscription.value?.planTier === 'pro')
-  const isBusinessTier = computed(() => subscription.value?.planTier === 'business')
-  const canUpgrade = computed(() => subscription.value?.planTier !== 'business')
+  const isProPlusTier = computed(() => subscription.value?.planTier === 'pro_plus')
+  const canUpgrade = computed(() => subscription.value?.planTier !== 'pro_plus')
 
   // Cancel subscription mutation
   const { mutateAsync: cancelSubscription, isPending: isCanceling } = useMutation({
@@ -550,7 +550,7 @@ export function useSubscription() {
     isLoading,
     isFreeTier,
     isProTier,
-    isBusinessTier,
+    isProPlusTier,
     canUpgrade,
     cancelSubscription,
     isCanceling,
@@ -564,19 +564,19 @@ export function useSubscription() {
 
 1. **Unauthenticated User:**
    - Views pricing page at `/pricing`
-   - Selects plan (Free/Pro/Business)
+   - Selects plan (Free/Pro/Pro Plus)
    - Redirected to `/auth/login` or `/auth/register`
 
 2. **Authenticated User (Free Tier):**
    - Views pricing page
-   - Clicks "Upgrade to Pro" or "Upgrade to Business"
+   - Clicks "Upgrade to Pro" or "Upgrade to Pro Plus"
    - Frontend calls `POST /billing/checkout` with price ID
    - Backend returns Stripe Checkout URL
    - User redirected to Stripe Checkout (hosted page)
    - Completes payment on Stripe
    - Redirected back to app (success URL: `/settings/billing?success=true`)
 
-3. **Authenticated User (Pro/Business Tier):**
+3. **Authenticated User (Pro/Pro Plus Tier):**
    - Views current plan in settings
    - Clicks "Manage Billing"
    - Frontend calls `POST /billing/portal`
@@ -644,7 +644,7 @@ const buttonLabel = computed(() => {
 Displays current subscription status in Settings page.
 
 **Features:**
-- Plan badge (Free/Pro/Business)
+- Plan badge (Free/Pro/Pro Plus)
 - Current limits (AI, Storage)
 - Next billing date
 - "Manage Billing" button → Stripe Billing Portal
@@ -672,8 +672,8 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 # Price IDs (created in Stripe Dashboard)
 STRIPE_PRO_MONTHLY_PRICE_ID=price_...
 STRIPE_PRO_ANNUAL_PRICE_ID=price_...
-STRIPE_BUSINESS_MONTHLY_PRICE_ID=price_...
-STRIPE_BUSINESS_ANNUAL_PRICE_ID=price_...
+STRIPE_PRO_PLUS_MONTHLY_PRICE_ID=price_...
+STRIPE_PRO_PLUS_ANNUAL_PRICE_ID=price_...
 ```
 
 #### Frontend `.env`
@@ -685,8 +685,8 @@ STRIPE_BUSINESS_ANNUAL_PRICE_ID=price_...
 VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...
 VITE_STRIPE_PRO_MONTHLY_PRICE_ID=price_...
 VITE_STRIPE_PRO_ANNUAL_PRICE_ID=price_...
-VITE_STRIPE_BUSINESS_MONTHLY_PRICE_ID=price_...
-VITE_STRIPE_BUSINESS_ANNUAL_PRICE_ID=price_...
+VITE_STRIPE_PRO_PLUS_MONTHLY_PRICE_ID=price_...
+VITE_STRIPE_PRO_PLUS_ANNUAL_PRICE_ID=price_...
 ```
 
 ### Stripe Dashboard Setup
@@ -698,32 +698,32 @@ VITE_STRIPE_BUSINESS_ANNUAL_PRICE_ID=price_...
 - Description: "Enhanced features with higher limits"
 - Statement descriptor: "GEARSTACK PRO"
 
-**Product 2: Business Plan**
-- Name: "Business Plan"
+**Product 2: Pro Plus Plan**
+- Name: "Pro Plus Plan"
 - Description: "Advanced features with highest limits"
-- Statement descriptor: "GEARSTACK BIZ"
+- Statement descriptor: "GEARSTACK PRO+"
 
 #### 2. Create Prices
 
 For each product, create two prices:
 
 **Pro Monthly:**
-- Amount: $4.99 USD
+- Amount: $5.00 USD
 - Billing period: Monthly
 - ID: `price_promonthly...` (copy to env)
 
 **Pro Annual:**
-- Amount: $49.00 USD (17% discount)
+- Amount: $50.00 USD (17% discount)
 - Billing period: Yearly
 - ID: `price_proannual...` (copy to env)
 
-**Business Monthly:**
-- Amount: $14.99 USD
+**Pro Plus Monthly:**
+- Amount: $15.00 USD
 - Billing period: Monthly
 - ID: `price_businessmonthly...`
 
-**Business Annual:**
-- Amount: $149.00 USD (17% discount)
+**Pro Plus Annual:**
+- Amount: $150.00 USD (17% discount)
 - Billing period: Yearly
 - ID: `price_businessannual...`
 
@@ -900,8 +900,8 @@ stripe trigger invoice.payment_failed
 
 #### 4. Plan Changes
 - ✅ Upgrade: Free → Pro (payment required)
-- ✅ Upgrade: Pro → Business (prorated charge)
-- ✅ Downgrade: Business → Pro (credit applied to next invoice)
+- ✅ Upgrade: Pro → Pro Plus (prorated charge)
+- ✅ Downgrade: Pro Plus → Pro (credit applied to next invoice)
 - ✅ Downgrade at period end: Access maintained until current period ends
 
 #### 5. Payment Failures
@@ -1210,8 +1210,8 @@ Prevent users from submitting arbitrary price IDs:
 VALID_PRICE_IDS = {
     'pro_month': settings.stripe.pro_monthly_price_id,
     'pro_year': settings.stripe.pro_annual_price_id,
-    'business_month': settings.stripe.business_monthly_price_id,
-    'business_year': settings.stripe.business_annual_price_id,
+    'pro_plus_month': settings.stripe.pro_plus_monthly_price_id,
+    'pro_plus_year': settings.stripe.pro_plus_annual_price_id,
 }
 
 if price_id not in VALID_PRICE_IDS.values():
@@ -1556,7 +1556,7 @@ This implementation plan provides a complete blueprint for integrating Stripe su
   - i18n uses `.ts` files (NOT `.json`)
   - Database models use `DateTime(timezone=True)` and `datetime.now(UTC)`
   - Added `is_grandfathered` field for lifetime Pro access
-  - Final pricing: Pro $4.99/mo, Business $14.99/mo
+  - Final pricing: Pro $5.00/mo, Pro Plus $15.00/mo
   - Free tier requires BYOK (own OpenRouter token)
 
 ---
