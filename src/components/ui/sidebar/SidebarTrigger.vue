@@ -22,7 +22,7 @@ const { t } = useI18n()
     variant="ghost"
     size="icon"
     :aria-label="t('common.toggleSidebar')"
-    :class="cn('h-7 w-7', props.class)"
+    :class="cn('size-7 hover:opacity-50', props.class)"
     @click="toggleSidebar"
   >
     <PanelLeft />

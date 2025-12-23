@@ -143,6 +143,18 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - Aktualizacja backendu (API, walidacja, baza danych) i migracja kolumny `preferred_weight_unit`
    - Status: ✅ Completed | Priority: Medium | Complexity: Small
 
+6. **Ulepszenia inspirowane LighterPack**
+   - 📍 Lokalizacja: [LIGHTERPACK_IMPROVEMENTS_TASKS.md](./comparison/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
+   - 📋 **Tryb prosty** - [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-tryb-prosty-simple-mode-inspiracja-lighterpack) - toggle w ustawieniach, ukryte zaawansowane funkcje
+   - 📋 **Drag & Drop** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-drag--drop---rozszerzenie-inspiracja-lighterpack) - rozszerzenie kolejności przedmiotów + przenoszenie między kontenerami
+   - 📋 **System pomocy / Tutorial** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-system-pomocy--tutorial-inspiracja-lighterpack) - ramki z pomocą, przycisk `?`, AI Chat
+   - 📋 **Kontekstowe podpowiedzi** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-kontekstowe-podpowiedzi-inspiracja-lighterpack) - tooltips, empty states, podpowiedzi w formularzach
+   - 📋 **Quick Add / Inline Editing** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-quick-add--inline-editing---dopracowanie-inspiracja-lighterpack) - dopracowanie UX, quick add bez formularza
+   - 📋 **Import CSV** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-import-csv-inspiracja-lighterpack) - nowa funkcjonalność (export już istnieje)
+   - 📋 **Lepsze wizualizacje** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-lepsze-wizualizacje-inspiracja-lighterpack) - ulepszenie wykresów donut
+   - 📋 **Natychmiastowe obliczenia wagi** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-natychmiastowe-obliczenia-wagi-inspiracja-lighterpack) - real-time podczas edycji
+   - Status: 🔄 Planned | Priority: Medium | Complexity: Various
+
 ### Obniżony priorytet (trudne zadania)
 
 1. **Warianty kontenera**

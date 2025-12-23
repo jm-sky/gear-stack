@@ -104,7 +104,7 @@ const handleLogout = async () => {
     <div class="mx-auto flex h-(--header-height) items-center">
       <div class="w-(--sidebar-width) flex items-center justify-start gap-6">
         <SidebarTrigger class="ml-2.5 opacity-80" />
-        <RouterLink :to="AuthRoutePaths.dashboard" class="flex items-center gap-2 hover:brightness-80 transition-all duration-300">
+        <RouterLink :to="AuthRoutePaths.dashboard" class="flex items-center gap-2 hover:brightness-80 hover:scale-103 transition-all ease-in-out duration-300">
           <LogoText />
         </RouterLink>
       </div>

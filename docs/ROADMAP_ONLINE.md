@@ -591,6 +591,28 @@ System limitów liczby przedmiotów i kontenerów w zależności od typu konta (
 - ✅ Pole `avatar_url` w profilu użytkownika (już istnieje w DB)
 - ✅ Możliwość podania własnego URL do awatara
 
+### 🔄 Tryb prosty (Simple Mode) (inspiracja LighterPack)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../comparison/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
+
+**Koncepcja:**
+Dodanie trybu prostego dla użytkowników, którzy chcą prostszy interfejs z ukrytymi zaawansowanymi funkcjami.
+
+**Wymagania:**
+- Toggle "Tryb prosty" w ustawieniach użytkownika (zapisywane w DB)
+- Zaawansowane opcje w dropdown menu jako `Więcej... →`
+- Podstawowe pola widoczne domyślnie
+- Zaawansowane pola ukryte pod `Więcej` w formularzach
+- W trybie prostym ukrywamy zaawansowane kolumny w tabelach (np. cena, waluta, marka, kolor)
+- Zagnieżdżanie kontenerów zostaje (użytkownik kontroluje czy zagnieżdża)
+- Nie robimy Wizard dla nowych użytkowników
+
+**Szczegóły implementacji:**
+- Ustawienie `simpleMode: boolean` w ustawieniach użytkownika (zapisywane w DB)
+- Podstawowe pola przedmiotu: nazwa, waga, ilość, kategoria, notatki, status, priorytet
+- Zaawansowane pola (ukryte w trybie prostym): cena, waluta, marka, kolor, URL, data ważności, shelf life, wearable, consumable
+- W tabelach: ukrycie zaawansowanych kolumn w trybie prostym
+- W formularzach: sekcja "Więcej opcji" z dropdown/expandable section
+
 ### 🚧 Sekcja AI w Gear Settings
 **Status:** 🚧 Partially Completed | **Priority:** High | **Complexity:** Medium
 
