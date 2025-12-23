@@ -39,7 +39,10 @@ docker-compose -f backend/docker-compose.dev.yml up    # Start backend in develo
 docker-compose -f backend/docker-compose.dev.yml down  # Stop backend
 ```
 
-**Important:** In development, the backend typically runs in a Docker container via `docker-compose.dev.yml`. This ensures consistent environment and dependencies. The backend is accessible at `http://localhost:8000` (or the port specified in `VITE_API_PROXY_URL`).
+**Important:**
+- In development, the backend typically runs in a Docker container via `docker-compose.dev.yml`. This ensures consistent environment and dependencies. The backend is accessible at `http://localhost:8000` (or the port specified in `VITE_API_PROXY_URL`).
+- **Auto-reload is enabled** - FastAPI uses WatchFiles to automatically reload when Python files change. No need to restart the container after code changes during development.
+- Only restart the container when changing environment variables (`.env`) or dependencies (`requirements.txt`).
 
 ### Backend Testing
 The backend uses **pytest** for testing with async support via `pytest-asyncio`.
