@@ -10,6 +10,7 @@ Gear Stack is a full-stack application designed for outdoor enthusiasts, prepper
 
 **Key Capabilities:**
 - **Multi-User Platform** - Secure user accounts with authentication and authorization
+- **Subscription Plans** - Free, Pro, and Pro Plus tiers with Stripe payment integration
 - **Hybrid Architecture** - Works offline with localStorage, syncs with cloud when online
 - **Advanced Organization** - Hierarchical container system with nested items and weight tracking
 - **Rich Metadata** - Track weight, expiration dates, priorities, brands, and custom categories
@@ -63,8 +64,9 @@ Gear Stack is a full-stack application designed for outdoor enthusiasts, prepper
 - PostgreSQL database
 - SQLAlchemy ORM with async support
 - JWT authentication with refresh tokens
+- Stripe payment integration for subscriptions
 - Rate limiting and reCAPTCHA protection
-- Modular architecture (auth, two-factor, email)
+- Modular architecture (auth, billing, two-factor, email)
 
 **Infrastructure:**
 - Docker containerization
@@ -106,6 +108,28 @@ Gear Stack is a full-stack application designed for outdoor enthusiasts, prepper
 ### 🎨 Theming
 - **Dark Mode** - Full dark theme support with system preference detection
 - **Theme Persistence** - Settings saved per user account
+
+---
+
+## 💳 Subscription Plans
+
+Gear Stack offers flexible subscription plans powered by **Stripe** for secure payment processing:
+
+| Plan | Price | Features |
+|------|-------|----------|
+| **Free** | $0/month | Basic gear management, data export, BYOK AI (bring your own OpenRouter key), 100MB storage, 2,000 items limit |
+| **Pro** | $5/month or $50/year | Everything in Free + AI-powered recommendations, ~$1 AI tokens/month, advanced features, 5GB storage, 10,000 items limit |
+| **Pro Plus** | $15/month or $150/year | Everything in Pro + priority AI processing, ~$10 AI tokens/month, premium support, 50GB storage, 50,000 items limit |
+
+**Payment Features:**
+- Secure checkout powered by Stripe
+- Monthly and annual billing (save 17% with annual)
+- Customer self-service portal for subscription management
+- Automatic subscription renewal
+- Easy plan switching and cancellation
+
+**Grandfathered Users:**
+Early supporters with existing premium access retain lifetime Pro benefits at no cost. 👑
 
 ---
 
@@ -275,6 +299,7 @@ Gear Stack is a full-stack application designed for outdoor enthusiasts, prepper
 - ✅ User authentication (OAuth, 2FA, reCAPTCHA) - Completed
 - ✅ Token blacklist and WebAuthn challenge storage (Redis) - Completed
 - ✅ Role system (Owner, Premium, Admin, User) - Completed
+- ✅ **Subscription billing (Stripe integration)** - Completed
 - 🚧 Multi-device synchronization - Partially completed
 - ✅ Container sharing (public containers, token sharing) - Completed
 - ✅ Public container gallery - Completed
@@ -316,10 +341,10 @@ pnpm lint             # Run ESLint with auto-fix
 **Backend Development:**
 ```bash
 cd backend
-python -m venv venv
-source venv/bin/activate  # or `venv\Scripts\activate` on Windows
+python -m venv .venv
+source .venv/bin/activate  # or `.venv\Scripts\activate` on Windows
 pip install -r requirements.txt
-python cli.py db migrate  # Run database migrations
+python migrations/047_add_billing_tables.py upgrade  # Run billing migration
 uvicorn app.main:app --reload
 ```
 
@@ -335,6 +360,8 @@ docker-compose up -d
 VITE_API_PROXY_URL=http://localhost:8000
 VITE_GOOGLE_RECAPTCHA_SITE_KEY=your_recaptcha_site_key
 VITE_GOOGLE_OAUTH_CLIENT_ID=your_google_oauth_client_id
+# Stripe (optional - for subscription features)
+VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...
 ```
 
 **Backend (backend/.env):**
@@ -345,6 +372,10 @@ RECAPTCHA_ENABLED=true
 RECAPTCHA_SECRET_KEY=your_recaptcha_secret
 GOOGLE_OAUTH_CLIENT_ID=your_oauth_client_id
 GOOGLE_OAUTH_CLIENT_SECRET=your_oauth_client_secret
+# Stripe (optional - for subscription features)
+STRIPE_ENABLED=true
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
 See `.env.example` and `backend/.env.example` for complete configuration options.
@@ -372,6 +403,7 @@ gear-stack/
 │   │   ├── core/             # Core functionality (config, DB, email)
 │   │   ├── modules/          # Feature modules
 │   │   │   ├── auth/         # Auth module
+│   │   │   ├── billing/      # Stripe subscription module
 │   │   │   └── two_factor/   # 2FA module
 │   │   └── main.py           # FastAPI app entry
 │   └── migrations/           # Database migrations
