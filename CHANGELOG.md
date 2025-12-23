@@ -21,6 +21,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.46.0] - 2025-12-23
+
+### Added
+- **Premium Feature Lock Button**: New component to manage access to premium features
+  - `PremiumFeatureLockButton` component for consistent premium feature gating
+  - Enhanced user experience for accessing premium features
+  - Integration with billing system for subscription management
+- **Stripe Webhook Signature Verification**: Enhanced security for Stripe integration
+  - Webhook signature verification for all Stripe webhook events
+  - Constants module for webhook paths requiring raw body processing
+  - Proper handling of subscription fields in webhook events (both object and string IDs)
+  - Improved logging for webhook events
+
+### Changed
+- **Billing & Subscription UI**: Enhanced billing navigation and components
+  - Reintroduced Billing & Subscription link in AppHeader for improved navigation
+  - Updated PlanCard component to display current plan and popular badges more effectively
+  - Improved visibility of billing options and premium features
+- **Subscription History**: Refactored for dynamic event types
+  - Removed restrictive `event_type` constraint from `subscription_history` table
+  - Support for dynamic event types (e.g., 'subscription_activated', 'admin_cancel_plan_tier')
+  - Enhanced flexibility in subscription event logging
+- **Middleware Updates**: Improved Stripe webhook compatibility
+  - Updated `ConvertEmptyStringsToNoneMiddleware` to exclude webhook paths
+  - Prevents payload modification that could invalidate webhook signatures
+  - Ensures compatibility with Stripe's signature verification requirements
+
+### Security
+- **Stripe Webhook Security**: Enhanced security for billing system
+  - Proper webhook signature verification prevents unauthorized webhook processing
+  - Raw body processing for webhook paths ensures signature validity
+  - Improved security and reliability of subscription management
+
+---
+
 ## [2.45.0] - 2025-01-22
 
 ### Added
