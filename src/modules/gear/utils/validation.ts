@@ -5,7 +5,7 @@ import { weightUnitEnum } from './weightUnits'
  * Check if a string is a valid ULID (26 characters, base32)
  * ULID format: 26 characters using Crockford's Base32 (0-9, A-Z without I, L, O, U)
  */
-function isValidULID(value: string): boolean {
+export function isValidULID(value: string): boolean {
   // ULID is exactly 26 characters
   if (value.length !== 26) return false
   // ULID uses Crockford's Base32: 0-9, A-Z without I, L, O, U
@@ -16,7 +16,7 @@ function isValidULID(value: string): boolean {
 /**
  * Check if a string is a valid UUID (8-4-4-4-12 hex format)
  */
-function isValidUUID(value: string): boolean {
+export function isValidUUID(value: string): boolean {
   const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   return uuidPattern.test(value)
 }
