@@ -18,6 +18,7 @@ import ContainerCard from '../components/ContainerCard.vue'
 import ContainersFilters from '../components/ContainersFilters.vue'
 import ContainersListPageDropdown from '../components/ContainersListPageDropdown.vue'
 import GenerateExampleGearButton from '../components/GenerateExampleGearButton.vue'
+import PremiumFeatureLockButton from '../components/PremiumFeatureLockButton.vue'
 
 // Lazy load dialogs - only loaded when user opens them
 const ExportToCSVDialog = defineAsyncComponent(() => import('../components/ExportToCSVDialog.vue'))
@@ -35,7 +36,6 @@ import type { TUUID } from '@/shared/types/base.type'
 // Action icons
 const ExportAllToMarkdownIcon = getActionIcon('exportAllToMarkdown')
 const CreateIcon = getActionIcon('create')
-const AiIcon = getActionIcon('ai')
 
 const router = useRouter()
 const route = useRoute()
@@ -285,17 +285,13 @@ const handleAiChat = () => {
         :description="t('gear.page.title')"
       >
         <template #actions>
-          <Button
-            v-if="canUseAi"
-            v-tooltip.bottom="t('gear.actions.aiAssistant')"
-            variant="ghost"
-            size="sm"
-            class="shrink-0"
+          <PremiumFeatureLockButton
+            :has-access="canUseAi"
+            icon="ai"
+            :tooltip="t('gear.actions.aiAssistant')"
             :aria-label="t('gear.actions.aiAssistant')"
             @click="handleAiChat"
-          >
-            <AiIcon class="size-4" />
-          </Button>
+          />
           <Button
             v-if="containers.length > 0"
             v-tooltip.bottom="t('gear.export.allToMarkdown')"

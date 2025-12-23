@@ -10,6 +10,7 @@ import {
   FileSpreadsheet,
   Globe,
   Image,
+  Lock,
   Plus,
   Sparkles,
   SparklesIcon,
@@ -59,6 +60,7 @@ export const ACTION_ICONS: Record<string, Component> = {
 
   // AI/Automation
   ai: Sparkles, // Main AI assistant button
+  aiPremium: Lock, // Premium AI assistant button (locked)
   recognizeParameters: SparklesIcon,
   recognizeParametersAll: SparklesIcon,
 

@@ -47,14 +47,14 @@ const coreLinks = computed<Link[]>(() => [
     icon: SettingsIcon,
   },
   {
-    to: BillingRoutePaths.billing,
-    label: t('billing.title', 'Billing & Subscription'),
-    icon: CreditCard,
-  },
-  {
     to: GearRoutePath.Settings,
     label: t('gear.settings.page.title', 'Gear settings'),
     icon: BackpackIcon,
+  },
+  {
+    to: BillingRoutePaths.billing,
+    label: t('billing.title', 'Billing & Subscription'),
+    icon: CreditCard,
   },
   {
     to: AdminRoutePaths.dashboard,

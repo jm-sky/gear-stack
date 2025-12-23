@@ -526,5 +526,6 @@ export default {
   },
   premium: {
     premiumFeature: 'Premium Feature',
+    unlockPremiumFeatures: 'Unlock Premium Features - Upgrade to access AI Assistant and more',
   },
 }

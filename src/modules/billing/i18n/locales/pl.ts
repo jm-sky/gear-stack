@@ -10,7 +10,7 @@ export const pl = {
     currentPeriod: 'Obecny Okres',
     manageSubscription: 'Zarządzaj Subskrypcją',
     selectPlan: 'Wybierz {plan}',
-    popular: 'Popularne',
+    popular: 'Popularny',
     savePercent: 'Oszczędź {percent}%',
     perMonth: '/miesiąc',
     perYear: '/rok',
@@ -34,11 +34,11 @@ export const pl = {
       goToApp: 'Przejdź do Aplikacji',
     },
     status: {
-      active: 'Aktywna',
-      canceled: 'Anulowana',
+      active: 'Aktywny',
+      canceled: 'Anulowany',
       canceling: 'Anulowanie',
       pastDue: 'Zaległości',
-      grandfathered: 'Dożywotnia',
+      grandfathered: 'Dożywotni',
     },
     grandfathered: {
       title: 'Dożywotni Dostęp Pro',

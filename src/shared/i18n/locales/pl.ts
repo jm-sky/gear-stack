@@ -526,5 +526,6 @@ export default {
   },
   premium: {
     premiumFeature: 'Funkcja Premium',
+    unlockPremiumFeatures: 'Odblokuj Funkcje Premium - Uaktualnij, aby uzyskać dostęp do Asystenta AI i więcej',
   },
 }

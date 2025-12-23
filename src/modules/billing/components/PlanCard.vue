@@ -22,11 +22,11 @@ const monthlyPrice = computed(() => plan.price.monthly)
 const annualMonthlyPrice = computed(() => plan.price.annualMonthly)
 const annualPrice = computed(() => plan.price.annual)
 
-const displayedPrice = computed(() => 
+const displayedPrice = computed(() =>
   billingInterval === 'annual' ? annualMonthlyPrice.value : monthlyPrice.value
 )
 
-const originalPrice = computed(() => 
+const originalPrice = computed(() =>
   billingInterval === 'annual' ? monthlyPrice.value : null
 )
 
@@ -34,13 +34,18 @@ const translatedFeatures = computed(() => getTranslatedFeatures(plan.tier, plan.
 </script>
 
 <template>
-  <Card :class="{ 'border-primary': plan.popular }">
+  <Card class="hover:shadow-lg hover:scale-101 hover:-translate-y-1 transition-all duration-300" :class="{ 'border-primary': plan.popular }">
     <CardHeader>
       <div class="flex items-center justify-between">
         <CardTitle>{{ plan.name }}</CardTitle>
-        <Badge v-if="plan.popular" variant="default">
-          {{ t('billing.popular') }}
-        </Badge>
+        <div class="flex flex-col md:flex-row items-center gap-2">
+          <Badge v-if="isCurrentPlan" variant="primary-outline">
+            {{ t('billing.currentPlan') }}
+          </Badge>
+          <Badge v-if="plan.popular" variant="default">
+            {{ t('billing.popular') }}
+          </Badge>
+        </div>
       </div>
       <CardDescription>
         <div class="mt-4 flex items-baseline gap-2">

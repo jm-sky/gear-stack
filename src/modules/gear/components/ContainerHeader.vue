@@ -36,6 +36,7 @@ import ContainerHeaderStats from './ContainerHeaderStats.vue'
 import FavoriteContainerButton from './FavoriteContainerButton.vue'
 import ItemsTableEditModeToggle from './ItemsTableEditModeToggle.vue'
 import MarkdownRenderer from './MarkdownRenderer.vue'
+import PremiumFeatureLockButton from './PremiumFeatureLockButton.vue'
 
 // Lazy load dialog to reduce initial bundle size
 const CloneContainerDialog = defineAsyncComponent(() => import('./CloneContainerDialog.vue'))
@@ -52,7 +53,6 @@ const ExportIcon = getActionIcon('export')
 const ExportToCSVIcon = getActionIcon('exportToCSV')
 const ImportIcon = getActionIcon('import')
 const RecognizeParametersAllIcon = getActionIcon('recognizeParametersAll')
-const AiIcon = getActionIcon('ai')
 const DeleteIcon = getActionIcon('delete')
 const PublishIcon = getActionIcon('publish')
 
@@ -186,16 +186,13 @@ const handlePublish = async () => {
           >
             <RefreshCcw class="size-4" />
           </Button>
-          <Button
-            v-if="canUseAi"
-            v-tooltip.bottom="t('gear.actions.aiAssistant')"
-            variant="ghost"
-            size="sm"
+          <PremiumFeatureLockButton
+            :has-access="canUseAi"
+            icon="ai"
+            :tooltip="t('gear.actions.aiAssistant')"
             :aria-label="t('gear.actions.aiAssistant')"
             @click="$emit('aiChat')"
-          >
-            <AiIcon class="size-4" />
-          </Button>
+          />
           <Button
             v-tooltip.bottom="t('gear.actions.exportToPrompt')"
             variant="ghost"
