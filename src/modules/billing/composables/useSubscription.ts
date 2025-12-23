@@ -4,6 +4,8 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useHandleError } from '@/shared/composables/useHandleError'
 import type {
   BillingInterval,
   CreateCheckoutSessionRequest,
@@ -16,6 +18,8 @@ import { PLAN_FEATURES } from '../types'
 
 export function useSubscription() {
   const queryClient = useQueryClient()
+  const { t } = useI18n()
+  const { handleError } = useHandleError()
 
   // Get current subscription
   const {
@@ -48,6 +52,11 @@ export function useSubscription() {
       // Redirect to Stripe Checkout
       window.location.href = data.sessionUrl
     },
+    onError: (error) => {
+      handleError(error, {
+        fallbackMessage: t('billing.errors.checkoutFailed', 'Failed to create checkout session. Please try again.'),
+      })
+    },
   })
 
   // Create portal session mutation
@@ -59,6 +68,11 @@ export function useSubscription() {
     onSuccess: (data) => {
       // Redirect to Stripe Billing Portal
       window.location.href = data.sessionUrl
+    },
+    onError: (error) => {
+      handleError(error, {
+        fallbackMessage: t('billing.errors.portalFailed', 'Failed to open billing portal. Please try again.'),
+      })
     },
   })
 

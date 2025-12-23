@@ -95,5 +95,9 @@ export const pl = {
       description: 'Przejdź na plan Pro, aby uzyskać rekomendacje AI, zaawansowane funkcje i więcej przestrzeni.',
       button: 'Zobacz Plany',
     },
+    errors: {
+      checkoutFailed: 'Nie udało się utworzyć sesji checkout. Spróbuj ponownie.',
+      portalFailed: 'Nie udało się otworzyć portalu rozliczeniowego. Spróbuj ponownie.',
+    },
   },
 }

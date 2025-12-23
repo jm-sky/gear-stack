@@ -95,5 +95,9 @@ export const en = {
       description: 'Upgrade to Pro for AI-powered recommendations, advanced features, and more storage.',
       button: 'View Plans',
     },
+    errors: {
+      checkoutFailed: 'Failed to create checkout session. Please try again.',
+      portalFailed: 'Failed to open billing portal. Please try again.',
+    },
   },
 }
