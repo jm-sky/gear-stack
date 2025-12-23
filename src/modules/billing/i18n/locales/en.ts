@@ -90,5 +90,10 @@ export const en = {
         },
       },
     },
+    upgradeBanner: {
+      title: 'Unlock Premium Features',
+      description: 'Upgrade to Pro for AI-powered recommendations, advanced features, and more storage.',
+      button: 'View Plans',
+    },
   },
 }

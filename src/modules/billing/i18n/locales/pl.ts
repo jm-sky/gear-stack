@@ -90,5 +90,10 @@ export const pl = {
         },
       },
     },
+    upgradeBanner: {
+      title: 'Odblokuj Funkcje Premium',
+      description: 'Przejdź na plan Pro, aby uzyskać rekomendacje AI, zaawansowane funkcje i więcej przestrzeni.',
+      button: 'Zobacz Plany',
+    },
   },
 }

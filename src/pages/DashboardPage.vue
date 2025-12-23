@@ -7,6 +7,7 @@ import ButtonLink from '@/components/ui/button-link/ButtonLink.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { AuthRoutePaths } from '@/modules/auth/config/routes'
+import UpgradePromptBanner from '@/modules/billing/components/UpgradePromptBanner.vue'
 import DashboardContainerCard from '@/modules/gear/components/dashboard/DashboardContainerCard.vue'
 import GenerateExampleGearButton from '@/modules/gear/components/GenerateExampleGearButton.vue'
 import { useGear } from '@/modules/gear/composables/useGear'
@@ -61,6 +62,9 @@ const readyContainersCount = computed(() => {
 <template>
   <AuthenticatedLayout>
     <div class="space-y-8">
+      <!-- Upgrade Prompt Banner (only for authenticated FREE users) -->
+      <UpgradePromptBanner v-if="isAuthenticated && config.backend.enabled" />
+
       <!-- Header -->
       <div class="text-center space-y-4">
         <div class="flex justify-center">
