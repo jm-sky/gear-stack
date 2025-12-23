@@ -81,6 +81,35 @@ describe('formatWeight', () => {
       expect(formatWeight(16, 'oz')).toBe('16.00 oz')
       expect(formatWeight(8.5, 'oz')).toBe('8.50 oz')
     })
+
+    describe('locale support', () => {
+      it('should format with en-US locale (dot as decimal separator)', () => {
+        expect(formatWeight(1.5, 'kg', 'en-US')).toBe('1.50 kg')
+        expect(formatWeight(2.5, 'lb', 'en-US')).toBe('2.50 lb')
+        expect(formatWeight(1000, 'g', 'en-US')).toBe('1000 g')
+      })
+
+      it('should format with pl-PL locale (comma as decimal separator)', () => {
+        expect(formatWeight(1.5, 'kg', 'pl-PL')).toBe('1,50 kg')
+        expect(formatWeight(2.5, 'lb', 'pl-PL')).toBe('2,50 lb')
+        expect(formatWeight(1000, 'g', 'pl-PL')).toBe('1000 g')
+      })
+
+      it('should format large values with thousand separators (en-US)', () => {
+        // en-US uses comma as thousand separator and dot as decimal separator
+        expect(formatWeight(10000, 'kg', 'en-US')).toBe('10,000.00 kg')
+        expect(formatWeight(100000, 'kg', 'en-US')).toBe('100,000.00 kg')
+        expect(formatWeight(10000, 'lb', 'en-US')).toBe('10,000.00 lb')
+      })
+
+      it('should format large values with thousand separators (pl-PL)', () => {
+        // pl-PL uses non-breaking space (U+00A0) as thousand separator and comma as decimal separator
+        const nbsp = '\u00A0'
+        expect(formatWeight(10000, 'kg', 'pl-PL')).toBe(`10${nbsp}000,00 kg`)
+        expect(formatWeight(100000, 'kg', 'pl-PL')).toBe(`100${nbsp}000,00 kg`)
+        expect(formatWeight(10000, 'lb', 'pl-PL')).toBe(`10${nbsp}000,00 lb`)
+      })
+    })
   })
 
   describe('formatWeightFromGrams', () => {
@@ -96,6 +125,32 @@ describe('formatWeight', () => {
 
     it('should handle zero weight', () => {
       expect(formatWeightFromGrams(0)).toBe('0 g')
+    })
+
+    describe('locale support', () => {
+      it('should format with en-US locale', () => {
+        expect(formatWeightFromGrams(1000, 'en-US')).toBe('1.00 kg')
+        expect(formatWeightFromGrams(2500, 'en-US')).toBe('2.50 kg')
+        expect(formatWeightFromGrams(500, 'en-US')).toBe('500 g')
+      })
+
+      it('should format with pl-PL locale', () => {
+        expect(formatWeightFromGrams(1000, 'pl-PL')).toBe('1,00 kg')
+        expect(formatWeightFromGrams(2500, 'pl-PL')).toBe('2,50 kg')
+        expect(formatWeightFromGrams(500, 'pl-PL')).toBe('500 g')
+      })
+
+      it('should format large values with thousand separators (en-US)', () => {
+        expect(formatWeightFromGrams(10000000, 'en-US')).toBe('10,000.00 kg')
+        expect(formatWeightFromGrams(100000000, 'en-US')).toBe('100,000.00 kg')
+      })
+
+      it('should format large values with thousand separators (pl-PL)', () => {
+        // pl-PL uses non-breaking space (U+00A0) as thousand separator
+        const nbsp = '\u00A0'
+        expect(formatWeightFromGrams(10000000, 'pl-PL')).toBe(`10${nbsp}000,00 kg`)
+        expect(formatWeightFromGrams(100000000, 'pl-PL')).toBe(`100${nbsp}000,00 kg`)
+      })
     })
   })
 
@@ -118,6 +173,32 @@ describe('formatWeight', () => {
     it('should format to ounces', () => {
       const weightInGrams = GRAMS_PER_OUNCE
       expect(formatWeightToPreferredUnit(weightInGrams, 'oz')).toBe('1.00 oz')
+    })
+
+    describe('locale support', () => {
+      it('should format with en-US locale', () => {
+        expect(formatWeightToPreferredUnit(1000, 'kg', 'en-US')).toBe('1.00 kg')
+        expect(formatWeightToPreferredUnit(GRAMS_PER_POUND, 'lb', 'en-US')).toBe('1.00 lb')
+        expect(formatWeightToPreferredUnit(500, 'g', 'en-US')).toBe('500 g')
+      })
+
+      it('should format with pl-PL locale', () => {
+        expect(formatWeightToPreferredUnit(1000, 'kg', 'pl-PL')).toBe('1,00 kg')
+        expect(formatWeightToPreferredUnit(GRAMS_PER_POUND, 'lb', 'pl-PL')).toBe('1,00 lb')
+        expect(formatWeightToPreferredUnit(500, 'g', 'pl-PL')).toBe('500 g')
+      })
+
+      it('should format large values with thousand separators (en-US)', () => {
+        expect(formatWeightToPreferredUnit(10000000, 'kg', 'en-US')).toBe('10,000.00 kg')
+        expect(formatWeightToPreferredUnit(100000000, 'kg', 'en-US')).toBe('100,000.00 kg')
+      })
+
+      it('should format large values with thousand separators (pl-PL)', () => {
+        // pl-PL uses non-breaking space (U+00A0) as thousand separator
+        const nbsp = '\u00A0'
+        expect(formatWeightToPreferredUnit(10000000, 'kg', 'pl-PL')).toBe(`10${nbsp}000,00 kg`)
+        expect(formatWeightToPreferredUnit(100000000, 'kg', 'pl-PL')).toBe(`100${nbsp}000,00 kg`)
+      })
     })
   })
 
@@ -146,6 +227,34 @@ describe('formatWeight', () => {
     it('should handle same unit conversion', () => {
       expect(formatWeightWithPreferredUnit(500, 'g', 'g')).toBe('500 g')
       expect(formatWeightWithPreferredUnit(2, 'kg', 'kg')).toBe('2.00 kg')
+    })
+
+    describe('locale support', () => {
+      it('should format with en-US locale', () => {
+        expect(formatWeightWithPreferredUnit(1000, 'g', 'kg', 'en-US')).toBe('1.00 kg')
+        expect(formatWeightWithPreferredUnit(1, 'lb', 'oz', 'en-US')).toBe('16.00 oz')
+        expect(formatWeightWithPreferredUnit(1, 'oz', 'g', 'en-US')).toBe(`${GRAMS_PER_OUNCE} g`)
+      })
+
+      it('should format with pl-PL locale', () => {
+        expect(formatWeightWithPreferredUnit(1000, 'g', 'kg', 'pl-PL')).toBe('1,00 kg')
+        expect(formatWeightWithPreferredUnit(1, 'lb', 'oz', 'pl-PL')).toBe('16,00 oz')
+        expect(formatWeightWithPreferredUnit(1, 'oz', 'g', 'pl-PL')).toBe(`${GRAMS_PER_OUNCE} g`)
+      })
+
+      it('should format large values with thousand separators (en-US)', () => {
+        expect(formatWeightWithPreferredUnit(10000, 'kg', 'kg', 'en-US')).toBe('10,000.00 kg')
+        expect(formatWeightWithPreferredUnit(100000, 'kg', 'kg', 'en-US')).toBe('100,000.00 kg')
+        expect(formatWeightWithPreferredUnit(10000, 'lb', 'lb', 'en-US')).toBe('10,000.00 lb')
+      })
+
+      it('should format large values with thousand separators (pl-PL)', () => {
+        // pl-PL uses non-breaking space (U+00A0) as thousand separator
+        const nbsp = '\u00A0'
+        expect(formatWeightWithPreferredUnit(10000, 'kg', 'kg', 'pl-PL')).toBe(`10${nbsp}000,00 kg`)
+        expect(formatWeightWithPreferredUnit(100000, 'kg', 'kg', 'pl-PL')).toBe(`100${nbsp}000,00 kg`)
+        expect(formatWeightWithPreferredUnit(10000, 'lb', 'lb', 'pl-PL')).toBe(`10${nbsp}000,00 lb`)
+      })
     })
   })
 

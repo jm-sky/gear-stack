@@ -61,7 +61,7 @@ function sortContainersByDependency(containers: IGearContainer[]): IGearContaine
 export function hasLocalData(): boolean {
   const stored = localStorage.getItem(STORAGE_KEY)
   if (!stored) return false
-  
+
   try {
     const containers = JSON.parse(stored) as unknown[]
     return Array.isArray(containers) && containers.length > 0
@@ -73,13 +73,13 @@ export function hasLocalData(): boolean {
 /**
  * Migrate data from localStorage to API
  * This is called after successful login when local data exists
- * 
+ *
  * Strategy:
  * 1. Load containers from localStorage
  * 2. For each container, try to create it via API
  * 3. If container already exists (by name or other criteria), skip or update
  * 4. Update store with migrated containers
- * 
+ *
  * @returns Promise that resolves when migration is complete
  */
 export async function migrateLocalDataToAPI(): Promise<void> {
@@ -93,7 +93,8 @@ export async function migrateLocalDataToAPI(): Promise<void> {
   logger.info(`Migrating ${localContainers.length} containers to API...`)
 
   // CRITICAL FIX: Sort containers by dependency to avoid orphaned containers
-  const sortedContainers = sortContainersByDependency([...localContainers])
+  // Make a deep copy to avoid modifying original containers during sorting
+  const sortedContainers = sortContainersByDependency(localContainers.map(c => ({ ...c })))
   logger.info('Containers sorted by dependency order')
 
   const store = useGearStore()
@@ -101,7 +102,12 @@ export async function migrateLocalDataToAPI(): Promise<void> {
   // Map old IDs to new IDs for parent reference updates
   const idMapping = new Map<string, string>()
 
-  for (const localContainer of sortedContainers) {
+  for (let i = 0; i < sortedContainers.length; i++) {
+    const localContainer = sortedContainers[i]
+    if (!localContainer) {
+      logger.warn(`Container at index ${i} is undefined, skipping`)
+      continue
+    }
     try {
       // Create container via API
       // Note: We need to extract items first, as API expects separate creation
@@ -109,8 +115,78 @@ export async function migrateLocalDataToAPI(): Promise<void> {
 
       // CRITICAL FIX: Map old parent ID to new API-generated ID
       let parentContainerId = containerData.parentContainerId
-      if (parentContainerId && idMapping.has(parentContainerId)) {
-        parentContainerId = idMapping.get(parentContainerId) ?? null
+
+      if (parentContainerId) {
+        // Check if this is a valid ULID (backend) or UUID (frontend offline) format
+        // Backend uses ULID (26 chars base32), frontend offline uses UUID (8-4-4-4-12 hex)
+        const isUlid = /^[0-9A-HJKMNP-TV-Z]{26}$/i.test(parentContainerId)
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(parentContainerId)
+        const isValidId = isUlid || isUuid
+
+        if (idMapping.has(parentContainerId)) {
+          // Parent ID found in mapping - use mapped ID (this is the correct API-generated ID)
+          const mappedId = idMapping.get(parentContainerId) ?? null
+          // Check if mapped ID is a valid ULID (backend) or UUID (frontend offline)
+          // Backend returns ULID (26 chars base32), frontend offline uses UUID (8-4-4-4-12 hex)
+          const isMappedIdUlid = mappedId ? /^[0-9A-HJKMNP-TV-Z]{26}$/i.test(mappedId) : false
+          const isMappedIdUuid = mappedId ? /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(mappedId) : false
+          if (mappedId && !isMappedIdUlid && !isMappedIdUuid) {
+            // Mapped ID is neither ULID nor UUID - this shouldn't happen in real scenarios
+            // but could happen in tests with incorrect mocks
+            logger.warn(`Mapped parent ID ${mappedId} for ${containerData.name} is not a valid ULID or UUID. Setting to null to avoid validation error.`)
+            parentContainerId = null
+          } else {
+            parentContainerId = mappedId
+          }
+        } else if (!isValidId) {
+          // Parent ID is not in mapping and not a UUID - this is an old localStorage ID
+          // Check if parent is in sorted containers before current index
+          const parentIndex = sortedContainers.findIndex(c => c.id === parentContainerId)
+          if (parentIndex === -1) {
+            // Parent doesn't exist - already handled by sorting (should be null), but handle edge case
+            logger.warn(`Parent container ${parentContainerId} not found in sorted containers. Setting parent to null for ${containerData.name}.`)
+            parentContainerId = null
+          } else if (parentIndex < i) {
+            // Parent should have been processed already - check if mapping exists for parent's old ID
+            const parentContainer = sortedContainers[parentIndex]
+            if (!parentContainer) {
+              logger.warn(`Parent container at index ${parentIndex} is undefined. Setting parent to null for ${containerData.name}.`)
+              parentContainerId = null
+            } else {
+
+            if (idMapping.has(parentContainer.id)) {
+              // Parent was processed and mapping exists - use mapped ID
+              const mappedId = idMapping.get(parentContainer.id) ?? null
+              // Check if mapped ID is a valid ULID (backend) or UUID (frontend offline)
+              const isMappedIdUlid = mappedId ? /^[0-9A-HJKMNP-TV-Z]{26}$/i.test(mappedId) : false
+              const isMappedIdUuid = mappedId ? /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(mappedId) : false
+              if (mappedId && !isMappedIdUlid && !isMappedIdUuid) {
+                logger.warn(`Mapped parent ID ${mappedId} for ${containerData.name} is not a valid ULID or UUID. Setting to null to avoid validation error.`)
+                parentContainerId = null
+              } else {
+                parentContainerId = mappedId
+              }
+            } else {
+                // Parent was processed but mapping not set - parent may have failed to migrate
+                logger.warn(`Parent container ${parentContainerId} was processed before ${containerData.name} (index ${parentIndex} < ${i}) but mapping not set. Parent may have failed to migrate. Setting parent to null.`)
+                parentContainerId = null
+              }
+            }
+          } else {
+            // Parent comes after current container - this shouldn't happen with correct sorting
+            logger.error(`Parent container ${parentContainerId} comes after ${containerData.name} in sorted order (index ${parentIndex} >= ${i}). Sorting may have failed. Setting parent to null.`)
+            parentContainerId = null
+          }
+        } else {
+          // Parent ID is a valid ULID/UUID but not in mapping - this shouldn't happen in normal flow
+          // but could happen if ULID/UUID was passed directly. Check if parent exists in sorted containers.
+          const parentIndex = sortedContainers.findIndex(c => c.id === parentContainerId)
+          if (parentIndex === -1 || parentIndex >= i) {
+            // Parent doesn't exist or comes after - set to null
+            logger.warn(`Parent container ID ${parentContainerId} (ULID/UUID) not found or not yet processed. Setting parent to null for ${containerData.name}.`)
+            parentContainerId = null
+          }
+        }
       }
 
       // M6 FIX: Validate container data before service call

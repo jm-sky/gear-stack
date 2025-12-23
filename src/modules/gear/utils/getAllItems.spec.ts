@@ -150,7 +150,9 @@ describe('getAllItems', () => {
 
     const result = getAllItems([container])
 
-    expect(result[0]).toMatchObject({
+    // Find the item (container is first, then items)
+    const item = result.find(r => r.id === 'item-1')
+    expect(item).toMatchObject({
       id: 'item-1',
       name: 'Water Bottle',
       category: 'water',
@@ -183,12 +185,14 @@ describe('getAllItems', () => {
 
     const result = getAllItems([container])
 
-    expect(result[0]?.weightUnit).toBe('g') // Default
-    expect(result[0]?.brand).toBeUndefined()
-    expect(result[0]?.color).toBeUndefined()
-    expect(result[0]?.expirationDate).toBeUndefined()
-    expect(result[0]?.wearable).toBeUndefined()
-    expect(result[0]?.consumable).toBeUndefined()
+    // Find the item (container is first, then items)
+    const item = result.find(r => r.id === 'item-1')
+    expect(item?.weightUnit).toBe('g') // Default
+    expect(item?.brand).toBeUndefined()
+    expect(item?.color).toBeUndefined()
+    expect(item?.expirationDate).toBeUndefined()
+    expect(item?.wearable).toBeUndefined()
+    expect(item?.consumable).toBeUndefined()
   })
 
   it('should handle container color with default', () => {
@@ -221,9 +225,11 @@ describe('getAllItems', () => {
 
     const result = getAllItems([container])
 
-    expect(result[0]?.name).toBe('First')
-    expect(result[1]?.name).toBe('Second')
-    expect(result[2]?.name).toBe('Third')
+    // Container is first, then items
+    expect(result[0]?.name).toBe('Backpack') // Container first
+    expect(result[1]?.name).toBe('First')
+    expect(result[2]?.name).toBe('Second')
+    expect(result[3]?.name).toBe('Third')
   })
 })
 

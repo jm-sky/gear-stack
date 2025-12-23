@@ -1,6 +1,37 @@
 import { z } from 'zod'
 import { weightUnitEnum } from './weightUnits'
 
+/**
+ * Check if a string is a valid ULID (26 characters, base32)
+ * ULID format: 26 characters using Crockford's Base32 (0-9, A-Z without I, L, O, U)
+ */
+function isValidULID(value: string): boolean {
+  // ULID is exactly 26 characters
+  if (value.length !== 26) return false
+  // ULID uses Crockford's Base32: 0-9, A-Z without I, L, O, U
+  const ulidPattern = /^[0-9A-HJKMNP-TV-Z]{26}$/
+  return ulidPattern.test(value.toUpperCase())
+}
+
+/**
+ * Check if a string is a valid UUID (8-4-4-4-12 hex format)
+ */
+function isValidUUID(value: string): boolean {
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  return uuidPattern.test(value)
+}
+
+/**
+ * Zod schema that accepts both ULID (backend) and UUID (frontend offline)
+ * Backend uses ULID, frontend offline uses UUID
+ */
+const ulidOrUuidSchema = z.string().refine(
+  (val) => !val || isValidULID(val) || isValidUUID(val),
+  {
+    message: 'Must be a valid ULID (26 chars) or UUID (8-4-4-4-12 format)',
+  },
+).optional().nullable()
+
 // Schema dla kontenera
 // Type can be a default type or any string (for custom container types)
 export const containerSchema = z.object({
@@ -8,7 +39,7 @@ export const containerSchema = z.object({
   description: z.string().optional(),
   type: z.string().min(1, 'Typ jest wymagany'), // Allow any string for custom container types
   color: z.enum(['default', 'coyote', 'khaki', 'olive', 'forestGreen', 'tan', 'brown', 'black', 'navy', 'jeans', 'gray', 'orange']).optional(),
-  parentContainerId: z.string().uuid().optional().nullable(),
+  parentContainerId: ulidOrUuidSchema,
   hideWhenNested: z.boolean().optional(),
   isPublic: z.boolean().optional(),
   favorite: z.boolean().optional(),
@@ -37,7 +68,7 @@ export const itemSchema = z.object({
   shelfLifeUnit: z.enum(['days', 'months', 'years']).optional(),
   priority: z.enum(['critical', 'high', 'medium', 'low']),
   status: z.enum(['owned', 'missing', 'toBuy']),
-  containerId: z.union([z.string().uuid(), z.literal('')]).optional(), // Reference to nested container (empty string = no container)
+  containerId: z.union([ulidOrUuidSchema, z.literal('')]).optional(), // Reference to nested container (empty string = no container), accepts ULID (backend) or UUID (frontend offline)
   price: z.number().min(0, 'Cena nie może być ujemna').optional(),
   currency: z.string().optional(),
   url: z.string().url('Nieprawidłowy URL').optional().or(z.literal('')),
