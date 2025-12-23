@@ -129,10 +129,8 @@ class SubscriptionHistoryDB(Base):
         nullable=False,
     )
 
-    # Constraints
-    __table_args__ = (
-        CheckConstraint(
-            "event_type IN ('created', 'updated', 'canceled', 'renewed', 'payment_failed')",
-            name="valid_event_type",
-        ),
-    )
+    # Note: No constraints on event_type to allow dynamic event types like:
+    # - 'subscription_activated', 'subscription_updated', 'subscription_cancelled'
+    # - 'payment_succeeded', 'payment_failed'
+    # - 'admin_update_*', 'admin_cancel_*' (dynamic admin actions)
+    # - 'cancellation_scheduled'

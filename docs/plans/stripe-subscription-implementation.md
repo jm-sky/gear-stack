@@ -11,7 +11,18 @@ This document outlines the complete implementation plan for integrating Stripe s
 
 **⚠️ IMPORTANT:** This plan has been verified against actual codebase patterns. See **[Pattern Verification Document](./stripe-pattern-verification.md)** for detailed pattern analysis.
 
-## 📊 Progress Summary (Updated: 2025-12-22)
+## 📊 Progress Summary (Updated: 2025-12-22 13:25)
+
+### 🎉 Current Status: Phase 5 - Testing & Integration (95% Complete)
+
+**Latest Session Progress (2025-12-22):**
+- ✅ Fixed Pydantic validation errors (snake_case ↔ camelCase mapping)
+- ✅ Fixed billing_interval constraint (`'month'/'year'` instead of `'monthly'/'annual'`)
+- ✅ Implemented upgrade/downgrade flow (auto-cancel old subscription)
+- ✅ Fixed subscription_history NOT NULL constraint
+- ✅ Fixed webhook handlers for nested Stripe objects
+- ✅ Webhooks processing successfully (200 OK on all events)
+- ⚠️ Webhook signature verification temporarily disabled (workaround in place)
 
 ### ✅ Completed (Phases 1-4)
 
@@ -41,13 +52,50 @@ This document outlines the complete implementation plan for integrating Stripe s
 
 ### 🚧 In Progress (Phase 5)
 
-**Testing & Integration:**
-- ✅ Admin dashboard complete
-- ⏳ Integration tests pending
-- ⏳ E2E tests pending
-- ⏳ Stripe CLI webhook testing pending
-- ⏳ Upgrade prompts in app pending
-- ⏳ User profile subscription badge pending
+**Testing & Integration Status:**
+
+**✅ Working Features:**
+1. **Checkout Flow** - Full payment flow with Stripe Checkout (test mode)
+2. **Webhook Processing** - All events return 200 OK:
+   - `checkout.session.completed` - Creates/updates subscription
+   - `customer.subscription.created` - Tracks new subscriptions
+   - `customer.subscription.updated` - Handles plan changes and cancellations
+   - `invoice.payment_succeeded` - Confirms successful payments
+   - All events logged to `stripe_webhook_events` table
+3. **Upgrade/Downgrade** - Users can change plans (Pro ↔ Pro Plus, monthly ↔ annual)
+   - Old subscription automatically canceled
+   - New checkout session created
+   - Seamless plan switching
+4. **Auto-Subscription** - New users automatically get FREE tier subscription
+5. **Database Mapping** - Pydantic correctly maps snake_case (DB) ↔ camelCase (API)
+6. **Subscription History** - All changes logged with proper plan/status tracking
+7. **Admin Dashboard** - Complete subscription management interface
+
+**⚠️ Temporary Workarounds (Development Only):**
+1. **Webhook Signature Verification DISABLED**
+   - Using custom `dict_to_obj()` converter instead of native Stripe objects
+   - Reason: Stripe CLI webhook secret mismatch with `.env` configuration
+   - Status: Works for development, **MUST BE FIXED before production**
+   - Location: `backend/app/modules/billing/router.py` (lines 387-412)
+   - Fix needed: Resolve webhook secret synchronization issue
+
+**🔧 Recent Fixes (2025-12-22 Session):**
+1. **Pydantic Field Aliases** - Added `Field(alias="...")` for all snake_case → camelCase mappings
+2. **UUID to String Conversion** - Added `@field_validator` for UUID fields
+3. **Billing Interval Constraint** - Changed from `'monthly'/'annual'` to `'month'/'year'`
+4. **Subscription History NOT NULL** - Fixed `old_plan_tier`/`new_plan_tier` population
+5. **Nested Object Access** - Fixed webhook handlers to support both dict and attribute access
+6. **Period Dates Calculation** - Use `billing_cycle_anchor` + interval to calculate period end
+7. **Upgrade Flow** - Auto-cancel old subscription when user upgrades/downgrades
+
+**⏳ Pending Tasks:**
+- 🔴 **CRITICAL:** Fix webhook signature verification (remove workaround)
+- ⏳ Write integration tests for subscription flows
+- ⏳ Write E2E tests with Stripe test mode
+- ⏳ Test cancellation flow end-to-end
+- ⏳ Add upgrade prompts for free users in app
+- ⏳ Add subscription status badge to user profile page
+- ⏳ Performance testing and optimization
 
 ### ⏳ Pending (Phase 6)
 
@@ -57,16 +105,29 @@ This document outlines the complete implementation plan for integrating Stripe s
 - ⏳ Production deployment
 - ⏳ Live testing
 
-### 📈 Next Steps
+### 📈 Immediate Next Steps (Priority Order)
 
-1. **Complete Phase 5 Testing:**
-   - Test webhook processing with Stripe CLI
-   - Write integration tests for subscription flows
-   - Write E2E tests with test mode checkout
-   - Add upgrade prompts for free users
-   - Add subscription badge to user profile
+1. **🔴 CRITICAL - Fix Webhook Signature Verification:**
+   - Investigate why Stripe CLI webhook secret doesn't match `.env` configuration
+   - Remove temporary `dict_to_obj()` workaround from `router.py`
+   - Re-enable native Stripe webhook signature verification
+   - Test with Stripe CLI to confirm fix
 
-2. **Prepare Phase 6 Production:**
+2. **Complete Phase 5 Testing:**
+   - ✅ Webhook processing tested (works with workaround)
+   - ⏳ Test cancellation flow end-to-end
+   - ⏳ Write integration tests for subscription flows
+   - ⏳ Write E2E tests with test mode checkout
+   - ⏳ Add upgrade prompts for free users
+   - ⏳ Add subscription badge to user profile
+
+3. **Commit Current Progress:**
+   - Commit Pydantic schema fixes
+   - Commit webhook handler improvements
+   - Commit upgrade/downgrade flow
+   - Update CHANGELOG with Phase 5 progress
+
+4. **Prepare Phase 6 Production:**
    - Set up Stripe products and prices
    - Configure production webhook endpoint
    - Deploy to staging environment
