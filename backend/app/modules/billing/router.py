@@ -3,6 +3,7 @@
 import logging
 from typing import Annotated, Any
 
+import stripe
 from fastapi import APIRouter, Body, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -371,58 +372,30 @@ async def stripe_webhook(
             detail="Stripe integration is disabled",
         )
 
+    # Get raw payload and signature header
     payload = await request.body()
     sig_header = request.headers.get("stripe-signature")
 
     if not sig_header:
+        logger.error("Missing Stripe signature header")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Missing Stripe signature",
         )
 
-    # Debug logging
-    logger.info(f"Webhook received - payload length: {len(payload)}, signature: {sig_header[:20]}...")
-    logger.info(f"Payload type: {type(payload)}")
-    logger.info(f"First 50 bytes of payload: {payload[:50].decode('utf-8', errors='replace')}")
-
     try:
-        # TEMPORARY: Parse event without signature verification for testing
-        import json
+        # Verify webhook signature and construct Stripe Event
+        event = stripe_client.construct_webhook_event(
+            payload=payload,
+            sig_header=sig_header,
+        )
+        logger.info(f"Webhook verified - Event type: {event.type}, ID: {event.id}")
 
-        def dict_to_obj(d: dict[str, Any] | list[Any] | Any) -> Any:
-            """Recursively convert dict to object with attributes."""
-            if isinstance(d, dict):
-
-                class DynamicObj:
-                    def __getattr__(self, name: str) -> Any:
-                        # Return None for missing attributes instead of raising AttributeError
-                        return None
-
-                obj = DynamicObj()
-                for key, value in d.items():
-                    setattr(obj, key, dict_to_obj(value))
-                return obj
-            elif isinstance(d, list):
-                return [dict_to_obj(item) for item in d]
-            return d
-
-        event_dict = json.loads(payload.decode("utf-8"))
-        logger.warning(f"TEMP: Skipping signature verification! Event type: {event_dict.get('type')}, ID: {event_dict.get('id')}")
-
-        # TODO: Re-enable signature verification
-        # event = stripe_client.construct_webhook_event(
-        #     payload=payload,
-        #     sig_header=sig_header,
-        # )
-
-        # Convert dict to Stripe Event-like object
-        event = dict_to_obj(event_dict)
-
-        # Log webhook event (use original dict for JSON payload)
+        # Log webhook event
         await repository.create_webhook_event(
             stripe_event_id=event.id,
             event_type=event.type,
-            payload=event_dict.get("data", {}).get("object", {}),
+            payload=event.data.object,
         )
 
         # Process event if handler exists
@@ -439,7 +412,7 @@ async def stripe_webhook(
                 logger.info(f"Processed webhook event: {event.type} ({event.id})")
             except Exception as e:
                 # Log error but don't fail (Stripe retries failed webhooks)
-                logger.error(f"Failed to process webhook event {event.type}: {e}")
+                logger.error(f"Failed to process webhook event {event.type}: {e}", exc_info=True)
 
                 # Mark event as failed
                 webhook_event = await repository.get_webhook_event_by_event_id(event.id)
@@ -452,19 +425,25 @@ async def stripe_webhook(
 
         return {"status": "success"}
     except WebhookValidationError as e:
-        logger.error(f"Webhook validation failed: {e}")
+        logger.error(f"Webhook validation error: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid webhook signature",
         )
     except WebhookProcessingError as e:
-        logger.error(f"Webhook processing failed: {e}")
+        logger.error(f"Webhook processing error: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to process webhook",
         )
+    except stripe.error.SignatureVerificationError as e:
+        logger.error(f"Stripe signature verification error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid webhook signature: {str(e)}",
+        )
     except Exception as e:
-        logger.error(f"Unexpected webhook error: {e}")
+        logger.error(f"Unexpected webhook error: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Webhook processing failed",

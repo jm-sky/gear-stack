@@ -1,8 +1,8 @@
 # Stripe Subscription Implementation Plan
 
-**Status:** 🚧 IN PROGRESS - Phase 4 Complete, Phase 5 Pending
+**Status:** 🚧 IN PROGRESS - Phase 5 Active, Webhook Signature Verification Complete
 **Created:** 2025-12-18
-**Last Updated:** 2025-12-22
+**Last Updated:** 2025-12-23
 **Progress:** 4/6 Phases Complete (67%)
 
 ## Executive Summary
@@ -13,16 +13,17 @@ This document outlines the complete implementation plan for integrating Stripe s
 
 ## 📊 Progress Summary (Updated: 2025-12-22 13:25)
 
-### 🎉 Current Status: Phase 5 - Testing & Integration (95% Complete)
+### 🎉 Current Status: Phase 5 - Testing & Integration (98% Complete)
 
-**Latest Session Progress (2025-12-22):**
+**Latest Session Progress (2025-12-23):**
 - ✅ Fixed Pydantic validation errors (snake_case ↔ camelCase mapping)
 - ✅ Fixed billing_interval constraint (`'month'/'year'` instead of `'monthly'/'annual'`)
 - ✅ Implemented upgrade/downgrade flow (auto-cancel old subscription)
 - ✅ Fixed subscription_history NOT NULL constraint
 - ✅ Fixed webhook handlers for nested Stripe objects
 - ✅ Webhooks processing successfully (200 OK on all events)
-- ⚠️ Webhook signature verification temporarily disabled (workaround in place)
+- ✅ **Webhook signature verification working** - Fixed middleware payload modification issue
+- ✅ Fixed invoice subscription field access (handles both object and string ID)
 
 ### ✅ Completed (Phases 1-4)
 
@@ -56,12 +57,14 @@ This document outlines the complete implementation plan for integrating Stripe s
 
 **✅ Working Features:**
 1. **Checkout Flow** - Full payment flow with Stripe Checkout (test mode)
-2. **Webhook Processing** - All events return 200 OK:
+2. **Webhook Processing** - All events return 200 OK with signature verification:
    - `checkout.session.completed` - Creates/updates subscription
-   - `customer.subscription.created` - Tracks new subscriptions
    - `customer.subscription.updated` - Handles plan changes and cancellations
+   - `customer.subscription.deleted` - Handles subscription cancellations
    - `invoice.payment_succeeded` - Confirms successful payments
+   - `invoice.payment_failed` - Handles payment failures
    - All events logged to `stripe_webhook_events` table
+   - ✅ **Signature verification working** - Webhook endpoints excluded from middleware
 3. **Upgrade/Downgrade** - Users can change plans (Pro ↔ Pro Plus, monthly ↔ annual)
    - Old subscription automatically canceled
    - New checkout session created
@@ -71,13 +74,14 @@ This document outlines the complete implementation plan for integrating Stripe s
 6. **Subscription History** - All changes logged with proper plan/status tracking
 7. **Admin Dashboard** - Complete subscription management interface
 
-**⚠️ Temporary Workarounds (Development Only):**
-1. **Webhook Signature Verification DISABLED**
-   - Using custom `dict_to_obj()` converter instead of native Stripe objects
-   - Reason: Stripe CLI webhook secret mismatch with `.env` configuration
-   - Status: Works for development, **MUST BE FIXED before production**
-   - Location: `backend/app/modules/billing/router.py` (lines 387-412)
-   - Fix needed: Resolve webhook secret synchronization issue
+**✅ Resolved Issues:**
+1. **Webhook Signature Verification** - ✅ FIXED
+   - Root cause: `ConvertEmptyStringsToNoneMiddleware` was modifying JSON payloads
+   - Solution: Added webhook path exclusion in middleware
+   - Webhook paths defined in `app.modules.billing.constants.WEBHOOK_PATHS`
+   - Status: ✅ Working correctly with Stripe SDK signature verification
+   - Location: `backend/app/core/convert_empty_strings_middleware.py`
+   - Related: Fixed invoice subscription field access (handles both object and string ID)
 
 **🔧 Recent Fixes (2025-12-22 Session):**
 1. **Pydantic Field Aliases** - Added `Field(alias="...")` for all snake_case → camelCase mappings
@@ -89,7 +93,7 @@ This document outlines the complete implementation plan for integrating Stripe s
 7. **Upgrade Flow** - Auto-cancel old subscription when user upgrades/downgrades
 
 **⏳ Pending Tasks:**
-- 🔴 **CRITICAL:** Fix webhook signature verification (remove workaround)
+- ✅ **COMPLETED:** Fix webhook signature verification (resolved via middleware exclusion)
 - ⏳ Write integration tests for subscription flows
 - ⏳ Write E2E tests with Stripe test mode
 - ⏳ Test cancellation flow end-to-end

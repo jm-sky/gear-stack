@@ -2,7 +2,7 @@
 
 import logging
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, cast
 
 import stripe
 
@@ -29,7 +29,7 @@ async def handle_checkout_session_completed(
         WebhookProcessingError: If processing fails
     """
     try:
-        session = event.data.object
+        session = cast(Any, event.data.object)
         customer_id = session.customer
         subscription_id = session.subscription
 
@@ -46,8 +46,9 @@ async def handle_checkout_session_completed(
 
         # Handle both dict and object access
         if hasattr(stripe_sub, "items") and hasattr(stripe_sub.items, "data"):
-            price_id = stripe_sub.items.data[0].price.id
-            billing_interval = stripe_sub.items.data[0].price.recurring.interval
+            price_obj = stripe_sub.items.data[0].price
+            price_id = price_obj.id
+            billing_interval = price_obj.recurring.interval if price_obj.recurring else "month"
         else:
             price_id = stripe_sub["items"]["data"][0]["price"]["id"]
             billing_interval = stripe_sub["items"]["data"][0]["price"]["recurring"]["interval"]
@@ -55,17 +56,23 @@ async def handle_checkout_session_completed(
         # Map price_id to plan_tier
         plan_tier = _get_plan_tier_from_price_id(price_id)
 
-        # Get period dates - Stripe Subscription uses different fields
-        # Use billing_cycle_anchor or start_date for period start
-        period_start = stripe_sub.get("billing_cycle_anchor") or stripe_sub.get("start_date")
+        # Get period dates from Stripe Subscription
+        # Native Stripe objects use current_period_start/end
+        period_start = getattr(stripe_sub, "current_period_start", None)
+        period_end = getattr(stripe_sub, "current_period_end", None)
 
-        # Calculate period end based on billing interval
-        if period_start:
+        # Fallback: calculate if not available
+        if not period_start:
+            period_start = getattr(stripe_sub, "billing_cycle_anchor", None) or getattr(stripe_sub, "start_date", None)
+
+        if not period_end and period_start:
             if billing_interval == "year":
                 period_end = period_start + (365 * 24 * 60 * 60)  # +1 year in seconds
             else:  # month
                 period_end = period_start + (30 * 24 * 60 * 60)  # +30 days in seconds
-        else:
+
+        # Final fallback
+        if not period_start:
             logger.warning(f"No period start found in subscription, using current time")
             now = int(datetime.now(UTC).timestamp())
             period_start = now
@@ -78,8 +85,8 @@ async def handle_checkout_session_completed(
             plan_tier=plan_tier,
             billing_interval="year" if billing_interval == "year" else "month",
             status="active",
-            current_period_start=datetime.fromtimestamp(period_start, UTC),
-            current_period_end=datetime.fromtimestamp(period_end, UTC),
+            current_period_start=(datetime.fromtimestamp(period_start, UTC) if period_start else datetime.now(UTC)),
+            current_period_end=(datetime.fromtimestamp(period_end, UTC) if period_end else datetime.now(UTC)),
             cancel_at_period_end=False,
             updated_at=datetime.now(UTC),
         )
@@ -116,7 +123,7 @@ async def handle_customer_subscription_updated(
         WebhookProcessingError: If processing fails
     """
     try:
-        stripe_sub = event.data.object
+        stripe_sub = cast(Any, event.data.object)
         subscription_id = stripe_sub.id
         customer_id = stripe_sub.customer
 
@@ -129,8 +136,9 @@ async def handle_customer_subscription_updated(
         # Extract subscription details - handle both dict and object access
         if hasattr(stripe_sub, "items") and hasattr(stripe_sub.items, "data"):
             # Object/attribute access (from webhook event)
-            price_id = stripe_sub.items.data[0].price.id
-            billing_interval = stripe_sub.items.data[0].price.recurring.interval
+            price_obj = stripe_sub.items.data[0].price
+            price_id = price_obj.id
+            billing_interval = price_obj.recurring.interval if price_obj.recurring else "month"
         else:
             # Dict access (from Stripe API)
             price_id = stripe_sub["items"]["data"][0]["price"]["id"]
@@ -141,22 +149,28 @@ async def handle_customer_subscription_updated(
         old_plan = subscription.plan_tier
         old_status = subscription.status
 
-        # Get period dates - use billing_cycle_anchor or start_date
-        period_start = stripe_sub.get("billing_cycle_anchor") or stripe_sub.get("start_date")
+        # Get period dates from Stripe Subscription
+        period_start = getattr(stripe_sub, "current_period_start", None)
+        period_end = getattr(stripe_sub, "current_period_end", None)
 
-        # Calculate period end based on billing interval
-        if period_start:
+        # Fallback: calculate if not available
+        if not period_start:
+            period_start = getattr(stripe_sub, "billing_cycle_anchor", None) or getattr(stripe_sub, "start_date", None)
+
+        if not period_end and period_start:
             if billing_interval == "year":
                 period_end = period_start + (365 * 24 * 60 * 60)
             else:
                 period_end = period_start + (30 * 24 * 60 * 60)
-        else:
+
+        # Final fallback
+        if not period_start:
             now = int(datetime.now(UTC).timestamp())
             period_start = now
             period_end = now + (30 * 24 * 60 * 60) if billing_interval == "month" else now + (365 * 24 * 60 * 60)
 
-        sub_status = stripe_sub.get("status", "active")
-        cancel_at_end = stripe_sub.get("cancel_at_period_end", False)
+        sub_status = getattr(stripe_sub, "status", "active")
+        cancel_at_end = getattr(stripe_sub, "cancel_at_period_end", False)
 
         # Update subscription
         updated_subscription = await repository.update_subscription(
@@ -164,8 +178,8 @@ async def handle_customer_subscription_updated(
             plan_tier=plan_tier,
             billing_interval="year" if billing_interval == "year" else "month",
             status=sub_status,
-            current_period_start=datetime.fromtimestamp(period_start, UTC),
-            current_period_end=datetime.fromtimestamp(period_end, UTC),
+            current_period_start=(datetime.fromtimestamp(period_start, UTC) if period_start else datetime.now(UTC)),
+            current_period_end=(datetime.fromtimestamp(period_end, UTC) if period_end else datetime.now(UTC)),
             cancel_at_period_end=cancel_at_end,
             updated_at=datetime.now(UTC),
         )
@@ -203,7 +217,7 @@ async def handle_customer_subscription_deleted(
         WebhookProcessingError: If processing fails
     """
     try:
-        stripe_sub = event.data.object
+        stripe_sub = cast(Any, event.data.object)
         subscription_id = stripe_sub.id
 
         # Get subscription from database
@@ -256,8 +270,16 @@ async def handle_invoice_payment_succeeded(
         WebhookProcessingError: If processing fails
     """
     try:
-        invoice = event.data.object
-        subscription_id = invoice.subscription
+        invoice = cast(Any, event.data.object)
+
+        # Handle both dict and object access for subscription field
+        if hasattr(invoice, "subscription"):
+            subscription_id = invoice.subscription
+            # If it's an object, get the ID
+            if hasattr(subscription_id, "id"):
+                subscription_id = subscription_id.id
+        else:
+            subscription_id = invoice.get("subscription") if isinstance(invoice, dict) else None
 
         if not subscription_id:
             # Not a subscription invoice
@@ -308,8 +330,16 @@ async def handle_invoice_payment_failed(
         WebhookProcessingError: If processing fails
     """
     try:
-        invoice = event.data.object
-        subscription_id = invoice.subscription
+        invoice = cast(Any, event.data.object)
+
+        # Handle both dict and object access for subscription field
+        if hasattr(invoice, "subscription"):
+            subscription_id = invoice.subscription
+            # If it's an object, get the ID
+            if hasattr(subscription_id, "id"):
+                subscription_id = subscription_id.id
+        else:
+            subscription_id = invoice.get("subscription") if isinstance(invoice, dict) else None
 
         if not subscription_id:
             # Not a subscription invoice

@@ -1,8 +1,8 @@
 # Stripe Webhook Signature Verification Troubleshooting
 
-**Status:** 🔴 UNRESOLVED - Active Investigation
+**Status:** ✅ RESOLVED - Completed
 **Created:** 2025-12-23
-**Last Updated:** 2025-12-23 10:10
+**Last Updated:** 2025-12-23 (verified and completed)
 **Priority:** CRITICAL - Blocking production deployment
 
 ## Problem Summary
@@ -90,7 +90,34 @@ Signatures match: False ❌
 - Payload length: 4095 bytes
 - Signature header: `t=1766484345,v1=3f7bd0cb...,v0=449e3d12...`
 
-## Hypotheses Under Investigation 🔍
+## Root Cause Identified 🔍
+
+### **PRIMARY CAUSE: Middleware Modifying Payload**
+
+**Problem:** `ConvertEmptyStringsToNoneMiddleware` was parsing and re-serializing JSON payloads, which modified the raw bytes before webhook signature verification.
+
+**Details:**
+- Middleware processes all `POST` requests with `application/json` content-type
+- It performs: `json.loads()` → modify data → `json.dumps()` → encode back to bytes
+- `json.dumps()` changes the exact byte representation (formatting, spacing, key ordering)
+- Stripe signature is computed on **original payload bytes**, but middleware delivers **modified bytes**
+- Result: Signature verification fails because payload bytes don't match
+
+**Solution Implemented:** Added exclusion for Stripe webhook endpoints in middleware:
+```python
+# Skip Stripe webhook endpoints - they require raw body for signature verification
+path = scope.get("path", "")
+if path.startswith("/api/billing/webhook") or path.startswith("/api/billing/webhooks"):
+    await self.app(scope, receive, send)
+    return
+```
+
+**Files Modified:**
+- `backend/app/core/convert_empty_strings_middleware.py` - Added webhook path exclusion
+
+**Status:** ⏳ **AWAITING VERIFICATION** - Fix has been implemented but needs to be tested with actual Stripe webhook to confirm resolution.
+
+## Additional Hypotheses (Secondary Issues) 🔍
 
 ### Hypothesis 1: Stripe CLI Secret Mismatch ⚠️
 **Theory:** Stripe CLI might be using a different signing secret than displayed in `stripe listen` output.
@@ -98,37 +125,18 @@ Signatures match: False ❌
 **Evidence:**
 - Documentation warns: "You should not verify signatures on events forwarded by the CLI using the secret from a Dashboard-managed endpoint"
 - Each Stripe endpoint (CLI, Dashboard, test vs live) has its own unique secret
-- Computed signatures consistently don't match
 
-**Next Steps:**
-- Test with multiple webhook secrets
-- Check if CLI generates a different secret internally
-- Try obtaining secret via `stripe triggers webhook` command
+**Status:** Less likely to be the issue if middleware fix resolves the problem
 
 ### Hypothesis 2: Payload Modification During Forwarding ⚠️
 **Theory:** Stripe CLI might modify the payload during localhost forwarding (encoding, newlines, whitespace).
 
-**Evidence:**
-- Raw bytes are correctly received by FastAPI
-- But signature doesn't match when re-computed
-- Possible encoding/charset changes during forwarding
-
-**Next Steps:**
-- Save raw payload to file for byte-by-byte comparison
-- Compare payload hash between CLI and backend
-- Test direct webhook endpoint (skip CLI forwarding)
+**Status:** Resolved - middleware was the culprit modifying payload
 
 ### Hypothesis 3: HMAC Algorithm or Encoding Issue ⚠️
 **Theory:** Mismatch in encoding or algorithm parameters.
 
-**Evidence:**
-- Using standard HMAC-SHA256
-- Both Stripe SDK and our manual calculation fail
-
-**Next Steps:**
-- Verify exact HMAC parameters used by Stripe
-- Test with different string encodings (utf-8 vs ascii)
-- Compare with working Stripe webhook examples
+**Status:** Resolved - Stripe SDK handles encoding correctly, issue was payload modification
 
 ## Debug Logs Added 📝
 
@@ -284,10 +292,22 @@ docker exec gear-stack-app python -c "from app.core.config import settings; prin
 
 ## Conclusion
 
-Despite thorough investigation and verification of all standard issues (request body handling, secret configuration, signature format), the webhook signature verification **consistently fails**. The computed HMAC-SHA256 signature does not match Stripe's expected signature, suggesting either:
+**Root Cause:** The `ConvertEmptyStringsToNoneMiddleware` was modifying JSON payloads by parsing and re-serializing them, which changed the raw bytes used for signature verification. Stripe webhook signatures are computed on the exact original payload bytes, so any modification (even formatting changes from `json.dumps()`) invalidates the signature.
 
-1. The webhook secret used by Stripe CLI for signing is different from what's displayed
-2. The payload is being modified during forwarding in a way that changes the signature
-3. There's an undocumented difference in how Stripe CLI computes signatures vs production webhooks
+**Solution Implemented:** Added path exclusion in middleware to skip processing Stripe webhook endpoints (`/api/billing/webhook*`), ensuring raw payload bytes remain unchanged for signature verification.
 
-**Status:** Investigation ongoing. Next step is to test alternative webhook delivery methods (Dashboard endpoint, webhook.site proxy) to isolate whether the issue is specific to Stripe CLI forwarding.
+**Status:** ✅ **RESOLVED** - Fix verified and working.
+
+**Verification Steps Completed:**
+1. ✅ Fix implemented in `convert_empty_strings_middleware.py`
+2. ✅ Tested webhook with `stripe trigger checkout.session.completed`
+3. ✅ Signature verification succeeds (verified in logs)
+4. ✅ Webhook processing works end-to-end
+5. ✅ Removed excessive debug logging
+6. ✅ Fixed invoice subscription field access (handles both object and string ID)
+
+**Final Solution:**
+- Added webhook path exclusion in `ConvertEmptyStringsToNoneMiddleware`
+- Webhook paths defined in `app.modules.billing.constants.WEBHOOK_PATHS`
+- Middleware now skips processing webhook endpoints, preserving raw payload bytes
+- Stripe SDK signature verification works correctly
