@@ -108,7 +108,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "style-src 'self' 'unsafe-inline'",
             "img-src 'self' data: https:",
             "font-src 'self' data:",
-            "connect-src 'self' https://www.google.com https://*.sentry.io",  # Google reCaptcha + Sentry
+            "connect-src 'self' https://api.gear-stack.ovh https://www.google.com https://*.sentry.io",  # API + Google reCaptcha + Sentry
             "worker-src 'self' blob:",  # Web Workers
             "frame-src 'self' https://www.google.com https://www.gstatic.com",  # Google reCaptcha iframe
             "frame-ancestors 'none'",
@@ -127,7 +127,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 yourdomain.com {
     header {
         # CSP (primary - backend should also set this)
-        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' blob: https://www.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://www.google.com https://*.sentry.io; worker-src 'self' blob:; frame-src 'self' https://www.google.com https://www.gstatic.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' blob: https://www.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.gear-stack.ovh https://www.google.com https://*.sentry.io; worker-src 'self' blob:; frame-src 'self' https://www.google.com https://www.gstatic.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 
         # Report-Only mode for testing
         # Content-Security-Policy-Report-Only "default-src 'self'; report-uri /api/csp-report"

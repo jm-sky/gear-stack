@@ -211,7 +211,7 @@ docker logs gear-stack-app
 | `style-src` | CSS sources | `'self' 'unsafe-inline'` |
 | `img-src` | Image sources | `'self' data: https:` |
 | `font-src` | Font sources | `'self' data:` |
-| `connect-src` | XHR, WebSocket, EventSource | `'self' https://www.google.com https://*.sentry.io` |
+| `connect-src` | XHR, WebSocket, EventSource | `'self' https://api.gear-stack.ovh https://www.google.com https://*.sentry.io` |
 | `worker-src` | Web Workers | `'self' blob:` |
 | `frame-src` | iframe sources (for reCaptcha) | `'self' https://www.google.com https://www.gstatic.com` |
 | `frame-ancestors` | Who can embed this site | `'none'` (prevents clickjacking) |

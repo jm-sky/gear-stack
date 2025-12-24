@@ -16,12 +16,12 @@ gear-stack.ovh {
   # Security Headers
   # Using '>' prefix to ensure headers override any backend headers (defer mode)
   header {
-    # Content Security Policy - Google reCaptcha + Sentry support
+    # Content Security Policy - Google reCaptcha + Sentry + API support
     # References:
     # - https://content-security-policy.com/
     # - https://developers.google.com/recaptcha/docs/faq#im-using-content-security-policy-csp-on-my-website.-how-can-i-configure-it-to-work-with-recaptcha
     # - https://docs.sentry.io/platforms/javascript/install/cdn/#content-security-policy
-    >Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' blob: https://www.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://www.google.com https://*.sentry.io; worker-src 'self' blob:; frame-src 'self' https://www.google.com https://www.gstatic.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    >Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' blob: https://www.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.gear-stack.ovh https://www.google.com https://*.sentry.io; worker-src 'self' blob:; frame-src 'self' https://www.google.com https://www.gstatic.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 
     # Prevent clickjacking attacks
     >X-Frame-Options "DENY"
