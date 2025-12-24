@@ -207,11 +207,12 @@ docker logs gear-stack-app
 | Directive | Purpose | Current Value |
 |-----------|---------|---------------|
 | `default-src` | Default policy for all resource types | `'self'` |
-| `script-src` | JavaScript execution sources | `'self' 'unsafe-inline' https://www.google.com https://www.gstatic.com` |
+| `script-src` | JavaScript execution sources | `'self' 'unsafe-inline' blob: https://www.google.com https://www.gstatic.com` |
 | `style-src` | CSS sources | `'self' 'unsafe-inline'` |
 | `img-src` | Image sources | `'self' data: https:` |
 | `font-src` | Font sources | `'self' data:` |
-| `connect-src` | XHR, WebSocket, EventSource | `'self' https://www.google.com` |
+| `connect-src` | XHR, WebSocket, EventSource | `'self' https://www.google.com https://*.sentry.io` |
+| `worker-src` | Web Workers | `'self' blob:` |
 | `frame-src` | iframe sources (for reCaptcha) | `'self' https://www.google.com https://www.gstatic.com` |
 | `frame-ancestors` | Who can embed this site | `'none'` (prevents clickjacking) |
 | `base-uri` | Allowed base URLs | `'self'` |
