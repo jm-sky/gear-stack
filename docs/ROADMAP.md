@@ -17,7 +17,22 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
 
 ### Wysoki priorytet
 
-1. ✅ **UUID support dla update workflow** - Zakończone
+1. **Bezpieczeństwo aplikacji (Security Hardening)** - 🚧 In Progress
+   - 📍 Plan: [SECURITY_IMPROVEMENT_PLAN.md](./security/SECURITY_IMPROVEMENT_PLAN.md)
+   - 📍 Docker Security: [SECURITY_FIX.md](./SECURITY_FIX.md)
+   - ⚠️ **Critical:** Implementacja security headers (CSP, HSTS, X-Frame-Options)
+   - ⚠️ **Critical:** Weryfikacja PostgreSQL SSL/TLS w produkcji
+   - 🔒 **High:** Implementacja WAF (Web Application Firewall)
+   - 🔒 **High:** Procedury backup/recovery bazy danych
+   - 🔐 **Medium:** Migracja na httpOnly cookies (obecnie localStorage)
+   - 🔐 **Medium:** Implementacja CSRF protection
+   - 🛡️ **Medium:** Strict CORS configuration
+   - 📋 **Low:** Procedury rotacji sekretów (secrets rotation)
+   - 📊 **Low:** Security monitoring & alerting
+   - Status: 🚧 In Progress | Priority: Critical | Complexity: Large
+   - **Uwaga:** Wymaga zmian w backend middleware, Caddy config, i frontend auth
+
+2. ✅ **UUID support dla update workflow** - Zakończone
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#uuid-support-dla-update-workflow)
    - Wykorzystanie istniejącego UUID (`id`) do aktualizacji istniejących kontenerów/przedmiotów podczas importu markdown
    - Status: ✅ Completed | Priority: Medium | Complexity: Medium
