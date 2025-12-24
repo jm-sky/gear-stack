@@ -104,11 +104,12 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         # Content Security Policy
         csp_directives = [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval'",  # Adjust based on needs
+            "script-src 'self' 'unsafe-inline' https://www.google.com https://www.gstatic.com",  # Google reCaptcha
             "style-src 'self' 'unsafe-inline'",
             "img-src 'self' data: https:",
             "font-src 'self' data:",
-            "connect-src 'self' https://api.openrouter.ai",  # Add AI endpoints
+            "connect-src 'self' https://www.google.com",  # Google reCaptcha verification
+            "frame-src 'self' https://www.google.com https://www.gstatic.com",  # Google reCaptcha iframe
             "frame-ancestors 'none'",
             "base-uri 'self'",
             "form-action 'self'"
@@ -125,7 +126,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 yourdomain.com {
     header {
         # CSP (primary - backend should also set this)
-        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.openrouter.ai; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://www.google.com; frame-src 'self' https://www.google.com https://www.gstatic.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 
         # Report-Only mode for testing
         # Content-Security-Policy-Report-Only "default-src 'self'; report-uri /api/csp-report"
