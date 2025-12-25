@@ -107,6 +107,7 @@ class GearItemCreateV2(BaseModel):
     maxWeightUnit: GearWeightUnit | None = Field(None, alias="maxWeightUnit")
     hideWhenNested: bool | None = Field(default=None, alias="hideWhenNested")
     isPublic: bool | None = Field(default=None, alias="isPublic")
+    isHiddenByReports: bool | None = Field(default=None, alias="isHiddenByReports")
     favorite: bool | None = Field(default=None)
     showItemImages: bool | None = Field(default=None, alias="showItemImages")
 
@@ -116,11 +117,13 @@ class GearItemCreateV2(BaseModel):
     status: GearItemStatus | None = None
     priority: GearItemPriority | None = None
     expirationDate: datetime | None = Field(None, alias="expirationDate")
+    shelfLife: dict[str, Any] | None = Field(None, alias="shelfLife")
     quality: GearItemQuality | None = None
     wearable: bool | None = None
     consumable: bool | None = None
     orderIndex: int | None = Field(None, alias="orderIndex")
     showOnContainer: bool | None = Field(None, alias="showOnContainer")
+    promoteCount: int | None = Field(None, ge=0, alias="promoteCount")
 
     # Linking fields
     linkedItemId: str | None = Field(None, alias="linkedItemId")
@@ -181,6 +184,7 @@ class GearItemUpdateV2(BaseModel):
     maxWeightUnit: GearWeightUnit | None = Field(None, alias="maxWeightUnit")
     hideWhenNested: bool | None = Field(None, alias="hideWhenNested")
     isPublic: bool | None = Field(None, alias="isPublic")
+    isHiddenByReports: bool | None = Field(None, alias="isHiddenByReports")
     favorite: bool | None = None
     showItemImages: bool | None = Field(None, alias="showItemImages")
 
@@ -190,11 +194,13 @@ class GearItemUpdateV2(BaseModel):
     status: GearItemStatus | None = None
     priority: GearItemPriority | None = None
     expirationDate: datetime | None = Field(None, alias="expirationDate")
+    shelfLife: dict[str, Any] | None = Field(None, alias="shelfLife")
     quality: GearItemQuality | None = None
     wearable: bool | None = None
     consumable: bool | None = None
     orderIndex: int | None = Field(None, alias="orderIndex")
     showOnContainer: bool | None = Field(None, alias="showOnContainer")
+    promoteCount: int | None = Field(None, ge=0, alias="promoteCount")
 
     # Linking fields
     linkedItemId: str | None = Field(None, alias="linkedItemId")
@@ -235,6 +241,7 @@ class GearItemResponseV2(BaseModel):
     maxWeightUnit: str | None = Field(None, alias="maxWeightUnit")
     hideWhenNested: bool | None = Field(None, alias="hideWhenNested")
     isPublic: bool | None = Field(None, alias="isPublic")
+    isHiddenByReports: bool | None = Field(None, alias="isHiddenByReports")
     favorite: bool | None = None
     showItemImages: bool | None = Field(None, alias="showItemImages")
 
@@ -244,11 +251,13 @@ class GearItemResponseV2(BaseModel):
     status: str | None = None
     priority: str | None = None
     expirationDate: datetime | None = Field(None, alias="expirationDate")
+    shelfLife: dict[str, Any] | None = Field(None, alias="shelfLife")
     quality: str | None = None
     wearable: bool | None = None
     consumable: bool | None = None
     orderIndex: int | None = Field(None, alias="orderIndex")
     showOnContainer: bool | None = Field(None, alias="showOnContainer")
+    promoteCount: int | None = Field(None, ge=0, alias="promoteCount")
 
     # Linking fields
     linkedItemId: str | None = Field(None, alias="linkedItemId")

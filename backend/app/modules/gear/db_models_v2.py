@@ -20,8 +20,10 @@ Benefits:
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import Any
 
 from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -73,6 +75,7 @@ class GearItemDBV2(Base):
         max_weight_unit: Max weight unit
         hide_when_nested: Hide container when nested
         is_public: Public visibility flag
+        is_hidden_by_reports: Hidden due to content reports (3+ reports)
         favorite: Favorite flag
         show_item_images: Show item images in gallery
 
@@ -82,11 +85,13 @@ class GearItemDBV2(Base):
         status: Item status (owned, missing, toBuy)
         priority: Item priority (critical, high, medium, low)
         expiration_date: Optional expiration date
+        shelf_life: Shelf life before purchase (e.g., {"value": 12, "unit": "months"})
         quality: Quality tier (low, medium, high)
         wearable: Whether item is worn on person
         consumable: Whether item is consumed
         order_index: Manual order (renamed from 'order')
         show_on_container: Show in container gallery
+        promote_count: Number of promotions to catalogue
 
         # Linking fields
         linked_item_id: Link to another item (for duplicates)
@@ -136,6 +141,7 @@ class GearItemDBV2(Base):
     max_weight_unit: Mapped[str | None] = mapped_column(String(5), nullable=True)
     hide_when_nested: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
     is_public: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False, index=True)
+    is_hidden_by_reports: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False, index=True)
     favorite: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False, index=True)
     show_item_images: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
 
@@ -145,11 +151,13 @@ class GearItemDBV2(Base):
     status: Mapped[str | None] = mapped_column(String(20), nullable=True, default="owned")
     priority: Mapped[str | None] = mapped_column(String(20), nullable=True, default="medium")
     expiration_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    shelf_life: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
     quality: Mapped[str | None] = mapped_column(String(20), nullable=True)
     wearable: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
     consumable: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
     order_index: Mapped[int | None] = mapped_column(Integer, nullable=True)
     show_on_container: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
+    promote_count: Mapped[int | None] = mapped_column(Integer, nullable=True, default=0)
 
     # Linking fields
     linked_item_id: Mapped[str | None] = mapped_column(
