@@ -20,6 +20,7 @@ import SortConfirmationAlert from '../components/SortConfirmationAlert.vue'
 import { useCatalogue } from '../composables/catalogue/useCatalogue'
 import { useContainerV2 } from '../composables/useContainerV2'
 import { useGear } from '../composables/useGear'
+import { useGearV2 } from '../composables/useGearV2'
 import { useItemsParamRecognition } from '../composables/useItemsParamRecognition'
 import { useJsonImportExport } from '../composables/useJsonImportExport'
 import { useSearchPaginationUrl } from '../composables/useSearchPaginationUrl'
@@ -52,7 +53,8 @@ const store = useGearStore()
 const storeV2 = useGearStoreV2()
 const { shouldUseAPI } = useBackend()
 const { container } = useContainerV2()
-const { deleteItem, updateItem, updateContainer, createItem, getContainerById, moveItem } = useGear()
+const { deleteItem, updateItem, createItem, moveItem } = useGearV2()
+const { updateContainer, getContainerById } = useGear()
 const { user, isAuthenticated } = useAuth()
 const { canUseAi } = useAi()
 const { setTitle } = usePageTitle()
