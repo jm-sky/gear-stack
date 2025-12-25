@@ -71,7 +71,7 @@ services:
     env_file:
       - .env
     environment:
-      - ENVIRONMENT=development
+      - ENVIRONMENT=${ENVIRONMENT:-development}
       - PROJECT_NAME=${PROJECT_NAME:-backend}
       - APP_PORT=${APP_PORT:-8000}
       - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-backend}:${POSTGRES_PASSWORD:-changeme}@db:5432/${POSTGRES_DB:-backend}
