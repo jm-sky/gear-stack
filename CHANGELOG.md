@@ -21,6 +21,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.47.0] - 2025-12-25
+
+### Security
+- **Security Headers Middleware**: Added comprehensive security headers to all HTTP responses
+  - Content-Security-Policy (CSP) with support for Google reCaptcha, Sentry, Web Workers, and Vue.js
+  - X-Frame-Options: DENY (prevents clickjacking attacks)
+  - X-Content-Type-Options: nosniff (prevents MIME type sniffing)
+  - X-XSS-Protection: 1; mode=block (enables XSS filter for legacy browsers)
+  - Strict-Transport-Security (HSTS): Enabled in production only (max-age=31536000; includeSubDomains; preload)
+  - Referrer-Policy: strict-origin-when-cross-origin
+  - Permissions-Policy: Disables geolocation, microphone, and camera
+  - Headers match Caddyfile configuration for consistency
+  - Middleware registered as first in pipeline (before CORS) to ensure headers are applied to all responses
+
+---
+
 ## [2.46.0] - 2025-12-23
 
 ### Added
