@@ -5,7 +5,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
 from app.core.config import settings
-from app.core.convert_empty_strings_middleware import ConvertEmptyStringsToNoneMiddleware
+from app.core.convert_empty_strings_middleware import (
+    ConvertEmptyStringsToNoneMiddleware,
+)
+from app.core.security_headers import SecurityHeadersMiddleware
 
 
 def setup_middleware(app: FastAPI) -> None:
@@ -13,12 +16,18 @@ def setup_middleware(app: FastAPI) -> None:
     Configure middleware for the FastAPI application.
 
     Security middleware is configured based on environment:
+    - Security Headers: Always enabled (CSP, X-Frame-Options, HSTS in production, etc.)
     - CORS: Always enabled with configurable origins (CORS_ORIGINS env var)
     - Trusted Host: Enabled in production with configurable hosts (ALLOWED_HOSTS env var)
 
     Args:
         app: FastAPI application instance
     """
+    # Security Headers Middleware - always enabled (first in pipeline)
+    # Adds CSP, X-Frame-Options, X-Content-Type-Options, HSTS (prod only), etc.
+    # Headers match Caddyfile configuration for consistency
+    app.add_middleware(SecurityHeadersMiddleware)
+
     # CORS Middleware - always enabled
     # Configure via CORS_ORIGINS environment variable
     # Example: CORS_ORIGINS='["https://example.com","https://app.example.com"]'
