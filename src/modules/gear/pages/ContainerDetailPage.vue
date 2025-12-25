@@ -30,7 +30,7 @@ import { useGearStore } from '../store/useGearStore'
 import { useGearStoreV2 } from '../store/useGearStoreV2'
 import { COLOR_BORDER_CLASSES, COLOR_TEXT_CLASSES } from '../utils/containerColors'
 import { createNavigationQuery } from '../utils/navigationParams'
-import { convertV2ContainerToV1 } from '../utils/typeConverters'
+import { convertV2ContainerToV1, convertV2ItemsArrayToV1, convertV2ItemToV1 } from '../utils/typeConverters'
 
 // Lazy load dialogs - only loaded when user opens them
 const ItemsTable = defineAsyncComponent(() => import('../components/ItemsTable.vue'))
@@ -261,7 +261,7 @@ const handleSaveSorting = async () => {
 
     // Use batchUpdateOrder for both backend and localStorage
     if ('batchUpdateOrder' in service && typeof service.batchUpdateOrder === 'function') {
-      await service.batchUpdateOrder(pendingSortingChanges.value)
+      await service.batchUpdateOrder(convertV2ItemsArrayToV1(pendingSortingChanges.value))
       toast.success(t('gear.item.reorderSuccess', 'Kolejność przedmiotów została zaktualizowana'))
       pendingSortingChanges.value = []
     } else {
@@ -324,7 +324,9 @@ const handleAddNestedContainer = async (nestedContainerId: string) => {
 
     // Create an item that references the nested container
     // Use container name as item name
-    await createItem(containerId, {
+    // Note: In V2, nested containers are just items with itemType='item' that point to a container via parentItemId
+    await createItem({
+      parentItemId: containerId,
       name: nestedContainer.name,
       category: 'other',
       quantity: 1,
@@ -332,7 +334,6 @@ const handleAddNestedContainer = async (nestedContainerId: string) => {
       weightUnit: config.defaults.preferredWeightUnit,
       priority: 'medium',
       status: 'owned',
-      containerId: nestedContainerId,
     })
     toast.success(t('common.success'))
   } catch (error) {
@@ -351,9 +352,16 @@ const handleExportToCSV = () => {
   isExportToCSVDialogOpen.value = true
 }
 
-// Convert container to V1 for useItemsParamRecognition (composable uses V1 types - will be migrated in future)
+// Convert container and items to V1 for useItemsParamRecognition (composable uses V1 types - will be migrated in future)
 const containerV1ForParamRecognition = computed(() => container.value ? convertV2ContainerToV1(container.value) : undefined)
-const { handleRecognizeParameters, handleRecognizeParametersAll } = useItemsParamRecognition(containerV1ForParamRecognition, items)
+const itemsV1ForParamRecognition = computed(() => convertV2ItemsArrayToV1(items.value))
+const { handleRecognizeParameters: handleRecognizeParametersV1, handleRecognizeParametersAll } = useItemsParamRecognition(containerV1ForParamRecognition, itemsV1ForParamRecognition)
+
+// Wrap V1 handler to convert V2 item to V1
+const handleRecognizeParameters = async (itemV2: IGearItemV2) => {
+  const itemV1 = convertV2ItemToV1(itemV2)
+  await handleRecognizeParametersV1(itemV1)
+}
 
 const handleManageShareTokens = () => {
   router.push(GearRoutePath.ContainerShareTokensById(containerId))
