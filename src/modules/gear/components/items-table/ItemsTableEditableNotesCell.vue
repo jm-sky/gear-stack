@@ -4,7 +4,7 @@ import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { useInlineItemEditing } from '../../composables/useInlineItemEditing'
+import { useInlineItemEditingV2 } from '../../composables/useInlineItemEditingV2'
 import type { IGearItemV2 } from '@/modules/gear/types/gear.types.v2'
 
 const { t } = useI18n()
@@ -18,7 +18,7 @@ const emit = defineEmits<{
 }>()
 
 // Use shared composable
-const { isLoading, save } = useInlineItemEditing(props.item)
+const { isLoading, save } = useInlineItemEditingV2(props.item)
 
 // In edit mode, always show input
 const editedNotes = ref(props.item.notes ?? '')

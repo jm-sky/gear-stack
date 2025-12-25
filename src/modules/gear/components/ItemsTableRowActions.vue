@@ -42,7 +42,7 @@ const RecognizeParametersIcon = getActionIcon('recognizeParameters')
 
 // Check if item is a nested container
 const isNestedContainer = computed(() => {
-  return !!props.row.containerId
+  return props.row.itemType === 'container'
 })
 
 // Check if item is linked to catalogue

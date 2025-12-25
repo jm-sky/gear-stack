@@ -24,7 +24,6 @@ import { isExpiringSoon } from '../utils/isExpiringSoon'
 import { createItemsColumns } from '../utils/itemsColumns'
 import { createNavigationQuery } from '../utils/navigationParams'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
-import { convertV1ContainerToV2, convertV1ItemToV2 } from '../utils/typeConverters'
 import ItemPriorityBadge from './badges/ItemPriorityBadge.vue'
 import ItemsTableCategoryCell from './items-table/ItemsTableCategoryCell.vue'
 import ItemsTableEditableCategoryCell from './items-table/ItemsTableEditableCategoryCell.vue'
@@ -581,7 +580,7 @@ async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority)
         @change="(updates) => handleCellChange(row.original, updates)"
       />
       <ItemsTableCategoryCell
-        v-else
+        v-else-if="row.original.category"
         :category="row.original.category"
       />
     </template>
@@ -605,7 +604,7 @@ async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority)
         v-else
         :item="row.original"
         :is-nested-container="isNestedContainer(row.original)"
-        :total-weight="isNestedContainer(row.original) ? calculateTotalWeight(row.original.containerId!) : undefined"
+        :total-weight="isNestedContainer(row.original) ? calculateTotalWeight(row.original.id) : undefined"
         :preferred-weight-unit="settings.preferredWeightUnit"
       />
     </template>
@@ -617,7 +616,7 @@ async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority)
         @change="(updates) => handleCellChange(row.original, updates)"
       />
       <ItemPriorityBadge
-        v-else
+        v-else-if="row.original.priority"
         :priority="row.original.priority"
       />
     </template>
@@ -629,7 +628,7 @@ async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority)
         @change="(updates) => handleCellChange(row.original, updates)"
       />
       <ItemStatusBadge
-        v-else
+        v-else-if="row.original.status"
         :status="row.original.status"
       />
     </template>
@@ -710,9 +709,9 @@ async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority)
     <template #row-after="{ row }">
       <ItemsTableNestedContainerRow
         v-if="isNestedContainer(row.original) && isRowExpanded(row.original.id)"
-        :nested-items="getNestedContainerItems(row.original).map(item => convertV1ItemToV2(item, row.original.containerId || ''))"
+        :nested-items="getNestedContainerItems(row.original)"
         :columns-length="columns.length"
-        :container="getNestedContainer(row.original) ? convertV1ContainerToV2(getNestedContainer(row.original)!) : undefined"
+        :container="getNestedContainer(row.original)"
       />
     </template>
 
