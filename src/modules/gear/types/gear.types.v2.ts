@@ -52,6 +52,15 @@ export {
 export type TGearItemType = 'container' | 'item'
 
 /**
+ * Shelf life configuration
+ * Represents the period before item expires when purchased/created
+ */
+export interface IShelfLife {
+  value: number
+  unit: 'days' | 'months' | 'years'
+}
+
+/**
  * Unified gear item interface (V2)
  *
  * This interface represents both containers and regular items.
@@ -117,11 +126,13 @@ export interface IGearItemV2 {
   status?: TGearItemStatus | null
   priority?: TGearItemPriority | null
   expirationDate?: TDateTime | null
+  shelfLife?: IShelfLife | null
   quality?: TGearItemQuality | null
   wearable?: boolean | null
   consumable?: boolean | null
   orderIndex?: number | null
   showOnContainer?: boolean | null
+  promoteCount?: number | null
 
   // Item image fields
   primaryImageUrl?: string | null
@@ -185,6 +196,7 @@ export interface ICreateGearItemV2Dto {
   maxWeightUnit?: TGearWeightUnit | null
   hideWhenNested?: boolean | null
   isPublic?: boolean | null
+  isHiddenByReports?: boolean | null
   favorite?: boolean | null
   showItemImages?: boolean | null
 
@@ -194,11 +206,13 @@ export interface ICreateGearItemV2Dto {
   status?: TGearItemStatus | null
   priority?: TGearItemPriority | null
   expirationDate?: TDateTime | null
+  shelfLife?: IShelfLife | null
   quality?: TGearItemQuality | null
   wearable?: boolean | null
   consumable?: boolean | null
   orderIndex?: number | null
   showOnContainer?: boolean | null
+  promoteCount?: number | null
 
   // Linking fields
   linkedItemId?: TUUID | null
@@ -230,6 +244,7 @@ export interface IUpdateGearItemV2Dto {
   maxWeightUnit?: TGearWeightUnit | null
   hideWhenNested?: boolean | null
   isPublic?: boolean | null
+  isHiddenByReports?: boolean | null
   favorite?: boolean | null
   showItemImages?: boolean | null
 
@@ -239,11 +254,13 @@ export interface IUpdateGearItemV2Dto {
   status?: TGearItemStatus | null
   priority?: TGearItemPriority | null
   expirationDate?: TDateTime | null
+  shelfLife?: IShelfLife | null
   quality?: TGearItemQuality | null
   wearable?: boolean | null
   consumable?: boolean | null
   orderIndex?: number | null
   showOnContainer?: boolean | null
+  promoteCount?: number | null
 
   // Linking fields
   linkedItemId?: TUUID | null
