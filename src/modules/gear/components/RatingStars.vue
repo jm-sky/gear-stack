@@ -74,7 +74,7 @@ function handleStarLeave() {
         :key="star"
         type="button"
         :class="[
-          'transition-colors',
+          'flex items-center justify-center transition-colors',
           starSize,
           interactive && !disabled ? 'cursor-pointer hover:scale-110' : 'cursor-default',
           disabled ? 'opacity-50' : ''
