@@ -183,7 +183,7 @@ const isLinkedToCatalogue = computed(() => !!item.catalogueItemId)
   <MoveItemDialog
     v-model:open="moveDialogOpen"
     :item-id="item.id"
-    :current-container-id="item.container?.id ?? ''"
+    :current-container-id="item.parentItemId ?? ''"
     @move="handleMoveConfirm"
   />
 </template>

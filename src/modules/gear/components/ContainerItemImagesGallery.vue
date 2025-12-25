@@ -60,9 +60,9 @@ const itemsToShow = computed(() => {
 
   // Return all items - we'll filter by primary image in loadImages
   return props.items.toSorted((a, b) => {
-    // Sort by order (lower numbers first), then by name if order is the same
-    const orderA = a.order ?? 0
-    const orderB = b.order ?? 0
+    // Sort by orderIndex (lower numbers first), then by name if orderIndex is the same
+    const orderA = a.orderIndex ?? 0
+    const orderB = b.orderIndex ?? 0
     if (orderA !== orderB) {
       return orderA - orderB
     }

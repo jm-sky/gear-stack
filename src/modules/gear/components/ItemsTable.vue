@@ -198,8 +198,8 @@ const globalFilterFn = (row: IGearItemV2, filterValue: string) => {
   return (
     row.name.toLowerCase().includes(query) ||
     row.notes?.toLowerCase().includes(query) ||
-    getCategoryLabel(row.category).toLowerCase().includes(query) ||
-    t(`gear.item.statuses.${row.status}`).toLowerCase().includes(query)
+    (row.category ? getCategoryLabel(row.category).toLowerCase().includes(query) : false) ||
+    (row.status ? t(`gear.item.statuses.${row.status}`).toLowerCase().includes(query) : false)
   )
 }
 

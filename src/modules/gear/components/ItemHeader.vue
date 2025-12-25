@@ -98,12 +98,12 @@ const handleEdit = () => {
     <div class="flex flex-col gap-2">
       <ItemHeaderName :item />
       <div class="flex flex-wrap items-center gap-2">
-        <Badge variant="outline" class="flex items-center gap-2">
+        <Badge v-if="item.category" variant="outline" class="flex items-center gap-2">
           <CategoryIcon :category="item.category" :size="14" />
           {{ getCategoryLabel(item.category) }}
         </Badge>
-        <ItemPriorityBadge :priority="item.priority" />
-        <ItemStatusBadge :status="item.status" />
+        <ItemPriorityBadge v-if="item.priority" :priority="item.priority" />
+        <ItemStatusBadge v-if="item.status" :status="item.status" />
         <Badge v-if="isExpired" variant="destructive" class="text-xs">
           {{ t('gear.item.expiration.expired') }}
         </Badge>
