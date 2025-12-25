@@ -9,7 +9,7 @@ import { useAuth } from '@/modules/auth/composables/useAuth'
 import { useBackend } from '@/shared/composables/useBackend'
 import { usePageTitle } from '@/shared/composables/usePageTitle'
 import { config } from '@/shared/config/config'
-import type { IGearContainer, IGearItem } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import ItemHeader from '../components/ItemHeader.vue'
 import MarkdownRenderer from '../components/MarkdownRenderer.vue'
 import ItemPromotionCard from '../components/promotion/ItemPromotionCard.vue'
@@ -39,8 +39,8 @@ const { deleteItem } = useGear()
 
 const containerId = route.params.containerId as string
 const itemId = route.params.itemId as string
-const item = ref<IGearItem | null>(null)
-const container = ref<IGearContainer | null>(null)
+const item = ref<IGearItemV2 | null>(null)
+const container = ref<IGearItemV2 | null>(null)
 const isLoading = ref(true)
 const imageGalleryRef = ref<InstanceType<typeof ItemImageGallery> | null>(null)
 

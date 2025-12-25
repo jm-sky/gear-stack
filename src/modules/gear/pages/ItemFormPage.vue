@@ -15,7 +15,7 @@ import { useBackend } from '@/shared/composables/useBackend'
 import { useHandleError } from '@/shared/composables/useHandleError'
 import { usePageTitle } from '@/shared/composables/usePageTitle'
 import { config } from '@/shared/config/config'
-import type { ICreateItemDto, IGearItem, IUpdateItemDto } from '../types/gear.types'
+import type { ICreateGearItemV2Dto, IGearItemV2, IUpdateGearItemV2Dto } from '../types/gear.types.v2'
 import type { IItemWithContainer } from '../utils/allItemsColumns'
 import ItemCatalogSelector from '../components/ItemCatalogSelector.vue'
 import ItemFormFields from '../components/ItemFormFields.vue'
@@ -49,7 +49,7 @@ const { container } = useContainer(containerId)
 const { navigateBackAndClean } = useNavigationReturn(containerId, itemId)
 
 // Local state for item (loaded explicitly, not from computed)
-const item = ref<IGearItem | null>(null)
+const item = ref<IGearItemV2 | null>(null)
 
 // Set dynamic page title
 watchEffect(() => {
@@ -245,7 +245,7 @@ const handleSetExpirationDate = () => {
 const onSubmit = handleSubmit(async (data: ItemFormData) => {
   try {
     // Convert form data to DTO
-    const dtoData: ICreateItemDto | IUpdateItemDto = {
+    const dtoData: ICreateGearItemV2Dto | IUpdateGearItemV2Dto = {
       ...data,
       shelfLife: data.shelfLifeValue && data.shelfLifeUnit
         ? {
@@ -260,13 +260,13 @@ const onSubmit = handleSubmit(async (data: ItemFormData) => {
     delete (dtoData as Record<string, unknown>).shelfLifeUnit
 
     if (isEditMode && itemId) {
-      await updateItem(itemId, dtoData as IUpdateItemDto)
+      await updateItem(itemId, dtoData as IUpdateGearItemV2Dto)
       toast.success(t('common.success'))
       await navigateBackAndClean()
     } else {
       // Add linkedItemId if selecting from catalog
-      const createData: ICreateItemDto = {
-        ...dtoData as ICreateItemDto,
+      const createData: ICreateGearItemV2Dto = {
+        ...dtoData as ICreateGearItemV2Dto,
         linkedItemId: tabMode.value === 'catalog' && selectedCatalogItemId.value ? selectedCatalogItemId.value : undefined,
       }
       await createItem(containerId, createData)

@@ -11,7 +11,7 @@ import { useAuth } from '@/modules/auth/composables/useAuth'
 import { useBackend } from '@/shared/composables/useBackend'
 import { usePageTitle } from '@/shared/composables/usePageTitle'
 import { config } from '@/shared/config/config'
-import type { IGearItem } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import type { TContainerColor } from '../types/gear.types.v2'
 import ContainerHeader from '../components/ContainerHeader.vue'
 import ContainerItemImagesGallery from '../components/ContainerItemImagesGallery.vue'
@@ -29,7 +29,7 @@ import { useGearStore } from '../store/useGearStore'
 import { useGearStoreV2 } from '../store/useGearStoreV2'
 import { COLOR_BORDER_CLASSES, COLOR_TEXT_CLASSES } from '../utils/containerColors'
 import { createNavigationQuery } from '../utils/navigationParams'
-import { convertV2ContainerToV1, convertV2ItemsArrayToV1 } from '../utils/typeConverters'
+import { convertV2ContainerToV1 } from '../utils/typeConverters'
 
 // Lazy load dialogs - only loaded when user opens them
 const ItemsTable = defineAsyncComponent(() => import('../components/ItemsTable.vue'))
@@ -99,7 +99,7 @@ const isExportToPromptDialogOpen = ref(false)
 const isExportToCSVDialogOpen = ref(false)
 const isAiDialogOpen = ref(false)
 const isMoveItemDialogOpen = ref(false)
-const itemToMove = ref<IGearItem | null>(null)
+const itemToMove = ref<IGearItemV2 | null>(null)
 const restoreHistoryId = ref<string | null>(null)
 
 // Watch for restoreHistoryId query param
@@ -116,12 +116,10 @@ watch(() => route.query.restoreHistoryId, (historyId) => {
 
 // File operations handled in handleImport
 
-// Items - use V2 store to get children, but convert to V1 types for ItemsTable
-const items = computed<IGearItem[]>(() => {
+// Items - use V2 store to get children
+const items = computed<IGearItemV2[]>(() => {
   if (!container.value) return []
-  const children = storeV2.getChildrenOfItem(container.value.id)
-  // Convert V2 items to V1 format (ItemsTable uses V1 types - will be migrated in future)
-  return convertV2ItemsArrayToV1(children)
+  return storeV2.getChildrenOfItem(container.value.id)
 })
 
 // Search and pagination state synchronized with URL
@@ -135,7 +133,7 @@ const globalFilter = search
 // Display items with pending sorting changes applied
 // This ensures that when user reorders items, the table shows the new order immediately
 // even before saving, allowing for multiple reorders in sequence
-const displayItems = computed<IGearItem[]>(() => {
+const displayItems = computed<IGearItemV2[]>(() => {
   if (pendingSortingChanges.value.length === 0) {
     return items.value
   }
@@ -167,18 +165,18 @@ const displayItems = computed<IGearItem[]>(() => {
 })
 
 // Pending sorting changes (for batch save when backend enabled)
-const pendingSortingChanges = ref<IGearItem[]>([])
+const pendingSortingChanges = ref<IGearItemV2[]>([])
 const isSavingSorting = ref(false)
 
 // Actions
-const handleEditItem = (item: IGearItem) => {
+const handleEditItem = (item: IGearItemV2) => {
   router.push({
     path: GearRoutePath.ItemEditById(containerId, item.id),
     query: createNavigationQuery('container'),
   })
 }
 
-const handleDeleteItem = async (item: IGearItem) => {
+const handleDeleteItem = async (item: IGearItemV2) => {
   if (!confirm(t('gear.item.deleteConfirm'))) return
   try {
     await deleteItem(item.id)
@@ -188,7 +186,7 @@ const handleDeleteItem = async (item: IGearItem) => {
   }
 }
 
-const handleStatusChange = async (item: IGearItem, status: IGearItem['status']) => {
+const handleStatusChange = async (item: IGearItemV2, status: IGearItemV2['status']) => {
   try {
     await updateItem(item.id, { status })
     toast.success(t('common.success'))
@@ -197,7 +195,7 @@ const handleStatusChange = async (item: IGearItem, status: IGearItem['status']) 
   }
 }
 
-const handleUnlinkFromCatalogue = async (item: IGearItem) => {
+const handleUnlinkFromCatalogue = async (item: IGearItemV2) => {
   try {
     await unlinkItemFromCatalogue(item.id)
     toast.success(t('gear.catalogue.unlinkedSuccess'))
@@ -206,7 +204,7 @@ const handleUnlinkFromCatalogue = async (item: IGearItem) => {
   }
 }
 
-const handleMoveItem = (item: IGearItem) => {
+const handleMoveItem = (item: IGearItemV2) => {
   itemToMove.value = item
   isMoveItemDialogOpen.value = true
 }
@@ -233,14 +231,14 @@ const handleHideItemImages = async () => {
   }
 }
 
-const handleReorder = (reorderedItems: IGearItem[]) => {
+const handleReorder = (reorderedItems: IGearItemV2[]) => {
   // Store pending changes - don't save yet, wait for user confirmation
   // Alert will show for both backend and localStorage
   // This works the same way as handleSortingChange - batch mode with confirmation
   pendingSortingChanges.value = reorderedItems
 }
 
-const handleSortingChange = (sortedItems: IGearItem[]) => {
+const handleSortingChange = (sortedItems: IGearItemV2[]) => {
   // If sorting was cleared (empty array), clear pending changes
   if (sortedItems.length === 0) {
     pendingSortingChanges.value = []
