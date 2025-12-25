@@ -66,7 +66,7 @@ is_hidden_by_reports: Mapped[bool | None] = mapped_column(
 )
 ```
 
-**Migration:** `backend/migrations/0XX_add_is_hidden_by_reports_to_v2.py`
+**Migration:** `backend/migrations/053_add_missing_fields_to_v2.py` (combined with other fields)
 ```python
 def upgrade():
     op.add_column(
@@ -121,7 +121,7 @@ promote_count: Mapped[int | None] = mapped_column(
 )
 ```
 
-**Migration:** `backend/migrations/0XX_add_promote_count_to_v2.py`
+**Migration:** `backend/migrations/053_add_missing_fields_to_v2.py` (combined with other fields)
 ```python
 def upgrade():
     op.add_column(
@@ -178,7 +178,7 @@ shelf_life: Mapped[dict[str, Any] | None] = mapped_column(
 )
 ```
 
-**Migration:** `backend/migrations/0XX_add_shelf_life_to_v2.py`
+**Migration:** `backend/migrations/053_add_missing_fields_to_v2.py` (combined with other fields)
 ```python
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -252,8 +252,8 @@ class GearServiceV2:
 3. Add `shelf_life` field to `gear_items_v2`
 4. Run migrations
 
-**Files to create:**
-- `backend/migrations/0XX_add_missing_fields_to_v2.py` (combined migration)
+**Files created:**
+- `backend/migrations/053_add_missing_fields_to_v2.py` (combined migration) ✅
 
 ### Phase 2: Backend Service Updates (Day 2)
 1. Update `GearServiceV2` with content reporting logic
@@ -322,7 +322,7 @@ class GearServiceV2:
 - [x] Add `is_hidden_by_reports` to V2 model ✅
 - [x] Add `promote_count` to V2 model ✅
 - [x] Add `shelf_life` to V2 model ✅
-- [x] Create combined migration file (049_add_missing_fields_to_v2.py) ✅
+- [x] Create combined migration file (053_add_missing_fields_to_v2.py) ✅
 - [ ] Run migrations on dev database (⏳ Pending - no DB/env configured)
 - [ ] Verify column types and indexes (⏳ After migration)
 
@@ -388,7 +388,7 @@ class GearServiceV2:
 **Backend:**
 - ✅ Database models updated (db_models_v2.py)
 - ✅ Pydantic schemas updated (schemas_v2.py)
-- ✅ Migration created (049_add_missing_fields_to_v2.py)
+- ✅ Migration created (053_add_missing_fields_to_v2.py)
 - ✅ Service methods added (service_v2.py)
 - ✅ Repository methods added (repository_v2.py)
 

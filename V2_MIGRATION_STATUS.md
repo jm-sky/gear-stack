@@ -11,9 +11,10 @@ Migrate from V1 dual-model (IGearContainer + IGearItem) to V2 unified model (IGe
 All backend work for V2 unified model is **production-ready** and committed.
 
 #### Database Layer
-- ✅ Migration 041: Create `gear_items_v2` table with unified schema
-- ✅ Migration 042: Migrate data from V1 to V2 (preserved, not run)
-- ✅ Migration 043: Update foreign keys to V2
+- ✅ Migration 050: Create `gear_items_v2` table with unified schema
+- ✅ Migration 051: Migrate data from V1 to V2 (preserved, not run)
+- ✅ Migration 052: Update foreign keys to V2
+- ✅ Migration 053: Add missing V1 fields (shelf_life, promote_count, is_hidden_by_reports)
 
 #### Backend API
 - ✅ `db_models_v2.py`: SQLAlchemy unified model (`GearItemDBV2`, `GearContainerDBV2`)

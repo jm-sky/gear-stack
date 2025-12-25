@@ -1549,7 +1549,7 @@ async def get_item_legacy(
 - [x] Foreign keys: parent_item_id, user_id, linked_item_id ✅
 - [x] Check constraints: type validation ✅
 - [x] Migracja danych: 17 containers + 115 items = 132 rows ✅
-- [x] Migration script: 042_migrate_data_to_unified_model.py ✅
+- [x] Migration script: 051_migrate_data_to_unified_model.py ✅
 - [x] Verification: counts match (132 = 17 + 115) ✅
 
 ### FAZA 3: Backend Models (100%) ✅
