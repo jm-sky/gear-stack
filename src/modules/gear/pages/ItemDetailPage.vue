@@ -15,8 +15,8 @@ import MarkdownRenderer from '../components/MarkdownRenderer.vue'
 import ItemPromotionCard from '../components/promotion/ItemPromotionCard.vue'
 import SearchImagesButton from '../components/SearchImagesButton.vue'
 import { useExpiration } from '../composables/useExpiration'
-import { useFormattedItemPrice } from '../composables/useFormattedItemPrice'
-import { useFormattedItemWeight } from '../composables/useFormattedItemWeight'
+import { useFormattedItemPriceV2 } from '../composables/useFormattedItemPriceV2'
+import { useFormattedItemWeightV2 } from '../composables/useFormattedItemWeightV2'
 import { useGear } from '../composables/useGear'
 import { useGearV2 } from '../composables/useGearV2'
 import { GearRoutePath } from '../routes'
@@ -160,8 +160,8 @@ const handleDeleteItem = async () => {
   }
 }
 
-const { formattedWeight } = useFormattedItemWeight(item)
-const { formattedPrice } = useFormattedItemPrice(item)
+const { formattedWeight } = useFormattedItemWeightV2(item)
+const { formattedPrice } = useFormattedItemPriceV2(item)
 
 // Check if there are any details to display
 const hasDetails = computed<boolean>(() => {

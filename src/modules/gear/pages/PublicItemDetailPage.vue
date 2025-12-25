@@ -15,16 +15,18 @@ import MarkdownRenderer from '../components/MarkdownRenderer.vue'
 import ItemPromotionCard from '../components/promotion/ItemPromotionCard.vue'
 import { useCategoryLabel } from '../composables/useCategoryLabel'
 import { useExpiration } from '../composables/useExpiration'
-import { useFormattedItemPrice } from '../composables/useFormattedItemPrice'
-import { useFormattedItemWeight } from '../composables/useFormattedItemWeight'
+import { useFormattedItemPriceV2 } from '../composables/useFormattedItemPriceV2'
+import { useFormattedItemWeightV2 } from '../composables/useFormattedItemWeightV2'
 import { GearRoutePath } from '../routes'
 import { publicContainersService } from '../services/publicContainersService'
+import { useGearStoreV2 } from '../store/useGearStoreV2'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 const { getCategoryLabel } = useCategoryLabel()
+const storeV2 = useGearStoreV2()
 
 const containerId = route.params.containerId as string
 const itemId = route.params.itemId as string
@@ -35,9 +37,8 @@ const { isExpired, isExpiringSoon } = useExpiration(item)
 
 const loadItem = async () => {
   try {
-    // Load container to get the item
-    const container = await publicContainersService.getPublicContainer(containerId)
-    const foundItem = container.items.find(i => i.id === itemId)
+    // Try to load from V2 store first
+    const foundItem = storeV2.getItemById(itemId)
 
     if (!foundItem) {
       toast.error(t('common.error'))
@@ -63,8 +64,8 @@ const handleBack = () => {
   router.push(GearRoutePath.PublicContainerDetailById(containerId))
 }
 
-const { formattedWeight } = useFormattedItemWeight(item)
-const { formattedPrice } = useFormattedItemPrice(item)
+const { formattedWeight } = useFormattedItemWeightV2(item)
+const { formattedPrice } = useFormattedItemPriceV2(item)
 
 // Check if there are any details to display
 const hasDetails = computed<boolean>(() => {
@@ -99,12 +100,12 @@ const hasDetails = computed<boolean>(() => {
             {{ item.name }}
           </h1>
           <div class="flex items-center gap-2 flex-wrap">
-            <Badge variant="outline" class="flex items-center gap-2">
+            <Badge v-if="item.category" variant="outline" class="flex items-center gap-2">
               <CategoryIcon :category="item.category" :size="14" />
               {{ getCategoryLabel(item.category) }}
             </Badge>
-            <ItemPriorityBadge :priority="item.priority" />
-            <ItemStatusBadge :status="item.status" />
+            <ItemPriorityBadge v-if="item.priority" :priority="item.priority" />
+            <ItemStatusBadge v-if="item.status" :status="item.status" />
             <Badge v-if="isExpired" variant="destructive" class="text-xs">
               {{ t('gear.item.expiration.expired') }}
             </Badge>
