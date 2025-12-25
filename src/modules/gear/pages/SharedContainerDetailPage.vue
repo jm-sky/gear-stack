@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import type { IGearContainer } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 const CategoryPieChart = defineAsyncComponent(() => import('../components/CategoryPieChart.vue'))
 import ContainerReadinessProgressBar from '../components/ContainerReadinessProgressBar.vue'
 import ItemsTable from '../components/ItemsTable.vue'
@@ -30,7 +30,7 @@ const { settings: gearSettings } = useGearSettings()
 const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
 
 const token = route.params.token as string
-const container = ref<IGearContainer | null>(null)
+const container = ref<IGearItemV2 | null>(null)
 const isLoading = ref(true)
 
 // Convert V1 container to V2 for components that use V2 types
@@ -65,7 +65,7 @@ onMounted(async () => {
   await loadContainer()
 })
 
-const items = computed<IGearContainer['items']>(() => container.value?.items ?? [])
+const items = computed<IGearItemV2[]>(() => container.value?.children ?? [])
 
 const totalWeight = computed<number>(() => {
   if (!container.value) return 0

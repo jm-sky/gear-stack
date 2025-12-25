@@ -7,7 +7,7 @@ import { toast } from 'vue-sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import type { IGearItem } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import ItemPriorityBadge from '../components/badges/ItemPriorityBadge.vue'
 import CategoryIcon from '../components/CategoryIcon.vue'
 import ItemStatusBadge from '../components/ItemStatusBadge.vue'
@@ -28,7 +28,7 @@ const { getCategoryLabel } = useCategoryLabel()
 
 const containerId = route.params.containerId as string
 const itemId = route.params.itemId as string
-const item = ref<IGearItem | null>(null)
+const item = ref<IGearItemV2 | null>(null)
 const isLoading = ref(true)
 
 const { isExpired, isExpiringSoon } = useExpiration(item)

@@ -11,7 +11,7 @@ import CommonPageHeader from '@/components/layout/CommonPageHeader.vue'
 import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { config, SHOPPING_PLANNING_PAGE_FILTERS_KEY } from '@/shared/config/config'
-import type { ICreateItemDto, IGearItem, TGearItemCategory, TGearItemPriority } from '../types/gear.types'
+import type { ICreateGearItemV2Dto, IGearItemV2, TGearItemCategory, TGearItemPriority } from '../types/gear.types.v2'
 import type { IItemWithContainerId } from '../types/shopping.types'
 import AvailableItemCard from '../components/shopping/AvailableItemCard.vue'
 import DeletedItemsList from '../components/shopping/DeletedItemsList.vue'
@@ -381,7 +381,7 @@ const generateMarkdown = (): string => {
   markdown += `${t('gear.shopping.generatedAt', 'Generated at')}: ${new Date().toLocaleString()}\n\n`
 
   // Group by priority
-  const byPriority: Record<TGearItemPriority, IGearItem[]> = {
+  const byPriority: Record<TGearItemPriority, IGearItemV2[]> = {
     critical: [],
     high: [],
     medium: [],

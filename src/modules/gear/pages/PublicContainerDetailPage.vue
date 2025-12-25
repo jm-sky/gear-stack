@@ -7,7 +7,7 @@ import { toast } from 'vue-sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
-import type { IGearContainer, TRatingType, TRatingValue } from '../types/gear.types'
+import type { IGearItemV2, TRatingType, TRatingValue } from '../types/gear.types.v2'
 const CategoryPieChart = defineAsyncComponent(() => import('../components/CategoryPieChart.vue'))
 import ContainerRatingCard from '../components/ContainerRatingCard.vue'
 import ContainerReadinessProgressBar from '../components/ContainerReadinessProgressBar.vue'
@@ -35,7 +35,7 @@ const { user } = useAuth()
 const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
 
 const containerId = route.params.id as string
-const container = ref<IGearContainer | null>(null)
+const container = ref<IGearItemV2 | null>(null)
 const isLoading = ref(true)
 const isRatingLoading = ref(false)
 
@@ -86,7 +86,7 @@ onMounted(async () => {
   await loadContainer()
 })
 
-const items = computed<IGearContainer['items']>(() => container.value?.items ?? [])
+const items = computed<IGearItemV2[]>(() => container.value?.children ?? [])
 
 const totalWeight = computed<number>(() => {
   if (!container.value) return 0
