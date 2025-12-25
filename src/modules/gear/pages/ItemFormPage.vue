@@ -20,13 +20,21 @@ import type { IItemWithContainer } from '../utils/allItemsColumns'
 import ItemCatalogSelector from '../components/ItemCatalogSelector.vue'
 import ItemFormFields from '../components/ItemFormFields.vue'
 import { useContainer } from '../composables/useContainer'
-import { useGear } from '../composables/useGear'
+import { useGearV2 } from '../composables/useGearV2'
 import { useNavigationReturn } from '../composables/useNavigationReturn'
 import { GearRoutePath } from '../routes'
 import { gearItemService } from '../services/gearItemService'
-import { useGearStore } from '../store/useGearStore'
+import { useGearStoreV2 } from '../store/useGearStoreV2'
 import { recognizeCategory } from '../utils/categoryRecognition'
+import {
+  DEFAULT_ITEM_CATEGORY,
+  DEFAULT_ITEM_PRIORITY,
+  DEFAULT_ITEM_QUANTITY,
+  DEFAULT_ITEM_STATUS,
+  DEFAULT_ITEM_WEIGHT,
+} from '../utils/constants'
 import { getDefaultItemValues } from '../utils/defaultValues'
+import { convertV1ItemToV2 } from '../utils/typeConverters'
 import { recognizeParameters } from '../utils/parameterRecognition'
 import { calculateExpirationDate } from '../utils/shelfLife'
 import { type ItemFormData, itemSchema } from '../utils/validation'
@@ -34,9 +42,9 @@ import { toBasicWeightUnit } from '../utils/weightUnits'
 
 const router = useRouter()
 const route = useRoute()
-const store = useGearStore()
+const storeV2 = useGearStoreV2()
 const { t } = useI18n()
-const { createItem, updateItem } = useGear()
+const { createItem, updateItem } = useGearV2()
 const { shouldUseAPI } = useBackend()
 const { handleError } = useHandleError()
 const { setTitle } = usePageTitle()
@@ -74,16 +82,16 @@ const getInitialValues = (): ItemFormData => {
   if (item.value) {
     return {
       name: item.value.name,
-      category: item.value.category,
-      quantity: item.value.quantity,
-      weight: item.value.weight,
+      category: item.value.category ?? DEFAULT_ITEM_CATEGORY,
+      quantity: item.value.quantity ?? DEFAULT_ITEM_QUANTITY,
+      weight: item.value.weight ?? DEFAULT_ITEM_WEIGHT,
       weightUnit: toBasicWeightUnit(item.value.weightUnit) ?? config.defaults.preferredWeightUnit,
       notes: item.value.notes ?? '',
       expirationDate: item.value.expirationDate ?? '',
       shelfLifeValue: item.value.shelfLife?.value ?? undefined,
       shelfLifeUnit: item.value.shelfLife?.unit ?? 'years',
-      priority: item.value.priority,
-      status: item.value.status,
+      priority: item.value.priority ?? DEFAULT_ITEM_PRIORITY,
+      status: item.value.status ?? DEFAULT_ITEM_STATUS,
       price: item.value.price ?? undefined,
       currency: item.value.currency ?? undefined,
       url: item.value.url ?? '',
@@ -118,10 +126,10 @@ const loadItem = async () => {
     const service = gearItemService()
 
     if (shouldUseAPI.value && 'getItem' in service) {
-      item.value = await service.getItem(itemId)
+      const loadedItem = await service.getItem(itemId)
+      item.value = convertV1ItemToV2(loadedItem, containerId)
     } else {
-      const containerData = store.getContainerById(containerId)
-      const foundItem = containerData?.items.find(i => i.id === itemId)
+      const foundItem = storeV2.getItemById(itemId)
 
       if (!foundItem) {
         toast.error(t('common.error'))
@@ -146,16 +154,16 @@ const loadItem = async () => {
       const loadedItem = item.value
       setValues({
         name: loadedItem.name,
-        category: loadedItem.category,
-        quantity: loadedItem.quantity,
-        weight: loadedItem.weight,
+        category: loadedItem.category ?? DEFAULT_ITEM_CATEGORY,
+        quantity: loadedItem.quantity ?? DEFAULT_ITEM_QUANTITY,
+        weight: loadedItem.weight ?? DEFAULT_ITEM_WEIGHT,
         weightUnit: toBasicWeightUnit(loadedItem.weightUnit) ?? 'g',
-      notes: loadedItem.notes ?? '',
-      expirationDate: loadedItem.expirationDate ?? '',
-      shelfLifeValue: loadedItem.shelfLife?.value ?? undefined,
-      shelfLifeUnit: loadedItem.shelfLife?.unit ?? 'years',
-      priority: loadedItem.priority,
-        status: loadedItem.status,
+        notes: loadedItem.notes ?? '',
+        expirationDate: loadedItem.expirationDate ?? '',
+        shelfLifeValue: loadedItem.shelfLife?.value ?? undefined,
+        shelfLifeUnit: loadedItem.shelfLife?.unit ?? 'years',
+        priority: loadedItem.priority ?? DEFAULT_ITEM_PRIORITY,
+        status: loadedItem.status ?? DEFAULT_ITEM_STATUS,
         price: loadedItem.price ?? undefined,
         currency: loadedItem.currency ?? undefined,
         url: loadedItem.url ?? '',
@@ -264,12 +272,13 @@ const onSubmit = handleSubmit(async (data: ItemFormData) => {
       toast.success(t('common.success'))
       await navigateBackAndClean()
     } else {
-      // Add linkedItemId if selecting from catalog
+      // Add parentItemId and linkedItemId if selecting from catalog
       const createData: ICreateGearItemV2Dto = {
         ...dtoData as ICreateGearItemV2Dto,
+        parentItemId: containerId,
         linkedItemId: tabMode.value === 'catalog' && selectedCatalogItemId.value ? selectedCatalogItemId.value : undefined,
       }
-      await createItem(containerId, createData)
+      await createItem(createData)
       toast.success(t('common.success'))
       await navigateBackAndClean()
     }

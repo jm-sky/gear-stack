@@ -14,10 +14,11 @@ import { useGearSettings } from '../composables/useGearSettings'
 import { GearRoutePath } from '../routes'
 import { sharedContainersService } from '../services/sharedContainersService'
 import { useGearStore } from '../store/useGearStore'
+import { useGearStoreV2 } from '../store/useGearStoreV2'
 import {
-  calculateReadinessPercentageSync,
-  calculateTotalWeightSync,
-} from '../utils/containerCalculations'
+  calculateReadinessPercentageSyncV2,
+  calculateTotalWeightSyncV2,
+} from '../utils/containerCalculationsV2'
 import { formatWeightToPreferredUnit } from '../utils/formatWeight'
 import { convertV1ContainerToV2 } from '../utils/typeConverters'
 
@@ -25,6 +26,7 @@ const route = useRoute()
 const router = useRouter()
 const { t, locale } = useI18n()
 const store = useGearStore()
+const storeV2 = useGearStoreV2()
 const { settings: gearSettings } = useGearSettings()
 
 const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
@@ -33,25 +35,22 @@ const token = route.params.token as string
 const container = ref<IGearItemV2 | null>(null)
 const isLoading = ref(true)
 
-// Convert V1 container to V2 for components that use V2 types
-const containerV2 = computed(() => {
-  return container.value ? convertV1ContainerToV2(container.value) : null
-})
-
 const loadContainer = async () => {
   try {
-    container.value = await sharedContainersService.getSharedContainer(token)
-    // Filter nested containers - only show items if nested container is public
-    if (container.value) {
-      container.value.items = container.value.items.filter(item => {
-        if (item.containerId) {
+    const loadedContainer = await sharedContainersService.getSharedContainer(token)
+    // Convert to V2 and filter nested containers - only show items if nested container is public
+    const containerV2Temp = convertV1ContainerToV2(loadedContainer)
+    if (containerV2Temp && containerV2Temp.children) {
+      containerV2Temp.children = containerV2Temp.children.filter(item => {
+        if (item.itemType === 'container') {
           // Check if nested container is public
-          const nestedContainer = store.getContainerById(item.containerId)
+          const nestedContainer = storeV2.getItemById(item.id)
           return nestedContainer?.isPublic ?? false
         }
         return true
       })
     }
+    container.value = containerV2Temp
   } catch (error) {
     console.error('Failed to load shared container:', error)
     toast.error(t('gear.sharedContainers.notFound'))
@@ -69,12 +68,20 @@ const items = computed<IGearItemV2[]>(() => container.value?.children ?? [])
 
 const totalWeight = computed<number>(() => {
   if (!container.value) return 0
-  return calculateTotalWeightSync(container.value, store.getAllContainers)
+  return calculateTotalWeightSyncV2(
+    container.value.id,
+    storeV2.getItemById,
+    storeV2.getChildrenOfItem,
+  )
 })
 
 const readinessPercentage = computed<number>(() => {
   if (!container.value) return 0
-  return calculateReadinessPercentageSync(container.value)
+  return calculateReadinessPercentageSyncV2(
+    container.value.id,
+    storeV2.getItemById,
+    storeV2.getChildrenOfItem,
+  )
 })
 
 const formattedWeight = computed<string>(() => formatWeightToPreferredUnit(totalWeight.value, settings.value.preferredWeightUnit, locale.value))
@@ -94,8 +101,8 @@ const handleBack = () => {
     <div v-else-if="container" class="space-y-6 w-full max-w-full overflow-hidden">
       <!-- Header -->
       <PublicContainerHeader
-        v-if="containerV2"
-        :container="containerV2"
+        v-if="container"
+        :container="container"
         :back-path="GearRoutePath.PublicContainers"
         @back="handleBack"
       />
@@ -139,7 +146,7 @@ const handleBack = () => {
       />
 
       <!-- Category Pie Chart -->
-      <CategoryPieChart v-if="containerV2" :container="containerV2" />
+      <CategoryPieChart v-if="container" :container="container" />
     </div>
   </AuthenticatedLayout>
 </template>
