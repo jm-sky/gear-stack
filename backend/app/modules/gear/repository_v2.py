@@ -73,6 +73,7 @@ class GearRepositoryV2(SearchMixin):
             max_weight_unit=data.maxWeightUnit,
             hide_when_nested=data.hideWhenNested,
             is_public=(data.isPublic if data.isPublic is not None else False),
+            is_hidden_by_reports=(data.isHiddenByReports if data.isHiddenByReports is not None else False),
             favorite=(data.favorite if data.favorite is not None else False),
             show_item_images=(data.showItemImages if data.showItemImages is not None else False),
             # Item-specific
@@ -81,11 +82,13 @@ class GearRepositoryV2(SearchMixin):
             status=data.status,
             priority=data.priority,
             expiration_date=data.expirationDate,
+            shelf_life=data.shelfLife,
             quality=data.quality,
             wearable=data.wearable,
             consumable=data.consumable,
             order_index=data.orderIndex,
             show_on_container=data.showOnContainer,
+            promote_count=(data.promoteCount if data.promoteCount is not None else 0),
             # Linking
             linked_item_id=data.linkedItemId,
             catalogue_item_id=data.catalogueItemId,
@@ -303,6 +306,42 @@ class GearRepositoryV2(SearchMixin):
         await self.db.commit()
         await self.db.refresh(item)
         return item
+
+    # Public containers operations
+
+    async def get_public_containers(
+        self,
+        user_id: str | None = None,
+        exclude_hidden: bool = True
+    ) -> Sequence[GearItemDBV2]:
+        """Get public containers, optionally excluding hidden ones.
+
+        Args:
+            user_id: Optional user ID (for filtering user's own containers)
+            exclude_hidden: If True, exclude containers with is_hidden_by_reports=True
+
+        Returns:
+            List of public containers
+        """
+        conditions = [
+            GearItemDBV2.item_type == "container",
+            GearItemDBV2.is_public == True,  # noqa: E712
+        ]
+
+        if user_id is not None:
+            conditions.append(GearItemDBV2.user_id == user_id)
+
+        if exclude_hidden:
+            conditions.append(
+                or_(
+                    GearItemDBV2.is_hidden_by_reports == False,  # noqa: E712
+                    GearItemDBV2.is_hidden_by_reports.is_(None)
+                )
+            )
+
+        stmt = select(GearItemDBV2).where(and_(*conditions))
+        result = await self.db.execute(stmt)
+        return result.scalars().all()
 
     # Helper methods
 

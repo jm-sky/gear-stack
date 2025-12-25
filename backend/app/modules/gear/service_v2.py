@@ -192,3 +192,103 @@ class GearServiceV2:
             ValueError: If target is invalid
         """
         return await self.repository.move_item(item_id, user_id, target_parent_id)
+
+    # Content Reporting operations
+
+    async def hide_container_by_reports(self, item_id: str, user_id: str) -> GearItemDBV2 | None:
+        """Hide a container due to content reports.
+
+        Sets is_hidden_by_reports=True. Only applicable to containers.
+
+        Args:
+            item_id: Container ID
+            user_id: Owner user ID
+
+        Returns:
+            Updated container if found, None otherwise
+
+        Raises:
+            ValueError: If item is not a container
+        """
+        item = await self.repository.get_item(item_id, user_id)
+        if not item:
+            return None
+
+        if item.item_type != "container":
+            raise ValueError("Only containers can be hidden by reports")
+
+        update_data = GearItemUpdateV2(isHiddenByReports=True)
+        return await self.repository.update_item(item_id, user_id, update_data)
+
+    async def unhide_container_by_reports(self, item_id: str, user_id: str) -> GearItemDBV2 | None:
+        """Unhide a container (clear report flag).
+
+        Sets is_hidden_by_reports=False.
+
+        Args:
+            item_id: Container ID
+            user_id: Owner user ID
+
+        Returns:
+            Updated container if found, None otherwise
+        """
+        update_data = GearItemUpdateV2(isHiddenByReports=False)
+        return await self.repository.update_item(item_id, user_id, update_data)
+
+    async def get_public_containers(
+        self,
+        user_id: str | None = None,
+        exclude_hidden: bool = True
+    ) -> Sequence[GearItemDBV2]:
+        """Get public containers, optionally excluding hidden ones.
+
+        Args:
+            user_id: Optional user ID (for filtering user's own containers)
+            exclude_hidden: If True, exclude containers with is_hidden_by_reports=True
+
+        Returns:
+            List of public containers
+        """
+        return await self.repository.get_public_containers(user_id, exclude_hidden)
+
+    # Item Promotion operations
+
+    async def increment_promotion_count(self, item_id: str, user_id: str) -> GearItemDBV2 | None:
+        """Increment promotion count for an item.
+
+        Only applicable to items (not containers).
+
+        Args:
+            item_id: Item ID
+            user_id: Owner user ID
+
+        Returns:
+            Updated item if found, None otherwise
+
+        Raises:
+            ValueError: If item is a container
+        """
+        item = await self.repository.get_item(item_id, user_id)
+        if not item:
+            return None
+
+        if item.item_type != "item":
+            raise ValueError("Only items can be promoted to catalogue")
+
+        # Increment promote_count
+        current_count = item.promote_count or 0
+        update_data = GearItemUpdateV2(promoteCount=current_count + 1)
+        return await self.repository.update_item(item_id, user_id, update_data)
+
+    async def get_promotable_items(self, user_id: str, min_count: int = 10) -> Sequence[GearItemDBV2]:
+        """Get items that have reached the promotion threshold.
+
+        Args:
+            user_id: Owner user ID
+            min_count: Minimum promotion count threshold
+
+        Returns:
+            List of items with promote_count >= min_count
+        """
+        all_items = await self.repository.get_items(user_id, item_type="item")
+        return [item for item in all_items if (item.promote_count or 0) >= min_count]
