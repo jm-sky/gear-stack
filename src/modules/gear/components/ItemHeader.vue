@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import type { IGearItem } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import CategoryIcon from '../components/CategoryIcon.vue'
 import ItemHeaderName from '../components/ItemHeaderName.vue'
 import ItemStatusBadge from '../components/ItemStatusBadge.vue'
@@ -28,7 +28,7 @@ const { getCategoryLabel } = useCategoryLabel()
 const { containerId, itemId, item } = defineProps<{
   containerId: string
   itemId: string
-  item: IGearItem
+  item: IGearItemV2
 }>()
 
 const emit = defineEmits<{

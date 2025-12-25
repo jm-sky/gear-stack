@@ -5,12 +5,12 @@ import { useI18n } from 'vue-i18n'
 import Badge from '@/components/ui/badge/Badge.vue'
 import { Input } from '@/components/ui/input'
 import ItemsTableMoveButtons from './ItemsTableMoveButtons.vue'
-import type { IGearItem, IUpdateItemDto } from '@/modules/gear/types/gear.types'
+import type { IGearItemV2, IUpdateGearItemV2Dto } from '@/modules/gear/types/gear.types.v2'
 
 const { t } = useI18n()
 
 const props = defineProps<{
-  item: IGearItem
+  item: IGearItemV2
   isExpired?: boolean
   isExpiringSoon?: boolean
   isSaving?: boolean
@@ -19,7 +19,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  change: [updates: IUpdateItemDto, save?: boolean]
+  change: [updates: IUpdateGearItemV2Dto, save?: boolean]
   moveUp: []
   moveDown: []
 }>()

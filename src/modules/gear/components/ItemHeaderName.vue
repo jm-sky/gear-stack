@@ -4,13 +4,13 @@ import { nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
 import Button from '@/components/ui/button/Button.vue'
-import type { IGearItem } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import { useExpiration } from '../composables/useExpiration'
 import { useGear } from '../composables/useGear'
 import ContainerNameInput from './inputs/ContainerNameInput.vue'
 
 const props = defineProps<{
-  item: IGearItem
+  item: IGearItemV2
 }>()
 
 const { updateItem } = useGear()

@@ -5,16 +5,16 @@ import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useInlineItemEditing } from '../../composables/useInlineItemEditing'
-import type { IGearItem } from '@/modules/gear/types/gear.types'
+import type { IGearItemV2 } from '@/modules/gear/types/gear.types.v2'
 
 const { t } = useI18n()
 
 const props = defineProps<{
-  item: IGearItem
+  item: IGearItemV2
 }>()
 
 const emit = defineEmits<{
-  update: [item: IGearItem]
+  update: [item: IGearItemV2]
 }>()
 
 // Use shared composable

@@ -2,10 +2,10 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { formatWeightToPreferredUnit, formatWeightWithPreferredUnit } from '@/modules/gear/utils/formatWeight'
-import type { IGearItem, TGearWeightUnit } from '@/modules/gear/types/gear.types'
+import type { IGearItemV2, TGearWeightUnit } from '@/modules/gear/types/gear.types.v2'
 
 const { item, isNestedContainer, totalWeight, preferredWeightUnit } = defineProps<{
-  item: IGearItem
+  item: IGearItemV2
   isNestedContainer: boolean
   totalWeight?: number
   preferredWeightUnit: TGearWeightUnit

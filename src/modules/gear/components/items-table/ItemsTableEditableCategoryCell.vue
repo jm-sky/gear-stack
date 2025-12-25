@@ -11,18 +11,18 @@ import {
 import { useCategoryLabel } from '../../composables/useCategoryLabel'
 import { useGearSettings } from '../../composables/useGearSettings'
 import CategoryIcon from '../CategoryIcon.vue'
-import type { IGearItem, IUpdateItemDto, TGearItemCategory } from '@/modules/gear/types/gear.types'
+import type { IGearItemV2, IUpdateGearItemV2Dto, TGearItemCategory } from '@/modules/gear/types/gear.types.v2'
 
 const { t } = useI18n()
 const { customCategories } = useGearSettings()
 const { getCategoryLabel } = useCategoryLabel()
 
 const props = defineProps<{
-  item: IGearItem
+  item: IGearItemV2
 }>()
 
 const emit = defineEmits<{
-  change: [updates: IUpdateItemDto]
+  change: [updates: IUpdateGearItemV2Dto]
 }>()
 
 // In edit mode, always show select

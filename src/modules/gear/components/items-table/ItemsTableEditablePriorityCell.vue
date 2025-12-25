@@ -8,16 +8,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { IGearItem, IUpdateItemDto, TGearItemPriority } from '@/modules/gear/types/gear.types'
+import type { IGearItemV2, IUpdateGearItemV2Dto, TGearItemPriority } from '@/modules/gear/types/gear.types.v2'
 
 const { t } = useI18n()
 
 const props = defineProps<{
-  item: IGearItem
+  item: IGearItemV2
 }>()
 
 const emit = defineEmits<{
-  change: [updates: IUpdateItemDto]
+  change: [updates: IUpdateGearItemV2Dto]
 }>()
 
 // In edit mode, always show select

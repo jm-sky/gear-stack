@@ -3,16 +3,16 @@ import { UndoIcon } from 'lucide-vue-next'
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Input } from '@/components/ui/input'
-import type { IGearItem, IUpdateItemDto } from '@/modules/gear/types/gear.types'
+import type { IGearItemV2, IUpdateGearItemV2Dto } from '@/modules/gear/types/gear.types.v2'
 
 const { t } = useI18n()
 
 const props = defineProps<{
-  item: IGearItem
+  item: IGearItemV2
 }>()
 
 const emit = defineEmits<{
-  change: [updates: IUpdateItemDto]
+  change: [updates: IUpdateGearItemV2Dto]
 }>()
 
 // In edit mode, always show input

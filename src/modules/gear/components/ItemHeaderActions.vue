@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import DropdownMenuSeparator from '@/components/ui/dropdown-menu/DropdownMenuSeparator.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
-import type { IGearItem } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import { useCatalogue } from '../composables/catalogue/useCatalogue'
 import { useItemPromotion } from '../composables/promotion/useItemPromotion'
 import { useGear } from '../composables/useGear'
@@ -28,7 +28,7 @@ const updateDialogOpen = ref(false)
 const moveDialogOpen = ref(false)
 
 const { item } = defineProps<{
-  item: IGearItem
+  item: IGearItemV2
 }>()
 
 const emit = defineEmits<{

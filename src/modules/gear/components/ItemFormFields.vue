@@ -8,7 +8,7 @@ import { FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/for
 import { Input } from '@/components/ui/input'
 import ShelfLifeInput from '@/components/ui/shelf-life-input/ShelfLifeInput.vue'
 import WeightInputWithUnitPicker from '@/components/ui/weight-input/WeightInputWithUnitPicker.vue'
-import type { IGearItem } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import { useGearSettings } from '../composables/useGearSettings'
 import BrandAutocomplete from './inputs/BrandAutocomplete.vue'
 import CategorySelect from './inputs/CategorySelect.vue'
@@ -20,7 +20,7 @@ import StatusSelect from './inputs/StatusSelect.vue'
 import TextareaWithMarkdownPreview from './TextareaWithMarkdownPreview.vue'
 
 defineProps<{
-  item?: IGearItem
+  item?: IGearItemV2
   loading?: boolean
   hideName?: boolean
 }>()

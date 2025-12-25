@@ -10,16 +10,16 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { WEIGHT_UNITS } from '../../utils/weightUnits'
-import type { IGearItem, IUpdateItemDto, TGearWeightUnit } from '@/modules/gear/types/gear.types'
+import type { IGearItemV2, IUpdateGearItemV2Dto, TGearWeightUnit } from '@/modules/gear/types/gear.types.v2'
 
 const { t } = useI18n()
 
 const props = defineProps<{
-  item: IGearItem
+  item: IGearItemV2
 }>()
 
 const emit = defineEmits<{
-  change: [updates: IUpdateItemDto]
+  change: [updates: IUpdateGearItemV2Dto]
 }>()
 
 // In edit mode, always show input
