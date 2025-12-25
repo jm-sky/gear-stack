@@ -381,7 +381,7 @@ const generateMarkdown = (): string => {
   markdown += `${t('gear.shopping.generatedAt', 'Generated at')}: ${new Date().toLocaleString()}\n\n`
 
   // Group by priority
-  const byPriority: Record<TGearItemPriority, IGearItemV2[]> = {
+  const byPriority: Record<TGearItemPriority, IItemWithContainerId[]> = {
     critical: [],
     high: [],
     medium: [],
@@ -397,10 +397,10 @@ const generateMarkdown = (): string => {
     if (items.length > 0) {
       markdown += `## ${t(`gear.item.priorities.${priority}`)}\n\n`
       items.forEach(item => {
-        const categoryLabel = getCategoryLabel(item.category)
+        const categoryLabel = getCategoryLabel(item.category ?? 'other')
         const currency = item.currency ?? defaultCurrency.value
         const price = item.price ? ` - ${item.price.toFixed(2)} ${currency}` : ''
-        const quantity = item.quantity > 1 ? ` x${item.quantity}` : ''
+        const quantity = (item.quantity ?? 1) > 1 ? ` x${item.quantity}` : ''
         const brand = item.brand ? ` **${item.brand}**` : ''
         const expiration = item.expirationDate ? ` (${t('gear.item.expiration.expiringSoon')}: ${new Date(item.expirationDate).toLocaleDateString()})` : ''
 
@@ -463,14 +463,30 @@ const addItemForm = useForm({
 
 const { handleSubmit: handleAddItemSubmit, isSubmitting: isAddingItem, resetForm: resetAddItemForm } = addItemForm
 
-const onAddItemSubmit = handleAddItemSubmit(async (data: ICreateItemDto) => {
+const onAddItemSubmit = handleAddItemSubmit(async (data: ItemFormData) => {
   if (!firstContainerId.value) {
     toast.error(t('gear.shopping.noContainer', 'No container available'))
     return
   }
 
   try {
-    const newItem = await createItem(firstContainerId.value, data)
+    // Convert form data to DTO
+    const dtoData: any = {
+      ...data,
+      itemType: 'item',
+      shelfLife: data.shelfLifeValue && data.shelfLifeUnit
+        ? {
+            value: data.shelfLifeValue,
+            unit: data.shelfLifeUnit,
+          }
+        : null,
+    }
+
+    // Remove form-specific fields
+    delete dtoData.shelfLifeValue
+    delete dtoData.shelfLifeUnit
+
+    const newItem = await createItem(firstContainerId.value, dtoData)
     // Add to shopping list
     const itemWithContainer: IItemWithContainerId = { ...newItem, _containerId: firstContainerId.value }
     addToShoppingList(itemWithContainer)

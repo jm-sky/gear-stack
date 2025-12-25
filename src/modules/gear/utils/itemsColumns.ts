@@ -1,9 +1,9 @@
-import type { IGearItem } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import type { ColumnDef } from '@tanstack/vue-table'
 
 export function createItemsColumns(
   t: (key: string, ...args: unknown[]) => string,
-): ColumnDef<IGearItem>[] {
+): ColumnDef<IGearItemV2>[] {
   return [
     {
       id: 'image',

@@ -11,7 +11,7 @@ import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
 import { ITEMS_TABLE_COLUMN_VISIBILITY_KEY } from '@/shared/config/config'
 import type { IGearItemV2, IUpdateGearItemV2Dto, TGearItemPriority } from '../types/gear.types.v2'
 import { useCategoryLabel } from '../composables/useCategoryLabel'
-import { formatItemPrice } from '../composables/useFormattedItemPrice'
+import { formatItemPriceV2 } from '../composables/useFormattedItemPriceV2'
 import { useGear } from '../composables/useGear'
 import { useGearV2 } from '../composables/useGearV2'
 import { useGearSettings } from '../composables/useGearSettings'
@@ -547,7 +547,7 @@ async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority)
       />
       <ItemsTableNameCell
         v-else
-        :item="convertV1ItemToV2(row.original, containerId || '')"
+        :item="row.original"
         :public-mode="publicMode"
         :is-expired="isExpired(row.original)"
         :is-expiring-soon="isExpiringSoon(row.original)"
@@ -555,7 +555,7 @@ async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority)
         :is-row-expanded="isRowExpanded(row.original.id)"
         :can-move-up="canMoveUp(row.original)"
         :can-move-down="canMoveDown(row.original)"
-        :nested-container="getNestedContainer(row.original) ? convertV1ContainerToV2(getNestedContainer(row.original)!) : undefined"
+        :nested-container="getNestedContainer(row.original)"
         @move-up="handleMoveUp(row.original)"
         @move-down="handleMoveDown(row.original)"
         @navigate="navigateToItem(row.original)"
@@ -640,7 +640,7 @@ async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority)
         @change="(updates) => handleCellChange(row.original, updates)"
       />
       <div v-else-if="row.original.price != null" class="text-end px-4">
-        {{ formatItemPrice(row.original, false, defaultCurrency) }}
+        {{ formatItemPriceV2(row.original, false, defaultCurrency) }}
       </div>
       <span v-else class="text-muted-foreground">-</span>
     </template>
