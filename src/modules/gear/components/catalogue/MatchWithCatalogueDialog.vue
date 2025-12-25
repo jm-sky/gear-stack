@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import SearchInput from '@/components/ui/input/SearchInput.vue'
 import { Label } from '@/components/ui/label'
 import type { IGlobalCatalogueItem } from '../../types/catalogue.types'
-import type { IGearItem, TGearItemCategory } from '../../types/gear.types'
+import type { IGearItemV2, TGearItemCategory } from '../../types/gear.types.v2'
 import { useCatalogue } from '../../composables/catalogue/useCatalogue'
 import { catalogueApiService } from '../../services/catalogueApiService'
 import CategorySelect from '../inputs/CategorySelect.vue'
@@ -19,7 +19,7 @@ const { t } = useI18n()
 const open = defineModel<boolean>('open', { default: false })
 
 const props = defineProps<{
-  item: IGearItem
+  item: IGearItemV2
 }>()
 
 const emit = defineEmits<{

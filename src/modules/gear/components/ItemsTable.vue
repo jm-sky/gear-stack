@@ -9,7 +9,7 @@ import Badge from '@/components/ui/badge/Badge.vue'
 import { Button } from '@/components/ui/button'
 import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
 import { ITEMS_TABLE_COLUMN_VISIBILITY_KEY } from '@/shared/config/config'
-import type { IGearItem, IUpdateItemDto, TGearItemPriority } from '../types/gear.types'
+import type { IGearItemV2, IUpdateGearItemV2Dto, TGearItemPriority } from '../types/gear.types.v2'
 import { useCategoryLabel } from '../composables/useCategoryLabel'
 import { formatItemPrice } from '../composables/useFormattedItemPrice'
 import { useGear } from '../composables/useGear'
@@ -45,7 +45,7 @@ const ItemsTableRowActions = defineAsyncComponent(() => import('./ItemsTableRowA
 
 const props = withDefaults(
   defineProps<{
-    items: IGearItem[]
+    items: IGearItemV2[]
     loading?: boolean
     publicMode?: boolean
     containerId?: string
@@ -113,15 +113,15 @@ const pageSizeModel = computed({
 })
 
 const emit = defineEmits<{
-  edit: [item: IGearItem]
-  delete: [item: IGearItem]
-  move: [item: IGearItem]
-  statusChange: [item: IGearItem, status: IGearItem['status']]
-  recognizeParameters: [item: IGearItem]
-  reorder: [items: IGearItem[]]
-  sortingChange: [items: IGearItem[]]
-  update: [item: IGearItem]
-  unlinkFromCatalogue: [item: IGearItem]
+  edit: [item: IGearItemV2]
+  delete: [item: IGearItemV2]
+  move: [item: IGearItemV2]
+  statusChange: [item: IGearItemV2, status: IGearItemV2['status']]
+  recognizeParameters: [item: IGearItemV2]
+  reorder: [items: IGearItemV2[]]
+  sortingChange: [items: IGearItemV2[]]
+  update: [item: IGearItemV2]
+  unlinkFromCatalogue: [item: IGearItemV2]
   'update:globalFilter': [filter: string]
   'update:page': [page: number]
   'update:pageSize': [pageSize: number]
@@ -193,7 +193,7 @@ const columns = computed<ReturnType<typeof createItemsColumns>>(() => {
 })
 
 // Custom filter function for searching
-const globalFilterFn = (row: IGearItem, filterValue: string) => {
+const globalFilterFn = (row: IGearItemV2, filterValue: string) => {
   const query = filterValue.toLowerCase()
   return (
     row.name.toLowerCase().includes(query) ||
@@ -204,18 +204,18 @@ const globalFilterFn = (row: IGearItem, filterValue: string) => {
 }
 
 // Helper do sprawdzania czy przedmiot jest przeterminowany
-function isExpired(item: IGearItem): boolean {
+function isExpired(item: IGearItemV2): boolean {
   if (!item.expirationDate) return false
   return new Date(item.expirationDate) < new Date()
 }
 
 // Helper to check if item is a nested container
-function isNestedContainer(item: IGearItem): boolean {
+function isNestedContainer(item: IGearItemV2): boolean {
   return !!item.containerId
 }
 
 // Navigate to nested container
-function navigateToNestedContainer(item: IGearItem) {
+function navigateToNestedContainer(item: IGearItemV2) {
   if (item.containerId) {
     if (props.publicMode) {
       router.push(GearRoutePath.PublicContainerDetailById(item.containerId))
@@ -226,7 +226,7 @@ function navigateToNestedContainer(item: IGearItem) {
 }
 
 // Navigate to item detail page
-function navigateToItem(item: IGearItem) {
+function navigateToItem(item: IGearItemV2) {
   if (props.publicMode && props.containerId) {
     router.push(GearRoutePath.PublicItemDetailById(props.containerId, item.id))
   } else if (props.containerId) {
@@ -256,14 +256,14 @@ function isRowExpanded(itemId: string): boolean {
 }
 
 // Get nested container items
-function getNestedContainerItems(item: IGearItem): IGearItem[] {
+function getNestedContainerItems(item: IGearItemV2): IGearItemV2[] {
   if (!item.containerId) return []
   const container = store.getContainerById(item.containerId)
   return container?.items ?? []
 }
 
 // Get nested container
-function getNestedContainer(item: IGearItem) {
+function getNestedContainer(item: IGearItemV2) {
   if (!item.containerId) return undefined
   return store.getContainerById(item.containerId)
 }
@@ -280,7 +280,7 @@ const tableSorting = ref<SortingState>([])
 
 // Sort items by order (default sorting) or by table sorting
 // Using toSorted() instead of sort() to avoid mutating the array
-const sortedItems = computed<IGearItem[]>(() => {
+const sortedItems = computed<IGearItemV2[]>(() => {
   const items = [...props.items]
 
   // If table has active sorting, apply it
@@ -292,8 +292,8 @@ const sortedItems = computed<IGearItem[]>(() => {
     const direction = sortConfig.desc ? -1 : 1
 
     return items.toSorted((a, b) => {
-      const aValue: unknown = a[columnId as keyof IGearItem]
-      const bValue: unknown = b[columnId as keyof IGearItem]
+      const aValue: unknown = a[columnId as keyof IGearItemV2]
+      const bValue: unknown = b[columnId as keyof IGearItemV2]
 
       // Handle different data types
       const aVal = aValue === null || aValue === undefined ? '' : aValue
@@ -353,8 +353,8 @@ watch(
 
       // Apply sorting (using toSorted to avoid mutating original array)
       const sorted = items.toSorted((a, b) => {
-        const aValue: unknown = a[columnId as keyof IGearItem]
-        const bValue: unknown = b[columnId as keyof IGearItem]
+        const aValue: unknown = a[columnId as keyof IGearItemV2]
+        const bValue: unknown = b[columnId as keyof IGearItemV2]
 
         const aVal = aValue === null || aValue === undefined ? '' : aValue
         const bVal = bValue === null || bValue === undefined ? '' : bValue
@@ -384,7 +384,7 @@ watch(
 )
 
 // Handle move up
-function handleMoveUp(item: IGearItem) {
+function handleMoveUp(item: IGearItemV2) {
   const currentIndex = sortedItems.value.findIndex(i => i.id === item.id)
   if (currentIndex <= 0) return
 
@@ -405,7 +405,7 @@ function handleMoveUp(item: IGearItem) {
 }
 
 // Handle move down
-function handleMoveDown(item: IGearItem) {
+function handleMoveDown(item: IGearItemV2) {
   const currentIndex = sortedItems.value.findIndex(i => i.id === item.id)
   if (currentIndex < 0 || currentIndex >= sortedItems.value.length - 1) return
 
@@ -426,32 +426,32 @@ function handleMoveDown(item: IGearItem) {
 }
 
 // Check if item can move up
-function canMoveUp(item: IGearItem): boolean {
+function canMoveUp(item: IGearItemV2): boolean {
   const currentIndex = sortedItems.value.findIndex(i => i.id === item.id)
   return currentIndex > 0
 }
 
 // Check if item can move down
-function canMoveDown(item: IGearItem): boolean {
+function canMoveDown(item: IGearItemV2): boolean {
   const currentIndex = sortedItems.value.findIndex(i => i.id === item.id)
   return currentIndex >= 0 && currentIndex < sortedItems.value.length - 1
 }
 
-// Track dirty state per row - Map<itemId, IUpdateItemDto>
-const dirtyChanges = ref<Map<string, IUpdateItemDto>>(new Map())
+// Track dirty state per row - Map<itemId, IUpdateGearItemV2Dto>
+const dirtyChanges = ref<Map<string, IUpdateGearItemV2Dto>>(new Map())
 const savingItems = ref<Set<TUUID>>(new Set())
 
 // Handle cell change - accumulate changes per row
-function handleCellChange(item: IGearItem, updates: IUpdateItemDto, save?: boolean) {
+function handleCellChange(item: IGearItemV2, updates: IUpdateGearItemV2Dto, save?: boolean) {
   const itemId = item.id
   const currentChanges = dirtyChanges.value.get(itemId) ?? {}
 
   // Merge updates with existing changes
-  const mergedChanges: IUpdateItemDto = { ...currentChanges, ...updates }
+  const mergedChanges: IUpdateGearItemV2Dto = { ...currentChanges, ...updates }
 
   // Remove empty updates (no actual changes)
   const hasChanges = Object.keys(mergedChanges).some(key => {
-    const value = mergedChanges[key as keyof IUpdateItemDto]
+    const value = mergedChanges[key as keyof IUpdateGearItemV2Dto]
     return value !== undefined && value !== null
   })
 
@@ -472,7 +472,7 @@ function hasDirtyChanges(itemId: string): boolean {
 }
 
 // Save all changes for a row
-async function handleSaveRow(item: IGearItem) {
+async function handleSaveRow(item: IGearItemV2) {
   const changes = dirtyChanges.value.get(item.id)
   if (!changes || Object.keys(changes).length === 0) return
 
@@ -493,7 +493,7 @@ async function handleSaveRow(item: IGearItem) {
 
 
 // Handle upload photo - navigate to item detail page with image upload
-function handleUploadPhoto(item: IGearItem) {
+function handleUploadPhoto(item: IGearItemV2) {
   if (!props.containerId) return
   router.push({
     path: GearRoutePath.ItemDetailById(props.containerId, item.id),
@@ -502,7 +502,7 @@ function handleUploadPhoto(item: IGearItem) {
 }
 
 // Handle star item - toggle priority between critical and medium
-async function handleStarItem(item: IGearItem, newPriority: TGearItemPriority) {
+async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority) {
   const { updateItem } = useGear()
   try {
     const updated = await updateItem(item.id, { priority: newPriority })

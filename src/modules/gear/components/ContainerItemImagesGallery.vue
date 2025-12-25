@@ -5,12 +5,12 @@ import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import { itemImageApiService } from '@/modules/gear/services/itemImageApiService'
 import { useHandleError } from '@/shared/composables/useHandleError'
-import type { IGearItem } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import type { IItemImage } from '../types/itemImage.types'
 import ContainerItemImageCard from './ContainerItemImageCard.vue'
 
 const props = defineProps<{
-  items: IGearItem[]
+  items: IGearItemV2[]
   containerId: string
   editable: boolean
   showItemImages?: boolean | null
@@ -28,7 +28,7 @@ function handleHide() {
 }
 
 interface ItemWithImage {
-  item: IGearItem
+  item: IGearItemV2
   image: IItemImage | null
 }
 

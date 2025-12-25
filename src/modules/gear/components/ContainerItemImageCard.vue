@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import type { IGearItem } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import type { IItemImage } from '../types/itemImage.types'
 import { GearRoutePath } from '../routes'
 import { createNavigationQuery } from '../utils/navigationParams'
 
 const props = defineProps<{
-  item: IGearItem
+  item: IGearItemV2
   image: IItemImage | null
   containerId: string
   hasError: boolean

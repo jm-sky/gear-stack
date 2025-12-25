@@ -14,25 +14,25 @@ import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import DropdownMenuSeparator from '@/components/ui/dropdown-menu/DropdownMenuSeparator.vue'
-import type { IGearItem, TGearItemPriority, TGearItemStatus } from '../types/gear.types'
+import type { IGearItemV2, TGearItemPriority, TGearItemStatus } from '../types/gear.types.v2'
 import { getActionIcon } from '../utils/actionIcons'
 
 const { t } = useI18n()
 
 const props = defineProps<{
-  row: IGearItem
+  row: IGearItemV2
 }>()
 
 const emit = defineEmits<{
-  edit: [item: IGearItem]
-  delete: [item: IGearItem]
-  move: [item: IGearItem]
+  edit: [item: IGearItemV2]
+  delete: [item: IGearItemV2]
+  move: [item: IGearItemV2]
   statusChange: [status: TGearItemStatus]
-  viewContainer: [item: IGearItem]
-  recognizeParameters: [item: IGearItem]
-  uploadPhoto: [item: IGearItem]
-  starItem: [item: IGearItem, priority: TGearItemPriority]
-  unlinkFromCatalogue: [item: IGearItem]
+  viewContainer: [item: IGearItemV2]
+  recognizeParameters: [item: IGearItemV2]
+  uploadPhoto: [item: IGearItemV2]
+  starItem: [item: IGearItemV2, priority: TGearItemPriority]
+  unlinkFromCatalogue: [item: IGearItemV2]
 }>()
 
 const EditIcon = getActionIcon('edit')

@@ -4,15 +4,15 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import type { IGearItem } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 
 const props = defineProps<{
-  pendingItems: IGearItem[]
+  pendingItems: IGearItemV2[]
   loading?: boolean
 }>()
 
 const emit = defineEmits<{
-  save: [items: IGearItem[]]
+  save: [items: IGearItemV2[]]
   cancel: []
 }>()
 

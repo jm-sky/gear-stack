@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { UPDATE_FROM_CATALOGUE_FIELDS_KEY } from '@/shared/config/config'
-import type { IGearItem } from '../../types/gear.types'
+import type { IGearItemV2 } from '../../types/gear.types.v2'
 import { useCatalogue } from '../../composables/catalogue/useCatalogue'
 
 const { t } = useI18n()
@@ -16,7 +16,7 @@ const { updateItemFromCatalogue, isUpdatingFromCatalogue } = useCatalogue()
 const open = defineModel<boolean>('open', { default: false })
 
 const props = defineProps<{
-  item: IGearItem
+  item: IGearItemV2
 }>()
 
 const emit = defineEmits<{
