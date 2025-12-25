@@ -18,10 +18,12 @@ import { useExpiration } from '../composables/useExpiration'
 import { useFormattedItemPrice } from '../composables/useFormattedItemPrice'
 import { useFormattedItemWeight } from '../composables/useFormattedItemWeight'
 import { useGear } from '../composables/useGear'
+import { useGearV2 } from '../composables/useGearV2'
 import { GearRoutePath } from '../routes'
 import { gearContainerService } from '../services/gearContainerService'
 import { gearItemService } from '../services/gearItemService'
 import { useGearStore } from '../store/useGearStore'
+import { useGearStoreV2 } from '../store/useGearStoreV2'
 import { getFrom } from '../utils/navigationParams'
 import { calculateExpirationDate, formatShelfLife } from '../utils/shelfLife'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
@@ -32,10 +34,11 @@ const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 const store = useGearStore()
+const storeV2 = useGearStoreV2()
 const { shouldUseAPI } = useBackend()
 const { user, isAuthenticated } = useAuth()
 const { setTitle } = usePageTitle()
-const { deleteItem } = useGear()
+const { deleteItem } = useGearV2()
 
 const containerId = route.params.containerId as string
 const itemId = route.params.itemId as string
@@ -79,29 +82,18 @@ const canManageImages = computed(() => {
 
 const loadItem = async () => {
   try {
-    const service = gearItemService()
+    // Load from V2 store
+    const containerData = storeV2.getItemById(containerId)
+    container.value = containerData ?? null
+    const foundItem = storeV2.getItemById(itemId)
 
-    if (shouldUseAPI.value && 'getItem' in service) {
-      // Load from API
-      item.value = await service.getItem(itemId)
-      // Load container to check ownership
-      const containerService = gearContainerService()
-      const containerData = await store.getContainerById(containerId) || await containerService.getContainer(containerId)
-      container.value = containerData ?? null
-    } else {
-      // Load from localStorage
-      const containerData = store.getContainerById(containerId)
-      container.value = containerData ?? null
-      const foundItem = containerData?.items.find(i => i.id === itemId)
-
-      if (!foundItem) {
-        toast.error(t('common.error'))
-        router.push(GearRoutePath.ContainerDetailById(containerId))
-        return
-      }
-
-      item.value = foundItem
+    if (!foundItem) {
+      toast.error(t('common.error'))
+      router.push(GearRoutePath.ContainerDetailById(containerId))
+      return
     }
+
+    item.value = foundItem
   } catch (error) {
     console.error('Failed to load item:', error)
     toast.error(t('common.error'))
@@ -117,35 +109,26 @@ onMounted(async () => {
 
 // Callback to refresh item after catalogue operations
 const handleItemUpdated = async () => {
-  // After catalogue operations, container is refreshed in store
-  // Try to get item from refreshed container first, then fallback to API
-  if (shouldUseAPI.value) {
-    try {
-      // First try to get item from refreshed container in store
-      const refreshedContainer = store.getContainerById(containerId)
-      if (refreshedContainer) {
-        const refreshedItem = refreshedContainer.items.find(i => i.id === itemId)
-        if (refreshedItem) {
-          item.value = refreshedItem
-          container.value = refreshedContainer
-          // Reload images in gallery
-          imageGalleryRef.value?.reload()
-          return
-        }
-      }
-      // Fallback to loading from API
-      await loadItem()
+  // After catalogue operations, item is refreshed in store
+  try {
+    // Try to get item from refreshed store
+    const refreshedItem = storeV2.getItemById(itemId)
+    const refreshedContainer = storeV2.getItemById(containerId)
+
+    if (refreshedItem) {
+      item.value = refreshedItem
+      container.value = refreshedContainer ?? null
       // Reload images in gallery
       imageGalleryRef.value?.reload()
-    } catch (error) {
-      console.error('Failed to refresh item:', error)
-      // Fallback to loading from API
-      await loadItem()
-      // Reload images in gallery
-      imageGalleryRef.value?.reload()
+      return
     }
-  } else {
-    // For localStorage, just reload from store
+    // Fallback to reloading
+    await loadItem()
+    // Reload images in gallery
+    imageGalleryRef.value?.reload()
+  } catch (error) {
+    console.error('Failed to refresh item:', error)
+    // Fallback to reloading
     await loadItem()
     // Reload images in gallery
     imageGalleryRef.value?.reload()
