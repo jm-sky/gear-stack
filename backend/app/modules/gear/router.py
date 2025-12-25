@@ -16,6 +16,7 @@ from app.modules.auth.dependencies import AdminUser, CurrentUser
 from app.modules.auth.models import User
 from app.modules.auth.repositories import get_user_repository
 from app.modules.auth.types.repository import UserRepositoryInterface
+from app.modules.billing.service import BillingService
 from app.modules.settings.db_models import UserSettingsDB
 
 from .repository import GearRepository
@@ -39,6 +40,7 @@ from .schemas import (
     PromoteItemResponse,
     ShareTokenCreate,
     ShareTokenResponse,
+    UserLimitsResponse,
 )
 from .service import GearService
 from .catalogue_item_image_router import router as catalogue_item_image_router
@@ -79,6 +81,34 @@ def get_gear_service(
 
 
 GearServiceDep = Annotated[GearService, Depends(get_gear_service)]
+
+
+def get_optional_billing_service(
+    db: AsyncSession = Depends(get_db),
+) -> BillingService | None:
+    """Get billing service optionally (returns None if unavailable).
+
+    This allows graceful degradation when billing service is not available.
+
+    Args:
+        db: Database session
+
+    Returns:
+        BillingService instance or None if unavailable
+    """
+    try:
+        from app.modules.billing.dependencies import get_billing_service, get_stripe_client
+        from app.modules.billing.repository import BillingRepository
+
+        billing_repo = BillingRepository(db)
+        stripe_client = get_stripe_client()
+        return get_billing_service(billing_repo, stripe_client)
+    except Exception:
+        # Graceful degradation - return None if billing service unavailable
+        return None
+
+
+OptionalBillingServiceDep = Annotated[BillingService | None, Depends(get_optional_billing_service)]
 
 # Optional authentication for public endpoints
 optional_security = HTTPBearer(auto_error=False)
@@ -126,6 +156,7 @@ async def create_container(
     current_user: CurrentUser,
     service: GearServiceDep,
     db: AsyncSession = Depends(get_db),
+    billing_service: OptionalBillingServiceDep = None,
 ) -> ContainerResponse:
     """Create a new gear container for the current user.
 
@@ -134,6 +165,7 @@ async def create_container(
         current_user: Authenticated user
         service: Gear service instance
         db: Database session
+        billing_service: Optional billing service for limit validation
 
     Returns:
         Created container
@@ -146,7 +178,7 @@ async def create_container(
     settings = result.scalars().first()
     default_public = settings.default_containers_public if settings else False
 
-    return await service.create_container(current_user.id, data, default_public=default_public)
+    return await service.create_container(current_user.id, data, default_public=default_public, billing_service=billing_service)
 
 
 @router.get(
@@ -298,6 +330,7 @@ async def create_item(
     data: ItemCreate,
     current_user: CurrentUser,
     service: GearServiceDep,
+    billing_service: OptionalBillingServiceDep = None,
 ) -> ItemResponse:
     """Create a new gear item in a container.
 
@@ -313,7 +346,7 @@ async def create_item(
     Raises:
         HTTPException: If container not found or validation fails
     """
-    item = await service.create_item(container_id, current_user.id, data)
+    item = await service.create_item(container_id, current_user.id, data, billing_service=billing_service)
     if not item:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -1507,3 +1540,68 @@ async def withdraw_report(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Report not found",
         )
+
+
+@router.get(
+    "/me/limits",
+    response_model=UserLimitsResponse,
+    summary="Get user account limits and usage",
+)
+async def get_user_limits(
+    current_user: CurrentUser,
+    service: GearServiceDep,
+    db: AsyncSession = Depends(get_db),
+) -> UserLimitsResponse:
+    """Get user account limits and current usage.
+
+    Args:
+        current_user: Authenticated user
+        service: Gear service instance
+        db: Database session
+
+    Returns:
+        User limits and usage information
+    """
+    # Get billing service for limits
+    try:
+        from app.modules.billing.dependencies import get_billing_service, get_stripe_client
+        from app.modules.billing.repository import BillingRepository
+
+        billing_repo = BillingRepository(db)
+        stripe_client = get_stripe_client()
+        billing_service = get_billing_service(billing_repo, stripe_client)
+        limits = await billing_service.get_subscription_limits(current_user.id)
+    except Exception:
+        # Fallback to free tier if billing service unavailable
+        from app.modules.billing.schemas import SubscriptionLimitsResponse
+
+        limits = SubscriptionLimitsResponse(
+            planTier="free",
+            aiMonthlyTokenLimit=0,
+            storageLimit=100 * 1024 * 1024,
+            canExportData=True,
+            canUseAdvancedFeatures=False,
+            requiresByok=True,
+            itemsLimit=2000,  # Updated to match new free tier limits
+            containersLimit=100,  # Updated to match new free tier limits
+        )
+
+    # Get current usage
+    items_count = await service.repository.count_user_items(current_user.id)
+    containers_count = await service.repository.count_user_containers(current_user.id)
+
+    return UserLimitsResponse(
+        tier=limits.planTier,
+        limits={
+            "items": limits.itemsLimit,
+            "containers": limits.containersLimit,
+        },
+        usage={
+            "items": items_count,
+            "containers": containers_count,
+        },
+        percentage={
+            "items": (items_count / limits.itemsLimit * 100) if limits.itemsLimit > 0 else 0.0,
+            "containers": (containers_count / limits.containersLimit * 100) if limits.containersLimit > 0 else 0.0,
+        },
+    )

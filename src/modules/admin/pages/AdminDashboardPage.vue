@@ -140,6 +140,24 @@ if (!canAccessAdminPanel.value) {
             </RouterLink>
           </div>
         </Card>
+
+        <Card class="p-6">
+          <div class="flex flex-col gap-4 flex-1">
+            <div class="flex-1">
+              <h3 class="text-lg font-semibold">
+                {{ t('admin.dashboard.subscriptions.title', 'Subscriptions') }}
+              </h3>
+              <p class="text-sm text-muted-foreground">
+                {{ t('admin.dashboard.subscriptions.description', 'Manage user subscriptions and billing plans') }}
+              </p>
+            </div>
+            <RouterLink :to="AdminRoutePaths.subscriptions">
+              <Button class="w-full">
+                {{ t('admin.dashboard.subscriptions.button', 'Manage Subscriptions') }}
+              </Button>
+            </RouterLink>
+          </div>
+        </Card>
       </div>
     </div>
   </AuthenticatedLayout>

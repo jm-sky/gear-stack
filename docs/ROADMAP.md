@@ -17,7 +17,22 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
 
 ### Wysoki priorytet
 
-1. ✅ **UUID support dla update workflow** - Zakończone
+1. **Bezpieczeństwo aplikacji (Security Hardening)** - 🚧 In Progress
+   - 📍 Plan: [SECURITY_IMPROVEMENT_PLAN.md](./security/SECURITY_IMPROVEMENT_PLAN.md)
+   - 📍 Docker Security: [SECURITY_FIX.md](./SECURITY_FIX.md)
+   - ⚠️ **Critical:** Implementacja security headers (CSP, HSTS, X-Frame-Options)
+   - ⚠️ **Critical:** Weryfikacja PostgreSQL SSL/TLS w produkcji
+   - 🔒 **High:** Implementacja WAF (Web Application Firewall)
+   - 🔒 **High:** Procedury backup/recovery bazy danych
+   - 🔐 **Medium:** Migracja na httpOnly cookies (obecnie localStorage)
+   - 🔐 **Medium:** Implementacja CSRF protection
+   - 🛡️ **Medium:** Strict CORS configuration
+   - 📋 **Low:** Procedury rotacji sekretów (secrets rotation)
+   - 📊 **Low:** Security monitoring & alerting
+   - Status: 🚧 In Progress | Priority: Critical | Complexity: Large
+   - **Uwaga:** Wymaga zmian w backend middleware, Caddy config, i frontend auth
+
+2. ✅ **UUID support dla update workflow** - Zakończone
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#uuid-support-dla-update-workflow)
    - Wykorzystanie istniejącego UUID (`id`) do aktualizacji istniejących kontenerów/przedmiotów podczas importu markdown
    - Status: ✅ Completed | Priority: Medium | Complexity: Medium
@@ -53,7 +68,7 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
   - ✅ Backend endpoints do zarządzania historią (GET, DELETE)
   - ✅ Frontend composable do zarządzania historią
   - ✅ **Zarządzanie historią - UI:** przeglądanie historii chatów, powrót do konwersacji, kasowanie historii - Completed
-  - 🔄 **Sprawdzenie i poprawa działania strony AiHistory** - planowane (przywracanie konwersacji nie działa - do wyjaśnienia)
+  - ✅ **Sprawdzenie i poprawa działania strony AiHistory** - Completed (przywracanie konwersacji działa)
   - 🔄 Classification, embeddings, vision models - planowane
 
 6. ✅ **AI settings - Premium feature** - Zakończone
@@ -109,18 +124,25 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
 
 ### Średni priorytet
 
-1. ✅ **Nawigacja przycisku "Wróć"** - Zakończone
+1. **Zabezpieczenie linków w markdown** - Phase 1 Completed
+   - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#zabezpieczenie-linków-w-markdown)
+   - 📋 **Plan implementacji:** [MARKDOWN_LINK_SECURITY_PLAN.md](./plans/MARKDOWN_LINK_SECURITY_PLAN.md)
+   - ✅ **Phase 1 (v2.45.0):** Walidacja protokołów, limity długości, rel="noopener noreferrer", sanityzacja przed zapisem
+   - 🔄 **Phase 2 (Planned):** Homograph detection, dialog potwierdzenia, blokowanie zewnętrznych obrazów
+   - Status: 🚧 Partially Completed (Phase 1) | Priority: Medium | Complexity: Medium
+
+2. ✅ **Nawigacja przycisku "Wróć"** - Zakończone
    - 📍 Lokalizacja: [FEATURE-028-back-button-navigation.md](./features/FEATURE-028-back-button-navigation.md)
    - Naprawa nawigacji przycisku "Wróć" w różnych komponentach aplikacji
    - Użycie parametru `from` zamiast `router.back()` dla przewidywalnej nawigacji
    - Status: ✅ Completed | Priority: High | Complexity: Small
 
-2. ✅ **Przenoszenie przedmiotów między kontenerami** - Zakończone
+3. ✅ **Przenoszenie przedmiotów między kontenerami** - Zakończone
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-przenoszenie-przedmiotów-między-kontenerami)
    - Dialog wyboru kontenera docelowego, endpoint API, pełna implementacja backend + frontend
    - Status: ✅ Completed | Priority: High | Complexity: Medium
 
-3. ✅ **Kasowanie obrazków z S3** - Zakończone
+4. ✅ **Kasowanie obrazków z S3** - Zakończone
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md)
    - ✅ Automatyczne usuwanie z S3 po usunięciu przedmiotu
    - ✅ Automatyczne usuwanie z S3 po usunięciu kontenera
@@ -128,13 +150,25 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - ✅ Automatyczne usuwanie z S3 po usunięciu konta użytkownika
    - Status: ✅ Completed | Priority: Medium | Complexity: Medium
 
-4. ✅ **Automatyczny wybór jednostki wagi (auto) i formatowanie z separatorem tysięcznym** - Zakończone
+5. ✅ **Automatyczny wybór jednostki wagi (auto) i formatowanie z separatorem tysięcznym** - Zakończone
    - 📍 Lokalizacja: [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-automatyczny-wybór-jednostki-wagi-auto-i-formatowanie-z-separatorem-tysięcznym) | [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-ustawienia-użytkownika-wymagające-db)
    - Opcje `auto g/kg` i `auto oz/lb` dla preferowanej jednostki wagi
    - Automatyczny wybór jednostki w zależności od wartości wagi (< 1 kg → g/oz, ≥ 1 kg → kg/lb)
    - Formatowanie liczby z separatorem tysięcznym (np. `1 500 g`)
    - Aktualizacja backendu (API, walidacja, baza danych) i migracja kolumny `preferred_weight_unit`
    - Status: ✅ Completed | Priority: Medium | Complexity: Small
+
+6. **Ulepszenia inspirowane LighterPack**
+   - 📍 Lokalizacja: [LIGHTERPACK_IMPROVEMENTS_TASKS.md](./comparison/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
+   - 📋 **Tryb prosty** - [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-tryb-prosty-simple-mode-inspiracja-lighterpack) - toggle w ustawieniach, ukryte zaawansowane funkcje
+   - 📋 **Drag & Drop** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-drag--drop---rozszerzenie-inspiracja-lighterpack) - rozszerzenie kolejności przedmiotów + przenoszenie między kontenerami
+   - 📋 **System pomocy / Tutorial** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-system-pomocy--tutorial-inspiracja-lighterpack) - ramki z pomocą, przycisk `?`, AI Chat
+   - 📋 **Kontekstowe podpowiedzi** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-kontekstowe-podpowiedzi-inspiracja-lighterpack) - tooltips, empty states, podpowiedzi w formularzach
+   - 📋 **Quick Add / Inline Editing** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-quick-add--inline-editing---dopracowanie-inspiracja-lighterpack) - dopracowanie UX, quick add bez formularza
+   - 📋 **Import CSV** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-import-csv-inspiracja-lighterpack) - nowa funkcjonalność (export już istnieje)
+   - 📋 **Lepsze wizualizacje** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-lepsze-wizualizacje-inspiracja-lighterpack) - ulepszenie wykresów donut
+   - 📋 **Natychmiastowe obliczenia wagi** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-natychmiastowe-obliczenia-wagi-inspiracja-lighterpack) - real-time podczas edycji
+   - Status: 🔄 Planned | Priority: Medium | Complexity: Various
 
 ### Obniżony priorytet (trudne zadania)
 

@@ -4,6 +4,7 @@
 -->
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { secureMarkdownHtml } from '@/shared/utils/markdownPostProcess'
 
 const props = defineProps<{
   content: string
@@ -48,7 +49,9 @@ const renderedContent = computed<string>(() => {
     // Fallback: return plain text if markdown-it is not loaded yet
     return props.content ?? ''
   }
-  return mdInstance.value.render(props.content)
+  const rawHtml = mdInstance.value.render(props.content)
+  // Post-process HTML to secure links
+  return secureMarkdownHtml(rawHtml)
 })
 
 const contentClasses = computed<string>(() => {
@@ -177,5 +180,13 @@ const contentClasses = computed<string>(() => {
 
 .prose :deep(ul ul ul) {
   list-style-type: square;
+}
+
+/* Disabled links styling */
+.prose :deep(a.link-disabled) {
+  color: hsl(var(--muted-foreground));
+  text-decoration: line-through;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 </style>

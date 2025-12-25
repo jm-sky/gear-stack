@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BackpackIcon, GlobeIcon, PackageIcon, SettingsIcon, ShieldIcon, ShoppingCartIcon, UserIcon } from 'lucide-vue-next'
+import { BackpackIcon, CreditCard, GlobeIcon, PackageIcon, SettingsIcon, ShieldIcon, ShoppingCartIcon, UserIcon } from 'lucide-vue-next'
 import { type Component, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -10,6 +10,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar'
 import { AdminRoutePaths } from '@/modules/admin/routes'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { AuthRouteNames, AuthRoutePaths } from '@/modules/auth/config/routes'
+import { BillingRoutePaths } from '@/modules/billing/routes'
 import { GearRoutePath } from '@/modules/gear/routes'
 import { SettingsRoutePaths } from '@/modules/settings/routes'
 import { useUser } from '@/modules/user/composables/useUser'
@@ -35,7 +36,7 @@ interface Link {
 }
 
 const coreLinks = computed<Link[]>(() => [
-{
+  {
     to: UserRoutePaths.profile,
     label: t('user.profile.title', 'Profile'),
     icon: UserIcon,
@@ -49,6 +50,11 @@ const coreLinks = computed<Link[]>(() => [
     to: GearRoutePath.Settings,
     label: t('gear.settings.page.title', 'Gear settings'),
     icon: BackpackIcon,
+  },
+  {
+    to: BillingRoutePaths.billing,
+    label: t('billing.title', 'Billing & Subscription'),
+    icon: CreditCard,
   },
   {
     to: AdminRoutePaths.dashboard,
@@ -98,7 +104,7 @@ const handleLogout = async () => {
     <div class="mx-auto flex h-(--header-height) items-center">
       <div class="w-(--sidebar-width) flex items-center justify-start gap-6">
         <SidebarTrigger class="ml-2.5 opacity-80" />
-        <RouterLink :to="AuthRoutePaths.dashboard" class="flex items-center gap-2 hover:brightness-80 transition-all duration-300">
+        <RouterLink :to="AuthRoutePaths.dashboard" class="flex items-center gap-2 hover:brightness-80 hover:scale-103 transition-all ease-in-out duration-300">
           <LogoText />
         </RouterLink>
       </div>

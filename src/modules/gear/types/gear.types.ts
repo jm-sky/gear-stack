@@ -26,8 +26,10 @@ export type TGearItemPriority = 'critical' | 'high' | 'medium' | 'low'
 // Półka cenowa / jakość
 export type TGearItemQuality = 'low' | 'medium' | 'high'
 
+export type TGearWeightAutoMode = 'auto-g-kg' | 'auto-oz-lb'
+
 // Jednostka wagi
-export type TGearWeightUnit = 'g' | 'kg' | 'oz' | 'lb' | 'auto-g-kg' | 'auto-oz-lb'
+export type TGearWeightUnit = 'g' | 'kg' | 'oz' | 'lb' | TGearWeightAutoMode
 
 // Rating type (1-5)
 export type TRatingValue = 1 | 2 | 3 | 4 | 5

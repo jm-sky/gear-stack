@@ -140,6 +140,32 @@ class GearRepository(SearchMixin):
         result = await self.db.execute(stmt)
         return result.scalars().all()
 
+    async def count_user_containers(self, user_id: str) -> int:
+        """Count all containers for a user.
+
+        Args:
+            user_id: Owner user ID
+
+        Returns:
+            Number of containers
+        """
+        stmt = select(func.count(GearContainerDB.id)).where(GearContainerDB.user_id == user_id)
+        result = await self.db.execute(stmt)
+        return result.scalar_one() or 0
+
+    async def count_user_items(self, user_id: str) -> int:
+        """Count all items for a user (across all containers).
+
+        Args:
+            user_id: Owner user ID
+
+        Returns:
+            Number of items
+        """
+        stmt = select(func.count(GearItemDB.id)).join(GearContainerDB, GearItemDB.container_id == GearContainerDB.id).where(GearContainerDB.user_id == user_id)
+        result = await self.db.execute(stmt)
+        return result.scalar_one() or 0
+
     async def get_public_containers(self, skip: int = 0, limit: int = 100) -> Sequence[GearContainerDB]:
         """Get all public containers from all users.
 
@@ -961,22 +987,46 @@ class GearRepository(SearchMixin):
         if quality:
             conditions.append(GlobalCatalogueItemDB.quality == quality)
 
-        # Search query (fuzzy search in name, description, brand, model)
+        # Full Text Search using PostgreSQL to_tsvector and to_tsquery
         if query:
-            search_pattern = f"%{query}%"
-            search_conditions = or_(
-                GlobalCatalogueItemDB.name.ilike(search_pattern),
-                GlobalCatalogueItemDB.description.ilike(search_pattern),
-                GlobalCatalogueItemDB.brand.ilike(search_pattern),
-                GlobalCatalogueItemDB.model.ilike(search_pattern),
+            from sqlalchemy import func, text
+
+            # Escape special characters in query for tsquery
+            # Replace spaces with & (AND operator) and escape special characters
+            query_escaped = query.replace("'", "''").replace("&", " ").replace("|", " ").replace("!", " ").replace("(", " ").replace(")", " ")
+            # Split by spaces and join with & (AND) operator
+            query_terms = " & ".join([term.strip() for term in query_escaped.split() if term.strip()])
+
+            # Build tsvector from multiple columns (name, description, brand, model)
+            # Use 'simple' dictionary for better matching (no language-specific stemming)
+            # Concatenate columns with space separator using || operator
+            tsvector_expr = func.to_tsvector(
+                "simple", func.coalesce(GlobalCatalogueItemDB.name, "") + " " + func.coalesce(GlobalCatalogueItemDB.description, "") + " " + func.coalesce(GlobalCatalogueItemDB.brand, "") + " " + func.coalesce(GlobalCatalogueItemDB.model, "")
             )
-            conditions.append(search_conditions)
+            tsquery_expr = func.to_tsquery("simple", query_terms)
+
+            # Full text search condition using @@ operator (PostgreSQL full-text search)
+            # Use text() with proper parameter binding for safety
+            # Apply search condition directly to statement (not via conditions list)
+            search_condition = text(
+                "to_tsvector('simple', "
+                "coalesce(global_catalogue_items.name, '') || ' ' || "
+                "coalesce(global_catalogue_items.description, '') || ' ' || "
+                "coalesce(global_catalogue_items.brand, '') || ' ' || "
+                "coalesce(global_catalogue_items.model, '')) "
+                "@@ to_tsquery('simple', :query_terms)"
+            ).bindparams(query_terms=query_terms)
+            stmt = stmt.where(search_condition)
+
+            # Order by relevance (ts_rank) when searching
+            rank_expr = func.ts_rank(tsvector_expr, tsquery_expr)
+            stmt = stmt.order_by(rank_expr.desc(), GlobalCatalogueItemDB.name.asc())
+        else:
+            # Order by name when not searching
+            stmt = stmt.order_by(GlobalCatalogueItemDB.name.asc())
 
         if conditions:
             stmt = stmt.where(and_(*conditions))
-
-        # Order by name
-        stmt = stmt.order_by(GlobalCatalogueItemDB.name.asc())
 
         # Load creator relationship
         stmt = stmt.options(joinedload(GlobalCatalogueItemDB.creator))

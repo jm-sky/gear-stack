@@ -121,6 +121,28 @@ Lista planowanych funkcjonalności wymagających backendu, bazy danych i/lub aut
 
 ## 🔒 Bezpieczeństwo i walidacja treści
 
+### ✅ Zabezpieczenie linków w markdown (Phase 1)
+**Status:** 🚧 Partially Completed (Phase 1) | **Priority:** Medium | **Complexity:** Medium | **Version:** v2.45.0
+
+**Phase 1 - Completed (v2.45.0):**
+- ✅ Frontend: Link security utilities with protocol validation and length limits
+- ✅ Frontend: Post-processing of rendered markdown HTML to secure links
+- ✅ Frontend: Automatic addition of `rel="noopener noreferrer"` to external links
+- ✅ Frontend: Blocking of dangerous protocols (`javascript:`, `data:`, `vbscript:`, `file:`, `about:`, etc.)
+- ✅ Frontend: Link length validation (max 2048 characters)
+- ✅ Backend: Markdown content sanitization before saving to database
+- ✅ Backend: Validators for `notes` and `description` fields in containers and items
+- ✅ Backend: Automatic removal of dangerous protocol links from markdown content
+- ✅ Security: Maximum markdown content length limit (50000 characters)
+- ✅ Security: Visual indication of blocked links (disabled styling)
+
+**Phase 2 - Planned:**
+- 🔄 Homograph detection and normalization
+- 🔄 Dialog confirmation for suspicious external links
+- 🔄 Blocking external images in markdown (or lazy loading with security)
+
+**📋 Plan implementacji:** [MARKDOWN_LINK_SECURITY_PLAN.md](./plans/MARKDOWN_LINK_SECURITY_PLAN.md)
+
 ### Zabezpieczenie przed obraźliwymi słowami i niebezpiecznymi URL
 **Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
 
@@ -333,48 +355,40 @@ System raportowania nieodpowiednich treści dla publicznych kontenerów przez za
 - ⏸️ "Odlinkowanie" przedmiotu (tworzenie kopii) - na razie nie implementowane (usuwanie = usunięcie z kontenera)
 - ⏸️ Zarządzanie referencjami - nie wymagane (uproszczona wersja)
 
-### 🔄 Pobierz obrazki z katalogu
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+### ✅ Pobierz obrazki z katalogu
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium
 
 **Koncepcja:**
 Akcja pozwalająca na pobranie obrazków z katalogu do przedmiotu, który jest już połączony z katalogiem (ma `catalogueItemId`). Obrazki z katalogu są kopiowane do galerii przedmiotu użytkownika.
 
-**Zakres implementacji:**
-- **Backend:**
-  - Endpoint `POST /gear/items/{item_id}/catalogue-images` do pobierania obrazków z katalogu
-  - Pobieranie obrazków powiązanych z `catalogueItemId` przedmiotu
-  - Kopiowanie obrazków z katalogu do storage użytkownika (S3 lub lokalny)
-  - Zachowanie kolejności obrazków z katalogu
-  - Ustawienie pierwszego obrazka jako primary (jeśli przedmiot nie ma jeszcze primary image)
-  - Walidacja: sprawdzanie czy przedmiot jest połączony z katalogiem
+**Zaimplementowane funkcjonalności:**
+- ✅ **Backend:**
+  - ✅ Endpoint `POST /gear/items/{item_id}/fetch-images-from-catalogue` do pobierania obrazków z katalogu
+  - ✅ Pobieranie obrazków powiązanych z `catalogueItemId` przedmiotu
+  - ✅ Kopiowanie obrazków z katalogu do storage użytkownika (S3 lub lokalny)
+  - ✅ Zachowanie kolejności obrazków z katalogu
+  - ✅ Ustawienie pierwszego obrazka jako primary (jeśli przedmiot nie ma jeszcze primary image)
+  - ✅ Walidacja: sprawdzanie czy przedmiot jest połączony z katalogiem
 
-- **Frontend:**
-  - Akcja "Pobierz obrazki z katalogu" w menu akcji przedmiotu (`ItemHeaderActions.vue`)
-  - Akcja widoczna tylko gdy przedmiot jest połączony z katalogiem (`isLinkedToCatalogue`)
-  - Umieszczenie akcji w dropdown menu pod innymi akcjami katalogu (po "Aktualizuj z katalogu", przed "Odłącz z katalogu")
-  - Loading state podczas pobierania obrazków
-  - Toast notification z potwierdzeniem sukcesu (liczba pobranych obrazków)
-  - Obsługa błędów (np. brak obrazków w katalogu, błąd pobierania)
-
-- **Edge cases:**
-  - Co jeśli przedmiot już ma obrazki? (dodanie do istniejących vs zastąpienie)
-  - Co jeśli obrazki z katalogu są już w przedmiocie? (pomijanie duplikatów)
-  - Limit liczby obrazków w galerii przedmiotu (max 10)
+- ✅ **Frontend:**
+  - ✅ Akcja "Pobierz obrazki z katalogu" w menu akcji przedmiotu (`ItemHeaderActions.vue`)
+  - ✅ Akcja widoczna tylko gdy przedmiot jest połączony z katalogiem (`isLinkedToCatalogue`)
+  - ✅ Umieszczenie akcji w dropdown menu pod innymi akcjami katalogu (po "Aktualizuj z katalogu", przed "Odłącz z katalogu")
+  - ✅ Loading state podczas pobierania obrazków (`isFetchingImages`)
+  - ✅ Toast notification z potwierdzeniem sukcesu
+  - ✅ Obsługa błędów (np. brak obrazków w katalogu, błąd pobierania)
+  - ✅ Automatyczne odświeżanie kontenera po pobraniu obrazków
 
 **Zalety:**
 - Szybkie uzupełnienie galerii przedmiotu obrazkami z katalogu
 - Lepsze UX - automatyczne pobieranie obrazków zamiast ręcznego uploadu
 - Spójność z innymi akcjami katalogu (aktualizacja, odłącz)
 
-**Lokalizacja implementacji:**
-- `src/modules/gear/components/ItemHeaderActions.vue` (linie 53-88) - dodanie akcji w dropdown menu
-- `src/modules/gear/composables/catalogue/useCatalogue.ts` - dodanie funkcji `downloadImagesFromCatalogue`
-
 ### ✅ Przenoszenie przedmiotów między kontenerami
 **Status:** ✅ Completed | **Priority:** High | **Complexity:** Medium
 
-### 🔄 Poprawa wyszukiwarki katalogu globalnego (lepsze dopasowanie)
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+### ✅ Poprawa wyszukiwarki katalogu globalnego (lepsze dopasowanie)
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium
 
 **Koncepcja:**
 Poprawa wyszukiwarki w tworzeniu połączenia przedmiotu z katalogiem globalnym (`MatchWithCatalogueDialog.vue`) - lepsze dopasowywanie wyników wyszukiwania.
@@ -493,8 +507,8 @@ Mechanizm pozwalający użytkownikom na promowanie swoich przedmiotów do global
 
 ## 💳 Limity kont i subskrypcje
 
-### Limity przedmiotów i kontenerów dla kont free/premium
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium
+### ✅ Limity przedmiotów i kontenerów dla kont free/premium
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium
 
 **Koncepcja:**
 System limitów liczby przedmiotów i kontenerów w zależności od typu konta (free/premium), z możliwością opcjonalnego uwzględnienia wykorzystanej przestrzeni w bazie danych.
@@ -576,6 +590,28 @@ System limitów liczby przedmiotów i kontenerów w zależności od typu konta (
 - ✅ Integracja z Gravatar (automatyczne pobieranie awatara na podstawie email)
 - ✅ Pole `avatar_url` w profilu użytkownika (już istnieje w DB)
 - ✅ Możliwość podania własnego URL do awatara
+
+### 🔄 Tryb prosty (Simple Mode) (inspiracja LighterPack)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../comparison/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
+
+**Koncepcja:**
+Dodanie trybu prostego dla użytkowników, którzy chcą prostszy interfejs z ukrytymi zaawansowanymi funkcjami.
+
+**Wymagania:**
+- Toggle "Tryb prosty" w ustawieniach użytkownika (zapisywane w DB)
+- Zaawansowane opcje w dropdown menu jako `Więcej... →`
+- Podstawowe pola widoczne domyślnie
+- Zaawansowane pola ukryte pod `Więcej` w formularzach
+- W trybie prostym ukrywamy zaawansowane kolumny w tabelach (np. cena, waluta, marka, kolor)
+- Zagnieżdżanie kontenerów zostaje (użytkownik kontroluje czy zagnieżdża)
+- Nie robimy Wizard dla nowych użytkowników
+
+**Szczegóły implementacji:**
+- Ustawienie `simpleMode: boolean` w ustawieniach użytkownika (zapisywane w DB)
+- Podstawowe pola przedmiotu: nazwa, waga, ilość, kategoria, notatki, status, priorytet
+- Zaawansowane pola (ukryte w trybie prostym): cena, waluta, marka, kolor, URL, data ważności, shelf life, wearable, consumable
+- W tabelach: ukrycie zaawansowanych kolumn w trybie prostym
+- W formularzach: sekcja "Więcej opcji" z dropdown/expandable section
 
 ### 🚧 Sekcja AI w Gear Settings
 **Status:** 🚧 Partially Completed | **Priority:** High | **Complexity:** Medium
@@ -780,9 +816,9 @@ System śledzenia wyświetleń kontenerów (publicznych i udostępnionych) z ~~d
   - ✅ Powrót do konwersacji (restore conversation from history - załadowanie wiadomości z historii do chat window) - Completed
   - ✅ Kasowanie historii (UI do usuwania pojedynczych wpisów i całej historii) - Completed
   - ✅ Historia viewer page (strona z listą historii, szczegóły konwersacji) - Completed
-- 🔄 **Sprawdzenie i poprawa działania strony AiHistory** - planowane
-  - 🔄 Przywracanie konwersacji nie działa - do wyjaśnienia i naprawy
-  - 🔄 Sprawdzenie innych funkcjonalności strony (filtrowanie, wyszukiwanie, paginacja)
+- ✅ **Sprawdzenie i poprawa działania strony AiHistory** - Completed
+  - ✅ Przywracanie konwersacji działa poprawnie
+  - ✅ Sprawdzenie innych funkcjonalności strony (filtrowanie, wyszukiwanie, paginacja) - działa
 - 🔄 Mechanizm limitu historii (domyślnie 100 wpisów) + automatyczne usuwanie najstarszych - planowane
 - ✅ **Rozszerzenie funkcjonalności czatu AI** - zaimplementowane - [FEATURE-AI-CHAT-ENHANCEMENTS.md](../features/FEATURE-AI-CHAT-ENHANCEMENTS.md)
   - ✅ Dodanie pola container_ids do modelu historii

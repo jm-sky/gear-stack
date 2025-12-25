@@ -1,5 +1,12 @@
 import { apiClient } from '@/shared/services/apiClient'
-import type { IAdminContainer, IAdminItem, IAdminUser } from '../types/admin.types'
+import type {
+  IAdminContainer,
+  IAdminItem,
+  IAdminSubscription,
+  IAdminSubscriptionStats,
+  IAdminUpdateSubscriptionRequest,
+  IAdminUser,
+} from '../types/admin.types'
 import type { IContentReport, IContentReportListResponse, IUpdateReportRequest, ReportStatus } from '@/modules/gear/types/reports.types'
 import type { TUUID } from '@/shared/types/base.type'
 
@@ -84,6 +91,31 @@ class AdminApiService {
 
   async updateReportStatus(reportId: TUUID, data: IUpdateReportRequest): Promise<IContentReport> {
     const response = await apiClient.patch<IContentReport>(`/admin/reports/${reportId}`, data)
+    return response.data
+  }
+
+  // Subscriptions management
+  async getSubscriptions(skip = 0, limit = 100): Promise<IAdminSubscription[]> {
+    const response = await apiClient.get<IAdminSubscription[]>('/billing/admin/subscriptions', {
+      params: { skip, limit },
+    })
+    return response.data
+  }
+
+  async getSubscriptionStats(): Promise<IAdminSubscriptionStats> {
+    const response = await apiClient.get<IAdminSubscriptionStats>('/billing/admin/subscriptions/stats')
+    return response.data
+  }
+
+  async updateSubscription(subscriptionId: TUUID, data: IAdminUpdateSubscriptionRequest): Promise<IAdminSubscription> {
+    const response = await apiClient.patch<IAdminSubscription>(`/billing/admin/subscriptions/${subscriptionId}`, data)
+    return response.data
+  }
+
+  async cancelSubscription(subscriptionId: TUUID, reason?: string): Promise<IAdminSubscription> {
+    const response = await apiClient.post<IAdminSubscription>(`/billing/admin/subscriptions/${subscriptionId}/cancel`, {
+      reason,
+    })
     return response.data
   }
 }

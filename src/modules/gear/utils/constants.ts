@@ -2,6 +2,8 @@
  * Constants for gear module
  */
 
+import type { TContainerColor, TGearItemCategory, TGearItemPriority, TGearItemStatus } from '../types/gear.types'
+
 // Pagination
 export const DEFAULT_PAGINATION_LIMIT = 100
 export const DEFAULT_PAGINATION_SKIP = 0
@@ -27,3 +29,7 @@ export const EXPIRATION_SOON_DAYS = 30
 // Time conversion
 export const MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24
 
+export const DEFAULT_ITEM_CATEGORY: TGearItemCategory = 'other'
+export const DEFAULT_ITEM_COLOR: TContainerColor = 'default'
+export const DEFAULT_ITEM_STATUS: TGearItemStatus = 'owned'
+export const DEFAULT_ITEM_PRIORITY: TGearItemPriority = 'medium'

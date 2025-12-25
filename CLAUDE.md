@@ -34,12 +34,22 @@ pnpm test:coverage    # Run tests with coverage report
 This project uses **pnpm** (version 10.18.3+). Always use `pnpm` instead of `npm` or `yarn`.
 
 ### Backend Development
+
+**CRITICAL - Docker Safety Rule:**
+- **NEVER run Docker commands if the project directory name starts with underscore (e.g., `_gear-stack-dev`)**
+- Underscore prefix indicates a development directory on the production server
+- Running Docker in such directories can cause conflicts with production services
+- If the current working directory starts with `_`, do not execute any `docker` or `docker-compose` commands
+
 ```bash
 docker-compose -f backend/docker-compose.dev.yml up    # Start backend in development mode
 docker-compose -f backend/docker-compose.dev.yml down  # Stop backend
 ```
 
-**Important:** In development, the backend typically runs in a Docker container via `docker-compose.dev.yml`. This ensures consistent environment and dependencies. The backend is accessible at `http://localhost:8000` (or the port specified in `VITE_API_PROXY_URL`).
+**Important:**
+- In development, the backend typically runs in a Docker container via `docker-compose.dev.yml`. This ensures consistent environment and dependencies. The backend is accessible at `http://localhost:8000` (or the port specified in `VITE_API_PROXY_URL`).
+- **Auto-reload is enabled** - FastAPI uses WatchFiles to automatically reload when Python files change. No need to restart the container after code changes during development.
+- Only restart the container when changing environment variables (`.env`) or dependencies (`requirements.txt`).
 
 ### Backend Testing
 The backend uses **pytest** for testing with async support via `pytest-asyncio`.

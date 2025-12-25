@@ -4,7 +4,7 @@
 
 Gear Stack to zaawansowana aplikacja webowa do zarządzania ekwipunkiem survivalowym, plecakami bug-out oraz sprzętem outdoorowym. Aplikacja działa w architekturze full-stack z obsługą wielu użytkowników, synchronizacją w chmurze i zaawansowanymi funkcjami organizacyjnymi.
 
-**Wersja:** 2.12.0
+**Wersja:** 2.43.0
 
 ---
 
@@ -22,6 +22,7 @@ Gear Stack to zaawansowana aplikacja webowa do zarządzania ekwipunkiem survival
 - 🔄 **GitHub OAuth** - planowane wsparcie dla GitHub
 - ✅ **Automatyczne avatary** - zdjęcia profilowe z dostawców OAuth
 - ✅ **Ochrona CSRF** - zabezpieczenie przez parametr state
+- ✅ **Zarządzanie połączeniami OAuth** - przeglądanie i usuwanie połączonych kont OAuth w ustawieniach
 
 ### Uwierzytelnianie Dwuskładnikowe (2FA)
 - ✅ **TOTP (Time-based OTP)** - wsparcie dla aplikacji typu Google Authenticator, Authy
@@ -35,6 +36,9 @@ Gear Stack to zaawansowana aplikacja webowa do zarządzania ekwipunkiem survival
 - ✅ **CORS Configuration** - bezpieczne zapytania cross-origin
 - ✅ **Ochrona przed SQL Injection** - parametryzowane zapytania przez SQLAlchemy
 - ✅ **Ochrona przed XSS** - walidacja i sanityzacja danych wejściowych
+- ✅ **Token Blacklist Service** - unieważnianie tokenów JWT przy wylogowaniu (Redis)
+- ✅ **WebAuthn Challenge Storage** - bezpieczne przechowywanie wyzwań WebAuthn w Redis
+- ✅ **Redis Infrastructure** - infrastruktura Redis dla token blacklist i challenge storage
 
 ---
 
@@ -47,30 +51,39 @@ Gear Stack to zaawansowana aplikacja webowa do zarządzania ekwipunkiem survival
 - ✅ **Metadane kontenerów** - typ, opis, waga podstawowa, kodowanie kolorami
 - ✅ **Detekcja cykli** - zapobiega cyklicznym odwołaniom w zagnieżdżonych kontenerach
 - ✅ **Klonowanie kontenerów** - duplikowanie kontenerów ze wszystkimi przedmiotami i zagnieżdżonymi kontenerami
+- ✅ **Edycja inline nazwy** - szybka edycja nazwy kontenera bezpośrednio na stronie szczegółów kontenera
+- ✅ **Kolejność przedmiotów** - ręczne ustawianie kolejności przedmiotów w kontenerze z potwierdzeniem zapisu
 
 ### Zarządzanie Przedmiotami
 - ✅ **Bogate dane przedmiotów:**
   - Podstawowe: nazwa, ilość, waga (z wyborem jednostki: g, kg, oz, lb)
   - Organizacja: kategoria, priorytet, status (posiadane/brakujące/do kupienia)
-  - Metadane: marka, notatki, data ważności
+  - Metadane: marka, notatki, data ważności, okres przydatności (shelf life)
   - Zaawansowane: flaga materiałów zużywalnych, flaga noszenia, własne kategorie
 - ✅ **Inteligentna kategoryzacja** - automatyczne rozpoznawanie kategorii na podstawie nazwy przedmiotu
 - ✅ **Śledzenie statusu** - oznaczanie jako posiadane, brakujące lub do kupienia
 - ✅ **Poziomy priorytetu** - niski, średni, wysoki, krytyczny
 - ✅ **Śledzenie daty ważności** - monitorowanie materiałów zużywalnych
+- ✅ **Okres przydatności (Shelf Life)** - definiowanie okresu przydatności przedmiotów przed zakupem (dni/miesiące/lata), automatyczne obliczanie daty ważności
 - ✅ **Dodawanie istniejących przedmiotów** - dodawanie przedmiotów z innych kontenerów przez selektor katalogu
 - ✅ **Rozpoznawanie parametrów** - automatyczne wykrywanie marki i koloru z nazw przedmiotów
 - ✅ **Zarządzanie markami** - własne marki z kolorami, zarządzanie w ustawieniach, integracja z formularzami i rozpoznawaniem parametrów
 - ✅ **Wsparcie dla walut** - ceny w różnych walutach (PLN, EUR, USD, GBP, JPY, CHF, CAD, AUD), domyślna waluta użytkownika z auto-detekcją, formatowanie cen, wyświetlanie w tabelach i statystykach
+- ✅ **Edycja inline nazwy** - szybka edycja nazwy przedmiotu bezpośrednio na stronie szczegółów przedmiotu
+- ✅ **Przenoszenie przedmiotów między kontenerami** - możliwość przenoszenia przedmiotów do innych kontenerów z zachowaniem wszystkich danych
+- ✅ **Linkowanie przedmiotów** - linkowanie przedmiotów między kontenerami z automatyczną propagacją zmian
 
 ### Analityka i Statystyki
 - ✅ **Obliczenia wagi:**
   - Całkowita waga plecaka z rekursywnym obliczaniem dla zagnieżdżonych kontenerów
   - Rozkład wagi według kategorii
   - Śledzenie wagi podstawowej vs. materiałów zużywalnych
+  - Rozkład wagi według typu (Other/Worn/Consumable) - wizualizacja breakdown
 - ✅ **Wskaźniki gotowości** - procent kompletności zestawu (posiadane vs. brakujące)
-- ✅ **Wykresy pierścieniowe (donut)** - wizualny rozkład wagi lub ilości według kategorii
+- ✅ **Wykresy pierścieniowe (donut)** - wizualny rozkład wagi, ilości, ceny lub priorytetu według kategorii
 - ✅ **Statystyki przedmiotów** - liczenie według statusu, kategorii lub priorytetu
+- ✅ **Automatyczny wybór jednostki wagi** - opcje `auto-g-kg` i `auto-oz-lb` z automatycznym wyborem jednostki w zależności od wartości
+- ✅ **Formatowanie z separatorem tysięcznym** - formatowanie wag z separatorami tysięcy zgodnie z lokalizacją użytkownika
 
 ### Wyszukiwanie i Filtrowanie
 - ✅ **Inteligentne wyszukiwanie** - znajdowanie przedmiotów po nazwie, marce lub notatkach we wszystkich kontenerach
@@ -87,17 +100,25 @@ Gear Stack to zaawansowana aplikacja webowa do zarządzania ekwipunkiem survival
   - Wsparcie dla zagnieżdżonych kontenerów z obliczonymi wagami
   - Legenda wyjaśniająca strukturę danych
   - Kopiowanie jednym kliknięciem do schowka
+  - Opcje eksportu: format opisu (off/compact/full), separatory semantyczne, zachowanie pustych linii dla ChatGPT
 - ✅ **Import z Markdown** - import kontenerów z plików markdown
+  - Wsparcie dla UUID w eksporcie/impocie - aktualizacja istniejących kontenerów/przedmiotów po UUID
+  - Tryb importu: aktualizacja istniejących (po UUID) vs tworzenie nowych
+- ✅ **CSV Export** - eksport kontenerów do formatu CSV z wyborem kolumn, separatorów i kodowania UTF-8 z BOM dla Excel
 - ✅ **Transfer między urządzeniami** - export z jednego urządzenia, import na drugim
 
 ### Galeria Zdjęć Przedmiotów
 - ✅ **Upload zdjęć** - możliwość dodawania zdjęć do przedmiotów (wymaga uprawnień admina)
-- ✅ **Wiele zdjęć na przedmiot** - galeria obrazów dla każdego przedmiotu
+- ✅ **Upload z URL** - możliwość dodawania zdjęć z zewnętrznych URL (szczególnie przydatne dla adminów)
+- ✅ **Wiele zdjęć na przedmiot** - galeria obrazów dla każdego przedmiotu (max 10)
 - ✅ **Zmiana kolejności** - drag & drop do zmiany kolejności zdjęć
 - ✅ **Główne zdjęcie** - oznaczanie zdjęcia jako głównego dla przedmiotu
 - ✅ **Usuwanie zdjęć** - możliwość usunięcia pojedynczych zdjęć z galerii
+- ✅ **Primary image w tabeli** - opcjonalne wyświetlanie miniaturki głównego zdjęcia w wierszach tabeli przedmiotów
+- ✅ **Podgląd obrazów** - pełnoekranowy podgląd obrazów w galerii
 - ✅ **Storage adapter pattern** - wsparcie dla local filesystem i S3 (Scaleway)
 - ✅ **Automatyczne przetwarzanie** - resize, optymalizacja JPEG, walidacja formatów
+- ✅ **Automatyczne usuwanie obrazów** - automatyczne usuwanie obrazów z S3/local storage przy usuwaniu przedmiotów, kontenerów, kont użytkowników
 - ✅ **Limity** - maksymalny rozmiar pliku (10 MB), maksymalna liczba zdjęć na przedmiot (10)
 - 🔄 **Automatyczne pobieranie zdjęć** - integracja z wyszukiwarkami obrazów (planowane)
 
@@ -113,6 +134,8 @@ Gear Stack to zaawansowana aplikacja webowa do zarządzania ekwipunkiem survival
 - ✅ **Wsparcie dla avatarów** - dostawcy OAuth automatycznie dostarczają zdjęcia profilowe (Gravatar jako fallback)
 - ✅ **Preferowane ustawienia** - jednostki wagi, język, motyw, preferencje wyświetlania
 - ✅ **Ustawienia bezpieczeństwa** - zarządzanie metodami 2FA, wyświetlanie statusu bezpieczeństwa
+- ✅ **Publiczny profil** - możliwość udostępnienia profilu publicznie z informacjami o użytkowniku i jego publicznych kontenerach
+- ✅ **Oznaczenia ról** - wizualne oznaczenia ról użytkownika (Owner, Premium, Admin) z ikonami i kolorami
 
 ---
 
@@ -125,6 +148,10 @@ Gear Stack to zaawansowana aplikacja webowa do zarządzania ekwipunkiem survival
 - ✅ **Publiczna strona szczegółów przedmiotu** - wyświetlanie szczegółów przedmiotu w trybie publicznym (`PublicItemDetailPage`)
 - ✅ **Backend endpoint** - API dla pobierania publicznych kontenerów (`/gear/public/containers`)
 - ✅ **Pole publiczne w formularzu** - możliwość oznaczenia kontenera jako publiczny podczas tworzenia/edycji
+- ✅ **System raportowania treści** - zgłaszanie nieodpowiednich treści w publicznych kontenerach przez zalogowanych użytkowników
+  - Automatyczne ukrywanie kontenerów z widoków publicznych po ≥3 zgłoszeniach
+  - Panel administracyjny do weryfikacji zgłoszeń
+  - Kategorie zgłoszeń: Spam/Oszustwa, Przemoc, Treści seksualne, Wulgaryzmy, Inne
 
 ---
 
@@ -139,9 +166,17 @@ Gear Stack to zaawansowana aplikacja webowa do zarządzania ekwipunkiem survival
 - ✅ **Lista wszystkich użytkowników** - przegląd kont z paginacją
 - ✅ **Wyszukiwanie użytkowników** - szybkie wyszukiwanie po nazwie lub emailu
 - ✅ **Promowanie/degradowanie adminów** - zarządzanie uprawnieniami administratora
+- ✅ **Role użytkowników** - system ról: Owner, Premium, Admin, User z odpowiednimi oznaczeniami
+- ✅ **Ochrona użytkowników** - ochrona Owner i Admin przed usunięciem przez innych adminów
 - ✅ **Usuwanie użytkowników** - możliwość usunięcia konta użytkownika z potwierdzeniem
-- ✅ **Statusy użytkowników** - widoczność statusów: aktywny/nieaktywny, zweryfikowany/niezweryfikowany, admin/user
+- ✅ **Statusy użytkowników** - widoczność statusów: aktywny/nieaktywny, zweryfikowany/niezweryfikowany, role
 - ✅ **Sortowanie i filtrowanie** - po dacie utworzenia, statusie, uprawnieniach
+
+### Zarządzanie Limitami Funkcji (`/admin/limits`)
+- ✅ **Konfiguracja limitów funkcji** - zarządzanie limitami AI i storage dla różnych ról użytkowników
+- ✅ **Limity per rola** - konfigurowalne limity dla User, Premium, Admin, Owner
+- ✅ **Limity AI** - limity użycia AI w USD (0$ dla User, 5$ dla Premium, unlimited dla Admin/Owner)
+- ✅ **Limity Storage** - limity przestrzeni dyskowej (20MB User, 50MB Premium, 200MB Admin, 1GB Owner)
 
 ### Zarządzanie Kontenerami (`/admin/containers`)
 - ✅ **Lista wszystkich kontenerów** - przegląd kontenerów wszystkich użytkowników
@@ -157,6 +192,13 @@ Gear Stack to zaawansowana aplikacja webowa do zarządzania ekwipunkiem survival
 - ✅ **Usuwanie przedmiotów** - możliwość usunięcia przedmiotu z potwierdzeniem
 - ✅ **Sortowanie** - po wszystkich kolumnach (nazwa, waga, data utworzenia, itp.)
 
+### Zarządzanie Katalogiem (`/admin/catalogue`)
+- ✅ **Zarządzanie globalnym katalogiem** - strona zarządzania przedmiotami w globalnym katalogu
+- ✅ **Filtrowanie i wyszukiwanie** - wyszukiwanie po nazwie, kategorii, marce, statusie aktywności
+- ✅ **Akcje na przedmiotach** - wyświetlanie, edycja, aktywacja/deaktywacja, usuwanie
+- ✅ **Promowanie przedmiotów do katalogu** - system głosowania społecznościowego (≥10 promocji)
+- ✅ **Wyświetlanie twórcy** - informacja o twórcy przedmiotu w katalogu (zgodnie z ustawieniami profilu publicznego)
+
 ---
 
 ## 🌐 Wielojęzyczność (i18n)
@@ -165,6 +207,7 @@ Gear Stack to zaawansowana aplikacja webowa do zarządzania ekwipunkiem survival
 - ✅ **Automatyczne wykrywanie języka** - z ustawień przeglądarki
 - ✅ **Ręczne przełączanie języka** - w ustawieniach
 - ✅ **Pełna lokalizacja** - wszystkie teksty UI, komunikaty walidacji i emaile
+- ✅ **Pluralizacja polska** - poprawne obsługiwanie form liczby mnogiej w języku polskim (0, 1, 2-4, 5+)
 
 ---
 
@@ -187,10 +230,13 @@ Gear Stack to zaawansowana aplikacja webowa do zarządzania ekwipunkiem survival
 
 - ✅ **Szybkie wprowadzanie przedmiotów** - inteligentne domyślne wartości i skróty klawiszowe
 - ✅ **Rozszerzalne wiersze** - rozwijanie w tabelach przedmiotów, aby zobaczyć zawartość zagnieżdżonych kontenerów
-- ✅ **Preferowana jednostka wagi** - ustawienie użytkownika dla spójnego wyświetlania wag
+- ✅ **Preferowana jednostka wagi** - ustawienie użytkownika dla spójnego wyświetlania wag (g, kg, oz, lb, auto-g-kg, auto-oz-lb)
 - ✅ **Limit maksymalnej wagi** - ustawianie maksymalnej wagi dla kontenerów z wizualnymi ostrzeżeniami
 - ✅ **Strona 404** - przyjazna dla użytkownika strona "nie znaleziono" z sugestiami nawigacji
 - ✅ **Footer i strony prawne** - informacje o cookies, zgodność z RODO, polityka prywatności
+- ✅ **Dynamiczne tytuły stron** - automatyczne ustawianie tytułów stron w przeglądarce z nazwami kontenerów/przedmiotów
+- ✅ **Sidebar Navigation** - nawigacja boczna z listą kontenerów i linkami, kompatybilna z LighterPack design
+- ✅ **Markdown w notatkach i opisach** - pełne wsparcie Markdown w notatkach przedmiotów i opisach kontenerów z podglądem
 
 ---
 
@@ -240,20 +286,35 @@ Gear Stack to zaawansowana aplikacja webowa do zarządzania ekwipunkiem survival
 
 ---
 
+## 🤖 Funkcje AI
+
+- ✅ **AI Chat Interface** - interfejs czatu z AI do interakcji z ekwipunkiem
+- ✅ **Zarządzanie modelami AI** - wybór modelu AI (OpenRouter), zarządzanie tokenami API
+- ✅ **Konfiguracja kontekstu** - konfiguracja kontekstu AI (wybór kontenerów, pól do uwzględnienia)
+- ✅ **Historia konwersacji** - zapisywanie i przeglądanie historii konwersacji z AI
+- ✅ **Szablony wiadomości** - szybkie szablony wiadomości do AI
+- ✅ **Wyświetlanie kosztów** - wyświetlanie kosztów użycia AI (prompt/completion/total tokens)
+- ✅ **Filtrowanie historii** - filtrowanie historii po kontenerach i typie operacji
+- ✅ **Przywracanie konwersacji** - możliwość powrotu do poprzednich konwersacji z AI
+- ✅ **Chat z listy kontenerów** - możliwość rozpoczęcia czatu z AI z automatycznym uwzględnieniem przefiltrowanych kontenerów
+- 🔄 **Classification, embeddings, vision models** - planowane rozszerzenia AI
+
 ## 🔮 Planowane Funkcje (Roadmap)
 
 ### Wysokopriorytetowe
-- 🔄 **Edycja inline** - szybka edycja przedmiotów bezpośrednio na liście
-- 🔄 **Drag & drop** - ręczne zmienianie kolejności przedmiotów
+- ✅ **Edycja inline nazwy** - szybka edycja nazwy przedmiotu/kontenera (częściowo zakończone)
+- 🔄 **Edycja inline pełna** - szybka edycja wszystkich pól przedmiotów bezpośrednio na liście
+- ✅ **Kolejność przedmiotów** - ręczne ustawianie kolejności przedmiotów (zakończone)
+- 🔄 **Drag & drop** - wizualne przeciąganie i upuszczanie do zmiany kolejności
 
 ### Średniopriorytetowe
-- 🔄 **Markdown w notatkach** - formatowane notatki
+- ✅ **Markdown w notatkach** - formatowane notatki (zakończone)
 
 ### Backend i Online
-- 🔄 **Synchronizacja wielourządzeniowa** - dane zsynchronizowane między wszystkimi urządzeniami
-- 🔄 **Udostępnianie kontenerów** - między użytkownikami (oprócz publicznych kontenerów)
-- 🔄 **Globalny katalog przedmiotów** - baza wspólnych przedmiotów
-- 🔄 **Funkcje AI** - rekomendacje, analiza, optymalizacja
+- 🚧 **Synchronizacja wielourządzeniowa** - automatyczna synchronizacja danych między urządzeniami (częściowo zakończone)
+- ✅ **Udostępnianie kontenerów** - publiczne kontenery i token sharing (zakończone)
+- ✅ **Globalny katalog przedmiotów** - baza wspólnych przedmiotów (zakończone)
+- 🚧 **Funkcje AI** - chat, historia, zarządzanie modelami (częściowo zakończone)
 
 ---
 

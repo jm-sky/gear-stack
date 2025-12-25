@@ -6,6 +6,19 @@ import { gearContainerApiService } from './gearContainerApiService'
 import { gearContainerLocalService } from './gearContainerLocalService'
 import { gearItemApiService } from './gearItemApiService'
 
+// Helper to generate deterministic UUIDs for testing
+function generateTestUUID(seed: string): string {
+  // Simple hash function to generate consistent UUIDs for testing
+  let hash = 0
+  for (let i = 0; i < seed.length; i++) {
+    hash = ((hash << 5) - hash) + seed.charCodeAt(i)
+    hash = hash & hash // Convert to 32bit integer
+  }
+  const hex = Math.abs(hash).toString(16).padStart(8, '0')
+  // Format as UUID: 8-4-4-4-12
+  return `${hex.slice(0, 8)}-${hex.slice(0, 4)}-${hex.slice(4, 8)}-${hex.slice(0, 4)}-${hex.slice(0, 12).padEnd(12, '0')}`
+}
+
 // Mock dependencies
 vi.mock('./gearContainerApiService')
 vi.mock('./gearContainerLocalService')
@@ -295,11 +308,12 @@ describe('dataMigrationService - CRITICAL FIX: Circular Dependencies', () => {
 
       const createContainerCalls: Array<{ name: string, parentId: string | null | undefined }> = []
       vi.spyOn(gearContainerApiService, 'createContainer').mockImplementation(async (data) => {
-        const newId = `api-${data.name.toLowerCase()}`
+        // Generate deterministic UUID based on name for testing
+        const newId = generateTestUUID(`api-${data.name.toLowerCase()}`)
         createContainerCalls.push({ name: data.name, parentId: data.parentContainerId })
         return {
           ...data,
-          id: newId, // API generates new ID
+          id: newId, // API generates new UUID
           items: [],
           createdAt: '2024-01-01',
           updatedAt: '2024-01-01',
@@ -315,7 +329,9 @@ describe('dataMigrationService - CRITICAL FIX: Circular Dependencies', () => {
       // Assert - CRITICAL: Child should reference new API parent ID, not old localStorage ID
       expect(createContainerCalls).toHaveLength(2)
       expect(createContainerCalls[0]).toEqual({ name: 'Parent', parentId: null })
-      expect(createContainerCalls[1]).toEqual({ name: 'Child', parentId: 'api-parent' })
+      // Child should reference parent's new UUID (generated from 'api-parent')
+      const parentApiId = generateTestUUID('api-parent')
+      expect(createContainerCalls[1]).toEqual({ name: 'Child', parentId: parentApiId })
     })
   })
 

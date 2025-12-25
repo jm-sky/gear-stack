@@ -97,6 +97,43 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 
 ## 🎨 UI/UX Ulepszenia
 
+### 🔄 System pomocy / Tutorial (inspiracja LighterPack)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small-Medium | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../comparison/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
+
+**Koncepcja:**
+Dodanie systemu pomocy i kontekstowych podpowiedzi dla użytkowników, inspirowane prostotą LighterPack.
+
+**Wymagania:**
+- Małe ramki z pomocą (contextual help boxes)
+- Przycisk `?` na górze który pokaże sugestie/podpowiedzi
+- Możliwość dodania AI Chat jako pomoc
+
+**Szczegóły implementacji:**
+- **Ramki z pomocą:**
+  - Tooltips przy pierwszym użyciu funkcji
+  - Highlighting ważnych elementów
+  - Dismissible (możliwość zamknięcia)
+- **Przycisk `?`:**
+  - W headerze aplikacji lub na każdej stronie
+  - Dropdown/modal z sugestiami dla aktualnej strony
+  - Linki do dokumentacji
+- **AI Chat jako pomoc:**
+  - Opcjonalna integracja z istniejącym AI Chat
+  - Kontekstowe sugestie na podstawie aktualnej strony
+
+### 🔄 Kontekstowe podpowiedzi (inspiracja LighterPack)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../comparison/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
+
+**Wymagania:**
+- Tooltips przy ważnych elementach
+- Empty states z sugestiami co zrobić
+- Kontekstowe podpowiedzi w formularzach
+
+**Szczegóły implementacji:**
+- Tooltips dla wszystkich akcji i przycisków
+- Empty states z konkretnymi sugestiami (np. "Dodaj pierwszy przedmiot", "Utwórz kontener")
+- Formularze: podpowiedzi pod polami (np. "Waga w gramach", "Format daty: DD.MM.YYYY")
+
 ### ✅ Strona z listą wszystkich przedmiotów
 **Status:** ✅ Completed | **Priority:** High | **Complexity:** Medium
 
@@ -673,6 +710,30 @@ Kombinacja opcji 1 i 2:
 
 **Lokalizacja:** `src/modules/gear/components/ContainerHeader.vue:186-189`
 
+### 🔄 Import CSV (inspiracja LighterPack)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../comparison/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
+
+**Obecny stan:**
+- ✅ CSV Export już istnieje (`ExportToCSVDialog.vue`, `exportToCSV.ts`)
+- ❌ CSV Import - brak implementacji
+
+**Wymagania:**
+- Dialog importu CSV z upload pliku
+- Parser CSV z obsługą różnych separatorów (przecinek, średnik)
+- Mapowanie kolumn (nazwa, waga, kategoria, itp.)
+- Walidacja danych przed importem
+- Preview przed importem
+- Obsługa błędów (nieprawidłowe dane, brakujące kolumny)
+
+**Szczegóły implementacji:**
+- Dialog importu CSV z upload pliku
+- Auto-detekcja separatora (przecinek vs średnik)
+- Mapowanie kolumn z interfejsu użytkownika (drag & drop lub select)
+- Walidacja danych przed importem (sprawdzanie typów, wymaganych pól)
+- Preview przed importem (podgląd pierwszych wierszy)
+- Obsługa błędów z informacją o problematycznych wierszach
+- Import do istniejącego kontenera lub tworzenie nowego
+
 ---
 
 ## ⚡ Usprawnienia dodawania przedmiotów
@@ -795,6 +856,27 @@ Kombinacja opcji 1 i 2:
   - Zmiana priorytetu
 - Wzorzec: LighterPack - wszystkie akcje dostępne bezpośrednio z wiersza tabeli
 
+### 🔄 Quick Add / Inline Editing - dopracowanie (inspiracja LighterPack)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../comparison/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
+
+**Obecny stan:**
+- ✅ Inline editing już istnieje dla: nazwa, ilość, waga, priorytet, status, cena, kategoria, notatki
+- ✅ Edit mode toggle już istnieje
+- ⚠️ Trzeba dopracować UX aby osiągnąć efekt podobny do LighterPack
+
+**Wymagania do dopracowania:**
+- Szybsze dodawanie przedmiotów (quick add bez otwierania formularza)
+- Lepsze wizualne feedback podczas edycji
+- Natychmiastowe zapisywanie zmian (debounce)
+- Możliwość dodania nowego przedmiotu bezpośrednio w tabeli (pusty wiersz na końcu)
+
+**Szczegóły implementacji:**
+- Quick add: pusty wiersz na końcu tabeli w trybie edycji
+- Wypełnienie podstawowych pól → automatyczne zapisanie
+- Wizualne oznaczenie edytowanych wierszy
+- Loading state podczas zapisywania
+- Error handling z możliwością retry
+
 ### Szybka edycja nazwy kontenera (Inline Editing)
 **Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Small
 
@@ -816,6 +898,32 @@ Kombinacja opcji 1 i 2:
 - Kolejność zapisywana w localStorage i wyświetlana domyślnie w tabeli przedmiotów
 - Opcja sortowania według innych kryteriów (nazwa, waga, kategoria) z możliwością powrotu do kolejności ręcznej
 - Wizualne wskaźniki podczas przeciągania (highlight, placeholder)
+
+### 🔄 Drag & Drop - rozszerzenie (inspiracja LighterPack)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../comparison/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
+
+**Koncepcja:**
+Rozszerzenie istniejącej funkcjonalności kolejności przedmiotów o pełne wsparcie drag & drop oraz przenoszenie przedmiotów między kontenerami.
+
+**Wymagania:**
+- ✅ (1) Drag & drop na stronie Container Details do zmiany kolejności przedmiotów (rozszerzenie istniejącego)
+- ✅ (2) Drag & drop do przenoszenia przedmiotów do innych kontenerów (przez sidebar menu lub inny mechanizm)
+- Ukrycie obecnych strzałek zmiany kolejności (obecnie wprowadzają wizualne zamieszanie)
+- Strzałki można pokazać po naciśnięciu guzika "Zmień kolejność" jako alternatywa dla drag'n'drop
+
+**Szczegóły implementacji:**
+- **Miejsce 1:** Tabela przedmiotów na Container Details
+  - Przeciąganie wierszy do zmiany kolejności (rozszerzenie istniejącego)
+  - Wizualne feedback podczas przeciągania (highlight, placeholder)
+  - Zapisywanie kolejności (pole `order` już istnieje)
+  - Ukrycie strzałek zmiany kolejności (obecnie wprowadzają wizualne zamieszanie)
+  - Strzałki można pokazać po naciśnięciu guzika "Zmień kolejność" jako alternatywa dla drag'n'drop
+- **Miejsce 2:** Przenoszenie między kontenerami
+  - Opcja A: Drag z tabeli do kontenera w sidebar menu
+  - Opcja B: Drag z tabeli do dropdown "Przenieś do kontenera"
+  - Opcja C: Drag handle w wierszu + dialog wyboru kontenera docelowego
+- Biblioteka: `@dnd-kit/core` lub VueUse `useDraggable`
+- Obsługa touch devices (mobile)
 
 ### ✅ Sortowanie w trybie batch z Alertem (ItemsTable)
 **Status:** ✅ Completed | **Priority:** High | **Complexity:** Medium
@@ -842,6 +950,24 @@ Kombinacja opcji 1 i 2:
 - ✅ Kolorowe segmenty odpowiadające kolorom kategorii (lub dedykowanym kolorom)
 - ✅ Legenda z nazwami kategorii i wartościami procentowymi
 - ✅ Uwzględnienie zagnieżdżonych kontenerów w obliczeniach (opcjonalnie)
+
+### 🔄 Lepsze wizualizacje (inspiracja LighterPack)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../comparison/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
+
+**Koncepcja:**
+Ulepszenie istniejących wykresów donut (nie zmieniamy na pie chart - donut jest lepszy) dla lepszej czytelności i użyteczności.
+
+**Wymagania:**
+- Wyświetlanie całkowitej wagi w środku donuta (obecnie tylko procenty)
+- Lepsze kolory i kontrasty
+- Większe, bardziej czytelne etykiety
+- Lepsze tooltips z dodatkowymi informacjami
+
+**Szczegóły implementacji:**
+- Wyświetlanie całkowitej wagi w środku donuta (obecnie tylko procenty)
+- Poprawa kolorów i kontrastów dla lepszej czytelności
+- Większe etykiety z procentami
+- Rozszerzone tooltips z wagą, ilością, ceną per kategoria
 
 ### ✅ Rozszerzenie wykresów na stronie szczegółów kontenera
 **Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium | **Feature:** [FEATURE-019](./features/FEATURE-019-extended-charts.md)
@@ -927,6 +1053,23 @@ Kombinacja opcji 1 i 2:
 - ✅ Filtrowanie pustych kategorii (nie pokazywanie kategorii z wagą = 0)
 - ✅ Pełne wsparcie i18n (PL/EN) z opisowymi etykietami
 - ✅ Przycisk w wykresie: "Inne / Noszone / Zużywalna" / "Other / Worn / Consumable"
+
+### 🔄 Natychmiastowe obliczenia wagi (inspiracja LighterPack)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../comparison/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
+
+**Koncepcja:**
+Obliczanie wagi w czasie rzeczywistym podczas edycji, z wizualnym feedbackiem zmian.
+
+**Wymagania:**
+- Obliczanie wagi w czasie rzeczywistym podczas edycji
+- Podgląd wpływu zmian na całkowitą wagę
+- Wizualne ostrzeżenia przy przekroczeniu limitu wagi
+
+**Szczegóły implementacji:**
+- Reaktywne obliczanie wagi podczas edycji inline
+- Wyświetlanie zmiany wagi (np. "+50g" w kolorze zielonym/czerwonym)
+- Ostrzeżenie gdy przekroczony limit wagi kontenera
+- Animacja zmiany wagi
 
 ---
 

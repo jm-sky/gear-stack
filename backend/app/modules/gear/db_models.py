@@ -625,7 +625,7 @@ class ContentReportDB(Base):
     )
 
     # Relationships
-    container: Mapped["GearContainerDB"] = relationship("GearContainerDB", foreign_keys=[container_id])
+    container: Mapped["GearContainerDB"] = relationship("GearContainerDB", foreign_keys=[container_id], back_populates="reports")
     reporter: Mapped["UserDB"] = relationship("UserDB", foreign_keys=[reporter_user_id])
     reviewer: Mapped["UserDB | None"] = relationship("UserDB", foreign_keys=[reviewed_by])
 
@@ -637,5 +637,6 @@ class ContentReportDB(Base):
 GearContainerDB.reports = relationship(
     "ContentReportDB",
     foreign_keys=[ContentReportDB.container_id],
+    back_populates="container",
     cascade="all, delete-orphan",
 )

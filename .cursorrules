@@ -1,5 +1,13 @@
 # Cursor Rules for Gear Stack
 
+## Docker Safety Rule
+
+**CRITICAL:** **NEVER run Docker commands if the project directory name starts with underscore (e.g., `_gear-stack-dev`)**
+
+- Underscore prefix indicates a development directory on the production server
+- Running Docker in such directories can cause conflicts with production services
+- If the current working directory starts with `_`, do not execute any `docker` or `docker-compose` commands
+
 ## Project Architecture
 
 **Hybrid Architecture:**
@@ -32,6 +40,12 @@
 **Example:**
 - ❌ User: "Does X support Y?" → You: *starts coding*
 - ✅ User: "Does X support Y?" → You: "No. Would you like me to add it?"
+
+**When user asks "Może lepiej...?" or "Should we...?" or similar questions:**
+- ✅ Answer the question first
+- ✅ Explain pros/cons if relevant
+- ✅ Ask: "Would you like me to implement this change?"
+- ❌ DO NOT start coding immediately
 
 ## Reka-ui / shadcn-vue Checkbox
 
