@@ -9,16 +9,27 @@
 
 ---
 
-## 📊 AKTUALNY STAN IMPLEMENTACJI (2025-12-18)
+## 📊 AKTUALNY STAN IMPLEMENTACJI (2025-12-25)
 
 ```
 BACKEND V2:  ████████████████████ 100% ✅
 FRONTEND V2: ████████████████░░░░  80% 🔄
 TESTY:       ████████████████████ 100% ✅ (123/123!)
 MIGRACJA:    ████████████████████ 100% ✅
+NOWE FUNKCJE:░░░░░░░░░░░░░░░░░░░░   0% ❌ (reporting, promotion, shelf_life)
 
-OGÓLNY POSTĘP: ███████████████████░ 90%
+OGÓLNY POSTĘP: ██████████████████░░ 85%
 ```
+
+### ⚠️ UWAGA: Brakujące funkcje z develop
+
+Po merge develop → feature/unified-model wykryto **3 kluczowe funkcje**, które muszą być dodane do V2:
+
+1. **Content Reporting** (`is_hidden_by_reports`) - dla kontenerów
+2. **Item Promotion** (`promote_count`) - dla przedmiotów
+3. **Shelf Life** (`shelf_life`) - dla przedmiotów
+
+📋 **Plan integracji:** [UNIFIED_MODEL_V2_MISSING_FEATURES.md](./UNIFIED_MODEL_V2_MISSING_FEATURES.md)
 
 ### ✅ Zrobione:
 - ✅ **Backend V2 (100%)**: DB models, repository, service, router, schemas
@@ -30,17 +41,29 @@ OGÓLNY POSTĘP: ███████████████████░ 90
 - ✅ **Main pages migrated**: ContainerDetailPage, ContainersListPage, PublicContainersBrowserPage
 - ✅ **TypeScript kompiluje się** bez błędów
 - ✅ **WSZYSTKIE TESTY (100%)**: 123/123 passing! ✅
+- ✅ **Merge develop → feature/unified-model**: No conflicts, auto-merged
 
 ### 🔄 W trakcie / Do zrobienia:
 - 🔄 **Komponenty UI (~3%)**: 4/117 components migrowane
 - ❌ **Backend routing**: V2 API istnieje ale nie jest domyślnym
 - ❌ **Cleanup V1**: Stare tabele/modele nadal istnieją
+- ❌ **Nowe funkcje z develop**:
+  - ❌ Content Reporting (`is_hidden_by_reports`)
+  - ❌ Item Promotion (`promote_count`)
+  - ❌ Shelf Life (`shelf_life`)
+  - ❌ Account Limits (validation only)
 
 ### 🎯 Następne kroki:
 1. ✅ ~~Naprawić failujące testy~~ **DONE! 123/123 passing**
-2. Migrować pozostałe komponenty UI (113 components) ← NASTĘPNY PRIORYTET
-3. Przełączyć backend routing na V2 jako domyślny
-4. Cleanup: usunąć V1 tables, models, stare API
+2. ✅ ~~Merge develop → feature/unified-model~~ **DONE! Auto-merged, no conflicts**
+3. **Dodać brakujące funkcje do V2** (HIGH PRIORITY) ← NOWY PRIORYTET
+   - Content Reporting
+   - Item Promotion
+   - Shelf Life
+   - 📋 Plan: [UNIFIED_MODEL_V2_MISSING_FEATURES.md](./UNIFIED_MODEL_V2_MISSING_FEATURES.md)
+4. Migrować pozostałe komponenty UI (113 components)
+5. Przełączyć backend routing na V2 jako domyślny
+6. Cleanup: usunąć V1 tables, models, stare API
 
 ---
 
