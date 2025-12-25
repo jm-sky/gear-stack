@@ -20,8 +20,8 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
 1. **Bezpieczeństwo aplikacji (Security Hardening)** - 🚧 In Progress
    - 📍 Plan: [SECURITY_IMPROVEMENT_PLAN.md](./security/SECURITY_IMPROVEMENT_PLAN.md)
    - 📍 Docker Security: [SECURITY_FIX.md](./SECURITY_FIX.md)
-   - ⚠️ **Critical:** Implementacja security headers (CSP, HSTS, X-Frame-Options)
-   - ⚠️ **Critical:** Weryfikacja PostgreSQL SSL/TLS w produkcji
+   - ✅ **Critical:** Implementacja security headers (CSP, HSTS, X-Frame-Options) - Completed (v2.47.0)
+   - 📋 **Low:** PostgreSQL SSL/TLS (opcjonalne - Docker network zapewnia izolację)
    - 🔒 **High:** Implementacja WAF (Web Application Firewall)
    - 🔒 **High:** Procedury backup/recovery bazy danych
    - 🔐 **Medium:** Migracja na httpOnly cookies (obecnie localStorage)

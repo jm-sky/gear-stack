@@ -52,16 +52,18 @@ function handleUserRatingChange(rating: TRatingValue | null) {
     <!-- Owner Rating Section -->
     <div v-if="isOwner" class="space-y-3">
       <div class="flex items-center justify-between">
-        <label class="text-sm font-medium">
+        <label class="text-sm font-medium flex items-center">
           {{ t('gear.container.ownerRating') }}
         </label>
       </div>
-      <RatingStars
-        :rating="ownerRating"
-        :interactive="true"
-        :disabled="loading"
-        @update:rating="handleOwnerRatingChange"
-      />
+      <div class="flex items-center">
+        <RatingStars
+          :rating="ownerRating"
+          :interactive="true"
+          :disabled="loading"
+          @update:rating="handleOwnerRatingChange"
+        />
+      </div>
       <p class="text-xs text-gray-500 dark:text-gray-400">
         {{ t('gear.container.ownerRatingDescription') }}
       </p>
@@ -70,33 +72,37 @@ function handleUserRatingChange(rating: TRatingValue | null) {
     <!-- User Rating Section -->
     <div v-if="isPublic && !isOwner" class="space-y-3">
       <div class="flex items-center justify-between">
-        <label class="text-sm font-medium">
+        <label class="text-sm font-medium flex items-center">
           {{ t('gear.container.yourRating') }}
         </label>
       </div>
-      <RatingStars
-        :rating="userRating"
-        :interactive="true"
-        :disabled="loading"
-        @update:rating="handleUserRatingChange"
-      />
+      <div class="flex items-center">
+        <RatingStars
+          :rating="userRating"
+          :interactive="true"
+          :disabled="loading"
+          @update:rating="handleUserRatingChange"
+        />
+      </div>
     </div>
 
     <!-- Average User Rating Display -->
     <div v-if="isPublic && userRatingCount > 0" class="space-y-3">
       <div class="flex items-center justify-between">
-        <label class="text-sm font-medium">
+        <label class="text-sm font-medium flex items-center">
           {{ t('gear.container.averageUserRating') }}
         </label>
-        <span class="text-sm text-gray-500 dark:text-gray-400">
+        <span class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
           ({{ userRatingCount }} {{ t('gear.container.ratings') }})
         </span>
       </div>
-      <RatingStars
-        :rating="averageUserRating"
-        :show-number="true"
-        :interactive="false"
-      />
+      <div class="flex items-center">
+        <RatingStars
+          :rating="averageUserRating"
+          :show-number="true"
+          :interactive="false"
+        />
+      </div>
     </div>
   </div>
 </template>

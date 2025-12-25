@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import UserRoleBadge from '@/components/ui/UserRoleBadge.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
+import ContainerTypeBadge from '@/modules/gear/components/badges/ContainerTypeBadge.vue'
 import ColorDot from '@/modules/gear/components/ColorDot.vue'
 import MarkdownRenderer from '@/modules/gear/components/MarkdownRenderer.vue'
 import { apiClient } from '@/shared/services/apiClient'
@@ -166,9 +167,7 @@ const handleContainerClick = (containerId: string) => {
 
             <CardContent class="flex flex-col gap-3 px-6 pb-4 text-card-foreground">
               <div class="flex items-center gap-2 flex-wrap">
-                <span class="text-xs px-2 py-1 rounded bg-muted">
-                  {{ container.type }}
-                </span>
+                <ContainerTypeBadge :container="container" />
               </div>
               <div class="text-sm text-muted-foreground">
                 {{ t('gear.container.itemsCount', { count: container.items.length }) }}
