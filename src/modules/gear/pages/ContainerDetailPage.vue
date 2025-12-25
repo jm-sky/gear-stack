@@ -326,6 +326,7 @@ const handleAddNestedContainer = async (nestedContainerId: string) => {
     // Use container name as item name
     // Note: In V2, nested containers are just items with itemType='item' that point to a container via parentItemId
     await createItem({
+      itemType: 'item',
       parentItemId: containerId,
       name: nestedContainer.name,
       category: 'other',

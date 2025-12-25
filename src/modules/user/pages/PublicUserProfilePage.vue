@@ -21,6 +21,8 @@ import type { IUser } from '../types/user.types'
 import { UserRoutePaths } from '../routes'
 import { userApiService } from '../services/userApiService'
 import type { IGearContainer } from '@/modules/gear/types/gear.types'
+import type { IGearItemV2 } from '@/modules/gear/types/gear.types.v2'
+import { convertV1ContainerToV2 } from '@/modules/gear/utils/typeConverters'
 
 const route = useRoute()
 const router = useRouter()
@@ -29,7 +31,7 @@ const { user: currentUser } = useAuth()
 
 const userId = route.params.userId as string
 const user = ref<IUser | null>(null)
-const containers = ref<IGearContainer[]>([])
+const containers = ref<IGearItemV2[]>([])
 const isLoading = ref(true)
 const error = ref<string | null>(null)
 
@@ -52,7 +54,7 @@ onMounted(async () => {
 
     // Fetch public containers for this user
     const containersResponse = await apiClient.get<IGearContainer[]>(`/gear/public/containers?authorId=${userId}`)
-    containers.value = containersResponse.data
+    containers.value = containersResponse.data.map(c => convertV1ContainerToV2(c))
   } catch (err: unknown) {
     console.error('Failed to load public user profile:', err)
     if (isAxiosError(err) && err.response?.status === HttpStatusCode.NotFound) {
@@ -153,7 +155,7 @@ const handleContainerClick = (containerId: string) => {
           >
             <CardHeader class="text-card-foreground">
               <div class="flex items-center gap-2">
-                <ColorDot :color="container.color ?? undefined" />
+                <ColorDot :color="(container.color as any) ?? undefined" />
                 <Package class="size-5" />
                 <CardTitle>{{ container.name }}</CardTitle>
               </div>
@@ -170,7 +172,7 @@ const handleContainerClick = (containerId: string) => {
                 <ContainerTypeBadge :container="container" />
               </div>
               <div class="text-sm text-muted-foreground">
-                {{ t('gear.container.itemsCount', { count: container.items.length }) }}
+                {{ t('gear.container.itemsCount', { count: container.children?.length ?? 0 }) }}
               </div>
             </CardContent>
           </Card>
