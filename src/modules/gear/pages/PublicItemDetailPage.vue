@@ -18,7 +18,6 @@ import { useExpiration } from '../composables/useExpiration'
 import { useFormattedItemPriceV2 } from '../composables/useFormattedItemPriceV2'
 import { useFormattedItemWeightV2 } from '../composables/useFormattedItemWeightV2'
 import { GearRoutePath } from '../routes'
-import { publicContainersService } from '../services/publicContainersService'
 import { useGearStoreV2 } from '../store/useGearStoreV2'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 

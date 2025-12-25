@@ -1,6 +1,6 @@
 import { computed, type ComputedRef, type MaybeRefOrGetter, toValue } from 'vue'
-import { DEFAULT_ITEM_QUANTITY } from '../utils/constants'
 import type { IGearItemV2 } from '../types/gear.types.v2'
+import { DEFAULT_ITEM_QUANTITY } from '../utils/constants'
 import { formatCurrency, getCurrency } from '../utils/currencyFormatter'
 import { useGearSettings } from './useGearSettings'
 

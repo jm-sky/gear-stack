@@ -15,6 +15,7 @@ import { useAuth } from '@/modules/auth/composables/useAuth'
 import ContainerTypeBadge from '@/modules/gear/components/badges/ContainerTypeBadge.vue'
 import ColorDot from '@/modules/gear/components/ColorDot.vue'
 import MarkdownRenderer from '@/modules/gear/components/MarkdownRenderer.vue'
+import { convertV1ContainerToV2 } from '@/modules/gear/utils/typeConverters'
 import { apiClient } from '@/shared/services/apiClient'
 import { getInitials } from '@/shared/utils/getInitials'
 import type { IUser } from '../types/user.types'
@@ -22,7 +23,6 @@ import { UserRoutePaths } from '../routes'
 import { userApiService } from '../services/userApiService'
 import type { IGearContainer } from '@/modules/gear/types/gear.types'
 import type { IGearItemV2 } from '@/modules/gear/types/gear.types.v2'
-import { convertV1ContainerToV2 } from '@/modules/gear/utils/typeConverters'
 
 const route = useRoute()
 const router = useRouter()

@@ -17,12 +17,8 @@ import SearchImagesButton from '../components/SearchImagesButton.vue'
 import { useExpiration } from '../composables/useExpiration'
 import { useFormattedItemPriceV2 } from '../composables/useFormattedItemPriceV2'
 import { useFormattedItemWeightV2 } from '../composables/useFormattedItemWeightV2'
-import { useGear } from '../composables/useGear'
 import { useGearV2 } from '../composables/useGearV2'
 import { GearRoutePath } from '../routes'
-import { gearContainerService } from '../services/gearContainerService'
-import { gearItemService } from '../services/gearItemService'
-import { useGearStore } from '../store/useGearStore'
 import { useGearStoreV2 } from '../store/useGearStoreV2'
 import { getFrom } from '../utils/navigationParams'
 import { calculateExpirationDate, formatShelfLife } from '../utils/shelfLife'
@@ -33,12 +29,11 @@ const ItemImageGallery = defineAsyncComponent(() => import('../components/ItemIm
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
-const store = useGearStore()
 const storeV2 = useGearStoreV2()
 const { shouldUseAPI } = useBackend()
 const { user, isAuthenticated } = useAuth()
 const { setTitle } = usePageTitle()
-const { deleteItem } = useGearV2()
+const { deleteItem, updateItem } = useGearV2()
 
 const containerId = route.params.containerId as string
 const itemId = route.params.itemId as string
@@ -55,7 +50,6 @@ watchEffect(() => {
 })
 
 const { isExpired, isExpiringSoon } = useExpiration(item)
-const { updateItem } = useGear()
 
 // Check if user is admin
 const isAdmin = computed(() => user.value?.isAdmin ?? false)

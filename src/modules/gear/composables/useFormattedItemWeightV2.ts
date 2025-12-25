@@ -1,7 +1,7 @@
 import { computed, type ComputedRef, type MaybeRefOrGetter, toValue } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { DEFAULT_ITEM_QUANTITY, DEFAULT_ITEM_WEIGHT } from '../utils/constants'
 import type { IGearItemV2, TGearWeightUnit } from '../types/gear.types.v2'
+import { DEFAULT_ITEM_QUANTITY, DEFAULT_ITEM_WEIGHT } from '../utils/constants'
 import { formatWeightWithPreferredUnit } from '../utils/formatWeight'
 import { useGearSettings } from './useGearSettings'
 

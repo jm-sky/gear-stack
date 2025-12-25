@@ -34,9 +34,9 @@ import {
   DEFAULT_ITEM_WEIGHT,
 } from '../utils/constants'
 import { getDefaultItemValues } from '../utils/defaultValues'
-import { convertV1ItemToV2 } from '../utils/typeConverters'
 import { recognizeParameters } from '../utils/parameterRecognition'
 import { calculateExpirationDate } from '../utils/shelfLife'
+import { convertV1ItemToV2 } from '../utils/typeConverters'
 import { type ItemFormData, itemSchema } from '../utils/validation'
 import { toBasicWeightUnit } from '../utils/weightUnits'
 

@@ -13,7 +13,6 @@ import PublicContainerHeader from '../components/PublicContainerHeader.vue'
 import { useGearSettings } from '../composables/useGearSettings'
 import { GearRoutePath } from '../routes'
 import { sharedContainersService } from '../services/sharedContainersService'
-import { useGearStore } from '../store/useGearStore'
 import { useGearStoreV2 } from '../store/useGearStoreV2'
 import {
   calculateReadinessPercentageSyncV2,
@@ -25,7 +24,6 @@ import { convertV1ContainerToV2 } from '../utils/typeConverters'
 const route = useRoute()
 const router = useRouter()
 const { t, locale } = useI18n()
-const store = useGearStore()
 const storeV2 = useGearStoreV2()
 const { settings: gearSettings } = useGearSettings()
 
