@@ -13,10 +13,12 @@ import type { IGearItemV2, IUpdateGearItemV2Dto, TGearItemPriority } from '../ty
 import { useCategoryLabel } from '../composables/useCategoryLabel'
 import { formatItemPrice } from '../composables/useFormattedItemPrice'
 import { useGear } from '../composables/useGear'
+import { useGearV2 } from '../composables/useGearV2'
 import { useGearSettings } from '../composables/useGearSettings'
 import { useItemsTableEditMode } from '../composables/useItemsTableEditMode'
 import { GearRoutePath } from '../routes'
 import { useGearStore } from '../store/useGearStore'
+import { useGearStoreV2 } from '../store/useGearStoreV2'
 import { calculateTotalWeightSync } from '../utils/containerCalculations'
 import { isExpiringSoon } from '../utils/isExpiringSoon'
 import { createItemsColumns } from '../utils/itemsColumns'
@@ -130,6 +132,7 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const router = useRouter()
 const store = useGearStore()
+const storeV2 = useGearStoreV2()
 
 const { settings: gearSettings, defaultCurrency } = useGearSettings()
 const { getCategoryLabel } = useCategoryLabel()
@@ -211,16 +214,16 @@ function isExpired(item: IGearItemV2): boolean {
 
 // Helper to check if item is a nested container
 function isNestedContainer(item: IGearItemV2): boolean {
-  return !!item.containerId
+  return item.itemType === 'container'
 }
 
 // Navigate to nested container
 function navigateToNestedContainer(item: IGearItemV2) {
-  if (item.containerId) {
+  if (item.itemType === 'container') {
     if (props.publicMode) {
-      router.push(GearRoutePath.PublicContainerDetailById(item.containerId))
+      router.push(GearRoutePath.PublicContainerDetailById(item.id))
     } else {
-      router.push(GearRoutePath.ContainerDetailById(item.containerId))
+      router.push(GearRoutePath.ContainerDetailById(item.id))
     }
   }
 }
@@ -257,15 +260,14 @@ function isRowExpanded(itemId: string): boolean {
 
 // Get nested container items
 function getNestedContainerItems(item: IGearItemV2): IGearItemV2[] {
-  if (!item.containerId) return []
-  const container = store.getContainerById(item.containerId)
-  return container?.items ?? []
+  if (item.itemType !== 'container') return []
+  return storeV2.getChildrenOfItem(item.id)
 }
 
 // Get nested container
 function getNestedContainer(item: IGearItemV2) {
-  if (!item.containerId) return undefined
-  return store.getContainerById(item.containerId)
+  if (item.itemType !== 'container') return undefined
+  return item
 }
 
 // Calculate total weight for nested container (sync helper)
@@ -314,10 +316,10 @@ const sortedItems = computed<IGearItemV2[]>(() => {
     })
   }
 
-  // Default: Sort by order (null/undefined items go to end)
+  // Default: Sort by orderIndex (null/undefined items go to end)
   return items.toSorted((a, b) => {
-    const orderA = a.order ?? Number.MAX_SAFE_INTEGER
-    const orderB = b.order ?? Number.MAX_SAFE_INTEGER
+    const orderA = a.orderIndex ?? Number.MAX_SAFE_INTEGER
+    const orderB = b.orderIndex ?? Number.MAX_SAFE_INTEGER
     return orderA - orderB
   })
 })
@@ -476,7 +478,7 @@ async function handleSaveRow(item: IGearItemV2) {
   const changes = dirtyChanges.value.get(item.id)
   if (!changes || Object.keys(changes).length === 0) return
 
-  const { updateItem } = useGear()
+  const { updateItem } = useGearV2()
   try {
     savingItems.value.add(item.id)
     const updated = await updateItem(item.id, changes)
@@ -503,7 +505,7 @@ function handleUploadPhoto(item: IGearItemV2) {
 
 // Handle star item - toggle priority between critical and medium
 async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority) {
-  const { updateItem } = useGear()
+  const { updateItem } = useGearV2()
   try {
     const updated = await updateItem(item.id, { priority: newPriority })
     emit('update', updated)
