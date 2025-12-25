@@ -142,21 +142,21 @@ const displayItems = computed<IGearItemV2[]>(() => {
   const pendingMap = new Map(pendingSortingChanges.value.map(item => [item.id, item]))
 
   // Merge pending changes with current items
-  // Items with pending changes use pending order, others keep their current order
+  // Items with pending changes use pending orderIndex, others keep their current orderIndex
   const mergedItems = items.value.map(item => {
     const pending = pendingMap.get(item.id)
     if (pending) {
-      return { ...item, order: pending.order }
+      return { ...item, orderIndex: pending.orderIndex }
     }
     return item
   })
 
-  // If pending changes contain all items (complete reorder), sort by order
+  // If pending changes contain all items (complete reorder), sort by orderIndex
   // Otherwise, items are already in correct order from items.value
   if (pendingSortingChanges.value.length === items.value.length) {
     return [...mergedItems].sort((a, b) => {
-      const orderA = a.order ?? Number.MAX_SAFE_INTEGER
-      const orderB = b.order ?? Number.MAX_SAFE_INTEGER
+      const orderA = a.orderIndex ?? Number.MAX_SAFE_INTEGER
+      const orderB = b.orderIndex ?? Number.MAX_SAFE_INTEGER
       return orderA - orderB
     })
   }
@@ -263,10 +263,10 @@ const handleSaveSorting = async () => {
       toast.success(t('gear.item.reorderSuccess', 'Kolejność przedmiotów została zaktualizowana'))
       pendingSortingChanges.value = []
     } else {
-      // Fallback: Update all items with new order values
+      // Fallback: Update all items with new orderIndex values
       await Promise.all(
         pendingSortingChanges.value.map(item =>
-          updateItem(item.id, { order: item.order }),
+          updateItem(item.id, { orderIndex: item.orderIndex }),
         ),
       )
       toast.success(t('gear.item.reorderSuccess', 'Kolejność przedmiotów została zaktualizowana'))

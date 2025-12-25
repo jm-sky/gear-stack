@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/select'
 import { DEFAULT_ITEM_WEIGHT } from '../../utils/constants'
 import { WEIGHT_UNITS } from '../../utils/weightUnits'
-import type { IGearItemV2, IUpdateGearItemV2Dto, TGearWeightUnit } from @/modules/gear/types/gear.types.v2'
+import type { IGearItemV2, IUpdateGearItemV2Dto, TGearWeightUnit } from '@/modules/gear/types/gear.types.v2'
 
 const { t } = useI18n()
 
