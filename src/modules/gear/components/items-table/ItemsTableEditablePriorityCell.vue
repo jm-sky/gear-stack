@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { DEFAULT_ITEM_PRIORITY } from '../../utils/constants'
 import type { IGearItemV2, IUpdateGearItemV2Dto, TGearItemPriority } from '@/modules/gear/types/gear.types.v2'
 
 const { t } = useI18n()
@@ -21,7 +22,7 @@ const emit = defineEmits<{
 }>()
 
 // In edit mode, always show select
-const editedPriority = ref<TGearItemPriority>(props.item.priority ?? 'medium')
+const editedPriority = ref<TGearItemPriority>(props.item.priority ?? DEFAULT_ITEM_PRIORITY)
 
 const priorities: TGearItemPriority[] = ['critical', 'high', 'medium', 'low']
 
@@ -39,7 +40,7 @@ function handlePriorityChange(newPriority: unknown) {
 watch(
   () => props.item.priority,
   (newPriority) => {
-    editedPriority.value = newPriority ?? 'medium'
+    editedPriority.value = newPriority ?? DEFAULT_ITEM_PRIORITY
   },
 )
 </script>

@@ -3,6 +3,7 @@ import { UndoIcon } from 'lucide-vue-next'
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Input } from '@/components/ui/input'
+import { DEFAULT_ITEM_QUANTITY } from '../../utils/constants'
 import type { IGearItemV2, IUpdateGearItemV2Dto } from '@/modules/gear/types/gear.types.v2'
 
 const { t } = useI18n()
@@ -16,7 +17,7 @@ const emit = defineEmits<{
 }>()
 
 // In edit mode, always show input
-const editedQuantity = ref((props.item.quantity ?? 1).toString())
+const editedQuantity = ref((props.item.quantity ?? DEFAULT_ITEM_QUANTITY).toString())
 
 // Handle change - emit updates to parent
 function handleChange() {
@@ -24,7 +25,7 @@ function handleChange() {
 
   // Validation - quantity must be >= 1
   if (isNaN(quantityValue) || quantityValue < 1) {
-    editedQuantity.value = (props.item.quantity ?? 1).toString()
+    editedQuantity.value = (props.item.quantity ?? DEFAULT_ITEM_QUANTITY).toString()
     emit('change', {})
     return
   }
@@ -45,13 +46,13 @@ function handleEnter() {
 watch(
   () => props.item.quantity,
   (newQuantity) => {
-    editedQuantity.value = (newQuantity ?? 1).toString()
+    editedQuantity.value = (newQuantity ?? DEFAULT_ITEM_QUANTITY).toString()
   },
 )
 
 // Reset value
 function handleReset() {
-  editedQuantity.value = (props.item.quantity ?? 1).toString()
+  editedQuantity.value = (props.item.quantity ?? DEFAULT_ITEM_QUANTITY).toString()
   emit('change', {})
 }
 </script>

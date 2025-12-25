@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/select'
 import { useCategoryLabel } from '../../composables/useCategoryLabel'
 import { useGearSettings } from '../../composables/useGearSettings'
+import { DEFAULT_ITEM_CATEGORY } from '../../utils/constants'
 import CategoryIcon from '../CategoryIcon.vue'
 import type { IGearItemV2, IUpdateGearItemV2Dto, TGearItemCategory } from '@/modules/gear/types/gear.types.v2'
 
@@ -26,7 +27,7 @@ const emit = defineEmits<{
 }>()
 
 // In edit mode, always show select
-const editedCategory = ref<TGearItemCategory>(props.item.category ?? 'other')
+const editedCategory = ref<TGearItemCategory>(props.item.category ?? DEFAULT_ITEM_CATEGORY)
 
 const defaultCategories = [
   'blades',
@@ -58,7 +59,7 @@ function handleCategoryChange(newCategory: unknown) {
 watch(
   () => props.item.category,
   (newCategory) => {
-    editedCategory.value = newCategory ?? 'other'
+    editedCategory.value = newCategory ?? DEFAULT_ITEM_CATEGORY
   },
 )
 </script>

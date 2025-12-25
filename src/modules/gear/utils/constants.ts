@@ -33,3 +33,5 @@ export const DEFAULT_ITEM_CATEGORY: TGearItemCategory = 'other'
 export const DEFAULT_ITEM_COLOR: TContainerColor = 'default'
 export const DEFAULT_ITEM_STATUS: TGearItemStatus = 'owned'
 export const DEFAULT_ITEM_PRIORITY: TGearItemPriority = 'medium'
+export const DEFAULT_ITEM_QUANTITY = 1
+export const DEFAULT_ITEM_WEIGHT = 0

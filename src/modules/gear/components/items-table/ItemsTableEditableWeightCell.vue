@@ -9,8 +9,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { DEFAULT_ITEM_WEIGHT } from '../../utils/constants'
 import { WEIGHT_UNITS } from '../../utils/weightUnits'
-import type { IGearItemV2, IUpdateGearItemV2Dto, TGearWeightUnit } from '@/modules/gear/types/gear.types.v2'
+import type { IGearItemV2, IUpdateGearItemV2Dto, TGearWeightUnit } from @/modules/gear/types/gear.types.v2'
 
 const { t } = useI18n()
 
@@ -23,7 +24,7 @@ const emit = defineEmits<{
 }>()
 
 // In edit mode, always show input
-const editedWeight = ref((props.item.weight ?? 0).toString())
+const editedWeight = ref((props.item.weight ?? DEFAULT_ITEM_WEIGHT).toString())
 const editedWeightUnit = ref<TGearWeightUnit>(props.item.weightUnit ?? 'g')
 
 // Handle change - emit updates to parent
@@ -32,7 +33,7 @@ function handleChange() {
 
   // Validation - weight must be >= 0
   if (isNaN(weightValue) || weightValue < 0) {
-    editedWeight.value = (props.item.weight ?? 0).toString()
+    editedWeight.value = (props.item.weight ?? DEFAULT_ITEM_WEIGHT).toString()
     editedWeightUnit.value = props.item.weightUnit ?? 'g'
     emit('change', {})
     return

@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { DEFAULT_ITEM_STATUS } from '../../utils/constants'
 import type { IGearItemV2, IUpdateGearItemV2Dto, TGearItemStatus } from '@/modules/gear/types/gear.types.v2'
 
 const { t } = useI18n()
@@ -21,7 +22,7 @@ const emit = defineEmits<{
 }>()
 
 // In edit mode, always show select
-const editedStatus = ref<TGearItemStatus>(props.item.status ?? 'owned')
+const editedStatus = ref<TGearItemStatus>(props.item.status ?? DEFAULT_ITEM_STATUS)
 
 const statuses: TGearItemStatus[] = ['owned', 'missing', 'toBuy']
 
@@ -39,7 +40,7 @@ function handleStatusChange(newStatus: unknown) {
 watch(
   () => props.item.status,
   (newStatus) => {
-    editedStatus.value = newStatus ?? 'owned'
+    editedStatus.value = newStatus ?? DEFAULT_ITEM_STATUS
   },
 )
 </script>
