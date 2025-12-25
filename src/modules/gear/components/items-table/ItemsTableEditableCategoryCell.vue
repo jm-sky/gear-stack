@@ -26,7 +26,7 @@ const emit = defineEmits<{
 }>()
 
 // In edit mode, always show select
-const editedCategory = ref<TGearItemCategory>(props.item.category)
+const editedCategory = ref<TGearItemCategory>(props.item.category ?? 'other')
 
 const defaultCategories = [
   'blades',
@@ -58,7 +58,7 @@ function handleCategoryChange(newCategory: unknown) {
 watch(
   () => props.item.category,
   (newCategory) => {
-    editedCategory.value = newCategory
+    editedCategory.value = newCategory ?? 'other'
   },
 )
 </script>

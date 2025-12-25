@@ -16,7 +16,7 @@ const emit = defineEmits<{
 }>()
 
 // In edit mode, always show input
-const editedQuantity = ref(props.item.quantity.toString())
+const editedQuantity = ref((props.item.quantity ?? 1).toString())
 
 // Handle change - emit updates to parent
 function handleChange() {
@@ -24,7 +24,7 @@ function handleChange() {
 
   // Validation - quantity must be >= 1
   if (isNaN(quantityValue) || quantityValue < 1) {
-    editedQuantity.value = props.item.quantity.toString()
+    editedQuantity.value = (props.item.quantity ?? 1).toString()
     emit('change', {})
     return
   }
@@ -45,13 +45,13 @@ function handleEnter() {
 watch(
   () => props.item.quantity,
   (newQuantity) => {
-    editedQuantity.value = newQuantity.toString()
+    editedQuantity.value = (newQuantity ?? 1).toString()
   },
 )
 
 // Reset value
 function handleReset() {
-  editedQuantity.value = props.item.quantity.toString()
+  editedQuantity.value = (props.item.quantity ?? 1).toString()
   emit('change', {})
 }
 </script>

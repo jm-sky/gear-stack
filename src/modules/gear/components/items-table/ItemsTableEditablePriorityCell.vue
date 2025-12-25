@@ -21,7 +21,7 @@ const emit = defineEmits<{
 }>()
 
 // In edit mode, always show select
-const editedPriority = ref<TGearItemPriority>(props.item.priority)
+const editedPriority = ref<TGearItemPriority>(props.item.priority ?? 'medium')
 
 const priorities: TGearItemPriority[] = ['critical', 'high', 'medium', 'low']
 
@@ -39,7 +39,7 @@ function handlePriorityChange(newPriority: unknown) {
 watch(
   () => props.item.priority,
   (newPriority) => {
-    editedPriority.value = newPriority
+    editedPriority.value = newPriority ?? 'medium'
   },
 )
 </script>

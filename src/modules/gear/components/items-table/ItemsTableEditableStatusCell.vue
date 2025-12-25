@@ -21,7 +21,7 @@ const emit = defineEmits<{
 }>()
 
 // In edit mode, always show select
-const editedStatus = ref<TGearItemStatus>(props.item.status)
+const editedStatus = ref<TGearItemStatus>(props.item.status ?? 'owned')
 
 const statuses: TGearItemStatus[] = ['owned', 'missing', 'toBuy']
 
@@ -39,7 +39,7 @@ function handleStatusChange(newStatus: unknown) {
 watch(
   () => props.item.status,
   (newStatus) => {
-    editedStatus.value = newStatus
+    editedStatus.value = newStatus ?? 'owned'
   },
 )
 </script>

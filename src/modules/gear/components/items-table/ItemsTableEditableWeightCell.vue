@@ -23,7 +23,7 @@ const emit = defineEmits<{
 }>()
 
 // In edit mode, always show input
-const editedWeight = ref(props.item.weight.toString())
+const editedWeight = ref((props.item.weight ?? 0).toString())
 const editedWeightUnit = ref<TGearWeightUnit>(props.item.weightUnit ?? 'g')
 
 // Handle change - emit updates to parent
@@ -32,7 +32,7 @@ function handleChange() {
 
   // Validation - weight must be >= 0
   if (isNaN(weightValue) || weightValue < 0) {
-    editedWeight.value = props.item.weight.toString()
+    editedWeight.value = (props.item.weight ?? 0).toString()
     editedWeightUnit.value = props.item.weightUnit ?? 'g'
     emit('change', {})
     return

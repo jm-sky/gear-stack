@@ -15,10 +15,10 @@ const { locale } = useI18n()
 
 const formattedWeight = computed<string>(() => {
   if (isNestedContainer && totalWeight !== undefined) {
-    return formatWeightToPreferredUnit(totalWeight * item.quantity, preferredWeightUnit, locale.value)
+    return formatWeightToPreferredUnit(totalWeight * (item.quantity ?? 1), preferredWeightUnit, locale.value)
   }
   return formatWeightWithPreferredUnit(
-    item.weight * item.quantity,
+    (item.weight ?? 0) * (item.quantity ?? 1),
     item.weightUnit ?? 'g',
     preferredWeightUnit,
     locale.value,
