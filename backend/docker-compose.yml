@@ -2,14 +2,14 @@ services:
   # PostgreSQL Database
   db:
     image: postgres:17-alpine
-    container_name: backend-db
+    container_name: gear-stack-db
     restart: unless-stopped
     environment:
       - POSTGRES_DB=${POSTGRES_DB:-backend}
       - POSTGRES_USER=${POSTGRES_USER:-backend}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-gear-stack-db-secret}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - gear_stack_postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-backend}"]
       interval: 10s
@@ -20,6 +20,8 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    networks:
+      - gearstack-network
     # Expose port only for development (comment out in production)
     # ports:
     #   - "5432:5432"
@@ -27,18 +29,18 @@ services:
   # Redis (for token blacklist and challenge storage)
   redis:
     image: redis:8-alpine
-    container_name: backend-redis
+    container_name: gear-stack-redis
     restart: unless-stopped
     volumes:
-      - redis_data:/data
+      - gear_stack_redis_data:/data
     command: >
       redis-server
       --appendonly yes
-      --requirepass ${REDIS_PASSWORD:-changeme}
+      --requirepass ${REDIS_PASSWORD:-gear-stack-redis-secret}
       --maxmemory 256mb
       --maxmemory-policy allkeys-lru
     healthcheck:
-      test: ["CMD", "sh", "-c", "redis-cli -a $${REDIS_PASSWORD:-changeme} ping | grep PONG"]
+      test: ["CMD", "sh", "-c", "redis-cli -a $${REDIS_PASSWORD:-gear-stack-redis-secret} ping | grep PONG"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -47,6 +49,8 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    networks:
+      - gearstack-network
     # Expose port only for development (comment out in production)
     # ports:
     #   - "${REDIS_FORWARD_PORT:-6379}:6379"
@@ -57,7 +61,7 @@ services:
       context: .
       dockerfile: Dockerfile
     image: backend:latest
-    container_name: backend
+    container_name: gear-stack-app
     restart: unless-stopped
     depends_on:
       db:
@@ -67,11 +71,11 @@ services:
     env_file:
       - .env
     environment:
-      - ENVIRONMENT=${ENVIRONMENT:-production}
+      - ENVIRONMENT=${ENVIRONMENT:-development}
       - PROJECT_NAME=${PROJECT_NAME:-backend}
       - APP_PORT=${APP_PORT:-8000}
-      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-backend}:${POSTGRES_PASSWORD:-changeme}@db:5432/${POSTGRES_DB:-backend}
-      - REDIS_URL=redis://:${REDIS_PASSWORD:-changeme}@redis:6379/0
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-backend}:${POSTGRES_PASSWORD:-gear-stack-db-secret}@db:5432/${POSTGRES_DB:-backend}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-gear-stack-redis-secret}@redis:6379/0
       - SECRET_KEY=${SECRET_KEY}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - CORS_ORIGINS=${CORS_ORIGINS:-["http://localhost:3000"]}
@@ -106,9 +110,9 @@ services:
       - STRIPE_PRO_PLUS_ANNUAL_PRICE_ID=${STRIPE_PRO_PLUS_ANNUAL_PRICE_ID}
     ports:
       - "127.0.0.1:${APP_PORT:-8000}:8000"  # Only localhost access (reverse proxy required)
-    # Volumes (optional - for persistent logs)
-    # volumes:
-    #   - ./logs:/app/logs
+    volumes:
+      # Mount uploads directory for persistent file storage (optional - S3 is preferred)
+      - gear_stack_uploads:/app/uploads
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 30s
@@ -120,6 +124,8 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    networks:
+      - gearstack-network
 
     # Resource limits (optional, adjust as needed)
     # deploy:
@@ -131,9 +137,16 @@ services:
     #       cpus: '0.5'
     #       memory: 256M
 
+networks:
+  gearstack-network:
+    name: gearstack-network
+    external: true
+
 volumes:
-  postgres_data:
+  gear_stack_postgres_data:
     driver: local
-  redis_data:
+  gear_stack_redis_data:
+    driver: local
+  gear_stack_uploads:
     driver: local
 
