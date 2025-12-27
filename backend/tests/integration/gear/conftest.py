@@ -4,6 +4,7 @@ PHASE 0: Test Creation (Pre-Implementation Safety Net)
 These fixtures establish baseline behavior before unified model migration.
 """
 
+import os
 from datetime import UTC, datetime
 from typing import AsyncGenerator
 
@@ -33,7 +34,8 @@ async def async_db_session() -> AsyncGenerator[AsyncSession, None]:
     # Use PostgreSQL test database from Docker
     # Connection from within Docker: db:5432
     # Connection from host: localhost:5432 (if running tests outside Docker)
-    test_db_url = "postgresql+asyncpg://backend:changeme@db:5432/backend_test"
+    db_password = os.getenv("POSTGRES_PASSWORD", "changeme")
+    test_db_url = f"postgresql+asyncpg://backend:{db_password}@db:5432/backend_test"
 
     engine = create_async_engine(
         test_db_url,

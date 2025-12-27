@@ -139,12 +139,10 @@ async def upgrade() -> None:
                                 status IS NULL AND
                                 priority IS NULL AND
                                 expiration_date IS NULL AND
-                                shelf_life IS NULL AND
                                 wearable IS NULL AND
                                 consumable IS NULL AND
                                 order_index IS NULL AND
-                                show_on_container IS NULL AND
-                                promote_count IS NULL
+                                show_on_container IS NULL
                             )
                         ),
                         CONSTRAINT check_item_fields CHECK (
@@ -154,7 +152,6 @@ async def upgrade() -> None:
                                 max_weight_unit IS NULL AND
                                 hide_when_nested IS NULL AND
                                 is_public IS NULL AND
-                                is_hidden_by_reports IS NULL AND
                                 favorite IS NULL AND
                                 show_item_images IS NULL
                             )
