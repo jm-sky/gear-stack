@@ -30,6 +30,7 @@ COMMAND_GROUPS = {
         "name": "Database Management",
         "commands": {
             "init": "Initialize database",
+            "init-test": "Initialize test database (PostgreSQL)",
             "migrate": "Run pending migrations",
             "migrate-status": "Show migration status",
             "migrate-graceful": "Run migrations gracefully (ignore errors)",

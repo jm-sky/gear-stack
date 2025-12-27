@@ -96,6 +96,61 @@ def init_database(force: bool = typer.Option(False, "--force", "-f", help="Recre
     console.print(f"[bold green]✓ Database ready:[/bold green] {db_path}")
 
 
+@db_app.command("init-test")
+def init_test_database(
+    force: bool = typer.Option(False, "--force", "-f", help="Recreate test database if it already exists"),
+) -> None:
+    """Initialize test database (backend_test) for integration tests.
+
+    This command creates the test database schema in PostgreSQL.
+    Requires DATABASE_URL to be set or POSTGRES_PASSWORD environment variable.
+    """
+    import os
+
+    async def _init_test() -> None:
+        _import_model_modules()
+
+        # Import SchemaMigration model to ensure it's included in metadata
+        from app.core.migrations import SchemaMigration  # noqa: F401
+        from app.core.database import Base
+        from sqlalchemy.ext.asyncio import create_async_engine
+
+        # Get database password from environment
+        db_password = os.getenv("POSTGRES_PASSWORD", "changeme")
+        test_db_url = f"postgresql+asyncpg://backend:{db_password}@db:5432/backend_test"
+
+        console.print(f"[dim]Test database URL: {test_db_url.replace(db_password, '***')}[/dim]")
+
+        # Create engine for test database
+        engine = create_async_engine(
+            test_db_url,
+            echo=False,
+        )
+
+        try:
+            async with engine.begin() as conn:
+                if force:
+                    from sqlalchemy import text
+                    console.print("[yellow]Dropping existing test database tables...[/yellow]")
+                    # Drop all tables with CASCADE to handle foreign keys
+                    await conn.execute(text("DROP SCHEMA public CASCADE"))
+                    await conn.execute(text("CREATE SCHEMA public"))
+                    # Grant permissions (important for PostgreSQL)
+                    await conn.execute(text("GRANT ALL ON SCHEMA public TO backend"))
+                    await conn.execute(text("GRANT ALL ON SCHEMA public TO public"))
+
+                console.print("[bold green]Creating test database schema...[/bold green]")
+                await conn.run_sync(Base.metadata.create_all)
+
+            console.print("[bold green]✓ Test database initialized successfully[/bold green]")
+
+        finally:
+            await engine.dispose()
+
+    console.print("[bold blue]Initializing test database (backend_test)...[/bold blue]")
+    asyncio.run(_init_test())
+
+
 @db_app.command("migrate")
 def migrate_database(
     fake: bool = typer.Option(False, "--fake", help="Mark migrations as applied without running them"),
