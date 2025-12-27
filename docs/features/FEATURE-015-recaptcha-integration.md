@@ -385,8 +385,8 @@ app.mount('#app')
 ```env
 # Enable reCAPTCHA
 RECAPTCHA_ENABLED=true
-RECAPTCHA_SECRET_KEY=6LcAMxQsAAAAAM-I9Q0VIf7AucJq2l2s-ONTc7_P
-RECAPTCHA_SITE_KEY=6LcAMxQsAAAAAIi3SbA6t9JMPwmw8Zbadakf4QdZ
+RECAPTCHA_SECRET_KEY=6Lxxxxxxxxxxxxxxxxxxxxxxxxxx
+RECAPTCHA_SITE_KEY=6Lyyyyyyyyyyyyyyyyyyyyyyyyyyyy
 RECAPTCHA_MIN_SCORE=0.5
 ```
 
@@ -394,7 +394,7 @@ RECAPTCHA_MIN_SCORE=0.5
 
 ```env
 # reCAPTCHA (public site key)
-VITE_GOOGLE_RECAPTCHA_SITE_KEY=6LcAMxQsAAAAAIi3SbA6t9JMPwmw8Zbadakf4QdZ
+VITE_GOOGLE_RECAPTCHA_SITE_KEY=6Lyyyyyyyyyyyyyyyyyyyyyyyyyyyy
 ```
 
 ## Score Thresholds
