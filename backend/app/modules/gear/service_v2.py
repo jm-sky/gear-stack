@@ -177,6 +177,30 @@ class GearServiceV2:
 
     # Move operation
 
+    async def is_descendant(self, potential_descendant_id: str, ancestor_id: str, user_id: str) -> bool:
+        """Check if an item is a descendant of another item (recursive).
+
+        Args:
+            potential_descendant_id: ID of item that might be a descendant
+            ancestor_id: ID of potential ancestor item
+            user_id: Owner user ID
+
+        Returns:
+            True if potential_descendant is a descendant of ancestor, False otherwise
+        """
+        # Get all children of ancestor
+        children = await self.repository.get_children(ancestor_id, user_id)
+
+        for child in children:
+            # Direct child match
+            if child.id == potential_descendant_id:
+                return True
+            # Recursive check for indirect descendants
+            if await self.is_descendant(potential_descendant_id, child.id, user_id):
+                return True
+
+        return False
+
     async def move_item(self, item_id: str, user_id: str, target_parent_id: str | None) -> GearItemDBV2 | None:
         """Move an item to a different parent.
 
@@ -189,8 +213,15 @@ class GearServiceV2:
             Updated item if successful, None if not found
 
         Raises:
-            ValueError: If target is invalid
+            ValueError: If target is invalid or would create circular reference
         """
+        # Check for circular reference: prevent moving item to its own descendant
+        if target_parent_id is not None:
+            if target_parent_id == item_id:
+                raise ValueError("Cannot move item to itself")
+            if await self.is_descendant(target_parent_id, item_id, user_id):
+                raise ValueError("Cannot move item: would create circular reference")
+
         return await self.repository.move_item(item_id, user_id, target_parent_id)
 
     # Content Reporting operations

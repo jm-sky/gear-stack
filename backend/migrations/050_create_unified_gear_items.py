@@ -132,9 +132,32 @@ async def upgrade() -> None:
                             ON DELETE SET NULL,
 
                         -- Type-specific fields validation
-                        CONSTRAINT check_type_fields CHECK (
-                            (item_type = 'container' AND category IS NULL AND quantity IS NULL) OR
-                            (item_type = 'item' AND container_type IS NULL)
+                        CONSTRAINT check_container_fields CHECK (
+                            item_type != 'container' OR (
+                                category IS NULL AND
+                                quantity IS NULL AND
+                                status IS NULL AND
+                                priority IS NULL AND
+                                expiration_date IS NULL AND
+                                shelf_life IS NULL AND
+                                wearable IS NULL AND
+                                consumable IS NULL AND
+                                order_index IS NULL AND
+                                show_on_container IS NULL AND
+                                promote_count IS NULL
+                            )
+                        ),
+                        CONSTRAINT check_item_fields CHECK (
+                            item_type != 'item' OR (
+                                container_type IS NULL AND
+                                max_weight IS NULL AND
+                                max_weight_unit IS NULL AND
+                                hide_when_nested IS NULL AND
+                                is_public IS NULL AND
+                                is_hidden_by_reports IS NULL AND
+                                favorite IS NULL AND
+                                show_item_images IS NULL
+                            )
                         )
                     );
                 """
@@ -205,6 +228,17 @@ async def upgrade() -> None:
                 )
             )
             print("✓ Created index: idx_gear_items_v2_catalogue_item_id")
+
+            await conn.execute(
+                text(
+                    """
+                    CREATE INDEX IF NOT EXISTS idx_gear_items_v2_favorite
+                    ON gear_items_v2(favorite)
+                    WHERE item_type = 'container';
+                """
+                )
+            )
+            print("✓ Created index: idx_gear_items_v2_favorite")
 
             print("✓ All indexes created successfully")
         else:
