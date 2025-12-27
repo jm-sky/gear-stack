@@ -80,7 +80,65 @@ docker exec gear-stack-app python -m pytest tests/ --cov=app --cov-report=html
   - `integration/gear/` - Integration tests for gear module (PHASE 0 baseline tests)
   - `conftest.py` - Pytest configuration and fixtures
 
-**Note:** Current test setup uses in-memory SQLite, but some models use PostgreSQL-specific types (JSONB). Test database configuration may need adjustment for full compatibility.
+**Test Database:**
+- Integration tests use PostgreSQL test database (`backend_test`)
+- Tests run against real PostgreSQL features (JSONB, arrays, etc.)
+- Use `python -m cli db init-test` to initialize test database
+
+### Backend CLI Commands
+
+The backend includes a Django-inspired CLI for database and user management.
+
+**Database Management:**
+```bash
+# Initialize main database
+docker exec gear-stack-app python -m cli db init
+
+# Initialize test database (PostgreSQL)
+docker exec gear-stack-app python -m cli db init-test
+docker exec gear-stack-app python -m cli db init-test --force  # Recreate
+
+# Run migrations
+docker exec gear-stack-app python -m cli db migrate
+docker exec gear-stack-app python -m cli db migrate-status
+
+# Seed database
+docker exec gear-stack-app python -m cli db seed catalogue
+docker exec gear-stack-app python -m cli db seed-remove catalogue
+```
+
+**User Management:**
+```bash
+# Create user
+docker exec gear-stack-app python -m cli users create
+
+# List users
+docker exec gear-stack-app python -m cli users list
+
+# Set roles
+docker exec gear-stack-app python -m cli users set-role
+docker exec gear-stack-app python -m cli users toggle-admin
+```
+
+**Interactive Mode:**
+```bash
+# Run CLI without arguments for interactive menu
+docker exec -it gear-stack-app python -m cli
+docker exec -it gear-stack-app python -m cli db
+docker exec -it gear-stack-app python -m cli users
+```
+
+**Testing & Debugging:**
+```bash
+# Test Sentry error reporting
+docker exec gear-stack-app python -m cli test sentry
+
+# Test storage adapter
+docker exec gear-stack-app python -m cli test storage
+
+# Test email sending
+docker exec gear-stack-app python -m cli test email
+```
 
 ## Architecture
 
