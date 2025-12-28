@@ -23,7 +23,7 @@ import HoverLink from '../ui/hover-link/HoverLink.vue'
 const { t } = useI18n()
 const router = useRouter()
 const { profile } = useUser()
-const { isAdmin } = usePermissions()
+const { canAccessAdminPanel } = usePermissions()
 const { logout, user: authUser } = useAuth()
 
 // Use auth user if backend is enabled, otherwise use profile from localStorage
@@ -33,6 +33,7 @@ interface Link {
   to: string
   label: string
   icon?: Component
+  hidden?: boolean
 }
 
 const coreLinks = computed<Link[]>(() => [
@@ -60,7 +61,7 @@ const coreLinks = computed<Link[]>(() => [
     to: AdminRoutePaths.dashboard,
     label: t('admin.dashboard.title', 'Admin Dashboard'),
     icon: ShieldIcon,
-    hidden: !isAdmin.value,
+    hidden: !canAccessAdminPanel.value,
   }
 ])
 
