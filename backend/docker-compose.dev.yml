@@ -23,7 +23,7 @@ services:
         max-size: "10m"
         max-file: "3"
     networks:
-      - gearstack-network
+      - gear-stack-network
 
   # Redis (for token blacklist and challenge storage)
   redis:
@@ -53,7 +53,7 @@ services:
         max-size: "10m"
         max-file: "3"
     networks:
-      - gearstack-network
+      - gear-stack-network
 
   # Application (Development Mode)
   app:
@@ -130,17 +130,19 @@ services:
         max-size: "10m"
         max-file: "3"
     networks:
-      - gearstack-network
+      - gear-stack-network
 
 networks:
-  gearstack-network:
-    name: gearstack-network
-    external: true
+  gear-stack-network:
+    name: gear-stack-network
 
 volumes:
   gear_stack_postgres_data:
-    driver: local
+    name: backend_gear_stack_postgres_data
+    external: true
   gear_stack_redis_data:
-    driver: local
+    name: backend_gear_stack_redis_data
+    external: true
   gear_stack_uploads:
-    driver: local
+    name: backend_gear_stack_uploads
+    external: true
