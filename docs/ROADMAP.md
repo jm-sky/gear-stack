@@ -170,6 +170,15 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - 📋 **Natychmiastowe obliczenia wagi** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-natychmiastowe-obliczenia-wagi-inspiracja-lighterpack) - real-time podczas edycji
    - Status: 🔄 Planned | Priority: Medium | Complexity: Various
 
+7. **Migracja z vue-i18n na Intlayer**
+   - 📍 Plan: [intlayer-migration-plan.md](./intlayer-migration-plan.md)
+   - Pełna migracja z vue-i18n na Intlayer (component-scoped translations)
+   - Korzyści: tree-shaking, lazy loading, lepszy TypeScript support, auto-generated types
+   - 9 faz implementacji: 221 komponentów, 2401 linii tłumaczeń, 7 modułów
+   - Szacowany czas: 3.5-5 tygodni (17-26 dni roboczych)
+   - Status: 🔄 Planned | Priority: Medium | Complexity: Large
+   - **Uwaga:** Wymaga refaktoryzacji wszystkich komponentów używających `useI18n()` → `useIntlayer()`
+
 ### Obniżony priorytet (trudne zadania)
 
 1. **Warianty kontenera**
@@ -315,5 +324,5 @@ Uwaga: Większość funkcji jest w ROADMAP_OFFLINE.md (offline-first approach)
 
 ---
 
-**Ostatnia aktualizacja:** 2025-12-17
+**Ostatnia aktualizacja:** 2025-12-29
 
