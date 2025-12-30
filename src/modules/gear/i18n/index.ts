@@ -342,6 +342,7 @@ export const gearEn = {
           reorderSuccess: 'Images reordered successfully',
           urlRequired: 'Image URL is required',
           urlInvalid: 'Please provide a valid URL',
+          fetchingImages: 'Fetching images...',
         },
         tooltips: {
           togglePrimary: 'Toggle primary image',
@@ -1278,6 +1279,7 @@ export const gearPl = {
           reorderSuccess: 'Kolejność obrazków została zaktualizowana',
           urlRequired: 'Adres URL obrazka jest wymagany',
           urlInvalid: 'Podaj poprawny adres URL',
+          fetchingImages: 'Pobieranie obrazków...',
         },
         tooltips: {
           togglePrimary: 'Przełącz obrazek główny',

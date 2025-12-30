@@ -61,16 +61,25 @@ const handleUpdateFromCatalogue = () => {
 const handleFetchImagesFromCatalogue = async () => {
   if (!item.catalogueItemId) return
 
+  // Show loading toast
+  const loadingToast = toast.loading(
+    t('gear.fileUpload.imageGallery.messages.fetchingImages', 'Fetching images...'),
+  )
+
   try {
     // Mutacja już odświeża kontener w store, ale musimy odświeżyć item w ItemDetailPage
     // Mutacja zwraca zaktualizowany item, więc możemy go użyć bezpośrednio
     await fetchImagesFromCatalogue(item.id)
-    toast.success(t('gear.catalogue.fetchedImagesFromCatalogue'))
+    toast.success(t('gear.catalogue.fetchedImagesFromCatalogue'), {
+      id: loadingToast,
+    })
     // Emit itemUpdated, aby ItemDetailPage odświeżył dane
     emit('itemUpdated')
   } catch (error) {
     console.error('Failed to fetch images from catalogue:', error)
-    toast.error(t('common.error'))
+    toast.error(t('common.error'), {
+      id: loadingToast,
+    })
   }
 }
 

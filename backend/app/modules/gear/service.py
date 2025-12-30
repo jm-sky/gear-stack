@@ -1337,21 +1337,22 @@ class GearService:
         if not created_item:
             return None
 
-        # Verify item exists in database before copying images
-        # This ensures the transaction is committed and item is visible
-        verified_item = await self.repository.get_item(created_item.id, user_id)
-        if not verified_item:
-            logger.error(
-                "Item %s was created but not found in database. Cannot copy images.",
-                created_item.id,
-            )
-            return created_item  # Return item even if image copy fails
-
         # Copy images if requested
+        # Note: We copy images before verifying item exists to avoid transaction isolation issues
+        # The create_item method already commits the transaction, so the item should be visible
         if copy_image:
-            await self._copy_catalogue_images_to_item(
-                catalogue_item_id, created_item.id, user_id
-            )
+            try:
+                await self._copy_catalogue_images_to_item(
+                    catalogue_item_id, created_item.id, user_id
+                )
+            except Exception as e:
+                logger.error(
+                    "Failed to copy images for item %s: %s. Item was created successfully.",
+                    created_item.id,
+                    e,
+                )
+                # Return item even if image copy fails
+                return created_item
 
         return created_item
 
@@ -1360,7 +1361,7 @@ class GearService:
         catalogue_item_id: str,
         item_id: str,
         user_id: str,
-    ) -> None:
+    ) -> bool:
         """Copy images from catalogue item to user item.
 
         Args:
@@ -1381,19 +1382,48 @@ class GearService:
         )
 
         if not catalogue_images:
-            return
+            return False
+
+        # Verify item exists before starting to copy images
+        # This is a safety check to ensure the item is in the database
+        from sqlalchemy import select
+        from app.modules.gear.db_models import GearItemDB
+
+        item_check_stmt = select(GearItemDB).where(GearItemDB.id == item_id)
+        item_check_result = await self.repository.db.execute(item_check_stmt)
+        initial_item_check = item_check_result.scalar_one_or_none()
+        if not initial_item_check:
+            logger.error(
+                "Item %s does not exist in database. Cannot copy images.",
+                item_id,
+            )
+            return False
 
         # Copy each image
+        # Note: Item was already committed by create_item(), so it exists in the database
         for idx, catalogue_image in enumerate(catalogue_images):
+            # Store catalogue_image attributes before try block to avoid accessing expired object in except
+            catalogue_image_id = catalogue_image.id
+            catalogue_image_file_path = catalogue_image.file_path
+            catalogue_image_file_name = catalogue_image.file_name
+            catalogue_image_mime_type = catalogue_image.mime_type
+            catalogue_image_storage_type = catalogue_image.storage_type
+            catalogue_image_file_size = catalogue_image.file_size
+            catalogue_image_width = catalogue_image.width
+            catalogue_image_height = catalogue_image.height
+            catalogue_image_is_primary = catalogue_image.is_primary
+            catalogue_image_is_processed = catalogue_image.is_processed
+            catalogue_image_original_file_size = catalogue_image.original_file_size
+
             try:
                 # Download image from storage
-                image_content = await self._storage.download(catalogue_image.file_path)
+                image_content = await self._storage.download(catalogue_image_file_path)
 
                 # Create new file path for item image
                 # Extract extension from original filename
                 file_extension = ""
-                if "." in catalogue_image.file_name:
-                    file_extension = "." + catalogue_image.file_name.rsplit(".", 1)[1]
+                if "." in catalogue_image_file_name:
+                    file_extension = "." + catalogue_image_file_name.rsplit(".", 1)[1]
                 new_filename = f"{generate_id()}{file_extension}"
                 new_file_path = f"items/{item_id}/{new_filename}"
 
@@ -1401,17 +1431,17 @@ class GearService:
                 await self._storage.upload(
                     image_content,
                     new_file_path,
-                    catalogue_image.mime_type,
+                    catalogue_image_mime_type,
                     metadata={
                         "item_id": item_id,
                         "user_id": user_id,
-                        "copied_from_catalogue_image": catalogue_image.id,
+                        "copied_from_catalogue_image": catalogue_image_id,
                     },
                 )
 
                 # Create ItemImageDB record
                 # Unset primary for other images if this is primary
-                if catalogue_image.is_primary:
+                if catalogue_image_is_primary:
                     await self._image_repository.unset_primary_for_item(item_id)
 
                 # Get next order value
@@ -1421,32 +1451,49 @@ class GearService:
                     id=generate_id(),
                     item_id=item_id,
                     user_id=user_id,
-                    storage_type=catalogue_image.storage_type,
+                    storage_type=catalogue_image_storage_type,
                     file_path=new_file_path,
-                    file_name=catalogue_image.file_name,
-                    file_size=catalogue_image.file_size,
-                    mime_type=catalogue_image.mime_type,
-                    width=catalogue_image.width,
-                    height=catalogue_image.height,
-                    is_primary=catalogue_image.is_primary,
+                    file_name=catalogue_image_file_name,
+                    file_size=catalogue_image_file_size,
+                    mime_type=catalogue_image_mime_type,
+                    width=catalogue_image_width,
+                    height=catalogue_image_height,
+                    is_primary=catalogue_image_is_primary,
                     order=next_order,
-                    is_processed=catalogue_image.is_processed,
-                    original_file_size=catalogue_image.original_file_size,
+                    is_processed=catalogue_image_is_processed,
+                    original_file_size=catalogue_image_original_file_size,
                 )
 
                 self.repository.db.add(new_image)
+                await self.repository.db.flush()  # Flush first to catch errors early
                 await self.repository.db.commit()
+
+                logger.info(
+                    "Successfully copied image %s from catalogue item %s to item %s",
+                    catalogue_image_id,
+                    catalogue_item_id,
+                    item_id,
+                )
             except Exception as e:
                 logger.error(
                     "Failed to copy image %s from catalogue item %s to item %s: %s",
-                    catalogue_image.id,
+                    catalogue_image_id,
                     catalogue_item_id,
                     item_id,
                     e,
                 )
                 # Rollback on error to allow next image to be added
-                await self.repository.db.rollback()
+                try:
+                    await self.repository.db.rollback()
+                except Exception as rollback_error:
+                    logger.error(
+                        "Failed to rollback after image copy error: %s",
+                        rollback_error,
+                    )
                 # Continue copying other images even if one fails
+
+        # Return True if at least one image was copied successfully
+        return True
 
     async def update_item_from_catalogue(
         self,
@@ -1587,10 +1634,32 @@ class GearService:
         if not catalogue_item or not catalogue_item.is_active:
             return None
 
+        # Verify item exists in database before copying images
+        # This ensures the item is committed and visible in the database
+        from sqlalchemy import select
+        from app.modules.gear.db_models import GearItemDB
+
+        item_verify_stmt = select(GearItemDB).where(GearItemDB.id == item_id)
+        item_verify_result = await self.repository.db.execute(item_verify_stmt)
+        item_verify = item_verify_result.scalar_one_or_none()
+        if not item_verify:
+            logger.error(
+                "Item %s does not exist in database. Cannot fetch images from catalogue.",
+                item_id,
+            )
+            return None
+
         # Copy images from catalogue to item
-        await self._copy_catalogue_images_to_item(
+        images_copied = await self._copy_catalogue_images_to_item(
             item.catalogue_item_id, item_id, user_id
         )
+
+        if not images_copied:
+            logger.warning(
+                "No images were copied for item %s from catalogue item %s",
+                item_id,
+                item.catalogue_item_id,
+            )
 
         # Return updated item
         return await self.get_item(item_id, user_id)

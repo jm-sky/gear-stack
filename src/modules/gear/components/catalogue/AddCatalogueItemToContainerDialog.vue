@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { isAxiosError } from 'axios'
 import { Package } from 'lucide-vue-next'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -62,6 +63,13 @@ watch(
 const handleConfirm = async () => {
   if (!selectedContainerId.value) return
 
+  // Show loading toast if copying images
+  const loadingToast = copyImage.value
+    ? toast.loading(
+        t('gear.fileUpload.imageGallery.messages.fetchingImages', 'Fetching images...'),
+      )
+    : null
+
   try {
     await addCatalogueItemToContainer(
       selectedContainerId.value,
@@ -74,16 +82,23 @@ const handleConfirm = async () => {
       },
     )
 
-    toast.success(t('gear.catalogue.addedToContainer'))
+    toast.success(t('gear.catalogue.addedToContainer'), {
+      id: loadingToast ?? undefined,
+    })
     open.value = false
 
     // Navigate to the container detail page
     if (shouldRedirect.value) {
       router.push(GearRoutePath.ContainerDetailById(selectedContainerId.value))
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Failed to add catalogue item to container:', error)
-    toast.error(t('common.error'))
+    const errorMessage = isAxiosError(error)
+      ? error.response?.data?.detail || t('common.error')
+      : t('common.error')
+    toast.error(errorMessage, {
+      id: loadingToast ?? undefined,
+    })
   }
 }
 
