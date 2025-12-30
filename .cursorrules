@@ -8,6 +8,10 @@
 - Running Docker in such directories can cause conflicts with production services
 - If the current working directory starts with `_`, do not execute any `docker` or `docker-compose` commands
 
+**Docker Compose Project Naming:**
+- Use `COMPOSE_PROJECT_NAME=gear-stack` in `backend/.env`
+- Prevents conflicts with other projects (e.g., zbory-chwz) on the same VPS
+
 ## Project Architecture
 
 **Hybrid Architecture:**
@@ -235,9 +239,28 @@ else {
 - Example: `text-sm sm:text-base lg:text-lg` (small on mobile, base on tablet, large on desktop)
 - Consider spacing, typography, layout, and visibility across breakpoints
 
+## Backend CLI
+
+**Database Management:**
+```bash
+docker exec gear-stack-app python -m cli db init          # Initialize database
+docker exec gear-stack-app python -m cli db init-test     # Initialize test database (PostgreSQL)
+docker exec gear-stack-app python -m cli db migrate       # Run migrations
+docker exec gear-stack-app python -m cli db seed catalogue # Seed data
+```
+
+**User Management:**
+```bash
+docker exec gear-stack-app python -m cli users create     # Create user
+docker exec gear-stack-app python -m cli users list       # List users
+docker exec gear-stack-app python -m cli users set-role   # Set user role
+```
+
+**Interactive Mode:** Run `python -m cli` without arguments for menu-driven interface.
+
 ## Testing
 
-**Commands:**
+**Frontend Tests:**
 ```bash
 pnpm test              # Watch mode
 pnpm test:ui           # Vitest UI
@@ -245,7 +268,13 @@ pnpm test:run          # CI mode
 pnpm test:coverage     # Coverage report
 ```
 
-**Test Framework:** vitest + happy-dom
+**Backend Tests:**
+```bash
+docker exec gear-stack-app python -m pytest tests/ -v
+docker exec gear-stack-app python -m cli db init-test     # Initialize test DB first
+```
+
+**Test Framework:** vitest + happy-dom (frontend), pytest + asyncpg (backend)
 **E2E:** @playwright/test
 
 ## API Integration

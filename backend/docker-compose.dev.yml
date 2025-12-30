@@ -7,7 +7,7 @@ services:
     environment:
       - POSTGRES_DB=${POSTGRES_DB:-backend}
       - POSTGRES_USER=${POSTGRES_USER:-backend}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-gear-stack-db-secret}
     volumes:
       - gear_stack_postgres_data:/var/lib/postgresql/data
     ports:
@@ -23,7 +23,7 @@ services:
         max-size: "10m"
         max-file: "3"
     networks:
-      - gearstack-network
+      - gear-stack-network
 
   # Redis (for token blacklist and challenge storage)
   redis:
@@ -31,7 +31,7 @@ services:
     container_name: gear-stack-redis
     restart: unless-stopped
     environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-changeme}
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-gear-stack-redis-secret}
     ports:
       - "127.0.0.1:${REDIS_FORWARD_PORT:-6379}:6379"  # Only localhost access
     volumes:
@@ -39,11 +39,11 @@ services:
     command: >
       redis-server
       --appendonly yes
-      --requirepass ${REDIS_PASSWORD:-changeme}
+      --requirepass ${REDIS_PASSWORD:-gear-stack-redis-secret}
       --maxmemory 256mb
       --maxmemory-policy allkeys-lru
     healthcheck:
-      test: ["CMD", "sh", "-c", "redis-cli -a $${REDIS_PASSWORD:-changeme} ping | grep PONG"]
+      test: ["CMD", "sh", "-c", "redis-cli -a $${REDIS_PASSWORD:-gear-stack-redis-secret} ping | grep PONG"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -53,7 +53,7 @@ services:
         max-size: "10m"
         max-file: "3"
     networks:
-      - gearstack-network
+      - gear-stack-network
 
   # Application (Development Mode)
   app:
@@ -71,11 +71,11 @@ services:
     env_file:
       - .env
     environment:
-      - ENVIRONMENT=development
+      - ENVIRONMENT=${ENVIRONMENT:-development}
       - PROJECT_NAME=${PROJECT_NAME:-backend}
       - APP_PORT=${APP_PORT:-8000}
-      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-backend}:${POSTGRES_PASSWORD:-changeme}@db:5432/${POSTGRES_DB:-backend}
-      - REDIS_URL=redis://:${REDIS_PASSWORD:-changeme}@redis:6379/0
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-backend}:${POSTGRES_PASSWORD:-gear-stack-db-secret}@db:5432/${POSTGRES_DB:-backend}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-gear-stack-redis-secret}@redis:6379/0
       - SECRET_KEY=${SECRET_KEY}
       - LOG_LEVEL=${LOG_LEVEL:-DEBUG}
       - CORS_ORIGINS=${CORS_ORIGINS:-["http://localhost:3000"]}
@@ -130,17 +130,19 @@ services:
         max-size: "10m"
         max-file: "3"
     networks:
-      - gearstack-network
+      - gear-stack-network
 
 networks:
-  gearstack-network:
-    name: gearstack-network
-    external: true
+  gear-stack-network:
+    name: gear-stack-network
 
 volumes:
   gear_stack_postgres_data:
-    driver: local
+    name: backend_gear_stack_postgres_data
+    external: true
   gear_stack_redis_data:
-    driver: local
+    name: backend_gear_stack_redis_data
+    external: true
   gear_stack_uploads:
-    driver: local
+    name: backend_gear_stack_uploads
+    external: true
