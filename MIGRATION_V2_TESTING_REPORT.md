@@ -209,9 +209,26 @@ This allows for:
 ## 🎯 Next Steps
 
 ### Immediate
-- [ ] Fix `quality` field NOT NULL constraint issue
-- [ ] Resolve all V2 integration test failures
-- [ ] Update migration 050 to include missing fields or fix CHECK constraints
+- [x] Fix `quality` field NOT NULL constraint issue - **FIXED via migration 054**
+- [ ] Resolve all V2 integration test failures (should be fixed by migration 054)
+- [x] Update migration 050 to include missing fields or fix CHECK constraints - **DONE**
+
+### Migration 054 Created (2025-12-30)
+**File:** `backend/migrations/054_fix_nullable_constraints_v2.py`
+
+**Purpose:** Fix NOT NULL constraints on all type-specific fields in `gear_items_v2` table.
+
+**What it does:**
+- Removes NOT NULL constraints from 8 container-specific fields
+- Removes NOT NULL constraints from 12 item-specific fields
+- Ensures database schema matches model definitions
+- Safe to run multiple times (idempotent)
+
+**Root Cause:** The `gear_items_v2` table was created by `Base.metadata.create_all()` in tests, which incorrectly generated NOT NULL constraints for some fields despite the model having `nullable=True`.
+
+**Fields fixed:**
+- Container-specific: `container_type`, `max_weight`, `max_weight_unit`, `hide_when_nested`, `is_public`, `is_hidden_by_reports`, `favorite`, `show_item_images`
+- Item-specific: `category`, `quantity`, `status`, `priority`, `expiration_date`, `shelf_life`, `quality`, `wearable`, `consumable`, `order_index`, `show_on_container`, `promote_count`
 
 ### Short-term
 - [ ] Add V2 feature flag to codebase

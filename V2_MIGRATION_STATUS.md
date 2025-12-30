@@ -15,6 +15,7 @@ All backend work for V2 unified model is **production-ready** and committed.
 - ✅ Migration 051: Migrate data from V1 to V2 (preserved, not run)
 - ✅ Migration 052: Update foreign keys to V2
 - ✅ Migration 053: Add missing V1 fields (shelf_life, promote_count, is_hidden_by_reports)
+- ✅ Migration 054: Fix nullable constraints (ensures all type-specific fields are nullable)
 
 #### Backend API
 - ✅ `db_models_v2.py`: SQLAlchemy unified model (`GearItemDBV2`, `GearContainerDBV2`)
