@@ -131,10 +131,14 @@ services:
         max-file: "3"
     networks:
       - gear-stack-network
+      - rustfs-network
 
 networks:
   gear-stack-network:
     name: gear-stack-network
+  rustfs-network:
+    name: rustfs-network
+    external: true
 
 volumes:
   gear_stack_postgres_data:
