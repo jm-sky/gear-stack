@@ -97,7 +97,10 @@ def get_optional_billing_service(
         BillingService instance or None if unavailable
     """
     try:
-        from app.modules.billing.dependencies import get_billing_service, get_stripe_client
+        from app.modules.billing.dependencies import (
+            get_billing_service,
+            get_stripe_client,
+        )
         from app.modules.billing.repository import BillingRepository
 
         billing_repo = BillingRepository(db)
@@ -108,7 +111,9 @@ def get_optional_billing_service(
         return None
 
 
-OptionalBillingServiceDep = Annotated[BillingService | None, Depends(get_optional_billing_service)]
+OptionalBillingServiceDep = Annotated[
+    BillingService | None, Depends(get_optional_billing_service)
+]
 
 # Optional authentication for public endpoints
 optional_security = HTTPBearer(auto_error=False)
@@ -116,7 +121,9 @@ optional_security = HTTPBearer(auto_error=False)
 
 async def get_optional_user(
     credentials: HTTPAuthorizationCredentials | None = Security(optional_security),
-    user_repository: Annotated[UserRepositoryInterface | None, Depends(get_user_repository)] = None,
+    user_repository: Annotated[
+        UserRepositoryInterface | None, Depends(get_user_repository)
+    ] = None,
 ) -> User | None:
     """Get current user if authenticated, None otherwise."""
     if credentials is None:
@@ -133,7 +140,9 @@ async def get_optional_user(
 
         # Get blacklist service
         redis_client = await get_redis_client()
-        blacklist_service = TokenBlacklistService(redis_client=redis_client, key_prefix=settings.redis.token_blacklist_prefix)
+        blacklist_service = TokenBlacklistService(
+            redis_client=redis_client, key_prefix=settings.redis.token_blacklist_prefix
+        )
 
         return await _verify_user_token(token, user_repository, blacklist_service, None)
     except Exception:
@@ -174,11 +183,18 @@ async def create_container(
         HTTPException: If validation fails
     """
     # Get user settings for default public setting
-    result = await db.execute(select(UserSettingsDB).where(UserSettingsDB.user_id == current_user.id))
+    result = await db.execute(
+        select(UserSettingsDB).where(UserSettingsDB.user_id == current_user.id)
+    )
     settings = result.scalars().first()
     default_public = settings.default_containers_public if settings else False
 
-    return await service.create_container(current_user.id, data, default_public=default_public, billing_service=billing_service)
+    return await service.create_container(
+        current_user.id,
+        data,
+        default_public=default_public,
+        billing_service=billing_service,
+    )
 
 
 @router.get(
@@ -190,7 +206,9 @@ async def get_containers(
     current_user: CurrentUser,
     service: GearServiceDep,
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
+    limit: int = Query(
+        100, ge=1, le=1000, description="Maximum number of records to return"
+    ),
 ) -> list[ContainerResponse]:
     """Get all gear containers for the current user.
 
@@ -346,7 +364,9 @@ async def create_item(
     Raises:
         HTTPException: If container not found or validation fails
     """
-    item = await service.create_item(container_id, current_user.id, data, billing_service=billing_service)
+    item = await service.create_item(
+        container_id, current_user.id, data, billing_service=billing_service
+    )
     if not item:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -365,7 +385,9 @@ async def get_items(
     current_user: CurrentUser,
     service: GearServiceDep,
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
+    limit: int = Query(
+        100, ge=1, le=1000, description="Maximum number of records to return"
+    ),
 ) -> list[ItemResponse]:
     """Get all items in a container.
 
@@ -391,7 +413,9 @@ async def get_all_items(
     current_user: CurrentUser,
     service: GearServiceDep,
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
+    limit: int = Query(
+        100, ge=1, le=1000, description="Maximum number of records to return"
+    ),
 ) -> list[ItemResponse]:
     """Get all gear items for the current user across all containers.
 
@@ -645,7 +669,9 @@ async def get_container_readiness(
 async def get_public_containers(
     service: GearServiceDep,
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
+    limit: int = Query(
+        100, ge=1, le=1000, description="Maximum number of records to return"
+    ),
     current_user: OptionalUser = None,
 ) -> list[ContainerResponse]:
     """Get all public containers from all users.
@@ -780,7 +806,9 @@ async def create_container_share_token(
     Raises:
         HTTPException: If container not found or user doesn't own it
     """
-    token = await service.create_share_token(container_id, current_user.id, data.expiresAt)
+    token = await service.create_share_token(
+        container_id, current_user.id, data.expiresAt
+    )
     tokens = await service.get_share_tokens(container_id, current_user.id)
     # Find the newly created token
     token_data = next((t for t in tokens if t["token"] == token), None)
@@ -823,7 +851,9 @@ async def revoke_container_share_token(
 
 
 # Rating endpoints
-@router.post("/containers/{container_id}/rating", response_model=dict, summary="Rate a container")
+@router.post(
+    "/containers/{container_id}/rating", response_model=dict, summary="Rate a container"
+)
 async def rate_container(
     container_id: str,
     rating_data: ContainerRatingCreate,
@@ -845,7 +875,9 @@ async def rate_container(
         # Try public container
         container = await repository.get_public_container(container_id)
         if not container:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Container not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Container not found"
+            )
 
     # Validate rating type
     is_owner = container.user_id == current_user.id
@@ -880,12 +912,20 @@ async def rate_container(
     # Get updated stats
     if rating_data.ratingType == "owner":
         owner_rating: int | None = rating.rating
-        avg_user_rating = await repository.get_container_average_user_rating(container_id)
-        user_rating_count = await repository.get_container_user_rating_count(container_id)
+        avg_user_rating = await repository.get_container_average_user_rating(
+            container_id
+        )
+        user_rating_count = await repository.get_container_user_rating_count(
+            container_id
+        )
     else:
         owner_rating = await repository.get_container_owner_rating(container_id)
-        avg_user_rating = await repository.get_container_average_user_rating(container_id)
-        user_rating_count = await repository.get_container_user_rating_count(container_id)
+        avg_user_rating = await repository.get_container_average_user_rating(
+            container_id
+        )
+        user_rating_count = await repository.get_container_user_rating_count(
+            container_id
+        )
 
     return {
         "rating": rating.rating,
@@ -901,7 +941,9 @@ async def delete_container_rating(
     container_id: str,
     current_user: CurrentUser,
     service: GearServiceDep,
-    rating_type: str = Query(default="user", description="Type of rating to delete: 'owner' or 'user'"),
+    rating_type: str = Query(
+        default="user", description="Type of rating to delete: 'owner' or 'user'"
+    ),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """Delete user's rating for a container."""
@@ -912,7 +954,9 @@ async def delete_container_rating(
     if not container:
         container = await repository.get_public_container(container_id)
         if not container:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Container not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Container not found"
+            )
 
     # Validate rating type
     is_owner = container.user_id == current_user.id
@@ -924,11 +968,15 @@ async def delete_container_rating(
         )
 
     # Delete rating
-    deleted = await repository.delete_container_rating(container_id, current_user.id, rating_type)
+    deleted = await repository.delete_container_rating(
+        container_id, current_user.id, rating_type
+    )
     await db.commit()
 
     if not deleted:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Rating not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Rating not found"
+        )
 
     # Get updated stats
     owner_rating = await repository.get_container_owner_rating(container_id)
@@ -954,11 +1002,19 @@ async def get_catalogue_items(
     query: str | None = Query(None, description="Search query"),
     category: str | None = Query(None, description="Filter by category"),
     brand: str | None = Query(None, description="Filter by brand"),
-    priceTier: Literal["low", "medium", "high"] | None = Query(None, description="Filter by price tier", alias="priceTier"),
-    quality: Literal["low", "medium", "high"] | None = Query(None, description="Filter by quality"),
-    isActive: bool | None = Query(True, description="Filter by active status", alias="isActive"),
+    priceTier: Literal["low", "medium", "high"] | None = Query(
+        None, description="Filter by price tier", alias="priceTier"
+    ),
+    quality: Literal["low", "medium", "high"] | None = Query(
+        None, description="Filter by quality"
+    ),
+    isActive: bool | None = Query(
+        True, description="Filter by active status", alias="isActive"
+    ),
     skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
+    limit: int = Query(
+        100, ge=1, le=1000, description="Maximum number of records to return"
+    ),
     current_user: OptionalUser = None,
 ) -> list[GlobalCatalogueItemResponse]:
     """Get global catalogue items with filtering and search.
@@ -1075,7 +1131,9 @@ async def update_catalogue_item(
         HTTPException: If item not found or user doesn't have permission
     """
     # Check if user is admin/owner
-    is_admin = (current_user.isAdmin if hasattr(current_user, "isAdmin") else False) or (current_user.isOwner if hasattr(current_user, "isOwner") else False)
+    is_admin = (
+        current_user.isAdmin if hasattr(current_user, "isAdmin") else False
+    ) or (current_user.isOwner if hasattr(current_user, "isOwner") else False)
     item = await service.update_catalogue_item(
         item_id,
         current_user.id,
@@ -1113,7 +1171,9 @@ async def delete_catalogue_item(
         HTTPException: If item not found or user doesn't have permission
     """
     # Check if user is admin/owner
-    is_admin = (current_user.isAdmin if hasattr(current_user, "isAdmin") else False) or (current_user.isOwner if hasattr(current_user, "isOwner") else False)
+    is_admin = (
+        current_user.isAdmin if hasattr(current_user, "isAdmin") else False
+    ) or (current_user.isOwner if hasattr(current_user, "isOwner") else False)
     deleted = await service.delete_catalogue_item(
         item_id,
         current_user.id,
@@ -1205,7 +1265,9 @@ async def link_item_to_catalogue(
     Raises:
         HTTPException: If item or catalogue item not found, or user doesn't own the item
     """
-    item = await service.link_item_to_catalogue(item_id, catalogue_item_id, current_user.id)
+    item = await service.link_item_to_catalogue(
+        item_id, catalogue_item_id, current_user.id
+    )
     if not item:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -1223,7 +1285,10 @@ async def update_item_from_catalogue(
     item_id: str,
     current_user: CurrentUser,
     service: GearServiceDep,
-    fields: str | None = Query(None, description="Comma-separated list of fields to update (e.g., 'name,weight,price')"),
+    fields: str | None = Query(
+        None,
+        description="Comma-separated list of fields to update (e.g., 'name,weight,price')",
+    ),
 ) -> ItemResponse:
     """Update an item with data from its linked catalogue item.
 
@@ -1246,7 +1311,9 @@ async def update_item_from_catalogue(
     if fields:
         fields_list = [f.strip() for f in fields.split(",") if f.strip()]
 
-    item = await service.update_item_from_catalogue(item_id, current_user.id, fields_list)
+    item = await service.update_item_from_catalogue(
+        item_id, current_user.id, fields_list
+    )
     if not item:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -1564,7 +1631,10 @@ async def get_user_limits(
     """
     # Get billing service for limits
     try:
-        from app.modules.billing.dependencies import get_billing_service, get_stripe_client
+        from app.modules.billing.dependencies import (
+            get_billing_service,
+            get_stripe_client,
+        )
         from app.modules.billing.repository import BillingRepository
 
         billing_repo = BillingRepository(db)
@@ -1601,7 +1671,15 @@ async def get_user_limits(
             "containers": containers_count,
         },
         percentage={
-            "items": (items_count / limits.itemsLimit * 100) if limits.itemsLimit > 0 else 0.0,
-            "containers": (containers_count / limits.containersLimit * 100) if limits.containersLimit > 0 else 0.0,
+            "items": (
+                (items_count / limits.itemsLimit * 100)
+                if limits.itemsLimit > 0
+                else 0.0
+            ),
+            "containers": (
+                (containers_count / limits.containersLimit * 100)
+                if limits.containersLimit > 0
+                else 0.0
+            ),
         },
     )

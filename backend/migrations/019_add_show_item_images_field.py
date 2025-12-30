@@ -63,10 +63,14 @@ async def upgrade() -> None:
 
         if not containers_exist:
             print("gear_containers table does not exist, skipping migration...")
-            print("Note: Table will be created with show_item_images field when created from models")
+            print(
+                "Note: Table will be created with show_item_images field when created from models"
+            )
             return
 
-        show_item_images_exists = await column_exists(conn, "gear_containers", "show_item_images")
+        show_item_images_exists = await column_exists(
+            conn, "gear_containers", "show_item_images"
+        )
 
         if show_item_images_exists:
             print("show_item_images column already exists, skipping migration...")

@@ -91,8 +91,16 @@ async def upgrade() -> None:
 
         # Create indexes
         print("Creating indexes...")
-        await conn.execute(text("CREATE INDEX ix_catalogue_item_images_catalogue_item_id ON catalogue_item_images(catalogue_item_id);"))
-        await conn.execute(text("CREATE INDEX ix_catalogue_item_images_user_id ON catalogue_item_images(user_id);"))
+        await conn.execute(
+            text(
+                "CREATE INDEX ix_catalogue_item_images_catalogue_item_id ON catalogue_item_images(catalogue_item_id);"
+            )
+        )
+        await conn.execute(
+            text(
+                "CREATE INDEX ix_catalogue_item_images_user_id ON catalogue_item_images(user_id);"
+            )
+        )
 
         print("✓ Created catalogue_item_images table with indexes")
 
@@ -113,8 +121,12 @@ async def downgrade() -> None:
         print("catalogue_item_images table exists, removing it...")
         # Drop indexes
         print("Dropping indexes...")
-        await conn.execute(text("DROP INDEX IF EXISTS ix_catalogue_item_images_user_id;"))
-        await conn.execute(text("DROP INDEX IF EXISTS ix_catalogue_item_images_catalogue_item_id;"))
+        await conn.execute(
+            text("DROP INDEX IF EXISTS ix_catalogue_item_images_user_id;")
+        )
+        await conn.execute(
+            text("DROP INDEX IF EXISTS ix_catalogue_item_images_catalogue_item_id;")
+        )
 
         # Drop table
         print("Dropping table...")
@@ -129,7 +141,9 @@ async def main() -> None:
     """Run migration."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Add catalogue_item_images table migration")
+    parser = argparse.ArgumentParser(
+        description="Add catalogue_item_images table migration"
+    )
     parser.add_argument(
         "action",
         choices=["upgrade", "downgrade"],

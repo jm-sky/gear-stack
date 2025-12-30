@@ -88,7 +88,9 @@ async def downgrade() -> None:
         long_values_count = result.scalar() or 0
 
         if long_values_count > 0:
-            print(f"⚠ Warning: {long_values_count} rows have preferred_weight_unit values longer than 5 characters.")
+            print(
+                f"⚠ Warning: {long_values_count} rows have preferred_weight_unit values longer than 5 characters."
+            )
             print("These values will be truncated. Consider updating them first.")
             # Truncate values longer than 5 characters
             await conn.execute(
@@ -122,7 +124,9 @@ async def main() -> None:
     """Run migration."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Increase preferred_weight_unit column length migration")
+    parser = argparse.ArgumentParser(
+        description="Increase preferred_weight_unit column length migration"
+    )
     parser.add_argument(
         "action",
         choices=["upgrade", "downgrade"],

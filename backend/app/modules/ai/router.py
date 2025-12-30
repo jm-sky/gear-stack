@@ -2,7 +2,12 @@
 
 from fastapi import APIRouter
 
-from app.modules.ai.routers import chat_router, history_router, models_router, settings_router
+from app.modules.ai.routers import (
+    chat_router,
+    history_router,
+    models_router,
+    settings_router,
+)
 
 router = APIRouter(prefix="/ai", tags=["ai"])
 

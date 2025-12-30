@@ -105,7 +105,9 @@ async def upgrade() -> None:
         # Step 2: Add cached_data column if it doesn't exist
         if not await column_exists(conn, "ai_cache", "cached_data"):
             print("  Adding cached_data column...")
-            await conn.execute(text("ALTER TABLE ai_cache ADD COLUMN cached_data JSONB"))
+            await conn.execute(
+                text("ALTER TABLE ai_cache ADD COLUMN cached_data JSONB")
+            )
 
         # Step 3: Copy data from response_data to cached_data
         print("  Copying data from response_data to cached_data...")
@@ -121,8 +123,14 @@ async def upgrade() -> None:
 
         # Step 4: Set NOT NULL constraint on cached_data
         print("  Setting NOT NULL constraint on cached_data...")
-        await conn.execute(text("UPDATE ai_cache SET cached_data = '{}'::jsonb WHERE cached_data IS NULL"))
-        await conn.execute(text("ALTER TABLE ai_cache ALTER COLUMN cached_data SET NOT NULL"))
+        await conn.execute(
+            text(
+                "UPDATE ai_cache SET cached_data = '{}'::jsonb WHERE cached_data IS NULL"
+            )
+        )
+        await conn.execute(
+            text("ALTER TABLE ai_cache ALTER COLUMN cached_data SET NOT NULL")
+        )
 
         # Step 5: Handle primary key change if needed
         if has_id_column:
@@ -132,7 +140,11 @@ async def upgrade() -> None:
             pk_constraint = await get_primary_key_constraint_name(conn, "ai_cache")
             if pk_constraint:
                 # Drop existing primary key constraint (constraint name is safe as it comes from information_schema)
-                await conn.execute(text(f'ALTER TABLE ai_cache DROP CONSTRAINT IF EXISTS "{pk_constraint}"'))
+                await conn.execute(
+                    text(
+                        f'ALTER TABLE ai_cache DROP CONSTRAINT IF EXISTS "{pk_constraint}"'
+                    )
+                )
 
             # Drop unique constraint on cache_key if it exists (will be replaced by primary key)
             unique_constraint_result = await conn.execute(
@@ -150,13 +162,21 @@ async def upgrade() -> None:
             )
             unique_constraint = unique_constraint_result.scalar()
             if unique_constraint:
-                await conn.execute(text(f'ALTER TABLE ai_cache DROP CONSTRAINT IF EXISTS "{unique_constraint}"'))
+                await conn.execute(
+                    text(
+                        f'ALTER TABLE ai_cache DROP CONSTRAINT IF EXISTS "{unique_constraint}"'
+                    )
+                )
 
             # First, ensure cache_key is unique and not null
-            await conn.execute(text("ALTER TABLE ai_cache ALTER COLUMN cache_key SET NOT NULL"))
+            await conn.execute(
+                text("ALTER TABLE ai_cache ALTER COLUMN cache_key SET NOT NULL")
+            )
 
             # Change cache_key to VARCHAR(64) if it's not already
-            await conn.execute(text("ALTER TABLE ai_cache ALTER COLUMN cache_key TYPE VARCHAR(64)"))
+            await conn.execute(
+                text("ALTER TABLE ai_cache ALTER COLUMN cache_key TYPE VARCHAR(64)")
+            )
 
             # Create new primary key on cache_key
             await conn.execute(text("ALTER TABLE ai_cache ADD PRIMARY KEY (cache_key)"))
@@ -167,7 +187,9 @@ async def upgrade() -> None:
         else:
             # Step 6: Ensure cache_key is VARCHAR(64) if it's VARCHAR(255)
             print("  Ensuring cache_key is VARCHAR(64)...")
-            await conn.execute(text("ALTER TABLE ai_cache ALTER COLUMN cache_key TYPE VARCHAR(64)"))
+            await conn.execute(
+                text("ALTER TABLE ai_cache ALTER COLUMN cache_key TYPE VARCHAR(64)")
+            )
 
         # Step 7: Drop old columns
         print("  Dropping old columns...")
@@ -176,7 +198,9 @@ async def upgrade() -> None:
         if await column_exists(conn, "ai_cache", "input_hash"):
             await conn.execute(text("ALTER TABLE ai_cache DROP COLUMN input_hash"))
         if await column_exists(conn, "ai_cache", "last_accessed_at"):
-            await conn.execute(text("ALTER TABLE ai_cache DROP COLUMN last_accessed_at"))
+            await conn.execute(
+                text("ALTER TABLE ai_cache DROP COLUMN last_accessed_at")
+            )
 
         # Step 8: Ensure correct indexes exist
         print("  Ensuring indexes...")
@@ -193,7 +217,9 @@ async def upgrade() -> None:
             )
         )
         if not index_result.scalar():
-            await conn.execute(text("CREATE INDEX idx_ai_cache_expires_at ON ai_cache(expires_at)"))
+            await conn.execute(
+                text("CREATE INDEX idx_ai_cache_expires_at ON ai_cache(expires_at)")
+            )
 
         # Check if index on operation_type exists
         index_result = await conn.execute(
@@ -208,7 +234,11 @@ async def upgrade() -> None:
             )
         )
         if not index_result.scalar():
-            await conn.execute(text("CREATE INDEX idx_ai_cache_operation_type ON ai_cache(operation_type)"))
+            await conn.execute(
+                text(
+                    "CREATE INDEX idx_ai_cache_operation_type ON ai_cache(operation_type)"
+                )
+            )
 
         print("✓ Migration completed successfully")
 
@@ -216,7 +246,9 @@ async def upgrade() -> None:
 async def downgrade() -> None:
     """Revert ai_cache table to old schema."""
     print("Reverting ai_cache table to old schema...")
-    print("Warning: This will lose data transformation. Old columns will be recreated but data may not match exactly.")
+    print(
+        "Warning: This will lose data transformation. Old columns will be recreated but data may not match exactly."
+    )
 
     async with engine.begin() as conn:
         # Check if table exists
@@ -232,13 +264,25 @@ async def downgrade() -> None:
         # Add old columns back
         print("  Adding old columns...")
         if not await column_exists(conn, "ai_cache", "id"):
-            await conn.execute(text("ALTER TABLE ai_cache ADD COLUMN id UUID DEFAULT gen_random_uuid()"))
+            await conn.execute(
+                text(
+                    "ALTER TABLE ai_cache ADD COLUMN id UUID DEFAULT gen_random_uuid()"
+                )
+            )
         if not await column_exists(conn, "ai_cache", "response_data"):
-            await conn.execute(text("ALTER TABLE ai_cache ADD COLUMN response_data JSONB"))
+            await conn.execute(
+                text("ALTER TABLE ai_cache ADD COLUMN response_data JSONB")
+            )
         if not await column_exists(conn, "ai_cache", "input_hash"):
-            await conn.execute(text("ALTER TABLE ai_cache ADD COLUMN input_hash VARCHAR(255)"))
+            await conn.execute(
+                text("ALTER TABLE ai_cache ADD COLUMN input_hash VARCHAR(255)")
+            )
         if not await column_exists(conn, "ai_cache", "last_accessed_at"):
-            await conn.execute(text("ALTER TABLE ai_cache ADD COLUMN last_accessed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()"))
+            await conn.execute(
+                text(
+                    "ALTER TABLE ai_cache ADD COLUMN last_accessed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()"
+                )
+            )
 
         # Copy data back
         print("  Copying data back...")
@@ -255,15 +299,31 @@ async def downgrade() -> None:
 
         # Change primary key back to id
         print("  Changing primary key back to id...")
-        await conn.execute(text("ALTER TABLE ai_cache DROP CONSTRAINT IF EXISTS ai_cache_pkey"))
-        await conn.execute(text("ALTER TABLE ai_cache ALTER COLUMN cache_key TYPE VARCHAR(255)"))
-        await conn.execute(text("ALTER TABLE ai_cache ALTER COLUMN cache_key DROP NOT NULL"))
+        await conn.execute(
+            text("ALTER TABLE ai_cache DROP CONSTRAINT IF EXISTS ai_cache_pkey")
+        )
+        await conn.execute(
+            text("ALTER TABLE ai_cache ALTER COLUMN cache_key TYPE VARCHAR(255)")
+        )
+        await conn.execute(
+            text("ALTER TABLE ai_cache ALTER COLUMN cache_key DROP NOT NULL")
+        )
         await conn.execute(text("ALTER TABLE ai_cache ADD PRIMARY KEY (id)"))
-        await conn.execute(text("ALTER TABLE ai_cache ADD CONSTRAINT ai_cache_cache_key_unique UNIQUE (cache_key)"))
+        await conn.execute(
+            text(
+                "ALTER TABLE ai_cache ADD CONSTRAINT ai_cache_cache_key_unique UNIQUE (cache_key)"
+            )
+        )
 
         # Set NOT NULL constraints
-        await conn.execute(text("UPDATE ai_cache SET response_data = '{}'::jsonb WHERE response_data IS NULL"))
-        await conn.execute(text("ALTER TABLE ai_cache ALTER COLUMN response_data SET NOT NULL"))
+        await conn.execute(
+            text(
+                "UPDATE ai_cache SET response_data = '{}'::jsonb WHERE response_data IS NULL"
+            )
+        )
+        await conn.execute(
+            text("ALTER TABLE ai_cache ALTER COLUMN response_data SET NOT NULL")
+        )
 
         # Drop new column
         print("  Dropping new column...")

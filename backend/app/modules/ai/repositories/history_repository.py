@@ -79,10 +79,20 @@ class HistoryRepository:
         Returns:
             History entry or None
         """
-        result = await self.db.execute(select(AIHistoryDB).where(AIHistoryDB.id == history_id, AIHistoryDB.user_id == user_id))
+        result = await self.db.execute(
+            select(AIHistoryDB).where(
+                AIHistoryDB.id == history_id, AIHistoryDB.user_id == user_id
+            )
+        )
         return result.scalar_one_or_none()
 
-    async def list_by_user(self, user_id: str, limit: int = 50, offset: int = 0, operation_type: str | None = None) -> tuple[list[AIHistoryDB], int]:
+    async def list_by_user(
+        self,
+        user_id: str,
+        limit: int = 50,
+        offset: int = 0,
+        operation_type: str | None = None,
+    ) -> tuple[list[AIHistoryDB], int]:
         """List history entries for user.
 
         Args:
@@ -122,7 +132,11 @@ class HistoryRepository:
         Returns:
             True if deleted, False if not found
         """
-        result = await self.db.execute(delete(AIHistoryDB).where(AIHistoryDB.id == history_id, AIHistoryDB.user_id == user_id))
+        result = await self.db.execute(
+            delete(AIHistoryDB).where(
+                AIHistoryDB.id == history_id, AIHistoryDB.user_id == user_id
+            )
+        )
         await self.db.commit()
         return (result.rowcount or 0) > 0  # type: ignore[attr-defined]
 
@@ -135,6 +149,8 @@ class HistoryRepository:
         Returns:
             Number of deleted entries
         """
-        result = await self.db.execute(delete(AIHistoryDB).where(AIHistoryDB.user_id == user_id))
+        result = await self.db.execute(
+            delete(AIHistoryDB).where(AIHistoryDB.user_id == user_id)
+        )
         await self.db.commit()
         return result.rowcount or 0  # type: ignore[attr-defined]

@@ -61,7 +61,13 @@ class OpenRouterProvider(AIProvider):
         try:
             # Cast messages to the expected type for OpenAI SDK
             typed_messages = cast(list[ChatCompletionMessageParam], messages)
-            response = await self.client.chat.completions.create(model=model, messages=typed_messages, temperature=temperature, max_tokens=max_tokens, **kwargs)
+            response = await self.client.chat.completions.create(
+                model=model,
+                messages=typed_messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                **kwargs,
+            )
 
             # Extract response data
             choice = response.choices[0]
@@ -70,7 +76,9 @@ class OpenRouterProvider(AIProvider):
             return ChatResponse(
                 message=message_content,
                 prompt_tokens=response.usage.prompt_tokens if response.usage else 0,
-                completion_tokens=response.usage.completion_tokens if response.usage else 0,
+                completion_tokens=(
+                    response.usage.completion_tokens if response.usage else 0
+                ),
                 total_tokens=response.usage.total_tokens if response.usage else 0,
                 model=response.model,
                 finish_reason=choice.finish_reason,

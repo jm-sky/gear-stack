@@ -72,7 +72,9 @@ async def upgrade() -> None:
             """
             )
         )
-        await conn.execute(text("CREATE INDEX ix_gear_settings_user_id ON gear_settings(user_id)"))
+        await conn.execute(
+            text("CREATE INDEX ix_gear_settings_user_id ON gear_settings(user_id)")
+        )
         print("✓ Created gear_settings table")
 
     print("✓ Migration completed successfully")

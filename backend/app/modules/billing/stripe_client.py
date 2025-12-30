@@ -23,7 +23,9 @@ class StripeClient:
 
     # ==================== Customer Operations ====================
 
-    async def create_customer(self, email: str, name: str, user_id: str) -> stripe.Customer:
+    async def create_customer(
+        self, email: str, name: str, user_id: str
+    ) -> stripe.Customer:
         """Create Stripe customer.
 
         Args:
@@ -111,7 +113,9 @@ class StripeClient:
                 billing_address_collection="auto",
                 metadata=metadata or {},
             )
-            logger.info(f"Created checkout session {session.id} for customer {customer_id}")
+            logger.info(
+                f"Created checkout session {session.id} for customer {customer_id}"
+            )
             return session
         except stripe.error.StripeError as e:
             logger.error(f"Failed to create checkout session: {e}")
@@ -119,7 +123,9 @@ class StripeClient:
 
     # ==================== Billing Portal Operations ====================
 
-    async def create_portal_session(self, customer_id: str, return_url: str) -> stripe.billing_portal.Session:
+    async def create_portal_session(
+        self, customer_id: str, return_url: str
+    ) -> stripe.billing_portal.Session:
         """Create Stripe Billing Portal session.
 
         Args:
@@ -157,7 +163,9 @@ class StripeClient:
             logger.error(f"Failed to retrieve subscription {subscription_id}: {e}")
             raise
 
-    async def cancel_subscription(self, subscription_id: str, cancel_at_period_end: bool = True) -> stripe.Subscription:
+    async def cancel_subscription(
+        self, subscription_id: str, cancel_at_period_end: bool = True
+    ) -> stripe.Subscription:
         """Cancel Stripe subscription.
 
         Args:
@@ -173,7 +181,9 @@ class StripeClient:
                     subscription_id,
                     cancel_at_period_end=True,
                 )
-                logger.info(f"Scheduled subscription {subscription_id} for cancellation at period end")
+                logger.info(
+                    f"Scheduled subscription {subscription_id} for cancellation at period end"
+                )
             else:
                 subscription = stripe.Subscription.cancel(subscription_id)
                 logger.info(f"Immediately canceled subscription {subscription_id}")
@@ -182,7 +192,9 @@ class StripeClient:
             logger.error(f"Failed to cancel subscription {subscription_id}: {e}")
             raise
 
-    async def update_subscription(self, subscription_id: str, **kwargs: Any) -> stripe.Subscription:
+    async def update_subscription(
+        self, subscription_id: str, **kwargs: Any
+    ) -> stripe.Subscription:
         """Update Stripe subscription.
 
         Args:
@@ -215,14 +227,18 @@ class StripeClient:
         """
         try:
             # Stripe SDK expects the raw bytes exactly as received
-            event = stripe.Webhook.construct_event(payload, sig_header, self.webhook_secret)
+            event = stripe.Webhook.construct_event(
+                payload, sig_header, self.webhook_secret
+            )
             logger.info(f"Webhook signature verified: {event.type} ({event.id})")
             return event
         except stripe.error.SignatureVerificationError as e:
             logger.error(f"Webhook signature verification failed: {e}")
             raise
 
-    async def verify_webhook_signature(self, payload: str, signature: str) -> stripe.Event:
+    async def verify_webhook_signature(
+        self, payload: str, signature: str
+    ) -> stripe.Event:
         """Verify webhook signature and construct event (async alias).
 
         Args:

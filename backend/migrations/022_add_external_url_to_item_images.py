@@ -89,7 +89,9 @@ async def main() -> None:
     """Run migration."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Add external_url to item_images migration")
+    parser = argparse.ArgumentParser(
+        description="Add external_url to item_images migration"
+    )
     parser.add_argument(
         "action",
         choices=["upgrade", "downgrade"],
