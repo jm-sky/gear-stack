@@ -6,6 +6,7 @@ containers are items with item_type='container'.
 All endpoints require authentication.
 """
 
+import logging
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -25,6 +26,8 @@ from .service_v2 import GearServiceV2
 
 
 router = APIRouter(prefix="/gear/v2", tags=["gear-v2"])
+
+logger = logging.getLogger(__name__)
 
 
 def get_gear_repository_v2(db: AsyncSession = Depends(get_db)) -> GearRepositoryV2:
@@ -145,6 +148,10 @@ async def get_items(
         # Get favorite containers
         GET /gear/v2/items?itemType=container&favorite=true
     """
+    # Normalize empty string to None for parent_item_id
+    if parent_item_id == "":
+        parent_item_id = None
+    
     if include_children:
         items = await service.get_items_with_children(
             current_user.id, item_type, parent_item_id

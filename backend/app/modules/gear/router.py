@@ -4,6 +4,7 @@ This module provides REST API endpoints for managing gear containers and items.
 All endpoints require authentication.
 """
 
+import logging
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Security, status
@@ -47,6 +48,8 @@ from .catalogue_item_image_router import router as catalogue_item_image_router
 from .item_image_router import router as item_image_router
 
 router = APIRouter(prefix="/gear", tags=["gear"])
+
+logger = logging.getLogger(__name__)
 
 # Include item images router
 router.include_router(item_image_router)

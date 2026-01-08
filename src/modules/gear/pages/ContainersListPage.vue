@@ -50,20 +50,21 @@ const { shouldUseAPI } = useBackend()
 // Fetch containers with children from API (for statistics like weight, readiness)
 // Only enabled when backend is available
 const { data: containersFromAPI, isLoading: isLoadingAPI } = useContainersWithChildren({
-  enabled: shouldUseAPI
+  enabled: computed(() => shouldUseAPI.value)
 })
 
 // Use API data if available, otherwise fall back to store (localStorage)
 const containers = computed(() => {
-  if (shouldUseAPI.value && containersFromAPI.value) {
-    return containersFromAPI.value
+  if (shouldUseAPI.value) {
+    return containersFromAPI.value ?? []
   }
   return containersFromStore.value
 })
 
 const rootContainers = computed(() => {
-  if (shouldUseAPI.value && containersFromAPI.value) {
-    return containersFromAPI.value.filter(c => !c.parentItemId)
+  if (shouldUseAPI.value) {
+    const apiContainers = containersFromAPI.value ?? []
+    return apiContainers.filter(c => !c.parentItemId)
   }
   return rootContainersFromStore.value
 })
