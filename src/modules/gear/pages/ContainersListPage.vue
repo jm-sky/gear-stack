@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useQueryClient } from '@tanstack/vue-query'
 import { refDebounced } from '@vueuse/core'
 import { FileInput, Package } from 'lucide-vue-next'
 import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
@@ -26,9 +27,11 @@ const ExportToPromptDialog = defineAsyncComponent(() => import('../components/Ex
 const ImportMarkdownDialog = defineAsyncComponent(() => import('../components/ImportMarkdownDialog.vue'))
 const AiChatDialog = defineAsyncComponent(() => import('@/modules/ai/components/AiChatDialog.vue'))
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
+import { useContainersWithChildren } from '../composables/useGearQueries'
 import { useGearV2 } from '../composables/useGearV2'
 import { GearRouteIcon, GearRoutePath } from '../routes'
 import { getActionIcon } from '../utils/actionIcons'
+import { gearQueryKeys } from '../utils/queryKeys'
 import type { TUUID } from '@/shared/types/base.type'
 
 // Action icons
@@ -38,13 +41,35 @@ const CreateIcon = getActionIcon('create')
 const router = useRouter()
 const route = useRoute()
 const { t } = useI18n()
-const { containers, rootContainers, deleteItem, refreshAll } = useGearV2()
+const queryClient = useQueryClient()
+const { containers: containersFromStore, rootContainers: rootContainersFromStore, deleteItem, refreshAll } = useGearV2()
 const { getContainerTypeLabel } = useContainerTypeLabel()
 const { canUseAi } = useAi()
 const { shouldUseAPI } = useBackend()
 
+// Fetch containers with children from API (for statistics like weight, readiness)
+// Only enabled when backend is available
+const { data: containersFromAPI, isLoading: isLoadingAPI } = useContainersWithChildren({
+  enabled: shouldUseAPI
+})
+
+// Use API data if available, otherwise fall back to store (localStorage)
+const containers = computed(() => {
+  if (shouldUseAPI.value && containersFromAPI.value) {
+    return containersFromAPI.value
+  }
+  return containersFromStore.value
+})
+
+const rootContainers = computed(() => {
+  if (shouldUseAPI.value && containersFromAPI.value) {
+    return containersFromAPI.value.filter(c => !c.parentItemId)
+  }
+  return rootContainersFromStore.value
+})
+
 // Filters - using refs that will be bound to ContainersFilters via v-model
-const loading = ref(false)
+const loading = computed(() => isLoadingAPI.value)
 
 // Initialize from URL query params or localStorage fallback
 function loadFiltersFromURL(): { searchQuery: string; showOnlyRootContainers: boolean } {
@@ -130,25 +155,13 @@ watch(() => route.query.restoreHistoryId, (historyId) => {
   }
 }, { immediate: true })
 
-// Check for import query parameter and open dialog, and load containers from API
-onMounted(async () => {
+// Check for import query parameter and open dialog
+// Note: Container loading is now handled by TanStack Query (useContainersWithChildren)
+onMounted(() => {
   if (route.query.import === 'true') {
     importDialogOpen.value = true
     // Remove query parameter from URL
     router.replace({ query: { ...route.query, import: undefined } })
-  }
-
-  // Load containers from API on mount (when backend is enabled AND user is authenticated)
-  if (shouldUseAPI.value) {
-    try {
-      loading.value = true
-      await refreshAll({ itemType: 'container' })
-    } catch (error) {
-      console.error('Failed to load containers from API:', error)
-      // Fallback to localStorage is handled by store initialization
-    } finally {
-      loading.value = false
-    }
   }
 })
 
@@ -222,15 +235,19 @@ const handleImport = () => {
 }
 
 const handleRefresh = async () => {
-  try {
-    loading.value = true
-    await refreshAll({ itemType: 'container' })
+  if (shouldUseAPI.value) {
+    // Invalidate all gear queries to refetch fresh data
+    await queryClient.invalidateQueries({ queryKey: ['gear'] })
     toast.success(t('common.refresh'))
-  } catch (error) {
-    console.error('Failed to refresh containers:', error)
-    toast.error(t('common.error'))
-  } finally {
-    loading.value = false
+  } else {
+    // For localStorage, use legacy refresh
+    try {
+      await refreshAll({ itemType: 'container' })
+      toast.success(t('common.refresh'))
+    } catch (error) {
+      console.error('Failed to refresh containers:', error)
+      toast.error(t('common.error'))
+    }
   }
 }
 

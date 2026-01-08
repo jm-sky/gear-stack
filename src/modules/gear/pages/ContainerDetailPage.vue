@@ -19,6 +19,7 @@ import ContainerRatingSection from '../components/ContainerRatingSection.vue'
 import SortConfirmationAlert from '../components/SortConfirmationAlert.vue'
 import { useCatalogue } from '../composables/catalogue/useCatalogue'
 import { useContainerV2 } from '../composables/useContainerV2'
+import { useContainerWithChildren } from '../composables/useGearQueries'
 import { useGear } from '../composables/useGear'
 import { useGearV2 } from '../composables/useGearV2'
 import { useItemsParamRecognition } from '../composables/useItemsParamRecognition'
@@ -52,7 +53,7 @@ const { t } = useI18n()
 const store = useGearStore()
 const storeV2 = useGearStoreV2()
 const { shouldUseAPI } = useBackend()
-const { container } = useContainerV2()
+const { container: containerFromStore } = useContainerV2()
 const { deleteItem, updateItem, createItem, moveItem } = useGearV2()
 const { updateContainer, getContainerById } = useGear()
 const { user, isAuthenticated } = useAuth()
@@ -61,6 +62,23 @@ const { setTitle } = usePageTitle()
 const { unlinkItemFromCatalogue } = useCatalogue()
 
 const containerId = route.params.id as string
+
+// Fetch container + children from API when using backend
+const {
+  container: containerFromAPI,
+  children: childrenFromAPI,
+  isLoading: isLoadingAPI
+} = useContainerWithChildren(
+  computed(() => shouldUseAPI.value ? containerId : undefined)
+)
+
+// Use API data if available, otherwise fall back to store
+const container = computed(() => {
+  if (shouldUseAPI.value && containerFromAPI.value) {
+    return containerFromAPI.value
+  }
+  return containerFromStore.value
+})
 
 const cardClass = computed(() => {
   if (!container.value?.color) return ''
@@ -118,9 +136,16 @@ watch(() => route.query.restoreHistoryId, (historyId) => {
 
 // File operations handled in handleImport
 
-// Items - use V2 store to get children
+// Items - use API data if available, otherwise fall back to store
 const items = computed<IGearItemV2[]>(() => {
   if (!container.value) return []
+
+  // Use API data if available (when backend is enabled)
+  if (shouldUseAPI.value && childrenFromAPI.value) {
+    return childrenFromAPI.value
+  }
+
+  // Fall back to store (localStorage)
   return storeV2.getChildrenOfItem(container.value.id)
 })
 
