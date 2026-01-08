@@ -28,6 +28,7 @@ from app.common.id_utils import generate_id
 from app.core.config import settings
 from app.core.storage.exceptions import CorruptedImageError
 from app.core.storage.factory import get_storage_adapter
+from app.modules.gear.item_image_schemas import ItemImageResponse
 from app.core.storage.image_processor import ImageProcessor
 from app.modules.auth.db_models import UserDB
 from app.modules.gear.item_image_repository import ItemImageRepository
@@ -470,7 +471,7 @@ class ImageUploadService:
             await self.repository.update(image_id, {"is_primary": True})
             return True
 
-    async def get_item_images(self, item_id: str) -> list[dict]:
+    async def get_item_images(self, item_id: str) -> list[ItemImageResponse]:
         """
         Get all images for an item with URLs.
 
@@ -478,7 +479,7 @@ class ImageUploadService:
             item_id: Item ID
 
         Returns:
-            List of image dictionaries with URLs
+            List of image response objects with URLs
         """
         images = await self.repository.get_by_item(item_id)
 
@@ -489,23 +490,23 @@ class ImageUploadService:
                 url = img.external_url
             else:
                 url = await self.storage.get_url(img.file_path)
-            result.append(
-                {
-                    "id": img.id,
-                    "item_id": img.item_id,
-                    "user_id": img.user_id,
-                    "url": url,
-                    "file_name": img.file_name,
-                    "file_size": img.file_size,
-                    "mime_type": img.mime_type,
-                    "width": img.width,
-                    "height": img.height,
-                    "is_primary": img.is_primary,
-                    "order": img.order,
-                    "created_at": img.created_at.isoformat(),
-                    "updated_at": img.updated_at.isoformat(),
-                }
+            # Use Pydantic schema to ensure proper field name conversion (is_primary -> isPrimary)
+            image_response = ItemImageResponse(
+                id=img.id,
+                item_id=img.item_id,
+                user_id=img.user_id,
+                url=url,
+                file_name=img.file_name,
+                file_size=img.file_size,
+                mime_type=img.mime_type,
+                width=img.width,
+                height=img.height,
+                is_primary=img.is_primary,
+                order=img.order,
+                created_at=img.created_at.isoformat(),
+                updated_at=img.updated_at.isoformat(),
             )
+            result.append(image_response)
 
         return result
 

@@ -52,7 +52,7 @@ async def upload_item_image(
 @router.get("/{item_id}/images", response_model=list[ItemImageResponse])
 async def get_item_images(
     item_id: str, db: AsyncSession = Depends(get_db)
-) -> list[dict]:
+) -> list[ItemImageResponse]:
     """
     Get all images for an item.
 
