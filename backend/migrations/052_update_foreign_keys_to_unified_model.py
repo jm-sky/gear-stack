@@ -70,7 +70,9 @@ async def upgrade() -> None:
         # Verify gear_items_v2 exists
         items_v2_exist = await table_exists(conn, "gear_items_v2")
         if not items_v2_exist:
-            print("❌ Error: gear_items_v2 table does not exist. Run migrations 041 and 042 first.")
+            print(
+                "❌ Error: gear_items_v2 table does not exist. Run migrations 041 and 042 first."
+            )
             sys.exit(1)
 
         # 1. Update item_images table
@@ -78,7 +80,9 @@ async def upgrade() -> None:
         item_images_exist = await table_exists(conn, "item_images")
         if item_images_exist:
             # Drop old constraint if exists
-            old_constraint = await constraint_exists(conn, "item_images", "item_images_item_id_fkey")
+            old_constraint = await constraint_exists(
+                conn, "item_images", "item_images_item_id_fkey"
+            )
             if old_constraint:
                 await conn.execute(
                     text(
@@ -125,7 +129,9 @@ async def upgrade() -> None:
                     """
                     )
                 )
-                print("  ✓ Dropped old constraint: container_share_tokens_container_id_fkey")
+                print(
+                    "  ✓ Dropped old constraint: container_share_tokens_container_id_fkey"
+                )
 
             # Add new constraint pointing to gear_items_v2
             await conn.execute(
@@ -148,7 +154,9 @@ async def upgrade() -> None:
         ratings_exist = await table_exists(conn, "container_ratings")
         if ratings_exist:
             # Drop old constraint if exists
-            old_constraint = await constraint_exists(conn, "container_ratings", "container_ratings_container_id_fkey")
+            old_constraint = await constraint_exists(
+                conn, "container_ratings", "container_ratings_container_id_fkey"
+            )
             if old_constraint:
                 await conn.execute(
                     text(
@@ -246,7 +254,9 @@ async def downgrade() -> None:
                     """
                     )
                 )
-                print("  ✓ Restored constraint: container_share_tokens → gear_containers")
+                print(
+                    "  ✓ Restored constraint: container_share_tokens → gear_containers"
+                )
         else:
             print("  ⚠️  container_share_tokens table does not exist, skipping")
 
@@ -289,7 +299,9 @@ async def downgrade() -> None:
 async def main() -> None:
     """Run migration based on command line argument."""
     if len(sys.argv) < 2:
-        print("Usage: python migrations/043_update_foreign_keys_to_unified_model.py [upgrade|downgrade]")
+        print(
+            "Usage: python migrations/043_update_foreign_keys_to_unified_model.py [upgrade|downgrade]"
+        )
         sys.exit(1)
 
     command = sys.argv[1].lower()
@@ -299,7 +311,9 @@ async def main() -> None:
         await downgrade()
     else:
         print(f"Unknown command: {command}")
-        print("Usage: python migrations/043_update_foreign_keys_to_unified_model.py [upgrade|downgrade]")
+        print(
+            "Usage: python migrations/043_update_foreign_keys_to_unified_model.py [upgrade|downgrade]"
+        )
         sys.exit(1)
 
 

@@ -16,6 +16,8 @@ from datetime import datetime
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
+from sqlalchemy.orm import object_session
+from sqlalchemy.orm.attributes import instance_state
 
 
 # Type aliases matching frontend
@@ -217,11 +219,11 @@ class GearItemResponseV2(BaseModel):
     which fields are populated.
     """
 
-    # Core fields
+    # Core fields (field names match DB, aliases for JSON output)
     id: str
-    userId: str = Field(..., alias="userId")
-    itemType: str = Field(..., alias="itemType")
-    parentItemId: str | None = Field(None, alias="parentItemId")
+    user_id: str = Field(..., serialization_alias="userId")
+    item_type: str = Field(..., serialization_alias="itemType")
+    parent_item_id: str | None = Field(None, serialization_alias="parentItemId")
 
     # Common fields
     name: str
@@ -230,45 +232,112 @@ class GearItemResponseV2(BaseModel):
     price: float | None = None
     currency: str | None = None
     weight: float | None = None
-    weightUnit: str | None = Field(None, alias="weightUnit")
+    weight_unit: str | None = Field(None, serialization_alias="weightUnit")
     url: str | None = None
     color: str | None = None
     notes: str | None = None
 
-    # Container-specific fields (None if itemType='item')
-    containerType: str | None = Field(None, alias="containerType")
-    maxWeight: float | None = Field(None, alias="maxWeight")
-    maxWeightUnit: str | None = Field(None, alias="maxWeightUnit")
-    hideWhenNested: bool | None = Field(None, alias="hideWhenNested")
-    isPublic: bool | None = Field(None, alias="isPublic")
-    isHiddenByReports: bool | None = Field(None, alias="isHiddenByReports")
+    # Container-specific fields (None if item_type='item')
+    container_type: str | None = Field(None, serialization_alias="containerType")
+    max_weight: float | None = Field(None, serialization_alias="maxWeight")
+    max_weight_unit: str | None = Field(None, serialization_alias="maxWeightUnit")
+    hide_when_nested: bool | None = Field(None, serialization_alias="hideWhenNested")
+    is_public: bool | None = Field(None, serialization_alias="isPublic")
+    is_hidden_by_reports: bool | None = Field(
+        None, serialization_alias="isHiddenByReports"
+    )
     favorite: bool | None = None
-    showItemImages: bool | None = Field(None, alias="showItemImages")
+    show_item_images: bool | None = Field(None, serialization_alias="showItemImages")
 
-    # Item-specific fields (None if itemType='container')
+    # Item-specific fields (None if item_type='container')
     category: str | None = None
     quantity: int | None = None
     status: str | None = None
     priority: str | None = None
-    expirationDate: datetime | None = Field(None, alias="expirationDate")
-    shelfLife: dict[str, Any] | None = Field(None, alias="shelfLife")
+    expiration_date: datetime | None = Field(None, serialization_alias="expirationDate")
+    shelf_life: dict[str, Any] | None = Field(None, serialization_alias="shelfLife")
     quality: str | None = None
     wearable: bool | None = None
     consumable: bool | None = None
-    orderIndex: int | None = Field(None, alias="orderIndex")
-    showOnContainer: bool | None = Field(None, alias="showOnContainer")
-    promoteCount: int | None = Field(None, ge=0, alias="promoteCount")
+    order_index: int | None = Field(None, serialization_alias="orderIndex")
+    show_on_container: bool | None = Field(None, serialization_alias="showOnContainer")
+    promote_count: int | None = Field(None, ge=0, serialization_alias="promoteCount")
 
     # Linking fields
-    linkedItemId: str | None = Field(None, alias="linkedItemId")
-    catalogueItemId: str | None = Field(None, alias="catalogueItemId")
+    linked_item_id: str | None = Field(None, serialization_alias="linkedItemId")
+    catalogue_item_id: str | None = Field(None, serialization_alias="catalogueItemId")
 
     # Metadata
-    createdAt: datetime = Field(..., alias="createdAt")
-    updatedAt: datetime = Field(..., alias="updatedAt")
+    created_at: datetime = Field(..., serialization_alias="createdAt")
+    updated_at: datetime = Field(..., serialization_alias="updatedAt")
 
     # Optional: nested children (for tree structure responses)
     children: list["GearItemResponseV2"] | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def handle_lazy_loaded_children(cls, data: Any) -> Any:
+        """Handle lazy-loaded children relationship to avoid MissingGreenlet error.
+
+        If data is an ORM object and children are not loaded, set children to None
+        to prevent Pydantic from trying to access the lazy-loaded relationship.
+        """
+        if hasattr(data, "__dict__"):
+            # Check if this is an ORM object with unloaded children
+            state = instance_state(data)
+            if state and "children" in state.unloaded:
+                # Children are not loaded, explicitly set to None
+                if isinstance(data, dict):
+                    data["children"] = None
+                else:
+                    # For ORM objects, we need to convert to dict to avoid lazy loading
+                    data_dict = {
+                        key: getattr(data, key)
+                        for key in [
+                            "id",
+                            "user_id",
+                            "item_type",
+                            "parent_item_id",
+                            "name",
+                            "description",
+                            "brand",
+                            "price",
+                            "currency",
+                            "weight",
+                            "weight_unit",
+                            "url",
+                            "color",
+                            "notes",
+                            "container_type",
+                            "max_weight",
+                            "max_weight_unit",
+                            "hide_when_nested",
+                            "is_public",
+                            "is_hidden_by_reports",
+                            "favorite",
+                            "show_item_images",
+                            "category",
+                            "quantity",
+                            "status",
+                            "priority",
+                            "expiration_date",
+                            "shelf_life",
+                            "quality",
+                            "wearable",
+                            "consumable",
+                            "order_index",
+                            "show_on_container",
+                            "promote_count",
+                            "linked_item_id",
+                            "catalogue_item_id",
+                            "created_at",
+                            "updated_at",
+                        ]
+                        if hasattr(data, key)
+                    }
+                    data_dict["children"] = None
+                    return data_dict
+        return data
 
     model_config = {"populate_by_name": True, "from_attributes": True}
 
@@ -311,7 +380,9 @@ class GearItemBatchUpdateOrderV2(BaseModel):
 class GearItemFiltersV2(BaseModel):
     """Query filters for fetching gear items."""
 
-    itemType: Literal["container", "item", "all"] | None = Field("all", alias="itemType")
+    itemType: Literal["container", "item", "all"] | None = Field(
+        "all", alias="itemType"
+    )
     parentItemId: str | None = Field(None, alias="parentItemId")
     isPublic: bool | None = Field(None, alias="isPublic")
     favorite: bool | None = None

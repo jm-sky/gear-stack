@@ -36,7 +36,9 @@ async def gear_service_v2(gear_repository_v2: GearRepositoryV2) -> GearServiceV2
     return GearServiceV2(gear_repository_v2)
 
 
-async def get_item_count(db: AsyncSession, user_id: str, item_type: str | None = None) -> int:
+async def get_item_count(
+    db: AsyncSession, user_id: str, item_type: str | None = None
+) -> int:
     """Helper to get item count for a user."""
     stmt = select(GearItemDBV2).where(GearItemDBV2.user_id == user_id)
     if item_type:
@@ -323,7 +325,9 @@ class TestReadOperationsV2:
         await gear_service_v2.create_item(test_user.id, container2_data)
 
         # Act
-        containers = await gear_service_v2.get_items(test_user.id, item_type="container")
+        containers = await gear_service_v2.get_items(
+            test_user.id, item_type="container"
+        )
 
         # Assert
         assert len(containers) == 2
@@ -421,7 +425,9 @@ class TestUpdateOperationsV2:
             name="New Name",
             favorite=True,
         )
-        updated = await gear_service_v2.update_item(container.id, test_user.id, update_data)
+        updated = await gear_service_v2.update_item(
+            container.id, test_user.id, update_data
+        )
 
         # Assert
         assert updated.name == "New Name"
@@ -502,7 +508,9 @@ class TestUpdateOperationsV2:
             {"id": item1.id, "orderIndex": 1},
             {"id": item2.id, "orderIndex": 0},
         ]
-        updated_items = await gear_service_v2.batch_update_order(batch_updates, test_user.id)
+        updated_items = await gear_service_v2.batch_update_order(
+            batch_updates, test_user.id
+        )
 
         # Assert
         assert len(updated_items) == 2

@@ -92,7 +92,9 @@ async def upgrade() -> None:
         for field in container_fields:
             if await column_exists(conn, "gear_items_v2", field):
                 await conn.execute(
-                    text(f"ALTER TABLE gear_items_v2 ALTER COLUMN {field} DROP NOT NULL;")
+                    text(
+                        f"ALTER TABLE gear_items_v2 ALTER COLUMN {field} DROP NOT NULL;"
+                    )
                 )
                 print(f"✓ Dropped NOT NULL constraint on {field}")
             else:
@@ -119,7 +121,9 @@ async def upgrade() -> None:
         for field in item_fields:
             if await column_exists(conn, "gear_items_v2", field):
                 await conn.execute(
-                    text(f"ALTER TABLE gear_items_v2 ALTER COLUMN {field} DROP NOT NULL;")
+                    text(
+                        f"ALTER TABLE gear_items_v2 ALTER COLUMN {field} DROP NOT NULL;"
+                    )
                 )
                 print(f"✓ Dropped NOT NULL constraint on {field}")
             else:
@@ -135,14 +139,18 @@ async def downgrade() -> None:
     Only run this if you're certain all values conform to the constraints.
     """
     print("WARNING: Downgrade will add NOT NULL constraints back.")
-    print("This migration is intentionally a no-op for downgrade to prevent data issues.")
+    print(
+        "This migration is intentionally a no-op for downgrade to prevent data issues."
+    )
     print("✓ Downgrade skipped (no changes made)")
 
 
 async def main() -> None:
     """Run migration based on command line argument."""
     if len(sys.argv) < 2:
-        print("Usage: python migrations/054_fix_nullable_constraints_v2.py [upgrade|downgrade]")
+        print(
+            "Usage: python migrations/054_fix_nullable_constraints_v2.py [upgrade|downgrade]"
+        )
         sys.exit(1)
 
     command = sys.argv[1].lower()
@@ -152,7 +160,9 @@ async def main() -> None:
         await downgrade()
     else:
         print(f"Unknown command: {command}")
-        print("Usage: python migrations/054_fix_nullable_constraints_v2.py [upgrade|downgrade]")
+        print(
+            "Usage: python migrations/054_fix_nullable_constraints_v2.py [upgrade|downgrade]"
+        )
         sys.exit(1)
 
 

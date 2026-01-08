@@ -73,9 +73,13 @@ class GearRepositoryV2(SearchMixin):
             max_weight_unit=data.maxWeightUnit,
             hide_when_nested=data.hideWhenNested,
             is_public=(data.isPublic if data.isPublic is not None else False),
-            is_hidden_by_reports=(data.isHiddenByReports if data.isHiddenByReports is not None else False),
+            is_hidden_by_reports=(
+                data.isHiddenByReports if data.isHiddenByReports is not None else False
+            ),
             favorite=(data.favorite if data.favorite is not None else False),
-            show_item_images=(data.showItemImages if data.showItemImages is not None else False),
+            show_item_images=(
+                data.showItemImages if data.showItemImages is not None else False
+            ),
             # Item-specific
             category=data.category,
             quantity=data.quantity,
@@ -181,11 +185,17 @@ class GearRepositoryV2(SearchMixin):
         if parent_item_id is not None:
             conditions.append(GearItemDBV2.parent_item_id == parent_item_id)
 
-        stmt = select(GearItemDBV2).where(and_(*conditions)).options(selectinload(GearItemDBV2.children))
+        stmt = (
+            select(GearItemDBV2)
+            .where(and_(*conditions))
+            .options(selectinload(GearItemDBV2.children))
+        )
         result = await self.db.execute(stmt)
         return result.scalars().all()
 
-    async def get_children(self, parent_item_id: str, user_id: str) -> Sequence[GearItemDBV2]:
+    async def get_children(
+        self, parent_item_id: str, user_id: str
+    ) -> Sequence[GearItemDBV2]:
         """Get all children of a parent item.
 
         Args:
@@ -206,7 +216,9 @@ class GearRepositoryV2(SearchMixin):
 
     # Update operations
 
-    async def update_item(self, item_id: str, user_id: str, data: GearItemUpdateV2) -> GearItemDBV2 | None:
+    async def update_item(
+        self, item_id: str, user_id: str, data: GearItemUpdateV2
+    ) -> GearItemDBV2 | None:
         """Update a gear item.
 
         Args:
@@ -233,7 +245,9 @@ class GearRepositoryV2(SearchMixin):
         await self.db.refresh(item)
         return item
 
-    async def batch_update_order(self, items: list[dict], user_id: str) -> Sequence[GearItemDBV2]:
+    async def batch_update_order(
+        self, items: list[dict], user_id: str
+    ) -> Sequence[GearItemDBV2]:
         """Batch update order_index for multiple items.
 
         Args:
@@ -278,7 +292,9 @@ class GearRepositoryV2(SearchMixin):
 
     # Move operation
 
-    async def move_item(self, item_id: str, user_id: str, target_parent_id: str | None) -> GearItemDBV2 | None:
+    async def move_item(
+        self, item_id: str, user_id: str, target_parent_id: str | None
+    ) -> GearItemDBV2 | None:
         """Move an item to a different parent.
 
         Args:
@@ -310,9 +326,7 @@ class GearRepositoryV2(SearchMixin):
     # Public containers operations
 
     async def get_public_containers(
-        self,
-        user_id: str | None = None,
-        exclude_hidden: bool = True
+        self, user_id: str | None = None, exclude_hidden: bool = True
     ) -> Sequence[GearItemDBV2]:
         """Get public containers, optionally excluding hidden ones.
 
@@ -335,7 +349,7 @@ class GearRepositoryV2(SearchMixin):
             conditions.append(
                 or_(
                     GearItemDBV2.is_hidden_by_reports == False,  # noqa: E712
-                    GearItemDBV2.is_hidden_by_reports.is_(None)
+                    GearItemDBV2.is_hidden_by_reports.is_(None),
                 )
             )
 

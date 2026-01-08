@@ -112,7 +112,9 @@ async def upgrade() -> None:
 
         if not v2_exists:
             print("gear_items_v2 table does not exist, skipping migration...")
-            print("Note: Table will be created with all fields when created from models")
+            print(
+                "Note: Table will be created with all fields when created from models"
+            )
             return
 
         # Add is_hidden_by_reports column (container-specific)
@@ -249,7 +251,9 @@ async def main() -> None:
     """Run migration."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Add missing fields to gear_items_v2 migration")
+    parser = argparse.ArgumentParser(
+        description="Add missing fields to gear_items_v2 migration"
+    )
     parser.add_argument(
         "action",
         choices=["upgrade", "downgrade"],
