@@ -61,7 +61,11 @@ class ItemImageRepository:
         Returns:
             List of images
         """
-        stmt = select(ItemImageDB).where(ItemImageDB.item_id == item_id).order_by(ItemImageDB.order)
+        stmt = (
+            select(ItemImageDB)
+            .where(ItemImageDB.item_id == item_id)
+            .order_by(ItemImageDB.order)
+        )
         result = await self.db.execute(stmt)
         return result.scalars().all()
 
@@ -75,7 +79,11 @@ class ItemImageRepository:
         Returns:
             Number of images
         """
-        stmt = select(func.count()).select_from(ItemImageDB).where(ItemImageDB.item_id == item_id)
+        stmt = (
+            select(func.count())
+            .select_from(ItemImageDB)
+            .where(ItemImageDB.item_id == item_id)
+        )
         result = await self.db.execute(stmt)
         return result.scalar() or 0
 
@@ -90,7 +98,12 @@ class ItemImageRepository:
         Returns:
             Updated image record if found, None otherwise
         """
-        stmt = update(ItemImageDB).where(ItemImageDB.id == image_id).values(**data).returning(ItemImageDB)
+        stmt = (
+            update(ItemImageDB)
+            .where(ItemImageDB.id == image_id)
+            .values(**data)
+            .returning(ItemImageDB)
+        )
         result = await self.db.execute(stmt)
         await self.db.commit()
         return result.scalar_one_or_none()
@@ -134,7 +147,11 @@ class ItemImageRepository:
         Args:
             item_id: Item ID
         """
-        stmt = update(ItemImageDB).where(ItemImageDB.item_id == item_id).values(is_primary=False)
+        stmt = (
+            update(ItemImageDB)
+            .where(ItemImageDB.item_id == item_id)
+            .values(is_primary=False)
+        )
         await self.db.execute(stmt)
         await self.db.commit()
 
@@ -148,11 +165,15 @@ class ItemImageRepository:
         Returns:
             Primary image if found, None otherwise
         """
-        stmt = select(ItemImageDB).where(ItemImageDB.item_id == item_id, ItemImageDB.is_primary == True)  # noqa: E712
+        stmt = select(ItemImageDB).where(
+            ItemImageDB.item_id == item_id, ItemImageDB.is_primary == True
+        )  # noqa: E712
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def get_primary_images_by_items(self, item_ids: list[str]) -> dict[str, ItemImageDB]:
+    async def get_primary_images_by_items(
+        self, item_ids: list[str]
+    ) -> dict[str, ItemImageDB]:
         """
         Get primary images for multiple items in a single query.
 
@@ -164,7 +185,9 @@ class ItemImageRepository:
         """
         if not item_ids:
             return {}
-        stmt = select(ItemImageDB).where(ItemImageDB.item_id.in_(item_ids), ItemImageDB.is_primary == True)  # noqa: E712
+        stmt = select(ItemImageDB).where(
+            ItemImageDB.item_id.in_(item_ids), ItemImageDB.is_primary == True
+        )  # noqa: E712
         result = await self.db.execute(stmt)
         images = result.scalars().all()
         return {img.item_id: img for img in images}
@@ -179,7 +202,9 @@ class ItemImageRepository:
         Returns:
             Total storage usage in bytes
         """
-        stmt = select(func.sum(ItemImageDB.file_size)).where(ItemImageDB.user_id == user_id)
+        stmt = select(func.sum(ItemImageDB.file_size)).where(
+            ItemImageDB.user_id == user_id
+        )
         result = await self.db.execute(stmt)
         total = result.scalar()
         return total or 0

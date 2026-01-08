@@ -44,7 +44,9 @@ async def upgrade() -> None:
 
         if not items_exist:
             print("gear_items table does not exist, skipping migration...")
-            print("Note: Table will be created with order field when created from models")
+            print(
+                "Note: Table will be created with order field when created from models"
+            )
             return
 
         print("gear_items table exists, adding order field...")

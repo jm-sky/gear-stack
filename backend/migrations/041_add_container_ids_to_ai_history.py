@@ -66,7 +66,9 @@ async def upgrade() -> None:
 
         # Step 1: Add column
         print("  Adding container_ids column...")
-        await conn.execute(text("ALTER TABLE ai_history ADD COLUMN container_ids JSONB"))
+        await conn.execute(
+            text("ALTER TABLE ai_history ADD COLUMN container_ids JSONB")
+        )
 
         # Step 2: Populate container_ids from input_data.context keys
         print("  Populating container_ids from input_data.context...")
@@ -129,7 +131,9 @@ async def main() -> None:
     """Run migration."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Add container_ids column to ai_history table")
+    parser = argparse.ArgumentParser(
+        description="Add container_ids column to ai_history table"
+    )
     parser.add_argument(
         "action",
         choices=["upgrade", "downgrade"],

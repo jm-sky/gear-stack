@@ -82,7 +82,9 @@ async def upgrade() -> None:
 
         if not items_exist:
             print("gear_items table does not exist, skipping migration...")
-            print("Note: Table will be created with promote_count field when created from models")
+            print(
+                "Note: Table will be created with promote_count field when created from models"
+            )
             return
 
         # Add promote_count column to gear_items if it doesn't exist
@@ -133,8 +135,12 @@ async def upgrade() -> None:
 
         # Create indexes
         print("Creating indexes...")
-        await conn.execute(text("CREATE INDEX ix_item_promotions_item_id ON item_promotions(item_id);"))
-        await conn.execute(text("CREATE INDEX ix_item_promotions_user_id ON item_promotions(user_id);"))
+        await conn.execute(
+            text("CREATE INDEX ix_item_promotions_item_id ON item_promotions(item_id);")
+        )
+        await conn.execute(
+            text("CREATE INDEX ix_item_promotions_user_id ON item_promotions(user_id);")
+        )
 
         print("✓ Created item_promotions table with indexes")
 

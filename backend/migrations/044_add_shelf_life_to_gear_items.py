@@ -82,7 +82,9 @@ async def upgrade() -> None:
 
         if not items_exist:
             print("gear_items table does not exist, skipping migration...")
-            print("Note: Table will be created with shelf_life field when created from models")
+            print(
+                "Note: Table will be created with shelf_life field when created from models"
+            )
             return
 
         # Add shelf_life column to gear_items if it doesn't exist
@@ -130,7 +132,9 @@ async def main() -> None:
     """Run migration."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Add shelf_life to gear_items migration")
+    parser = argparse.ArgumentParser(
+        description="Add shelf_life to gear_items migration"
+    )
     parser.add_argument(
         "action",
         choices=["upgrade", "downgrade"],

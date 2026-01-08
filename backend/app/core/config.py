@@ -11,7 +11,9 @@ from app.core.helpers import parse_list_value
 
 
 # Shared config for all nested settings
-_base_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", case_sensitive=False, extra="ignore")
+_base_config = SettingsConfigDict(
+    env_file=".env", env_file_encoding="utf-8", case_sensitive=False, extra="ignore"
+)
 
 
 class Environment(str, Enum):
@@ -28,7 +30,9 @@ class AppSettings(BaseSettings):
 
     model_config = _base_config
 
-    name: str = Field(default="backend", validation_alias="APP_NAME", description="Application name")
+    name: str = Field(
+        default="backend", validation_alias="APP_NAME", description="Application name"
+    )
     display_name: str = Field(
         default="Gear Stack",
         validation_alias="APP_DISPLAY_NAME",
@@ -39,7 +43,9 @@ class AppSettings(BaseSettings):
         validation_alias="APP_VERSION",
         description="Application version",
     )
-    debug: bool = Field(default=False, validation_alias="DEBUG", description="Debug mode")
+    debug: bool = Field(
+        default=False, validation_alias="DEBUG", description="Debug mode"
+    )
     environment: Environment = Field(
         default=Environment.DEVELOPMENT,
         validation_alias="ENVIRONMENT",
@@ -68,7 +74,9 @@ class ServerSettings(BaseSettings):
 
     model_config = _base_config
 
-    host: str = Field(default="0.0.0.0", validation_alias="HOST", description="Server host")
+    host: str = Field(
+        default="0.0.0.0", validation_alias="HOST", description="Server host"
+    )
     port: int = Field(default=8000, validation_alias="PORT", description="Server port")
     reload: bool = Field(
         default=True,
@@ -101,7 +109,9 @@ class ServerSettings(BaseSettings):
         description="Allowed hosts for TrustedHostMiddleware (production security)",
     )
 
-    @field_validator("cors_origins", "cors_methods", "cors_headers", "allowed_hosts", mode="after")
+    @field_validator(
+        "cors_origins", "cors_methods", "cors_headers", "allowed_hosts", mode="after"
+    )
     @classmethod
     def parse_list_fields(cls, v: str | list[str]) -> list[str]:
         """Parse list fields from JSON array or comma-separated string."""
@@ -141,7 +151,9 @@ class DatabaseSettings(BaseSettings):
         validation_alias="DATABASE_POOL_RECYCLE",
         description="Database pool recycle time (seconds)",
     )
-    echo: bool = Field(default=False, validation_alias="DATABASE_ECHO", description="Echo SQL queries")
+    echo: bool = Field(
+        default=False, validation_alias="DATABASE_ECHO", description="Echo SQL queries"
+    )
 
     @field_validator("url")
     @classmethod
@@ -206,14 +218,23 @@ class SecuritySettings(BaseSettings):
     def validate_secret_key(cls, v: str) -> str:
         """Validate secret key strength and security."""
         if "change-me" in v.lower() or "change-this" in v.lower():
-            raise ValueError("Secret key must be changed from default value in production. " "Set SECRET_KEY environment variable with a secure random string.")
+            raise ValueError(
+                "Secret key must be changed from default value in production. "
+                "Set SECRET_KEY environment variable with a secure random string."
+            )
 
         if len(v) < 32:
-            raise ValueError("Secret key must be at least 32 characters long for security. " "Use a cryptographically secure random string.")
+            raise ValueError(
+                "Secret key must be at least 32 characters long for security. "
+                "Use a cryptographically secure random string."
+            )
 
         # Check for basic entropy (not all same character)
         if len(set(v)) < 8:
-            raise ValueError("Secret key must have sufficient entropy. " "Use a truly random string with varied characters.")
+            raise ValueError(
+                "Secret key must have sufficient entropy. "
+                "Use a truly random string with varied characters."
+            )
 
         return v
 
@@ -265,13 +286,17 @@ class LoggingSettings(BaseSettings):
 
     model_config = _base_config
 
-    level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = Field(default="INFO", validation_alias="LOG_LEVEL", description="Logging level")
+    level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = Field(
+        default="INFO", validation_alias="LOG_LEVEL", description="Logging level"
+    )
     format: str = Field(
         default="%(asctime)s | %(name)s | %(levelname)s | %(message)s",
         validation_alias="LOG_FORMAT",
         description="Log format",
     )
-    file: str | None = Field(default=None, validation_alias="LOG_FILE", description="Log file path")
+    file: str | None = Field(
+        default=None, validation_alias="LOG_FILE", description="Log file path"
+    )
 
 
 class RecaptchaSettings(BaseSettings):
@@ -321,7 +346,9 @@ class RecaptchaSettings(BaseSettings):
     def validate_min_score(cls, v: float) -> float:
         """Validate reCAPTCHA score is in valid range."""
         if not 0.0 <= v <= 1.0:
-            raise ValueError(f"reCAPTCHA min_score must be between 0.0 and 1.0, got: {v}")
+            raise ValueError(
+                f"reCAPTCHA min_score must be between 0.0 and 1.0, got: {v}"
+            )
         return v
 
 
@@ -390,9 +417,15 @@ class EmailSettings(BaseSettings):
         validation_alias="SMTP_HOST",
         description="SMTP server host",
     )
-    smtp_port: int = Field(default=587, validation_alias="SMTP_PORT", description="SMTP server port")
-    smtp_user: str = Field(default="", validation_alias="SMTP_USER", description="SMTP username")
-    smtp_password: str = Field(default="", validation_alias="SMTP_PASSWORD", description="SMTP password")
+    smtp_port: int = Field(
+        default=587, validation_alias="SMTP_PORT", description="SMTP server port"
+    )
+    smtp_user: str = Field(
+        default="", validation_alias="SMTP_USER", description="SMTP username"
+    )
+    smtp_password: str = Field(
+        default="", validation_alias="SMTP_PASSWORD", description="SMTP password"
+    )
     smtp_from: str = Field(
         default="noreply@example.com",
         validation_alias="SMTP_FROM",
@@ -600,17 +633,39 @@ class AISettings(BaseSettings):
 
     model_config = _base_config
 
-    enabled: bool = Field(default=True, validation_alias="AI_ENABLED", description="Enable AI features")
-    openrouter_api_key: str = Field(default="", validation_alias="OPENROUTER_API_KEY", description="OpenRouter API key")
+    enabled: bool = Field(
+        default=True, validation_alias="AI_ENABLED", description="Enable AI features"
+    )
+    openrouter_api_key: str = Field(
+        default="",
+        validation_alias="OPENROUTER_API_KEY",
+        description="OpenRouter API key",
+    )
     openrouter_base_url: str = Field(
         default="https://openrouter.ai/api/v1",
         validation_alias="OPENROUTER_BASE_URL",
         description="OpenRouter base URL",
     )
-    token_encryption_key: str = Field(default="", validation_alias="AI_TOKEN_ENCRYPTION_KEY", description="Fernet encryption key for API tokens")
-    cache_enabled: bool = Field(default=True, validation_alias="AI_CACHE_ENABLED", description="Enable PostgreSQL caching")
-    cache_ttl_classify: int = Field(default=7, validation_alias="AI_CACHE_TTL_CLASSIFY", description="Cache TTL for classification (days)")
-    cache_ttl_embed: int = Field(default=30, validation_alias="AI_CACHE_TTL_EMBED", description="Cache TTL for embeddings (days)")
+    token_encryption_key: str = Field(
+        default="",
+        validation_alias="AI_TOKEN_ENCRYPTION_KEY",
+        description="Fernet encryption key for API tokens",
+    )
+    cache_enabled: bool = Field(
+        default=True,
+        validation_alias="AI_CACHE_ENABLED",
+        description="Enable PostgreSQL caching",
+    )
+    cache_ttl_classify: int = Field(
+        default=7,
+        validation_alias="AI_CACHE_TTL_CLASSIFY",
+        description="Cache TTL for classification (days)",
+    )
+    cache_ttl_embed: int = Field(
+        default=30,
+        validation_alias="AI_CACHE_TTL_EMBED",
+        description="Cache TTL for embeddings (days)",
+    )
 
     @field_validator("enabled", "cache_enabled", mode="before")
     @classmethod

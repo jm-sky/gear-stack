@@ -20,7 +20,9 @@ try:
 except ImportError:
     HAS_MAGIC = False
     logger = logging.getLogger(__name__)
-    logger.warning("python-magic not available, will use Pillow for MIME type detection")
+    logger.warning(
+        "python-magic not available, will use Pillow for MIME type detection"
+    )
 
 from app.common.id_utils import generate_id
 from app.core.config import settings
@@ -140,7 +142,9 @@ class ImageUploadService:
         # Resolve hostname to IP address and check if it's private
         try:
             # Use getaddrinfo to resolve hostname (handles both IPv4 and IPv6)
-            addr_info = socket.getaddrinfo(hostname, None, socket.AF_UNSPEC, socket.SOCK_STREAM)
+            addr_info = socket.getaddrinfo(
+                hostname, None, socket.AF_UNSPEC, socket.SOCK_STREAM
+            )
             if not addr_info:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -255,14 +259,20 @@ class ImageUploadService:
             ImageProcessor instance configured for user's mode
         """
         # Get user settings
-        result = await self.db.execute(select(UserSettingsDB).where(UserSettingsDB.user_id == user_id))
+        result = await self.db.execute(
+            select(UserSettingsDB).where(UserSettingsDB.user_id == user_id)
+        )
         user_settings = result.scalars().first()
 
         # Get processing mode (default to 'balanced' if not set)
-        processing_mode = (user_settings.image_processing_mode if user_settings else None) or "balanced"
+        processing_mode = (
+            user_settings.image_processing_mode if user_settings else None
+        ) or "balanced"
 
         # Get configuration for mode
-        mode_config = IMAGE_PROCESSING_MODES.get(processing_mode, IMAGE_PROCESSING_MODES["balanced"])
+        mode_config = IMAGE_PROCESSING_MODES.get(
+            processing_mode, IMAGE_PROCESSING_MODES["balanced"]
+        )
 
         # Create processor with user's settings
         return ImageProcessor(
@@ -272,7 +282,9 @@ class ImageUploadService:
             convert_to_webp=settings.storage.convert_to_webp,
         )
 
-    async def validate_upload(self, file: UploadFile, item_id: str, user_id: str) -> None:
+    async def validate_upload(
+        self, file: UploadFile, item_id: str, user_id: str
+    ) -> None:
         """
         Validate file upload constraints.
 
@@ -320,7 +332,9 @@ class ImageUploadService:
                     detail="Insufficient storage space",
                 )
 
-    async def upload_image(self, file: UploadFile, item_id: str, user_id: str, is_primary: bool = False) -> dict:
+    async def upload_image(
+        self, file: UploadFile, item_id: str, user_id: str, is_primary: bool = False
+    ) -> dict:
         """
         Upload and process image with transaction safety.
 
@@ -395,14 +409,18 @@ class ImageUploadService:
                 try:
                     await self.storage.delete(image.file_path)
                 except Exception as e:
-                    logger.error(f"Failed to delete image file from storage (item_id={item_id}, image_id={image.id}): {e}")
+                    logger.error(
+                        f"Failed to delete image file from storage (item_id={item_id}, image_id={image.id}): {e}"
+                    )
 
             # Delete from database
             try:
                 await self.repository.delete(image.id)
                 deleted_count += 1
             except Exception as e:
-                logger.error(f"Failed to delete image record from database (item_id={item_id}, image_id={image.id}): {e}")
+                logger.error(
+                    f"Failed to delete image record from database (item_id={item_id}, image_id={image.id}): {e}"
+                )
 
         if deleted_count > 0:
             logger.info(f"Deleted {deleted_count} image(s) for item {item_id}")
@@ -658,7 +676,9 @@ class ImageUploadService:
                     "webp": "image/webp",
                     "gif": "image/gif",
                 }
-                detected_mime = format_to_mime.get(format_lower) if format_lower else None
+                detected_mime = (
+                    format_to_mime.get(format_lower) if format_lower else None
+                )
                 if not detected_mime:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
@@ -692,7 +712,9 @@ class ImageUploadService:
         # Process image if enabled
         if settings.storage.enable_processing:
             try:
-                content, detected_mime, width, height = await processor.process_image(content, detected_mime)
+                content, detected_mime, width, height = await processor.process_image(
+                    content, detected_mime
+                )
                 processed_size = len(content)
             except CorruptedImageError as e:
                 # Handle corrupted/truncated images gracefully
@@ -768,7 +790,9 @@ class ImageUploadService:
                     "is_primary": is_primary,
                     "order": await self.repository.get_next_order(item_id),
                     "is_processed": settings.storage.enable_processing,
-                    "original_file_size": (original_size if settings.storage.enable_processing else None),
+                    "original_file_size": (
+                        original_size if settings.storage.enable_processing else None
+                    ),
                 }
             )
 

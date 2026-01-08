@@ -102,7 +102,9 @@ async def main() -> None:
     """Run migration."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Add shops to global_catalogue_items migration")
+    parser = argparse.ArgumentParser(
+        description="Add shops to global_catalogue_items migration"
+    )
     parser.add_argument(
         "action",
         choices=["upgrade", "downgrade"],

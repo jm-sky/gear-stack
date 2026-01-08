@@ -52,7 +52,9 @@ async def upgrade() -> None:
 
     async with engine.begin() as conn:
         price_exists = await column_exists(conn, "global_catalogue_items", "price")
-        currency_exists = await column_exists(conn, "global_catalogue_items", "currency")
+        currency_exists = await column_exists(
+            conn, "global_catalogue_items", "currency"
+        )
 
         if price_exists and currency_exists:
             print("price and currency columns already exist, skipping migration...")
@@ -91,7 +93,9 @@ async def downgrade() -> None:
 
     async with engine.begin() as conn:
         price_exists = await column_exists(conn, "global_catalogue_items", "price")
-        currency_exists = await column_exists(conn, "global_catalogue_items", "currency")
+        currency_exists = await column_exists(
+            conn, "global_catalogue_items", "currency"
+        )
 
         if not price_exists and not currency_exists:
             print("price and currency columns do not exist, skipping downgrade...")
@@ -128,7 +132,9 @@ async def main() -> None:
     """Run migration."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Add price and currency to global_catalogue_items migration")
+    parser = argparse.ArgumentParser(
+        description="Add price and currency to global_catalogue_items migration"
+    )
     parser.add_argument(
         "action",
         choices=["upgrade", "downgrade"],

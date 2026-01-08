@@ -62,7 +62,9 @@ async def upgrade() -> None:
 
         if not containers_exist:
             print("gear_containers table does not exist, skipping migration...")
-            print("Note: Table will be created with favorite field when created from models")
+            print(
+                "Note: Table will be created with favorite field when created from models"
+            )
             return
 
         favorite_exists = await column_exists(conn, "gear_containers", "favorite")

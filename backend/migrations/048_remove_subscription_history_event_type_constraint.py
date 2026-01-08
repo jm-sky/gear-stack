@@ -60,7 +60,9 @@ async def upgrade() -> None:
 
     async with engine.begin() as conn:
         if await table_exists(conn, "subscription_history"):
-            if await constraint_exists(conn, "subscription_history", "valid_event_type"):
+            if await constraint_exists(
+                conn, "subscription_history", "valid_event_type"
+            ):
                 await conn.execute(
                     text(
                         """
@@ -115,7 +117,9 @@ async def main() -> None:
     """Run migration."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Remove subscription_history event_type constraint")
+    parser = argparse.ArgumentParser(
+        description="Remove subscription_history event_type constraint"
+    )
     parser.add_argument("action", choices=["upgrade", "downgrade"])
     args = parser.parse_args()
 

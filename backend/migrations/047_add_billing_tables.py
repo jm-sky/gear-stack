@@ -94,11 +94,27 @@ async def upgrade() -> None:
             print("✓ Created subscriptions table")
 
             # Create indexes
-            await conn.execute(text("CREATE INDEX idx_subscriptions_user_id ON subscriptions(user_id)"))
-            await conn.execute(text("CREATE INDEX idx_subscriptions_stripe_customer_id ON subscriptions(stripe_customer_id)"))
-            await conn.execute(text("CREATE INDEX idx_subscriptions_stripe_subscription_id ON subscriptions(stripe_subscription_id)"))
-            await conn.execute(text("CREATE INDEX idx_subscriptions_plan_tier ON subscriptions(plan_tier)"))
-            await conn.execute(text("CREATE INDEX idx_subscriptions_status ON subscriptions(status)"))
+            await conn.execute(
+                text("CREATE INDEX idx_subscriptions_user_id ON subscriptions(user_id)")
+            )
+            await conn.execute(
+                text(
+                    "CREATE INDEX idx_subscriptions_stripe_customer_id ON subscriptions(stripe_customer_id)"
+                )
+            )
+            await conn.execute(
+                text(
+                    "CREATE INDEX idx_subscriptions_stripe_subscription_id ON subscriptions(stripe_subscription_id)"
+                )
+            )
+            await conn.execute(
+                text(
+                    "CREATE INDEX idx_subscriptions_plan_tier ON subscriptions(plan_tier)"
+                )
+            )
+            await conn.execute(
+                text("CREATE INDEX idx_subscriptions_status ON subscriptions(status)")
+            )
             print("✓ Created indexes")
 
         # 2. Create stripe_webhook_events table
@@ -122,9 +138,21 @@ async def upgrade() -> None:
             print("✓ Created stripe_webhook_events table")
 
             # Create indexes
-            await conn.execute(text("CREATE INDEX idx_webhook_events_event_id ON stripe_webhook_events(stripe_event_id)"))
-            await conn.execute(text("CREATE INDEX idx_webhook_events_processed ON stripe_webhook_events(processed)"))
-            await conn.execute(text("CREATE INDEX idx_webhook_events_event_type ON stripe_webhook_events(event_type)"))
+            await conn.execute(
+                text(
+                    "CREATE INDEX idx_webhook_events_event_id ON stripe_webhook_events(stripe_event_id)"
+                )
+            )
+            await conn.execute(
+                text(
+                    "CREATE INDEX idx_webhook_events_processed ON stripe_webhook_events(processed)"
+                )
+            )
+            await conn.execute(
+                text(
+                    "CREATE INDEX idx_webhook_events_event_type ON stripe_webhook_events(event_type)"
+                )
+            )
             print("✓ Created webhook event indexes")
 
         # 3. Create subscription_history table
@@ -160,9 +188,21 @@ async def upgrade() -> None:
             print("✓ Created subscription_history table")
 
             # Create indexes
-            await conn.execute(text("CREATE INDEX idx_subscription_history_subscription_id ON subscription_history(subscription_id)"))
-            await conn.execute(text("CREATE INDEX idx_subscription_history_user_id ON subscription_history(user_id)"))
-            await conn.execute(text("CREATE INDEX idx_subscription_history_event_type ON subscription_history(event_type)"))
+            await conn.execute(
+                text(
+                    "CREATE INDEX idx_subscription_history_subscription_id ON subscription_history(subscription_id)"
+                )
+            )
+            await conn.execute(
+                text(
+                    "CREATE INDEX idx_subscription_history_user_id ON subscription_history(user_id)"
+                )
+            )
+            await conn.execute(
+                text(
+                    "CREATE INDEX idx_subscription_history_event_type ON subscription_history(event_type)"
+                )
+            )
             print("✓ Created subscription history indexes")
 
         # 4. Migrate existing premium users to grandfathered Pro
@@ -266,11 +306,15 @@ async def downgrade() -> None:
     async with engine.begin() as conn:
         # Drop tables in reverse order
         if await table_exists(conn, "subscription_history"):
-            await conn.execute(text("DROP TABLE IF EXISTS subscription_history CASCADE"))
+            await conn.execute(
+                text("DROP TABLE IF EXISTS subscription_history CASCADE")
+            )
             print("✓ Dropped subscription_history table")
 
         if await table_exists(conn, "stripe_webhook_events"):
-            await conn.execute(text("DROP TABLE IF EXISTS stripe_webhook_events CASCADE"))
+            await conn.execute(
+                text("DROP TABLE IF EXISTS stripe_webhook_events CASCADE")
+            )
             print("✓ Dropped stripe_webhook_events table")
 
         if await table_exists(conn, "subscriptions"):
@@ -296,12 +340,16 @@ async def downgrade() -> None:
             """
                 )
             )
-            await conn.execute(text("DELETE FROM feature_limits WHERE role = 'business'"))
+            await conn.execute(
+                text("DELETE FROM feature_limits WHERE role = 'business'")
+            )
             print("✓ Reverted feature_limits constraints")
 
         # Remove openrouter_api_token field
         if await column_exists(conn, "users", "openrouter_api_token"):
-            await conn.execute(text("ALTER TABLE users DROP COLUMN openrouter_api_token"))
+            await conn.execute(
+                text("ALTER TABLE users DROP COLUMN openrouter_api_token")
+            )
             print("✓ Removed openrouter_api_token field")
 
     print("✅ Billing rollback completed successfully")

@@ -62,15 +62,33 @@ class SubscriptionResponse(BaseModel):
 
     id: str = Field(alias="id", serialization_alias="id")
     userId: str = Field(alias="user_id", serialization_alias="userId")
-    stripeCustomerId: str | None = Field(None, alias="stripe_customer_id", serialization_alias="stripeCustomerId")
-    stripeSubscriptionId: str | None = Field(None, alias="stripe_subscription_id", serialization_alias="stripeSubscriptionId")
-    planTier: Literal["free", "pro", "pro_plus"] = Field(alias="plan_tier", serialization_alias="planTier")
-    billingInterval: Literal["month", "year"] | None = Field(None, alias="billing_interval", serialization_alias="billingInterval")
-    status: Literal["active", "canceled", "past_due", "unpaid", "incomplete"] = Field(alias="status", serialization_alias="status")
-    currentPeriodStart: datetime | None = Field(None, alias="current_period_start", serialization_alias="currentPeriodStart")
-    currentPeriodEnd: datetime | None = Field(None, alias="current_period_end", serialization_alias="currentPeriodEnd")
-    cancelAtPeriodEnd: bool = Field(False, alias="cancel_at_period_end", serialization_alias="cancelAtPeriodEnd")
-    isGrandfathered: bool = Field(False, alias="is_grandfathered", serialization_alias="isGrandfathered")
+    stripeCustomerId: str | None = Field(
+        None, alias="stripe_customer_id", serialization_alias="stripeCustomerId"
+    )
+    stripeSubscriptionId: str | None = Field(
+        None, alias="stripe_subscription_id", serialization_alias="stripeSubscriptionId"
+    )
+    planTier: Literal["free", "pro", "pro_plus"] = Field(
+        alias="plan_tier", serialization_alias="planTier"
+    )
+    billingInterval: Literal["month", "year"] | None = Field(
+        None, alias="billing_interval", serialization_alias="billingInterval"
+    )
+    status: Literal["active", "canceled", "past_due", "unpaid", "incomplete"] = Field(
+        alias="status", serialization_alias="status"
+    )
+    currentPeriodStart: datetime | None = Field(
+        None, alias="current_period_start", serialization_alias="currentPeriodStart"
+    )
+    currentPeriodEnd: datetime | None = Field(
+        None, alias="current_period_end", serialization_alias="currentPeriodEnd"
+    )
+    cancelAtPeriodEnd: bool = Field(
+        False, alias="cancel_at_period_end", serialization_alias="cancelAtPeriodEnd"
+    )
+    isGrandfathered: bool = Field(
+        False, alias="is_grandfathered", serialization_alias="isGrandfathered"
+    )
     createdAt: datetime = Field(alias="created_at", serialization_alias="createdAt")
     updatedAt: datetime = Field(alias="updated_at", serialization_alias="updatedAt")
 
@@ -111,7 +129,9 @@ class SubscriptionLimitsResponse(BaseModel):
     canUseAdvancedFeatures: bool
     requiresByok: bool
     itemsLimit: int = Field(..., description="Maximum number of items allowed")
-    containersLimit: int = Field(..., description="Maximum number of containers allowed")
+    containersLimit: int = Field(
+        ..., description="Maximum number of containers allowed"
+    )
 
 
 class MessageResponse(BaseModel):
@@ -186,17 +206,39 @@ class AdminSubscriptionResponse(BaseModel):
 
     id: str = Field(alias="id", serialization_alias="id")
     userId: str = Field(alias="user_id", serialization_alias="userId")
-    userName: str | None = Field(None, alias="user_name", serialization_alias="userName")
-    userEmail: str | None = Field(None, alias="user_email", serialization_alias="userEmail")
-    stripeCustomerId: str | None = Field(None, alias="stripe_customer_id", serialization_alias="stripeCustomerId")
-    stripeSubscriptionId: str | None = Field(None, alias="stripe_subscription_id", serialization_alias="stripeSubscriptionId")
-    planTier: Literal["free", "pro", "pro_plus"] = Field(alias="plan_tier", serialization_alias="planTier")
-    billingInterval: Literal["month", "year"] | None = Field(None, alias="billing_interval", serialization_alias="billingInterval")
-    status: Literal["active", "canceled", "past_due", "unpaid", "incomplete"] = Field(alias="status", serialization_alias="status")
-    currentPeriodStart: datetime | None = Field(None, alias="current_period_start", serialization_alias="currentPeriodStart")
-    currentPeriodEnd: datetime | None = Field(None, alias="current_period_end", serialization_alias="currentPeriodEnd")
-    cancelAtPeriodEnd: bool = Field(False, alias="cancel_at_period_end", serialization_alias="cancelAtPeriodEnd")
-    isGrandfathered: bool = Field(False, alias="is_grandfathered", serialization_alias="isGrandfathered")
+    userName: str | None = Field(
+        None, alias="user_name", serialization_alias="userName"
+    )
+    userEmail: str | None = Field(
+        None, alias="user_email", serialization_alias="userEmail"
+    )
+    stripeCustomerId: str | None = Field(
+        None, alias="stripe_customer_id", serialization_alias="stripeCustomerId"
+    )
+    stripeSubscriptionId: str | None = Field(
+        None, alias="stripe_subscription_id", serialization_alias="stripeSubscriptionId"
+    )
+    planTier: Literal["free", "pro", "pro_plus"] = Field(
+        alias="plan_tier", serialization_alias="planTier"
+    )
+    billingInterval: Literal["month", "year"] | None = Field(
+        None, alias="billing_interval", serialization_alias="billingInterval"
+    )
+    status: Literal["active", "canceled", "past_due", "unpaid", "incomplete"] = Field(
+        alias="status", serialization_alias="status"
+    )
+    currentPeriodStart: datetime | None = Field(
+        None, alias="current_period_start", serialization_alias="currentPeriodStart"
+    )
+    currentPeriodEnd: datetime | None = Field(
+        None, alias="current_period_end", serialization_alias="currentPeriodEnd"
+    )
+    cancelAtPeriodEnd: bool = Field(
+        False, alias="cancel_at_period_end", serialization_alias="cancelAtPeriodEnd"
+    )
+    isGrandfathered: bool = Field(
+        False, alias="is_grandfathered", serialization_alias="isGrandfathered"
+    )
     createdAt: datetime = Field(alias="created_at", serialization_alias="createdAt")
     updatedAt: datetime = Field(alias="updated_at", serialization_alias="updatedAt")
 
@@ -237,9 +279,11 @@ class AdminUpdateSubscriptionRequest(BaseModel):
         None,
         description="Update subscription plan tier",
     )
-    status: Literal["active", "canceled", "past_due", "unpaid", "incomplete"] | None = Field(
-        None,
-        description="Update subscription status",
+    status: Literal["active", "canceled", "past_due", "unpaid", "incomplete"] | None = (
+        Field(
+            None,
+            description="Update subscription status",
+        )
     )
     isGrandfathered: bool | None = Field(
         None,

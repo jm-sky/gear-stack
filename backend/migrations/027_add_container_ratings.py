@@ -160,7 +160,9 @@ async def main() -> None:
     """Run migration."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Add container_ratings table migration")
+    parser = argparse.ArgumentParser(
+        description="Add container_ratings table migration"
+    )
     parser.add_argument(
         "action",
         choices=["upgrade", "downgrade"],

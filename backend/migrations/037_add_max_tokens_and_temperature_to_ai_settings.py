@@ -114,7 +114,9 @@ async def main() -> None:
     """Run migration."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Add max_tokens and temperature to ai_user_settings migration")
+    parser = argparse.ArgumentParser(
+        description="Add max_tokens and temperature to ai_user_settings migration"
+    )
     parser.add_argument(
         "action",
         choices=["upgrade", "downgrade"],

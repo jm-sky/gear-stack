@@ -80,7 +80,9 @@ async def upgrade() -> None:
 
         if not items_exist:
             print("gear_items table does not exist, skipping migration...")
-            print("Note: Table will be created with currency field when created from models")
+            print(
+                "Note: Table will be created with currency field when created from models"
+            )
             return
 
         currency_exists = await column_exists(conn, "gear_items", "currency")

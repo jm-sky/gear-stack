@@ -42,10 +42,14 @@ def is_dangerous_protocol(url: str) -> bool:
         return is_protocol_blocked(protocol)
     except Exception:
         # If parsing fails, check if URL starts with blocked protocol
-        return any(url.lower().startswith(f"{blocked}:") for blocked in BLOCKED_PROTOCOLS)
+        return any(
+            url.lower().startswith(f"{blocked}:") for blocked in BLOCKED_PROTOCOLS
+        )
 
 
-def sanitize_markdown_content(content: str, max_length: int = MAX_MARKDOWN_LENGTH) -> str:
+def sanitize_markdown_content(
+    content: str, max_length: int = MAX_MARKDOWN_LENGTH
+) -> str:
     """Sanitize markdown content by removing dangerous links and validating length.
 
     Args:
@@ -59,11 +63,18 @@ def sanitize_markdown_content(content: str, max_length: int = MAX_MARKDOWN_LENGT
         ValueError: If content exceeds max_length
     """
     if len(content) > max_length:
-        raise ValueError(f"Markdown content exceeds maximum length of {max_length} characters")
+        raise ValueError(
+            f"Markdown content exceeds maximum length of {max_length} characters"
+        )
 
     # Remove dangerous protocol links using regex
     # Match URLs with dangerous protocols
-    dangerous_pattern = re.compile(r"\b(" + "|".join(re.escape(proto) + ":" for proto in BLOCKED_PROTOCOLS) + r")[^\s]*", re.IGNORECASE)
+    dangerous_pattern = re.compile(
+        r"\b("
+        + "|".join(re.escape(proto) + ":" for proto in BLOCKED_PROTOCOLS)
+        + r")[^\s]*",
+        re.IGNORECASE,
+    )
 
     sanitized = dangerous_pattern.sub("", content)
     return sanitized

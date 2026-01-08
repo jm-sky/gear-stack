@@ -63,10 +63,14 @@ async def upgrade() -> None:
 
         if not items_exist:
             print("gear_items table does not exist, skipping migration...")
-            print("Note: Table will be created with show_on_container field when created from models")
+            print(
+                "Note: Table will be created with show_on_container field when created from models"
+            )
             return
 
-        show_on_container_exists = await column_exists(conn, "gear_items", "show_on_container")
+        show_on_container_exists = await column_exists(
+            conn, "gear_items", "show_on_container"
+        )
 
         if show_on_container_exists:
             print("show_on_container column already exists, skipping migration...")
@@ -131,7 +135,9 @@ async def main() -> None:
     """Run migration."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Add show_on_container field migration")
+    parser = argparse.ArgumentParser(
+        description="Add show_on_container field migration"
+    )
     parser.add_argument(
         "action",
         choices=["upgrade", "downgrade"],
