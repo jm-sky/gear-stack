@@ -11,6 +11,7 @@ import CommonPageHeader from '@/components/layout/CommonPageHeader.vue'
 import { Button } from '@/components/ui/button'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { config, SHOPPING_PLANNING_PAGE_FILTERS_KEY } from '@/shared/config/config'
+import type { ICreateItemDto } from '../types/gear.types'
 import type { TGearItemCategory, TGearItemPriority } from '../types/gear.types.v2'
 import type { IItemWithContainerId } from '../types/shopping.types'
 import AvailableItemCard from '../components/shopping/AvailableItemCard.vue'
@@ -470,21 +471,15 @@ const onAddItemSubmit = handleAddItemSubmit(async (data: ItemFormData) => {
   }
 
   try {
-    // Convert form data to DTO
-    const dtoData: any = {
-      ...data,
-      itemType: 'item',
-      shelfLife: data.shelfLifeValue && data.shelfLifeUnit
-        ? {
-            value: data.shelfLifeValue,
-            unit: data.shelfLifeUnit,
-          }
-        : null,
+    // Convert form data to DTO (omit form-only shelfLifeValue/shelfLifeUnit, add shelfLife)
+    const { shelfLifeValue, shelfLifeUnit, ...rest } = data
+    const dtoData: ICreateItemDto = {
+      ...rest,
+      shelfLife:
+        shelfLifeValue && shelfLifeUnit
+          ? { value: shelfLifeValue, unit: shelfLifeUnit }
+          : null,
     }
-
-    // Remove form-specific fields
-    delete dtoData.shelfLifeValue
-    delete dtoData.shelfLifeUnit
 
     const newItem = await createItem(firstContainerId.value, dtoData)
     // Add to shopping list
