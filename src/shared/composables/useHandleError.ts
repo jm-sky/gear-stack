@@ -26,10 +26,14 @@ export const useHandleError = () => {
 
   const handleUnauthorizedFormError = (error: unknown, setErrors?: (errors: Record<string, string[]>) => void) => {
     if (isUnauthorizedFormError(error) && setErrors) {
-      setErrors(error.response.data.errors)
+      setErrors(error.response.data.errors ?? {
+        email: [t('auth.invalid_credentials')],
+        password: [t('auth.invalid_credentials')],
+      })
     } else if (isAxiosError(error)) {
       toast.error(error.response?.data.message ?? error.response?.data.detail ?? t('errors.unauthorized'))
     } else {
+      console.error('Unexpected error:', error)
       toast.error(t('errors.unauthorized'))
     }
   }

@@ -74,7 +74,6 @@ const onSubmit = handleSubmit(async (values: LoginCredentials) => {
     const redirectTo = typeof route.query.redirectTo === 'string' ? route.query.redirectTo : undefined
     await router.push(redirectTo ?? AuthRoutePaths.dashboard)
   } catch (err: unknown) {
-    console.error('Login error:', err)
     handleUnauthorizedFormError(err, setErrors)
   }
 })

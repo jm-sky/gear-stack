@@ -42,6 +42,12 @@ export async function errorResponseInterceptor(error: AxiosError) {
   const isOnAuthPage = typeof window !== 'undefined' && window.location.pathname.startsWith(AUTH_PREFIX)
   const isAuthRequest = originalRequest?.url?.includes(AUTH_PREFIX) ?? false
 
+  // For auth requests (login, register, etc.), pass the error through
+  // so the form can handle it with field-level validation errors
+  if (isAuthRequest && error.response?.status === HttpStatusCode.Unauthorized) {
+    return Promise.reject(error)
+  }
+
   // Handle 401 Unauthorized errors
   if (
     error.response?.status === HttpStatusCode.Unauthorized &&
