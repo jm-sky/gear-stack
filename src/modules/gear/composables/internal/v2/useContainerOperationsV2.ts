@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/vue-query'
 import type { ICreateGearItemV2Dto, IGearItemV2, IUpdateGearItemV2Dto } from '../../../types/gear.types.v2'
 import { useGearV2 } from '../../useGearV2'
 import type { TUUID } from '@/shared/types/base.type'
@@ -15,6 +16,7 @@ import type { TUUID } from '@/shared/types/base.type'
  * ```
  */
 export function useContainerOperationsV2() {
+  const queryClient = useQueryClient()
   const {
     items: _items,
     containers,
@@ -28,13 +30,22 @@ export function useContainerOperationsV2() {
   } = useGearV2()
 
   /**
+   * Invalidate gear queries to refresh data
+   */
+  const invalidateGearQueries = () => {
+    queryClient.invalidateQueries({ queryKey: ['gear'] })
+  }
+
+  /**
    * Create a new container
    * @param data - Container creation data
    * @returns Created container
    */
   const createContainer = async (data: Omit<ICreateGearItemV2Dto, 'itemType'>): Promise<IGearItemV2> => {
     // Force itemType to 'container'
-    return await createItem({ ...data, itemType: 'container' })
+    const container = await createItem({ ...data, itemType: 'container' })
+    invalidateGearQueries()
+    return container
   }
 
   /**
@@ -44,7 +55,9 @@ export function useContainerOperationsV2() {
    * @returns Updated container
    */
   const updateContainer = async (id: TUUID, data: IUpdateGearItemV2Dto): Promise<IGearItemV2> => {
-    return await updateItem(id, data)
+    const container = await updateItem(id, data)
+    invalidateGearQueries()
+    return container
   }
 
   /**
@@ -53,6 +66,7 @@ export function useContainerOperationsV2() {
    */
   const deleteContainer = async (id: TUUID): Promise<void> => {
     await deleteItem(id)
+    invalidateGearQueries()
   }
 
   /**
@@ -66,6 +80,7 @@ export function useContainerOperationsV2() {
       await deleteItem(container.id)
       deletedCount++
     }
+    invalidateGearQueries()
     return deletedCount
   }
 
@@ -107,7 +122,9 @@ export function useContainerOperationsV2() {
    * @returns Moved container
    */
   const moveContainer = async (containerId: TUUID, targetParentId: TUUID | null): Promise<IGearItemV2> => {
-    return await moveItem(containerId, targetParentId)
+    const container = await moveItem(containerId, targetParentId)
+    invalidateGearQueries()
+    return container
   }
 
   return {

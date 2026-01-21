@@ -148,17 +148,19 @@ async def get_items(
         # Get favorite containers
         GET /gear/v2/items?itemType=container&favorite=true
     """
-    # Normalize empty string to None for parent_item_id
-    if parent_item_id == "":
+    # Convert 'null' string or empty string to None (for IS NULL filter)
+    # This allows frontend to explicitly filter for root items (no parent)
+    filter_for_null_parent = parent_item_id in ("null", "")
+    if filter_for_null_parent:
         parent_item_id = None
     
     if include_children:
         items = await service.get_items_with_children(
-            current_user.id, item_type, parent_item_id
+            current_user.id, item_type, parent_item_id, filter_for_null_parent
         )
     else:
         items = await service.get_items(
-            current_user.id, item_type, parent_item_id, is_public, favorite
+            current_user.id, item_type, parent_item_id, is_public, favorite, filter_for_null_parent
         )
     return [GearItemResponseV2.model_validate(item) for item in items]
 

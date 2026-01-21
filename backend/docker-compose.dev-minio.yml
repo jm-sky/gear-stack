@@ -10,8 +10,8 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-gear-stack-db-secret}
     volumes:
       - gear_stack_postgres_data:/var/lib/postgresql/data
-    ports:
-      - "127.0.0.1:${DB_FORWARD_PORT:-5432}:5432"  # Only localhost access
+    # ports:
+    #   - "127.0.0.1:${DB_FORWARD_PORT:-5432}:5432"  # Only localhost access
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-backend}"]
       interval: 10s
@@ -30,8 +30,8 @@ services:
     restart: unless-stopped
     environment:
       - REDIS_PASSWORD=${REDIS_PASSWORD:-gear-stack-redis-secret}
-    ports:
-      - "127.0.0.1:${REDIS_FORWARD_PORT:-6379}:6379"  # Only localhost access
+    # ports:
+    #   - "127.0.0.1:${REDIS_FORWARD_PORT:-6379}:6379"  # Only localhost access
     volumes:
       - gear_stack_redis_data:/data
     command: >

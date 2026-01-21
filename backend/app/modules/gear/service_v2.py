@@ -75,6 +75,7 @@ class GearServiceV2:
         parent_item_id: str | None = None,
         is_public: bool | None = None,
         favorite: bool | None = None,
+        filter_for_null_parent: bool = False,
     ) -> Sequence[GearItemDBV2]:
         """Get gear items with optional filters.
 
@@ -84,12 +85,13 @@ class GearServiceV2:
             parent_item_id: Filter by parent item ID
             is_public: Filter by public visibility
             favorite: Filter by favorite status
+            filter_for_null_parent: If True, filter for items with parent_item_id IS NULL
 
         Returns:
             List of items matching filters
         """
         return await self.repository.get_items(
-            user_id, item_type, parent_item_id, is_public, favorite
+            user_id, item_type, parent_item_id, is_public, favorite, filter_for_null_parent
         )
 
     async def get_items_with_children(
@@ -97,6 +99,7 @@ class GearServiceV2:
         user_id: str,
         item_type: str | None = None,
         parent_item_id: str | None = None,
+        filter_for_null_parent: bool = False,
     ) -> Sequence[GearItemDBV2]:
         """Get gear items with children eagerly loaded.
 
@@ -104,12 +107,13 @@ class GearServiceV2:
             user_id: Owner user ID
             item_type: Filter by item type
             parent_item_id: Filter by parent item ID
+            filter_for_null_parent: If True, filter for items with parent_item_id IS NULL
 
         Returns:
             List of items with children loaded
         """
         return await self.repository.get_items_with_children(
-            user_id, item_type, parent_item_id
+            user_id, item_type, parent_item_id, filter_for_null_parent
         )
 
     async def get_children(

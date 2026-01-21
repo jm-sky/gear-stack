@@ -10,10 +10,11 @@ import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useSettings } from '@/modules/settings/composables/useSettings'
 import { useHandleError } from '@/shared/composables/useHandleError'
 import { usePageTitle } from '@/shared/composables/usePageTitle'
-import type { ICreateContainerDto, IUpdateContainerDto, TContainerColor } from '../types/gear.types'
+import type { TContainerColor } from '../types/gear.types'
+import type { ICreateGearItemV2Dto, IUpdateGearItemV2Dto } from '../types/gear.types.v2'
 import ContainerFormFields from '../components/ContainerFormFields.vue'
 import { useContainer } from '../composables/useContainer'
-import { useGear } from '../composables/useGear'
+import { useContainerOperationsV2 } from '../composables/internal/v2/useContainerOperationsV2'
 import { useGearSettings } from '../composables/useGearSettings'
 import { GearRoutePath } from '../routes'
 import { CONTAINER_COLORS } from '../utils/containerColors'
@@ -27,7 +28,7 @@ import { toBasicWeightUnit } from '../utils/weightUnits'
 const router = useRouter()
 const route = useRoute()
 const { t } = useI18n()
-const { createContainer, updateContainer } = useGear()
+const { createContainer, updateContainer } = useContainerOperationsV2()
 const { customBrands } = useGearSettings()
 const { settings } = useSettings()
 const { handleError } = useHandleError()
@@ -197,11 +198,34 @@ const handleNameBlur = () => {
   }
 }
 
+// Convert form data to V2 DTO format
+const convertToV2Dto = (data: ContainerFormData): Omit<ICreateGearItemV2Dto, 'itemType'> => ({
+  name: data.name,
+  description: data.description || null,
+  containerType: data.type, // V1 'type' → V2 'containerType'
+  color: data.color || null,
+  parentItemId: data.parentContainerId || null, // V1 'parentContainerId' → V2 'parentItemId'
+  hideWhenNested: data.hideWhenNested || false,
+  isPublic: data.isPublic || false,
+  favorite: data.favorite || false,
+  brand: data.brand || null,
+  price: data.price || null,
+  currency: data.currency || null,
+  weight: data.weight || null,
+  weightUnit: data.weightUnit || null,
+  maxWeight: data.maxWeight || null,
+  maxWeightUnit: data.maxWeightUnit || null,
+  url: data.url || null,
+  showItemImages: data.showItemImages || false,
+})
+
 // Submit handler
 const onSubmit = handleSubmit(async (data: ContainerFormData) => {
   try {
+    const v2Data = convertToV2Dto(data)
+
     if (isEditMode && containerId) {
-      updateContainer(containerId, data as IUpdateContainerDto)
+      await updateContainer(containerId, v2Data as IUpdateGearItemV2Dto)
       toast.success(t('common.success'))
       // Preserve 'from' parameter when navigating back to ContainerDetails
       // This ensures the back button in ContainerHeader works correctly
@@ -211,7 +235,7 @@ const onSubmit = handleSubmit(async (data: ContainerFormData) => {
         query: createNavigationQuery(undefined, from),
       })
     } else {
-      const newContainer = await createContainer(data as ICreateContainerDto)
+      const newContainer = await createContainer(v2Data)
       toast.success(t('common.success'))
       router.push(GearRoutePath.ContainerDetailById(newContainer.id))
     }

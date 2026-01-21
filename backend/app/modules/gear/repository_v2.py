@@ -130,15 +130,17 @@ class GearRepositoryV2(SearchMixin):
         parent_item_id: str | None = None,
         is_public: bool | None = None,
         favorite: bool | None = None,
+        filter_for_null_parent: bool = False,
     ) -> Sequence[GearItemDBV2]:
         """Get gear items with optional filters.
 
         Args:
             user_id: Owner user ID
             item_type: Filter by item type ('container', 'item', or None for all)
-            parent_item_id: Filter by parent item ID (None for root items)
+            parent_item_id: Filter by parent item ID
             is_public: Filter by public visibility
             favorite: Filter by favorite status
+            filter_for_null_parent: If True, filter for items with parent_item_id IS NULL
 
         Returns:
             List of items matching filters
@@ -150,6 +152,9 @@ class GearRepositoryV2(SearchMixin):
 
         if parent_item_id is not None:
             conditions.append(GearItemDBV2.parent_item_id == parent_item_id)
+        elif filter_for_null_parent:
+            # Explicitly filter for items with no parent (root items)
+            conditions.append(GearItemDBV2.parent_item_id.is_(None))
 
         if is_public is not None:
             conditions.append(GearItemDBV2.is_public == is_public)
@@ -166,6 +171,7 @@ class GearRepositoryV2(SearchMixin):
         user_id: str,
         item_type: str | None = None,
         parent_item_id: str | None = None,
+        filter_for_null_parent: bool = False,
     ) -> Sequence[GearItemDBV2]:
         """Get gear items with children eagerly loaded.
 
@@ -173,6 +179,7 @@ class GearRepositoryV2(SearchMixin):
             user_id: Owner user ID
             item_type: Filter by item type
             parent_item_id: Filter by parent item ID
+            filter_for_null_parent: If True, filter for items with parent_item_id IS NULL
 
         Returns:
             List of items with children loaded
@@ -184,6 +191,9 @@ class GearRepositoryV2(SearchMixin):
 
         if parent_item_id is not None:
             conditions.append(GearItemDBV2.parent_item_id == parent_item_id)
+        elif filter_for_null_parent:
+            # Explicitly filter for items with no parent (root items)
+            conditions.append(GearItemDBV2.parent_item_id.is_(None))
 
         stmt = (
             select(GearItemDBV2)

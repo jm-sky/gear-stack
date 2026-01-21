@@ -39,7 +39,9 @@ export const gearItemApiServiceV2: IGearItemServiceV2 = {
       params.append('itemType', filters.itemType)
     }
     if (filters?.parentItemId !== undefined) {
-      params.append('parentItemId', filters.parentItemId ?? '')
+      // Use 'null' string to indicate filtering for items with no parent (root items)
+      // Backend interprets 'null' as IS NULL filter
+      params.append('parentItemId', filters.parentItemId === null ? 'null' : filters.parentItemId)
     }
     if (filters?.isPublic !== undefined) {
       params.append('isPublic', String(filters.isPublic))
