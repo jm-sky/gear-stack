@@ -21,6 +21,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.47.1] - 2026-01-21
+
+### Fixed
+- **Gear (unified model V2)**: Lint cleanups – remove unused imports (`IGearItemFiltersV2`, `gearQueryKeys`) and variables (`isLoadingAPI` → `_isLoadingAPI`)
+
+---
+
 ## [2.47.0] - 2025-12-25
 
 ### Security

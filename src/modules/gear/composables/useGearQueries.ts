@@ -8,11 +8,11 @@
 
 import { useQuery, useQueryClient, type UseQueryOptions } from '@tanstack/vue-query'
 import { computed, type MaybeRefOrGetter, toValue } from 'vue'
-import type { TUUID } from '@/shared/types/base.type'
-import type { IGearItemFiltersV2, IGearItemV2 } from '../types/gear.types.v2'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import { gearItemApiServiceV2 } from '../services/gearItemApiServiceV2'
-import { gearQueryKeys } from '../utils/queryKeys'
 import { useGearStoreV2 } from '../store/useGearStoreV2'
+import { gearQueryKeys } from '../utils/queryKeys'
+import type { TUUID } from '@/shared/types/base.type'
 
 /**
  * Fetch all root containers

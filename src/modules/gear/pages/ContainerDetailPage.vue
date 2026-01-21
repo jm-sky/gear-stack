@@ -19,8 +19,8 @@ import ContainerRatingSection from '../components/ContainerRatingSection.vue'
 import SortConfirmationAlert from '../components/SortConfirmationAlert.vue'
 import { useCatalogue } from '../composables/catalogue/useCatalogue'
 import { useContainerV2 } from '../composables/useContainerV2'
-import { useContainerWithChildren } from '../composables/useGearQueries'
 import { useGear } from '../composables/useGear'
+import { useContainerWithChildren } from '../composables/useGearQueries'
 import { useGearV2 } from '../composables/useGearV2'
 import { useItemsParamRecognition } from '../composables/useItemsParamRecognition'
 import { useJsonImportExport } from '../composables/useJsonImportExport'
@@ -67,7 +67,7 @@ const containerId = route.params.id as string
 const {
   container: containerFromAPI,
   children: childrenFromAPI,
-  isLoading: isLoadingAPI
+  isLoading: _isLoadingAPI
 } = useContainerWithChildren(
   computed(() => shouldUseAPI.value ? containerId : undefined)
 )

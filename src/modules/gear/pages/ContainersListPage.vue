@@ -31,7 +31,6 @@ import { useContainersWithChildren } from '../composables/useGearQueries'
 import { useGearV2 } from '../composables/useGearV2'
 import { GearRouteIcon, GearRoutePath } from '../routes'
 import { getActionIcon } from '../utils/actionIcons'
-import { gearQueryKeys } from '../utils/queryKeys'
 import type { TUUID } from '@/shared/types/base.type'
 
 // Action icons
