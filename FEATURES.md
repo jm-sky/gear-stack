@@ -36,7 +36,8 @@ Gear Stack to zaawansowana aplikacja webowa do zarządzania ekwipunkiem survival
 - ✅ **CORS Configuration** - bezpieczne zapytania cross-origin
 - ✅ **Ochrona przed SQL Injection** - parametryzowane zapytania przez SQLAlchemy
 - ✅ **Ochrona przed XSS** - walidacja i sanityzacja danych wejściowych
-- ✅ **Token Blacklist Service** - unieważnianie tokenów JWT przy wylogowaniu (Redis)
+- ✅ **Token Blacklist Service** - unieważnianie tokenów JWT przy wylogowaniu, usunięciu konta i zmianie hasła (Redis + JTI tracking)
+- ✅ **Unieważnianie wszystkich sesji** - zmiana hasła i usunięcie konta unieważniają wszystkie aktywne tokeny (podwójny mechanizm: Redis JTI blacklist + token_version w DB)
 - ✅ **WebAuthn Challenge Storage** - bezpieczne przechowywanie wyzwań WebAuthn w Redis
 - ✅ **Redis Infrastructure** - infrastruktura Redis dla token blacklist i challenge storage
 

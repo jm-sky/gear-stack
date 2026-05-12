@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Token blacklisting po usunięciu konta**: usunięcie konta unieważnia wszystkie aktywne sesje użytkownika w Redis
+- **JTI session tracking**: każdy login tworzy unikalny JTI rejestrowany w Redis sorted set; wylogowanie usuwa konkretną sesję
+- **token_version w DB**: kolumna `token_version` w tabeli users; zmiana hasła i usunięcie konta inkrementują wersję, co unieważnia wszystkie tokeny nawet przy awarii Redis
+- **Blacklisting przy zmianie/resecie hasła**: zmiana i reset hasła unieważniają wszystkie aktywne tokeny użytkownika
 
 ### Changed
 

@@ -79,6 +79,7 @@ class UserRepository(SearchMixin, UserRepositoryInterface):
             oauthProvider=user_db.oauth_provider,
             oauthProviderId=user_db.oauth_provider_id,
             avatarUrl=user_db.avatar_url,
+            tokenVersion=user_db.token_version,
         )
 
     async def create_user(
@@ -340,12 +341,25 @@ class UserRepository(SearchMixin, UserRepositoryInterface):
             # Clear sensitive data
             user_db.reset_token = None
             user_db.reset_token_expiry = None
+            # Invalidate all tokens by incrementing version
+            user_db.token_version = (user_db.token_version or 0) + 1
         else:
             # Hard delete: physically remove from database
             await self.db.delete(user_db)
 
         await self.db.commit()
         return True
+
+    async def increment_token_version(self, user_id: str) -> int:
+        """Increment token_version to invalidate all existing tokens for a user."""
+        stmt = select(UserDB).where(UserDB.id == user_id)
+        result = await self.db.execute(stmt)
+        user_db = result.scalar_one_or_none()
+        if not user_db:
+            return 0
+        user_db.token_version = (user_db.token_version or 0) + 1
+        await self.db.commit()
+        return user_db.token_version
 
     async def create_oauth_user(
         self,

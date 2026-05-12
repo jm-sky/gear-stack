@@ -1,3 +1,5 @@
+name: gear-stack-dev
+
 services:
   # PostgreSQL Database
   db:
