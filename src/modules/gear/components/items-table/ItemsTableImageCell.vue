@@ -17,7 +17,7 @@ import { useAuth } from '@/modules/auth/composables/useAuth'
 import { useItemImage } from '@/modules/gear/composables/useItemImage'
 import { GearRoutePath } from '@/modules/gear/routes'
 import { itemImageApiService } from '@/modules/gear/services/itemImageApiService'
-import { useGearStore } from '@/modules/gear/store/useGearStore'
+import { useGearStoreV2 } from '@/modules/gear/store/useGearStoreV2'
 import { createNavigationQuery } from '@/modules/gear/utils/navigationParams'
 import { useHandleError } from '@/shared/composables/useHandleError'
 import { config } from '@/shared/config/config'
@@ -36,7 +36,7 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const { handleError } = useHandleError()
 const { user, isAuthenticated } = useAuth()
-const store = useGearStore()
+const store = useGearStoreV2()
 const { uploadImage: uploadImageWithUpdate, uploadImageFromUrl: uploadImageFromUrlWithUpdate, deleteImage: deleteImageWithUpdate } = useItemImage()
 
 const isUploading = ref(false)
@@ -50,7 +50,7 @@ const isSubmittingUrl = ref(false)
 // Get container to check ownership
 const container = computed(() => {
   if (!props.containerId) return undefined
-  return store.getContainerById(props.containerId)
+  return store.getItemById(props.containerId)
 })
 
 // Check if user is admin

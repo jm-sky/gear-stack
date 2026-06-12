@@ -16,9 +16,8 @@ import { useGearSettings } from '../composables/useGearSettings'
 import { useGearV2 } from '../composables/useGearV2'
 import { useItemsTableEditMode } from '../composables/useItemsTableEditMode'
 import { GearRoutePath } from '../routes'
-import { useGearStore } from '../store/useGearStore'
 import { useGearStoreV2 } from '../store/useGearStoreV2'
-import { calculateTotalWeightSync } from '../utils/containerCalculations'
+import { calculateTotalWeightSyncV2 } from '../utils/containerCalculationsV2'
 import { isExpiringSoon } from '../utils/isExpiringSoon'
 import { createItemsColumns } from '../utils/itemsColumns'
 import { createNavigationQuery } from '../utils/navigationParams'
@@ -129,10 +128,29 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const router = useRouter()
-const store = useGearStore()
 const storeV2 = useGearStoreV2()
+const { getChildren } = useGearV2()
 
 const { settings: gearSettings, defaultCurrency } = useGearSettings()
+
+// Nested containers are children with itemType='container'. The container detail page only
+// loads the current container's direct children, so a nested container's own children
+// (grandchildren) aren't in the store yet. Fetch them here so their contents and weight
+// render in the expanded row. Skipped in public mode (different, unauthenticated data path).
+watch(
+  () => props.items,
+  (items) => {
+    if (props.publicMode) return
+    for (const item of items) {
+      if (item.itemType === 'container') {
+        getChildren(item.id).catch(() => {
+          // Best-effort prefetch; ignore failures (e.g. offline)
+        })
+      }
+    }
+  },
+  { immediate: true, deep: false },
+)
 const { getCategoryLabel } = useCategoryLabel()
 const { editMode } = useItemsTableEditMode()
 
@@ -268,11 +286,13 @@ function getNestedContainer(item: IGearItemV2) {
   return item
 }
 
-// Calculate total weight for nested container (sync helper)
+// Calculate total weight for nested container (sync helper, V2)
 function calculateTotalWeight(containerId: string): number {
-  const container = store.getContainerById(containerId)
-  if (!container) return 0
-  return calculateTotalWeightSync(container, store.getAllContainers)
+  return calculateTotalWeightSyncV2(
+    containerId,
+    id => storeV2.getItemById(id),
+    id => storeV2.getChildrenOfItem(id),
+  )
 }
 
 // Sorting state from DataTable
