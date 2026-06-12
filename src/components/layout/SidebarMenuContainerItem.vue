@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import {
   SidebarMenuButton,
@@ -6,13 +7,16 @@ import {
 } from '@/components/ui/sidebar'
 import ContainerIcon from '@/modules/gear/components/ContainerIcon.vue'
 import { GearRoutePath } from '@/modules/gear/routes'
-import type { IGearContainer } from '@/modules/gear/types/gear.types'
+import type { IGearItemV2, TContainerColor, TGearContainerType } from '@/modules/gear/types/gear.types.v2'
 
-defineProps<{
-  container: IGearContainer
+const props = defineProps<{
+  container: IGearItemV2
 }>()
 
 const route = useRoute()
+
+const iconType = computed<TGearContainerType>(() => props.container.containerType ?? 'backpack')
+const iconColor = computed<TContainerColor | null>(() => (props.container.color ?? null) as TContainerColor | null)
 
 // Sprawdzanie czy kontener jest aktywny
 const isActive = (containerId: string): boolean => {
@@ -24,7 +28,7 @@ const isActive = (containerId: string): boolean => {
   <SidebarMenuItem>
     <SidebarMenuButton :is-active="isActive(container.id)" as-child>
       <RouterLink :to="GearRoutePath.ContainerDetailById(container.id)">
-        <ContainerIcon :type="container.type" :color="container.color" :size="4" />
+        <ContainerIcon :type="iconType" :color="iconColor" :size="4" />
         <span>{{ container.name }}</span>
       </RouterLink>
     </SidebarMenuButton>

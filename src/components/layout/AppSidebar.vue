@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { BackpackIcon, BookIcon, Globe, Info, Package, ShoppingCart } from 'lucide-vue-next'
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import SidebarMenuContainerItem from '@/components/layout/SidebarMenuContainerItem.vue'
@@ -17,14 +17,17 @@ import {
   SidebarRail,
   SidebarSeparator,
 } from '@/components/ui/sidebar'
-import { useGear } from '@/modules/gear/composables/useGear'
+import { useGearV2 } from '@/modules/gear/composables/useGearV2'
 import { GearRoutePath } from '@/modules/gear/routes'
-import { getRootContainers } from '@/modules/gear/utils/containerNesting'
 import { PublicRoutePaths } from '@/router/publicRoutes'
-import type { IGearContainer } from '@/modules/gear/types/gear.types'
+import type { IGearItemV2 } from '@/modules/gear/types/gear.types.v2'
 
 const { t } = useI18n()
-const { containers } = useGear()
+// Load containers through the active V2 service (API or localStorage) into the store
+const { rootContainers: rootContainersV2, getItems } = useGearV2()
+onMounted(() => {
+  getItems({ itemType: 'container' }).catch(() => {})
+})
 
 // Linki: Mój sprzęt
 const myGearLinks = computed(() => [
@@ -60,12 +63,9 @@ const publicLinks = computed(() => [
 ])
 
 // Root kontenery posortowane: ulubione + alfabetycznie
-const rootContainers = computed<IGearContainer[]>(() => {
-  const allContainers = containers.value
-  const roots = getRootContainers(allContainers)
-
+const rootContainers = computed<IGearItemV2[]>(() => {
   // Sortowanie: najpierw ulubione, potem alfabetycznie
-  return [...roots].sort((a, b) => {
+  return [...rootContainersV2.value].sort((a, b) => {
     // Najpierw ulubione
     if (a.favorite && !b.favorite) return -1
     if (!a.favorite && b.favorite) return 1
