@@ -20,15 +20,27 @@ Type-check, ESLint i 403 testy jednostkowe przechodzą.
   `useItemsParamRecognition` (typy V2 + `useGearMutations`)
 - ✅ Eksport JSON (`exportToJsonV2`) z `/gear`
 
+**Zrobione (cd.):**
+- ✅ Pickery kontenerów dual-path (API/localStorage): `AddNestedContainerDialog` (fix bug #5),
+  `MoveItemDialog`, `AddCatalogueItemToContainerDialog`
+- ✅ Wyświetlanie zagnieżdżonych kontenerów: `ItemsTable` dociąga dzieci wnuków i liczy wagę na V2;
+  `ItemsTableImageCell` na store V2
+- ✅ Luki funkcjonalne na V2 (z testami jednostkowymi): **clone** (`cloneContainerV2`),
+  **import/eksport JSON** (`importFromJsonV2` + `exportToJsonV2`), **odczyt katalogu**
+  (`getAllItemsForCatalogV2` + `useItemCatalogV2`)
+- ✅ `useCatalogue` — usunięto martwą synchronizację store'a V1, polega na inwalidacji cache
+- ✅ `AppSidebar` + `SidebarMenuContainerItem` na V2
+
+**Potwierdzone:** `migrateV1ToV2()` uruchamia się przy inicjalizacji store'a V2 → dane offline
+(z localStorage V1, klucz `gear-stack:containers`) są transparentnie migrowane do V2
+(`gear-stack:items-v2`). Dzięki temu ścieżka offline na V2 (`useGearV2` → serwis lokalny) działa.
+
 **Pozostało (wymaga ostrożnej migracji + najlepiej manualnego testu UI):**
 - ⏳ `ShoppingPlanningPage` + komponenty `shopping/*` (typowane V1 `IGearItem`/`IItemWithContainerId`,
   konsumują `container.items` — wymaga adaptera „kontenery z dziećmi" z V2 lub przetypowania)
-- ⏳ Read-only: `DashboardPage`, `AppSidebar`, `AllItemsPage`, `LocalContainersStats`,
+- ⏳ Read-only: `DashboardPage`, `AllItemsPage`, `LocalContainersStats`,
   `TotalsStats`, `statsLocalService`, `ai/useAiContext`, `LandingPage`, `appInit`
 - ⏳ Ścieżka zapisu AI: `ai/useAiActions` (tworzy/aktualizuje przez V1)
-- ⏳ Luki funkcjonalne do dobudowania na V2: **clone** (`CloneContainerDialog`),
-  **odczyt katalogu** (`ItemCatalogSelector`, `GlobalCatalogueSelector`, `catalogue/useCatalogue`),
-  **import JSON** (`useJsonImportExport`)
 - ⏳ Martwe (do usunięcia w Fazie 4, brak konsumentów): `useItem` (V1), `useInlineItemEditing` (V1)
 - ⏳ Faza 4: usunięcie warstwy V1 po odpięciu wszystkich konsumentów
 
