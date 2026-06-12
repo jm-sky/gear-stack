@@ -14,14 +14,13 @@ import type { TContainerColor } from '../types/gear.types'
 import type { ICreateGearItemV2Dto, IUpdateGearItemV2Dto } from '../types/gear.types.v2'
 import ContainerFormFields from '../components/ContainerFormFields.vue'
 import { useContainerOperationsV2 } from '../composables/internal/v2/useContainerOperationsV2'
-import { useContainer } from '../composables/useContainer'
+import { useContainerV2 } from '../composables/useContainerV2'
 import { useGearSettings } from '../composables/useGearSettings'
 import { GearRoutePath } from '../routes'
 import { CONTAINER_COLORS } from '../utils/containerColors'
 import { recognizeContainerType } from '../utils/containerTypeRecognition'
 import { createNavigationQuery, getFrom } from '../utils/navigationParams'
 import { recognizeParameters } from '../utils/parameterRecognition'
-import { convertV1ContainerToV2 } from '../utils/typeConverters'
 import { type ContainerFormData, containerSchema } from '../utils/validation'
 import { toBasicWeightUnit } from '../utils/weightUnits'
 
@@ -37,7 +36,7 @@ const { setTitle } = usePageTitle()
 const containerId = route.params.id as string | undefined
 const isEditMode: boolean = !!containerId
 
-const { container } = useContainer(containerId)
+const { container } = useContainerV2(containerId)
 
 // Set dynamic page title
 watchEffect(() => {
@@ -51,8 +50,8 @@ const getInitialValues = (): ContainerFormData => {
     return {
       name: container.value.name,
       description: container.value.description ?? '',
-      type: container.value.type,
-      color: container.value.color ?? 'default',
+      type: container.value.containerType ?? 'other',
+      color: (container.value.color ?? 'default') as TContainerColor,
       hideWhenNested: container.value.hideWhenNested ?? false,
       isPublic: container.value.isPublic ?? false,
       brand: container.value.brand ?? '',
@@ -307,7 +306,7 @@ const handleRecognizeParameters = () => {
       <div class="bg-card rounded-lg border p-6">
         <form @submit="onSubmit">
           <ContainerFormFields
-            :container="container ? convertV1ContainerToV2(container) : undefined"
+            :container="container"
             :loading="isSubmitting"
             @submit="handleSubmit"
             @cancel="handleCancel"

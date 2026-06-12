@@ -6,14 +6,14 @@ import { toast } from 'vue-sonner'
 import Button from '@/components/ui/button/Button.vue'
 import type { IGearItemV2 } from '../types/gear.types.v2'
 import { useExpiration } from '../composables/useExpiration'
-import { useGear } from '../composables/useGear'
+import { useGearMutations } from '../composables/useGearMutations'
 import ContainerNameInput from './inputs/ContainerNameInput.vue'
 
 const props = defineProps<{
   item: IGearItemV2
 }>()
 
-const { updateItem } = useGear()
+const { updateItem } = useGearMutations()
 const { t } = useI18n()
 const { isExpired, isExpiringSoon } = useExpiration(props.item)
 

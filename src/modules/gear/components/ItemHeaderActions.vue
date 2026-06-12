@@ -10,7 +10,7 @@ import { useAuth } from '@/modules/auth/composables/useAuth'
 import type { IGearItemV2 } from '../types/gear.types.v2'
 import { useCatalogue } from '../composables/catalogue/useCatalogue'
 import { useItemPromotion } from '../composables/promotion/useItemPromotion'
-import { useGear } from '../composables/useGear'
+import { useGearMutations } from '../composables/useGearMutations'
 import { getActionIcon } from '../utils/actionIcons'
 import MoveItemDialog from './MoveItemDialog.vue'
 
@@ -20,7 +20,7 @@ const UpdateFromCatalogueDialog = defineAsyncComponent(() => import('./catalogue
 const { t } = useI18n()
 const { user } = useAuth()
 const { fetchImagesFromCatalogue, unlinkItemFromCatalogue, isFetchingImages, isUnlinking } = useCatalogue()
-const { moveItem } = useGear()
+const { moveItem } = useGearMutations()
 const { addToCatalogue, isAddingToCatalogue } = useItemPromotion(computed(() => item.id))
 
 const matchDialogOpen = defineModel<boolean>('matchDialogOpen', { default: false })

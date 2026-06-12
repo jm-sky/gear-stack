@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/table'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { smallDateTime } from '@/shared/utils/smallDateTime'
-import { useContainer } from '../composables/useContainer'
+import { useContainerV2 } from '../composables/useContainerV2'
 import { GearRoutePath } from '../routes'
 import { type IShareToken, sharedContainersService } from '../services/sharedContainersService'
 import { getActionIcon } from '../utils/actionIcons'
@@ -33,7 +33,7 @@ import { getActionIcon } from '../utils/actionIcons'
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
-const { container } = useContainer()
+const { container } = useContainerV2()
 
 const containerId = route.params.id as string
 const tokens = ref<IShareToken[]>([])

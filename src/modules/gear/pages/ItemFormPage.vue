@@ -11,7 +11,6 @@ import TabsContent from '@/components/ui/tabs/TabsContent.vue'
 import TabsList from '@/components/ui/tabs/TabsList.vue'
 import TabsTrigger from '@/components/ui/tabs/TabsTrigger.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import { useBackend } from '@/shared/composables/useBackend'
 import { useHandleError } from '@/shared/composables/useHandleError'
 import { usePageTitle } from '@/shared/composables/usePageTitle'
 import { config } from '@/shared/config/config'
@@ -19,12 +18,10 @@ import type { ICreateGearItemV2Dto, IGearItemV2, IUpdateGearItemV2Dto } from '..
 import type { IItemWithContainer } from '../utils/allItemsColumns'
 import ItemCatalogSelector from '../components/ItemCatalogSelector.vue'
 import ItemFormFields from '../components/ItemFormFields.vue'
-import { useContainer } from '../composables/useContainer'
+import { useContainerV2 } from '../composables/useContainerV2'
 import { useGearV2 } from '../composables/useGearV2'
 import { useNavigationReturn } from '../composables/useNavigationReturn'
 import { GearRoutePath } from '../routes'
-import { gearItemService } from '../services/gearItemService'
-import { useGearStoreV2 } from '../store/useGearStoreV2'
 import { recognizeCategory } from '../utils/categoryRecognition'
 import {
   DEFAULT_ITEM_CATEGORY,
@@ -36,16 +33,13 @@ import {
 import { getDefaultItemValues } from '../utils/defaultValues'
 import { recognizeParameters } from '../utils/parameterRecognition'
 import { calculateExpirationDate } from '../utils/shelfLife'
-import { convertV1ItemToV2 } from '../utils/typeConverters'
 import { type ItemFormData, itemSchema } from '../utils/validation'
 import { toBasicWeightUnit } from '../utils/weightUnits'
 
 const router = useRouter()
 const route = useRoute()
-const storeV2 = useGearStoreV2()
 const { t } = useI18n()
-const { createItem, updateItem } = useGearV2()
-const { shouldUseAPI } = useBackend()
+const { createItem, updateItem, getItemById } = useGearV2()
 const { handleError } = useHandleError()
 const { setTitle } = usePageTitle()
 
@@ -53,7 +47,7 @@ const containerId = route.params.containerId as string
 const itemId = route.params.itemId as string | undefined
 const isEditMode: boolean = !!itemId
 
-const { container } = useContainer(containerId)
+const { container } = useContainerV2(containerId)
 const { navigateBackAndClean } = useNavigationReturn(containerId, itemId)
 
 // Local state for item (loaded explicitly, not from computed)
@@ -123,22 +117,15 @@ const loadItem = async () => {
   }
 
   try {
-    const service = gearItemService()
+    const foundItem = await getItemById(itemId)
 
-    if (shouldUseAPI.value && 'getItem' in service) {
-      const loadedItem = await service.getItem(itemId)
-      item.value = convertV1ItemToV2(loadedItem, containerId)
-    } else {
-      const foundItem = storeV2.getItemById(itemId)
-
-      if (!foundItem) {
-        toast.error(t('common.error'))
-        router.push(GearRoutePath.ContainerDetailById(containerId))
-        return
-      }
-
-      item.value = foundItem
+    if (!foundItem) {
+      toast.error(t('common.error'))
+      router.push(GearRoutePath.ContainerDetailById(containerId))
+      return
     }
+
+    item.value = foundItem
   } catch (error) {
     console.error('Failed to load item:', error)
     toast.error(t('common.error'))

@@ -11,8 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { useGear } from '../composables/useGear'
-import { useGearV2 } from '../composables/useGearV2'
+import { useContainerOperationsV2 } from '../composables/internal/v2/useContainerOperationsV2'
 import { GearRoutePath } from '../routes'
 import { useGearStoreV2 } from '../store/useGearStoreV2'
 import { getActionIcon } from '../utils/actionIcons'
@@ -31,10 +30,8 @@ const router = useRouter()
 const { t } = useI18n()
 const queryClient = useQueryClient()
 const storeV2 = useGearStoreV2()
-// Visibility is driven by the V2 list (same source as the page); delete still goes
-// through the V1 bulk endpoint until the full V1→V2 migration lands.
-const { containers } = useGearV2()
-const { deleteAllContainers } = useGear()
+// Visibility and deletion both go through V2 (same source as the page list).
+const { containers, deleteAllContainers } = useContainerOperationsV2()
 
 const emit = defineEmits<{
   exportAllToMarkdown: [],

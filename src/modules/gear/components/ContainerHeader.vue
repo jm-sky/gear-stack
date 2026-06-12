@@ -21,7 +21,7 @@ import { useBackend } from '@/shared/composables/useBackend'
 import { useHandleError } from '@/shared/composables/useHandleError'
 import { smallDateTime } from '@/shared/utils/smallDateTime'
 import type { IGearItemV2 } from '../types/gear.types.v2'
-import { useGear } from '../composables/useGear'
+import { useGearMutations } from '../composables/useGearMutations'
 import { GearRoutePath } from '../routes'
 import { getActionIcon } from '../utils/actionIcons'
 import { formatWeight } from '../utils/formatWeight'
@@ -77,7 +77,7 @@ const router = useRouter()
 const { t, locale } = useI18n()
 const { canUseAi } = useAi()
 const { shouldUseAPI } = useBackend()
-const { deleteContainer, updateContainer } = useGear()
+const { deleteItem, updateItem } = useGearMutations()
 const { handleError } = useHandleError()
 
 const isCloneDialogOpen = ref(false)
@@ -138,7 +138,7 @@ const handleDeleteConfirm = async () => {
 
   try {
     isDeleting.value = true
-    await deleteContainer(props.container.id)
+    await deleteItem(props.container.id)
     toast.success(t('common.success'))
     router.push(GearRoutePath.Containers)
   } catch (error) {
@@ -152,7 +152,7 @@ const handleDeleteConfirm = async () => {
 
 const handlePublish = async () => {
   try {
-    await updateContainer(props.container.id, { isPublic: true })
+    await updateItem(props.container.id, { isPublic: true })
     toast.success(t('common.success'))
     emit('refresh')
   } catch (error) {
