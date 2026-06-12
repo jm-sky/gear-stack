@@ -62,9 +62,15 @@ const cancelEditingName = () => {
   isEditingName.value = false
 }
 
-const handleEnter = (event: KeyboardEvent) => {
-  event.preventDefault()
-  saveName()
+// Single keydown handler (avoids two `@keydown.*` bindings compiling to a duplicate
+// onKeydown prop, which vue-tsc 3.3+ flags as TS1117)
+const handleKeydown = (event: KeyboardEvent) => {
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    saveName()
+  } else if (event.key === 'Escape') {
+    cancelEditingName()
+  }
 }
 </script>
 
@@ -88,8 +94,7 @@ const handleEnter = (event: KeyboardEvent) => {
       ref="nameInputRef"
       v-model="editingName"
       :disabled="isSavingName"
-      @keydown.enter="handleEnter"
-      @keydown.esc="cancelEditingName"
+      @keydown="handleKeydown"
       @blur="saveName"
     />
     <RefreshCcwIcon v-if="isSavingName" class="absolute right-6 top-0 size-4 animate-spin translate-y-1/2" />
