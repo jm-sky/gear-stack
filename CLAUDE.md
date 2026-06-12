@@ -6,6 +6,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Gear Stack is a Vue 3 application for managing survival gear and bug-out bag equipment. The app uses a hybrid architecture with both client-side localStorage and backend API integration for features like authentication, AI assistance, and admin functionality.
 
+## Known Bugs
+
+A running list of known bugs (with root causes and status) is kept in **[BUGS.md](BUGS.md)**. Check and update it when fixing or reporting issues. Note the recurring V1/V2 gotcha: the `/gear` page renders from TanStack Query (V2 cache), so any mutation done through V1 (`useGear()`) — or through `useGearV2()` without invalidation — must also invalidate the V2 query cache (`gearQueryKeys.all`) and sync the V2 store, otherwise the UI shows stale data.
+
+## V1 → V2 migration
+
+The gear module still has a legacy "V1" data layer (`useGear`, `useGearStore`, `gearContainerService`, ...) running in parallel with the target "V2" unified model (`useGearV2`, `useGearStoreV2`, `useGearQueries`, `gearQueryKeys`). The goal is **V2 everywhere**; legacy is not maintained. New code should use V2. The full inventory, V1→V2 mapping, feature gaps, and recommended migration order live in **[docs/migration-v1-to-v2.md](docs/migration-v1-to-v2.md)**.
+
 ## Commands
 
 ### Development
