@@ -84,3 +84,43 @@ przez re-parenting (`parentItemId`) zamiast tworzenia „placeholder" itemu. Try
 (resolucja po UUID) zachowany.
 
 **Pliki:** `src/modules/gear/components/ImportMarkdownDialog.vue`
+
+---
+
+## 5. Dialog „Dodaj kontener" (nesting) pokazuje „Brak dostępnych kontenerów" — `TODO`
+
+**Strona:** `/gear/:id` (np. `/gear/01KAP9SZH1X1F460J6FN06C822` – „Bagażnik") → dialog „Dodaj kontener"
+
+**Objaw:** Próba zagnieżdżenia istniejącego kontenera (np. „Plecak Helikon EDC Cordura")
+w „Bagażniku" – dialog pokazuje „Brak dostępnych kontenerów do zagnieżdżenia", mimo że
+ten kontener jest na liście `/gear`.
+
+**Przyczyna:** Rozjazd V1/V2. `AddNestedContainerDialog.vue` czyta `containers` z `useGear()`
+(store V1), a `ContainerDetailPage` jest już zmigrowany na V2 i **nie zasila store'a V1**.
+Gdy wchodzi się prosto na stronę kontenera, store V1 jest pusty → lista dostępnych
+kontenerów jest pusta. Dialog używa też V1-owego pola `container.type` i `getAllNestedContainers`
+operującego na typach V1.
+
+**Sugerowana poprawka:** zmigrować dialog na V2 (`useGearV2()`/store V2, `containerType`,
+V2-owa wersja wykluczania zagnieżdżeń). Część Kroku 1 migracji V1→V2
+(`docs/migration-v1-to-v2.md`).
+
+**Pliki:** `src/modules/gear/components/AddNestedContainerDialog.vue`,
+`src/modules/gear/utils/containerNesting.ts`
+
+---
+
+## 6. UX: dodawanie istniejącego kontenera/przedmiotu z poziomu „Dodaj przedmiot" — `TODO` (usprawnienie)
+
+**Strona:** `/gear/:id/items/new`
+
+**Obserwacja:** Strona „Dodaj przedmiot" ma 2 zakładki: „Nowy przedmiot" oraz „Z katalogu".
+Wygodnie byłoby dodać trzecią zakładkę „Mój istniejący przedmiot/kontener", pozwalającą
+zagnieździć istniejący kontener lub dodać/zlinkować istniejący przedmiot bez wchodzenia
+do osobnego dialogu na stronie kontenera.
+
+**Do doprecyzowania:** zakładka „Z katalogu" – czy to katalog publiczny, czy katalog
+przedmiotów użytkownika? (nazewnictwo do ujednolicenia, by było jednoznaczne).
+
+**Status:** usprawnienie UX, nie błąd. Do zaplanowania osobno (powiązane z migracją katalogu
+na V2 – patrz luki w `docs/migration-v1-to-v2.md`).

@@ -10,8 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useGear } from '../composables/useGear'
-import { getAllNestedContainers } from '../utils/containerNesting'
+import type { IGearItemV2 } from '../types/gear.types.v2'
+import { useContainers } from '../composables/useGearQueries'
 
 const { t } = useI18n()
 
@@ -25,22 +25,36 @@ const emit = defineEmits<{
   confirm: [containerId: string]
 }>()
 
-const { containers } = useGear()
+// Fetch the full container list from the V2 API. The container detail page only loads
+// the current container + its children into the store, so we can't rely on the store here.
+const { data: containersData } = useContainers()
+
+/**
+ * Collect a container id and all of its descendants (V2 hierarchy via parentItemId).
+ */
+const collectSubtreeIds = (rootId: string, all: IGearItemV2[]): Set<string> => {
+  const ids = new Set<string>([rootId])
+  const walk = (parentId: string) => {
+    for (const c of all) {
+      if (c.parentItemId === parentId && !ids.has(c.id)) {
+        ids.add(c.id)
+        walk(c.id)
+      }
+    }
+  }
+  walk(rootId)
+  return ids
+}
 
 // Get available containers for selection (exclude current container and its nested containers)
-const availableContainers = computed(() => {
-  const allContainers = containers.value
+const availableContainers = computed<IGearItemV2[]>(() => {
+  const allContainers = containersData.value ?? []
   if (!props.currentContainerId) {
     return allContainers
   }
 
-  // Exclude current container and all containers nested inside it
-  const nestedIds = new Set(
-    getAllNestedContainers(props.currentContainerId, allContainers).map(c => c.id)
-  )
-  nestedIds.add(props.currentContainerId)
-
-  return allContainers.filter(c => !nestedIds.has(c.id))
+  const excludedIds = collectSubtreeIds(props.currentContainerId, allContainers)
+  return allContainers.filter(c => !excludedIds.has(c.id))
 })
 
 const selectedContainerId = ref<string>('')
@@ -100,7 +114,7 @@ const isOpen = computed({
                     <div class="flex items-center gap-2">
                       <Package :size="16" class="text-muted-foreground" />
                       <span>{{ container.name }}</span>
-                      <span class="text-xs text-muted-foreground">({{ t(`gear.container.types.${container.type}`) }})</span>
+                      <span class="text-xs text-muted-foreground">({{ t(`gear.container.types.${container.containerType ?? 'other'}`) }})</span>
                     </div>
                   </SelectItem>
                 </template>
