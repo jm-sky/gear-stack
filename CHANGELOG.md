@@ -8,10 +8,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Token blacklisting po usunięciu konta**: usunięcie konta unieważnia wszystkie aktywne sesje użytkownika w Redis
-- **JTI session tracking**: każdy login tworzy unikalny JTI rejestrowany w Redis sorted set; wylogowanie usuwa konkretną sesję
-- **token_version w DB**: kolumna `token_version` w tabeli users; zmiana hasła i usunięcie konta inkrementują wersję, co unieważnia wszystkie tokeny nawet przy awarii Redis
-- **Blacklisting przy zmianie/resecie hasła**: zmiana i reset hasła unieważniają wszystkie aktywne tokeny użytkownika
 
 ### Changed
 
@@ -22,6 +18,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 ### Security
+
+---
+
+## [2.48.0] - 2026-06-12
+
+### Added
+- **Token blacklisting po usunięciu konta**: usunięcie konta unieważnia wszystkie aktywne sesje użytkownika w Redis
+- **JTI session tracking**: każdy login tworzy unikalny JTI rejestrowany w Redis sorted set; wylogowanie usuwa konkretną sesję
+- **token_version w DB**: kolumna `token_version` w tabeli users; zmiana hasła i usunięcie konta inkrementują wersję, co unieważnia wszystkie tokeny nawet przy awarii Redis
+- **Blacklisting przy zmianie/resecie hasła**: zmiana i reset hasła unieważniają wszystkie aktywne tokeny użytkownika
+- **Eksport wszystkich kontenerów do JSON** z listy `/gear` (drzewo kontenerów z zagnieżdżonymi dziećmi, model V2)
+
+### Fixed
+- **Gear**: akcja „Usuń wszystkie kontenery" nie odświeżała listy – kontenery zostawały widoczne (nieaktualny cache V2); teraz czyści store V2 i inwaliduje cache TanStack Query
+- **Gear**: akcje „Eksport do Markdown/CSV" z menu rozwijanego nie działały z powodu niespójnych nazw zdarzeń między komponentem a stroną
+- **Gear**: import z Markdown nie zapisywał danych przez API i nie pokazywał ich na liście u zalogowanego użytkownika; zapisuje teraz przez warstwę V2 i inwaliduje cache
+- **Gear**: błąd „Item not found" podczas importu – decyzja create/update opierała się na lokalnym store; zastąpiona odpornym upsertem po UUID (fallback create przy 404)
 
 ---
 
