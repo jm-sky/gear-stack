@@ -40,7 +40,7 @@
     "date-fns": "^4.4.0",
     "floating-vue": "^5.2.2",
     "jwt-decode": "^4.0.0",
-    "lucide-vue-next": "^0.554.0",
+    "lucide-vue-next": "^1.0.0",
     "markdown-it": "^14.2.0",
     "md5": "^2.3.0",
     "pinia": "^3.0.4",

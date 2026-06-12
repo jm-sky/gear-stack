@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Gear**: `useGearMutations` – ujednolicona warstwa mutacji V2 z automatyczną inwalidacją cache TanStack Query (keystone migracji V1→V2)
 
 ### Changed
+- **Zależności (npm)**: bump in-range (minor/patch) wszystkich pakietów + bezpieczne majory dev-tooling (`@vue/tsconfig` 0.9, `npm-run-all2` 9, `@sentry/vite-plugin` 5, `lucide-vue-next` 1.0). Pozostałe majory wysokiego ryzyka (typescript 6, vite 8, zod 4, vue-router 5, eslint 10) — zaplanowane w `docs/security-dependabot-remediation.md`, do zrobienia z weryfikacją UI
 - **Gear (migracja V1→V2, w toku)**: rdzeń modułu gear przeniesiony na model V2 (unified):
   `ContainerDetailPage`, `ContainerHeader`, `ItemHeaderName`, `ItemHeaderActions`,
   `ContainersListPageDropdown` (delete-all), formularze kontenera/przedmiotu i strona share-tokens

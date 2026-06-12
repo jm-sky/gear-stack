@@ -115,3 +115,54 @@ Rozbicie na osobne commity ułatwia rollback, gdyby któraś zmiana zepsuła bui
 - Jeśli `pnpm build` zaprotestuje przy serialize-javascript 7.x (np. wymóg nowszego Node u terser),
   fallbackiem jest bump `vite-plugin-pwa`/`@rollup/plugin-terser` do wersji ciągnącej naprawiony
   `serialize-javascript`, zamiast twardego override.
+
+---
+
+# Bump wszystkich zależności (npm + Python)
+
+## npm — stan
+
+- ✅ **In-range (minor/patch)** — zrobione `pnpm update`: vue 3.5.38, vite 7.3.5, vitest 4.1.8,
+  vue-tsc 3.3.4, tailwind 4.x, @tanstack/vue-query, @sentry/vue, vue-i18n, reka-ui, playwright 1.60,
+  date-fns i in. Zweryfikowane (type-check, lint, 414 testów, build+PWA).
+  - Uwaga: vue-tsc 3.3 zgłasza dwa `@keydown.*` na jednym elemencie jako TS1117 — połączono w
+    jeden `handleKeydown` w `ItemHeaderName`/`ContainerHeaderName`.
+
+### npm — pozostałe MAJORY (do zrobienia ostrożnie, pojedynczo, z `type-check`+`lint`+`test`+`build`)
+
+Ranking od najniższego ryzyka. Każdy w osobnym commicie; rollback jeśli psuje.
+
+| Pakiet | Z → Na | Ryzyko | Uwagi |
+|--------|--------|--------|-------|
+| @vue/tsconfig | 0.8 → 0.9 | niskie | preset tsconfig; sprawdzić `type-check` |
+| npm-run-all2 | 8 → 9 | niskie | runner skryptów (`run-p` w `build`); sprawdzić `pnpm build` |
+| @sentry/vite-plugin | 4 → 5 | niskie | plugin build (upload sourcemap); sprawdzić `pnpm build` |
+| @types/node | 22 → 25 | niskie–średnie | **zostawić na 22** — `engines` wspiera node ^20.19/>=22.12; typy ahead of runtime |
+| eslint-plugin-perfectionist | 4 → 5 | średnie | zmiany reguł sortowania → duży diff po `lint --fix` |
+| lucide-vue-next | 0.554 → 1.0 | średnie | możliwe zmiany nazw ikon → `type-check` wyłapie brakujące importy |
+| eslint | 9 → 10 | średnie | nowe domyślne reguły/flat config; spodziewać się lint-fixów |
+| vite | 7 → 8 | **wysokie** | major narzędzia build; konfiguracja/plugin API; pełny `build`+`preview` |
+| typescript | 5.9 → 6.0 | **wysokie** | nowe błędy typów w całym repo; robić z dużym buforem czasu |
+| zod | 3 → 4 | **wysokie** | breaking API; krytyczna zgodność z `vee-validate`/`@vee-validate/zod` |
+| vue-router | 4 → 5 | **wysokie** | major API routera; **zweryfikować, czy 5.x jest przeznaczone dla Vue 3** przed bumpem |
+
+Dodatkowo z `pnpm audit` (poza listą Dependabota, dev/build): `esbuild` (<0.28.1, ciągnięty przez
+vite — naprawi się przy vite 8 lub override), `postcss`, `ws`, `brace-expansion`, `fast-uri`.
+
+## Python (backend) — stan: `TODO`
+
+Wymaga uruchomienia kontenera i `pytest` (zob. CLAUDE.md → Backend Testing). Procedura:
+
+```bash
+# (katalog NIE zaczyna się od '_' → Docker dozwolony)
+docker compose -f backend/docker-compose.dev.yml up -d
+# przegląd nieaktualnych
+docker exec gear-stack-app pip list --outdated
+# bump w backend/requirements.txt (ostrożnie: FastAPI/Pydantic/SQLAlchemy to majory wysokiego ryzyka)
+docker compose -f backend/docker-compose.dev.yml up -d --build
+docker exec gear-stack-app python -m pytest tests/ -v
+docker exec gear-stack-app python -m black . && docker exec gear-stack-app python -m mypy .
+```
+
+Kolejność: najpierw patch/minor (bezpieczne CVE), potem majory pojedynczo. Pydantic v1→v2 lub
+SQLAlchemy 1.x→2.x (jeśli dotyczy) traktować jako osobne, duże zadania z pełnym przebiegiem testów.
