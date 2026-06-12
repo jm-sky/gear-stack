@@ -23,8 +23,8 @@ import type {
   IGearItemV2,
   IUpdateGearItemV2Dto,
 } from '../types/gear.types.v2'
-import { useGearV2 } from './useGearV2'
 import { gearQueryKeys } from '../utils/queryKeys'
+import { useGearV2 } from './useGearV2'
 import type { TUUID } from '@/shared/types/base.type'
 
 export function useGearMutations() {
