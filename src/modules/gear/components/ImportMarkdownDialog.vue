@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useQueryClient } from '@tanstack/vue-query'
+import { HttpStatusCode, isAxiosError } from 'axios'
 import { FileText, Info } from 'lucide-vue-next'
 import { computed, nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -16,10 +18,11 @@ import DialogProgressOverlay from '@/components/ui/dialog/DialogProgressOverlay.
 import Textarea from '@/components/ui/textarea/Textarea.vue'
 import { useHandleError } from '@/shared/composables/useHandleError'
 import { logger } from '@/shared/utils/logger'
-import type { IGearItemV2 } from '../types/gear.types.v2'
+import type { ICreateGearItemV2Dto, IGearItemV2, IUpdateGearItemV2Dto } from '../types/gear.types.v2'
 import { useGearSettings } from '../composables/useGearSettings'
+import { useGearV2 } from '../composables/useGearV2'
 import { markdownImportService } from '../services/markdownImportService'
-import { useGearStoreV2 } from '../store/useGearStoreV2'
+import { gearQueryKeys } from '../utils/queryKeys'
 import { safeValidateContainer, safeValidateItem } from '../utils/validation'
 import GuidelinesDialog from './GuidelinesDialog.vue'
 import MarkdownImportOptions from './import-markdown/MarkdownImportOptions.vue'
@@ -35,7 +38,8 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const store = useGearStoreV2()
+const queryClient = useQueryClient()
+const { createItem, updateItem } = useGearV2()
 const { customBrands } = useGearSettings()
 const { handleError } = useHandleError()
 
@@ -124,6 +128,45 @@ const handleOpenGuidelines = () => {
   isGuidelinesDialogOpen.value = true
 }
 
+/**
+ * Detect "entity does not exist" errors from either the API (404) or the local service.
+ */
+const isNotFoundError = (error: unknown): boolean => {
+  if (isAxiosError(error)) {
+    return error.response?.status === HttpStatusCode.NotFound
+  }
+  return error instanceof Error && /not found/i.test(error.message)
+}
+
+/**
+ * Upsert a gear item by UUID.
+ *
+ * In 'update' mode with a UUID we try to PATCH the existing entity and, if the backend
+ * doesn't have it (404 / not found), fall back to creating it with the same UUID. This is
+ * resilient to stale local store state (e.g. items left over from older imports that were
+ * never persisted to the backend). In 'create' mode we always create a fresh entity.
+ */
+const upsertGearItem = async (
+  uuid: string | undefined,
+  createDto: ICreateGearItemV2Dto,
+  updateDto: IUpdateGearItemV2Dto,
+): Promise<{ item: IGearItemV2; created: boolean }> => {
+  if (importMode.value === 'update' && uuid) {
+    try {
+      const item = await updateItem(uuid, updateDto)
+      return { item, created: false }
+    } catch (error) {
+      if (!isNotFoundError(error)) throw error
+      const item = await createItem({ ...createDto, id: uuid })
+      return { item, created: true }
+    }
+  }
+
+  // Create mode (or no UUID): always create. Reuse the UUID only in update mode above.
+  const item = await createItem(createDto)
+  return { item, created: true }
+}
+
 const handleImport = async () => {
   if (!previewResult.value || previewResult.value.containers.length === 0) {
     toast.error(t('gear.import.noPreview'))
@@ -154,7 +197,7 @@ const handleImport = async () => {
     // Map to store container slug/id -> container UUID for nested container resolution
     const containerIdMap = new Map<string, string>()
 
-    // Phase 1: Create/update all containers first
+    // Phase 1: Create/update all containers first (persisted via API when authenticated)
     const createdContainers: Array<{ containerData: typeof previewResult.value.containers[0]; container: IGearItemV2 }> = []
 
     for (const containerData of previewResult.value.containers) {
@@ -181,117 +224,35 @@ const handleImport = async () => {
         continue // Skip invalid container
       }
 
-      let container
+      const commonContainerFields = {
+        name: validation.data.name,
+        description: validation.data.description || null,
+        containerType: validation.data.type,
+        weight: validation.data.weight ?? null,
+        weightUnit: validation.data.weightUnit ?? null,
+        url: validation.data.url ?? null,
+        price: validation.data.price ?? null,
+        currency: validation.data.currency ?? null,
+        favorite: validation.data.favorite ?? false,
+      }
 
-      // Check if we should update existing container (has UUID and mode is update)
-      if (importMode.value === 'update' && containerData.uuid) {
-        const existing = store.getItemById(containerData.uuid)
-        if (existing && existing.itemType === 'container') {
-          // Update existing container with all parsed fields
-          store.upsertItem({
-            ...existing,
-            name: validation.data.name,
-            description: validation.data.description || null,
-            weight: validation.data.weight ?? null,
-            weightUnit: validation.data.weightUnit ?? null,
-            url: validation.data.url ?? null,
-            price: validation.data.price ?? null,
-            currency: validation.data.currency ?? null,
-            favorite: validation.data.favorite ?? false,
-            updatedAt: new Date().toISOString(),
-            // Keep existing type, color, brand, and other fields that aren't in markdown
-          })
-          container = store.getItemById(existing.id)!
-          updatedCount++
-        } else {
-          // UUID provided but container not found - create new with same UUID
-          container = {
-            id: containerData.uuid, // Use UUID from markdown export
-            userId: 'local-user',
-            itemType: 'container' as const,
-            parentItemId: null,
-            name: validation.data.name,
-            description: validation.data.description || null,
-            containerType: validation.data.type,
-            category: null,
-            orderIndex: null,
-            status: 'owned' as const,
-            priority: null,
-            weight: validation.data.weight ?? null,
-            weightUnit: validation.data.weightUnit ?? null,
-            maxWeight: null,
-            maxWeightUnit: null,
-            quantity: 1,
-            wearable: false,
-            consumable: false,
-            favorite: validation.data.favorite ?? false,
-            hideWhenNested: false,
-            price: validation.data.price ?? null,
-            currency: validation.data.currency ?? null,
-            url: validation.data.url ?? null,
-            brand: null,
-            color: null,
-            expirationDate: null,
-            quality: null,
-            notes: null,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            isPublic: false,
-            authorId: null,
-            authorName: null,
-            averageUserRating: null,
-            userRatingCount: undefined,
-            ownerRating: null,
-            userRating: null,
-            showItemImages: false,
-          }
-          store.upsertItem(container)
-          importedCount++
-        }
-      } else {
-        // Create new container
-        container = {
-          id: crypto.randomUUID(),
-          userId: 'local-user',
-          itemType: 'container' as const,
+      // Upsert by UUID (update in update-mode, otherwise create). Resilient to stale
+      // local state: a UUID present in the store but missing on the backend falls back
+      // to create-with-UUID instead of failing with "Item not found".
+      const { item: container, created } = await upsertGearItem(
+        containerData.uuid,
+        {
+          itemType: 'container',
           parentItemId: null,
-          name: validation.data.name,
-          description: validation.data.description || null,
-          containerType: validation.data.type,
-          category: null,
-          orderIndex: null,
-          status: 'owned' as const,
-          priority: null,
-          weight: validation.data.weight ?? null,
-          weightUnit: validation.data.weightUnit ?? null,
-          maxWeight: null,
-          maxWeightUnit: null,
-          quantity: 1,
-          wearable: false,
-          consumable: false,
-          favorite: validation.data.favorite ?? false,
-          hideWhenNested: false,
-          price: validation.data.price ?? null,
-          currency: validation.data.currency ?? null,
-          url: validation.data.url ?? null,
-          brand: null,
-          color: null,
-          expirationDate: null,
-          quality: undefined,
-          notes: null,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          isPublic: false,
-          authorId: null,
-          authorName: null,
-          averageUserRating: null,
-          userRatingCount: undefined,
-          ownerRating: null,
-          userRating: null,
-          showItemImages: false,
-        }
-        store.upsertItem(container)
+          ...commonContainerFields,
+        },
+        commonContainerFields,
+      )
+
+      if (created) {
         importedCount++
+      } else {
+        updatedCount++
       }
 
       // Store mapping: slug/id -> container UUID
@@ -311,23 +272,27 @@ const handleImport = async () => {
     // Phase 2: Create/update items with nested container resolution
     importProgress.value.phase = 'items'
     for (const { containerData, container } of createdContainers) {
-      // Get children of container to check for existing items
-      const existingChildren = store.getChildrenOfItem(container.id)
-
       // Import/update items
       for (const itemData of containerData.items) {
         importProgress.value.currentItem = itemData.name || t('gear.import.importingItem', 'Importing item')
         // Extract nestedContainerId before destructuring
         const { uuid: itemUuid, nestedContainerId, ...itemDto } = itemData
 
-        // Resolve nestedContainerId (slug) to actual container UUID
+        // Nested container reference: re-parent the already-created container under
+        // this one (V2-native hierarchy) instead of creating a placeholder item.
         if (nestedContainerId) {
           const nestedContainerUuid = containerIdMap.get(nestedContainerId)
           if (nestedContainerUuid) {
-            itemDto.containerId = nestedContainerUuid
+            try {
+              await updateItem(nestedContainerUuid, { parentItemId: container.id })
+            } catch (error) {
+              logger.warn(`Failed to nest container "${nestedContainerId}" under "${container.name}"`, error)
+            }
           } else {
             logger.warn(`Nested container with id "${nestedContainerId}" not found`)
           }
+          importProgress.value.current++
+          continue
         }
 
         // M6 FIX: Validate item data before service call
@@ -339,84 +304,49 @@ const handleImport = async () => {
           continue // Skip invalid item
         }
 
-        if (importMode.value === 'update' && itemUuid) {
-          // Try to find existing item by UUID in the container's children
-          const existingItem = existingChildren.find(i => i.id === itemUuid && i.itemType === 'item')
-          if (existingItem) {
-            // Update existing item
-            store.upsertItem({
-              ...existingItem,
-              ...validation.data,
-              updatedAt: new Date().toISOString(),
-            })
-            itemUpdatedCount++
-          } else {
-            // UUID provided but item not found - create new with same UUID
-            store.upsertItem({
-              ...validation.data,
-              id: itemUuid, // Use UUID from markdown export
-              userId: 'local-user',
-              itemType: 'item' as const,
-              parentItemId: container.id,
-              description: validation.data.notes || null,
-              containerType: null,
-              orderIndex: undefined,
-              status: validation.data.status || 'owned',
-              priority: validation.data.priority || null,
-              maxWeight: null,
-              maxWeightUnit: null,
-              hideWhenNested: false,
-              expirationDate: validation.data.expirationDate || null,
-              quality: validation.data.quality || null,
-              notes: validation.data.notes || null,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-              isPublic: false,
-              authorId: null,
-              authorName: null,
-              averageUserRating: null,
-              userRatingCount: undefined,
-              ownerRating: null,
-              userRating: null,
-              showItemImages: false,
-            })
-            itemCount++
-          }
-        } else {
-          // Create new item
-          store.upsertItem({
-            ...validation.data,
-            id: crypto.randomUUID(),
-            userId: 'local-user',
-            itemType: 'item' as const,
+        const commonItemFields = {
+          name: validation.data.name,
+          category: validation.data.category,
+          quantity: validation.data.quantity,
+          weight: validation.data.weight ?? null,
+          weightUnit: validation.data.weightUnit ?? null,
+          status: validation.data.status || 'owned',
+          priority: validation.data.priority ?? null,
+          price: validation.data.price ?? null,
+          currency: validation.data.currency ?? null,
+          url: validation.data.url ?? null,
+          brand: validation.data.brand ?? null,
+          color: validation.data.color ?? null,
+          quality: validation.data.quality ?? null,
+          wearable: validation.data.wearable ?? null,
+          consumable: validation.data.consumable ?? null,
+          showOnContainer: validation.data.showOnContainer ?? null,
+          expirationDate: validation.data.expirationDate ?? null,
+          notes: validation.data.notes ?? null,
+          description: validation.data.notes ?? null,
+        }
+
+        const { created } = await upsertGearItem(
+          itemUuid,
+          {
+            itemType: 'item',
             parentItemId: container.id,
-            description: validation.data.notes || null,
-            containerType: null,
-            orderIndex: undefined,
-            status: validation.data.status || 'owned',
-            priority: validation.data.priority || null,
-            maxWeight: null,
-            maxWeightUnit: null,
-            hideWhenNested: false,
-            expirationDate: validation.data.expirationDate || null,
-            quality: validation.data.quality || undefined,
-            notes: validation.data.notes || null,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            isPublic: false,
-            authorId: null,
-            authorName: null,
-            averageUserRating: null,
-            userRatingCount: undefined,
-            ownerRating: null,
-            userRating: null,
-            showItemImages: false,
-          })
+            ...commonItemFields,
+          },
+          commonItemFields,
+        )
+
+        if (created) {
           itemCount++
+        } else {
+          itemUpdatedCount++
         }
         importProgress.value.current++
       }
     }
+
+    // Refresh the page list (TanStack Query cache) so imported data appears immediately
+    await queryClient.invalidateQueries({ queryKey: gearQueryKeys.all })
 
     const message = importMode.value === 'update'
       ? t('gear.import.successWithUpdates', {
