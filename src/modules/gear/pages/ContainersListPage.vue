@@ -26,11 +26,13 @@ const ExportToCSVDialog = defineAsyncComponent(() => import('../components/Expor
 const ExportToPromptDialog = defineAsyncComponent(() => import('../components/ExportToPromptDialog.vue'))
 const ImportMarkdownDialog = defineAsyncComponent(() => import('../components/ImportMarkdownDialog.vue'))
 const AiChatDialog = defineAsyncComponent(() => import('@/modules/ai/components/AiChatDialog.vue'))
+import { downloadBlob } from '@/shared/utils/downloadBlob'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { useContainersWithChildren } from '../composables/useGearQueries'
 import { useGearV2 } from '../composables/useGearV2'
 import { GearRouteIcon, GearRoutePath } from '../routes'
 import { getActionIcon } from '../utils/actionIcons'
+import { exportContainersToJSONV2, generateAllContainersJSONFileName } from '../utils/exportToJsonV2'
 import type { TUUID } from '@/shared/types/base.type'
 
 // Action icons
@@ -41,7 +43,7 @@ const router = useRouter()
 const route = useRoute()
 const { t } = useI18n()
 const queryClient = useQueryClient()
-const { containers: containersFromStore, rootContainers: rootContainersFromStore, deleteItem, refreshAll } = useGearV2()
+const { containers: containersFromStore, rootContainers: rootContainersFromStore, deleteItem, refreshAll, getChildrenFromStore } = useGearV2()
 const { getContainerTypeLabel } = useContainerTypeLabel()
 const { canUseAi } = useAi()
 const { shouldUseAPI } = useBackend()
@@ -284,6 +286,21 @@ const handleExportAllToCSV = () => {
   isExportToCSVDialogOpen.value = true
 }
 
+const handleExportAllToJson = () => {
+  const roots = rootContainers.value
+  if (roots.length === 0) {
+    toast.error(t('gear.export.noContainers'))
+    return
+  }
+
+  const json = exportContainersToJSONV2(roots, {
+    getChildrenOfItem: getChildrenFromStore,
+    includeNestedContainers: true,
+  })
+  downloadBlob(new Blob([json], { type: 'application/json' }), generateAllContainersJSONFileName())
+  toast.success(t('gear.export.jsonSuccess', { count: roots.length }))
+}
+
 const handleAiChat = () => {
   isAiDialogOpen.value = true
 }
@@ -328,7 +345,12 @@ const handleAiChat = () => {
           </Button>
         </template>
         <template #dropdown>
-          <ContainersListPageDropdown @export-all-to-prompt="handleExportAllToMarkdown" @export-all-to-csv="handleExportAllToCSV" @import="handleImport" />
+          <ContainersListPageDropdown
+            @export-all-to-markdown="handleExportAllToMarkdown"
+            @export-all-to-csv="handleExportAllToCSV"
+            @export-all-to-json="handleExportAllToJson"
+            @import="handleImport"
+          />
         </template>
       </CommonPageHeader>
 

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useQueryClient } from '@tanstack/vue-query'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
@@ -11,8 +12,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useGear } from '../composables/useGear'
+import { useGearV2 } from '../composables/useGearV2'
 import { GearRoutePath } from '../routes'
+import { useGearStoreV2 } from '../store/useGearStoreV2'
 import { getActionIcon } from '../utils/actionIcons'
+import { gearQueryKeys } from '../utils/queryKeys'
 
 // Action icons
 const MoreActionsIcon = getActionIcon('moreActions')
@@ -20,15 +24,22 @@ const CreateIcon = getActionIcon('create')
 const ImportFromMarkdownIcon = getActionIcon('importFromMarkdown')
 const ExportAllToMarkdownIcon = getActionIcon('exportAllToMarkdown')
 const ExportToCSVIcon = getActionIcon('exportToCSV')
+const ExportToJsonIcon = getActionIcon('exportToJson')
 const DeleteAllIcon = getActionIcon('deleteAll')
 
 const router = useRouter()
 const { t } = useI18n()
-const { containers, deleteAllContainers } = useGear()
+const queryClient = useQueryClient()
+const storeV2 = useGearStoreV2()
+// Visibility is driven by the V2 list (same source as the page); delete still goes
+// through the V1 bulk endpoint until the full V1→V2 migration lands.
+const { containers } = useGearV2()
+const { deleteAllContainers } = useGear()
 
 const emit = defineEmits<{
   exportAllToMarkdown: [],
-  exportAllToCSV: [],
+  exportAllToCsv: [],
+  exportAllToJson: [],
   import: [],
 }>()
 
@@ -40,10 +51,13 @@ const handleImport = () => {
   emit('import')
 }
 
-const handleDeleteAll = () => {
+const handleDeleteAll = async () => {
   if (confirm(t('gear.container.deleteAllConfirm'))) {
     try {
-      deleteAllContainers()
+      await deleteAllContainers()
+      // Keep the V2 store and TanStack Query cache (used by the page list) in sync
+      storeV2.clearAll()
+      await queryClient.invalidateQueries({ queryKey: gearQueryKeys.all })
       toast.success(t('gear.container.deleteAllSuccess'))
     } catch {
       toast.error(t('common.error'))
@@ -55,8 +69,12 @@ const handleExportAllToMarkdown = () => {
   emit('exportAllToMarkdown')
 }
 
-const handleExportAllToCSV = () => {
-  emit('exportAllToCSV')
+const handleExportAllToCsv = () => {
+  emit('exportAllToCsv')
+}
+
+const handleExportAllToJson = () => {
+  emit('exportAllToJson')
 }
 </script>
 
@@ -92,10 +110,17 @@ const handleExportAllToCSV = () => {
       </DropdownMenuItem>
       <DropdownMenuItem
         v-if="containers.length > 0"
-        @click="handleExportAllToCSV"
+        @click="handleExportAllToCsv"
       >
         <ExportToCSVIcon class="size-4 mr-2" />
         {{ t('gear.export.allToCSV') }}
+      </DropdownMenuItem>
+      <DropdownMenuItem
+        v-if="containers.length > 0"
+        @click="handleExportAllToJson"
+      >
+        <ExportToJsonIcon class="size-4 mr-2" />
+        {{ t('gear.export.allToJson') }}
       </DropdownMenuItem>
       <DropdownMenuSeparator v-if="containers.length > 0" />
       <DropdownMenuItem

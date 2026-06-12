@@ -6,6 +6,7 @@ import {
   Edit,
   Ellipsis,
   FileInput,
+  FileJson,
   FileOutput,
   FileSpreadsheet,
   Globe,
@@ -57,6 +58,7 @@ export const ACTION_ICONS: Record<string, Component> = {
   exportToPrompt: FileOutput, // AI-related export action
   exportAllToMarkdown: FileOutput, // AI-related export action
   exportToCSV: FileSpreadsheet, // CSV export action
+  exportToJson: FileJson, // JSON export action
 
   // AI/Automation
   ai: Sparkles, // Main AI assistant button
