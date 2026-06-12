@@ -3,6 +3,35 @@
 Cel: usunąć legacy warstwę „V1" modułu gear i oprzeć wszystko na V2 (unified model).
 Nie dbamy o kompatybilność wsteczną z V1.
 
+## Status (2026-06-12)
+
+Aplikacja jest w spójnym, działającym stanie hybrydowym — zmigrowane komponenty używają V2,
+niezmigrowane wciąż działają na V1 (store V1 nadal zasilany przez `DashboardPage`/`AllItemsPage`).
+Type-check, ESLint i 403 testy jednostkowe przechodzą.
+
+**Zrobione:**
+- ✅ Faza 0: `useGearMutations` (keystone — mutacje V2 + inwalidacja cache)
+- ✅ Komponenty mutujące: `ItemHeaderName`, `ItemHeaderActions`, `ContainerHeader`,
+  `ContainersListPageDropdown` (delete-all → V2), `ContainerDetailPage` (pełny V2:
+  mutacje, batchUpdateOrder, re-parenting zagnieżdżonych kontenerów, refresh przez invalidację)
+- ✅ Strony formularzy: `ContainerFormPage`, `ItemFormPage`, `ContainerShareTokensPage`
+  → `useContainerV2`; `ItemFormPage` ładuje przez `useGearV2().getItemById`
+- ✅ Composable: `useItemImage` (primaryImageUrl w store V2 + invalidacja),
+  `useItemsParamRecognition` (typy V2 + `useGearMutations`)
+- ✅ Eksport JSON (`exportToJsonV2`) z `/gear`
+
+**Pozostało (wymaga ostrożnej migracji + najlepiej manualnego testu UI):**
+- ⏳ `ShoppingPlanningPage` + komponenty `shopping/*` (typowane V1 `IGearItem`/`IItemWithContainerId`,
+  konsumują `container.items` — wymaga adaptera „kontenery z dziećmi" z V2 lub przetypowania)
+- ⏳ Read-only: `DashboardPage`, `AppSidebar`, `AllItemsPage`, `LocalContainersStats`,
+  `TotalsStats`, `statsLocalService`, `ai/useAiContext`, `LandingPage`, `appInit`
+- ⏳ Ścieżka zapisu AI: `ai/useAiActions` (tworzy/aktualizuje przez V1)
+- ⏳ Luki funkcjonalne do dobudowania na V2: **clone** (`CloneContainerDialog`),
+  **odczyt katalogu** (`ItemCatalogSelector`, `GlobalCatalogueSelector`, `catalogue/useCatalogue`),
+  **import JSON** (`useJsonImportExport`)
+- ⏳ Martwe (do usunięcia w Fazie 4, brak konsumentów): `useItem` (V1), `useInlineItemEditing` (V1)
+- ⏳ Faza 4: usunięcie warstwy V1 po odpięciu wszystkich konsumentów
+
 > Główna przyczyna błędów ze „stale UI": mutacje przez V1 (lub przez `useGearV2()`
 > bez inwalidacji) nie odświeżają cache TanStack Query (`gearQueryKeys`). Strona `/gear`
 > renderuje z tego cache. Patrz [BUGS.md](../BUGS.md).

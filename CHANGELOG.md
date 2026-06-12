@@ -8,8 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Gear**: `useGearMutations` – ujednolicona warstwa mutacji V2 z automatyczną inwalidacją cache TanStack Query (keystone migracji V1→V2)
 
 ### Changed
+- **Gear (migracja V1→V2, w toku)**: rdzeń modułu gear przeniesiony na model V2 (unified):
+  `ContainerDetailPage`, `ContainerHeader`, `ItemHeaderName`, `ItemHeaderActions`,
+  `ContainersListPageDropdown` (delete-all), formularze kontenera/przedmiotu i strona share-tokens
+  (`useContainerV2`), oraz composable `useItemImage`/`useItemsParamRecognition`. Zagnieżdżone
+  kontenery używają teraz natywnego re-parentingu V2 (`parentItemId`). Szczegóły i pozostały
+  zakres: `docs/migration-v1-to-v2.md`
 
 ### Deprecated
 
