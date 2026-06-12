@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Package } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import {
@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useContainers } from '../composables/useGearQueries'
+import { useGearV2 } from '../composables/useGearV2'
 
 const { t } = useI18n()
 
@@ -25,13 +25,23 @@ const emit = defineEmits<{
   move: [targetContainerId: string]
 }>()
 
-// Fetch the full container list from the V2 API (the store may only hold the
-// current container's subtree, depending on the page we were opened from).
-const { data: containersData } = useContainers()
+// Load all containers through the active V2 service (API or localStorage) into the store.
+// The store may only hold the current container's subtree depending on the opening page.
+const { containers, getItems } = useGearV2()
+
+watch(
+  () => props.open,
+  (open) => {
+    if (open) {
+      getItems({ itemType: 'container' }).catch(() => {})
+    }
+  },
+  { immediate: true },
+)
 
 // Get available containers for selection (exclude current container)
 const availableContainers = computed(() => {
-  return (containersData.value ?? []).filter(c => c.id !== props.currentContainerId)
+  return containers.value.filter(c => c.id !== props.currentContainerId)
 })
 
 const selectedContainerId = ref<string>('')

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Package } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
 import {
@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import type { IGearItemV2 } from '../types/gear.types.v2'
-import { useContainers } from '../composables/useGearQueries'
+import { useGearV2 } from '../composables/useGearV2'
 
 const { t } = useI18n()
 
@@ -25,9 +25,22 @@ const emit = defineEmits<{
   confirm: [containerId: string]
 }>()
 
-// Fetch the full container list from the V2 API. The container detail page only loads
-// the current container + its children into the store, so we can't rely on the store here.
-const { data: containersData } = useContainers()
+// Load the full container list through the active V2 service (API when authenticated,
+// localStorage otherwise) into the store. The container detail page only loads the current
+// container + its children, so we fetch all containers when the dialog opens.
+const { containers, getItems } = useGearV2()
+
+watch(
+  () => props.open,
+  (open) => {
+    if (open) {
+      getItems({ itemType: 'container' }).catch(() => {
+        // Best-effort; fall back to whatever is already in the store
+      })
+    }
+  },
+  { immediate: true },
+)
 
 /**
  * Collect a container id and all of its descendants (V2 hierarchy via parentItemId).
@@ -48,7 +61,7 @@ const collectSubtreeIds = (rootId: string, all: IGearItemV2[]): Set<string> => {
 
 // Get available containers for selection (exclude current container and its nested containers)
 const availableContainers = computed<IGearItemV2[]>(() => {
-  const allContainers = containersData.value ?? []
+  const allContainers = containers.value
   if (!props.currentContainerId) {
     return allContainers
   }

@@ -19,7 +19,7 @@ import {
 import type { IGlobalCatalogueItem } from '../../types/catalogue.types'
 import type { TGearItemPriority, TGearItemStatus } from '../../types/gear.types.v2'
 import { useCatalogue } from '../../composables/catalogue/useCatalogue'
-import { useContainers } from '../../composables/useGearQueries'
+import { useGearV2 } from '../../composables/useGearV2'
 import { GearRoutePath } from '../../routes'
 
 const { t } = useI18n()
@@ -31,8 +31,17 @@ const props = defineProps<{
   catalogueItem: IGlobalCatalogueItem
 }>()
 
-const { data: containersData } = useContainers()
-const containers = computed(() => containersData.value ?? [])
+// Load all containers through the active V2 service (API or localStorage) into the store.
+const { containers, getItems } = useGearV2()
+watch(
+  open,
+  (isOpen) => {
+    if (isOpen) {
+      getItems({ itemType: 'container' }).catch(() => {})
+    }
+  },
+  { immediate: true },
+)
 const { addCatalogueItemToContainer, isAddingToContainer } = useCatalogue()
 
 // Form state
