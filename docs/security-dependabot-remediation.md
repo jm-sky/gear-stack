@@ -1,7 +1,15 @@
 # Plan remediacji podatności (GitHub Dependabot)
 
-Plan naprawy 6 alertów Dependabota (5 unikalnych pakietów). Status: `TODO`.
-Stan na: 2026-06-12. Menedżer pakietów: **pnpm 10.18.3**.
+Naprawa 6 alertów Dependabota (5 unikalnych pakietów). Status: **DONE** (2026-06-12) —
+zweryfikowane `type-check` + `lint` + `test:run` (414 zielonych) + `pnpm build` (PWA OK).
+`pnpm audit` potwierdza: żaden z 6 alertów nie pozostał. Menedżer pakietów: **pnpm 10.18.3**.
+
+> Zastosowane: `axios` → `^1.17.0` (bezpośredni) oraz `pnpm.overrides` dla shell-quote
+> (1.8.4), @babel/plugin-transform-modules-systemjs (7.29.7), serialize-javascript (7.0.5).
+>
+> **Pozostałe (poza listą Dependabota, wykryte przez `pnpm audit`)** — głównie dev/build,
+> do osobnego bumpu: `esbuild` (<0.28.1, via vite), `postcss`, `ws`, `brace-expansion`,
+> `fast-uri`. Patrz „Bump wszystkich zależności" niżej.
 
 > Tylko `axios` jest zależnością bezpośrednią — resztę naprawiamy przez `pnpm.overrides`
 > w `package.json` (wymuszenie wersji w zależnościach tranzytywnych).

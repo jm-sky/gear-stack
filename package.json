@@ -35,7 +35,7 @@
     "@unovis/vue": "^1.6.4",
     "@vee-validate/zod": "^4.15.1",
     "@vueuse/core": "^14.2.1",
-    "axios": "^1.15.0",
+    "axios": "^1.17.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
@@ -85,6 +85,13 @@
     "vitest": "^4.1.4",
     "vue-tsc": "^3.2.6",
     "workbox-window": "^7.4.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "shell-quote@<1.8.4": "^1.8.4",
+      "@babel/plugin-transform-modules-systemjs@<7.29.4": "^7.29.7",
+      "serialize-javascript@<7.0.0": "^7.0.5"
+    }
   },
   "packageManager": "pnpm@10.18.3+sha512.bbd16e6d7286fd7e01f6b3c0b3c932cda2965c06a908328f74663f10a9aea51f1129eea615134bf992831b009eabe167ecb7008b597f40ff9bc75946aadfb08d"
 }

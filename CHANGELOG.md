@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 ### Security
+- Naprawiono 6 alertów Dependabota: `axios` → 1.17.0 (3 CVE: MITM proxy, NO_PROXY bypass, wyciek Proxy-Authorization), oraz `pnpm.overrides` dla `shell-quote` 1.8.4 (Critical), `@babel/plugin-transform-modules-systemjs` 7.29.7, `serialize-javascript` 7.0.5 (RCE)
 
 ---
 
