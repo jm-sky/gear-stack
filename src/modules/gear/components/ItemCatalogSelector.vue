@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import Badge from '@/components/ui/badge/Badge.vue'
 import ComboBox from '@/components/ui/combo-box/ComboBox.vue'
 import type { IItemWithContainer } from '../utils/allItemsColumns'
-import { useGear } from '../composables/useGear'
+import { useItemCatalogV2 } from '../composables/useItemCatalogV2'
 import CategoryIcon from './CategoryIcon.vue'
 import type { ComboBoxOption } from '@/components/ui/combo-box/ComboBox.vue'
 import type { TUUID } from '@/shared/types/base.type'
@@ -22,12 +22,9 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
-const { getAllItemsForCatalog } = useGear()
 
 // Get all items excluding items from current container
-const catalogItems = computed<IItemWithContainer[]>(() => {
-  return getAllItemsForCatalog(props.containerId)
-})
+const { catalogItems } = useItemCatalogV2(() => props.containerId)
 
 // Convert items to ComboBox options
 const options = computed<ComboBoxOption<IItemWithContainer>[]>(() => {

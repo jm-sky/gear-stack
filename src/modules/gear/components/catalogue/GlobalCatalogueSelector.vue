@@ -17,7 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils'
 import CategoryIcon from '@/modules/gear/components/CategoryIcon.vue'
 import { useCatalogue } from '@/modules/gear/composables/catalogue/useCatalogue'
-import { useGear } from '@/modules/gear/composables/useGear'
+import { useItemCatalogV2 } from '@/modules/gear/composables/useItemCatalogV2'
 import type { IGlobalCatalogueItem } from '@/modules/gear/types/catalogue.types'
 import type { IItemWithContainer } from '@/modules/gear/utils/allItemsColumns'
 import type { TUUID } from '@/shared/types/base.type'
@@ -52,15 +52,12 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const { catalogueItems, isLoadingItems } = useCatalogue({ enableItemsQuery: true })
-const { getAllItemsForCatalog } = useGear()
 
 const open = ref(false)
 const searchText = ref('')
 
 // Get user items (excluding current container)
-const userItems = computed<IItemWithContainer[]>(() => {
-  return getAllItemsForCatalog(props.containerId)
-})
+const { catalogItems: userItems } = useItemCatalogV2(() => props.containerId)
 
 // Convert catalogue items to options
 const catalogueOptions = computed<CatalogueOption[]>(() => {
