@@ -1,6 +1,8 @@
+import { useQueryClient } from '@tanstack/vue-query'
 import type { IItemImage } from '../types/itemImage.types'
 import { itemImageApiService } from '../services/itemImageApiService'
-import { useGear } from './useGear'
+import { useGearStoreV2 } from '../store/useGearStoreV2'
+import { gearQueryKeys } from '../utils/queryKeys'
 import type { TUUID } from '@/shared/types/base.type'
 
 /**
@@ -8,9 +10,23 @@ import type { TUUID } from '@/shared/types/base.type'
  *
  * This composable provides methods to manage item images (upload, delete, set primary)
  * and automatically updates the item's primaryImageUrl in the Pinia store.
+ *
+ * Note: in the V2 model `primaryImageUrl` is derived server-side from the image records,
+ * so it isn't part of the item update DTO. The image operations themselves are persisted
+ * by `itemImageApiService`; here we only reflect the new primary URL in the local store and
+ * invalidate the gear query cache so the UI updates immediately.
  */
 export function useItemImage() {
-  const { updateItem } = useGear()
+  const store = useGearStoreV2()
+  const queryClient = useQueryClient()
+
+  const setPrimaryImageUrl = async (itemId: TUUID, url: string | null): Promise<void> => {
+    const existing = store.getItemById(itemId)
+    if (existing) {
+      store.upsertItem({ ...existing, primaryImageUrl: url })
+    }
+    await queryClient.invalidateQueries({ queryKey: gearQueryKeys.all })
+  }
 
   /**
    * Upload image for an item and update primaryImageUrl if needed
@@ -25,7 +41,7 @@ export function useItemImage() {
 
     // Update item's primaryImageUrl if this is the primary image
     if (isPrimary) {
-      await updateItem(itemId, { primaryImageUrl: image.url })
+      await setPrimaryImageUrl(itemId, image.url)
     }
 
     return image
@@ -50,7 +66,7 @@ export function useItemImage() {
 
     // Update item's primaryImageUrl if this is the primary image
     if (isPrimary) {
-      await updateItem(itemId, { primaryImageUrl: image.url })
+      await setPrimaryImageUrl(itemId, image.url)
     }
 
     return image
@@ -80,7 +96,7 @@ export function useItemImage() {
       const nextPrimary = remainingImages.find(img => img.isPrimary)
 
       // Update item with new primaryImageUrl (null if no images left)
-      await updateItem(itemId, { primaryImageUrl: nextPrimary?.url ?? null })
+      await setPrimaryImageUrl(itemId, nextPrimary?.url ?? null)
     }
   }
 
@@ -104,7 +120,7 @@ export function useItemImage() {
     const isPrimary = await itemImageApiService.togglePrimaryImage(itemId, imageId)
 
     // Update item's primaryImageUrl (null if unset, image.url if set)
-    await updateItem(itemId, { primaryImageUrl: isPrimary ? image.url : null })
+    await setPrimaryImageUrl(itemId, isPrimary ? image.url : null)
 
     return isPrimary
   }

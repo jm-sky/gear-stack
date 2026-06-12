@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useQueryClient } from '@tanstack/vue-query'
 import { AlertTriangle } from 'lucide-vue-next'
 import { computed, defineAsyncComponent, ref, watch, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -10,7 +11,6 @@ import { useAi } from '@/modules/ai/composables/useAi'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { useBackend } from '@/shared/composables/useBackend'
 import { usePageTitle } from '@/shared/composables/usePageTitle'
-import { config } from '@/shared/config/config'
 import type { IGearItemV2 } from '../types/gear.types.v2'
 import type { TContainerColor } from '../types/gear.types.v2'
 import ContainerHeader from '../components/ContainerHeader.vue'
@@ -19,19 +19,16 @@ import ContainerRatingSection from '../components/ContainerRatingSection.vue'
 import SortConfirmationAlert from '../components/SortConfirmationAlert.vue'
 import { useCatalogue } from '../composables/catalogue/useCatalogue'
 import { useContainerV2 } from '../composables/useContainerV2'
-import { useGear } from '../composables/useGear'
+import { useGearMutations } from '../composables/useGearMutations'
 import { useContainerWithChildren } from '../composables/useGearQueries'
-import { useGearV2 } from '../composables/useGearV2'
 import { useItemsParamRecognition } from '../composables/useItemsParamRecognition'
 import { useJsonImportExport } from '../composables/useJsonImportExport'
 import { useSearchPaginationUrl } from '../composables/useSearchPaginationUrl'
 import { GearRoutePath } from '../routes'
-import { gearItemService } from '../services/gearItemService'
-import { useGearStore } from '../store/useGearStore'
 import { useGearStoreV2 } from '../store/useGearStoreV2'
 import { COLOR_BORDER_CLASSES, COLOR_TEXT_CLASSES } from '../utils/containerColors'
 import { createNavigationQuery } from '../utils/navigationParams'
-import { convertV2ContainerToV1, convertV2ItemsArrayToV1, convertV2ItemToV1 } from '../utils/typeConverters'
+import { gearQueryKeys } from '../utils/queryKeys'
 
 // Lazy load dialogs - only loaded when user opens them
 const ItemsTable = defineAsyncComponent(() => import('../components/ItemsTable.vue'))
@@ -50,12 +47,17 @@ const AiChatDialog = defineAsyncComponent(() => import('@/modules/ai/components/
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
-const store = useGearStore()
 const storeV2 = useGearStoreV2()
+const queryClient = useQueryClient()
 const { shouldUseAPI } = useBackend()
 const { container: containerFromStore } = useContainerV2()
-const { deleteItem, updateItem, createItem, moveItem } = useGearV2()
-const { updateContainer, getContainerById } = useGear()
+// useGearMutations auto-invalidates the gear query cache after each mutation,
+// keeping the page (driven by useContainerWithChildren) in sync.
+const { deleteItem, updateItem, moveItem, batchUpdateOrder } = useGearMutations()
+
+// Refresh the page data (TanStack Query cache). Used for pure refreshes that the
+// cache doesn't know about, e.g. restoring original order or manual refresh.
+const refreshContainer = () => queryClient.invalidateQueries({ queryKey: gearQueryKeys.all })
 const { user, isAuthenticated } = useAuth()
 const { canUseAi } = useAi()
 const { setTitle } = usePageTitle()
@@ -251,7 +253,7 @@ const handleMoveConfirm = async (targetContainerId: string) => {
 const handleHideItemImages = async () => {
   if (!container.value) return
   try {
-    await updateContainer(container.value.id, { showItemImages: false })
+    await updateItem(container.value.id, { showItemImages: false })
     toast.success(t('gear.container.itemImages.hidden', 'Item images hidden'))
   } catch {
     toast.error(t('common.error'))
@@ -282,23 +284,15 @@ const handleSaveSorting = async () => {
 
   try {
     isSavingSorting.value = true
-    const service = gearItemService()
 
-    // Use batchUpdateOrder for both backend and localStorage
-    if ('batchUpdateOrder' in service && typeof service.batchUpdateOrder === 'function') {
-      await service.batchUpdateOrder(convertV2ItemsArrayToV1(pendingSortingChanges.value))
-      toast.success(t('gear.item.reorderSuccess', 'Kolejność przedmiotów została zaktualizowana'))
-      pendingSortingChanges.value = []
-    } else {
-      // Fallback: Update all items with new orderIndex values
-      await Promise.all(
-        pendingSortingChanges.value.map(item =>
-          updateItem(item.id, { orderIndex: item.orderIndex }),
-        ),
-      )
-      toast.success(t('gear.item.reorderSuccess', 'Kolejność przedmiotów została zaktualizowana'))
-      pendingSortingChanges.value = []
-    }
+    await batchUpdateOrder(
+      pendingSortingChanges.value.map((item, index) => ({
+        id: item.id,
+        orderIndex: item.orderIndex ?? index,
+      })),
+    )
+    toast.success(t('gear.item.reorderSuccess', 'Kolejność przedmiotów została zaktualizowana'))
+    pendingSortingChanges.value = []
   } catch {
     toast.error(t('common.error'))
   } finally {
@@ -316,8 +310,7 @@ const handleCancelSorting = async () => {
   if (shouldUseAPI.value && container.value) {
     try {
       // Reload container from API to restore original order
-      await getContainerById(container.value.id)
-      // Container will automatically update via reactive computed property
+      await refreshContainer()
     } catch {
       // If refresh fails, just clear pending changes
       // User can manually reset sorting
@@ -335,32 +328,15 @@ const handleAddContainer = () => {
 
 const handleAddNestedContainer = async (nestedContainerId: string) => {
   try {
-    const nestedContainer = store.getContainerById(nestedContainerId)
+    const nestedContainer = storeV2.getItemById(nestedContainerId)
     if (!nestedContainer) {
       toast.error(t('common.error'))
       return
     }
 
-    // Update the nested container's parentContainerId to establish the relationship
-    // This ensures hideWhenNested works correctly for containers nested via item reference
-    await updateContainer(nestedContainerId, {
-      parentContainerId: containerId,
-    })
-
-    // Create an item that references the nested container
-    // Use container name as item name
-    // Note: In V2, nested containers are just items with itemType='item' that point to a container via parentItemId
-    await createItem({
-      itemType: 'item',
-      parentItemId: containerId,
-      name: nestedContainer.name,
-      category: 'other',
-      quantity: 1,
-      weight: 0,
-      weightUnit: config.defaults.preferredWeightUnit,
-      priority: 'medium',
-      status: 'owned',
-    })
+    // V2-native nesting: re-parent the existing container under this one by setting
+    // its parentItemId. No placeholder item is needed (that was the V1 dual model).
+    await updateItem(nestedContainerId, { parentItemId: containerId })
     toast.success(t('common.success'))
   } catch (error) {
     toast.error(t('common.error'))
@@ -378,16 +354,7 @@ const handleExportToCSV = () => {
   isExportToCSVDialogOpen.value = true
 }
 
-// Convert container and items to V1 for useItemsParamRecognition (composable uses V1 types - will be migrated in future)
-const containerV1ForParamRecognition = computed(() => container.value ? convertV2ContainerToV1(container.value) : undefined)
-const itemsV1ForParamRecognition = computed(() => convertV2ItemsArrayToV1(items.value))
-const { handleRecognizeParameters: handleRecognizeParametersV1, handleRecognizeParametersAll } = useItemsParamRecognition(containerV1ForParamRecognition, itemsV1ForParamRecognition)
-
-// Wrap V1 handler to convert V2 item to V1
-const handleRecognizeParameters = async (itemV2: IGearItemV2) => {
-  const itemV1 = convertV2ItemToV1(itemV2)
-  await handleRecognizeParametersV1(itemV1)
-}
+const { handleRecognizeParameters, handleRecognizeParametersAll } = useItemsParamRecognition(container, items)
 
 const handleManageShareTokens = () => {
   router.push(GearRoutePath.ContainerShareTokensById(containerId))
@@ -396,7 +363,7 @@ const handleManageShareTokens = () => {
 const handleRefresh = async () => {
   if (!container.value) return
   try {
-    await getContainerById(container.value.id)
+    await refreshContainer()
     toast.success(t('common.refreshed'))
   } catch (error) {
     console.error('Failed to refresh container:', error)

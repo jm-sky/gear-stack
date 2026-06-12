@@ -1,27 +1,27 @@
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
-import type { IGearContainer, IGearItem } from '../types/gear.types'
+import type { IGearItemV2, IUpdateGearItemV2Dto } from '../types/gear.types.v2'
 import { recognizeParameters, recognizeParametersForItems } from '../utils/parameterRecognition'
-import { useGear } from './useGear'
+import { useGearMutations } from './useGearMutations'
 import type { ComputedRef } from 'vue'
 
 export const useItemsParamRecognition = (
-    container: ComputedRef<IGearContainer | undefined>,
-    items: ComputedRef<IGearItem[]>
+    container: ComputedRef<IGearItemV2 | undefined>,
+    items: ComputedRef<IGearItemV2[]>
 ) => {
     const { t } = useI18n()
-    const { updateItem } = useGear()
+    const { updateItem } = useGearMutations()
 
-    const handleRecognizeParameters = async (item: IGearItem) => {
+    const handleRecognizeParameters = async (item: IGearItemV2) => {
         try {
           const params = recognizeParameters(item.name)
-      
+
           if (!params.brand && !params.color) {
             toast.info(t('gear.actions.noParametersFound'))
             return
           }
-      
-          const updateData: Partial<IGearItem> = {}
+
+          const updateData: IUpdateGearItemV2Dto = {}
           if (params.brand && !item.brand) {
             updateData.brand = params.brand
           }
@@ -54,7 +54,7 @@ export const useItemsParamRecognition = (
             const params = paramsMap.get(item.id)
             if (!params) continue
       
-            const updateData: Partial<IGearItem> = {}
+            const updateData: IUpdateGearItemV2Dto = {}
             if (params.brand && !item.brand) {
               updateData.brand = params.brand
             }
