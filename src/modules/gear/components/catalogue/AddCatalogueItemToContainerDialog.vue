@@ -19,7 +19,7 @@ import {
 import type { IGlobalCatalogueItem } from '../../types/catalogue.types'
 import type { TGearItemPriority, TGearItemStatus } from '../../types/gear.types.v2'
 import { useCatalogue } from '../../composables/catalogue/useCatalogue'
-import { useGear } from '../../composables/useGear'
+import { useContainers } from '../../composables/useGearQueries'
 import { GearRoutePath } from '../../routes'
 
 const { t } = useI18n()
@@ -31,7 +31,8 @@ const props = defineProps<{
   catalogueItem: IGlobalCatalogueItem
 }>()
 
-const { containers } = useGear()
+const { data: containersData } = useContainers()
+const containers = computed(() => containersData.value ?? [])
 const { addCatalogueItemToContainer, isAddingToContainer } = useCatalogue()
 
 // Form state
@@ -142,7 +143,7 @@ const hasImage = computed(() => !!props.catalogueItem.primaryImageUrl)
                   <div class="flex items-center gap-2">
                     <Package :size="16" class="text-muted-foreground" />
                     <span>{{ container.name }}</span>
-                    <span class="text-xs text-muted-foreground">({{ t(`gear.container.types.${container.type}`) }})</span>
+                    <span class="text-xs text-muted-foreground">({{ t(`gear.container.types.${container.containerType ?? 'other'}`) }})</span>
                   </div>
                 </SelectItem>
               </SelectContent>

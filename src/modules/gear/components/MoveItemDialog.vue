@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useGear } from '../composables/useGear'
+import { useContainers } from '../composables/useGearQueries'
 
 const { t } = useI18n()
 
@@ -25,12 +25,13 @@ const emit = defineEmits<{
   move: [targetContainerId: string]
 }>()
 
-const { containers } = useGear()
+// Fetch the full container list from the V2 API (the store may only hold the
+// current container's subtree, depending on the page we were opened from).
+const { data: containersData } = useContainers()
 
 // Get available containers for selection (exclude current container)
 const availableContainers = computed(() => {
-  const allContainers = containers.value
-  return allContainers.filter(c => c.id !== props.currentContainerId)
+  return (containersData.value ?? []).filter(c => c.id !== props.currentContainerId)
 })
 
 const selectedContainerId = ref<string>('')
@@ -89,7 +90,7 @@ const isOpen = computed({
                     <div class="flex items-center gap-2">
                       <Package :size="16" class="text-muted-foreground" />
                       <span>{{ container.name }}</span>
-                      <span class="text-xs text-muted-foreground">({{ t(`gear.container.types.${container.type}`) }})</span>
+                      <span class="text-xs text-muted-foreground">({{ t(`gear.container.types.${container.containerType ?? 'other'}`) }})</span>
                     </div>
                   </SelectItem>
                 </template>
