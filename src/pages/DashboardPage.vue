@@ -10,37 +10,38 @@ import { AuthRoutePaths } from '@/modules/auth/config/routes'
 import UpgradePromptBanner from '@/modules/billing/components/UpgradePromptBanner.vue'
 import DashboardContainerCard from '@/modules/gear/components/dashboard/DashboardContainerCard.vue'
 import GenerateExampleGearButton from '@/modules/gear/components/GenerateExampleGearButton.vue'
-import { useGear } from '@/modules/gear/composables/useGear'
+import { useGearV2 } from '@/modules/gear/composables/useGearV2'
 import { GearRoutePath } from '@/modules/gear/routes'
-import { gearContainerService } from '@/modules/gear/services/gearContainerService'
+import { useGearStoreV2 } from '@/modules/gear/store/useGearStoreV2'
 import { READINESS_EXCELLENT_THRESHOLD } from '@/modules/gear/utils/constants'
 import { config } from '@/shared/config/config'
 import { apiClient } from '@/shared/services/apiClient'
-import type { IGearContainer } from '@/modules/gear/types/gear.types'
+import type { IGearItemV2 } from '@/modules/gear/types/gear.types.v2'
 
 const { t } = useI18n()
-const { containers } = useGear()
+const store = useGearStoreV2()
+const { getItems } = useGearV2()
 const { isAuthenticated } = useAuth()
+
+const containers = computed(() => store.getAllContainers)
+const itemsCount = computed(() => store.getAllItems.filter(i => i.itemType === 'item').length)
 
 const publicContainersCount = ref<number>(0)
 const isLoadingPublicContainers = ref(false)
 
-// Load containers from API on mount (when backend is enabled)
+// Load gear from the active V2 service (API or localStorage) on mount
 onMounted(async () => {
-  if (config.backend.enabled) {
-    try {
-      await gearContainerService().getContainers()
-    } catch (error) {
-      console.error('Failed to load containers from API:', error)
-      // Fallback to localStorage is handled by store initialization
-    }
+  try {
+    await getItems()
+  } catch (error) {
+    console.error('Failed to load gear:', error)
   }
 
   // Load public containers count
   if (config.backend.enabled) {
     try {
       isLoadingPublicContainers.value = true
-      const response = await apiClient.get<IGearContainer[]>('/gear/public/containers')
+      const response = await apiClient.get<IGearItemV2[]>('/gear/public/containers')
       publicContainersCount.value = response.data.length
     } catch (error) {
       console.error('Failed to load public containers count:', error)
@@ -52,8 +53,10 @@ onMounted(async () => {
 
 const readyContainersCount = computed(() => {
   return containers.value.filter(c => {
-    const ownedItems = c.items.filter(i => i.status === 'owned').length
-    const totalItems = c.items.length
+    const items = store.getChildrenOfItem(c.id).filter(i => i.itemType === 'item')
+    const totalItems = items.length
+    if (totalItems === 0) return false
+    const ownedItems = items.filter(i => i.status === 'owned').length
     return ownedItems / totalItems * 100 >= READINESS_EXCELLENT_THRESHOLD
   }).length
 })
@@ -89,7 +92,7 @@ const readyContainersCount = computed(() => {
         />
         <DashboardContainerCard
           :to="GearRoutePath.AllItems"
-          :count="containers.reduce((sum, c) => sum + c.items.length, 0)"
+          :count="itemsCount"
           :label="t('gear.page.items', 'Items')"
         />
         <DashboardContainerCard
