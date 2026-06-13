@@ -1,11 +1,12 @@
 import type {
+  TGearContainerType,
   TGearItemCategory,
   TGearItemPriority,
   TGearItemQuality,
   TGearItemStatus,
   TGearWeightUnit,
 } from '../types/gear.types'
-import { validateContainerDto, validateItemDto } from '../utils/validation'
+import type { ICreateGearItemV2Dto, IGearItemV2 } from '../types/gear.types.v2'
 import {
   bugOutBagFirePouchItems,
   bugOutBagItems,
@@ -13,9 +14,13 @@ import {
   firePouchItems,
   type IExampleSetItem,
 } from './exampleSets'
-import { gearContainerService } from './gearContainerService'
-import { gearItemService } from './gearItemService'
 import type { TUUID } from '@/shared/types/base.type'
+
+/**
+ * Function that creates a gear item (container or item) — injected from the caller so this
+ * service stays decoupled from Vue composables and works with the active V2 service.
+ */
+export type CreateGearItemFn = (data: ICreateGearItemV2Dto) => Promise<IGearItemV2>
 
 export type SampleSetVariant = 'firePouch' | 'bugOutBag' | 'edc' | 'budgetEdc' | 'mediumEdc'
 
@@ -54,77 +59,82 @@ interface ISampleSetContainer {
  */
 export async function generateSampleSet(
   t: (key: string) => string,
-  variant: SampleSetVariant = 'bugOutBag'
+  variant: SampleSetVariant = 'bugOutBag',
+  createItem?: CreateGearItemFn,
 ): Promise<TUUID[]> {
+  if (!createItem) {
+    throw new Error('generateSampleSet requires a createItem function')
+  }
+
   const setDefinition = getSampleSetDefinition(t, variant)
   const containerIds: TUUID[] = []
 
-  // M6 FIX: Validate container data before service call
-  const mainContainerDto = validateContainerDto({
-    name: setDefinition.name,
-    type: setDefinition.type,
-    description: setDefinition.description,
-  })
-
   // Create main container
-  const mainContainer = await gearContainerService().createContainer(mainContainerDto)
+  const mainContainer = await createItem({
+    itemType: 'container',
+    parentItemId: null,
+    name: setDefinition.name,
+    containerType: setDefinition.type as TGearContainerType,
+    description: setDefinition.description ?? null,
+  })
   containerIds.push(mainContainer.id)
 
-  // Recursively create containers and items
-  await createContainerWithItems(mainContainer.id, setDefinition)
+  // Recursively create nested containers and items
+  await createContainerWithItems(mainContainer.id, setDefinition, createItem)
 
   return containerIds
 }
 
 async function createContainerWithItems(
   containerId: TUUID,
-  containerDef: ISampleSetContainer
+  containerDef: ISampleSetContainer,
+  createItem: CreateGearItemFn,
 ): Promise<void> {
-  // Create nested containers first
-  const nestedContainerIds: Map<string, TUUID> = new Map()
+  // Create nested containers first (V2-native: parentItemId links them to this container)
+  const nestedContainerNames = new Set<string>()
   if (containerDef.nestedContainers) {
     for (const nestedDef of containerDef.nestedContainers) {
-      // M6 FIX: Validate nested container data before service call
-      const nestedContainerDto = validateContainerDto({
+      const nestedContainer = await createItem({
+        itemType: 'container',
+        parentItemId: containerId,
         name: nestedDef.name,
-        type: nestedDef.type,
-        description: nestedDef.description,
+        containerType: nestedDef.type as TGearContainerType,
+        description: nestedDef.description ?? null,
       })
-
-      const nestedContainer = await gearContainerService().createContainer(nestedContainerDto)
-      nestedContainerIds.set(nestedDef.name, nestedContainer.id)
+      nestedContainerNames.add(nestedDef.name)
       // Recursively create items in nested container
-      await createContainerWithItems(nestedContainer.id, nestedDef)
+      await createContainerWithItems(nestedContainer.id, nestedDef, createItem)
     }
   }
 
   // Create items in this container
   for (const item of containerDef.items) {
-    // Check if this item represents a nested container
-    const nestedContainerId = nestedContainerIds.get(item.name)
+    // Skip placeholder items that just mirror a nested container (V1 dual-model artifact)
+    if (nestedContainerNames.has(item.name)) {
+      continue
+    }
 
-    // M6 FIX: Validate item data before service call
-    const itemDto = validateItemDto({
+    await createItem({
+      itemType: 'item',
+      parentItemId: containerId,
       name: item.name,
-      catalogueItemId: item.catalogueItemId || undefined,
+      catalogueItemId: item.catalogueItemId ?? null,
       category: item.category,
       weight: item.weight,
       weightUnit: item.weightUnit,
       quantity: item.quantity ?? 1,
       priority: item.priority ?? 'medium',
       status: item.status ?? 'owned',
-      brand: item.brand,
-      notes: item.notes,
-      containerId: nestedContainerId || undefined,
-      color: item.color,
-      price: item.price,
-      currency: item.currency,
-      url: item.url,
-      quality: item.quality,
-      consumable: item.consumable,
+      brand: item.brand ?? null,
+      notes: item.notes ?? null,
+      description: item.notes ?? null,
+      color: item.color ?? null,
+      price: item.price ?? null,
+      currency: item.currency ?? null,
+      url: item.url ?? null,
+      quality: item.quality ?? null,
+      consumable: item.consumable ?? null,
     })
-
-    await gearItemService().createItem(containerId, itemDto)
   }
 }
 

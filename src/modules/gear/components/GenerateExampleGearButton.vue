@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useQueryClient } from '@tanstack/vue-query'
 import { BookCopyIcon, ChevronDown } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -10,8 +11,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useGearV2 } from '@/modules/gear/composables/useGearV2'
 import { GearRouteName } from '@/modules/gear/routes'
 import { generateSampleSet } from '@/modules/gear/services/sampleSetGenerator'
+import { gearQueryKeys } from '@/modules/gear/utils/queryKeys'
 import { useHandleError } from '@/shared/composables/useHandleError'
 import type { ButtonProps } from '@/components/ui/button'
 
@@ -31,10 +34,13 @@ const props = withDefaults(defineProps<{
 const router = useRouter()
 const { t } = useI18n()
 const { handleError } = useHandleError()
+const { createItem } = useGearV2()
+const queryClient = useQueryClient()
 
 const handleGenerate = async (variant: SampleSetVariant) => {
   try {
-    await generateSampleSet(t, variant)
+    await generateSampleSet(t, variant, createItem)
+    await queryClient.invalidateQueries({ queryKey: gearQueryKeys.all })
     toast.success(t('gear.sampleSet.success'))
     if (props.redirect) {
       router.push({ name: GearRouteName.Containers })
