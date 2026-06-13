@@ -35,14 +35,25 @@ Type-check, ESLint i 403 testy jednostkowe przechodzą.
 (z localStorage V1, klucz `gear-stack:containers`) są transparentnie migrowane do V2
 (`gear-stack:items-v2`). Dzięki temu ścieżka offline na V2 (`useGearV2` → serwis lokalny) działa.
 
-**Pozostało (wymaga ostrożnej migracji + najlepiej manualnego testu UI):**
-- ⏳ `ShoppingPlanningPage` + komponenty `shopping/*` (typowane V1 `IGearItem`/`IItemWithContainerId`,
-  konsumują `container.items` — wymaga adaptera „kontenery z dziećmi" z V2 lub przetypowania)
-- ⏳ Read-only: `DashboardPage`, `AllItemsPage`, `LocalContainersStats`,
-  `TotalsStats`, `statsLocalService`, `ai/useAiContext`, `LandingPage`, `appInit`
-- ⏳ Ścieżka zapisu AI: `ai/useAiActions` (tworzy/aktualizuje przez V1)
-- ⏳ Martwe (do usunięcia w Fazie 4, brak konsumentów): `useItem` (V1), `useInlineItemEditing` (V1)
-- ⏳ Faza 4: usunięcie warstwy V1 po odpięciu wszystkich konsumentów
+**Zrobione (cd. 2):**
+- ✅ `ShoppingPlanningPage` (widok V1-shaped z V2 przez konwertery; create/update przez `useGearMutations`)
+- ✅ Read-only: `DashboardPage`, `AllItemsPage` (reużywa `getAllItemsForCatalogV2`), `LocalContainersStats`,
+  `TotalsStats`, `statsLocalService`, `ai/useAiContext`, `LandingPage`
+- ✅ Ścieżka zapisu AI: `ai/useAiActions` → `useGearMutations`
+- ✅ Usunięto martwe composable V1: `useItem`, `useContainer`, `useInlineItemEditing`
+
+**Pozostało — jedyny blocker finalnego usunięcia V1: feature „migracja danych lokalnych → API":**
+- ⏳ `services/dataMigrationService.ts` (czyta store V1, uploaduje do API) + konsumenci:
+  `useDataMigration`, `useDataMigrationModal`, `DataMigrationDialog`
+- ⏳ `shared/utils/appInit.ts` — bootstrap store'a V1 (potrzebny tylko przez dataMigrationService;
+  migracja localStorage V1→V2 i tak idzie przez `migrateV1ToV2()` w store V2, nie przez appInit)
+- ⏳ Po zmigrowaniu powyższego: **Faza 4** — usunąć `useGear`, `internal/*`, serwisy V1
+  (`gearContainerService`, `gearItemService`, `gearItemHybridService`, `gearItemLocalService`,
+  `gearContainerLocalService`), `store/useGearStore`, `dataMigrationService`, `migrationV1toV2Service`,
+  oraz specy V1. **Zostają**: `gear.types.ts` (wspólne uniony), `gearContainerApiService` (ratingi/raporty public).
+
+> Uwaga: feature dataMigration to upload danych offline na backend — wymaga weryfikacji
+> (zalogowanie z danymi w localStorage). Robić ostrożnie jako osobne zadanie.
 
 > Główna przyczyna błędów ze „stale UI": mutacje przez V1 (lub przez `useGearV2()`
 > bez inwalidacji) nie odświeżają cache TanStack Query (`gearQueryKeys`). Strona `/gear`
