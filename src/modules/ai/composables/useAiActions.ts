@@ -5,16 +5,21 @@
 
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
-import { gearContainerService } from '@/modules/gear/services/gearContainerService'
-import { gearItemService } from '@/modules/gear/services/gearItemService'
-import { useGearStore } from '@/modules/gear/store/useGearStore'
+import { useGearMutations } from '@/modules/gear/composables/useGearMutations'
+import { useGearStoreV2 } from '@/modules/gear/store/useGearStoreV2'
 import { recognizeCategory } from '@/modules/gear/utils/categoryRecognition'
 import type { IAiStructuredOutput } from '../types'
-import type { ICreateContainerDto, ICreateItemDto, IUpdateItemDto, TGearWeightUnit } from '@/modules/gear/types/gear.types'
+import type { ICreateGearItemV2Dto, IUpdateGearItemV2Dto, TGearWeightUnit } from '@/modules/gear/types/gear.types.v2'
 
 export function useAiActions() {
   const { t } = useI18n()
-  const gearStore = useGearStore()
+  const gearStore = useGearStoreV2()
+  const { createItem, updateItem, deleteItem } = useGearMutations()
+
+  const containerExists = (containerId: string): boolean => {
+    const item = gearStore.getItemById(containerId)
+    return !!item && item.itemType === 'container'
+  }
 
   const executeAction = async (
     structuredOutput: IAiStructuredOutput | null,
@@ -108,33 +113,35 @@ export function useAiActions() {
       category = recognized ?? 'other'
     }
 
+    // Check if container exists
+    if (!containerExists(containerId)) {
+      toast.error(t('ai.actions.containerNotFound'))
+      return false
+    }
+
     // Build item from AI data with all required fields
-    const newItem: ICreateItemDto = {
+    const newItem: ICreateGearItemV2Dto = {
+      itemType: 'item',
+      parentItemId: containerId,
       name,
-      category: category as ICreateItemDto['category'],
+      category: category as ICreateGearItemV2Dto['category'],
       weight,
       weightUnit,
       quantity: (data.quantity as number) ?? 1,
-      priority: (data.priority as ICreateItemDto['priority']) ?? 'medium',
-      status: (data.status as ICreateItemDto['status']) ?? 'owned',
+      priority: (data.priority as ICreateGearItemV2Dto['priority']) ?? 'medium',
+      status: (data.status as ICreateGearItemV2Dto['status']) ?? 'owned',
       price: (data.price as number) ?? null,
       url: (data.url as string) ?? null,
       notes: (data.notes as string) ?? null,
+      description: (data.notes as string) ?? null,
       brand: (data.brand as string) ?? null,
       color: (data.color as string) ?? null,
       wearable: (data.wearable as boolean) ?? null,
       consumable: (data.consumable as boolean) ?? null,
     }
 
-    // Check if container exists
-    const container = gearStore.getContainerById(containerId)
-    if (!container) {
-      toast.error(t('ai.actions.containerNotFound'))
-      return false
-    }
-
-    // Create item using service (API or localStorage based on backend status)
-    await gearItemService().createItem(containerId, newItem)
+    // Create item via V2 (API or localStorage based on backend status) + cache invalidation
+    await createItem(newItem)
     toast.success(t('ai.actions.itemCreated', { name }))
 
     return true
@@ -158,14 +165,13 @@ export function useAiActions() {
     }
 
     // Check if container exists
-    const container = gearStore.getContainerById(containerId)
-    if (!container) {
+    if (!containerExists(containerId)) {
       toast.error(t('ai.actions.containerNotFound'))
       return false
     }
 
-    // Update item using service (API or localStorage based on backend status)
-    await gearItemService().updateItem(itemId, updates as IUpdateItemDto)
+    // Update item via V2 (API or localStorage based on backend status) + cache invalidation
+    await updateItem(itemId, updates as IUpdateGearItemV2Dto)
     toast.success(t('ai.actions.itemUpdated'))
 
     return true
@@ -188,14 +194,13 @@ export function useAiActions() {
     }
 
     // Check if container exists
-    const container = gearStore.getContainerById(containerId)
-    if (!container) {
+    if (!containerExists(containerId)) {
       toast.error(t('ai.actions.containerNotFound'))
       return false
     }
 
-    // Delete item using service (API or localStorage based on backend status)
-    await gearItemService().deleteItem(itemId)
+    // Delete item via V2 (API or localStorage based on backend status) + cache invalidation
+    await deleteItem(itemId)
     toast.success(t('ai.actions.itemDeleted'))
 
     return true
@@ -209,13 +214,14 @@ export function useAiActions() {
       return false
     }
 
-    // Create container using service (API or localStorage based on backend status)
-    // Note: gearContainerService().createContainer() already handles store updates
-    await gearContainerService().createContainer({
+    // Create container via V2 (API or localStorage based on backend status) + cache invalidation
+    await createItem({
+      itemType: 'container',
+      parentItemId: null,
       name,
-      description: data.description as string,
-      type: (data.container_type as string) ?? 'backpack',
-    } as ICreateContainerDto)
+      description: (data.description as string) ?? null,
+      containerType: (data.container_type as ICreateGearItemV2Dto['containerType']) ?? 'backpack',
+    })
 
     toast.success(t('ai.actions.containerCreated', { name }))
 
