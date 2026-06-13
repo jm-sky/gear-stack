@@ -8,46 +8,43 @@ import { useAuth } from '@/modules/auth/composables/useAuth'
 import { AuthRoutePaths } from '@/modules/auth/config/routes'
 import { useAuthStore } from '@/modules/auth/store/useAuthStore'
 import { GearRoutePath } from '@/modules/gear/routes'
-import { hasLocalData } from '@/modules/gear/services/dataMigrationService'
-import { useGearStore } from '@/modules/gear/store/useGearStore'
+import { useGearStoreV2 } from '@/modules/gear/store/useGearStoreV2'
 import { READINESS_EXCELLENT_THRESHOLD } from '@/modules/gear/utils/constants'
 
 const { t } = useI18n()
 const authStore = useAuthStore()
-const gearStore = useGearStore()
+const gearStore = useGearStoreV2()
 const { isAuthenticated } = useAuth()
 
-// Check if user is not logged in but has containers in localStorage
-const hasLocalContainers = computed(() => {
-  if (authStore.isAuthenticated) return false
-  return hasLocalData()
-})
-
-// Load containers from localStorage if not authenticated
+// Load containers from localStorage (V2 store; migrateV1ToV2 runs on store init)
 onMounted(() => {
   if (!authStore.isAuthenticated) {
     gearStore.loadFromStorage()
   }
 })
 
-// Get containers for stats
+// Check if user is not logged in but has containers in localStorage
 const localContainers = computed(() => {
-  if (!hasLocalContainers.value) return []
+  if (authStore.isAuthenticated) return []
   return gearStore.getAllContainers
 })
+
+const hasLocalContainers = computed(() => localContainers.value.length > 0)
+
+// Regular items (V2 store is flat; exclude nested containers)
+const localItems = computed(() => gearStore.getAllItems.filter(i => i.itemType === 'item'))
 
 // Calculate stats similar to HomePage
 const containersCount = computed(() => localContainers.value.length)
 
-const itemsCount = computed(() => {
-  return localContainers.value.reduce((sum, c) => sum + c.items.length, 0)
-})
+const itemsCount = computed(() => (hasLocalContainers.value ? localItems.value.length : 0))
 
 const readyContainersCount = computed(() => {
   return localContainers.value.filter(c => {
-    const ownedItems = c.items.filter(i => i.status === 'owned').length
-    const totalItems = c.items.length
+    const items = gearStore.getChildrenOfItem(c.id).filter(i => i.itemType === 'item')
+    const totalItems = items.length
     if (totalItems === 0) return false
+    const ownedItems = items.filter(i => i.status === 'owned').length
     return (ownedItems / totalItems) * 100 >= READINESS_EXCELLENT_THRESHOLD
   }).length
 })

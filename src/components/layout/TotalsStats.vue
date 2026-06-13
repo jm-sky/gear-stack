@@ -3,11 +3,11 @@ import { Package, PackageCheck, Users } from 'lucide-vue-next'
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/modules/auth/store/useAuthStore'
-import { useGearStore } from '@/modules/gear/store/useGearStore'
+import { useGearStoreV2 } from '@/modules/gear/store/useGearStoreV2'
 import { statsService } from '@/modules/stats/services/statsService'
 
 const { t } = useI18n()
-const gearStore = useGearStore()
+const gearStore = useGearStoreV2()
 const authStore = useAuthStore()
 
 // Stats state

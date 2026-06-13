@@ -1,4 +1,4 @@
-import { useGearStore } from '@/modules/gear/store/useGearStore'
+import { useGearStoreV2 } from '@/modules/gear/store/useGearStoreV2'
 
 /**
  * Stats Local Service
@@ -34,7 +34,7 @@ class StatsLocalService {
    * Get container statistics from localStorage
    */
   async getContainerStats(): Promise<{ total: number; newThisMonth: number }> {
-    const gearStore = useGearStore()
+    const gearStore = useGearStoreV2()
     const containers = gearStore.getAllContainers
 
     const total = containers.length
@@ -47,9 +47,9 @@ class StatsLocalService {
    * Get item statistics from localStorage
    */
   async getItemStats(): Promise<{ total: number; newThisMonth: number }> {
-    const gearStore = useGearStore()
-    const containers = gearStore.getAllContainers
-    const allItems = containers.flatMap(c => c.items)
+    const gearStore = useGearStoreV2()
+    // V2 store is flat; regular items only (exclude containers)
+    const allItems = gearStore.getAllItems.filter(item => item.itemType === 'item')
 
     const total = allItems.length
     const newThisMonth = allItems.filter(item => this.isThisMonth(item.createdAt)).length

@@ -4,9 +4,9 @@
  */
 
 import { computed, ref } from 'vue'
-import { useGearStore } from '@/modules/gear/store/useGearStore'
+import { useGearStoreV2 } from '@/modules/gear/store/useGearStoreV2'
 import { useAiStore } from '../store/useAiStore'
-import type { IGearContainer, IGearItem } from '@/modules/gear/types/gear.types'
+import type { IGearItemV2 } from '@/modules/gear/types/gear.types.v2'
 
 export interface IAiContext {
   container_ids?: string[]
@@ -15,7 +15,7 @@ export interface IAiContext {
 
 export function useAiContext() {
   const aiStore = useAiStore()
-  const gearStore = useGearStore()
+  const gearStore = useGearStoreV2()
 
   const selectedContainerIds = ref<string[]>([])
   const selectedFields = ref<string[]>(['name', 'category', 'weight'])
@@ -55,13 +55,13 @@ export function useAiContext() {
     }
   }
 
-  const getContainerData = (containerId: string): IGearContainer | undefined => {
-    return gearStore.getContainerById(containerId)
+  const getContainerData = (containerId: string): IGearItemV2 | undefined => {
+    const item = gearStore.getItemById(containerId)
+    return item && item.itemType === 'container' ? item : undefined
   }
 
-  const getItemsData = (containerId: string): IGearItem[] => {
-    const container = getContainerData(containerId)
-    return container?.items ?? []
+  const getItemsData = (containerId: string): IGearItemV2[] => {
+    return gearStore.getChildrenOfItem(containerId).filter(child => child.itemType === 'item')
   }
 
   const buildContextData = (containerIds?: string[]): Record<string, unknown> => {
@@ -86,7 +86,7 @@ export function useAiContext() {
 
       // Always include items for context
       const items = getItemsData(containerId)
-      containerData.items = items.map((item: IGearItem) => {
+      containerData.items = items.map((item: IGearItemV2) => {
         const itemData: Record<string, unknown> = { id: item.id }
 
         if (fields.includes('name')) itemData.name = item.name
