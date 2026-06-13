@@ -8,26 +8,25 @@ import TotalsStats from '@/components/layout/TotalsStats.vue'
 import WelcomeQuickActions from '@/components/layout/WelcomeQuickActions.vue'
 import LandingLayout from '@/layouts/LandingLayout.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
-import { hasLocalData } from '@/modules/gear/services/dataMigrationService'
-import { useGearStore } from '@/modules/gear/store/useGearStore'
+import { useGearStoreV2 } from '@/modules/gear/store/useGearStoreV2'
 import { config } from '@/shared/config/config'
 
 const { t } = useI18n()
 const router = useRouter()
 const { isAuthenticated, user } = useAuth()
-const gearStore = useGearStore()
+const gearStore = useGearStoreV2()
 
-// Check if user is not logged in but has containers in localStorage
-const hasLocalContainers = computed(() => {
-  if (isAuthenticated.value) return false
-  return hasLocalData()
-})
-
-// Load containers from localStorage if not authenticated
+// Load containers from localStorage if not authenticated (V2 store auto-migrates V1 on init)
 onMounted(() => {
   if (!isAuthenticated.value) {
     gearStore.loadFromStorage()
   }
+})
+
+// Check if user is not logged in but has containers in localStorage
+const hasLocalContainers = computed(() => {
+  if (isAuthenticated.value) return false
+  return gearStore.getAllContainers.length > 0
 })
 
 // If backend is disabled, redirect to home (offline mode)
