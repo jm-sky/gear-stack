@@ -312,6 +312,55 @@ export async function migrateV1ToV2(): Promise<MigrationResult> {
 }
 
 /**
+ * Read V1 localStorage data and return it as flat V2 items (containers + items),
+ * WITHOUT touching V2 storage or the store.
+ *
+ * Used by the local→API upload flow (`dataMigrationService`): the V1 key
+ * (`gear-stack:containers`) is a stable offline snapshot that the API-synced V2 store
+ * never overwrites, so it's the safe source for uploading offline data to the backend.
+ */
+export function readV1LocalDataAsV2Items(): IGearItemV2[] {
+  let v1Containers: IGearContainer[] = []
+  try {
+    const raw = localStorage.getItem(V1_CONTAINERS_KEY)
+    if (!raw) return []
+    v1Containers = JSON.parse(raw) as IGearContainer[]
+  } catch {
+    return []
+  }
+
+  const v2Items: IGearItemV2[] = []
+  for (const container of v1Containers) {
+    try {
+      v2Items.push(transformContainerToV2(container))
+      if (Array.isArray(container.items)) {
+        for (const item of container.items) {
+          try {
+            v2Items.push(transformItemToV2(item, container.id))
+          } catch {
+            // Skip malformed item
+          }
+        }
+      }
+    } catch {
+      // Skip malformed container
+    }
+  }
+  return v2Items
+}
+
+/**
+ * Clear the V1 localStorage snapshot (after it has been uploaded to the API).
+ */
+export function clearV1LocalData(): void {
+  try {
+    localStorage.removeItem(V1_CONTAINERS_KEY)
+  } catch {
+    // ignore
+  }
+}
+
+/**
  * Check if migration is needed (for displaying UI notification)
  */
 export function needsMigration(): boolean {

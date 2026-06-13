@@ -1,19 +1,17 @@
 import { logger } from '@/shared/utils/logger'
-import type { IGearContainer, IGearItem } from '../types/gear.types'
-import { useGearStore } from '../store/useGearStore'
-import { mapParentContainerId, sortContainersByDependency } from '../utils/migrationHelpers'
-import { validateContainerDto, validateItemDto } from '../utils/validation'
-import { gearContainerApiService } from './gearContainerApiService'
-import { gearContainerLocalService } from './gearContainerLocalService'
-import { gearItemApiService } from './gearItemApiService'
+import type { ICreateGearItemV2Dto, IGearItemV2 } from '../types/gear.types.v2'
+import { useGearStoreV2 } from '../store/useGearStoreV2'
+import { gearItemApiServiceV2 } from './gearItemApiServiceV2'
+import { clearV1LocalData, readV1LocalDataAsV2Items } from './v1ToV2Migration'
 
-const STORAGE_KEY = 'gear-stack:containers'
+const V1_CONTAINERS_KEY = 'gear-stack:containers'
 
 /**
- * Check if there are containers in localStorage
+ * Check if there is offline gear data in localStorage (the legacy V1 key, which is the
+ * stable offline snapshot used as the upload source).
  */
 export function hasLocalData(): boolean {
-  const stored = localStorage.getItem(STORAGE_KEY)
+  const stored = localStorage.getItem(V1_CONTAINERS_KEY)
   if (!stored) return false
 
   try {
@@ -25,148 +23,130 @@ export function hasLocalData(): boolean {
 }
 
 /**
- * Migrate data from localStorage to API
- * This is called after successful login when local data exists
+ * Build a create DTO from a V2 item, preserving its id and parent so the hierarchy is
+ * reconstructed on the backend without an id-mapping step (the V2 API honors provided ids).
+ */
+function toCreateDto(item: IGearItemV2): ICreateGearItemV2Dto {
+  return {
+    id: item.id,
+    itemType: item.itemType,
+    parentItemId: item.parentItemId,
+    name: item.name,
+    description: item.description,
+    brand: item.brand,
+    price: item.price,
+    currency: item.currency,
+    weight: item.weight,
+    weightUnit: item.weightUnit,
+    url: item.url,
+    color: item.color,
+    notes: item.notes,
+    // Container-specific
+    containerType: item.containerType,
+    maxWeight: item.maxWeight,
+    maxWeightUnit: item.maxWeightUnit,
+    hideWhenNested: item.hideWhenNested,
+    isPublic: item.isPublic,
+    favorite: item.favorite,
+    showItemImages: item.showItemImages,
+    // Item-specific
+    category: item.category,
+    quantity: item.quantity,
+    status: item.status,
+    priority: item.priority,
+    expirationDate: item.expirationDate,
+    shelfLife: item.shelfLife,
+    quality: item.quality,
+    wearable: item.wearable,
+    consumable: item.consumable,
+    orderIndex: item.orderIndex,
+  }
+}
+
+/**
+ * Order containers so a parent always precedes its children (so parentItemId references
+ * are valid at creation time).
+ */
+function sortContainersParentFirst(containers: IGearItemV2[]): IGearItemV2[] {
+  const byId = new Map(containers.map(c => [c.id, c]))
+  const emitted = new Set<string>()
+  const visiting = new Set<string>() // cycle guard
+  const result: IGearItemV2[] = []
+
+  const visit = (container: IGearItemV2): void => {
+    if (emitted.has(container.id) || visiting.has(container.id)) return
+    visiting.add(container.id)
+    const parent = container.parentItemId ? byId.get(container.parentItemId) : undefined
+    if (parent) visit(parent)
+    visiting.delete(container.id)
+    emitted.add(container.id)
+    result.push(container)
+  }
+
+  containers.forEach(visit)
+  return result
+}
+
+/**
+ * Migrate offline gear data (V1 localStorage snapshot) to the API.
+ * Called after successful login when local data exists.
  *
  * Strategy:
- * 1. Load containers from localStorage
- * 2. For each container, try to create it via API
- * 3. If container already exists (by name or other criteria), skip or update
- * 4. Update store with migrated containers
- *
- * @returns Promise that resolves when migration is complete
+ * 1. Read offline data from the V1 localStorage key as flat V2 items
+ * 2. Create containers first (parent before child), then items, via the V2 API,
+ *    preserving ids so the hierarchy is reconstructed without id mapping
+ * 3. Refresh the V2 store from the API and clear the V1 snapshot
  */
 export async function migrateLocalDataToAPI(): Promise<void> {
-  const localContainers = await gearContainerLocalService.getAllContainers()
+  const items = readV1LocalDataAsV2Items()
 
-  if (localContainers.length === 0) {
+  if (items.length === 0) {
     logger.info('No local data to migrate')
     return
   }
 
-  logger.info(`Migrating ${localContainers.length} containers to API...`)
+  const containers = sortContainersParentFirst(items.filter(i => i.itemType === 'container'))
+  const regularItems = items.filter(i => i.itemType === 'item')
 
-  // CRITICAL FIX: Sort containers by dependency to avoid orphaned containers
-  // Make a deep copy to avoid modifying original containers during sorting
-  const sortedContainers = sortContainersByDependency(localContainers.map(c => ({ ...c })))
-  logger.info('Containers sorted by dependency order')
+  logger.info(`Migrating ${containers.length} containers and ${regularItems.length} items to API...`)
 
-  const store = useGearStore()
-  const migratedContainers: IGearContainer[] = []
-  // Map old IDs to new IDs for parent reference updates
-  const idMapping = new Map<string, string>()
+  let failures = 0
 
-  for (let i = 0; i < sortedContainers.length; i++) {
-    const localContainer = sortedContainers[i]
-    if (!localContainer) {
-      logger.warn(`Container at index ${i} is undefined, skipping`)
-      continue
-    }
+  // Phase 1: containers (parent before child)
+  for (const container of containers) {
     try {
-      // Create container via API
-      // Note: We need to extract items first, as API expects separate creation
-      const { items, ...containerData } = localContainer
-
-      // CRITICAL FIX: Map old parent ID to new API-generated ID
-      const parentContainerId = mapParentContainerId(
-        containerData.parentContainerId,
-        containerData,
-        sortedContainers,
-        i,
-        idMapping,
-      )
-
-      // M6 FIX: Validate container data before service call
-      const containerDto = createContainerDtoFromLocal(containerData, parentContainerId)
-
-      // Create container without items first
-      const createdContainer = await gearContainerApiService.createContainer(containerDto)
-
-      // CRITICAL FIX: Store ID mapping for child containers
-      idMapping.set(localContainer.id, createdContainer.id)
-
-      // Create items for this container
-      await migrateContainerItems(createdContainer.id, createdContainer.name, items)
-
-      migratedContainers.push(createdContainer)
-      logger.info(`Migrated container: ${createdContainer.name}`)
+      await gearItemApiServiceV2.createItem(toCreateDto(container))
     } catch (error) {
-      logger.error(`Failed to migrate container ${localContainer.name}:`, error)
-      // Continue with other containers
+      failures++
+      logger.warn(`Failed to migrate container ${container.name}:`, error)
     }
   }
 
-  // Update store with migrated containers
-  if (migratedContainers.length > 0) {
-    // Fetch all containers from API to get complete data
-    const allContainers = await gearContainerApiService.getContainers()
-    store.setContainers(allContainers)
-    logger.info(`Migration complete: ${migratedContainers.length} containers migrated`)
-  }
-}
-
-/**
- * Create container DTO from local container data
- */
-function createContainerDtoFromLocal(
-  containerData: Omit<IGearContainer, 'items' | 'id' | 'createdAt' | 'updatedAt'>,
-  parentContainerId: string | null,
-) {
-  return validateContainerDto({
-    name: containerData.name,
-    description: containerData.description,
-    type: containerData.type,
-    parentContainerId,
-    maxWeight: containerData.maxWeight,
-    maxWeightUnit: containerData.maxWeightUnit,
-    weight: containerData.weight,
-    weightUnit: containerData.weightUnit,
-    color: containerData.color,
-    brand: containerData.brand,
-    price: containerData.price,
-    url: containerData.url,
-    hideWhenNested: containerData.hideWhenNested,
-  })
-}
-
-/**
- * Migrate items for a container
- */
-async function migrateContainerItems(
-  containerId: string,
-  containerName: string,
-  items: IGearItem[],
-): Promise<void> {
-  if (!items || items.length === 0) {
-    return
-  }
-
-  for (const item of items) {
+  // Phase 2: items (their parent containers now exist)
+  for (const item of regularItems) {
     try {
-      const itemDto = validateItemDto({
-        name: item.name,
-        category: item.category,
-        quantity: item.quantity ?? 1,
-        weight: item.weight ?? 0,
-        weightUnit: item.weightUnit ?? 'g',
-        status: item.status,
-        notes: item.notes ?? undefined,
-        expirationDate: item.expirationDate ?? undefined,
-        priority: item.priority ?? 'medium',
-        brand: item.brand ?? undefined,
-        color: item.color ?? undefined,
-        price: item.price ?? undefined,
-        url: item.url ?? undefined,
-        quality: item.quality ?? undefined,
-        wearable: item.wearable ?? undefined,
-        consumable: item.consumable ?? undefined,
-      })
-
-      await gearItemApiService.createItem(containerId, itemDto)
-    } catch (itemError) {
-      logger.warn(`Failed to migrate item ${item.name} for container ${containerName}:`, itemError)
-      // Continue with other items
+      await gearItemApiServiceV2.createItem(toCreateDto(item))
+    } catch (error) {
+      failures++
+      logger.warn(`Failed to migrate item ${item.name}:`, error)
     }
+  }
+
+  // Refresh the store from the API so it reflects the uploaded data
+  try {
+    const fresh = await gearItemApiServiceV2.getItems()
+    useGearStoreV2().setItems(fresh)
+  } catch (error) {
+    logger.warn('Failed to refresh store after migration:', error)
+  }
+
+  // Only drop the offline snapshot when everything uploaded cleanly, to avoid losing
+  // data that didn't make it to the backend.
+  if (failures === 0) {
+    clearV1LocalData()
+    logger.info('Migration complete; offline snapshot cleared')
+  } else {
+    logger.warn(`Migration finished with ${failures} failures; keeping offline snapshot`)
   }
 }
 
@@ -177,4 +157,3 @@ async function migrateContainerItems(
 export function shouldPromptForMigration(): boolean {
   return hasLocalData()
 }
-
