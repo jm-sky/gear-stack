@@ -85,6 +85,7 @@ export const gearEn = {
       addNestedDescription: 'Select a container to nest inside this container.',
       selectContainer: 'Container',
       selectContainerPlaceholder: 'Select a container',
+      searchContainers: 'Search containers...',
       noContainersAvailable: 'No containers available to nest.',
       // Extended fields
       extendedFields: 'Additional Information',
@@ -1024,6 +1025,7 @@ export const gearPl = {
       addNestedDescription: 'Wybierz kontener, aby zagnieździć go w tym kontenerze.',
       selectContainer: 'Kontener',
       selectContainerPlaceholder: 'Wybierz kontener',
+      searchContainers: 'Szukaj kontenerów...',
       noContainersAvailable: 'Brak dostępnych kontenerów do zagnieżdżenia.',
       // Extended fields
       extendedFields: 'Dodatkowe Informacje',
