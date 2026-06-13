@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Package, RefreshCcwIcon } from 'lucide-vue-next'
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import DataTable from '@/components/data-table/DataTable.vue'
@@ -11,7 +11,6 @@ import Badge from '@/components/ui/badge/Badge.vue'
 import Button from '@/components/ui/button/Button.vue'
 import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import { useBackend } from '@/shared/composables/useBackend'
 import { ALL_ITEMS_PAGE_FILTERS_KEY, ALL_ITEMS_TABLE_COLUMN_VISIBILITY_KEY, config } from '@/shared/config/config'
 import type { IItemWithContainer } from '../utils/allItemsColumns'
 import ItemPriorityBadge from '../components/badges/ItemPriorityBadge.vue'
@@ -22,22 +21,21 @@ import ItemStatusBadge from '../components/ItemStatusBadge.vue'
 import { useCategoryLabel } from '../composables/useCategoryLabel'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
 import { formatItemWeight } from '../composables/useFormattedItemWeight'
-import { useGear } from '../composables/useGear'
 import { useGearSettings } from '../composables/useGearSettings'
+import { useGearV2 } from '../composables/useGearV2'
 import { GearRoutePath } from '../routes'
-import { gearContainerService } from '../services/gearContainerService'
-import { gearItemApiService } from '../services/gearItemApiService'
-import { useGearStore } from '../store/useGearStore'
+import { useGearStoreV2 } from '../store/useGearStoreV2'
 import { createAllItemsColumns } from '../utils/allItemsColumns'
 import { COLOR_TEXT_CLASSES } from '../utils/containerColors'
-import { getAllItems } from '../utils/getAllItems'
+import { getAllItemsForCatalogV2 } from '../utils/getAllItemsForCatalogV2'
 import { createNavigationQuery } from '../utils/navigationParams'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 
 const router = useRouter()
 const route = useRoute()
 const { t, locale } = useI18n()
-const { containers } = useGear()
+const store = useGearStoreV2()
+const { getItems } = useGearV2()
 const { getCategoryLabel } = useCategoryLabel()
 const { settings: gearSettings } = useGearSettings()
 const { getContainerTypeLabel } = useContainerTypeLabel()
@@ -171,57 +169,27 @@ watch(() => route.query, () => {
   }
 }, { immediate: false })
 
-// Get all items from all containers (includes containers as items)
+// Get all items from all containers (includes containers as items), flattened from the V2 store
 const allItemsRaw = computed<IItemWithContainer[]>(() => {
-  return getAllItems(containers.value)
+  return getAllItemsForCatalogV2(store.getAllItems)
 })
 
-// Refresh items from API/localStorage
+// Refresh the full gear list from the active V2 service (API or localStorage) into the store
 async function refreshItems() {
   try {
     loading.value = true
-    const { shouldUseAPI } = useBackend()
-    const store = useGearStore()
-
-    // Get containers from API/localStorage
-    const fetchedContainers = await gearContainerService().getContainers()
-
-    // If using API, fetch all items in one request and distribute them to containers
-    if (shouldUseAPI.value) {
-      // Fetch all items for the user in one request
-      const allItems = await gearItemApiService.getAllItems()
-
-      // Group items by container ID
-      // Note: item.containerId refers to nested container (if item is a container)
-      // item.container.id refers to the parent container where item is located
-      const itemsByContainerId = new Map<string, typeof allItems>()
-      for (const item of allItems) {
-        // Use container.id (parent container) instead of containerId (nested container)
-        const containerId = item.container?.id
-        if (containerId) {
-          if (!itemsByContainerId.has(containerId)) {
-            itemsByContainerId.set(containerId, [])
-          }
-          itemsByContainerId.get(containerId)!.push(item)
-        }
-      }
-
-      // Update containers with their items
-      const containersWithItems = fetchedContainers.map((container) => ({
-        ...container,
-        items: itemsByContainerId.get(container.id) ?? [],
-      }))
-
-      // Update store with containers that have items
-      store.setContainers(containersWithItems)
-    }
-    // Store will automatically update containers.value, which triggers allItemsRaw recomputation
+    await getItems()
   } catch (error) {
     console.error('Failed to refresh items:', error)
   } finally {
     loading.value = false
   }
 }
+
+// Load on mount
+onMounted(() => {
+  refreshItems()
+})
 
 // Filter items based on filterType and image filter
 const allItems = computed<IItemWithContainer[]>(() => {
