@@ -23,20 +23,41 @@ import ShoppingListSummary from '../components/shopping/ShoppingListSummary.vue'
 // Lazy load dialogs - only loaded when user opens them
 const AddItemToShoppingDialog = defineAsyncComponent(() => import('../components/shopping/AddItemToShoppingDialog.vue'))
 const ShoppingExportDialog = defineAsyncComponent(() => import('../components/shopping/ShoppingExportDialog.vue'))
+import type { IGearContainer } from '../types/gear.types'
 import { useCategoryLabel } from '../composables/useCategoryLabel'
-import { useGear } from '../composables/useGear'
+import { useGearMutations } from '../composables/useGearMutations'
 import { useGearSettings } from '../composables/useGearSettings'
+import { useGearV2 } from '../composables/useGearV2'
+import { useGearStoreV2 } from '../store/useGearStoreV2'
 import { getDefaultItemValues } from '../utils/defaultValues'
 import { isExpiringSoon } from '../utils/isExpiringSoon'
 import { getReturnTo } from '../utils/navigationParams'
+import { convertV2ContainerToV1, convertV2ItemToV1 } from '../utils/typeConverters'
 import { type ItemFormData, itemSchema } from '../utils/validation'
 import type { TUUID } from '@/shared/types/base.type'
 
 const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
-const { containers, createItem, updateItem } = useGear()
+const store = useGearStoreV2()
+const { createItem, updateItem } = useGearMutations()
+const { getItems } = useGearV2()
 const { defaultCurrency } = useGearSettings()
+
+// V1-shaped view (containers with nested items) built from the flat V2 store, so the
+// existing shopping logic (which iterates container.items) and the V1-typed shopping
+// components keep working unchanged.
+const containers = computed<IGearContainer[]>(() =>
+  store.getAllContainers.map(c => ({
+    ...convertV2ContainerToV1(c),
+    items: store.getChildrenOfItem(c.id).filter(i => i.itemType === 'item').map(convertV2ItemToV1),
+  })),
+)
+
+// Load the full gear list into the V2 store
+onMounted(() => {
+  getItems().catch(() => {})
+})
 const { getCategoryLabel } = useCategoryLabel()
 
 // Filters
@@ -481,9 +502,15 @@ const onAddItemSubmit = handleAddItemSubmit(async (data: ItemFormData) => {
           : null,
     }
 
-    const newItem = await createItem(firstContainerId.value, dtoData)
-    // Add to shopping list
-    const itemWithContainer: IItemWithContainerId = { ...newItem, _containerId: firstContainerId.value }
+    // Drop the V1-only nested containerId; V2 hierarchy is parentItemId
+    const { containerId: _nestedContainerId, ...itemFields } = dtoData
+    const newItem = await createItem({
+      ...itemFields,
+      itemType: 'item',
+      parentItemId: firstContainerId.value,
+    })
+    // Add to shopping list (convert back to the V1 shape the shopping components use)
+    const itemWithContainer: IItemWithContainerId = { ...convertV2ItemToV1(newItem), _containerId: firstContainerId.value }
     addToShoppingList(itemWithContainer)
     addItemDialogOpen.value = false
     resetAddItemForm({ values: getInitialAddItemValues() })
