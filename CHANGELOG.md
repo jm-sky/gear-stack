@@ -12,16 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Zależności (npm)**: bump in-range (minor/patch) wszystkich pakietów + bezpieczne majory dev-tooling (`@vue/tsconfig` 0.9, `npm-run-all2` 9, `@sentry/vite-plugin` 5, `lucide-vue-next` 1.0). Pozostałe majory wysokiego ryzyka (typescript 6, vite 8, zod 4, vue-router 5, eslint 10) — zaplanowane w `docs/security-dependabot-remediation.md`, do zrobienia z weryfikacją UI
-- **Gear (migracja V1→V2, w toku)**: rdzeń modułu gear przeniesiony na model V2 (unified):
-  `ContainerDetailPage`, `ContainerHeader`, `ItemHeaderName`, `ItemHeaderActions`,
-  `ContainersListPageDropdown` (delete-all), formularze kontenera/przedmiotu i strona share-tokens
-  (`useContainerV2`), oraz composable `useItemImage`/`useItemsParamRecognition`. Zagnieżdżone
-  kontenery używają teraz natywnego re-parentingu V2 (`parentItemId`). Szczegóły i pozostały
-  zakres: `docs/migration-v1-to-v2.md`
+- **Gear: migracja V1→V2 ukończona** — cały moduł gear działa na modelu V2 (unified). Wprowadzono `useGearMutations` (mutacje V2 + inwalidacja cache), dobudowano brakujące funkcje na V2 (clone kontenera, import/eksport JSON, odczyt katalogu, generator przykładowego sprzętu) z testami jednostkowymi, a upload danych offline → API (`dataMigrationService`) przepisano na V2 z zachowaniem ID. Zagnieżdżone kontenery używają natywnego re-parentingu (`parentItemId`)
 
 ### Deprecated
 
 ### Removed
+- **Gear: legacy warstwa V1** — `useGear` + `internal/*`, serwisy V1 (`gearContainerService`, `gearItemService`, `gearItemHybridService`, `gearItemLocalService`, `gearContainerLocalService`, `gearItemApiService`, `migrationV1toV2Service`), `store/useGearStore`, utils V1 (`getAllItems`, `containerCalculations`, `migrationHelpers`). Zachowano `gear.types.ts` (wspólne typy), `gearContainerApiService` (ratingi/raporty public) i `v1ToV2Migration` (transparentna migracja localStorage)
 
 ### Fixed
 

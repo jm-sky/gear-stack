@@ -3,11 +3,29 @@
 Cel: usunąć legacy warstwę „V1" modułu gear i oprzeć wszystko na V2 (unified model).
 Nie dbamy o kompatybilność wsteczną z V1.
 
-## Status (2026-06-12)
+## Status: ✅ UKOŃCZONE (2026-06-13)
 
-Aplikacja jest w spójnym, działającym stanie hybrydowym — zmigrowane komponenty używają V2,
-niezmigrowane wciąż działają na V1 (store V1 nadal zasilany przez `DashboardPage`/`AllItemsPage`).
-Type-check, ESLint i 403 testy jednostkowe przechodzą.
+Migracja zakończona — **warstwa V1 całkowicie usunięta**, cały moduł gear działa na V2.
+Type-check, ESLint i 359 testów jednostkowych przechodzą; `pnpm build` (PWA) OK.
+
+Usunięto: `useGear` + `internal/*`, serwisy V1 (`gearContainerService`, `gearItemService`,
+`gearItemHybridService`, `gearItemLocalService`, `gearContainerLocalService`, `gearItemApiService`,
+`migrationV1toV2Service`), `store/useGearStore`, utils V1 (`getAllItems`, `containerCalculations`,
+`migrationHelpers`) + ich specy.
+
+Zostawiono (świadomie): `gear.types.ts` (wspólne uniony/enumy), `gearContainerApiService`
+(ratingi/raporty kontenerów publicznych — brak odpowiednika V2), `v1ToV2Migration`
+(transparentna migracja localStorage V1→V2 przy starcie store'a V2), `dataMigrationService`
+(upload danych offline → API, przepisany na V2).
+
+> Historyczny opis planu poniżej — zachowany jako dokumentacja procesu.
+
+---
+
+## (Archiwum) Status w trakcie (2026-06-12)
+
+Aplikacja była w spójnym, działającym stanie hybrydowym — zmigrowane komponenty używały V2,
+niezmigrowane działały na V1.
 
 **Zrobione:**
 - ✅ Faza 0: `useGearMutations` (keystone — mutacje V2 + inwalidacja cache)
