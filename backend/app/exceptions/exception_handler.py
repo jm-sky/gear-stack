@@ -84,14 +84,12 @@ async def validation_exception_handler(
     Returns:
         JSON response with validation errors
     """
-    errors = []
-    for error in exc.errors():
-        error_detail = {
-            "loc": error["loc"],
-            "msg": error["msg"],
-            "type": error["type"],
-        }
-        errors.append(error_detail)
+    raw_errors = exc.errors()
+    errors: dict[str, list[str]] = {}
+    for error in raw_errors:
+        loc = error["loc"]
+        field_name = str(loc[-1]) if len(loc) > 1 else "__root__"
+        errors.setdefault(field_name, []).append(error["msg"])
 
     logger.warning(
         f"Validation error on {request.method} {request.url.path}",

@@ -51,6 +51,8 @@ class GearRepositoryV2(SearchMixin):
         Returns:
             Created item
         """
+        is_container = data.itemType == "container"
+
         item = GearItemDBV2(
             id=(data.id if data.id else generate_id()),
             user_id=user_id,
@@ -67,31 +69,27 @@ class GearRepositoryV2(SearchMixin):
             url=data.url,
             color=data.color,
             notes=data.notes,
-            # Container-specific
-            container_type=data.containerType,
-            max_weight=data.maxWeight,
-            max_weight_unit=data.maxWeightUnit,
-            hide_when_nested=data.hideWhenNested,
-            is_public=(data.isPublic if data.isPublic is not None else False),
-            is_hidden_by_reports=(
-                data.isHiddenByReports if data.isHiddenByReports is not None else False
-            ),
-            favorite=(data.favorite if data.favorite is not None else False),
-            show_item_images=(
-                data.showItemImages if data.showItemImages is not None else False
-            ),
-            # Item-specific
-            category=data.category,
-            quantity=data.quantity,
-            status=data.status,
-            priority=data.priority,
-            expiration_date=data.expirationDate,
-            shelf_life=data.shelfLife,
-            quality=data.quality,
-            wearable=data.wearable,
-            consumable=data.consumable,
-            order_index=data.orderIndex,
-            show_on_container=data.showOnContainer,
+            # Container-specific — must be NULL for items (check_item_fields constraint)
+            container_type=data.containerType if is_container else None,
+            max_weight=data.maxWeight if is_container else None,
+            max_weight_unit=data.maxWeightUnit if is_container else None,
+            hide_when_nested=data.hideWhenNested if is_container else None,
+            is_public=(data.isPublic if data.isPublic is not None else False) if is_container else None,
+            is_hidden_by_reports=(data.isHiddenByReports if data.isHiddenByReports is not None else False) if is_container else None,
+            favorite=(data.favorite if data.favorite is not None else False) if is_container else None,
+            show_item_images=(data.showItemImages if data.showItemImages is not None else False) if is_container else None,
+            # Item-specific — must be NULL for containers (check_container_fields constraint)
+            category=data.category if not is_container else None,
+            quantity=data.quantity if not is_container else None,
+            status=data.status if not is_container else None,
+            priority=data.priority if not is_container else None,
+            expiration_date=data.expirationDate if not is_container else None,
+            shelf_life=data.shelfLife if not is_container else None,
+            quality=data.quality if not is_container else None,
+            wearable=data.wearable if not is_container else None,
+            consumable=data.consumable if not is_container else None,
+            order_index=data.orderIndex if not is_container else None,
+            show_on_container=data.showOnContainer if not is_container else None,
             promote_count=(data.promoteCount if data.promoteCount is not None else 0),
             # Linking
             linked_item_id=data.linkedItemId,

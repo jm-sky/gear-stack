@@ -262,6 +262,7 @@ const onSubmit = handleSubmit(async (data: ItemFormData) => {
       // Add parentItemId and linkedItemId if selecting from catalog
       const createData: ICreateGearItemV2Dto = {
         ...dtoData as ICreateGearItemV2Dto,
+        itemType: 'item',
         parentItemId: containerId,
         linkedItemId: tabMode.value === 'catalog' && selectedCatalogItemId.value ? selectedCatalogItemId.value : undefined,
       }
