@@ -1,4 +1,4 @@
-import { BackpackIcon, BoxIcon, GlobeIcon, PackageIcon, ShoppingCartIcon } from 'lucide-vue-next'
+import { BackpackIcon, BoxIcon, GlobeIcon, LayoutGridIcon, PackageIcon, ShoppingCartIcon } from 'lucide-vue-next'
 import type { Component } from 'vue'
 import type { RouteRecordRaw } from 'vue-router'
 
@@ -17,6 +17,7 @@ export const GearRouteName = {
   SharedContainerDetail: 'gear-shared-container-detail',
   PublicItemDetail: 'gear-public-item-detail',
   ContainerShareTokens: 'gear-container-share-tokens',
+  Visualization: 'gear-visualization',
   Settings: 'gear-settings',
   CatalogueBrowser: 'gear-catalogue-browser',
   CatalogueManage: 'gear-catalogue-manage',
@@ -49,6 +50,7 @@ export const GearRoutePath = {
   SharedContainerDetailByToken: (token: string) => `/shared/container/${token}`,
   ContainerShareTokens: '/gear/:id/share-tokens',
   ContainerShareTokensById: (id: string) => `/gear/${id}/share-tokens`,
+  Visualization: '/gear/visualization',
   Settings: '/gear/settings',
   CatalogueBrowser: '/gear/catalogue',
   CatalogueManage: '/gear/catalogue/manage',
@@ -63,6 +65,7 @@ export const GearRouteIcon: Partial<Record<keyof typeof GearRouteName, Component
   Containers: BackpackIcon,
   AllItems: PackageIcon,
   ShoppingPlanning: ShoppingCartIcon,
+  Visualization: LayoutGridIcon,
   ContainerDetail: BoxIcon,
   PublicContainers: GlobeIcon,
 }
@@ -91,6 +94,12 @@ export const gearRoutes: RouteRecordRaw[] = [
     name: GearRouteName.ContainerNew,
     component: () => import('@/modules/gear/pages/ContainerFormPage.vue'),
     meta: { layout: 'authenticated', title: 'gear.container.create.title' },
+  },
+  {
+    path: GearRoutePath.Visualization,
+    name: GearRouteName.Visualization,
+    component: () => import('@/modules/gear/pages/ContainerVisualizationPage.vue'),
+    meta: { layout: 'authenticated', title: 'gear.visualization.title' },
   },
   {
     path: GearRoutePath.ContainerDetail,

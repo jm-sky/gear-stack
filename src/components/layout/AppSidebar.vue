@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BackpackIcon, BookIcon, Globe, Info, Package, ShoppingCart } from 'lucide-vue-next'
+import { BackpackIcon, BookIcon, Globe, Info, LayoutGrid, Package, ShoppingCart } from 'lucide-vue-next'
 import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
@@ -45,6 +45,11 @@ const myGearLinks = computed(() => [
     to: GearRoutePath.ShoppingPlanning,
     label: t('gear.shopping.navTitle', 'Shopping'),
     icon: ShoppingCart,
+  },
+  {
+    to: GearRoutePath.Visualization,
+    label: t('gear.visualization.navTitle', 'Visualization'),
+    icon: LayoutGrid,
   },
 ])
 
