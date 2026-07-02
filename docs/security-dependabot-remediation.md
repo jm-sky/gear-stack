@@ -5,11 +5,17 @@ zweryfikowane `type-check` + `lint` + `test:run` (414 zielonych) + `pnpm build` 
 `pnpm audit` potwierdza: żaden z 6 alertów nie pozostał. Menedżer pakietów: **pnpm 10.18.3**.
 
 > Zastosowane: `axios` → `^1.17.0` (bezpośredni) oraz `pnpm.overrides` dla shell-quote
-> (1.8.4), @babel/plugin-transform-modules-systemjs (7.29.7), serialize-javascript (7.0.5).
+> (1.8.4), @babel/plugin-transform-modules-systemjs (7.29.7), serialize-javascript (7.0.5),
+> esbuild (0.28.1, via vite — patrz aktualizacja 2026-07-02 niżej).
 >
-> **Pozostałe (poza listą Dependabota, wykryte przez `pnpm audit`)** — głównie dev/build,
-> do osobnego bumpu: `esbuild` (<0.28.1, via vite), `postcss`, `ws`, `brace-expansion`,
-> `fast-uri`. Patrz „Bump wszystkich zależności" niżej.
+> **2026-07-02** — `pnpm audit` wykrył kolejny alert (low): `esbuild` <0.28.1 (arbitrary
+> file read na dev serverze, tylko Windows), przez `vite`. Naprawione: `vite` bumpnięty
+> `^7.3.5` → `^7.3.6` (najnowszy patch w linii 7.x; 7.3.6 akceptuje `esbuild ^0.28.0`) +
+> `pnpm.overrides["esbuild@<0.28.1"] = "^0.28.1"`. Zweryfikowane: `type-check`, czysty
+> `pnpm build` (PWA precache 266 wpisów, zgodnie z build sprzed zmiany), `pnpm audit` → brak
+> alertów (w tym `postcss`/`ws`/`brace-expansion`/`fast-uri` wymienione niżej — już czyste,
+> naprawione przy okazji wcześniejszych bumpów tranzytywnych). Vite 8 (rolldown-based,
+> major) świadomie pominięty — zbyt ryzykowny bump dla jednego low-severity alertu.
 
 > Tylko `axios` jest zależnością bezpośrednią — resztę naprawiamy przez `pnpm.overrides`
 > w `package.json` (wymuszenie wersji w zależnościach tranzytywnych).
