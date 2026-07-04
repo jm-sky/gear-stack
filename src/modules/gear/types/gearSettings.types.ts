@@ -26,6 +26,7 @@ export interface IGearSettings {
   customContainerTypes: IUserContainerType[]
   customBrands: IUserBrand[]
   preferredWeightUnit?: TGearWeightUnit
+  defaultCurrency?: string
 }
 
 export interface IUpdateGearSettingsDto {
@@ -33,6 +34,7 @@ export interface IUpdateGearSettingsDto {
   customContainerTypes?: IUserContainerType[]
   customBrands?: IUserBrand[]
   preferredWeightUnit?: TGearWeightUnit
+  defaultCurrency?: string
 }
 
 // Service interface for gear settings operations

@@ -85,6 +85,12 @@ export const authEn = {
       verification_success: 'Verification successful',
       verify_button: 'Verify',
       no_methods_configured: 'No 2FA methods configured',
+      setup: {
+        title: 'Two-Factor Authentication Setup',
+      },
+      verify: {
+        title: 'Two-Factor Authentication',
+      },
       totp: {
         title: 'Authenticator App (TOTP)',
         description: 'Use an authenticator app like Google Authenticator or Authy',
@@ -161,10 +167,19 @@ export const authEn = {
       email_required: 'Email address is required to resend the verification link.',
       invalid_or_expired: 'Verification link is invalid or has expired. Request a new one below.',
       success: 'Email address verified successfully.',
+      redirecting_to_dashboard: 'Redirecting to dashboard...',
+      redirecting_to_login: 'Redirecting to login...',
+    },
+    pages: {
+      login: 'Sign In',
+      register: 'Sign Up',
+      verifyEmail: 'Verify Email',
+      oauthCallback: 'OAuth Callback',
     },
     oauth: {
       button: {
         continue_with_google: 'Google',
+        continue_with_facebook: 'Facebook',
         redirecting: 'Redirecting...',
       },
       or_continue_with: 'Or continue with',

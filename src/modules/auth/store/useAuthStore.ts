@@ -60,6 +60,9 @@ export const useAuthStore = defineStore('auth', () => {
         name: newUser.name,
         email: newUser.email,
         avatarUrl: newUser.avatarUrl,
+        isAdmin: newUser.isAdmin,
+        isOwner: newUser.isOwner,
+        isPremium: newUser.isPremium,
         createdAt: newUser.createdAt,
         updatedAt: new Date().toISOString(),
       })

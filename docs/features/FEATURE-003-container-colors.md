@@ -259,3 +259,24 @@ Predefined colors (Tailwind CSS classes):
 - Category icons (FEATURE-002)
 - Container nesting (FEATURE-004)
 
+---
+
+
+### Updated Color Utilities (summary)
+
+- `CONTAINER_COLORS` – lista powyższych kolorów.
+- `COLOR_DOT_CLASSES` – używa HEX (np. `coyote: #8B6F47`, `olive: #556B2F`, `black: #111111`) dobranych tak, żeby przypominały realne materiały (cordura, plecaki, odzież).
+- `COLOR_TEXT_CLASSES`, `COLOR_BORDER_CLASSES` – używają klas Tailwind możliwie zbliżonych do powyższych HEX, ale z priorytetem na kontrast i czytelność w light/dark theme.
+
+### Why These Colors?
+
+- Paleta jest inspirowana realnym gear’em: coyote/khaki/olive/tan/brown dla sprzętu taktycznego, forestGreen/navy/jeans/gray/black/orange dla typowych kolorów ubrań i ekwipunku.
+- Kropka pokazuje **„realny” kolor kontenera**, a tekst i ramka są spójne z kropką, ale pozostają w granicach bezpiecznego UI (Tailwind).
+
+### UX Guidelines
+
+- Kolory mają być:
+  - łatwo odróżnialne na liście kontenerów,
+  - semantycznie sensowne dla outdoor/tactical,
+  - działające poprawnie w trybie jasnym i ciemnym.
+  

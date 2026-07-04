@@ -16,6 +16,6 @@ export function getPriorityVariant(priority: TGearItemPriority): BadgeVariants['
 export function getStatusVariant(status: TGearItemStatus): BadgeVariants['variant'] {
   if (status === 'owned') return 'default'
   if (status === 'missing') return 'destructive'
-  return 'outline'
+  return 'destructive-outline'
 }
 

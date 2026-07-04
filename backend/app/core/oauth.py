@@ -50,7 +50,7 @@ class OAuthProvider(ABC):
 class GoogleOAuthProvider(OAuthProvider):
     """Google OAuth provider implementation."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.client_id = settings.oauth.google_client_id
         self.client_secret = settings.oauth.google_client_secret
         self.redirect_uri = settings.oauth.google_redirect_uri
@@ -67,7 +67,7 @@ class GoogleOAuthProvider(OAuthProvider):
             "state": state,
             "response_type": "code",
             "access_type": "offline",
-            "prompt": "consent",
+            "prompt": "select_account",
         }
 
         query_string = "&".join([f"{k}={v}" for k, v in params.items()])
@@ -92,7 +92,9 @@ class GoogleOAuthProvider(OAuthProvider):
             data = response.json()
 
             if "error" in data:
-                raise ValueError(f"Google OAuth error: {data.get('error_description', data['error'])}")
+                raise ValueError(
+                    f"Google OAuth error: {data.get('error_description', data['error'])}"
+                )
 
             return OAuthTokenResponse(
                 accessToken=data["access_token"],
@@ -127,12 +129,102 @@ class GoogleOAuthProvider(OAuthProvider):
             )
 
 
+class FacebookOAuthProvider(OAuthProvider):
+    """Facebook OAuth provider implementation."""
+
+    def __init__(self) -> None:
+        self.client_id = settings.oauth.facebook_client_id
+        self.client_secret = settings.oauth.facebook_client_secret
+        self.redirect_uri = settings.oauth.facebook_redirect_uri
+        self.auth_url = "https://www.facebook.com/v18.0/dialog/oauth"
+        self.token_url = "https://graph.facebook.com/v18.0/oauth/access_token"
+        self.user_api_url = "https://graph.facebook.com/v18.0/me"
+
+    def get_authorization_url(self, state: str) -> str:
+        """Generate Facebook OAuth authorization URL."""
+        params = {
+            "client_id": self.client_id,
+            "redirect_uri": self.redirect_uri,
+            "scope": "email public_profile",
+            "state": state,
+            "response_type": "code",
+        }
+
+        query_string = "&".join([f"{k}={v}" for k, v in params.items()])
+        return f"{self.auth_url}?{query_string}"
+
+    async def exchange_code_for_token(self, code: str) -> OAuthTokenResponse:
+        """Exchange Facebook authorization code for access token."""
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                self.token_url,
+                params={
+                    "client_id": self.client_id,
+                    "client_secret": self.client_secret,
+                    "code": code,
+                    "redirect_uri": self.redirect_uri,
+                },
+                headers={"Accept": "application/json"},
+                timeout=10.0,
+            )
+            response.raise_for_status()
+            data = response.json()
+
+            if "error" in data:
+                error_info = data.get("error", {})
+                error_message = error_info.get(
+                    "message", error_info.get("error_description", "Unknown error")
+                )
+                raise ValueError(f"Facebook OAuth error: {error_message}")
+
+            return OAuthTokenResponse(
+                accessToken=data["access_token"],
+                tokenType=data.get("token_type", "Bearer"),
+                scope=None,  # Facebook doesn't return scope in token response
+                refreshToken=None,  # Facebook doesn't provide refresh tokens
+            )
+
+    async def get_user_info(self, access_token: str) -> OAuthUserInfo:
+        """Get Facebook user information."""
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                self.user_api_url,
+                params={
+                    "fields": "id,name,email,picture",
+                    "access_token": access_token,
+                },
+                headers={"Accept": "application/json"},
+                timeout=10.0,
+            )
+            response.raise_for_status()
+            user_data = response.json()
+
+            if "error" in user_data:
+                error_info = user_data.get("error", {})
+                error_message = error_info.get("message", "Unknown error")
+                raise ValueError(f"Facebook API error: {error_message}")
+
+            # Get picture URL if available
+            avatar_url = None
+            if "picture" in user_data and "data" in user_data["picture"]:
+                avatar_url = user_data["picture"]["data"].get("url")
+
+            return OAuthUserInfo(
+                provider="facebook",
+                providerId=str(user_data["id"]),
+                email=user_data.get("email", ""),
+                name=user_data.get("name"),
+                avatarUrl=avatar_url,
+            )
+
+
 class OAuthService:
     """Central OAuth service for managing multiple providers."""
 
-    def __init__(self):
-        self.providers = {
+    def __init__(self) -> None:
+        self.providers: dict[str, OAuthProvider] = {
             "google": GoogleOAuthProvider(),
+            "facebook": FacebookOAuthProvider(),
         }
 
     def get_provider(self, provider_name: str) -> OAuthProvider:
@@ -150,17 +242,23 @@ class OAuthService:
         provider = self.get_provider(provider_name)
         return provider.get_authorization_url(state)
 
-    async def exchange_code_for_token(self, provider_name: str, code: str) -> OAuthTokenResponse:
+    async def exchange_code_for_token(
+        self, provider_name: str, code: str
+    ) -> OAuthTokenResponse:
         """Exchange authorization code for access token."""
         provider = self.get_provider(provider_name)
         return await provider.exchange_code_for_token(code)
 
-    async def get_user_info(self, provider_name: str, access_token: str) -> OAuthUserInfo:
+    async def get_user_info(
+        self, provider_name: str, access_token: str
+    ) -> OAuthUserInfo:
         """Get user information from provider."""
         provider = self.get_provider(provider_name)
         return await provider.get_user_info(access_token)
 
-    async def complete_oauth_flow(self, provider_name: str, code: str) -> tuple[OAuthUserInfo, OAuthTokenResponse]:
+    async def complete_oauth_flow(
+        self, provider_name: str, code: str
+    ) -> tuple[OAuthUserInfo, OAuthTokenResponse]:
         """Complete OAuth flow: exchange code for token and get user info."""
         token_response = await self.exchange_code_for_token(provider_name, code)
         user_info = await self.get_user_info(provider_name, token_response.accessToken)

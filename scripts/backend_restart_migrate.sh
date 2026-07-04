@@ -23,15 +23,15 @@ echo -e "${GREEN}🐳 Starting backend restart and migration...${NC}"
 if [ -d "$BACKEND_DIR" ] && [ -f "$BACKEND_DIR/$COMPOSE_FILE" ]; then
   cd "$BACKEND_DIR"
 
-  echo -e "${YELLOW}🔄 Stopping Docker Compose services...${NC}"
-  docker compose -f "$COMPOSE_FILE" down
+  echo -e "${YELLOW}🔨 Building app image...${NC}"
+  docker compose -f "$COMPOSE_FILE" build app
 
   echo ""
-  echo -e "${YELLOW}🚀 Starting Docker Compose services...${NC}"
-  docker compose -f "$COMPOSE_FILE" up -d
+  echo -e "${YELLOW}🔄 Restarting app container...${NC}"
+  docker compose -f "$COMPOSE_FILE" up -d --force-recreate app
 
   echo ""
-  echo -e "${YELLOW}⏳ Waiting for services to be healthy...${NC}"
+  echo -e "${YELLOW}⏳ Waiting for app to be healthy...${NC}"
   sleep 5
 
   echo ""

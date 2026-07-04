@@ -92,7 +92,9 @@ async def upgrade() -> None:
         # Add default_containers_public to user_settings
         settings_exist = await table_exists(conn, "user_settings")
         if settings_exist:
-            default_public_exists = await column_exists(conn, "user_settings", "default_containers_public")
+            default_public_exists = await column_exists(
+                conn, "user_settings", "default_containers_public"
+            )
             if not default_public_exists:
                 print("Adding default_containers_public column to user_settings...")
                 await conn.execute(
@@ -105,7 +107,9 @@ async def upgrade() -> None:
                 )
                 print("✓ Added default_containers_public column to user_settings")
             else:
-                print("✓ default_containers_public column already exists in user_settings")
+                print(
+                    "✓ default_containers_public column already exists in user_settings"
+                )
         else:
             print("user_settings table does not exist, skipping...")
 
@@ -146,7 +150,9 @@ async def downgrade() -> None:
         # Remove default_containers_public from user_settings
         settings_exist = await table_exists(conn, "user_settings")
         if settings_exist:
-            default_public_exists = await column_exists(conn, "user_settings", "default_containers_public")
+            default_public_exists = await column_exists(
+                conn, "user_settings", "default_containers_public"
+            )
             if default_public_exists:
                 await conn.execute(
                     text(
@@ -158,7 +164,9 @@ async def downgrade() -> None:
                 )
                 print("✓ Removed default_containers_public column from user_settings")
             else:
-                print("✓ default_containers_public column does not exist in user_settings")
+                print(
+                    "✓ default_containers_public column does not exist in user_settings"
+                )
 
     print("✓ Migration downgrade completed successfully")
 
@@ -167,7 +175,9 @@ async def main() -> None:
     """Run migration."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Add public containers and settings migration")
+    parser = argparse.ArgumentParser(
+        description="Add public containers and settings migration"
+    )
     parser.add_argument(
         "action",
         choices=["upgrade", "downgrade"],

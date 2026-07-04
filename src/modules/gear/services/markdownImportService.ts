@@ -1,5 +1,6 @@
 import type { ICreateItemDto } from '../types/gear.types'
 import { recognizeParameters } from '../utils/parameterRecognition'
+import { priceParser } from '../utils/priceParser'
 import { SUGGESTED_BRANDS, SUGGESTED_COLORS } from '../utils/suggestedValues'
 
 // Markdown template for AI guidelines
@@ -9,7 +10,7 @@ When generating or updating gear lists, use this format:
 
 ## Standard Format
 \`\`\`markdown
-## [Container Name] [#container-id] ([Container Type]) <URL> - [weight]g
+## [Container Name] [#container-id] [uuid:xxx] ([Container Type]) [favorite] <URL> - [weight]g
 - **[Item Name]** x[qty] ([Brand], [Color]) [#nested-id] ([Status]) <URL> - [weight]g
 \`\`\`
 
@@ -40,6 +41,17 @@ When generating or updating gear lists, use this format:
 - ID is generated from container name as slug
 - Example: \`Bug-Out Bag\` → \`[#bug-out-bag]\`
 
+### UUID (Optional, recommended for updates)
+- Format: \`[uuid:xxx]\` in container header
+- Used for stable references when updating existing containers
+- Example: \`[uuid:7f6af1c1-7c6b-4b0d-9dd9-8c36f3d1b100]\`
+
+### Favorite Flag (Optional)
+- Format: \`[favorite]\` in container header
+- Marks container as favorite (will appear first in lists)
+- Only shown if container is marked as favorite
+- Example: \`## Bug-Out Bag [#bug-out-bag] [uuid:xxx] (Backpack) [favorite]\`
+
 ### URL (Optional)
 - Format: \`<URL>\` in angle brackets or plain URL
 - Recognized by \`http://\`, \`https://\`, or \`www.\`
@@ -53,7 +65,7 @@ When generating or updating gear lists, use this format:
 
 ## Example
 \`\`\`markdown
-## Bug-Out Bag [#bug-out-bag] (Backpack) <https://example.com/backpack> - 2000g
+## Bug-Out Bag [#bug-out-bag] [uuid:7f6af1c1-7c6b-4b0d-9dd9-8c36f3d1b100] (Backpack) [favorite] <https://example.com/backpack> - 2000g
 - **Water Bottle** x2 (Nalgene) - 300g
 - **Tactical Knife** (Victorinox, Black) - 200g
 - **Headlamp** (Petzl, Red) (Missing) - 90g
@@ -61,7 +73,7 @@ When generating or updating gear lists, use this format:
 - **Energy Bar** (Consumable) - 50g
 - **First Aid Pouch** (Pouch) [#first-aid-pouch] - 350g
 
-## First Aid Pouch [#first-aid-pouch] (Pouch) - 500g
+## First Aid Pouch [#first-aid-pouch] [uuid:9c4fc7c8-95b2-46cd-bb09-ef3ca52a3f45] (Pouch) - 500g
 - **Bandages** x5 - 100g
 - **Pain Pills** (Expiration: 31.12.2025, Consumable) - 50g
 \`\`\`
@@ -95,6 +107,7 @@ export interface IMarkdownImportResult {
     description?: string // Container description (text between header and first item)
     price?: number // Container price
     currency?: string // Container currency (PLN, USD, EUR, GBP, etc.)
+    favorite?: boolean // Container favorite flag from [favorite] in header
     items: Array<ICreateItemDto & { nestedContainerId?: string; uuid?: string }> // nestedContainerId is temporary slug reference, uuid for updates
   }>
   errors: string[]
@@ -133,45 +146,9 @@ interface IItemParams {
  */
 class MarkdownImportService {
   /**
-   * Parse price from text
-   * Supports formats: 100PLN, 10 PLN, 10,00 PLN, 1 000,00 PLN, 10zł, $50, 50$, €100, 100€, £75, 75£
-   * @returns {price: number, currency: string} or undefined if not found
+   * M7 FIX: Use PriceParser with registry pattern (OCP compliance)
+   * Price parsing is now delegated to the priceParser singleton
    */
-  private parsePrice(text: string): { price: number; currency: string } | undefined {
-    // Currency symbols and codes
-    const currencyPatterns = [
-      // Format: 100PLN, 100 PLN
-      { regex: /(\d+(?:[\s,.]\d+)*)\s*PLN/i, currency: 'PLN' },
-      { regex: /(\d+(?:[\s,.]\d+)*)\s*zł/i, currency: 'PLN' },
-      { regex: /(\d+(?:[\s,.]\d+)*)\s*z[lł]/i, currency: 'PLN' },
-      // Format: $50, 50$
-      { regex: /\$\s*(\d+(?:[\s,.]\d+)*)/i, currency: 'USD' },
-      { regex: /(\d+(?:[\s,.]\d+)*)\s*\$/i, currency: 'USD' },
-      { regex: /(\d+(?:[\s,.]\d+)*)\s*USD/i, currency: 'USD' },
-      // Format: €100, 100€
-      { regex: /€\s*(\d+(?:[\s,.]\d+)*)/i, currency: 'EUR' },
-      { regex: /(\d+(?:[\s,.]\d+)*)\s*€/i, currency: 'EUR' },
-      { regex: /(\d+(?:[\s,.]\d+)*)\s*EUR/i, currency: 'EUR' },
-      // Format: £75, 75£
-      { regex: /£\s*(\d+(?:[\s,.]\d+)*)/i, currency: 'GBP' },
-      { regex: /(\d+(?:[\s,.]\d+)*)\s*£/i, currency: 'GBP' },
-      { regex: /(\d+(?:[\s,.]\d+)*)\s*GBP/i, currency: 'GBP' },
-    ]
-
-    for (const pattern of currencyPatterns) {
-      const match = text.match(pattern.regex)
-      if (match && match[1]) {
-        // Remove spaces and replace comma with dot for parsing
-        const priceStr = match[1].replace(/\s/g, '').replace(',', '.')
-        const price = Number.parseFloat(priceStr)
-        if (!Number.isNaN(price)) {
-          return { price, currency: pattern.currency }
-        }
-      }
-    }
-
-    return undefined
-  }
 
   private categoryKeywords: Record<string, string[]> = {
     water: ['butelka', 'bottle', 'water', 'woda', 'filtr'],
@@ -189,7 +166,282 @@ class MarkdownImportService {
   }
 
   /**
-   * Parse markdown content into containers and items
+   * M5 FIX: Asynchronous markdown parsing with chunked processing
+   * Prevents UI freezing on large markdown files by yielding to event loop
+   *
+   * @param markdown - Markdown content to parse
+   * @param options - Parsing options
+   * @param options.recognizeFromName - Whether to recognize brand and color from item name (default: false)
+   * @param options.customBrands - Custom user brands to include in recognition
+   * @param options.onProgress - Progress callback (percentage 0-100)
+   * @param options.chunkSize - Lines per chunk (default: 50)
+   */
+  async parseMarkdownAsync(
+    markdown: string,
+    options?: {
+      recognizeFromName?: boolean
+      customBrands?: Array<{ value: string }>
+      onProgress?: (percent: number) => void
+      chunkSize?: number
+    }
+  ): Promise<IMarkdownImportResult> {
+    const CHUNK_SIZE = options?.chunkSize ?? 50
+    const lines = markdown.split('\n')
+    const result: IMarkdownImportResult = {
+      containers: [],
+      errors: [],
+    }
+
+    let currentContainer: { name: string; id?: string; uuid?: string; weight?: number; weightUnit?: 'g' | 'kg' | 'oz' | 'lb'; url?: string; description?: string; price?: number; currency?: string; favorite?: boolean; items: ICreateItemDto[] } | null = null
+    let descriptionLines: string[] = []
+    let isCollectingDescription = false
+
+    // Process lines in chunks
+    for (let chunkStart = 0; chunkStart < lines.length; chunkStart += CHUNK_SIZE) {
+      // Yield to event loop to keep UI responsive
+      await new Promise(resolve => setTimeout(resolve, 0))
+
+      // Report progress
+      if (options?.onProgress) {
+        const progress = Math.round((chunkStart / lines.length) * 100)
+        options.onProgress(progress)
+      }
+
+      const chunkEnd = Math.min(chunkStart + CHUNK_SIZE, lines.length)
+
+      // Process current chunk
+      for (let i = chunkStart; i < chunkEnd; i++) {
+        const line = lines[i]?.trim()
+        if (!line) {
+          // Keep empty lines in description
+          if (isCollectingDescription) {
+            descriptionLines.push('')
+          }
+          continue
+        }
+
+        // Container header (## Header [#id] [uuid:xxx] (Type) <URL> - weight)
+        if (line.startsWith('## ')) {
+          // Save previous container with description
+          if (currentContainer && currentContainer.items.length > 0) {
+            // Trim and save description (only if not already set from header)
+            if (descriptionLines.length > 0 && !currentContainer.description) {
+              const description = descriptionLines.join('\n').trim()
+              if (description) {
+                currentContainer.description = description
+              }
+            }
+            result.containers.push(currentContainer)
+          }
+
+          // Reset description collection
+          descriptionLines = []
+          isCollectingDescription = true
+
+          // Parse container header (inline logic from sync version)
+          let headerText = line.substring(3).trim()
+          let containerId: string | undefined
+          let containerUuid: string | undefined
+          let containerUrl: string | undefined
+          let containerWeight: number | undefined
+          let containerWeightUnit: 'g' | 'kg' | 'oz' | 'lb' | undefined
+          let containerPrice: number | undefined
+          let containerCurrency: string | undefined
+          let containerFavorite: boolean | undefined
+          let containerDescription: string | undefined
+
+          // Extract price (before other patterns to avoid conflicts)
+          const priceResult = priceParser.parse(headerText)
+          if (priceResult) {
+            containerPrice = priceResult.price
+            containerCurrency = priceResult.currency
+            // Remove price from header text
+            headerText = headerText.replace(/(\d+(?:[\s,.]\d+)*)\s*(PLN|zł|z[lł]|\$|USD|€|EUR|£|GBP)/gi, '').trim()
+          }
+
+          // Extract ID from [#id]
+          const idMatch = headerText.match(/\[#([^\]]+)\]/)
+          if (idMatch) {
+            containerId = idMatch[1]?.trim()
+            headerText = headerText.replace(idMatch[0] ?? '', '').trim()
+          }
+
+          // Extract UUID from [uuid:xxx]
+          const uuidMatch = headerText.match(/\[uuid:([^\]]+)\]/)
+          if (uuidMatch) {
+            containerUuid = uuidMatch[1]?.trim()
+            headerText = headerText.replace(uuidMatch[0] ?? '', '').trim()
+          }
+
+          // Extract favorite flag from [favorite]
+          const favoriteMatch = headerText.match(/\[favorite\]/i)
+          if (favoriteMatch) {
+            containerFavorite = true
+            headerText = headerText.replace(favoriteMatch[0] ?? '', '').trim()
+          }
+
+          // Extract description/notes in italic format *(text)* BEFORE parsing name
+          const italicDescriptionMatch = headerText.match(/\*\(([^)]+)\)\*/)
+          if (italicDescriptionMatch) {
+            containerDescription = italicDescriptionMatch[1]?.trim()
+            headerText = headerText.replace(italicDescriptionMatch[0] ?? '', '').trim()
+          }
+
+          // Extract URL from <URL> or plain URL
+          const urlAngleMatch = headerText.match(/<([^>]+)>/)
+          if (urlAngleMatch) {
+            containerUrl = urlAngleMatch[1]?.trim()
+            headerText = headerText.replace(urlAngleMatch[0] ?? '', '').trim()
+          } else {
+            // Try plain URL (http://, https://, www.)
+            const urlPlainMatch = headerText.match(/(https?:\/\/[^\s]+|www\.[^\s]+)/i)
+            if (urlPlainMatch && urlPlainMatch[1]) {
+              containerUrl = urlPlainMatch[1].trim()
+              if (containerUrl.startsWith('www.')) {
+                containerUrl = `https://${containerUrl}`
+              }
+              headerText = headerText.replace(urlPlainMatch[0] ?? '', '').trim()
+            }
+          }
+
+          // Extract weight from - weightg, - weightkg, - weightoz, - weightlb (at the end)
+          const weightMatch = headerText.match(/-?\s*([\d.]+)\s*(g|kg|oz|lb)\s*$/i)
+          if (weightMatch) {
+            containerWeight = parseFloat(weightMatch[1] ?? '0')
+            const unit = weightMatch[2]?.toLowerCase() ?? 'g'
+            containerWeightUnit = (unit === 'kg' ? 'kg' : unit === 'oz' ? 'oz' : unit === 'lb' ? 'lb' : 'g') as 'g' | 'kg' | 'oz' | 'lb'
+            headerText = headerText.replace(weightMatch[0] ?? '', '').trim()
+          }
+
+          // Extract container name (remove type in parentheses if present)
+          const nameMatch = headerText.match(/^([^(]+)/)
+          const containerName = (nameMatch ? nameMatch[1]?.trim() : headerText) || headerText
+
+          currentContainer = {
+            name: containerName,
+            id: containerId,
+            uuid: containerUuid,
+            weight: containerWeight,
+            weightUnit: containerWeightUnit,
+            url: containerUrl,
+            description: containerDescription, // Description from *(text)* in header
+            price: containerPrice,
+            currency: containerCurrency,
+            favorite: containerFavorite,
+            items: [],
+          }
+          continue
+        }
+
+        // Item line (- Item...)
+        if (line.startsWith('- ')) {
+          // Stop collecting description when first item is found
+          isCollectingDescription = false
+          if (!currentContainer) {
+            result.errors.push(`Line ${i + 1}: Item found before container header`)
+            continue
+          }
+
+          try {
+            const item = this.parseItemLine(line.substring(2).trim(), {
+              recognizeFromName: options?.recognizeFromName,
+              customBrands: options?.customBrands,
+            })
+            if (item) {
+              // Collect indented notes after the item line
+              const noteLines: string[] = []
+              let j = i + 1
+              while (j < lines.length) {
+                const nextLine = lines[j]
+                if (!nextLine) {
+                  // Empty line - keep it in notes
+                  noteLines.push('')
+                  j++
+                  continue
+                }
+
+                // Check if line starts with exactly 2 spaces (indented note)
+                if (nextLine.startsWith('  ') && !nextLine.startsWith('   ')) {
+                  // Remove the 2-space indent and add to notes
+                  const noteLine = nextLine.substring(2)
+                  noteLines.push(noteLine)
+                  j++
+                  continue
+                }
+
+                // Stop if we encounter another item or container
+                const trimmedNextLine = nextLine.trim()
+                if (trimmedNextLine.startsWith('- ') || trimmedNextLine.startsWith('## ')) {
+                  break
+                }
+
+                // If line doesn't start with 2 spaces, it's not a note
+                break
+              }
+
+              // Join note lines and set as item notes (if any)
+              if (noteLines.length > 0) {
+                // Remove trailing empty lines but preserve empty lines in the middle
+                while (noteLines.length > 0 && noteLines[noteLines.length - 1] === '') {
+                  noteLines.pop()
+                }
+                const notes = noteLines.join('\n')
+                if (notes.trim()) {
+                  item.notes = notes
+                }
+                // Skip the lines we've processed
+                const linesProcessed = j - i - 1
+                i += linesProcessed
+                // IMPORTANT: Adjust chunkEnd if we processed notes beyond current chunk
+                if (i >= chunkEnd) {
+                  // Continue from where we left off in next iteration
+                  chunkStart = i
+                  currentContainer.items.push(item)
+                  break
+                }
+              }
+              // If no indented lines found, keep notes from parseItemLine (*(text)* format as fallback)
+
+              currentContainer.items.push(item)
+            }
+          } catch (error) {
+            result.errors.push(`Line ${i + 1}: ${error instanceof Error ? error.message : 'Unknown error'}`)
+          }
+          continue
+        }
+
+        // Description line (between header and first item)
+        if (isCollectingDescription && currentContainer) {
+          descriptionLines.push(line)
+        }
+      }
+    }
+
+    // Add last container with description
+    if (currentContainer && currentContainer.items.length > 0) {
+      // Save description if still collecting (only if not already set from header)
+      if (descriptionLines.length > 0 && !currentContainer.description) {
+        const description = descriptionLines.join('\n').trim()
+        if (description) {
+          currentContainer.description = description
+        }
+      }
+      result.containers.push(currentContainer)
+    }
+
+    // Report 100% completion
+    if (options?.onProgress) {
+      options.onProgress(100)
+    }
+
+    return result
+  }
+
+  /**
+   * Parse markdown content into containers and items (synchronous version)
+   *
+   * NOTE: For large files (>100 lines), prefer parseMarkdownAsync() to avoid UI freezing
+   *
    * @param markdown - Markdown content to parse
    * @param options - Parsing options
    * @param options.recognizeFromName - Whether to recognize brand and color from item name (default: false)
@@ -208,7 +460,7 @@ class MarkdownImportService {
     }
 
     const lines = markdown.split('\n')
-    let currentContainer: { name: string; id?: string; uuid?: string; weight?: number; weightUnit?: 'g' | 'kg' | 'oz' | 'lb'; url?: string; description?: string; price?: number; currency?: string; items: ICreateItemDto[] } | null = null
+    let currentContainer: { name: string; id?: string; uuid?: string; weight?: number; weightUnit?: 'g' | 'kg' | 'oz' | 'lb'; url?: string; description?: string; price?: number; currency?: string; favorite?: boolean; items: ICreateItemDto[] } | null = null
     let descriptionLines: string[] = []
     let isCollectingDescription = false
 
@@ -226,8 +478,8 @@ class MarkdownImportService {
       if (line.startsWith('## ')) {
         // Save previous container with description
         if (currentContainer && currentContainer.items.length > 0) {
-          // Trim and save description
-          if (descriptionLines.length > 0) {
+          // Trim and save description (only if not already set from header)
+          if (descriptionLines.length > 0 && !currentContainer.description) {
             const description = descriptionLines.join('\n').trim()
             if (description) {
               currentContainer.description = description
@@ -248,9 +500,10 @@ class MarkdownImportService {
         let containerWeightUnit: 'g' | 'kg' | 'oz' | 'lb' | undefined
         let containerPrice: number | undefined
         let containerCurrency: string | undefined
+        let containerFavorite: boolean | undefined
 
         // Extract price (before other patterns to avoid conflicts)
-        const priceResult = this.parsePrice(headerText)
+        const priceResult = priceParser.parse(headerText)
         if (priceResult) {
           containerPrice = priceResult.price
           containerCurrency = priceResult.currency
@@ -270,6 +523,22 @@ class MarkdownImportService {
         if (uuidMatch) {
           containerUuid = uuidMatch[1]?.trim()
           headerText = headerText.replace(uuidMatch[0] ?? '', '').trim()
+        }
+
+        // Extract favorite flag from [favorite]
+        const favoriteMatch = headerText.match(/\[favorite\]/i)
+        if (favoriteMatch) {
+          containerFavorite = true
+          headerText = headerText.replace(favoriteMatch[0] ?? '', '').trim()
+        }
+
+        // Extract description/notes in italic format *(text)* BEFORE parsing name
+        // This prevents description from being included in the container name
+        let containerDescription: string | undefined
+        const italicDescriptionMatch = headerText.match(/\*\(([^)]+)\)\*/)
+        if (italicDescriptionMatch) {
+          containerDescription = italicDescriptionMatch[1]?.trim()
+          headerText = headerText.replace(italicDescriptionMatch[0] ?? '', '').trim()
         }
 
         // Extract URL from <URL> or plain URL
@@ -309,8 +578,10 @@ class MarkdownImportService {
           weight: containerWeight,
           weightUnit: containerWeightUnit,
           url: containerUrl,
+          description: containerDescription, // Description from *(text)* in header
           price: containerPrice,
           currency: containerCurrency,
+          favorite: containerFavorite,
           items: [],
         }
         continue
@@ -320,8 +591,8 @@ class MarkdownImportService {
       if (line.startsWith('- ') && currentContainer) {
         // First item encountered - stop collecting description
         if (isCollectingDescription) {
-          // Save collected description
-          if (descriptionLines.length > 0) {
+          // Save collected description (only if not already set from header)
+          if (descriptionLines.length > 0 && !currentContainer.description) {
             const description = descriptionLines.join('\n').trim()
             if (description) {
               currentContainer.description = description
@@ -337,6 +608,53 @@ class MarkdownImportService {
             customBrands: options?.customBrands,
           })
           if (item) {
+            // Collect indented lines (notes) after the item line
+            const noteLines: string[] = []
+            let j = i + 1
+            while (j < lines.length) {
+              const nextLine = lines[j]
+              if (!nextLine) {
+                // Empty line - keep it in notes
+                noteLines.push('')
+                j++
+                continue
+              }
+
+              // Check if line starts with exactly 2 spaces (indented note)
+              if (nextLine.startsWith('  ') && !nextLine.startsWith('   ')) {
+                // Remove the 2-space indent and add to notes
+                const noteLine = nextLine.substring(2)
+                noteLines.push(noteLine)
+                j++
+                continue
+              }
+
+              // Stop if we encounter another item or container
+              const trimmedNextLine = nextLine.trim()
+              if (trimmedNextLine.startsWith('- ') || trimmedNextLine.startsWith('## ')) {
+                break
+              }
+
+              // If line doesn't start with 2 spaces, it's not a note
+              break
+            }
+
+            // Join note lines and set as item notes (if any)
+            // Indented lines take priority over inline *(text)* format
+            if (noteLines.length > 0) {
+              // Remove trailing empty lines but preserve empty lines in the middle
+              while (noteLines.length > 0 && noteLines[noteLines.length - 1] === '') {
+                noteLines.pop()
+              }
+              const notes = noteLines.join('\n')
+              if (notes.trim()) {
+                item.notes = notes
+              }
+              // Skip the lines we've processed
+              i = j - 1
+            }
+            // If no indented lines found, keep notes from parseItemLine (*(text)* format as fallback)
+
             currentContainer.items.push(item)
           }
         } catch (error) {
@@ -353,8 +671,8 @@ class MarkdownImportService {
 
     // Add last container with description
     if (currentContainer && currentContainer.items.length > 0) {
-      // Save description if still collecting
-      if (descriptionLines.length > 0) {
+      // Save description if still collecting (only if not already set from header)
+      if (descriptionLines.length > 0 && !currentContainer.description) {
         const description = descriptionLines.join('\n').trim()
         if (description) {
           currentContainer.description = description
@@ -403,7 +721,7 @@ class MarkdownImportService {
     let currency: string | undefined
 
     // 0. Extract price first (before other patterns to avoid conflicts)
-    const priceResult = this.parsePrice(workingLine)
+    const priceResult = priceParser.parse(workingLine)
     if (priceResult) {
       price = priceResult.price
       currency = priceResult.currency

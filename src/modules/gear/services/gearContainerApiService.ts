@@ -4,7 +4,10 @@ import type {
   ICreateContainerDto,
   IGearContainer,
   IUpdateContainerDto,
+  TRatingType,
+  TRatingValue,
 } from '@/modules/gear/types/gear.types'
+import type { IContentReport, ICreateReportRequest } from '@/modules/gear/types/reports.types'
 import type { TUUID } from '@/shared/types/base.type'
 
 /**
@@ -16,33 +19,39 @@ import type { TUUID } from '@/shared/types/base.type'
 class GearContainerApiService {
   /**
    * Clean data before sending to API:
-   * - Remove undefined values
-   * - Convert empty strings to null
-   * - Filter out unsupported weight units (only 'g' and 'kg' are supported)
+   * - Remove undefined values (for optional fields)
+   * - Empty strings are converted to null by backend middleware
+   * - Backend handles all weight units (g, kg, oz, lb)
    */
   private cleanContainerData(data: ICreateContainerDto): ICreateContainerDto {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const cleaned: any = {}
+
+    // Optional UUID field (for import/update workflow)
+    if (isSet(data.id)) {
+      cleaned.id = data.id
+    }
 
     // Required fields
     cleaned.name = data.name
     cleaned.type = data.type
 
     // Optional fields - only include if set (not undefined and not null)
+    // Middleware handles empty string to null conversion
     if (isSet(data.description)) {
-      cleaned.description = data.description || null
+      cleaned.description = data.description
     }
     if (isSet(data.color)) {
-      cleaned.color = data.color || null
+      cleaned.color = data.color
     }
     if (isSet(data.parentContainerId)) {
-      cleaned.parentContainerId = data.parentContainerId || null
+      cleaned.parentContainerId = data.parentContainerId
     }
     if (isSet(data.hideWhenNested)) {
       cleaned.hideWhenNested = data.hideWhenNested
     }
     if (isSet(data.brand)) {
-      cleaned.brand = data.brand || null
+      cleaned.brand = data.brand
     }
     if (isSet(data.price)) {
       cleaned.price = data.price
@@ -50,22 +59,27 @@ class GearContainerApiService {
     if (isSet(data.weight)) {
       cleaned.weight = data.weight
     }
-    // Only include weightUnit if it's 'g' or 'kg' (backend doesn't support 'oz' or 'lb')
-    if (isSet(data.weightUnit) && (data.weightUnit === 'g' || data.weightUnit === 'kg')) {
+    // Backend handles all weight units (g, kg, oz, lb)
+    if (isSet(data.weightUnit)) {
       cleaned.weightUnit = data.weightUnit
     }
     if (isSet(data.maxWeight)) {
       cleaned.maxWeight = data.maxWeight
     }
-    // Only include maxWeightUnit if it's 'g' or 'kg' (backend doesn't support 'oz' or 'lb')
-    if (isSet(data.maxWeightUnit) && (data.maxWeightUnit === 'g' || data.maxWeightUnit === 'kg')) {
+    if (isSet(data.maxWeightUnit)) {
       cleaned.maxWeightUnit = data.maxWeightUnit
     }
     if (isSet(data.url)) {
-      cleaned.url = data.url || null
+      cleaned.url = data.url
     }
     if (data.isPublic !== undefined && data.isPublic !== null) {
       cleaned.isPublic = data.isPublic
+    }
+    if (data.favorite !== undefined && data.favorite !== null) {
+      cleaned.favorite = data.favorite
+    }
+    if (data.showItemImages !== undefined && data.showItemImages !== null) {
+      cleaned.showItemImages = data.showItemImages
     }
 
     return cleaned
@@ -90,70 +104,20 @@ class GearContainerApiService {
     return response.data
   }
 
-  /**
-   * Clean update data before sending to API
-   */
-  private cleanContainerUpdateData(data: IUpdateContainerDto): IUpdateContainerDto {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const cleaned: any = {}
-
-    // Only include set fields (not undefined and not null)
-    if (isSet(data.name)) {
-      cleaned.name = data.name
-    }
-    if (isSet(data.description)) {
-      cleaned.description = data.description || null
-    }
-    if (isSet(data.type)) {
-      cleaned.type = data.type
-    }
-    if (isSet(data.color)) {
-      cleaned.color = data.color || null
-    }
-    if (isSet(data.parentContainerId)) {
-      cleaned.parentContainerId = data.parentContainerId || null
-    }
-    if (isSet(data.hideWhenNested)) {
-      cleaned.hideWhenNested = data.hideWhenNested
-    }
-    if (isSet(data.brand)) {
-      cleaned.brand = data.brand || null
-    }
-    if (isSet(data.price)) {
-      cleaned.price = data.price
-    }
-    if (isSet(data.weight)) {
-      cleaned.weight = data.weight
-    }
-    // Only include weightUnit if it's 'g' or 'kg' (backend doesn't support 'oz' or 'lb')
-    if (isSet(data.weightUnit) && (data.weightUnit === 'g' || data.weightUnit === 'kg')) {
-      cleaned.weightUnit = data.weightUnit
-    }
-    if (isSet(data.maxWeight)) {
-      cleaned.maxWeight = data.maxWeight
-    }
-    // Only include maxWeightUnit if it's 'g' or 'kg' (backend doesn't support 'oz' or 'lb')
-    if (isSet(data.maxWeightUnit) && (data.maxWeightUnit === 'g' || data.maxWeightUnit === 'kg')) {
-      cleaned.maxWeightUnit = data.maxWeightUnit
-    }
-    if (isSet(data.url)) {
-      cleaned.url = data.url || null
-    }
-    if (data.isPublic !== undefined && data.isPublic !== null) {
-      cleaned.isPublic = data.isPublic
-    }
-
-    return cleaned
-  }
 
   async updateContainer(id: TUUID, data: IUpdateContainerDto): Promise<IGearContainer> {
-    const cleanedData = this.cleanContainerUpdateData(data)
-    const response = await apiClient.patch<IGearContainer>(`/gear/containers/${id}`, cleanedData)
+    // Axios automatically omits undefined, middleware converts empty strings to null
+    // Backend handles all weight units (g, kg, oz, lb)
+    const response = await apiClient.patch<IGearContainer>(`/gear/containers/${id}`, data)
     return response.data
   }
 
   async deleteContainer(id: TUUID): Promise<void> {
     await apiClient.delete(`/gear/containers/${id}`)
+  }
+
+  async deleteAllContainers(): Promise<void> {
+    await apiClient.delete('/gear/containers')
   }
 
   // Statistics operations
@@ -179,6 +143,86 @@ class GearContainerApiService {
       readinessPercentage: number
     }>(`/gear/containers/${containerId}/stats/readiness`)
     return response.data
+  }
+
+  // Rating operations
+  async rateContainer(
+    containerId: string,
+    rating: TRatingValue,
+    ratingType: TRatingType = 'user'
+  ): Promise<{
+    rating: TRatingValue
+    ratingType: TRatingType
+    ownerRating: TRatingValue | null
+    averageUserRating: number | null
+    userRatingCount: number
+  }> {
+    const response = await apiClient.post(
+      `/gear/containers/${containerId}/rating`,
+      {
+        rating,
+        ratingType
+      }
+    )
+    return response.data
+  }
+
+  async deleteContainerRating(
+    containerId: string,
+    ratingType: TRatingType = 'user'
+  ): Promise<{
+    message: string
+    ownerRating: TRatingValue | null
+    averageUserRating: number | null
+    userRatingCount: number
+  }> {
+    const response = await apiClient.delete(
+      `/gear/containers/${containerId}/rating`,
+      {
+        params: { rating_type: ratingType }
+      }
+    )
+    return response.data
+  }
+
+  /**
+   * Report a public container for inappropriate content.
+   *
+   * @param containerId - Container ID to report
+   * @param reportData - Report data (reason and optional additional info)
+   * @returns Created report
+   */
+  async reportPublicContainer(
+    containerId: string,
+    reportData: ICreateReportRequest
+  ): Promise<IContentReport> {
+    const response = await apiClient.post<IContentReport>(
+      `/gear/containers/${containerId}/report`,
+      reportData
+    )
+    return response.data
+  }
+
+  /**
+   * Get user's report status for a container
+   *
+   * @param containerId - Container ID
+   * @returns Object with hasReported boolean
+   */
+  async getReportStatus(containerId: string): Promise<{ hasReported: boolean }> {
+    const response = await apiClient.get<{ hasReported: boolean }>(
+      `/gear/containers/${containerId}/report/status`
+    )
+    return response.data
+  }
+
+  /**
+   * Withdraw (delete) user's report for a container
+   *
+   * @param containerId - Container ID
+   */
+  async withdrawReport(containerId: string): Promise<void> {
+    await apiClient.delete(`/gear/containers/${containerId}/report`)
   }
 }
 

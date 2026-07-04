@@ -54,7 +54,7 @@ onMounted(async () => {
     }
 
     // Verify state parameter for CSRF protection
-    const storedState = localStorage.getItem('oauth_state')
+    const storedState = sessionStorage.getItem('oauth_state')
     if (!storedState || storedState !== state) {
       error.value = t('auth.oauth.callback.invalid_state')
       setTimeout(() => {
@@ -64,7 +64,7 @@ onMounted(async () => {
     }
 
     // Clear stored state
-    localStorage.removeItem('oauth_state')
+    sessionStorage.removeItem('oauth_state')
 
     // Get reCAPTCHA token if enabled
     const recaptchaToken = await getToken('oauth_callback')
@@ -129,11 +129,11 @@ onMounted(async () => {
     <Card class="w-full max-w-md">
       <CardHeader>
         <CardTitle v-if="error" class="text-destructive">
-          {{ $t('auth.oauth.callback.authentication_failed') }}
+          {{ t('auth.oauth.callback.authentication_failed') }}
         </CardTitle>
         <CardTitle v-else class="flex items-center">
           <div class="mr-2 size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-          {{ $t('auth.oauth.callback.signing_in') }}
+          {{ t('auth.oauth.callback.signing_in') }}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -141,7 +141,7 @@ onMounted(async () => {
           {{ error }}
         </CardDescription>
         <CardDescription v-else>
-          {{ $t('auth.oauth.callback.processing', { provider }) }}
+          {{ t('auth.oauth.callback.processing', { provider }) }}
         </CardDescription>
       </CardContent>
     </Card>

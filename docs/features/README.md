@@ -24,6 +24,15 @@ This directory contains detailed implementation plans for features from the [ROA
 | [FEATURE-014](./FEATURE-014-oauth-authentication.md) | OAuth Authentication | ✅ Completed | Medium | 🔐 Authentication |
 | [FEATURE-015](./FEATURE-015-recaptcha-integration.md) | reCAPTCHA Integration | ✅ Completed | Medium-High | 🔐 Security |
 | [FEATURE-016](./FEATURE-016-automatic-item-image-fetching.md) | Automatic Item Image Fetching | 🔄 Planned | Medium | 📷 Media & Resources |
+| [FEATURE-017](./FEATURE-017-currency-support.md) | Currency Support | ✅ Completed | Medium | 📝 Data Model / 💰 Financial |
+| [FEATURE-018](./FEATURE-018-item-ordering.md) | Item Ordering | 🚧 In Progress | Medium | ✏️ Editing / 🎨 UI/UX |
+| [FEATURE-019](./FEATURE-019-extended-charts.md) | Extended Charts | 🚧 In Progress | Medium | 📊 Visualizations / Analytics |
+| [FEATURE-020](./FEATURE-020-price-display-in-export.md) | Price Display in Export | ✅ Completed | Medium | 🚀 Import/Export |
+| [FEATURE-021](./FEATURE-021-csv-export.md) | CSV Export | ✅ Completed | Medium | 🚀 Import/Export |
+| [FEATURE-022](./FEATURE-022-accessibility.md) | Accessibility (Dostępność) | 🔄 Planned | Medium | ♿ Accessibility / 🎨 UI/UX |
+| [FEATURE-023](./FEATURE-023-rating-system.md) | Rating System (System Ocen) | 🔄 Planned | Medium | 📊 User Feedback / ⭐ Ratings |
+| [FEATURE-024](./FEATURE-024-container-images-and-unification.md) | Container Images and Unification | 🔄 Planned | Medium | 📷 Media & Resources |
+| [FEATURE-025](./FEATURE-025-image-processing-modes.md) | Image Processing Modes | ✅ Completed | Medium | 📷 Media & Resources |
 
 ---
 
@@ -52,6 +61,8 @@ This directory contains detailed implementation plans for features from the [ROA
 3. Follow the implementation steps
 4. Update status when starting/completing
 5. Reference related features
+
+**Note:** Some features have additional integration guides (e.g., `FEATURE-017-integration-guide.md`) that provide practical examples and troubleshooting tips.
 
 ---
 

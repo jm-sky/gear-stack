@@ -1,7 +1,9 @@
 import { computed } from 'vue'
 import { config } from '@/shared/config/config'
+import { useLocale } from '@/shared/i18n'
 import type { IUpdateGearSettingsDto, IUserBrand, IUserCategory, IUserContainerType } from '../types/gearSettings.types'
 import { useGearSettingsStore } from '../store/useGearSettingsStore'
+import { detectDefaultCurrency, type SupportedCurrency } from '../utils/currencyFormatter'
 
 /**
  * Composable for gear settings (custom categories, container types, brands, and preferred weight unit)
@@ -9,12 +11,19 @@ import { useGearSettingsStore } from '../store/useGearSettingsStore'
 export function useGearSettings() {
   const store = useGearSettingsStore()
 
+  const { currentLocale } = useLocale()
+
   const settings = computed(() => ({
     customCategories: store.customCategories,
     customContainerTypes: store.customContainerTypes,
     customBrands: store.customBrands,
     preferredWeightUnit: store.preferredWeightUnit ?? config.defaults.preferredWeightUnit,
+    defaultCurrency: store.defaultCurrency,
   }))
+
+  const defaultCurrency = computed<SupportedCurrency>(() => {
+    return (store.defaultCurrency as SupportedCurrency) || detectDefaultCurrency(currentLocale.value)
+  })
 
   const customCategories = computed<IUserCategory[]>(() => store.getAllCategories)
   const customContainerTypes = computed<IUserContainerType[]>(() => store.getAllContainerTypes)
@@ -65,6 +74,7 @@ export function useGearSettings() {
     customCategories,
     customContainerTypes,
     customBrands,
+    defaultCurrency,
     updateSettings,
     addCategory,
     updateCategory,

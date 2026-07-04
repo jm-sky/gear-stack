@@ -86,7 +86,7 @@ const formatDate = (dateString?: string) => {
                 variant="ghost"
                 size="icon"
                 :disabled="isDeleting"
-                :title="t('auth.two_factor.webauthn.delete')"
+                :aria-label="t('auth.two_factor.webauthn.delete')"
                 class="hover:text-destructive"
                 @click="handleDelete(passkey.id)"
               >

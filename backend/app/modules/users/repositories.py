@@ -10,6 +10,7 @@ a base class, we wrap and adapt the auth repository to our needs.
 
 import logging
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,6 +22,9 @@ from app.modules.auth.repositories import get_user_repository as get_auth_reposi
 
 from .models import User
 from .exceptions import UserAlreadyExistsError
+
+if TYPE_CHECKING:
+    from app.modules.auth.models import User as AuthUser
 
 
 logger = logging.getLogger(__name__)
@@ -43,7 +47,7 @@ class UserRepository:
         """
         self._auth_repo = auth_repo
 
-    def _auth_user_to_users_user(self, auth_user) -> User:
+    def _auth_user_to_users_user(self, auth_user: "AuthUser") -> User:
         """Convert auth module's User to users module's User.
 
         Args:
@@ -74,7 +78,10 @@ class UserRepository:
             password handling which should only be done through auth endpoints.
             Admin users can create users through the auth module's endpoints.
         """
-        raise NotImplementedError("User creation with password must be done through auth module endpoints. " "Use POST /auth/register for new user registration.")
+        raise NotImplementedError(
+            "User creation with password must be done through auth module endpoints. "
+            "Use POST /auth/register for new user registration."
+        )
 
     async def get_user_by_email(self, email: str) -> User | None:
         """Get user by email from database."""
@@ -90,7 +97,13 @@ class UserRepository:
             return None
         return self._auth_user_to_users_user(auth_user)
 
-    async def get_all_users(self, skip: int = 0, limit: int = 100, include_inactive: bool = False, search: str | None = None) -> list[User]:
+    async def get_all_users(
+        self,
+        skip: int = 0,
+        limit: int = 100,
+        include_inactive: bool = False,
+        search: str | None = None,
+    ) -> list[User]:
         """Get all users from database with pagination and search.
 
         Args:
@@ -118,6 +131,9 @@ class UserRepository:
         role: str | None = None,
         is_active: bool | None = None,
         avatar_url: str | None = None,
+        is_admin: bool | None = None,
+        is_owner: bool | None = None,
+        is_premium: bool | None = None,
     ) -> User | None:
         """Update user fields in database.
 
@@ -125,8 +141,12 @@ class UserRepository:
             user_id: User ID to update
             email: New email (optional)
             name: New name (optional)
-            role: New role - 'admin' or 'user' (optional)
+            role: New role - 'admin', 'user', 'owner', 'premium' (optional, deprecated - use flags instead)
             is_active: Active status (optional)
+            avatar_url: Avatar URL (optional)
+            is_admin: Admin flag (optional)
+            is_owner: Owner flag (optional)
+            is_premium: Premium flag (optional)
 
         Returns:
             Updated User or None if not found
@@ -152,8 +172,22 @@ class UserRepository:
         if name is not None:
             auth_user.name = name
 
+        # Handle role updates - support both old 'role' field and new flags
         if role is not None:
+            # Legacy support: map role string to flags
             auth_user.isAdmin = role == "admin"
+            auth_user.isOwner = role == "owner"
+            auth_user.isPremium = (
+                role == "premium" or role == "admin" or role == "owner"
+            )
+        else:
+            # Use explicit flags if provided
+            if is_admin is not None:
+                auth_user.isAdmin = is_admin
+            if is_owner is not None:
+                auth_user.isOwner = is_owner
+            if is_premium is not None:
+                auth_user.isPremium = is_premium
 
         if is_active is not None:
             auth_user.isActive = is_active
@@ -173,7 +207,9 @@ class UserRepository:
         """Permanently delete user from database."""
         return await self._auth_repo.delete_user(user_id, soft_delete=False)
 
-    async def count_users(self, include_inactive: bool = False, search: str | None = None) -> int:
+    async def count_users(
+        self, include_inactive: bool = False, search: str | None = None
+    ) -> int:
         """Count total users in database with optional search.
 
         Args:
@@ -183,10 +219,14 @@ class UserRepository:
         Returns:
             Total count of users matching criteria
         """
-        return await self._auth_repo.count_users(include_inactive=include_inactive, search=search)
+        return await self._auth_repo.count_users(
+            include_inactive=include_inactive, search=search
+        )
 
 
-def get_user_repository(auth_repo: AuthUserRepository = Depends(get_auth_repository)) -> UserRepository:
+def get_user_repository(
+    auth_repo: AuthUserRepository = Depends(get_auth_repository),
+) -> UserRepository:
     """FastAPI dependency to get user repository instance.
 
     This creates an adapter that wraps the auth repository using composition.

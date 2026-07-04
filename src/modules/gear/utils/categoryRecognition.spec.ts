@@ -37,10 +37,31 @@ describe('categoryRecognition', () => {
     expect(recognizeCategory('Apteczka')).toBe('firstAid')
   })
 
+  it('should recognize blades category', () => {
+    expect(recognizeCategory('Knife')).toBe('blades')
+    expect(recognizeCategory('Knives')).toBe('blades')
+    expect(recognizeCategory('Machete')).toBe('blades')
+    expect(recognizeCategory('Axe')).toBe('blades')
+    expect(recognizeCategory('Hatchet')).toBe('blades')
+    expect(recognizeCategory('Sword')).toBe('blades')
+    expect(recognizeCategory('Nóż')).toBe('blades')
+    expect(recognizeCategory('Noże')).toBe('blades')
+    expect(recognizeCategory('Maczeta')).toBe('blades')
+    expect(recognizeCategory('Siekiera')).toBe('blades')
+    expect(recognizeCategory('Toporek')).toBe('blades')
+  })
+
   it('should recognize tools category', () => {
-    expect(recognizeCategory('Knife')).toBe('tools')
     expect(recognizeCategory('Multitool')).toBe('tools')
-    expect(recognizeCategory('Nóż')).toBe('tools')
+    expect(recognizeCategory('Saw')).toBe('tools')
+    expect(recognizeCategory('Hammer')).toBe('tools')
+    expect(recognizeCategory('Screwdriver')).toBe('tools')
+    expect(recognizeCategory('Wrench')).toBe('tools')
+    expect(recognizeCategory('Pliers')).toBe('tools')
+    expect(recognizeCategory('Shovel')).toBe('tools')
+    expect(recognizeCategory('Narzędzie')).toBe('tools')
+    expect(recognizeCategory('Piła')).toBe('tools')
+    expect(recognizeCategory('Młotek')).toBe('tools')
   })
 
   it('should recognize navigation category', () => {
@@ -75,7 +96,8 @@ describe('categoryRecognition', () => {
 
   it('should be case-insensitive', () => {
     expect(recognizeCategory('WATER BOTTLE')).toBe('water')
-    expect(recognizeCategory('knife')).toBe('tools')
+    expect(recognizeCategory('knife')).toBe('blades')
+    expect(recognizeCategory('KNIFE')).toBe('blades')
     expect(recognizeCategory('FlashLight')).toBe('light')
   })
 
@@ -90,14 +112,17 @@ describe('categoryRecognition', () => {
   })
 
   it('should handle keywords in the middle of name', () => {
-    expect(recognizeCategory('Tactical Knife')).toBe('tools')
+    expect(recognizeCategory('Tactical Knife')).toBe('blades')
+    expect(recognizeCategory('Survival Knife')).toBe('blades')
     expect(recognizeCategory('Emergency Water Bottle')).toBe('water')
   })
 
   it('should handle Polish keywords', () => {
     expect(recognizeCategory('Woda')).toBe('water')
     expect(recognizeCategory('Jedzenie')).toBe('food')
-    expect(recognizeCategory('Nóż')).toBe('tools')
+    expect(recognizeCategory('Nóż')).toBe('blades')
+    expect(recognizeCategory('Noże')).toBe('blades')
+    expect(recognizeCategory('Siekiera')).toBe('blades')
     expect(recognizeCategory('Apteczka')).toBe('firstAid')
   })
 

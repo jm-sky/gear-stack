@@ -26,7 +26,16 @@ class LogService:
         """
         self.log_repository = log_repository
 
-    async def log_error(self, message: str, exception: Exception | None = None, module: str | None = None, function: str | None = None, user_id: str | None = None, request_id: str | None = None, extra_data: str | None = None) -> Log:
+    async def log_error(
+        self,
+        message: str,
+        exception: Exception | None = None,
+        module: str | None = None,
+        function: str | None = None,
+        user_id: str | None = None,
+        request_id: str | None = None,
+        extra_data: str | None = None,
+    ) -> Log:
         """Log an error with optional exception traceback.
 
         Args:
@@ -43,11 +52,30 @@ class LogService:
         """
         traceback_str = None
         if exception:
-            traceback_str = "".join(tb.format_exception(type(exception), exception, exception.__traceback__))
+            traceback_str = "".join(
+                tb.format_exception(type(exception), exception, exception.__traceback__)
+            )
 
-        return await self.log_repository.create_log(level=LogLevel.ERROR, message=message, module=module, function=function, user_id=user_id, request_id=request_id, traceback=traceback_str, extra_data=extra_data)
+        return await self.log_repository.create_log(
+            level=LogLevel.ERROR,
+            message=message,
+            module=module,
+            function=function,
+            user_id=user_id,
+            request_id=request_id,
+            traceback=traceback_str,
+            extra_data=extra_data,
+        )
 
-    async def log_warning(self, message: str, module: str | None = None, function: str | None = None, user_id: str | None = None, request_id: str | None = None, extra_data: str | None = None) -> Log:
+    async def log_warning(
+        self,
+        message: str,
+        module: str | None = None,
+        function: str | None = None,
+        user_id: str | None = None,
+        request_id: str | None = None,
+        extra_data: str | None = None,
+    ) -> Log:
         """Log a warning message.
 
         Args:
@@ -61,9 +89,25 @@ class LogService:
         Returns:
             Created log entry
         """
-        return await self.log_repository.create_log(level=LogLevel.WARNING, message=message, module=module, function=function, user_id=user_id, request_id=request_id, extra_data=extra_data)
+        return await self.log_repository.create_log(
+            level=LogLevel.WARNING,
+            message=message,
+            module=module,
+            function=function,
+            user_id=user_id,
+            request_id=request_id,
+            extra_data=extra_data,
+        )
 
-    async def log_info(self, message: str, module: str | None = None, function: str | None = None, user_id: str | None = None, request_id: str | None = None, extra_data: str | None = None) -> Log:
+    async def log_info(
+        self,
+        message: str,
+        module: str | None = None,
+        function: str | None = None,
+        user_id: str | None = None,
+        request_id: str | None = None,
+        extra_data: str | None = None,
+    ) -> Log:
         """Log an informational message.
 
         Args:
@@ -77,9 +121,19 @@ class LogService:
         Returns:
             Created log entry
         """
-        return await self.log_repository.create_log(level=LogLevel.INFO, message=message, module=module, function=function, user_id=user_id, request_id=request_id, extra_data=extra_data)
+        return await self.log_repository.create_log(
+            level=LogLevel.INFO,
+            message=message,
+            module=module,
+            function=function,
+            user_id=user_id,
+            request_id=request_id,
+            extra_data=extra_data,
+        )
 
-    async def get_recent_errors(self, limit: int = 50, user_id: str | None = None) -> list[Log]:
+    async def get_recent_errors(
+        self, limit: int = 50, user_id: str | None = None
+    ) -> list[Log]:
         """Get recent error logs.
 
         Args:
@@ -89,7 +143,9 @@ class LogService:
         Returns:
             List of error log entries
         """
-        return await self.log_repository.get_error_logs(skip=0, limit=limit, user_id=user_id)
+        return await self.log_repository.get_error_logs(
+            skip=0, limit=limit, user_id=user_id
+        )
 
     async def get_logs_by_request(self, request_id: str) -> list[Log]:
         """Get all logs for a specific request.
@@ -100,7 +156,9 @@ class LogService:
         Returns:
             List of log entries for the request
         """
-        return await self.log_repository.get_logs(request_id=request_id, limit=1000)  # Reasonable limit for single request
+        return await self.log_repository.get_logs(
+            request_id=request_id, limit=1000
+        )  # Reasonable limit for single request
 
     async def cleanup_old_logs(self, days: int = 30) -> int:
         """Delete logs older than specified number of days.

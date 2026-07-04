@@ -3,11 +3,18 @@
 import logging
 import os
 from datetime import UTC, datetime
+from uuid import uuid4
 
+from ...core.auth.token_blacklist import TokenBlacklistService
 from ...core.config import settings
 from ...core.email import get_email_service
 from ...core.email.i18n import SupportedLocale, get_translations
-from .auth_utils import create_access_token, create_email_verification_token, create_refresh_token, verify_token
+from .auth_utils import (
+    create_access_token,
+    create_email_verification_token,
+    create_refresh_token,
+    verify_token,
+)
 from .exceptions import (
     InvalidCredentialsError,
     InvalidTokenError,
@@ -26,8 +33,13 @@ class AuthService:
 
     user_repository: UserRepositoryInterface
 
-    def __init__(self, user_repository: UserRepositoryInterface):
+    def __init__(
+        self,
+        user_repository: UserRepositoryInterface,
+        token_blacklist_service: TokenBlacklistService | None = None,
+    ):
         self.user_repository = user_repository
+        self.token_blacklist_service = token_blacklist_service
 
     async def register_user(
         self,
@@ -55,8 +67,12 @@ class AuthService:
             user = await self.user_repository.create_user(email, password, name)
 
             # Generate verification token and send verification email
-            verification_token = create_email_verification_token({"sub": user.id, "email": email})
-            stored_user = await self.user_repository.store_email_verification_token(user.id, verification_token, datetime.now(UTC))
+            verification_token = create_email_verification_token(
+                {"sub": user.id, "email": email}
+            )
+            stored_user = await self.user_repository.store_email_verification_token(
+                user.id, verification_token, datetime.now(UTC)
+            )
             if stored_user:
                 user = stored_user
 
@@ -104,25 +120,50 @@ class AuthService:
         if not user.isActive:
             raise InvalidCredentialsError("User account is inactive")
 
-        # Generate tokens
+        return await self._issue_login_tokens(user)
+
+    async def _issue_login_tokens(
+        self,
+        user: User,
+        tfa_verified: bool = False,
+        tfa_method: str | None = None,
+    ) -> LoginResponse:
+        """Generate JWT tokens for a user and track the session in Redis."""
+        session_jti = str(uuid4())
+        token_version = user.tokenVersion
+
         access_token = create_access_token(
             data={
                 "sub": user.id,
                 "email": user.email,
-                "tfaVerified": False,
-                "tfaMethod": None,
+                "tfaVerified": tfa_verified,
+                "tfaMethod": tfa_method,
                 "emailVerified": user.isEmailVerified,
+                "jti": session_jti,
+                "tv": token_version,
             }
         )
         refresh_token = create_refresh_token(
             data={
                 "sub": user.id,
                 "email": user.email,
-                "tfaVerified": False,
-                "tfaMethod": None,
+                "tfaVerified": tfa_verified,
+                "tfaMethod": tfa_method,
                 "emailVerified": user.isEmailVerified,
+                "jti": session_jti,
+                "tv": token_version,
             }
         )
+
+        if self.token_blacklist_service:
+            try:
+                refresh_payload = verify_token(refresh_token)
+                refresh_exp = refresh_payload.get("exp", 0)
+                await self.token_blacklist_service.track_user_session(
+                    user_id=user.id, jti=session_jti, expires_at=refresh_exp
+                )
+            except Exception as e:
+                logger.warning(f"Failed to track user session in Redis: {e}")
 
         return LoginResponse(
             user=UserResponse(**user.to_response()),
@@ -169,7 +210,9 @@ class AuthService:
 
             # Generate new tokens with preserved 2FA state
             # Ensure tfaVerified is bool (not None)
-            tfa_verified_bool = old_tfa_verified if old_tfa_verified is not None else False
+            tfa_verified_bool = (
+                old_tfa_verified if old_tfa_verified is not None else False
+            )
             new_access_token = create_access_token(
                 data={
                     "sub": user_id,
@@ -190,7 +233,12 @@ class AuthService:
                 }
             )
 
-            return {"accessToken": new_access_token, "refreshToken": new_refresh_token, "tokenType": "bearer", "expiresIn": settings.security.access_token_expires_minutes * 60}
+            return {
+                "accessToken": new_access_token,
+                "refreshToken": new_refresh_token,
+                "tokenType": "bearer",
+                "expiresIn": settings.security.access_token_expires_minutes * 60,
+            }
 
         except InvalidTokenError:
             # Re-raise known errors
@@ -243,7 +291,10 @@ class AuthService:
             # In development mode only, also log the token (NEVER in production!)
             environment = os.getenv("ENVIRONMENT", "production").lower()
             if environment == "development":
-                logger.warning(f"DEV MODE: Password reset token for {email}: {token}\n" f"Reset link: /reset-password?token={token}")
+                logger.warning(
+                    f"DEV MODE: Password reset token for {email}: {token}\n"
+                    f"Reset link: /reset-password?token={token}"
+                )
             else:
                 # In production, just log that email was sent without exposing token
                 logger.info(f"Password reset email sent to {email}")
@@ -264,9 +315,26 @@ class AuthService:
         Raises:
             InvalidTokenError: If token is invalid
         """
-        success = await self.user_repository.reset_password_with_token(token, new_password)
+        user_id = None
+        try:
+            payload = verify_token(token)
+            user_id = payload.get("sub")
+        except Exception:
+            pass
+
+        success = await self.user_repository.reset_password_with_token(
+            token, new_password
+        )
         if not success:
             raise InvalidTokenError("Invalid or expired reset token")
+
+        if user_id:
+            await self.user_repository.increment_token_version(user_id)
+            if self.token_blacklist_service:
+                await self.token_blacklist_service.blacklist_all_user_tokens(
+                    user_id, reason="password_reset"
+                )
+
         return True
 
     async def resend_email_verification(
@@ -284,7 +352,9 @@ class AuthService:
             return True
 
         token = create_email_verification_token({"sub": user.id, "email": user.email})
-        await self.user_repository.store_email_verification_token(user.id, token, datetime.now(UTC))
+        await self.user_repository.store_email_verification_token(
+            user.id, token, datetime.now(UTC)
+        )
 
         try:
             email_service = get_email_service()
@@ -352,7 +422,9 @@ class AuthService:
             InvalidCredentialsError: If current password is incorrect
             UserNotFoundError: If user not found
         """
-        success = await self.user_repository.change_password(user_id, current_password, new_password)
+        success = await self.user_repository.change_password(
+            user_id, current_password, new_password
+        )
         if not success:
             user = await self.user_repository.get_user_by_id(user_id)
             if not user:
@@ -374,6 +446,12 @@ class AuthService:
         except Exception as e:
             # Log error but don't fail password change if email fails
             logger.warning(f"Failed to send password changed email: {e}")
+
+        await self.user_repository.increment_token_version(user_id)
+        if self.token_blacklist_service:
+            await self.token_blacklist_service.blacklist_all_user_tokens(
+                user_id, reason="password_changed"
+            )
 
         return True
 
@@ -413,7 +491,10 @@ class AuthService:
                 raise InvalidCredentialsError("Password is incorrect")
 
         # Verify confirmation phrase (should be 'DELETE' or user email)
-        if confirmation.upper() != "DELETE" and confirmation.lower() != user.email.lower():
+        if (
+            confirmation.upper() != "DELETE"
+            and confirmation.lower() != user.email.lower()
+        ):
             raise InvalidCredentialsError("Confirmation phrase is incorrect")
 
         # Store user email and name before deletion for email notification
@@ -421,7 +502,9 @@ class AuthService:
         user_name = user.name
 
         # Delete user account
-        success = await self.user_repository.delete_user(user_id, soft_delete=soft_delete)
+        success = await self.user_repository.delete_user(
+            user_id, soft_delete=soft_delete
+        )
         if not success:
             raise UserNotFoundError("Failed to delete user account")
 
@@ -439,8 +522,10 @@ class AuthService:
             # Log error but don't fail deletion if email fails
             logger.warning(f"Failed to send account deletion email: {e}")
 
-        # TODO: Invalidate all user sessions/tokens
-        # TODO: Delete related data (2FA, passkeys, etc.)
+        if self.token_blacklist_service:
+            await self.token_blacklist_service.blacklist_all_user_tokens(
+                user_id, reason="account_deleted"
+            )
 
         return True
 
@@ -466,38 +551,63 @@ class AuthService:
             raise ValueError("Email is required from OAuth provider")
 
         # Extract provider_id - support both camelCase (providerId) and snake_case (provider_id, id, sub)
-        provider_id = user_info.get("providerId") or user_info.get("provider_id") or user_info.get("id") or user_info.get("sub") or ""
+        provider_id = (
+            user_info.get("providerId")
+            or user_info.get("provider_id")
+            or user_info.get("id")
+            or user_info.get("sub")
+            or ""
+        )
 
         # Extract avatar URL - support both camelCase (avatarUrl) and snake_case (avatar_url, picture)
-        avatar_url = user_info.get("avatarUrl") or user_info.get("avatar_url") or user_info.get("picture")
+        avatar_url = (
+            user_info.get("avatarUrl")
+            or user_info.get("avatar_url")
+            or user_info.get("picture")
+        )
 
         # Extract name
         name = user_info.get("name", email.split("@")[0])
 
-        # Check if user already exists
-        existing_user = await self.user_repository.get_user_by_email(email)
+        # Check if user already exists by OAuth provider
+        existing_user_by_provider = (
+            await self.user_repository.get_user_by_oauth_provider(provider, provider_id)
+        )
 
-        if existing_user:
-            # User exists - check if OAuth is already linked
-            if existing_user.oauthProvider and existing_user.oauthProviderId:
-                # OAuth already linked - verify it matches
-                if existing_user.oauthProvider != provider:
-                    raise ValueError(f"Email already registered with {existing_user.oauthProvider}")
-            else:
-                # Regular user exists - link OAuth to existing account
-                # This allows users to add OAuth to existing password-based accounts
-                pass
-
-            user = existing_user
+        if existing_user_by_provider:
+            # User exists with this OAuth provider - use existing user
+            # IMPORTANT: We do NOT update user's name/avatar from OAuth here to preserve
+            # any manual changes the user made in their profile (e.g., custom avatar, display name)
+            user = existing_user_by_provider
         else:
-            # Create new OAuth user
-            user = await self.user_repository.create_oauth_user(
-                email=email,
-                name=name,
-                provider=provider,
-                provider_id=provider_id,
-                avatar_url=avatar_url,
-            )
+            # Check if user exists by email
+            existing_user = await self.user_repository.get_user_by_email(email)
+
+            if existing_user:
+                # User exists with this email - link OAuth to existing account
+                # This allows users to add OAuth to existing password-based accounts
+                # IMPORTANT: We do NOT update user's name/avatar from OAuth here to preserve
+                # any manual changes the user made in their profile
+                user = existing_user
+            else:
+                # Create new OAuth user - only for new users do we set initial data from OAuth
+                user = await self.user_repository.create_oauth_user(
+                    email=email,
+                    name=name,
+                    provider=provider,
+                    provider_id=provider_id,
+                    avatar_url=avatar_url,
+                )
+
+        # Create or update OAuth connection in oauth_connections table
+        await self.user_repository.create_oauth_connection(
+            user_id=user.id,
+            provider=provider,
+            provider_id=provider_id,
+            email=email,
+            name=name,
+            avatar_url=avatar_url,
+        )
 
         # Generate tokens
         access_token = create_access_token({"sub": user.id})

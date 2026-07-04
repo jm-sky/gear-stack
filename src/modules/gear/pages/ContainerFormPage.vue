@@ -2,50 +2,66 @@
 import { toTypedSchema } from '@vee-validate/zod'
 import { useDebounceFn } from '@vueuse/core'
 import { useForm } from 'vee-validate'
-import { watch } from 'vue'
+import { watch, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import { useSettings } from '@/modules/settings/composables/useSettings'
-import type { ICreateContainerDto, IUpdateContainerDto, TContainerColor } from '../types/gear.types'
+import { useHandleError } from '@/shared/composables/useHandleError'
+import { usePageTitle } from '@/shared/composables/usePageTitle'
+import type { TContainerColor } from '../types/gear.types'
+import type { ICreateGearItemV2Dto, IUpdateGearItemV2Dto } from '../types/gear.types.v2'
 import ContainerFormFields from '../components/ContainerFormFields.vue'
-import { useContainer } from '../composables/useContainer'
-import { useGear } from '../composables/useGear'
+import { useContainerOperationsV2 } from '../composables/internal/v2/useContainerOperationsV2'
+import { useContainerV2 } from '../composables/useContainerV2'
 import { useGearSettings } from '../composables/useGearSettings'
+import { GearRoutePath } from '../routes'
 import { CONTAINER_COLORS } from '../utils/containerColors'
 import { recognizeContainerType } from '../utils/containerTypeRecognition'
+import { createNavigationQuery, getFrom } from '../utils/navigationParams'
 import { recognizeParameters } from '../utils/parameterRecognition'
 import { type ContainerFormData, containerSchema } from '../utils/validation'
+import { toBasicWeightUnit } from '../utils/weightUnits'
 
 const router = useRouter()
 const route = useRoute()
 const { t } = useI18n()
-const { createContainer, updateContainer } = useGear()
+const { createContainer, updateContainer } = useContainerOperationsV2()
 const { customBrands } = useGearSettings()
 const { settings } = useSettings()
+const { handleError } = useHandleError()
+const { setTitle } = usePageTitle()
 
 const containerId = route.params.id as string | undefined
 const isEditMode: boolean = !!containerId
 
-const { container } = useContainer(containerId)
+const { container } = useContainerV2(containerId)
+
+// Set dynamic page title
+watchEffect(() => {
+  if (isEditMode && container.value?.name) {
+    setTitle('gear.container.edit.title', { name: container.value.name })
+  }
+})
 
 const getInitialValues = (): ContainerFormData => {
   if (container.value) {
     return {
       name: container.value.name,
       description: container.value.description ?? '',
-      type: container.value.type,
-      color: container.value.color ?? 'default',
+      type: container.value.containerType ?? 'other',
+      color: (container.value.color ?? 'default') as TContainerColor,
       hideWhenNested: container.value.hideWhenNested ?? false,
       isPublic: container.value.isPublic ?? false,
       brand: container.value.brand ?? '',
       price: container.value.price ?? undefined,
       weight: container.value.weight ?? undefined,
-      weightUnit: container.value.weightUnit ?? 'kg',
+      weightUnit: toBasicWeightUnit(container.value.weightUnit) ?? 'kg',
       maxWeight: container.value.maxWeight ?? undefined,
-      maxWeightUnit: container.value.maxWeightUnit ?? 'kg',
+      maxWeightUnit: toBasicWeightUnit(container.value.maxWeightUnit) ?? 'kg',
       url: container.value.url ?? '',
+      showItemImages: container.value.showItemImages ?? false,
     }
   }
   // For new containers, use default from settings (will be updated via watch)
@@ -63,10 +79,11 @@ const getInitialValues = (): ContainerFormData => {
     maxWeight: undefined,
     maxWeightUnit: 'kg' as const,
     url: '',
+    showItemImages: false,
   }
 }
 
-const { handleSubmit, isSubmitting, setFieldValue, values } = useForm({
+const { handleSubmit, isSubmitting, setFieldValue, values, setErrors } = useForm({
   validationSchema: toTypedSchema(containerSchema),
   initialValues: getInitialValues(),
 })
@@ -90,25 +107,33 @@ watch(() => settings.value?.defaultContainersPublic, (newValue) => {
 const mapItemColorToContainerColor = (itemColor: string): TContainerColor | null => {
   const normalized = itemColor.toLowerCase().trim()
 
-  // Direct matches
+  // Map item colors to available container colors
   const colorMap: Record<string, TContainerColor> = {
-    'green': 'green',
-    'blue': 'blue',
-    'red': 'red',
-    'yellow': 'yellow',
-    'purple': 'purple',
+    // Direct matches (colors that exist in TContainerColor)
     'orange': 'orange',
-    'pink': 'pink',
-    'teal': 'teal',
-    'indigo': 'indigo',
-    // Additional mappings
-    'navy': 'blue',
-    'olive': 'green',
-    'gray': 'default',
-    'grey': 'default',
-    'black': 'default',
-    'tan': 'yellow',
-    'brown': 'orange',
+    'olive': 'olive',
+    'tan': 'tan',
+    'brown': 'brown',
+    'black': 'black',
+    'navy': 'navy',
+    'jeans': 'jeans',
+    'gray': 'gray',
+    'grey': 'gray',
+    'coyote': 'coyote',
+    'khaki': 'khaki',
+    'forestgreen': 'forestGreen',
+    'forest-green': 'forestGreen',
+    // Mappings from old colors to new colors
+    'green': 'forestGreen',
+    'blue': 'jeans',
+    'red': 'orange',
+    'yellow': 'tan',
+    'purple': 'navy',
+    'pink': 'orange',
+    'teal': 'jeans',
+    'indigo': 'navy',
+    // Default fallback
+    'default': 'default',
   }
 
   // Check direct match
@@ -172,30 +197,59 @@ const handleNameBlur = () => {
   }
 }
 
+// Convert form data to V2 DTO format
+const convertToV2Dto = (data: ContainerFormData): Omit<ICreateGearItemV2Dto, 'itemType'> => ({
+  name: data.name,
+  description: data.description || null,
+  containerType: data.type, // V1 'type' → V2 'containerType'
+  color: data.color || null,
+  parentItemId: data.parentContainerId || null, // V1 'parentContainerId' → V2 'parentItemId'
+  hideWhenNested: data.hideWhenNested || false,
+  isPublic: data.isPublic || false,
+  favorite: data.favorite || false,
+  brand: data.brand || null,
+  price: data.price || null,
+  currency: data.currency || null,
+  weight: data.weight || null,
+  weightUnit: data.weightUnit || null,
+  maxWeight: data.maxWeight || null,
+  maxWeightUnit: data.maxWeightUnit || null,
+  url: data.url || null,
+  showItemImages: data.showItemImages || false,
+})
+
 // Submit handler
 const onSubmit = handleSubmit(async (data: ContainerFormData) => {
   try {
+    const v2Data = convertToV2Dto(data)
+
     if (isEditMode && containerId) {
-      updateContainer(containerId, data as IUpdateContainerDto)
+      await updateContainer(containerId, v2Data as IUpdateGearItemV2Dto)
       toast.success(t('common.success'))
-      router.push(`/gear/${containerId}`)
+      // Preserve 'from' parameter when navigating back to ContainerDetails
+      // This ensures the back button in ContainerHeader works correctly
+      const from = getFrom(route)
+      router.push({
+        path: GearRoutePath.ContainerDetailById(containerId),
+        query: createNavigationQuery(undefined, from),
+      })
     } else {
-      const newContainer = await createContainer(data as ICreateContainerDto)
+      const newContainer = await createContainer(v2Data)
       toast.success(t('common.success'))
-      router.push(`/gear/${newContainer.id}`)
+      router.push(GearRoutePath.ContainerDetailById(newContainer.id))
     }
   } catch (error) {
-    toast.error(t('common.error'))
     console.error(error)
+    handleError(error, { setErrors })
   }
 })
 
 // Cancel handler
 const handleCancel = () => {
   if (isEditMode && containerId) {
-    router.push(`/gear/${containerId}`)
+    router.push(GearRoutePath.ContainerDetailById(containerId))
   } else {
-    router.push('/gear')
+    router.push(GearRoutePath.Containers)
   }
 }
 

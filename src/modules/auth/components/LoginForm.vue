@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
-import { isAxiosError } from 'axios'
 import { useForm } from 'vee-validate'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -8,13 +7,14 @@ import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import OAuthButton from '@/modules/auth/components/OAuthButton.vue'
+import OAuthFacebookButton from '@/modules/auth/components/OAuthFacebookButton.vue'
+import OAuthGoogleButton from '@/modules/auth/components/OAuthGoogleButton.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { AuthRouteNames, AuthRoutePaths } from '@/modules/auth/config/routes'
 import { loginSchema } from '@/modules/auth/validation/login.schema'
+import { useHandleError } from '@/shared/composables/useHandleError'
 import { useRecaptcha } from '@/shared/composables/useRecaptcha'
 import { config } from '@/shared/config/config'
-import { isValidationError } from '@/shared/utils/typeGuards'
 import type { IAuthService } from '@/modules/auth/types/auth.type'
 import type { LoginCredentials } from '@/modules/auth/types/user.type'
 
@@ -32,6 +32,7 @@ const router = useRouter()
 const route = useRoute()
 const { login, isLoggingIn } = useAuth(authService)
 const { getToken } = useRecaptcha()
+const { handleUnauthorizedFormError } = useHandleError()
 
 const { handleSubmit, setErrors } = useForm({
   validationSchema: toTypedSchema(loginSchema),
@@ -73,16 +74,7 @@ const onSubmit = handleSubmit(async (values: LoginCredentials) => {
     const redirectTo = typeof route.query.redirectTo === 'string' ? route.query.redirectTo : undefined
     await router.push(redirectTo ?? AuthRoutePaths.dashboard)
   } catch (err: unknown) {
-    if (isValidationError(err)) {
-      setErrors(err.response.data.errors)
-    } else {
-      setErrors({
-        email: t('auth.invalid_credentials'),
-        password: t('auth.invalid_credentials'),
-      })
-    }
-    toast.error(isAxiosError(err) ? err.response?.data.detail : t('errors.generic'))
-    console.error('Login error:', err)
+    handleUnauthorizedFormError(err, setErrors)
   }
 })
 </script>
@@ -129,7 +121,8 @@ const onSubmit = handleSubmit(async (values: LoginCredentials) => {
         </div>
       </div>
 
-      <OAuthButton />
+      <OAuthGoogleButton />
+      <OAuthFacebookButton />
     </template>
   </form>
 </template>

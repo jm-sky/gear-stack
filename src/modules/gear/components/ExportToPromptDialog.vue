@@ -21,25 +21,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { IGearContainer } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
-import { useGearStore } from '../store/useGearStore'
-import { calculateTotalWeightSync } from '../utils/containerCalculations'
-import { exportContainersToPrompt, exportContainerToPrompt } from '../utils/exportToPrompt'
+import { useGearSettings } from '../composables/useGearSettings'
+import { useGearStoreV2 } from '../store/useGearStoreV2'
+import { calculateTotalWeightSyncV2 } from '../utils/containerCalculationsV2'
+import { exportContainersToPromptV2, exportContainerToPromptV2 } from '../utils/exportToPromptV2'
 import GuidelinesDialog from './GuidelinesDialog.vue'
 
+const open = defineModel<boolean>('open', { required: true })
+
 const props = defineProps<{
-  open: boolean
-  container?: IGearContainer
-  containers?: IGearContainer[]
+  container?: IGearItemV2
+  containers?: IGearItemV2[]
 }>()
 
-const emit = defineEmits<{
-  'update:open': [value: boolean]
-}>()
-
-const { t } = useI18n()
-const store = useGearStore()
+const { t, locale } = useI18n()
+const store = useGearStoreV2()
+const { defaultCurrency } = useGearSettings()
 const copied = ref(false)
 const isGuidelinesDialogOpen = ref(false)
 const showUuid = ref(true)
@@ -48,20 +47,19 @@ const showColor = ref(true)
 const showBrand = ref(true)
 const showNestedContainer = ref(true)
 const showLegend = ref(true)
+const showPrices = ref(false)
 const descriptionFormat = ref<'off' | 'inline' | 'newline'>('off')
 
 // Get container type label helper
 const { getContainerTypeLabel } = useContainerTypeLabel()
 
 // Sync helpers for computed
-const getContainerById = (id: string): IGearContainer | undefined => {
-  return store.getContainerById(id)
+const getContainerById = (id: string): IGearItemV2 | undefined => {
+  return store.getItemById(id)
 }
 
 const calculateTotalWeight = (containerId: string): number => {
-  const container = store.getContainerById(containerId)
-  if (!container) return 0
-  return calculateTotalWeightSync(container, store.getAllContainers)
+  return calculateTotalWeightSyncV2(containerId, store.getItemById, store.getChildrenOfItem)
 }
 
 // Generate markdown based on current options
@@ -69,7 +67,8 @@ const markdown = computed<string>(() => {
   const exportOptions = {
     t,
     getContainerTypeLabel,
-    getContainerById,
+    getItemById: getContainerById,
+    getChildrenOfItem: store.getChildrenOfItem,
     calculateTotalWeight,
     showUuid: showUuid.value,
     showWeight: showWeight.value,
@@ -77,20 +76,35 @@ const markdown = computed<string>(() => {
     showBrand: showBrand.value,
     showNestedContainer: showNestedContainer.value,
     showLegend: showLegend.value,
+    showPrices: showPrices.value,
     descriptionFormat: descriptionFormat.value,
+    defaultCurrency: defaultCurrency.value,
+    locale: locale.value,
   }
 
   if (props.container) {
-    return exportContainerToPrompt(props.container, exportOptions)
+    return exportContainerToPromptV2(props.container, exportOptions)
   } else if (props.containers && props.containers.length > 0) {
-    return exportContainersToPrompt(props.containers, exportOptions)
+    return exportContainersToPromptV2(props.containers, exportOptions)
   }
   return ''
 })
 
 const handleCopy = async () => {
   try {
-    await navigator.clipboard.writeText(markdown.value)
+    // Add non-breaking spaces to preserve double blank lines when pasting into ChatGPT
+    // This preserves visual spacing while separators (---) provide semantic structure
+    const textForChatGPT = markdown.value.replace(/\n\n+/g, (match) => {
+      // For multiple blank lines, add non-breaking space to preserve them
+      const blankLineCount = match.length - 1
+      if (blankLineCount > 0) {
+        // Use non-breaking space + newline for each blank line
+        return '\n' + '\u00A0\n'.repeat(blankLineCount)
+      }
+      return match
+    })
+    
+    await navigator.clipboard.writeText(textForChatGPT)
     copied.value = true
     toast.success(t('gear.actions.exportToPromptSuccess'))
     setTimeout(() => {
@@ -106,13 +120,10 @@ const handleOpenGuidelines = () => {
   isGuidelinesDialogOpen.value = true
 }
 
-const handleOpenChange = (value: boolean) => {
-  emit('update:open', value)
-}
 </script>
 
 <template>
-  <Dialog :open="open" @update:open="handleOpenChange">
+  <Dialog v-model:open="open">
     <DialogContent class="min-w-full md:min-w-3xl max-w-screen md:max-w-6xl max-h-[90vh] flex flex-col">
       <DialogHeader>
         <DialogTitle>
@@ -165,6 +176,12 @@ const handleOpenChange = (value: boolean) => {
               {{ t('gear.export.showLegend', 'Show legend') }}
             </Label>
           </div>
+          <div class="flex items-center space-x-2">
+            <Checkbox id="showPrices" v-model="showPrices" />
+            <Label for="showPrices" class="text-sm font-normal cursor-pointer">
+              {{ t('gear.export.showPrices', 'Show prices') }}
+            </Label>
+          </div>
         </div>
         <div class="space-y-2">
           <Label class="text-sm font-medium">
@@ -199,7 +216,7 @@ const handleOpenChange = (value: boolean) => {
           {{ t('gear.export.guidelines', 'Guidelines') }}
         </Button>
         <div class="flex gap-2">
-          <Button class="flex-1" variant="outline" @click="handleOpenChange(false)">
+          <Button class="flex-1" variant="outline" @click="open = false">
             {{ t('common.close') }}
           </Button>
           <Button class="flex-1" @click="handleCopy">

@@ -7,12 +7,23 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
+from ..main import COMMAND_GROUPS, show_group_interactive_menu
+
 tenants_app = typer.Typer(
     name="tenants",
     help="Tenant management commands",
+    no_args_is_help=False,  # We handle no-args case ourselves for interactive mode
 )
 
 console = Console()
+
+
+@tenants_app.callback(invoke_without_command=True)
+def tenants_callback(ctx: typer.Context) -> None:
+    """Callback for tenants command group - shows interactive menu if no subcommand provided."""
+    if ctx.invoked_subcommand is None:
+        # No subcommand provided, show interactive menu
+        show_group_interactive_menu("tenants", COMMAND_GROUPS["tenants"])
 
 
 async def _create_tenant_async(name: str, description: Optional[str], owner_email: str) -> None:

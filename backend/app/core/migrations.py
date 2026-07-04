@@ -44,7 +44,9 @@ async def get_applied_migrations() -> List[str]:
         List of migration version strings (e.g., ['001', '002'])
     """
     async with AsyncSessionLocal() as session:
-        result = await session.execute(select(SchemaMigration.version).order_by(SchemaMigration.version))
+        result = await session.execute(
+            select(SchemaMigration.version).order_by(SchemaMigration.version)
+        )
         return [row[0] for row in result.fetchall()]
 
 
@@ -58,7 +60,9 @@ async def is_migration_applied(version: str) -> bool:
         True if migration has been applied, False otherwise
     """
     async with AsyncSessionLocal() as session:
-        result = await session.execute(select(SchemaMigration).where(SchemaMigration.version == version))
+        result = await session.execute(
+            select(SchemaMigration).where(SchemaMigration.version == version)
+        )
         return result.scalar_one_or_none() is not None
 
 
@@ -82,7 +86,9 @@ async def unmark_migration(version: str) -> None:
         version: Migration version string (e.g., '001')
     """
     async with AsyncSessionLocal() as session:
-        result = await session.execute(select(SchemaMigration).where(SchemaMigration.version == version))
+        result = await session.execute(
+            select(SchemaMigration).where(SchemaMigration.version == version)
+        )
         migration = result.scalar_one_or_none()
         if migration:
             await session.delete(migration)
@@ -175,9 +181,11 @@ async def is_database_initialized() -> bool:
     try:
         async with engine.begin() as conn:
             # Use run_sync to execute inspect on the sync connection
-            def _check_tables(sync_conn):
-                inspector = inspect(sync_conn)
-                tables = inspector.get_table_names()
+            def _check_tables(sync_conn: object) -> bool:
+                insp = inspect(sync_conn)
+                if insp is None:
+                    return False
+                tables = insp.get_table_names()
                 return len(tables) > 0
 
             return await conn.run_sync(_check_tables)

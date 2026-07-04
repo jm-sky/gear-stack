@@ -1,5 +1,11 @@
 export const settingsEn = {
   settings: {
+    common: {
+      save: 'Save',
+      add: 'Add',
+      edit: 'Edit',
+      cancel: 'Cancel',
+    },
     page: {
       title: 'Settings',
       subtitle: 'Manage your preferences and custom categories',
@@ -80,6 +86,7 @@ export const settingsEn = {
       title: 'Gear Preferences',
       description: 'Manage your gear-specific preferences and settings',
       save: 'Save',
+      saved: 'Saved',
       preferredWeightUnit: {
         label: 'Preferred Weight Unit',
         subtitle: 'Default unit for displaying weights throughout the application',
@@ -89,6 +96,25 @@ export const settingsEn = {
           kg: 'Kilograms (kg)',
           oz: 'Ounces (oz)',
           lb: 'Pounds (lb)',
+          'auto-g-kg': 'Auto (g/kg)',
+          'auto-oz-lb': 'Auto (oz/lb)',
+        },
+      },
+      defaultCurrency: {
+        label: 'Default Currency',
+        subtitle: 'Default currency for prices in items and containers',
+        placeholder: 'Select a currency',
+      },
+      imageProcessingMode: {
+        label: 'Image Processing Mode',
+        subtitle: 'Choose how uploaded images are processed (resized and compressed)',
+        options: {
+          highQuality: 'High Quality',
+          highQualityDescription: 'Maximum size: 2560x2560px, JPEG quality: 95%. Best quality, larger file size.',
+          balanced: 'Balanced',
+          balancedDescription: 'Maximum size: 1200x1200px, JPEG quality: 90%. Good balance between quality and file size.',
+          storageSaver: 'Storage Saver',
+          storageSaverDescription: 'Maximum size: 800x800px, JPEG quality: 80%. Smaller file size, lower quality.',
         },
       },
     },
@@ -101,6 +127,7 @@ export const settingsEn = {
       cancel: 'Cancel',
       deleteConfirm: 'Are you sure you want to delete this category?',
       valuePlaceholder: 'Category name',
+      valueRequired: 'Category name is required',
       empty: 'No custom categories yet. Add your first one above.',
     },
     containerTypes: {
@@ -112,6 +139,7 @@ export const settingsEn = {
       cancel: 'Cancel',
       deleteConfirm: 'Are you sure you want to delete this container type?',
       valuePlaceholder: 'Container type name',
+      valueRequired: 'Container type name is required',
       empty: 'No custom container types yet. Add your first one above.',
     },
     brands: {
@@ -123,7 +151,30 @@ export const settingsEn = {
       cancel: 'Cancel',
       deleteConfirm: 'Are you sure you want to delete this brand?',
       valuePlaceholder: 'Brand name',
+      valueRequired: 'Brand name is required',
       empty: 'No custom brands yet. Add your first one above.',
+    },
+    oauth: {
+      title: 'OAuth Connections',
+      description: 'Manage linked OAuth accounts (Google, Facebook, etc.)',
+      login_required: 'Please log in to manage OAuth connections.',
+      no_connections: 'No linked OAuth accounts.',
+      providers: {
+        google: 'Google',
+        facebook: 'Facebook',
+      },
+      connection: {
+        linked: 'Connected',
+        deleted: 'OAuth connection has been removed',
+        confirm_delete: 'Are you sure you want to remove the connection to {provider}?',
+      },
+    },
+    storage: {
+      title: 'Storage Usage',
+      description: 'View your file storage usage and limits',
+      used: 'Used',
+      usagePercentage: 'Usage',
+      error: 'Unable to load storage information',
     },
     delete_account: {
       title: 'Delete Account',

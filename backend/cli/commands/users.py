@@ -11,6 +11,7 @@ from rich.panel import Panel
 from rich.prompt import Confirm, Prompt
 from rich.table import Table
 
+from ..main import COMMAND_GROUPS, show_group_interactive_menu
 from ..utils import (
     format_2fa_status,
     format_email_verified,
@@ -25,7 +26,16 @@ from ..utils import (
 users_app = typer.Typer(
     name="users",
     help="User management commands",
+    no_args_is_help=False,  # We handle no-args case ourselves for interactive mode
 )
+
+
+@users_app.callback(invoke_without_command=True)
+def users_callback(ctx: typer.Context) -> None:
+    """Callback for users command group - shows interactive menu if no subcommand provided."""
+    if ctx.invoked_subcommand is None:
+        # No subcommand provided, show interactive menu
+        show_group_interactive_menu("users", COMMAND_GROUPS["users"])
 
 
 @users_app.command("create")
@@ -38,6 +48,8 @@ def users_create(
         help="User password (not recommended, will prompt if not provided)",
     ),
     admin: bool = typer.Option(False, "--admin", "-a", help="Create as administrator"),
+    owner: bool = typer.Option(False, "--owner", "-o", help="Create as owner"),
+    premium: bool = typer.Option(False, "--premium", "-p", help="Create as premium user"),
     no_input: bool = typer.Option(False, "--no-input", help="Skip interactive prompts (requires all options)"),
 ) -> None:
     """Create a new user interactively with rich prompts and validation.
@@ -49,6 +61,12 @@ def users_create(
         # Create admin user
         python -m cli users create --admin
 
+        # Create owner user
+        python -m cli users create --owner
+
+        # Create premium user
+        python -m cli users create --premium
+
         # Non-interactive mode (for scripts)
         python -m cli users create --no-input \\
             --email admin@example.com \\
@@ -56,7 +74,7 @@ def users_create(
             --password "SecurePass123!" \\
             --admin
     """
-    asyncio.run(_users_create_async(email, name, password, admin, no_input))
+    asyncio.run(_users_create_async(email, name, password, admin, owner, premium, no_input))
 
 
 async def _users_create_async(
@@ -64,6 +82,8 @@ async def _users_create_async(
     name: str | None,
     password: str | None,
     admin: bool,
+    owner: bool,
+    premium: bool,
     no_input: bool,
 ) -> None:
     """Async implementation of user creation."""
@@ -77,9 +97,11 @@ async def _users_create_async(
     name_value = await _get_name(console, name, no_input)
     password_value = await _get_password(console, password, no_input)
     is_admin = await _get_admin_status(console, admin, no_input)
+    is_owner = owner  # Owner role is typically set via CLI flag only
+    is_premium = premium  # Premium role is typically set via CLI flag only
 
     # Show summary
-    _show_user_summary(console, email_value, name_value, is_admin)
+    _show_user_summary(console, email_value, name_value, is_admin, is_owner, is_premium)
 
     # Confirm creation
     if not no_input:
@@ -90,15 +112,16 @@ async def _users_create_async(
     # Create user with spinner
     try:
         with console.status("[bold green]Creating user...", spinner="dots"):
-            user = await _create_user_in_db(email_value, name_value, password_value, is_admin)
+            user = await _create_user_in_db(email_value, name_value, password_value, is_admin, is_owner, is_premium)
 
         # Show success message
         console.print("\n[bold green]✓[/bold green] User created successfully!\n")
 
         # Show user info panel
+        role_str = "Owner" if user.get("isOwner") else ("Administrator" if user.get("isAdmin") else ("Premium" if user.get("isPremium") else "User"))
         user_info = f"""[bold]Email:[/bold] {user['email']}
 [bold]Name:[/bold] {user['name']}
-[bold]Role:[/bold] {'Administrator' if user['isAdmin'] else 'User'}
+[bold]Role:[/bold] {role_str}
 [bold]Status:[/bold] {'Active' if user['isActive'] else 'Inactive'}
 [bold]ID:[/bold] {user['id']}
 [bold]Created:[/bold] {user['createdAt']}"""
@@ -199,17 +222,18 @@ async def _get_admin_status(console: Any, admin: bool, no_input: bool) -> bool:
     return Confirm.ask("[cyan]Create as administrator?[/cyan]", default=admin)
 
 
-def _show_user_summary(console: Any, email: str, name: str, is_admin: bool) -> None:
+def _show_user_summary(console: Any, email: str, name: str, is_admin: bool, is_owner: bool = False, is_premium: bool = False) -> None:
     """Show user creation summary."""
+    role_str = "Owner" if is_owner else ("Administrator" if is_admin else ("Premium" if is_premium else "User"))
     summary = f"""[bold]Email:[/bold] {email}
 [bold]Name:[/bold] {name}
-[bold]Role:[/bold] {'Administrator' if is_admin else 'User'}"""
+[bold]Role:[/bold] {role_str}"""
 
     panel = Panel(summary, title="[bold]User Summary[/bold]", border_style="cyan")
     console.print(panel)
 
 
-async def _create_user_in_db(email: str, name: str, password: str, is_admin: bool) -> dict[str, Any]:
+async def _create_user_in_db(email: str, name: str, password: str, is_admin: bool, is_owner: bool = False, is_premium: bool = False) -> dict[str, Any]:
     """Create user in database.
 
     Args:
@@ -217,6 +241,8 @@ async def _create_user_in_db(email: str, name: str, password: str, is_admin: boo
         name: User name
         password: User password (will be hashed)
         is_admin: Whether user is admin
+        is_owner: Whether user is owner
+        is_premium: Whether user is premium
 
     Returns:
         dict: Created user data
@@ -231,8 +257,14 @@ async def _create_user_in_db(email: str, name: str, password: str, is_admin: boo
         repo = UserRepository(db)
 
         try:
-            # Create user
+            # Create user (create_user only supports is_admin, so we'll update flags after)
             user = await repo.create_user(email=email, password=password, full_name=name, is_admin=is_admin)
+
+            # Update role flags if needed
+            if is_owner or is_premium:
+                user.isOwner = is_owner
+                user.isPremium = is_premium
+                user = await repo.update_user(user)
 
             user.isEmailVerified = True
             user.emailVerifiedAt = datetime.now(UTC)
@@ -245,6 +277,8 @@ async def _create_user_in_db(email: str, name: str, password: str, is_admin: boo
                 "name": user.name,
                 "isActive": user.isActive,
                 "isAdmin": user.isAdmin,
+                "isOwner": user.isOwner,
+                "isPremium": user.isPremium,
                 "createdAt": user.createdAt,
             }
 
@@ -391,7 +425,11 @@ async def _users_list_async(
                 truncate_id(user["id"]),
                 user["email"],
                 user["name"],
-                format_user_role(user["isAdmin"]),
+                format_user_role(
+                    is_admin=user.get("isAdmin", False),
+                    is_owner=user.get("isOwner", False),
+                    is_premium=user.get("isPremium", False),
+                ),
                 format_user_status(user["isActive"]),
             ]
             if detailed:
@@ -422,35 +460,42 @@ async def _get_users_from_db(detailed: bool = False) -> list[dict[str, Any]]:
     from sqlalchemy import select
 
     from app.core.database import get_db
-    from app.modules.auth.repositories import UserRepository
+    from app.modules.auth.db_models import UserDB
     from app.modules.two_factor.db_models import PasskeyDB, TotpConfigDB
 
     async for db in get_db():
-        repo = UserRepository(db)
-        users = await repo.get_all_users()
+        # Query database directly to avoid Pydantic email validation errors
+        # This allows us to handle users with invalid emails (e.g., soft-deleted users)
+        stmt = select(UserDB)
+        result = await db.execute(stmt)
+        users_db = result.scalars().all()
 
         # Convert to dict for display
-        result = []
-        for user in users:
+        result_list = []
+        for user_db in users_db:
+            # Build user dict directly from database model
+            # This avoids Pydantic validation which would fail on invalid emails
             user_dict = {
-                "id": user.id,
-                "email": user.email,
-                "name": user.name,
-                "isActive": user.isActive,
-                "isAdmin": user.isAdmin,
-                "createdAt": user.createdAt,
+                "id": user_db.id,
+                "email": user_db.email,  # May contain invalid emails (e.g., deleted_xxx@deleted.local)
+                "name": user_db.name,
+                "isActive": user_db.is_active,
+                "isAdmin": user_db.is_admin,
+                "isOwner": user_db.is_owner,
+                "isPremium": user_db.is_premium,
+                "createdAt": user_db.created_at,
             }
 
             if detailed:
                 # Get email verification status
-                user_dict["isEmailVerified"] = user.isEmailVerified
+                user_dict["isEmailVerified"] = user_db.is_email_verified
 
                 # Check 2FA status (TOTP or Passkey)
                 has_2fa = False
 
                 # Check TOTP
                 totp_stmt = select(TotpConfigDB).where(
-                    TotpConfigDB.user_id == user.id,
+                    TotpConfigDB.user_id == user_db.id,
                     TotpConfigDB.is_enabled.is_(True),
                 )
                 totp_result = await db.execute(totp_stmt)
@@ -461,7 +506,7 @@ async def _get_users_from_db(detailed: bool = False) -> list[dict[str, Any]]:
                 # Check Passkeys if TOTP not enabled
                 if not has_2fa:
                     passkey_stmt = select(PasskeyDB).where(
-                        PasskeyDB.user_id == user.id,
+                        PasskeyDB.user_id == user_db.id,
                         PasskeyDB.is_enabled.is_(True),
                     )
                     passkey_result = await db.execute(passkey_stmt)
@@ -471,9 +516,9 @@ async def _get_users_from_db(detailed: bool = False) -> list[dict[str, Any]]:
 
                 user_dict["has2FA"] = has_2fa
 
-            result.append(user_dict)
+            result_list.append(user_dict)
 
-        return result
+        return result_list
 
     return []
 
@@ -577,6 +622,10 @@ async def _find_user(identifier: str) -> dict[str, Any] | None:
                 "name": user.name,
                 "isActive": user.isActive,
                 "isAdmin": user.isAdmin,
+                "isOwner": user.isOwner,
+                "isPremium": user.isPremium,
+                "isEmailVerified": user.isEmailVerified,
+                "emailVerifiedAt": user.emailVerifiedAt,
                 "createdAt": user.createdAt,
             }
 
@@ -605,3 +654,580 @@ async def _delete_user_from_db(user_id: str) -> None:
         # Delete user
         await db.delete(user_db)
         await db.commit()
+
+
+@users_app.command("toggle-admin")
+def users_toggle_admin(
+    identifier: str | None = typer.Argument(None, help="User email or ID"),
+    yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation prompt"),
+) -> None:
+    """Toggle admin flag for a user by email or ID.
+
+    Examples:
+        # Interactive mode (will prompt for email/ID)
+        python -m cli users toggle-admin
+
+        # Toggle admin by email
+        python -m cli users toggle-admin user@example.com
+
+        # Toggle admin by ID without confirmation
+        python -m cli users toggle-admin 01HQX... --yes
+    """
+    asyncio.run(_users_toggle_admin_async(identifier, yes))
+
+
+async def _users_toggle_admin_async(identifier: str | None, yes: bool) -> None:
+    """Async implementation of toggle admin."""
+    from rich.console import Console
+
+    console = Console()
+
+    try:
+        # Get identifier if not provided
+        if not identifier:
+            identifier = Prompt.ask("[cyan]Enter user email or ID[/cyan]")
+
+        # Find user
+        with console.status("[bold green]Finding user...", spinner="dots"):
+            user = await _find_user(identifier)
+
+        if not user:
+            console.print(f"\n[red]User not found:[/red] {identifier}\n")
+            return
+
+        # Determine new admin status
+        new_admin_status = not user["isAdmin"]
+        action = "promote to administrator" if new_admin_status else "demote to regular user"
+
+        # Show user info
+        console.print(f"\n[bold cyan]User to modify:[/bold cyan]\n")
+
+        user_info = f"""[bold]ID:[/bold] {user['id']}
+[bold]Email:[/bold] {user['email']}
+[bold]Name:[/bold] {user['name']}
+[bold]Current Role:[/bold] {'Administrator' if user['isAdmin'] else 'User'}
+[bold]New Role:[/bold] {'Administrator' if new_admin_status else 'User'}"""
+
+        panel = Panel(user_info, border_style="cyan")
+        console.print(panel)
+
+        # Confirm change
+        if not yes:
+            console.print()
+            if not Confirm.ask(f"Are you sure you want to {action}?", default=True):
+                console.print("[yellow]Cancelled[/yellow]")
+                return
+
+        # Toggle admin status
+        with console.status(f"[bold green]Updating user...", spinner="dots"):
+            await _toggle_admin_in_db(user["id"], new_admin_status)
+
+        console.print(f"\n[bold green]✓[/bold green] User {'promoted to administrator' if new_admin_status else 'demoted to regular user'} successfully\n")
+
+    except Exception as e:
+        console.print(f"\n[red]Error toggling admin status:[/red] {e}\n")
+        raise typer.Exit(1)
+
+
+async def _toggle_admin_in_db(user_id: str, is_admin: bool) -> None:
+    """Toggle admin status in database.
+
+    Args:
+        user_id: User ID to update
+        is_admin: New admin status
+    """
+    from app.core.database import get_db
+    from app.modules.auth.repositories import UserRepository
+
+    async for db in get_db():
+        repo = UserRepository(db)
+
+        # Get user
+        user = await repo.get_user_by_id(user_id)
+        if not user:
+            raise ValueError(f"User with id {user_id} not found")
+
+        # Update admin status
+        user.isAdmin = is_admin
+        await repo.update_user(user)
+        break  # Ensure we only process first iteration
+
+
+@users_app.command("toggle-owner")
+def users_toggle_owner(
+    identifier: str | None = typer.Argument(None, help="User email or ID"),
+    yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation prompt"),
+) -> None:
+    """Toggle owner flag for a user by email or ID.
+
+    Examples:
+        # Interactive mode (will prompt for email/ID)
+        python -m cli users toggle-owner
+
+        # Toggle owner by email
+        python -m cli users toggle-owner user@example.com
+
+        # Toggle owner by ID without confirmation
+        python -m cli users toggle-owner 01HQX... --yes
+    """
+    asyncio.run(_users_toggle_owner_async(identifier, yes))
+
+
+async def _users_toggle_owner_async(identifier: str | None, yes: bool) -> None:
+    """Async implementation of toggle owner."""
+    from rich.console import Console
+
+    console = Console()
+
+    try:
+        # Get identifier if not provided
+        if not identifier:
+            identifier = Prompt.ask("[cyan]Enter user email or ID[/cyan]")
+
+        # Find user
+        with console.status("[bold green]Finding user...", spinner="dots"):
+            user = await _find_user(identifier)
+
+        if not user:
+            console.print(f"\n[red]User not found:[/red] {identifier}\n")
+            return
+
+        # Determine new owner status
+        new_owner_status = not user.get("isOwner", False)
+        action = "promote to owner" if new_owner_status else "demote from owner"
+
+        # Show user info
+        console.print(f"\n[bold cyan]User to modify:[/bold cyan]\n")
+
+        current_role = "Owner" if user.get("isOwner") else ("Administrator" if user.get("isAdmin") else ("Premium" if user.get("isPremium") else "User"))
+        new_role = "Owner" if new_owner_status else ("Administrator" if user.get("isAdmin") else ("Premium" if user.get("isPremium") else "User"))
+
+        user_info = f"""[bold]ID:[/bold] {user['id']}
+[bold]Email:[/bold] {user['email']}
+[bold]Name:[/bold] {user['name']}
+[bold]Current Role:[/bold] {current_role}
+[bold]New Role:[/bold] {new_role}"""
+
+        panel = Panel(user_info, border_style="cyan")
+        console.print(panel)
+
+        # Confirm change
+        if not yes:
+            console.print()
+            if not Confirm.ask(f"Are you sure you want to {action}?", default=True):
+                console.print("[yellow]Cancelled[/yellow]")
+                return
+
+        # Toggle owner status
+        with console.status(f"[bold green]Updating user...", spinner="dots"):
+            await _toggle_owner_in_db(user["id"], new_owner_status)
+            await _toggle_admin_in_db(user["id"], new_owner_status)
+
+        console.print(f"\n[bold green]✓[/bold green] User {'promoted to owner' if new_owner_status else 'demoted from owner'} successfully\n")
+
+    except Exception as e:
+        console.print(f"\n[red]Error toggling owner status:[/red] {e}\n")
+        raise typer.Exit(1)
+
+
+async def _toggle_owner_in_db(user_id: str, is_owner: bool) -> None:
+    """Toggle owner status in database.
+
+    Args:
+        user_id: User ID to update
+        is_owner: New owner status
+    """
+    from app.core.database import get_db
+    from app.modules.auth.repositories import UserRepository
+
+    async for db in get_db():
+        repo = UserRepository(db)
+
+        # Get user
+        user = await repo.get_user_by_id(user_id)
+        if not user:
+            raise ValueError(f"User with id {user_id} not found")
+
+        # Update owner status
+        user.isOwner = is_owner
+        await repo.update_user(user)
+        break  # Ensure we only process first iteration
+
+
+@users_app.command("set-role")
+def users_set_role(
+    identifier: str | None = typer.Argument(None, help="User email or ID"),
+    role: str | None = typer.Option(
+        None,
+        "--role",
+        "-r",
+        help="Role to set: user, premium, admin, or owner",
+    ),
+    yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation prompt"),
+) -> None:
+    """Set user role (user, premium, admin, or owner).
+
+    Examples:
+        # Interactive mode (will prompt for email/ID and role)
+        python -m cli users set-role
+
+        # Set role by email
+        python -m cli users set-role user@example.com --role admin
+
+        # Set role by ID without confirmation
+        python -m cli users set-role 01HQX... --role user --yes
+    """
+    asyncio.run(_users_set_role_async(identifier, role, yes))
+
+
+async def _users_set_role_async(identifier: str | None, role: str | None, yes: bool) -> None:
+    """Async implementation of set role."""
+    from rich.console import Console
+
+    console = Console()
+
+    # Valid roles
+    VALID_ROLES = ["user", "premium", "admin", "owner"]
+    ROLE_DISPLAY_NAMES = {
+        "user": "[dim]User[/dim]",
+        "premium": "[cyan]Premium[/cyan]",
+        "admin": "[yellow]Admin[/yellow]",
+        "owner": "[bold magenta]Owner[/bold magenta]",
+    }
+
+    try:
+        # Get identifier if not provided
+        if not identifier:
+            identifier = Prompt.ask("[cyan]Enter user email or ID[/cyan]")
+
+        # Find user
+        with console.status("[bold green]Finding user...", spinner="dots"):
+            user = await _find_user(identifier)
+
+        if not user:
+            console.print(f"\n[red]User not found:[/red] {identifier}\n")
+            return
+
+        # Get role if not provided
+        if not role:
+            console.print("\n[bold cyan]Available roles:[/bold cyan]\n")
+            for i, role_option in enumerate(VALID_ROLES, 1):
+                console.print(f"  {i}. {ROLE_DISPLAY_NAMES[role_option]}")
+            console.print()
+
+            while True:
+                role_input = (
+                    Prompt.ask(
+                        "[cyan]Select role[/cyan] (1-4 or name)",
+                        default="",
+                    )
+                    .strip()
+                    .lower()
+                )
+
+                # Try to parse as number
+                if role_input.isdigit():
+                    role_num = int(role_input)
+                    if 1 <= role_num <= len(VALID_ROLES):
+                        role = VALID_ROLES[role_num - 1]
+                        break
+                    else:
+                        console.print(f"[red]Invalid number. Please enter 1-{len(VALID_ROLES)}[/red]")
+                        continue
+
+                # Try to parse as role name
+                if role_input in VALID_ROLES:
+                    role = role_input
+                    break
+
+                console.print(f"[red]Invalid role. Please enter 1-{len(VALID_ROLES)} or one of: {', '.join(VALID_ROLES)}[/red]")
+        else:
+            # Validate provided role
+            role = role.lower().strip()
+            if role not in VALID_ROLES:
+                console.print(f"\n[red]Invalid role:[/red] {role}\n")
+                console.print(f"[yellow]Valid roles are:[/yellow] {', '.join(VALID_ROLES)}\n")
+                raise typer.Exit(1)
+
+        # Determine current and new role display
+        current_role_display = "Owner" if user.get("isOwner") else ("Administrator" if user.get("isAdmin") else ("Premium" if user.get("isPremium") else "User"))
+
+        new_role_display = role.capitalize()
+
+        # Determine flags for new role
+        is_admin = role == "admin"
+        is_owner = role == "owner"
+        is_premium = role == "premium"
+
+        # Show user info
+        console.print(f"\n[bold cyan]User to modify:[/bold cyan]\n")
+
+        user_info = f"""[bold]ID:[/bold] {user['id']}
+[bold]Email:[/bold] {user['email']}
+[bold]Name:[/bold] {user['name']}
+[bold]Current Role:[/bold] {current_role_display}
+[bold]New Role:[/bold] {new_role_display}"""
+
+        panel = Panel(user_info, border_style="cyan")
+        console.print(panel)
+
+        # Confirm change
+        if not yes:
+            console.print()
+            if not Confirm.ask(f"Are you sure you want to set role to {new_role_display}?", default=True):
+                console.print("[yellow]Cancelled[/yellow]")
+                return
+
+        # Update role
+        with console.status(f"[bold green]Updating user role...", spinner="dots"):
+            await _set_role_in_db(user["id"], is_admin, is_owner, is_premium)
+
+        console.print(f"\n[bold green]✓[/bold green] User role set to {new_role_display} successfully\n")
+
+    except Exception as e:
+        console.print(f"\n[red]Error setting user role:[/red] {e}\n")
+        raise typer.Exit(1)
+
+
+async def _set_role_in_db(user_id: str, is_admin: bool, is_owner: bool, is_premium: bool) -> None:
+    """Set user role in database.
+
+    Args:
+        user_id: User ID to update
+        is_admin: Whether user is admin
+        is_owner: Whether user is owner
+        is_premium: Whether user is premium
+    """
+    from app.core.database import get_db
+    from app.modules.auth.repositories import UserRepository
+
+    async for db in get_db():
+        repo = UserRepository(db)
+
+        # Get user
+        user = await repo.get_user_by_id(user_id)
+        if not user:
+            raise ValueError(f"User with id {user_id} not found")
+
+        # Update role flags
+        user.isAdmin = is_admin
+        user.isOwner = is_owner
+        user.isPremium = is_premium
+
+        await repo.update_user(user)
+        break  # Ensure we only process first iteration
+
+
+@users_app.command("verify-email")
+def users_verify_email(
+    identifier: str | None = typer.Argument(None, help="User email or ID"),
+    show_link: bool = typer.Option(
+        False,
+        "--show-link",
+        "-l",
+        help="Show email verification link for the user",
+    ),
+    confirm_email: bool = typer.Option(
+        False,
+        "--confirm",
+        "-c",
+        help="Mark email as verified without using a link",
+    ),
+    yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation prompts"),
+) -> None:
+    """Manage email verification for a user.
+
+    Provides two options:
+    - Show verification link (for manual sending/debugging)
+    - Mark email as verified directly (without token)
+
+    Examples:
+        # Interactive mode (choose between link or direct verification)
+        python -m cli users verify-email
+
+        # Show verification link for user
+        python -m cli users verify-email user@example.com --show-link
+
+        # Mark email as verified (non-interactive)
+        python -m cli users verify-email user@example.com --confirm --yes
+    """
+    asyncio.run(_users_verify_email_async(identifier, show_link, confirm_email, yes))
+
+
+async def _users_verify_email_async(
+    identifier: str | None,
+    show_link: bool,
+    confirm_email: bool,
+    yes: bool,
+) -> None:
+    """Async implementation of email verification management."""
+    from rich.console import Console
+
+    console = Console()
+
+    # Validate options
+    if show_link and confirm_email:
+        console.print("\n[red]You cannot use --show-link and --confirm together. Choose one option.[/red]\n")
+        raise typer.Exit(1)
+
+    try:
+        # Get identifier if not provided
+        if not identifier:
+            identifier = Prompt.ask("[cyan]Enter user email or ID[/cyan]")
+
+        # Find user
+        with console.status("[bold green]Finding user...", spinner="dots"):
+            user = await _find_user(identifier)
+
+        if not user:
+            console.print(f"\n[red]User not found:[/red] {identifier}\n")
+            return
+
+        # Show user info
+        console.print("\n[bold cyan]User:[/bold cyan]\n")
+
+        email_verified_str = "Yes" if user.get("isEmailVerified") else "No"
+
+        user_info = f"""[bold]ID:[/bold] {user['id']}
+[bold]Email:[/bold] {user['email']}
+[bold]Name:[/bold] {user['name']}
+[bold]Role:[/bold] {'Owner' if user.get('isOwner') else ('Administrator' if user.get('isAdmin') else ('Premium' if user.get('isPremium') else 'User'))}
+[bold]Active:[/bold] {'Yes' if user['isActive'] else 'No'}
+[bold]Email verified:[/bold] {email_verified_str}"""
+
+        panel = Panel(user_info, border_style="cyan")
+        console.print(panel)
+
+        # Determine action (interactive if neither flag provided)
+        action: str | None = None
+        if show_link:
+            action = "show_link"
+        elif confirm_email:
+            action = "confirm"
+        else:
+            console.print("\n[bold cyan]Email verification options:[/bold cyan]\n")
+            console.print("  1. Show verification link")
+            console.print("  2. Mark email as verified (without link)")
+            console.print()
+
+            while True:
+                choice = Prompt.ask(
+                    "[cyan]Select option[/cyan] (1-2)",
+                    default="1",
+                ).strip()
+
+                if choice == "1":
+                    action = "show_link"
+                    break
+                if choice == "2":
+                    action = "confirm"
+                    break
+
+                console.print("[red]Invalid choice. Please enter 1 or 2.[/red]")
+
+        # Execute selected action
+        if action == "show_link":
+            with console.status("[bold green]Generating verification link...", spinner="dots"):
+                link, meta = await _generate_email_verification_link(user["id"])
+
+            console.print("\n[bold green]✓[/bold green] Verification link generated successfully\n")
+
+            link_info = f"""[bold]Verification link:[/bold]
+{link}
+
+[bold]Token:[/bold] {meta['token']}
+[bold]Expires in:[/bold] {meta['expires_hours']} hours"""
+
+            link_panel = Panel(link_info, title="[bold]Email Verification Link[/bold]", border_style="green")
+            console.print(link_panel)
+            console.print()
+
+        elif action == "confirm":
+            if user.get("isEmailVerified"):
+                console.print("\n[yellow]User email is already verified.[/yellow]\n")
+                if not yes:
+                    if not Confirm.ask("Mark as verified again anyway?", default=False):
+                        console.print("[yellow]Cancelled[/yellow]")
+                        return
+            else:
+                if not yes:
+                    console.print()
+                    if not Confirm.ask("Mark this email as verified?", default=True):
+                        console.print("[yellow]Cancelled[/yellow]")
+                        return
+
+            with console.status("[bold green]Marking email as verified...", spinner="dots"):
+                updated_user = await _mark_email_verified_in_db(user["id"])
+
+            console.print("\n[bold green]✓[/bold green] Email marked as verified successfully\n")
+
+            updated_info = f"""[bold]ID:[/bold] {updated_user.id}
+[bold]Email:[/bold] {updated_user.email}
+[bold]Name:[/bold] {updated_user.name}
+[bold]Email verified:[/bold] {'Yes' if updated_user.isEmailVerified else 'No'}
+[bold]Verified at:[/bold] {updated_user.emailVerifiedAt}"""
+
+            updated_panel = Panel(updated_info, title="[bold]Updated User[/bold]", border_style="green")
+            console.print(updated_panel)
+            console.print()
+
+    except Exception as e:
+        console.print(f"\n[red]Error managing email verification:[/red] {e}\n")
+        raise typer.Exit(1)
+
+
+async def _generate_email_verification_link(user_id: str) -> tuple[str, dict[str, Any]]:
+    """Generate and store email verification token, return verification link and metadata."""
+    from datetime import UTC, datetime
+
+    from app.core.config import settings
+    from app.core.database import get_db
+    from app.modules.auth.auth_utils import create_email_verification_token
+    from app.modules.auth.repositories import UserRepository
+
+    async for db in get_db():
+        repo = UserRepository(db)
+
+        user = await repo.get_user_by_id(user_id)
+        if not user:
+            raise ValueError(f"User with id {user_id} not found")
+
+        # Generate new token
+        token = create_email_verification_token({"sub": user.id, "email": user.email})
+
+        # Store token metadata
+        await repo.store_email_verification_token(user.id, token, datetime.now(UTC))
+
+        # Build verification link (same as in email service)
+        link = f"{settings.frontend_url}/auth/verify-email?token={token}"
+
+        meta: dict[str, Any] = {
+            "token": token,
+            "expires_hours": settings.security.email_verification_token_expires_hours,
+        }
+
+        return link, meta
+
+    # This should never be reached
+    raise RuntimeError("Database session not available")
+
+
+async def _mark_email_verified_in_db(user_id: str) -> Any:
+    """Mark user email as verified directly in database."""
+    from datetime import UTC, datetime
+
+    from app.core.database import get_db
+    from app.modules.auth.repositories import UserRepository
+
+    async for db in get_db():
+        repo = UserRepository(db)
+
+        user = await repo.get_user_by_id(user_id)
+        if not user:
+            raise ValueError(f"User with id {user_id} not found")
+
+        user.mark_email_verified(datetime.now(UTC))
+        return await repo.update_user(user)
+
+    # This should never be reached
+    raise RuntimeError("Database session not available")

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { formatDistanceToNow } from 'date-fns'
 import { enUS, pl } from 'date-fns/locale'
-import { Clock } from 'lucide-vue-next'
+import { CalendarPlus } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { smallDateTime } from '@/shared/utils/smallDateTime'
@@ -11,7 +11,7 @@ const { createdAt } = defineProps<{
   createdAt: string
 }>()
 
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 
 const dateFnsLocale = computed(() => {
   const currentLocale = locale.value as SupportedLocale
@@ -32,10 +32,10 @@ const formattedDateTime = computed(() => {
 
 <template>
   <div
-    v-tooltip:bottom="formattedDateTime"
+    v-tooltip:bottom="`${t('common.created')}: ${formattedDateTime}`"
     class="flex items-center gap-1 text-xs text-muted-foreground"
   >
-    <Clock class="size-3" />
+    <CalendarPlus class="size-3" />
     {{ timeAgo }}
   </div>
 </template>

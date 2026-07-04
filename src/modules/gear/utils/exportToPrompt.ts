@@ -3,6 +3,7 @@
  */
 
 import type { IGearContainer, IGearItem } from '../types/gear.types'
+import { formatCurrency, getCurrency } from './currencyFormatter'
 import { formatWeight, formatWeightFromGrams } from './formatWeight'
 import { isSet } from './helpers'
 
@@ -17,7 +18,10 @@ interface ExportOptions {
   showBrand?: boolean // Whether to show brand in export (default: true)
   showNestedContainer?: boolean // Whether to show nested container reference [#id] (default: true)
   showLegend?: boolean // Whether to show legend at the end (default: true)
+  showPrices?: boolean // Whether to show prices in export (default: false)
   descriptionFormat?: 'off' | 'inline' | 'newline' // Description format (default: 'off')
+  defaultCurrency?: string // Default currency to use when item/container doesn't have currency
+  locale?: string // Locale for formatting numbers (default: 'pl-PL')
 }
 
 /**
@@ -43,12 +47,24 @@ function generateContainerId(name: string): string {
 }
 
 /**
+ * Format notes as indented block (for newline format)
+ * Preserves Markdown and multiline structure
+ */
+function formatNotesAsIndentedBlock(notes: string, indent: number): string {
+  const indentStr = '  '.repeat(indent)
+  const noteIndent = '  ' // 2 spaces for note indentation
+  const lines = notes.split('\n')
+  return lines.map(line => `${indentStr}${noteIndent}${line}`).join('\n')
+}
+
+/**
  * Format item for markdown export (compact format)
  */
 function formatItem(
   item: IGearItem,
   options: ExportOptions,
   indent = 0,
+  defaultCurrency: string = 'PLN',
 ): string {
   const indentStr = '  '.repeat(indent)
   const parts: string[] = []
@@ -57,6 +73,7 @@ function formatItem(
   parts.push(`**${item.name}**`)
 
   // Description in inline format (immediately after name, before other fields)
+  // Only if descriptionFormat is inline
   if (item.notes && options.descriptionFormat === 'inline') {
     parts.push(`*(${item.notes})*`)
   }
@@ -131,17 +148,26 @@ function formatItem(
     if (item.containerId && options.calculateTotalWeight) {
       const containerWeightInGrams = options.calculateTotalWeight(item.containerId)
       totalWeight = containerWeightInGrams * item.quantity
-      weightText = formatWeightFromGrams(totalWeight)
+      weightText = formatWeightFromGrams(totalWeight, options.locale)
     } else {
       // Regular item weight
       totalWeight = item.weight * item.quantity
-      weightText = formatWeight(totalWeight, item.weightUnit ?? 'g')
+      weightText = formatWeight(totalWeight, item.weightUnit ?? 'g', options.locale)
     }
 
     parts.push(`- ${weightText}`)
   }
 
+  // Price at the end (only if showPrices is true and item has price)
+  if (options.showPrices && item.price) {
+    const currency = getCurrency(item.currency, defaultCurrency)
+    const totalPrice = item.price * (item.quantity || 1)
+    const formattedPrice = formatCurrency(totalPrice, currency)
+    parts.push(`- ${formattedPrice}`)
+  }
+
   // For newline format, split the line: name + metadata on first line, description alone on second line
+  // Only if descriptionFormat is newline
   if (item.notes && options.descriptionFormat === 'newline') {
     const namePart = `**${item.name}**`
 
@@ -215,17 +241,26 @@ function formatItem(
       if (item.containerId && options.calculateTotalWeight) {
         const containerWeightInGrams = options.calculateTotalWeight(item.containerId)
         totalWeight = containerWeightInGrams * item.quantity
-        weightText = formatWeightFromGrams(totalWeight)
+        weightText = formatWeightFromGrams(totalWeight, options.locale)
       } else {
         totalWeight = item.weight * item.quantity
-        weightText = formatWeight(totalWeight, item.weightUnit ?? 'g')
+        weightText = formatWeight(totalWeight, item.weightUnit ?? 'g', options.locale)
       }
 
       firstLineParts.push(`- ${weightText}`)
     }
 
-    // Build output: first line with name and metadata, second line with description only
-    return `${indentStr}- ${firstLineParts.join(' ')}\n${indentStr}  *${item.notes}*`
+    // Price at the end (only if showPrices is true and item has price)
+    if (options.showPrices && item.price) {
+      const currency = getCurrency(item.currency, defaultCurrency)
+      const totalPrice = item.price * (item.quantity || 1)
+      const formattedPrice = formatCurrency(totalPrice, currency)
+      firstLineParts.push(`- ${formattedPrice}`)
+    }
+
+    // Build output: first line with name and metadata, notes as indented block below
+    const formattedNotes = formatNotesAsIndentedBlock(item.notes, indent)
+    return `${indentStr}- ${firstLineParts.join(' ')}\n${formattedNotes}`
   }
 
   return `${indentStr}- ${parts.join(' ')}`
@@ -238,6 +273,7 @@ function formatNestedContainer(
   container: IGearContainer,
   options: ExportOptions,
   indent = 0,
+  defaultCurrency: string = 'PLN',
 ): string {
   const indentStr = '  '.repeat(indent)
   const lines: string[] = []
@@ -249,18 +285,103 @@ function formatNestedContainer(
   const containerId = generateContainerId(container.name)
   const containerIdPart = options.showNestedContainer !== false ? ` [${containerId}]` : ''
   const uuidPart = options.showUuid !== false ? ` [uuid:${container.id}]` : ''
-  lines.push(`${indentStr}## ${container.name}${containerIdPart}${uuidPart} (${typeLabel})`)
+  const favoritePart = container.favorite ? ' [favorite]' : ''
+
+  // Build container header parts
+  const headerParts: string[] = [`${indentStr}## ${container.name}${containerIdPart}${uuidPart} (${typeLabel})${favoritePart}`]
+
+  // Add price to header if enabled
+  if (options.showPrices && container.price) {
+    const currency = getCurrency(container.currency, defaultCurrency)
+    const formattedPrice = formatCurrency(container.price, currency)
+    headerParts.push(`- ${formattedPrice}`)
+  }
+
+  lines.push(headerParts.join(' '))
+
+  // Add container description as indented block (if description format is not off)
+  if (container.description && options.descriptionFormat !== 'off') {
+    const formattedDescription = formatNotesAsIndentedBlock(container.description, indent)
+    lines.push(formattedDescription)
+  }
 
   // Container items
   if (container.items.length === 0) {
     lines.push(`${indentStr}*Brak przedmiotów w kontenerze.*`)
   } else {
     container.items.forEach(item => {
-      lines.push(formatItem(item, options, indent))
+      lines.push(formatItem(item, options, indent, defaultCurrency))
     })
   }
 
   return lines.join('\n')
+}
+
+/**
+ * Generate "To Buy" summary section
+ */
+function generateToBuySummary(
+  containers: IGearContainer[],
+  options: ExportOptions,
+  defaultCurrency: string = 'PLN',
+): string {
+  const { t } = options
+
+  const toBuyItems: Array<{
+    name: string
+    price: number
+    quantity: number
+    currency: string
+  }> = []
+
+  containers.forEach(container => {
+    container.items
+      .filter(item => item.status === 'toBuy' && item.price)
+      .forEach(item => {
+        toBuyItems.push({
+          name: item.name,
+          price: item.price!,
+          quantity: item.quantity || 1,
+          currency: getCurrency(item.currency, getCurrency(container.currency, defaultCurrency)),
+        })
+      })
+  })
+
+  if (toBuyItems.length === 0) {
+    return ''
+  }
+
+  // Group by currency
+  const byCurrency = new Map<string, typeof toBuyItems>()
+  toBuyItems.forEach(item => {
+    const existing = byCurrency.get(item.currency) ?? []
+    existing.push(item)
+    byCurrency.set(item.currency, existing)
+  })
+
+  // Generate summary
+  const toBuyTitle = t ? t('gear.export.toBuyTitle', 'To Buy') : 'To Buy'
+  const toBuyTotalCost = t ? t('gear.export.toBuyTotalCost', 'Total Cost') : 'Total Cost'
+  const toBuyItemsToPurchase = t ? t('gear.export.toBuyItemsToPurchase', 'Items to purchase') : 'Items to purchase'
+
+  let summary = '\n---\n\n'
+  summary += `## ${toBuyTitle}\n\n`
+
+  byCurrency.forEach((items, currency) => {
+    const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+    const formattedTotal = formatCurrency(total, currency)
+
+    summary += `**${toBuyTotalCost} (${currency}):** ${formattedTotal}\n\n`
+    summary += `${toBuyItemsToPurchase}:\n`
+    items.forEach(item => {
+      const itemTotal = item.price * item.quantity
+      const formattedPrice = formatCurrency(itemTotal, currency)
+      summary += `- **${item.name}**${item.quantity > 1 ? ` x${item.quantity}` : ''} - ${formattedPrice}\n`
+    })
+    summary += '\n'
+  })
+
+  return summary
 }
 
 /**
@@ -285,6 +406,8 @@ export function exportContainerToPrompt(
   lines.push(`# ${titleText}`)
   lines.push(descriptionText)
   lines.push('')
+  lines.push('---')
+  lines.push('')
 
   // Container header with ID and UUID
   const typeLabel = getContainerTypeLabel
@@ -304,6 +427,10 @@ export function exportContainerToPrompt(
     containerHeaderParts.push(`[uuid:${container.id}]`)
   }
   containerHeaderParts.push(`(${typeLabel})`)
+  // Add favorite flag if container is marked as favorite
+  if (container.favorite) {
+    containerHeaderParts.push('[favorite]')
+  }
 
   // Add URL if provided
   if (container.url) {
@@ -312,13 +439,27 @@ export function exportContainerToPrompt(
 
   // Add weight if provided
   if (isSet(container.weight) && isSet(container.weightUnit)) {
-    const weightText = formatWeight(container.weight, container.weightUnit)
+    const weightText = formatWeight(container.weight, container.weightUnit, options.locale)
     // Extract just the number and unit (e.g., "1.50 kg" -> "1.50kg" or "500 g" -> "500g")
     const weightValue = weightText.replace(/\s/g, '')
     containerHeaderParts.push(`- ${weightValue}`)
   }
 
+  // Add price if enabled
+  const defaultCurrency = options.defaultCurrency || 'PLN'
+  if (options.showPrices && container.price) {
+    const currency = getCurrency(container.currency, defaultCurrency)
+    const formattedPrice = formatCurrency(container.price, currency)
+    containerHeaderParts.push(`- ${formattedPrice}`)
+  }
+
   lines.push(containerHeaderParts.join(' '))
+
+  // Add container description as indented block (if description format is not off)
+  if (container.description && options.descriptionFormat !== 'off') {
+    const formattedDescription = formatNotesAsIndentedBlock(container.description, 0)
+    lines.push(formattedDescription)
+  }
 
   // Collect nested containers to show separately
   const nestedContainers: Array<{ item: IGearItem; container: IGearContainer }> = []
@@ -334,16 +475,16 @@ export function exportContainerToPrompt(
         const nestedContainer = getContainerById(item.containerId)
         if (nestedContainer) {
           // Add as regular item (without content, but with calculated weight)
-          lines.push(formatItem(item, options, 0))
+          lines.push(formatItem(item, options, 0, defaultCurrency))
           // Store for later display
           nestedContainers.push({ item, container: nestedContainer })
         } else {
           // Regular item
-          lines.push(formatItem(item, options, 0))
+          lines.push(formatItem(item, options, 0, defaultCurrency))
         }
       } else {
         // Regular item
-        lines.push(formatItem(item, options, 0))
+        lines.push(formatItem(item, options, 0, defaultCurrency))
       }
     })
   }
@@ -353,7 +494,7 @@ export function exportContainerToPrompt(
     lines.push('')
     nestedContainers.forEach(({ container: nestedContainer }) => {
       lines.push('')
-      lines.push(formatNestedContainer(nestedContainer, options, 0))
+      lines.push(formatNestedContainer(nestedContainer, options, 0, defaultCurrency))
     })
   }
 
@@ -397,6 +538,14 @@ export function exportContainerToPrompt(
     lines.push('')
   }
 
+  // Add "To Buy" summary if prices enabled
+  if (options.showPrices) {
+    const summary = generateToBuySummary([container], options, defaultCurrency)
+    if (summary) {
+      lines.push(summary)
+    }
+  }
+
   return lines.join('\n')
 }
 
@@ -413,12 +562,16 @@ export function exportContainersToPrompt(
   const titleText = t ? t('gear.export.title', 'Lista sprzętu') : 'Lista sprzętu'
   lines.push(`# ${titleText}`)
   lines.push('')
+  lines.push('---')
+  lines.push('')
 
   // Export each container without legend (legend will be added once at the end)
   const exportOptionsWithoutLegend = { ...options, showLegend: false }
 
   containers.forEach((container, index) => {
     if (index > 0) {
+      lines.push('')
+      lines.push('---')
       lines.push('')
     }
     const containerMarkdown = exportContainerToPrompt(container, exportOptionsWithoutLegend)
@@ -473,6 +626,15 @@ export function exportContainersToPrompt(
     lines.push(legendColor)
     lines.push(legendNested)
     lines.push('')
+  }
+
+  // Add "To Buy" summary if prices enabled
+  if (options.showPrices) {
+    const defaultCurrency = options.defaultCurrency || 'PLN'
+    const summary = generateToBuySummary(containers, options, defaultCurrency)
+    if (summary) {
+      lines.push(summary)
+    }
   }
 
   return lines.join('\n')

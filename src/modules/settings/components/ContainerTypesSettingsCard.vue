@@ -1,9 +1,13 @@
 <script setup lang="ts">
+import { toTypedSchema } from '@vee-validate/zod'
 import { Edit, InfoIcon, Plus, Trash2 } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
+import { useForm } from 'vee-validate'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useGearSettings } from '@/modules/gear/composables/useGearSettings'
 import type { IUserContainerType } from '@/modules/gear/types/gearSettings.types'
@@ -12,57 +16,61 @@ const { t } = useI18n()
 const { customContainerTypes, addContainerType, updateContainerType, removeContainerType } = useGearSettings()
 
 const editingId = ref<string | null>(null)
-const newTypeValue = ref('')
 
-const isAdding = computed(() => editingId.value === null && !!newTypeValue.value.trim())
+const containerTypeSchema = z.object({
+  value: z.string().min(1, t('settings.containerTypes.valueRequired')),
+})
 
-const handleAdd = () => {
-  if (!newTypeValue.value.trim()) {
-    return
+const { handleSubmit, setValues, resetForm, values } = useForm({
+  validationSchema: toTypedSchema(containerTypeSchema),
+  initialValues: {
+    value: '',
+  },
+})
+
+const onSubmit = handleSubmit(async (formValues) => {
+  if (editingId.value) {
+    // Edit mode
+    const containerType = customContainerTypes.value.find(t => t.id === editingId.value)
+    if (!containerType) return
+
+    const updated: IUserContainerType = {
+      ...containerType,
+      value: formValues.value.trim(),
+      updatedAt: new Date().toISOString(),
+    }
+
+    await updateContainerType(updated)
+    editingId.value = null
+  } else {
+    // Add mode
+    const now = new Date().toISOString()
+    const containerType: IUserContainerType = {
+      id: crypto.randomUUID(),
+      value: formValues.value.trim(),
+      createdAt: now,
+      updatedAt: now,
+    }
+
+    await addContainerType(containerType)
   }
 
-  const now = new Date().toISOString()
-  const containerType: IUserContainerType = {
-    id: crypto.randomUUID(),
-    value: newTypeValue.value.trim(),
-    createdAt: now,
-    updatedAt: now,
-  }
-
-  addContainerType(containerType)
-
-  // Reset form
-  newTypeValue.value = ''
-}
+  resetForm()
+})
 
 const handleEdit = (containerType: IUserContainerType) => {
   editingId.value = containerType.id
-  newTypeValue.value = containerType.value
-}
-
-const handleSave = (id: string) => {
-  const containerType = customContainerTypes.value.find(t => t.id === id)
-  if (!containerType) return
-
-  const updated: IUserContainerType = {
-    ...containerType,
-    value: newTypeValue.value.trim(),
-    updatedAt: new Date().toISOString(),
-  }
-
-  updateContainerType(updated)
-  editingId.value = null
-  newTypeValue.value = ''
+  setValues({ value: containerType.value })
 }
 
 const handleCancel = () => {
   editingId.value = null
-  newTypeValue.value = ''
+  resetForm()
 }
 
-const handleDelete = (id: string) => {
+const handleDelete = async (id: string) => {
   if (confirm(t('settings.containerTypes.deleteConfirm'))) {
-    removeContainerType(id)
+    await removeContainerType(id)
   }
 }
 </script>
@@ -77,35 +85,40 @@ const handleDelete = (id: string) => {
     </CardHeader>
     <CardContent class="space-y-4">
       <!-- Add New Container Type Form -->
-      <div class="border rounded-lg p-4 space-y-3">
-        <h4 class="font-medium text-sm">
-          {{ editingId ? t('settings.containerTypes.edit') : t('settings.containerTypes.add') }}
-        </h4>
-        <Input
-          v-model="newTypeValue"
-          :placeholder="t('settings.containerTypes.valuePlaceholder')"
-          @keydown.enter="handleAdd"
-        />
-        <div class="flex gap-2">
-          <Button
-            v-if="isAdding"
-            size="sm"
-            @click="editingId ? handleSave(editingId) : handleAdd"
-          >
-            <Plus v-if="!editingId" class="size-4" />
-            <Edit v-else class="size-4" />
-            {{ editingId ? t('settings.containerTypes.save') : t('settings.containerTypes.add') }}
-          </Button>
-          <Button
-            v-if="editingId"
-            size="sm"
-            variant="outline"
-            @click="handleCancel"
-          >
-            {{ t('settings.containerTypes.cancel') }}
-          </Button>
+      <form @submit="onSubmit">
+        <div class="border rounded-lg p-4 space-y-3">
+          <h4 class="font-medium text-sm">
+            {{ editingId ? t('settings.containerTypes.edit') : t('settings.containerTypes.add') }}
+          </h4>
+          <div class="flex gap-2">
+            <FormField v-slot="{ componentField }" name="value">
+              <FormItem class="flex-1">
+                <Input
+                  v-bind="componentField"
+                  :placeholder="t('settings.containerTypes.valuePlaceholder')"
+                />
+                <FormMessage />
+              </FormItem>
+            </FormField>
+            <Button
+              type="submit"
+              :disabled="!values.value?.trim()"
+            >
+              <Plus v-if="!editingId" class="size-4" />
+              <Edit v-else class="size-4" />
+              {{ editingId ? t('settings.common.save') : t('settings.common.add') }}
+            </Button>
+            <Button
+              v-if="editingId"
+              type="button"
+              variant="outline"
+              @click="handleCancel"
+            >
+              {{ t('settings.containerTypes.cancel') }}
+            </Button>
+          </div>
         </div>
-      </div>
+      </form>
 
       <!-- Container Types List -->
       <div v-if="customContainerTypes.length > 0" class="space-y-2">
@@ -137,7 +150,7 @@ const handleDelete = (id: string) => {
           </div>
         </div>
       </div>
-      <div v-else class="flex items-center justify-center gap-2 text-sm py-8 text-muted-foreground">
+      <div v-else class="flex items-center justify-center gap-2 text-sm py-6 text-muted-foreground">
         <InfoIcon class="size-4 inline" />
         {{ t('settings.containerTypes.empty') }}
       </div>

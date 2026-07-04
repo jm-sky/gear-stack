@@ -4,7 +4,7 @@ Helper functions for common repository operations using composition over inherit
 These functions can be used by any repository without requiring base class inheritance.
 """
 
-from typing import TypeVar, Type
+from typing import Any, TypeVar, Type
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -22,7 +22,9 @@ async def get_by_id(session: AsyncSession, model: Type[T], id: str) -> T | None:
     Returns:
         Entity instance or None if not found
     """
-    result = await session.execute(select(model).where(model.id == id))
+    # Use getattr to access the id column dynamically
+    id_column = getattr(model, "id")
+    result = await session.execute(select(model).where(id_column == id))
     return result.scalar_one_or_none()
 
 
@@ -40,7 +42,9 @@ async def count_all(session: AsyncSession, model: Type[T]) -> int:
     return result.scalar_one()
 
 
-async def exists_by_field(session: AsyncSession, model: Type[T], field_name: str, value: any) -> bool:
+async def exists_by_field(
+    session: AsyncSession, model: Type[T], field_name: str, value: Any
+) -> bool:
     """Check if entity exists with given field value.
 
     Args:
@@ -56,7 +60,9 @@ async def exists_by_field(session: AsyncSession, model: Type[T], field_name: str
         exists = await exists_by_field(session, UserDB, "email", "test@example.com")
     """
     field = getattr(model, field_name)
-    result = await session.execute(select(func.count()).select_from(model).where(field == value))
+    result = await session.execute(
+        select(func.count()).select_from(model).where(field == value)
+    )
     count = result.scalar_one()
     return count > 0
 

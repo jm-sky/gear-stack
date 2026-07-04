@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Copy, Edit, Eye, MoreVertical, Trash2 } from 'lucide-vue-next'
-import { ref } from 'vue'
+import { defineAsyncComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { Button } from '@/components/ui/button'
@@ -11,11 +11,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import type { IGearContainer } from '../types/gear.types'
-import CloneContainerDialog from './CloneContainerDialog.vue'
+import type { IGearItemV2 } from '../types/gear.types.v2'
+import { GearRoutePath } from '../routes'
+
+// Lazy load dialog to reduce initial bundle size
+const CloneContainerDialog = defineAsyncComponent(() => import('./CloneContainerDialog.vue'))
 
 const props = defineProps<{
-  container: IGearContainer
+  container: IGearItemV2
 }>()
 
 const emit = defineEmits<{
@@ -28,11 +31,11 @@ const isCloneDialogOpen = ref(false)
 
 // Actions
 const handleShow = () => {
-  router.push(`/gear/${props.container.id}`)
+  router.push(GearRoutePath.ContainerDetailById(props.container.id))
 }
 
 const handleEdit = () => {
-  router.push(`/gear/${props.container.id}/edit`)
+  router.push(GearRoutePath.ContainerEditById(props.container.id))
 }
 
 const handleClone = () => {
@@ -49,10 +52,11 @@ const handleDelete = () => {
     <DropdownMenu>
       <DropdownMenuTrigger as-child>
         <Button
+          v-tooltip.bottom="t('gear.actions.moreActions')"
           variant="ghost"
           size="sm"
           class="size-8 p-0"
-          :aria-label="$t('gear.actions.moreActions')"
+          :aria-label="t('gear.actions.moreActions')"
           @click.stop
         >
           <MoreVertical class="size-4" />
@@ -89,4 +93,3 @@ const handleDelete = () => {
     />
   </div>
 </template>
-

@@ -18,12 +18,22 @@ export interface IItemWithContainer {
   expirationDate?: string
   wearable?: boolean
   consumable?: boolean
+  isContainer?: boolean // True if this is a container (not a regular item)
+  containerType?: string // Container type (if isContainer is true)
+  primaryImageUrl?: string | null // URL of the primary image for the item
 }
 
 export function createAllItemsColumns(
   t: (key: string, ...args: unknown[]) => string,
 ): ColumnDef<IItemWithContainer>[] {
   return [
+    {
+      id: 'image',
+      accessorKey: 'id',
+      header: () => t('gear.item.image'),
+      enableSorting: false,
+      enableHiding: true,
+    },
     {
       id: 'category',
       accessorKey: 'category',

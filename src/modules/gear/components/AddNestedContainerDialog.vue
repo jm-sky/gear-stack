@@ -1,16 +1,21 @@
 <script setup lang="ts">
 import { Package } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
+import ComboBox, { type ComboBoxOption } from '@/components/ui/combo-box/ComboBox.vue'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { useGear } from '../composables/useGear'
-import { getAllNestedContainers } from '../utils/containerNesting'
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import type { IGearItemV2 } from '../types/gear.types.v2'
+import { useGearV2 } from '../composables/useGearV2'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   open: boolean
@@ -22,25 +27,61 @@ const emit = defineEmits<{
   confirm: [containerId: string]
 }>()
 
-const { containers } = useGear()
+// Load the full container list through the active V2 service (API when authenticated,
+// localStorage otherwise) into the store. The container detail page only loads the current
+// container + its children, so we fetch all containers when the dialog opens.
+const { containers, getItems } = useGearV2()
+
+watch(
+  () => props.open,
+  (open) => {
+    if (open) {
+      getItems({ itemType: 'container' }).catch(() => {
+        // Best-effort; fall back to whatever is already in the store
+      })
+    }
+  },
+  { immediate: true },
+)
+
+/**
+ * Collect a container id and all of its descendants (V2 hierarchy via parentItemId).
+ */
+const collectSubtreeIds = (rootId: string, all: IGearItemV2[]): Set<string> => {
+  const ids = new Set<string>([rootId])
+  const walk = (parentId: string) => {
+    for (const c of all) {
+      if (c.parentItemId === parentId && !ids.has(c.id)) {
+        ids.add(c.id)
+        walk(c.id)
+      }
+    }
+  }
+  walk(rootId)
+  return ids
+}
 
 // Get available containers for selection (exclude current container and its nested containers)
-const availableContainers = computed(() => {
+const availableContainers = computed<IGearItemV2[]>(() => {
   const allContainers = containers.value
   if (!props.currentContainerId) {
     return allContainers
   }
 
-  // Exclude current container and all containers nested inside it
-  const nestedIds = new Set(
-    getAllNestedContainers(props.currentContainerId, allContainers).map(c => c.id)
-  )
-  nestedIds.add(props.currentContainerId)
-
-  return allContainers.filter(c => !nestedIds.has(c.id))
+  const excludedIds = collectSubtreeIds(props.currentContainerId, allContainers)
+  return allContainers.filter(c => !excludedIds.has(c.id))
 })
 
+// Combo-box options (search matches the rendered text: name + type label)
+const containerOptions = computed<ComboBoxOption<IGearItemV2>[]>(() =>
+  availableContainers.value.map(c => ({ value: c.id, label: c.name, data: c })),
+)
+
 const selectedContainerId = ref<string>('')
+
+const containerTypeLabel = (option: ComboBoxOption<IGearItemV2>): string => {
+  return t(`gear.container.types.${option.data?.containerType ?? 'other'}`)
+}
 
 const handleOpenChange = (open: boolean) => {
   emit('update:open', open)
@@ -55,71 +96,56 @@ const handleConfirm = () => {
     handleOpenChange(false)
   }
 }
-
-const isOpen = computed({
-  get: () => props.open,
-  set: (value) => handleOpenChange(value),
-})
 </script>
 
 <template>
-  <Teleport to="body">
-    <div
-      v-if="isOpen"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-      @click="handleOpenChange(false)"
-    >
-      <div
-        class="bg-card rounded-lg border shadow-lg w-[95vw] max-w-md mx-4"
-        @click.stop
-      >
-        <div class="p-6 space-y-4">
-          <div>
-            <h2 class="text-lg font-semibold">
-              {{ $t('gear.container.addNested') }}
-            </h2>
-            <p class="text-sm text-muted-foreground mt-1">
-              {{ $t('gear.container.addNestedDescription') }}
-            </p>
-          </div>
+  <Dialog :open="props.open" @update:open="handleOpenChange">
+    <DialogContent class="w-full sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle>{{ t('gear.container.addNested') }}</DialogTitle>
+        <DialogDescription>
+          {{ t('gear.container.addNestedDescription') }}
+        </DialogDescription>
+      </DialogHeader>
 
-          <div class="space-y-2">
-            <label class="text-sm font-medium">
-              {{ $t('gear.container.selectContainer') }}
-            </label>
-            <Select v-model="selectedContainerId">
-              <SelectTrigger>
-                <SelectValue :placeholder="$t('gear.container.selectContainerPlaceholder')" />
-              </SelectTrigger>
-              <SelectContent>
-                <template v-for="container in availableContainers" :key="container.id">
-                  <SelectItem :value="container.id">
-                    <div class="flex items-center gap-2">
-                      <Package :size="16" class="text-muted-foreground" />
-                      <span>{{ container.name }}</span>
-                      <span class="text-xs text-muted-foreground">({{ $t(`gear.container.types.${container.type}`) }})</span>
-                    </div>
-                  </SelectItem>
-                </template>
-              </SelectContent>
-            </Select>
-          </div>
+      <div class="space-y-2">
+        <label class="text-sm font-medium">
+          {{ t('gear.container.selectContainer') }}
+        </label>
+        <ComboBox
+          v-model:value="selectedContainerId"
+          :options="containerOptions"
+          class="w-full"
+          :placeholder="t('gear.container.selectContainerPlaceholder')"
+          :search-placeholder="t('gear.container.searchContainers', 'Search containers...')"
+          :empty-message="t('gear.container.noContainersAvailable')"
+          clearable
+          popover-content-class="w-[calc(100vw-3rem)] sm:w-[var(--reka-popper-anchor-width)] p-0"
+        >
+          <template #option-before>
+            <Package :size="16" class="text-muted-foreground" />
+          </template>
+          <template #option-content="{ option }">
+            <span class="truncate">{{ option.label }}</span>
+            <span class="text-xs text-muted-foreground ml-1 shrink-0">
+              ({{ containerTypeLabel(option as ComboBoxOption<IGearItemV2>) }})
+            </span>
+          </template>
+        </ComboBox>
 
-          <p v-if="availableContainers.length === 0" class="text-sm text-muted-foreground">
-            {{ $t('gear.container.noContainersAvailable') }}
-          </p>
-
-          <div class="flex justify-end gap-2 pt-4">
-            <Button variant="outline" @click="handleOpenChange(false)">
-              {{ $t('gear.actions.cancel') }}
-            </Button>
-            <Button :disabled="!selectedContainerId" @click="handleConfirm">
-              {{ $t('gear.actions.add') }}
-            </Button>
-          </div>
-        </div>
+        <p v-if="availableContainers.length === 0" class="text-sm text-muted-foreground">
+          {{ t('gear.container.noContainersAvailable') }}
+        </p>
       </div>
-    </div>
-  </Teleport>
-</template>
 
+      <DialogFooter class="flex-col-reverse gap-2 sm:flex-row">
+        <Button variant="outline" class="w-full sm:w-auto" @click="handleOpenChange(false)">
+          {{ t('gear.actions.cancel') }}
+        </Button>
+        <Button class="w-full sm:w-auto" :disabled="!selectedContainerId" @click="handleConfirm">
+          {{ t('gear.actions.add') }}
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+</template>

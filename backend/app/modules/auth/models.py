@@ -68,6 +68,8 @@ class User(BaseModel):
     hashedPassword: str | None = None  # Nullable for OAuth users
     isActive: bool = True
     isAdmin: bool = False
+    isOwner: bool = False
+    isPremium: bool = False
     isEmailVerified: bool = False
     createdAt: datetime
     resetToken: str | None = None
@@ -75,6 +77,7 @@ class User(BaseModel):
     emailVerificationToken: str | None = None
     emailVerificationSentAt: datetime | None = None
     emailVerifiedAt: datetime | None = None
+    tokenVersion: int = 0
     oauthProvider: str | None = None  # 'google', 'github', etc.
     oauthProviderId: str | None = None  # Provider's user ID
     avatarUrl: str | None = None  # Profile picture URL
@@ -131,7 +134,9 @@ class User(BaseModel):
             logger.debug("Invalid reset token for user %s", self.id)
             return False
         except Exception as e:
-            logger.error("Unexpected error validating reset token: %s", e, exc_info=True)
+            logger.error(
+                "Unexpected error validating reset token: %s", e, exc_info=True
+            )
             return False
 
     def set_email_verification_token(self, token: str, sent_at: datetime) -> None:
@@ -178,7 +183,11 @@ class User(BaseModel):
             logger.debug("Invalid email verification token for user %s", self.id)
             return False
         except Exception as e:
-            logger.error("Unexpected error validating email verification token: %s", e, exc_info=True)
+            logger.error(
+                "Unexpected error validating email verification token: %s",
+                e,
+                exc_info=True,
+            )
             return False
 
     def to_response(self) -> dict[str, Any]:
@@ -189,6 +198,8 @@ class User(BaseModel):
             "name": self.name,
             "isActive": self.isActive,
             "isAdmin": self.isAdmin,
+            "isOwner": self.isOwner,
+            "isPremium": self.isPremium,
             "createdAt": self.createdAt,
             "isEmailVerified": self.isEmailVerified,
             "emailVerifiedAt": self.emailVerifiedAt,

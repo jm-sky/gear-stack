@@ -1,55 +1,120 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
-import { CheckCircle2, Download, Minus, Plus, RotateCcw, ShoppingCart, Trash2, X } from 'lucide-vue-next'
+import { useDebounceFn } from '@vueuse/core'
+import { Download, Plus, RotateCcw, ShoppingCart } from 'lucide-vue-next'
 import { useForm } from 'vee-validate'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import Badge from '@/components/ui/badge/Badge.vue'
+import CommonPageHeader from '@/components/layout/CommonPageHeader.vue'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
-import type { ICreateItemDto, IGearItem } from '../types/gear.types'
-import type { TGearItemCategory, TGearItemPriority } from '../types/gear.types'
-import CategoryIcon from '../components/CategoryIcon.vue'
-import ItemFormFields from '../components/ItemFormFields.vue'
-import { useGear } from '../composables/useGear'
+import { config, SHOPPING_PLANNING_PAGE_FILTERS_KEY } from '@/shared/config/config'
+import type { ICreateItemDto } from '../types/gear.types'
+import type { TGearItemCategory, TGearItemPriority } from '../types/gear.types.v2'
+import type { IItemWithContainerId } from '../types/shopping.types'
+import AvailableItemCard from '../components/shopping/AvailableItemCard.vue'
+import DeletedItemsList from '../components/shopping/DeletedItemsList.vue'
+import ShoppingListFilters from '../components/shopping/ShoppingListFilters.vue'
+import ShoppingListItem from '../components/shopping/ShoppingListItem.vue'
+import ShoppingListSummary from '../components/shopping/ShoppingListSummary.vue'
+
+// Lazy load dialogs - only loaded when user opens them
+const AddItemToShoppingDialog = defineAsyncComponent(() => import('../components/shopping/AddItemToShoppingDialog.vue'))
+const ShoppingExportDialog = defineAsyncComponent(() => import('../components/shopping/ShoppingExportDialog.vue'))
+import type { IGearContainer } from '../types/gear.types'
+import { useCategoryLabel } from '../composables/useCategoryLabel'
+import { useGearMutations } from '../composables/useGearMutations'
 import { useGearSettings } from '../composables/useGearSettings'
-import { getPriorityVariant } from '../utils/badgeVariants'
-import { EXPIRATION_WARNING_DAYS, MILLISECONDS_PER_DAY } from '../utils/constants'
+import { useGearV2 } from '../composables/useGearV2'
+import { useGearStoreV2 } from '../store/useGearStoreV2'
 import { getDefaultItemValues } from '../utils/defaultValues'
-import { formatWeightWithPreferredUnit } from '../utils/formatWeight'
+import { isExpiringSoon } from '../utils/isExpiringSoon'
+import { getReturnTo } from '../utils/navigationParams'
+import { convertV2ContainerToV1, convertV2ItemToV1 } from '../utils/typeConverters'
 import { type ItemFormData, itemSchema } from '../utils/validation'
+import type { TUUID } from '@/shared/types/base.type'
 
 const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
-const { containers, createItem, updateItem } = useGear()
-const { customCategories, settings: gearSettings } = useGearSettings()
-const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
+const store = useGearStoreV2()
+const { createItem, updateItem } = useGearMutations()
+const { getItems } = useGearV2()
+const { defaultCurrency } = useGearSettings()
+
+// V1-shaped view (containers with nested items) built from the flat V2 store, so the
+// existing shopping logic (which iterates container.items) and the V1-typed shopping
+// components keep working unchanged.
+const containers = computed<IGearContainer[]>(() =>
+  store.getAllContainers.map(c => ({
+    ...convertV2ContainerToV1(c),
+    items: store.getChildrenOfItem(c.id).filter(i => i.itemType === 'item').map(convertV2ItemToV1),
+  })),
+)
+
+// Load the full gear list into the V2 store
+onMounted(() => {
+  getItems().catch(() => {})
+})
+const { getCategoryLabel } = useCategoryLabel()
 
 // Filters
 const selectedCategories = ref<TGearItemCategory[]>([])
 const budget = ref<number | null>(null)
 const includeExpiringSoon = ref(true)
+const itemsBeingPurchased = ref<Set<TUUID>>(new Set<TUUID>())
 
-// Category checkbox states - using reactive object for v-model compatibility
-const categoryChecked = ref<Record<string, boolean>>({})
+// Storage keys
+const SHOPPING_LIST_STORAGE_KEY = `${config.app.id}:shopping-list`
+const DELETED_ITEMS_STORAGE_KEY = `${config.app.id}:shopping-deleted-items`
 
-// Storage key for shopping list
-const SHOPPING_LIST_STORAGE_KEY = 'gear-stack:shopping-list'
-const DELETED_ITEMS_STORAGE_KEY = 'gear-stack:shopping-deleted-items'
+// Helper to load filters from localStorage
+interface FiltersState {
+  selectedCategories: TGearItemCategory[]
+  budget: number | null
+  includeExpiringSoon: boolean
+}
+
+function loadFiltersFromStorage(): FiltersState | null {
+  const stored = localStorage.getItem(SHOPPING_PLANNING_PAGE_FILTERS_KEY)
+  if (stored) {
+    try {
+      return JSON.parse(stored) as FiltersState
+    } catch (error) {
+      console.error('Error loading filters from storage:', error)
+    }
+  }
+  return null
+}
+
+// Helper to save filters to localStorage
+function saveFiltersToStorage(): void {
+  try {
+    const filters: FiltersState = {
+      selectedCategories: selectedCategories.value,
+      budget: budget.value,
+      includeExpiringSoon: includeExpiringSoon.value,
+    }
+    localStorage.setItem(SHOPPING_PLANNING_PAGE_FILTERS_KEY, JSON.stringify(filters))
+  } catch (error) {
+    console.error('Error saving filters to storage:', error)
+  }
+}
+
+// Load filters from storage on mount
+const savedFilters = loadFiltersFromStorage()
+if (savedFilters) {
+  selectedCategories.value = savedFilters.selectedCategories
+  budget.value = savedFilters.budget
+  includeExpiringSoon.value = savedFilters.includeExpiringSoon
+}
+
+// Watch filters and save to localStorage
+watch([selectedCategories, budget, includeExpiringSoon], () => {
+  saveFiltersToStorage()
+}, { deep: true })
 
 // Helper to load shopping list from localStorage
 function loadShoppingListFromStorage(): IItemWithContainerId[] {
@@ -101,38 +166,24 @@ const shoppingList = ref<IItemWithContainerId[]>(loadShoppingListFromStorage())
 // Deleted items (local to this page)
 const deletedItems = ref<IItemWithContainerId[]>(loadDeletedItemsFromStorage())
 
-// Watch shopping list changes and save to localStorage
+// Debounced save functions to reduce localStorage writes
+const debouncedSaveShoppingList = useDebounceFn((list: IItemWithContainerId[]) => {
+  saveShoppingListToStorage(list)
+}, 500)
+
+const debouncedSaveDeletedItems = useDebounceFn((items: IItemWithContainerId[]) => {
+  saveDeletedItemsToStorage(items)
+}, 500)
+
+// Watch shopping list changes and save to localStorage (debounced)
 watch(shoppingList, (newList) => {
-  saveShoppingListToStorage(newList)
+  debouncedSaveShoppingList(newList)
 }, { deep: true })
 
-// Watch deleted items changes and save to localStorage
+// Watch deleted items changes and save to localStorage (debounced)
 watch(deletedItems, (newItems) => {
-  saveDeletedItemsToStorage(newItems)
+  debouncedSaveDeletedItems(newItems)
 }, { deep: true })
-
-// Helper to check if item is expired
-function isExpired(item: IGearItem): boolean {
-  if (!item.expirationDate) return false
-  const expirationDate = new Date(item.expirationDate)
-  const now = new Date()
-  return expirationDate < now
-}
-
-// Helper to check if item is expiring soon (includes expired items)
-function isExpiringSoon(item: IGearItem, days: number = EXPIRATION_WARNING_DAYS): boolean {
-  if (!item.expirationDate) return false
-  const expirationDate = new Date(item.expirationDate)
-  const now = new Date()
-  const daysUntilExpiration = Math.ceil((expirationDate.getTime() - now.getTime()) / MILLISECONDS_PER_DAY)
-  // Include expired items (daysUntilExpiration <= 0) and items expiring soon
-  return daysUntilExpiration <= days
-}
-
-// Item with container ID for navigation
-interface IItemWithContainerId extends IGearItem {
-  _containerId: string // Internal field to track container ID
-}
 
 // Get available items (toBuy + optionally expiring soon/expired) with container IDs
 const availableItems = computed<IItemWithContainerId[]>(() => {
@@ -163,54 +214,6 @@ const allCategories = computed<TGearItemCategory[]>(() => {
   return Array.from(categories).sort()
 })
 
-// Helper to get category label
-const getCategoryLabel = (categoryValue: string): string => {
-  const customCategory = customCategories.value.find(c => c.value === categoryValue)
-  if (customCategory) {
-    return customCategory.value
-  }
-  return t(`gear.item.categories.${categoryValue}`)
-}
-
-// Sync categoryChecked with selectedCategories
-watch(
-  () => allCategories.value,
-  (categories) => {
-    categories.forEach(category => {
-      if (!(category in categoryChecked.value)) {
-        categoryChecked.value[category] = selectedCategories.value.includes(category)
-      }
-    })
-  },
-  { immediate: true },
-)
-
-// Watch categoryChecked changes and sync to selectedCategories
-watch(
-  categoryChecked,
-  (checked) => {
-    const newSelected: TGearItemCategory[] = []
-    Object.entries(checked).forEach(([category, isChecked]) => {
-      if (isChecked && allCategories.value.includes(category as TGearItemCategory)) {
-        newSelected.push(category as TGearItemCategory)
-      }
-    })
-    selectedCategories.value = newSelected
-  },
-  { deep: true },
-)
-
-// Watch selectedCategories changes and sync to categoryChecked
-watch(
-  selectedCategories,
-  (selected) => {
-    allCategories.value.forEach(category => {
-      categoryChecked.value[category] = selected.includes(category)
-    })
-  },
-  { immediate: true },
-)
-
 // Priority order for sorting
 const priorityOrder: Record<TGearItemPriority, number> = {
   critical: 0,
@@ -237,25 +240,24 @@ const filteredItems = computed<IItemWithContainerId[]>(() => {
     })
   }
 
-  // Sort by priority
-  items.sort((a, b) => {
+  // Sort by priority (using toSorted to avoid mutating the array)
+  return items.toSorted((a, b) => {
     return priorityOrder[a.priority] - priorityOrder[b.priority]
   })
-
-  return items
 })
 
-// Calculate total price for shopping list
-const totalPrice = computed(() => {
-  return shoppingList.value.reduce((sum, item) => {
-    const itemPrice = item.price ?? 0
-    return sum + (itemPrice * item.quantity)
-  }, 0)
-})
-
-// Calculate total items count
-const totalItemsCount = computed(() => {
-  return shoppingList.value.reduce((sum, item) => sum + item.quantity, 0)
+// Calculate total price for shopping list (per currency)
+const totalPriceByCurrency = computed(() => {
+  const totals: Record<string, number> = {}
+  const defaultCurr = defaultCurrency.value
+  shoppingList.value.forEach(item => {
+    if (item.price != null && item.price > 0) {
+      const currency = item.currency ?? defaultCurr
+      const totalPrice = item.price * item.quantity
+      totals[currency] = (totals[currency] || 0) + totalPrice
+    }
+  })
+  return totals
 })
 
 // Check if item is in shopping list
@@ -292,12 +294,16 @@ const toggleShoppingList = (item: IItemWithContainerId) => {
 // Mark item as purchased (change status to Owned and remove from list)
 const markAsPurchased = async (item: IItemWithContainerId) => {
   try {
+    itemsBeingPurchased.value.add(item.id)
     await updateItem(item.id, { status: 'owned' })
+    itemsBeingPurchased.value.delete(item.id)
     removeFromShoppingList(item)
     toast.success(t('gear.shopping.markedAsPurchased', 'Item marked as purchased'))
   } catch (error) {
     console.error('Failed to mark item as purchased:', error)
     toast.error(t('common.error', 'Error'))
+  } finally {
+    itemsBeingPurchased.value.delete(item.id)
   }
 }
 
@@ -397,7 +403,7 @@ const generateMarkdown = (): string => {
   markdown += `${t('gear.shopping.generatedAt', 'Generated at')}: ${new Date().toLocaleString()}\n\n`
 
   // Group by priority
-  const byPriority: Record<TGearItemPriority, IGearItem[]> = {
+  const byPriority: Record<TGearItemPriority, IItemWithContainerId[]> = {
     critical: [],
     high: [],
     medium: [],
@@ -413,9 +419,10 @@ const generateMarkdown = (): string => {
     if (items.length > 0) {
       markdown += `## ${t(`gear.item.priorities.${priority}`)}\n\n`
       items.forEach(item => {
-        const categoryLabel = getCategoryLabel(item.category)
-        const price = item.price ? ` - ${item.price} ${t('gear.shopping.currency', 'PLN')}` : ''
-        const quantity = item.quantity > 1 ? ` x${item.quantity}` : ''
+        const categoryLabel = getCategoryLabel(item.category ?? 'other')
+        const currency = item.currency ?? defaultCurrency.value
+        const price = item.price ? ` - ${item.price.toFixed(2)} ${currency}` : ''
+        const quantity = (item.quantity ?? 1) > 1 ? ` x${item.quantity}` : ''
         const brand = item.brand ? ` **${item.brand}**` : ''
         const expiration = item.expirationDate ? ` (${t('gear.item.expiration.expiringSoon')}: ${new Date(item.expirationDate).toLocaleDateString()})` : ''
 
@@ -425,13 +432,21 @@ const generateMarkdown = (): string => {
     }
   })
 
-  const exportTotalPrice = itemsToExport.reduce((sum, item) => {
-    const itemPrice = item.price ?? 0
-    return sum + (itemPrice * item.quantity)
-  }, 0)
+  // Calculate total price per currency
+  const exportTotalPriceByCurrency: Record<string, number> = {}
+  itemsToExport.forEach(item => {
+    if (item.price != null && item.price > 0) {
+      const currency = item.currency ?? defaultCurrency.value
+      const totalPrice = item.price * item.quantity
+      exportTotalPriceByCurrency[currency] = (exportTotalPriceByCurrency[currency] || 0) + totalPrice
+    }
+  })
 
-  if (exportTotalPrice > 0) {
-    markdown += `\n**${t('gear.shopping.totalPrice', 'Total')}**: ${exportTotalPrice.toFixed(2)} ${t('gear.shopping.currency', 'PLN')}\n`
+  if (Object.keys(exportTotalPriceByCurrency).length > 0) {
+    markdown += `\n**${t('gear.shopping.totalPrice', 'Total')}**:\n`
+    Object.entries(exportTotalPriceByCurrency).forEach(([currency, amount]) => {
+      markdown += `- ${amount.toFixed(2)} ${currency}\n`
+    })
   }
 
   return markdown
@@ -470,16 +485,32 @@ const addItemForm = useForm({
 
 const { handleSubmit: handleAddItemSubmit, isSubmitting: isAddingItem, resetForm: resetAddItemForm } = addItemForm
 
-const onAddItemSubmit = handleAddItemSubmit(async (data: ICreateItemDto) => {
+const onAddItemSubmit = handleAddItemSubmit(async (data: ItemFormData) => {
   if (!firstContainerId.value) {
     toast.error(t('gear.shopping.noContainer', 'No container available'))
     return
   }
 
   try {
-    const newItem = await createItem(firstContainerId.value, data)
-    // Add to shopping list
-    const itemWithContainer: IItemWithContainerId = { ...newItem, _containerId: firstContainerId.value }
+    // Convert form data to DTO (omit form-only shelfLifeValue/shelfLifeUnit, add shelfLife)
+    const { shelfLifeValue, shelfLifeUnit, ...rest } = data
+    const dtoData: ICreateItemDto = {
+      ...rest,
+      shelfLife:
+        shelfLifeValue && shelfLifeUnit
+          ? { value: shelfLifeValue, unit: shelfLifeUnit }
+          : null,
+    }
+
+    // Drop the V1-only nested containerId; V2 hierarchy is parentItemId
+    const { containerId: _nestedContainerId, ...itemFields } = dtoData
+    const newItem = await createItem({
+      ...itemFields,
+      itemType: 'item',
+      parentItemId: firstContainerId.value,
+    })
+    // Add to shopping list (convert back to the V1 shape the shopping components use)
+    const itemWithContainer: IItemWithContainerId = { ...convertV2ItemToV1(newItem), _containerId: firstContainerId.value }
     addToShoppingList(itemWithContainer)
     addItemDialogOpen.value = false
     resetAddItemForm({ values: getInitialAddItemValues() })
@@ -489,6 +520,11 @@ const onAddItemSubmit = handleAddItemSubmit(async (data: ICreateItemDto) => {
     toast.error(t('common.error', 'Error'))
   }
 })
+
+const handleCancelAddItem = () => {
+  addItemDialogOpen.value = false
+  resetAddItemForm({ values: getInitialAddItemValues() })
+}
 
 // Sync shopping list with current container data
 // This ensures items in shopping list are up-to-date with container data
@@ -543,14 +579,21 @@ function syncDeletedItemsWithContainers() {
 }
 
 // Watch containers changes and sync shopping list
-watch(containers, () => {
+// Track only item IDs instead of deep watching to reduce reactivity overhead
+watch(() => {
+  // Create a string of all item IDs from all containers
+  // This will change when items are added/removed, but won't trigger on property changes
+  return containers.value
+    .flatMap(container => container.items.map(item => item.id))
+    .join(',')
+}, () => {
   syncShoppingListWithContainers()
   syncDeletedItemsWithContainers()
-}, { deep: true })
+})
 
 // Handle redirect from edit page
 onMounted(() => {
-  const returnTo = route.query.returnTo as string | undefined
+  const returnTo = getReturnTo(route)
   if (returnTo === 'shopping') {
     // Clear the query param
     router.replace({ query: {} })
@@ -564,19 +607,14 @@ onMounted(() => {
 
 <template>
   <AuthenticatedLayout>
-    <div class="space-y-6 w-full max-w-full overflow-hidden">
+    <div class="space-y-6 w-full max-w-full">
       <!-- Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 class="text-3xl font-bold tracking-tight flex items-center gap-3">
-            <ShoppingCart class="size-8 text-primary" />
-            {{ t('gear.shopping.title', 'Shopping Planning') }}
-          </h1>
-          <p class="text-muted-foreground mt-2">
-            {{ t('gear.shopping.subtitle', 'Plan your purchases for items to buy and expiring soon') }}
-          </p>
-        </div>
-        <div class="flex items-center gap-2 flex-wrap">
+      <CommonPageHeader
+        :icon="ShoppingCart"
+        :label="t('gear.shopping.title', 'Shopping Planning')"
+        :description="t('gear.shopping.subtitle', 'Plan your purchases for items to buy and expiring soon')"
+      >
+        <template #actions>
           <Button
             variant="default"
             @click="addItemDialogOpen = true"
@@ -599,101 +637,26 @@ onMounted(() => {
             <RotateCcw class="size-4" />
             {{ t('gear.shopping.reset', 'Reset') }}
           </Button>
-        </div>
-      </div>
+        </template>
+      </CommonPageHeader>
 
       <!-- Summary above list -->
-      <div
-        v-if="shoppingList.length > 0"
-        class="p-4 border rounded-lg bg-primary/5"
-      >
-        <div class="flex items-center justify-between">
-          <div>
-            <h3 class="font-semibold">
-              {{ t('gear.shopping.summary', 'Summary') }}
-            </h3>
-            <p class="text-sm text-muted-foreground">
-              {{ t('gear.shopping.itemsCount', { count: shoppingList.length }) }}
-              ({{ t('gear.shopping.totalQuantity', { count: totalItemsCount }) }})
-              <span v-if="totalPrice > 0">
-                - {{ totalPrice.toFixed(2) }} {{ t('gear.shopping.currency', 'PLN') }}
-              </span>
-            </p>
-          </div>
-        </div>
-      </div>
+      <ShoppingListSummary
+        :shopping-list="shoppingList"
+        :total-price-by-currency="totalPriceByCurrency"
+      />
 
       <!-- Filters -->
-      <div class="space-y-4 p-4 border rounded-lg bg-muted/50">
-        <h3 class="font-semibold text-sm">
-          {{ t('gear.shopping.filters', 'Filters') }}
-        </h3>
-
-        <!-- Categories filter -->
-        <div v-if="allCategories.length > 0" class="space-y-2">
-          <Label class="text-sm">{{ t('gear.shopping.filterByCategory', 'Filter by Category') }}</Label>
-          <div class="flex flex-wrap gap-2">
-            <div
-              v-for="category in allCategories"
-              :key="category"
-              class="flex items-center gap-2"
-            >
-              <Checkbox
-                :id="`category-${category}`"
-                v-model="categoryChecked[category]"
-              />
-              <Label
-                :for="`category-${category}`"
-                class="text-sm cursor-pointer flex items-center gap-2"
-              >
-                <CategoryIcon :category="category" :size="14" />
-                {{ getCategoryLabel(category) }}
-              </Label>
-            </div>
-          </div>
-        </div>
-
-        <!-- Budget filter -->
-        <div class="space-y-2">
-          <Label class="text-sm">{{ t('gear.shopping.filterByBudget', 'Filter by Budget') }}</Label>
-          <div class="flex items-center gap-2">
-            <Input
-              :model-value="budget?.toString() ?? ''"
-              type="number"
-              :placeholder="t('gear.shopping.budgetPlaceholder', 'Enter budget amount')"
-              class="max-w-xs"
-              min="0"
-              step="0.01"
-              @update:model-value="(value) => {
-                budget = value === '' ? null : Number(value)
-              }"
-            />
-            <span class="text-sm text-muted-foreground">{{ t('gear.shopping.currency', 'PLN') }}</span>
-            <Button
-              v-if="budget !== null"
-              variant="ghost"
-              size="sm"
-              @click="budget = null"
-            >
-              {{ t('gear.shopping.clearBudget', 'Clear') }}
-            </Button>
-          </div>
-        </div>
-
-        <!-- Include expiring soon -->
-        <div class="flex items-center gap-2">
-          <Checkbox
-            id="include-expiring"
-            v-model="includeExpiringSoon"
-          />
-          <Label
-            for="include-expiring"
-            class="text-sm cursor-pointer"
-          >
-            {{ t('gear.shopping.includeExpiringSoon', 'Include items expiring soon') }}
-          </Label>
-        </div>
-      </div>
+      <ShoppingListFilters
+        :all-categories="allCategories"
+        :selected-categories="selectedCategories"
+        :budget="budget"
+        :include-expiring-soon="includeExpiringSoon"
+        :default-currency="defaultCurrency"
+        @update:selected-categories="selectedCategories = $event"
+        @update:budget="budget = $event"
+        @update:include-expiring-soon="includeExpiringSoon = $event"
+      />
 
       <!-- Shopping list section -->
       <div
@@ -714,104 +677,17 @@ onMounted(() => {
         </div>
 
         <div class="space-y-2">
-          <div
+          <ShoppingListItem
             v-for="item in shoppingList"
             :key="item.id"
-            class="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-          >
-            <!-- Category icon -->
-            <CategoryIcon :category="item.category" :size="20" class="text-muted-foreground shrink-0" />
-
-            <!-- Item info -->
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2 flex-wrap">
-                <RouterLink
-                  :to="`/gear/${item._containerId}/items/${item.id}/edit?returnTo=shopping`"
-                  class="font-medium hover:text-primary hover:underline transition-colors"
-                >
-                  {{ item.name }}
-                </RouterLink>
-                <Badge
-                  :variant="getPriorityVariant(item.priority)"
-                  class="text-xs"
-                >
-                  {{ t(`gear.item.priorities.${item.priority}`) }}
-                </Badge>
-                <Badge
-                  v-if="item.status === 'toBuy'"
-                  variant="outline"
-                  class="text-xs"
-                >
-                  {{ t('gear.item.statuses.toBuy') }}
-                </Badge>
-                <Badge
-                  v-else-if="isExpiringSoon(item)"
-                  variant="outline"
-                  :class="[
-                    'text-xs',
-                    isExpired(item) ? 'text-red-600 border-red-600' : 'text-yellow-600 border-yellow-600'
-                  ]"
-                >
-                  {{ isExpired(item) ? t('gear.item.expiration.expired') : t('gear.item.expiration.expiringSoon') }}
-                </Badge>
-              </div>
-              <div class="flex items-center gap-4 mt-1 text-sm text-muted-foreground flex-wrap">
-                <span>{{ getCategoryLabel(item.category) }}</span>
-                <span v-if="item.brand">{{ item.brand }}</span>
-                <span>{{ t('gear.item.quantity') }}: {{ item.quantity }}</span>
-                <span>
-                  {{ formatWeightWithPreferredUnit(item.weight * item.quantity, item.weightUnit, settings.preferredWeightUnit) }}
-                </span>
-                <span v-if="item.price">
-                  {{ (item.price * item.quantity).toFixed(2) }} {{ t('gear.shopping.currency', 'PLN') }}
-                </span>
-                <span v-if="item.expirationDate" :class="isExpired(item) ? 'text-red-600' : 'text-yellow-600'">
-                  {{ isExpired(item) ? t('gear.item.expiration.expired') : t('gear.item.expiration.expiringSoon') }}: {{ new Date(item.expirationDate).toLocaleDateString() }}
-                </span>
-              </div>
-            </div>
-
-            <!-- Quantity controls -->
-            <div class="flex items-center gap-2 shrink-0">
-              <Button
-                variant="outline"
-                size="sm"
-                :disabled="item.quantity <= 1"
-                @click="decrementQuantity(item)"
-              >
-                <Minus class="size-4" />
-              </Button>
-              <span class="text-sm font-medium min-w-[2ch] text-center">
-                {{ item.quantity }}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                @click="incrementQuantity(item)"
-              >
-                <Plus class="size-4" />
-              </Button>
-            </div>
-
-            <!-- Actions -->
-            <div class="flex items-center gap-2 shrink-0">
-              <Button
-                variant="default"
-                size="sm"
-                @click="markAsPurchased(item)"
-              >
-                <CheckCircle2 class="size-4" />
-                <span class="hidden sm:inline">{{ t('gear.shopping.purchased', 'Purchased') }}</span>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                @click="deleteFromShoppingList(item)"
-              >
-                <X class="size-4" />
-              </Button>
-            </div>
-          </div>
+            v-memo="[item.id, item.quantity, itemsBeingPurchased.has(item.id)]"
+            :item="item"
+            :is-being-purchased="itemsBeingPurchased.has(item.id)"
+            @purchase="markAsPurchased(item)"
+            @increment="incrementQuantity(item)"
+            @decrement="decrementQuantity(item)"
+            @delete="deleteFromShoppingList(item)"
+          />
         </div>
       </div>
 
@@ -845,210 +721,45 @@ onMounted(() => {
             </p>
           </div>
 
-          <div
+          <AvailableItemCard
             v-for="item in filteredItems"
             :key="item.id"
-            class="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-          >
-            <!-- Toggle button -->
-            <Button
-              :variant="isInShoppingList(item) ? 'default' : 'outline'"
-              size="sm"
-              @click="toggleShoppingList(item)"
-            >
-              <Plus
-                v-if="!isInShoppingList(item)"
-                class="size-4"
-              />
-              <Trash2
-                v-else
-                class="size-4"
-              />
-            </Button>
-
-            <!-- Category icon -->
-            <CategoryIcon :category="item.category" :size="20" class="text-muted-foreground shrink-0" />
-
-            <!-- Item info -->
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2 flex-wrap">
-                <RouterLink
-                  :to="`/gear/${item._containerId}/items/${item.id}/edit?returnTo=shopping`"
-                  class="font-medium hover:text-primary hover:underline transition-colors"
-                >
-                  {{ item.name }}
-                </RouterLink>
-                <Badge
-                  :variant="getPriorityVariant(item.priority)"
-                  class="text-xs"
-                >
-                  {{ t(`gear.item.priorities.${item.priority}`) }}
-                </Badge>
-                <Badge
-                  v-if="item.status === 'toBuy'"
-                  variant="outline"
-                  class="text-xs"
-                >
-                  {{ t('gear.item.statuses.toBuy') }}
-                </Badge>
-                <Badge
-                  v-else-if="isExpiringSoon(item)"
-                  variant="outline"
-                  :class="[
-                    'text-xs',
-                    isExpired(item) ? 'text-red-600 border-red-600' : 'text-yellow-600 border-yellow-600'
-                  ]"
-                >
-                  {{ isExpired(item) ? t('gear.item.expiration.expired') : t('gear.item.expiration.expiringSoon') }}
-                </Badge>
-              </div>
-              <div class="flex items-center gap-4 mt-1 text-sm text-muted-foreground flex-wrap">
-                <span>{{ getCategoryLabel(item.category) }}</span>
-                <span v-if="item.brand">{{ item.brand }}</span>
-                <span>{{ t('gear.item.quantity') }}: {{ item.quantity }}</span>
-                <span>
-                  {{ formatWeightWithPreferredUnit(item.weight * item.quantity, item.weightUnit, settings.preferredWeightUnit) }}
-                </span>
-                <span v-if="item.price">
-                  {{ (item.price * item.quantity).toFixed(2) }} {{ t('gear.shopping.currency', 'PLN') }}
-                </span>
-                <span v-if="item.expirationDate" :class="isExpired(item) ? 'text-red-600' : 'text-yellow-600'">
-                  {{ isExpired(item) ? t('gear.item.expiration.expired') : t('gear.item.expiration.expiringSoon') }}: {{ new Date(item.expirationDate).toLocaleDateString() }}
-                </span>
-              </div>
-            </div>
-          </div>
+            v-memo="[item.id, item.status, item.priority, isInShoppingList(item), itemsBeingPurchased.has(item.id)]"
+            :item="item"
+            :is-in-shopping-list="isInShoppingList(item)"
+            :is-being-purchased="itemsBeingPurchased.has(item.id)"
+            @toggle="toggleShoppingList(item)"
+            @purchase="markAsPurchased(item)"
+          />
         </div>
       </div>
 
       <!-- Summary below list -->
-      <div
-        v-if="shoppingList.length > 0"
-        class="p-4 border rounded-lg bg-primary/5"
-      >
-        <div class="flex items-center justify-between">
-          <div>
-            <h3 class="font-semibold">
-              {{ t('gear.shopping.summary', 'Summary') }}
-            </h3>
-            <p class="text-sm text-muted-foreground">
-              {{ t('gear.shopping.itemsCount', { count: shoppingList.length }) }}
-              ({{ t('gear.shopping.totalQuantity', { count: totalItemsCount }) }})
-              <span v-if="totalPrice > 0">
-                - {{ totalPrice.toFixed(2) }} {{ t('gear.shopping.currency', 'PLN') }}
-              </span>
-            </p>
-          </div>
-        </div>
-      </div>
+      <ShoppingListSummary
+        :shopping-list="shoppingList"
+        :total-price-by-currency="totalPriceByCurrency"
+      />
 
       <!-- Deleted items section -->
-      <div
-        v-if="deletedItems.length > 0"
-        class="space-y-4"
-      >
-        <h2 class="text-xl font-semibold text-muted-foreground">
-          {{ t('gear.shopping.deletedItems', 'Deleted Items') }}
-        </h2>
-
-        <div class="space-y-2">
-          <div
-            v-for="item in deletedItems"
-            :key="item.id"
-            class="flex items-center gap-4 p-4 border rounded-lg bg-muted/30 opacity-75"
-          >
-            <!-- Category icon -->
-            <CategoryIcon :category="item.category" :size="20" class="text-muted-foreground shrink-0" />
-
-            <!-- Item info -->
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2 flex-wrap">
-                <span class="font-medium">{{ item.name }}</span>
-                <Badge
-                  :variant="getPriorityVariant(item.priority)"
-                  class="text-xs"
-                >
-                  {{ t(`gear.item.priorities.${item.priority}`) }}
-                </Badge>
-              </div>
-              <div class="flex items-center gap-4 mt-1 text-sm text-muted-foreground flex-wrap">
-                <span>{{ getCategoryLabel(item.category) }}</span>
-                <span v-if="item.brand">{{ item.brand }}</span>
-                <span>{{ t('gear.item.quantity') }}: {{ item.quantity }}</span>
-                <span v-if="item.price">
-                  {{ (item.price * item.quantity).toFixed(2) }} {{ t('gear.shopping.currency', 'PLN') }}
-                </span>
-              </div>
-            </div>
-
-            <!-- Restore button -->
-            <Button
-              variant="outline"
-              size="sm"
-              @click="restoreToShoppingList(item)"
-            >
-              {{ t('gear.shopping.restore', 'Restore') }}
-            </Button>
-          </div>
-        </div>
-      </div>
+      <DeletedItemsList
+        :deleted-items="deletedItems"
+        @restore="restoreToShoppingList"
+      />
 
       <!-- Export Dialog -->
-      <Dialog v-model:open="exportDialogOpen">
-        <DialogContent class="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{{ t('gear.shopping.exportMarkdown', 'Export Markdown') }}</DialogTitle>
-            <DialogDescription>
-              {{ t('gear.shopping.exportDescription', 'Copy the markdown content below') }}
-            </DialogDescription>
-          </DialogHeader>
-          <div class="space-y-4">
-            <pre class="p-4 bg-muted rounded-lg text-sm overflow-x-auto whitespace-pre-wrap">{{ markdownContent }}</pre>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" @click="exportDialogOpen = false">
-              {{ t('gear.actions.cancel', 'Cancel') }}
-            </Button>
-            <Button @click="handleCopyMarkdown">
-              {{ t('gear.shopping.copyMarkdown', 'Copy to Clipboard') }}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ShoppingExportDialog
+        v-model:open="exportDialogOpen"
+        :markdown-content="markdownContent"
+        @copy="handleCopyMarkdown"
+      />
 
       <!-- Add Item Dialog -->
-      <Dialog v-model:open="addItemDialogOpen">
-        <DialogContent class="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{{ t('gear.shopping.addItem', 'Add') }}</DialogTitle>
-            <DialogDescription>
-              {{ t('gear.shopping.addItemDescription', 'Add a new item to your shopping list') }}
-            </DialogDescription>
-          </DialogHeader>
-          <form @submit="onAddItemSubmit">
-            <ItemFormFields
-              :item="undefined"
-              :loading="isAddingItem"
-              @cancel="() => {
-                addItemDialogOpen = false
-                resetAddItemForm({ values: getInitialAddItemValues() })
-              }"
-            />
-            <DialogFooter>
-              <Button
-                variant="outline"
-                type="button"
-                @click="() => {
-                  addItemDialogOpen = false
-                  resetAddItemForm({ values: getInitialAddItemValues() })
-                }"
-              >
-                {{ t('gear.actions.cancel', 'Cancel') }}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <AddItemToShoppingDialog
+        v-model:open="addItemDialogOpen"
+        :loading="isAddingItem"
+        @submit="onAddItemSubmit"
+        @cancel="handleCancelAddItem"
+      />
     </div>
   </AuthenticatedLayout>
 </template>

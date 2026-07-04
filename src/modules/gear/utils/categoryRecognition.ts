@@ -35,11 +35,17 @@ export const CATEGORY_KEYWORDS: Record<TGearItemCategory, string[]> = {
     // Polish
     'apteczka', 'pierwsza', 'pomoc', 'medyczny', 'bandaż', 'lek', 'zdrowie', 'rana', 'uraz',
   ],
+  blades: [
+    // English
+    'knife', 'knives', 'blade', 'blades', 'machete', 'machetes', 'axe', 'axes', 'hatchet', 'hatchets', 'sword', 'swords', 'dagger', 'daggers', 'cleaver', 'cleavers',
+    // Polish (including normalized versions without Polish diacritics)
+    'nóż', 'noz', 'noże', 'noze', 'ostrze', 'ostrza', 'maczeta', 'maczety', 'siekiera', 'siekery', 'toporek', 'toporki', 'miecz', 'miecze', 'sztylet', 'sztylety', 'tasak', 'tasaki',
+  ],
   tools: [
     // English
-    'tool', 'knife', 'multitool', 'axe', 'hatchet', 'saw', 'hammer', 'screwdriver', 'wrench', 'pliers', 'shovel', 'trowel', 'entrenching',
+    'tool', 'tools', 'multitool', 'multitools', 'saw', 'saws', 'hammer', 'hammers', 'screwdriver', 'screwdrivers', 'wrench', 'wrenches', 'pliers', 'shovel', 'shovels', 'trowel', 'trowels', 'entrenching',
     // Polish
-    'narzędzie', 'nóż', 'siekiera', 'toporek', 'piła', 'młotek', 'śrubokręt', 'klucz', 'obcęgi', 'niezbędnik', 'saperka', 'łopatka',
+    'narzędzie', 'narzędzia', 'niezbędnik', 'niezbędniki', 'piła', 'piły', 'młotek', 'młotki', 'śrubokręt', 'śrubokręty', 'klucz', 'klucze', 'obcęgi', 'saperka', 'saperki', 'łopatka', 'łopatki',
   ],
   navigation: [
     // English
@@ -55,9 +61,9 @@ export const CATEGORY_KEYWORDS: Record<TGearItemCategory, string[]> = {
   ],
   clothing: [
     // English
-    'clothing', 'clothes', 'jacket', 'pants', 'shirt', 'socks', 'boots', 'gloves', 'hat',
+    'clothing', 'clothes', 'jacket', 'pants', 'shirt', 'socks', 'boots', 'gloves', 'hat', 'poncho',
     // Polish
-    'odzież', 'ubranie', 'kurtka', 'spodnie', 'koszula', 'skarpety', 'buty', 'rękawice', 'czapka',
+    'odzież', 'ubranie', 'kurtka', 'spodnie', 'koszula', 'skarpety', 'buty', 'rękawice', 'czapka', 'płaszcz',
   ],
   hygiene: [
     // English
@@ -70,6 +76,12 @@ export const CATEGORY_KEYWORDS: Record<TGearItemCategory, string[]> = {
     'light', 'flashlight', 'torch', 'lamp', 'lantern', 'headlamp', 'headlight', 'illumination', 'led',
     // Polish
     'światło', 'latarka', 'lampa', 'lampion', 'reflektor', 'oświetlenie', 'świetlówka',
+  ],
+  container: [
+    // English
+    'container', 'box', 'bag', 'pouch', 'backpack', 'rucksack', 'sack',
+    // Polish
+    'kontener', 'skrzynka', 'torba', 'etui', 'plecak', 'tornister', 'worek', 'sakwa',
   ],
   other: [], // No keywords for "other" category
 }

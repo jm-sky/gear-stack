@@ -97,7 +97,7 @@ const handleCopySecret = async () => {
             type="button"
             variant="outline"
             size="icon"
-            :title="t('auth.two_factor.totp.copy_secret')"
+            :aria-label="t('auth.two_factor.totp.copy_secret')"
             @click="handleCopySecret"
           >
             <Check v-if="copied" :size="16" />

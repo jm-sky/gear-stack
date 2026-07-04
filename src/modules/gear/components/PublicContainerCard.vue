@@ -1,19 +1,33 @@
 <script setup lang="ts">
-import { Package } from 'lucide-vue-next'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import type { IGearContainer } from '../types/gear.types'
+import type { IGearItemV2, TContainerColor } from '../types/gear.types.v2'
 import ColorDot from '../components/ColorDot.vue'
 import { GearRoutePath } from '../routes'
+import { useGearStoreV2 } from '../store/useGearStoreV2'
+import { getContainerIcon } from '../utils/containerIcons'
 import ContainerCardBadges from './ContainerCardBadges.vue'
 import ContainerCardCreatedDate from './ContainerCardCreatedDate.vue'
+import MarkdownRenderer from './MarkdownRenderer.vue'
+import RatingStars from './RatingStars.vue'
 
 const { t } = useI18n()
+const store = useGearStoreV2()
 
-defineProps<{
-  container: IGearContainer
+const props = defineProps<{
+  container: IGearItemV2
 }>()
+
+// Get container icon based on type
+const ContainerIcon = computed(() => getContainerIcon(props.container.containerType))
+
+// Get items count from V2 store
+const itemsCount = computed(() => {
+  const children = store.getChildrenOfItem(props.container.id)
+  return children.filter(child => child.itemType === 'item').length
+})
 </script>
 
 <template>
@@ -26,8 +40,7 @@ defineProps<{
     >
       <CardHeader class="h-8 text-card-foreground flex items-center justify-between">
         <div class="flex items-center gap-2">
-          <ColorDot :color="container.color ?? undefined" />
-          <Package class="size-5" />
+          <ColorDot :color="(container.color as TContainerColor | undefined)" :icon="ContainerIcon" />
           <CardTitle>{{ container.name }}</CardTitle>
         </div>
       </CardHeader>
@@ -35,12 +48,28 @@ defineProps<{
       <CardContent class="flex flex-col flex-1 gap-3 px-6 pb-4 text-card-foreground">
         <ContainerCardBadges :container with-author />
 
-        <CardDescription class="flex-1">
-          {{ container.description ?? '' }}
+        <CardDescription v-if="container.description" class="flex-1">
+          <MarkdownRenderer
+            :content="container.description"
+            class="text-sm"
+          />
         </CardDescription>
 
         <div class="text-sm text-muted-foreground">
-          {{ t('gear.container.itemsCount', { count: container.items.length }) }}
+          {{ t('gear.container.itemsCount', { count: itemsCount }) }}
+        </div>
+
+        <!-- Rating Display -->
+        <div v-if="container.averageUserRating != null" class="flex items-center gap-2">
+          <RatingStars
+            :rating="container.averageUserRating"
+            :show-number="true"
+            size="sm"
+            :interactive="false"
+          />
+          <span class="text-xs text-muted-foreground">
+            ({{ container.userRatingCount }})
+          </span>
         </div>
 
         <div class="-mb-6 mt-2 flex items-center justify-end">

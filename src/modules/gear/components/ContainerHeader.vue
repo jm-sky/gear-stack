@@ -1,30 +1,63 @@
 <script setup lang="ts">
-import { ArrowLeft, BoxIcon, Download, Edit, MessageSquare, MoreVertical, Plus, SparklesIcon, Upload } from 'lucide-vue-next'
-import { computed } from 'vue'
+import { CalendarPlus, CalendarSync, ExternalLink, Link2, RefreshCcw } from 'lucide-vue-next'
+import { computed, defineAsyncComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import DropdownMenuSeparator from '@/components/ui/dropdown-menu/DropdownMenuSeparator.vue'
-import type { IGearContainer } from '../types/gear.types'
-import { useContainerTypeLabel } from '../composables/useContainerTypeLabel'
-import { useGearSettings } from '../composables/useGearSettings'
-import { useGearStore } from '../store/useGearStore'
-import {
-  READINESS_EXCELLENT_THRESHOLD,
-  READINESS_GOOD_THRESHOLD,
-} from '../utils/constants'
-import {
-  calculateReadinessPercentageSync,
-  calculateTotalWeightSync,
-  calculateWeightLimitPercentageSync,
-} from '../utils/containerCalculations'
-import { convertToGrams, formatWeight, formatWeightToPreferredUnit } from '../utils/formatWeight'
+import { useAi } from '@/modules/ai/composables/useAi'
+import { useBackend } from '@/shared/composables/useBackend'
+import { useHandleError } from '@/shared/composables/useHandleError'
+import { smallDateTime } from '@/shared/utils/smallDateTime'
+import type { IGearItemV2 } from '../types/gear.types.v2'
+import { useGearMutations } from '../composables/useGearMutations'
+import { GearRoutePath } from '../routes'
+import { getActionIcon } from '../utils/actionIcons'
+import { formatWeight } from '../utils/formatWeight'
 import { isSet } from '../utils/helpers'
+import { getFrom } from '../utils/navigationParams'
+import ContainerRatingBadge from './badges/ContainerRatingBadge.vue'
+import ContainerTypeBadge from './badges/ContainerTypeBadge.vue'
+import PublicContainerBadge from './badges/PublicContainerBadge.vue'
+import WeightLimitBadge from './badges/WeightLimitBadge.vue'
+import ContainerHeaderName from './ContainerHeaderName.vue'
+import ContainerHeaderStats from './ContainerHeaderStats.vue'
+import FavoriteContainerButton from './FavoriteContainerButton.vue'
+import ItemsTableEditModeToggle from './ItemsTableEditModeToggle.vue'
+import MarkdownRenderer from './MarkdownRenderer.vue'
+import PremiumFeatureLockButton from './PremiumFeatureLockButton.vue'
+
+// Lazy load dialog to reduce initial bundle size
+const CloneContainerDialog = defineAsyncComponent(() => import('./CloneContainerDialog.vue'))
+
+// Action icons
+const BackIcon = getActionIcon('back')
+const ExportToPromptIcon = getActionIcon('exportToPrompt')
+const EditIcon = getActionIcon('edit')
+const CloneIcon = getActionIcon('clone')
+const AddContainerIcon = getActionIcon('addContainer')
+const AddItemIcon = getActionIcon('addItem')
+const MoreActionsIcon = getActionIcon('moreActions')
+const ExportIcon = getActionIcon('export')
+const ExportToCSVIcon = getActionIcon('exportToCSV')
+const ImportIcon = getActionIcon('import')
+const RecognizeParametersAllIcon = getActionIcon('recognizeParametersAll')
+const DeleteIcon = getActionIcon('delete')
+const PublishIcon = getActionIcon('publish')
 
 const props = defineProps<{
-  container: IGearContainer
+  container: IGearItemV2
 }>()
 
 const emit = defineEmits<{
@@ -32,64 +65,44 @@ const emit = defineEmits<{
   import: []
   addContainer: []
   exportToPrompt: []
+  exportToCsv: []
   recognizeParametersAll: []
+  aiChat: []
+  manageShareTokens: []
+  refresh: []
 }>()
 
+const route = useRoute()
 const router = useRouter()
-const { t } = useI18n()
-const store = useGearStore()
-const { settings: gearSettings } = useGearSettings()
-const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.preferredWeightUnit }))
+const { t, locale } = useI18n()
+const { canUseAi } = useAi()
+const { shouldUseAPI } = useBackend()
+const { deleteItem, updateItem } = useGearMutations()
+const { handleError } = useHandleError()
 
-// Computed properties - use sync helpers for computed
-const totalWeight = computed<number>(() => {
-  return calculateTotalWeightSync(props.container, store.getAllContainers)
-})
-const readinessPercentage = computed<number>(() => {
-  return calculateReadinessPercentageSync(props.container)
-})
-const itemsCount = computed<number>(() => props.container.items.length)
+const isCloneDialogOpen = ref(false)
+const isDeleteDialogOpen = ref(false)
+const isDeleting = ref(false)
 
-// Format weight (totalWeight is in grams)
-const formattedWeight = computed<string>(() => formatWeightToPreferredUnit(totalWeight.value, settings.value.preferredWeightUnit))
-
-// Readiness color
-const readinessColor = computed<string>(() => {
-  if (readinessPercentage.value >= READINESS_EXCELLENT_THRESHOLD) return 'text-green-600'
-  if (readinessPercentage.value >= READINESS_GOOD_THRESHOLD) return 'text-yellow-600'
-  return 'text-red-600'
+const backTo = computed<string>(() => {
+  const from = getFrom(route)
+  if (from === 'all-items') {
+    return GearRoutePath.AllItems
+  }
+  // Domyślnie wracamy do ContainersList
+  return GearRoutePath.Containers
 })
 
-// Get container type label helper
-const { typeLabel } = useContainerTypeLabel(computed(() => props.container.type))
-
-// Weight limit
-const weightLimitPercentage = computed<number | null>(() => {
-  return calculateWeightLimitPercentageSync(props.container, store.getAllContainers)
-})
-const hasWeightLimit = computed<boolean>(() => weightLimitPercentage.value !== null)
-const weightLimitColor = computed<string>(() => {
-  if (!weightLimitPercentage.value) return ''
-  if (weightLimitPercentage.value >= 100) return 'text-red-600'
-  if (weightLimitPercentage.value >= 90) return 'text-orange-600'
-  if (weightLimitPercentage.value >= 70) return 'text-yellow-600'
-  return 'text-green-600'
-})
-const formattedMaxWeight = computed<string>(() => {
-  if (!props.container.maxWeight || !props.container.maxWeightUnit) return ''
-  return formatWeightToPreferredUnit(
-    convertToGrams(props.container.maxWeight, props.container.maxWeightUnit),
-    settings.value.preferredWeightUnit
-  )
-})
-
-// Actions
 const handleEdit = () => {
-  router.push(`/gear/${props.container.id}/edit`)
+  router.push(GearRoutePath.ContainerEditById(props.container.id))
+}
+
+const handleClone = () => {
+  isCloneDialogOpen.value = true
 }
 
 const handleAddItem = () => {
-  router.push(`/gear/${props.container.id}/items/new`)
+  router.push(GearRoutePath.ItemNew.replace(':containerId', props.container.id))
 }
 
 const handleAddContainer = () => {
@@ -108,8 +121,44 @@ const handleExportToPrompt = () => {
   emit('exportToPrompt')
 }
 
+const handleExportToCSV = () => {
+  emit('exportToCsv')
+}
+
 const handleBack = () => {
-  router.push('/gear')
+  router.push(backTo.value)
+}
+
+const handleDelete = () => {
+  isDeleteDialogOpen.value = true
+}
+
+const handleDeleteConfirm = async () => {
+  if (isDeleting.value) return
+
+  try {
+    isDeleting.value = true
+    await deleteItem(props.container.id)
+    toast.success(t('common.success'))
+    router.push(GearRoutePath.Containers)
+  } catch (error) {
+    console.error('Error deleting container:', error)
+    handleError(error, { fallbackMessage: t('common.error') })
+  } finally {
+    isDeleting.value = false
+    isDeleteDialogOpen.value = false
+  }
+}
+
+const handlePublish = async () => {
+  try {
+    await updateItem(props.container.id, { isPublic: true })
+    toast.success(t('common.success'))
+    emit('refresh')
+  } catch (error) {
+    console.error('Error publishing container:', error)
+    handleError(error, { fallbackMessage: t('common.error') })
+  }
 }
 </script>
 
@@ -118,73 +167,100 @@ const handleBack = () => {
     <!-- Header -->
     <div class="flex flex-col gap-4">
       <div class="flex items-center justify-between gap-3">
-        <Button variant="ghost" size="sm" @click="handleBack">
-          <ArrowLeft class="size-4" />
-          {{ t('common.back') }}
-        </Button>
         <Button
-          v-tooltip.bottom="t('gear.actions.exportToPrompt')"
           variant="ghost"
           size="sm"
-          :aria-label="$t('gear.actions.exportToPrompt')"
-          @click="handleExportToPrompt"
+          @click="handleBack"
         >
-          <SparklesIcon class="size-4" />
+          <BackIcon class="size-4" />
+          {{ t('common.back') }}
         </Button>
+        <div class="flex items-center gap-2">
+          <Button
+            v-if="shouldUseAPI"
+            v-tooltip.bottom="t('common.refresh')"
+            variant="ghost"
+            size="sm"
+            :aria-label="t('common.refresh')"
+            @click="$emit('refresh')"
+          >
+            <RefreshCcw class="size-4" />
+          </Button>
+          <PremiumFeatureLockButton
+            :has-access="canUseAi"
+            icon="ai"
+            :tooltip="t('gear.actions.aiAssistant')"
+            :aria-label="t('gear.actions.aiAssistant')"
+            @click="$emit('aiChat')"
+          />
+          <Button
+            v-tooltip.bottom="t('gear.actions.exportToPrompt')"
+            variant="ghost"
+            size="sm"
+            :aria-label="t('gear.actions.exportToPrompt')"
+            @click="handleExportToPrompt"
+          >
+            <ExportToPromptIcon class="size-4" />
+          </Button>
+          <FavoriteContainerButton :container />
+        </div>
       </div>
 
       <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
         <div class="flex-1">
-          <h1 class="text-3xl font-bold mb-2">
-            {{ container.name }}
-          </h1>
-          <p v-if="container.description" class="text-muted-foreground mb-3">
-            {{ container.description }}
-          </p>
+          <ContainerHeaderName :container />
+          <div v-if="container.description" class="text-muted-foreground mb-3">
+            <MarkdownRenderer
+              :content="container.description"
+              class="text-sm"
+            />
+          </div>
           <div class="flex items-center gap-2 flex-wrap">
-            <Badge variant="outline">
-              {{ typeLabel }}
+            <ContainerTypeBadge :container />
+            <PublicContainerBadge v-if="container.isPublic" />
+            <Badge
+              v-tooltip.bottom="t('common.created')"
+              variant="secondary"
+              class="text-xs"
+            >
+              <CalendarPlus class="size-4" />
+              {{ smallDateTime(container.createdAt) }}
             </Badge>
-            <Badge variant="secondary" class="text-xs">
-              {{ $d(new Date(container.createdAt), 'short') }}
-            </Badge>
-            <Badge v-if="container.updatedAt !== container.createdAt" variant="secondary" class="text-xs">
-              {{ $t('gear.container.updated') }}: {{ $d(new Date(container.updatedAt), 'short') }}
+            <Badge
+              v-if="container.updatedAt !== container.createdAt"
+              v-tooltip.bottom="t('common.updated')"
+              variant="secondary"
+              class="text-xs"
+            >
+              <CalendarSync class="size-4" /> {{ smallDateTime(container.updatedAt) }}
             </Badge>
             <Badge v-if="container.brand" variant="secondary" class="normal-case">
               {{ container.brand }}
             </Badge>
             <Badge v-if="isSet(container.weight) && isSet(container.weightUnit)" variant="secondary">
-              {{ formatWeight(container.weight, container.weightUnit) }}
+              {{ formatWeight(container.weight, container.weightUnit, locale) }}
             </Badge>
-            <Badge
-              v-if="hasWeightLimit && weightLimitPercentage !== null && weightLimitPercentage >= 90"
-              :class="weightLimitPercentage >= 100 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'"
-            >
-              {{ weightLimitPercentage >= 100 ? t('gear.container.weightLimitExceeded') : t('gear.container.weightLimitWarning') }}
-              ({{ weightLimitPercentage }}%)
-            </Badge>
-            <a
+            <WeightLimitBadge :container />
+            <ContainerRatingBadge :container />
+            <ExternalLink
               v-if="container.url"
               :href="container.url"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-primary hover:underline text-sm"
               @click.stop
             >
               {{ t('gear.container.url') }}
-            </a>
+            </ExternalLink>
           </div>
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
+          <ItemsTableEditModeToggle />
           <Button
             variant="outline"
             size="sm"
             class="shrink-0"
             @click="handleEdit"
           >
-            <Edit class="size-4" />
+            <EditIcon class="size-4" />
             <span class="hidden sm:inline">{{ t('gear.actions.edit') }}</span>
           </Button>
           <Button
@@ -193,42 +269,73 @@ const handleBack = () => {
             class="shrink-0"
             @click="handleAddContainer"
           >
-            <BoxIcon class="size-4" />
+            <AddContainerIcon class="size-4" />
             <span class="hidden sm:inline">{{ t('gear.container.addNested') }}</span>
           </Button>
           <Button size="sm" class="shrink-0 flex-1 sm:flex-none" @click="handleAddItem">
-            <Plus class="size-4" />
+            <AddItemIcon class="size-4" />
             {{ t('gear.item.create') }}
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger as-child>
               <Button
+                v-tooltip.bottom="t('gear.actions.moreActions')"
                 variant="outline"
                 size="sm"
                 class="shrink-0"
-                :aria-label="$t('gear.actions.moreActions')"
+                :aria-label="t('gear.actions.moreActions')"
               >
-                <MoreVertical class="size-4" />
+                <MoreActionsIcon class="size-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem @click="handleExport">
-                <Download class="size-4" />
-                {{ t('gear.actions.export') }}
+              <DropdownMenuItem @click="handleClone">
+                <CloneIcon class="size-4" />
+                {{ t('gear.container.clone') }}
               </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem @click="handleImport">
-                <Upload class="size-4" />
+                <ImportIcon class="size-4" />
                 {{ t('gear.actions.import') }}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
+              <DropdownMenuItem @click="handleExport">
+                <ExportIcon class="size-4" />
+                {{ t('gear.actions.exportToJSON') }}
+              </DropdownMenuItem>
+              <DropdownMenuItem @click="handleExportToCSV">
+                <ExportToCSVIcon class="size-4" />
+                {{ t('gear.actions.exportToCSV') }}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem @click="handleExportToPrompt">
-                <MessageSquare class="size-4" />
+                <ExportToPromptIcon class="size-4" />
                 {{ t('gear.actions.exportToPrompt') }}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem @click="$emit('recognizeParametersAll')">
-                <SparklesIcon class="size-4" />
+                <RecognizeParametersAllIcon class="size-4" />
                 {{ t('gear.actions.recognizeParametersAll') }}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                v-if="!container.isPublic && shouldUseAPI"
+                @click="handlePublish"
+              >
+                <PublishIcon class="size-4" />
+                {{ t('gear.actions.publishContainer') }}
+              </DropdownMenuItem>
+              <DropdownMenuItem v-if="shouldUseAPI" @click="$emit('manageShareTokens')">
+                <Link2 class="size-4" />
+                {{ t('gear.actions.manageShareTokens') }}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                class="text-destructive focus:text-destructive"
+                @click="handleDelete"
+              >
+                <DeleteIcon class="size-4" />
+                {{ t('gear.container.delete') }}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -236,54 +343,42 @@ const handleBack = () => {
       </div>
     </div>
 
-    <!-- Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="bg-card rounded-lg border p-4">
-        <div class="text-sm text-muted-foreground mb-1">
-          {{ t('gear.container.itemsCountLabel') }}
-        </div>
-        <div class="text-2xl font-bold">
-          {{ itemsCount }}
-        </div>
-      </div>
-      <div class="bg-card rounded-lg border p-4">
-        <div class="text-sm text-muted-foreground mb-1">
-          {{ t('gear.container.totalWeight') }}
-        </div>
-        <div :class="['text-2xl font-bold', hasWeightLimit ? weightLimitColor : '']">
-          {{ formattedWeight }}
-          <span v-if="hasWeightLimit" class="text-sm text-muted-foreground">
-            / {{ formattedMaxWeight }}
-          </span>
-        </div>
-        <div v-if="hasWeightLimit && weightLimitPercentage !== null" class="w-full bg-muted rounded-full h-2 mt-2">
-          <div
-            :class="[
-              'h-2 rounded-full transition-all',
-              weightLimitPercentage >= 100 ? 'bg-red-600' : weightLimitPercentage >= 90 ? 'bg-orange-600' : weightLimitPercentage >= 70 ? 'bg-yellow-600' : 'bg-green-600',
-            ]"
-            :style="{ width: `${Math.min(weightLimitPercentage, 100)}%` }"
-          />
-        </div>
-      </div>
-      <div class="bg-card rounded-lg border p-4">
-        <div class="text-sm text-muted-foreground mb-1">
-          {{ t('gear.container.readiness') }}
-        </div>
-        <div :class="['text-2xl font-bold', readinessColor]">
-          {{ readinessPercentage }}%
-        </div>
-        <div class="w-full bg-muted rounded-full h-2 mt-2">
-          <div
-            :class="[
-              'h-2 rounded-full transition-all',
-              readinessPercentage >= READINESS_EXCELLENT_THRESHOLD ? 'bg-green-600' : readinessPercentage >= READINESS_GOOD_THRESHOLD ? 'bg-yellow-600' : 'bg-red-600',
-            ]"
-            :style="{ width: `${readinessPercentage}%` }"
-          />
-        </div>
-      </div>
-    </div>
+    <ContainerHeaderStats :container />
+
+    <!-- Clone Dialog -->
+    <CloneContainerDialog
+      v-model:open="isCloneDialogOpen"
+      :container="container"
+    />
+
+    <!-- Delete Confirmation Dialog -->
+    <Dialog :open="isDeleteDialogOpen" @update:open="(open) => { isDeleteDialogOpen = open }">
+      <DialogContent class="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>
+            {{ t('gear.container.delete') }}
+          </DialogTitle>
+          <DialogDescription>
+            {{ t('gear.container.deleteConfirm') }}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter class="flex-col sm:flex-row gap-2">
+          <Button
+            variant="outline"
+            :disabled="isDeleting"
+            @click="isDeleteDialogOpen = false"
+          >
+            {{ t('common.cancel') }}
+          </Button>
+          <Button
+            variant="destructive"
+            :disabled="isDeleting"
+            @click="handleDeleteConfirm"
+          >
+            {{ isDeleting ? t('common.loading') : t('common.delete') }}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   </div>
 </template>
-

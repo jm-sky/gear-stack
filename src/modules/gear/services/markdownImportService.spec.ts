@@ -601,6 +601,34 @@ This backpack (model XYZ) is great.
 
       expect(container?.description).toBe('This backpack (model XYZ) is great.')
     })
+
+    it('should parse description in italic format from container header', () => {
+      const markdown = `
+## Apteczka Blackhawk [#apteczka-blackhawk] [uuid:bd404a57-4c08-46c4-9c93-162fd047dca1] *(Łączna waga 470 g)* (Pouch)
+- **Scyzoryk** - 40g
+      `.trim()
+
+      const result = markdownImportService.parseMarkdown(markdown)
+      const container = result.containers[0]
+
+      expect(container?.name).toBe('Apteczka Blackhawk')
+      expect(container?.description).toBe('Łączna waga 470 g')
+      expect(container?.id).toBe('apteczka-blackhawk')
+      expect(container?.uuid).toBe('bd404a57-4c08-46c4-9c93-162fd047dca1')
+    })
+
+    it('should prioritize description from header over description from lines below', () => {
+      const markdown = `
+## Backpack [#backpack] *(Header description)*
+This description should be ignored.
+- **Item 1** - 100g
+      `.trim()
+
+      const result = markdownImportService.parseMarkdown(markdown)
+      const container = result.containers[0]
+
+      expect(container?.description).toBe('Header description')
+    })
   })
 
   describe('Price parsing', () => {

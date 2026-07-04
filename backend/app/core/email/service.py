@@ -31,11 +31,16 @@ class EmailService:
         """
         self.adapter = adapter
         self.templates_dir = Path(__file__).parent / "templates"
-        self.jinja_env = Environment(loader=FileSystemLoader(str(self.templates_dir)), autoescape=select_autoescape(["html", "xml"]))
+        self.jinja_env = Environment(
+            loader=FileSystemLoader(str(self.templates_dir)),
+            autoescape=select_autoescape(["html", "xml"]),
+        )
         # Primary color from frontend: oklch(0.646 0.222 41.116) converted to hex for email compatibility
         self.primary_color = "#D97757"
 
-    def _render_translation(self, translations: dict, key: str, context: dict) -> str:
+    def _render_translation(
+        self, translations: dict[str, object], key: str, context: dict[str, object]
+    ) -> str:
         """Render a translation string with context variables.
 
         Args:
@@ -48,7 +53,7 @@ class EmailService:
         """
         # Navigate through nested keys (e.g., "welcome.subject")
         keys = key.split(".")
-        value = translations
+        value: object = translations
         for k in keys:
             if isinstance(value, dict):
                 value = value.get(k)
@@ -102,7 +107,9 @@ class EmailService:
             # Render subject if it's a translation key
             if translations and subject.startswith("translation:"):
                 translation_key = subject.replace("translation:", "")
-                subject = self._render_translation(translations, translation_key, context)
+                subject = self._render_translation(
+                    translations, translation_key, context
+                )
 
             # Add common context variables (app_name, primary_color, frontend_url)
             context_with_defaults = {
@@ -118,9 +125,13 @@ class EmailService:
                 context_with_defaults["locale"] = locale or DEFAULT_LOCALE
 
                 # Add helper function for translations in templates
-                def translate(key: str, **kwargs: dict) -> str:
+                # Note: translations is guaranteed to be a dict here
+                def translate(key: str, **kwargs: object) -> str:
                     """Helper function for translations in templates."""
-                    return self._render_translation(translations, key, {**context_with_defaults, **kwargs})
+                    assert translations is not None
+                    return self._render_translation(
+                        translations, key, {**context_with_defaults, **kwargs}
+                    )
 
                 context_with_defaults["translate"] = translate
             else:
@@ -133,27 +144,32 @@ class EmailService:
             # Generate text version (simple strip of HTML tags)
             text_body = self._html_to_text(html_body)
 
-            # Check if adapter supports audit parameters
-            # (AuditEmailAdapter has these params, standard adapters don't)
-            send_params = {
-                "to": to,
-                "subject": subject,
-                "html_body": html_body,
-                "text_body": text_body,
-                "from_email": from_email,
-            }
-
-            # Add audit parameters if adapter supports them
-            if hasattr(self.adapter, "repository"):
-                # This is an AuditEmailAdapter
-                send_params["template_name"] = template_name
-                send_params["template_context"] = context
-                send_params["user_id"] = user_id
-                send_params["related_entity_type"] = related_entity_type
-                send_params["related_entity_id"] = related_entity_id
-
             # Send via adapter
-            return await self.adapter.send_email(**send_params)
+            # Add audit parameters if adapter supports them (AuditEmailAdapter)
+            if hasattr(self.adapter, "repository"):
+                # This is an AuditEmailAdapter - call with all params
+                # Use type: ignore since AuditEmailAdapter extends base signature
+                return await self.adapter.send_email(  # type: ignore[call-arg]
+                    to=to,
+                    subject=subject,
+                    html_body=html_body,
+                    text_body=text_body,
+                    from_email=from_email,
+                    template_name=template_name,
+                    template_context=context,
+                    user_id=user_id,
+                    related_entity_type=related_entity_type,
+                    related_entity_id=related_entity_id,
+                )
+            else:
+                # Standard adapter
+                return await self.adapter.send_email(
+                    to=to,
+                    subject=subject,
+                    html_body=html_body,
+                    text_body=text_body,
+                    from_email=from_email,
+                )
 
         except Exception as e:
             logger.error(f"Failed to send email: {e}", exc_info=True)
@@ -234,7 +250,9 @@ class EmailService:
         Returns:
             True if email sent successfully
         """
-        verification_link = f"{settings.frontend_url}/auth/verify-email?token={verification_token}"
+        verification_link = (
+            f"{settings.frontend_url}/auth/verify-email?token={verification_token}"
+        )
         context = {
             "name": name,
             "email": to,
@@ -425,7 +443,10 @@ def get_email_service() -> EmailService:
                 use_tls=email_settings.smtp_use_tls,
                 max_retries=email_settings.max_retries,
             )
-            logger.info(f"Using RetrySMTPAdapter with {email_settings.max_retries} " f"max retries")
+            logger.info(
+                f"Using RetrySMTPAdapter with {email_settings.max_retries} "
+                f"max retries"
+            )
         else:
             adapter = SMTPEmailAdapter(
                 host=email_settings.smtp_host,

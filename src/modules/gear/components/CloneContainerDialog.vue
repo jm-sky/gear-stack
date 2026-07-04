@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useQueryClient } from '@tanstack/vue-query'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -15,12 +16,16 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import type { IGearContainer } from '../types/gear.types'
-import { useGear } from '../composables/useGear'
+import { useHandleError } from '@/shared/composables/useHandleError'
+import type { IGearItemV2 } from '../types/gear.types.v2'
+import { useGearV2 } from '../composables/useGearV2'
+import { GearRoutePath } from '../routes'
+import { cloneContainerV2 } from '../utils/cloneContainerV2'
+import { gearQueryKeys } from '../utils/queryKeys'
 
 const props = defineProps<{
   open: boolean
-  container: IGearContainer | null
+  container: IGearItemV2 | null
 }>()
 
 const emit = defineEmits<{
@@ -29,7 +34,9 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const router = useRouter()
-const { cloneContainer } = useGear()
+const queryClient = useQueryClient()
+const { getItemById, getChildren, createItem } = useGearV2()
+const { handleError } = useHandleError()
 
 const newName = ref('')
 const includeNestedContainers = ref(false)
@@ -58,20 +65,25 @@ const handleClone = async () => {
 
   try {
     isCloning.value = true
-    const clonedContainer = await cloneContainer(props.container.id, {
-      newName: newName.value.trim(),
-      includeNestedContainers: includeNestedContainers.value,
-      includePrices: includePrices.value,
-    })
+    const clonedContainer = await cloneContainerV2(
+      props.container.id,
+      {
+        newName: newName.value.trim(),
+        includeNestedContainers: includeNestedContainers.value,
+        includePrices: includePrices.value,
+      },
+      { getItemById, getChildren, createItem },
+    )
+    await queryClient.invalidateQueries({ queryKey: gearQueryKeys.all })
 
     toast.success(t('gear.container.cloneSuccess'))
     handleOpenChange(false)
     
     // Navigate to the cloned container
-    router.push(`/gear/${clonedContainer.id}`)
+    router.push(GearRoutePath.ContainerDetailById(clonedContainer.id))
   } catch (error) {
     console.error('Error cloning container:', error)
-    toast.error(t('common.error'))
+    handleError(error)
   } finally {
     isCloning.value = false
   }

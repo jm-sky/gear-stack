@@ -6,7 +6,11 @@ from fastapi import APIRouter, Depends, status
 
 from app.modules.auth.dependencies import CurrentUser
 from app.modules.tenants.repositories import TenantRepository, get_tenant_repository
-from app.modules.tenants.schemas import TenantCreateRequest, TenantListResponse, TenantResponse
+from app.modules.tenants.schemas import (
+    TenantCreateRequest,
+    TenantListResponse,
+    TenantResponse,
+)
 
 
 router = APIRouter(prefix="/tenants", tags=["Tenants"])

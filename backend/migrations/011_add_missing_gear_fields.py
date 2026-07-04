@@ -49,7 +49,9 @@ async def upgrade() -> None:
         items_exist = await table_exists(conn, "gear_items")
 
         if not containers_exist:
-            print("gear_containers table does not exist, creating it with all fields...")
+            print(
+                "gear_containers table does not exist, creating it with all fields..."
+            )
             await conn.run_sync(GearContainerDB.metadata.create_all)
             print("✓ gear_containers table created with all fields")
         else:

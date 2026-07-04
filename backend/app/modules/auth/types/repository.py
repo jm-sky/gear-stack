@@ -106,7 +106,9 @@ class UserRepositoryInterface(ABC):
         ...
 
     @abstractmethod
-    async def change_password(self, user_id: str, current_password: str, new_password: str) -> bool:
+    async def change_password(
+        self, user_id: str, current_password: str, new_password: str
+    ) -> bool:
         """Change user password after verifying current password.
 
         Args:
@@ -133,7 +135,21 @@ class UserRepositoryInterface(ABC):
         ...
 
     @abstractmethod
-    async def store_email_verification_token(self, user_id: str, token: str, sent_at: datetime) -> User | None:
+    async def increment_token_version(self, user_id: str) -> int:
+        """Increment token_version to invalidate all existing tokens for a user.
+
+        Args:
+            user_id: User ID
+
+        Returns:
+            New token_version value, or 0 if user not found
+        """
+        ...
+
+    @abstractmethod
+    async def store_email_verification_token(
+        self, user_id: str, token: str, sent_at: datetime
+    ) -> User | None:
         """Persist email verification token for a user.
 
         Args:
@@ -185,7 +201,9 @@ class UserRepositoryInterface(ABC):
         ...
 
     @abstractmethod
-    async def get_user_by_oauth_provider(self, provider: str, provider_id: str) -> User | None:
+    async def get_user_by_oauth_provider(
+        self, provider: str, provider_id: str
+    ) -> User | None:
         """Get user by OAuth provider and provider ID.
 
         Args:
@@ -194,5 +212,55 @@ class UserRepositoryInterface(ABC):
 
         Returns:
             User object if found, None otherwise
+        """
+        ...
+
+    @abstractmethod
+    async def get_oauth_connections(self, user_id: str) -> list[dict]:
+        """Get all OAuth connections for a user.
+
+        Args:
+            user_id: User ID
+
+        Returns:
+            List of OAuth connection dictionaries
+        """
+        ...
+
+    @abstractmethod
+    async def create_oauth_connection(
+        self,
+        user_id: str,
+        provider: str,
+        provider_id: str,
+        email: str | None = None,
+        name: str | None = None,
+        avatar_url: str | None = None,
+    ) -> dict:
+        """Create a new OAuth connection for a user.
+
+        Args:
+            user_id: User ID
+            provider: OAuth provider name (google, github, etc.)
+            provider_id: Provider's unique user ID
+            email: Email from OAuth provider (optional)
+            name: Name from OAuth provider (optional)
+            avatar_url: Profile picture URL from OAuth provider (optional)
+
+        Returns:
+            Created or existing OAuth connection dictionary
+        """
+        ...
+
+    @abstractmethod
+    async def delete_oauth_connection(self, user_id: str, provider: str) -> bool:
+        """Delete an OAuth connection for a user.
+
+        Args:
+            user_id: User ID
+            provider: OAuth provider name (google, github, etc.)
+
+        Returns:
+            True if connection deleted, False if not found
         """
         ...

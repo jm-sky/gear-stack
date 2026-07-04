@@ -1,10 +1,17 @@
-import type { IGearItem } from '../types/gear.types'
+import type { IGearItemV2 } from '../types/gear.types.v2'
 import type { ColumnDef } from '@tanstack/vue-table'
 
 export function createItemsColumns(
   t: (key: string, ...args: unknown[]) => string,
-): ColumnDef<IGearItem>[] {
+): ColumnDef<IGearItemV2>[] {
   return [
+    {
+      id: 'image',
+      accessorKey: 'id',
+      header: () => t('gear.item.image', 'Image'),
+      enableSorting: false,
+      enableHiding: true,
+    },
     {
       id: 'name',
       accessorKey: 'name',
@@ -48,6 +55,13 @@ export function createItemsColumns(
       enableHiding: true,
     },
     {
+      id: 'price',
+      accessorKey: 'price',
+      header: () => t('gear.item.price'),
+      enableSorting: true,
+      enableHiding: true,
+    },
+    {
       id: 'brand',
       accessorKey: 'brand',
       header: () => t('gear.item.brand'),
@@ -76,10 +90,21 @@ export function createItemsColumns(
       enableHiding: true,
     },
     {
+      id: 'order',
+      accessorKey: 'order',
+      header: () => t('gear.item.order', 'Order'),
+      enableSorting: true,
+      enableHiding: true,
+      // Hidden by default (used for manual ordering)
+    },
+    {
       id: 'actions',
       header: () => t('gear.item.actions'),
       enableSorting: false,
       enableHiding: false,
+      meta: {
+        pinned: 'right',
+      },
     },
   ]
 }

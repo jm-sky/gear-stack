@@ -4,10 +4,16 @@ from __future__ import annotations
 
 from typing import Any, Protocol
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from ..db_models import PasskeyDB, TotpConfigDB
 
 
 class TwoFactorRepositoryInterface(Protocol):
+    """Protocol for Two-Factor repository interface."""
+
+    db: AsyncSession  # Database session
+
     async def get_totp_config(self, user_id: str) -> TotpConfigDB | None: ...
 
     async def create_totp_config(
@@ -21,16 +27,22 @@ class TwoFactorRepositoryInterface(Protocol):
 
     async def update_totp_last_verified(self, user_id: str) -> None: ...
 
-    async def update_backup_codes(self, user_id: str, backup_codes_hashed_json: str) -> None: ...
+    async def update_backup_codes(
+        self, user_id: str, backup_codes_hashed_json: str
+    ) -> None: ...
 
-    async def mark_backup_code_used(self, user_id: str, used_codes_json: str) -> None: ...
+    async def mark_backup_code_used(
+        self, user_id: str, used_codes_json: str
+    ) -> None: ...
 
     async def disable_totp(self, user_id: str) -> None: ...
 
     # Passkey methods
     async def get_passkeys(self, user_id: str) -> list[PasskeyDB]: ...
 
-    async def get_passkey_by_credential_id(self, credential_id: str) -> PasskeyDB | None: ...
+    async def get_passkey_by_credential_id(
+        self, credential_id: str
+    ) -> PasskeyDB | None: ...
 
     async def create_passkey(
         self,

@@ -14,7 +14,9 @@ from app.exceptions.custom_exceptions import AppException
 logger = logging.getLogger(__name__)
 
 
-async def http_exception_handler(request: Request, exc: Union[HTTPException, AppException, Exception]) -> JSONResponse:
+async def http_exception_handler(
+    request: Request, exc: Union[HTTPException, AppException, Exception]
+) -> JSONResponse:
     """
     Global exception handler for HTTP and application exceptions.
 
@@ -67,7 +69,9 @@ async def http_exception_handler(request: Request, exc: Union[HTTPException, App
     )
 
 
-async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
+async def validation_exception_handler(
+    request: Request, exc: RequestValidationError
+) -> JSONResponse:
     """
     Handler for request validation errors.
 
@@ -80,14 +84,12 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     Returns:
         JSON response with validation errors
     """
-    errors = []
-    for error in exc.errors():
-        error_detail = {
-            "loc": error["loc"],
-            "msg": error["msg"],
-            "type": error["type"],
-        }
-        errors.append(error_detail)
+    raw_errors = exc.errors()
+    errors: dict[str, list[str]] = {}
+    for error in raw_errors:
+        loc = error["loc"]
+        field_name = str(loc[-1]) if len(loc) > 1 else "__root__"
+        errors.setdefault(field_name, []).append(error["msg"])
 
     logger.warning(
         f"Validation error on {request.method} {request.url.path}",

@@ -12,11 +12,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { useHandleError } from '@/shared/composables/useHandleError'
 import { useDataMigrationModal } from '../composables/useDataMigrationModal'
 import { migrateLocalDataToAPI } from '../services/dataMigrationService'
 
 const { t } = useI18n()
 const { isOpen, close, handleSuccess, handleCancel } = useDataMigrationModal()
+const { handleError } = useHandleError()
 const isMigrating = ref(false)
 
 const handleMigrate = async () => {
@@ -28,7 +30,7 @@ const handleMigrate = async () => {
     await handleSuccess()
   } catch (error) {
     console.error('Migration failed:', error)
-    toast.error(t('gear.migration.error', 'Failed to migrate data. Please try again.'))
+    handleError(error, { fallbackMessage: t('gear.migration.error', 'Failed to migrate data. Please try again.') })
   } finally {
     isMigrating.value = false
   }

@@ -19,6 +19,16 @@ def setup_static_routes(app: FastAPI) -> None:
     Args:
         app: FastAPI application instance
     """
+    # Mount uploads directory for user-uploaded files (if using local storage)
+    from app.core.config import settings
+
+    if settings.storage.type == "local":
+        uploads_path = Path(settings.storage.local_path)
+        if uploads_path.exists():
+            app.mount(
+                "/uploads", StaticFiles(directory=str(uploads_path)), name="uploads"
+            )
+
     # Check if dist directory exists (for production builds)
     dist_path = Path("dist")
 
@@ -30,7 +40,9 @@ def setup_static_routes(app: FastAPI) -> None:
 
         webfonts_path = dist_path / "webfonts"
         if webfonts_path.exists():
-            app.mount("/webfonts", StaticFiles(directory=str(webfonts_path)), name="webfonts")
+            app.mount(
+                "/webfonts", StaticFiles(directory=str(webfonts_path)), name="webfonts"
+            )
 
 
 @router.get("/favicon.ico", include_in_schema=False)
@@ -51,7 +63,7 @@ async def favicon() -> FileResponse:
     raise HTTPException(status_code=404, detail="Favicon not found")
 
 
-@router.get("/{path:path}", include_in_schema=False)
+@router.get("/{path:path}", include_in_schema=False, response_model=None)
 async def spa_handler(path: str) -> FileResponse | dict[str, str]:
     """
     Catch-all route for SPA.

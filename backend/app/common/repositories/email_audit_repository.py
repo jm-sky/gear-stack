@@ -349,7 +349,9 @@ class EmailAuditRepository(SearchMixin):
         return list(emails), total
 
 
-def get_email_audit_repository(db: AsyncSession = Depends(get_db)) -> EmailAuditRepository:
+def get_email_audit_repository(
+    db: AsyncSession = Depends(get_db),
+) -> EmailAuditRepository:
     """FastAPI dependency to get email audit repository instance.
 
     Args:

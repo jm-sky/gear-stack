@@ -3,11 +3,11 @@
 > 📋 **Zobacz też:**
 > - [ROADMAP.md](../ROADMAP.md) - Główny indeks roadmap
 > - [ROADMAP_OFFLINE.md](../ROADMAP_OFFLINE.md) - Funkcjonalności offline
-> - [TODO_FEATURES.md](../TODO_FEATURES.md) - Aktualne podsumowanie funkcji do zaimplementowania
+> - [ROADMAP_ONLINE.md](../ROADMAP_ONLINE.md) - Funkcjonalności online
 
 Lista funkcjonalności z ROADMAP_OFFLINE.md gotowych do implementacji, uporządkowana według priorytetu i złożoności.
 
-> ⚠️ **Uwaga:** Ten dokument może zawierać przestarzałe informacje. Sprawdź [TODO_FEATURES.md](../TODO_FEATURES.md) dla aktualnego statusu.
+> ⚠️ **Uwaga:** Ten dokument może zawierać przestarzałe informacje. Sprawdź [ROADMAP_OFFLINE.md](../ROADMAP_OFFLINE.md) i [ROADMAP_ONLINE.md](../ROADMAP_ONLINE.md) dla aktualnego statusu.
 
 ---
 
