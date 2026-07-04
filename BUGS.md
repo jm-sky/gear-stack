@@ -124,3 +124,65 @@ przedmiotów użytkownika? (nazewnictwo do ujednolicenia, by było jednoznaczne)
 
 **Status:** usprawnienie UX, nie błąd. Do zaplanowania osobno (powiązane z migracją katalogu
 na V2 – patrz luki w `docs/migration-v1-to-v2.md`).
+
+---
+
+## 7. Po dodaniu przedmiotu lista w kontenerze się nie odświeża — `TODO`
+
+**Strona:** `/gear/:id` (szczegóły kontenera) → `/gear/:id/items/new` → zapis nowego przedmiotu
+
+**Objaw:** Po dodaniu przedmiotu i powrocie na stronę kontenera nowy element nie pojawia się
+na liście. Trzeba ręcznie odświeżyć stronę (lub użyć akcji refresh), żeby go zobaczyć.
+
+**Przyczyna (prawdopodobna):** Rozjazd V1/V2 — ten sam wzorzec co w bugach #1 i #4.
+`ContainerDetailPage.vue` przy zalogowanym użytkowniku (`shouldUseAPI`) renderuje dzieci
+z TanStack Query (`useContainerWithChildren` → `childrenFromAPI`), a `ItemFormPage.vue`
+po zapisie woła `useGearV2().createItem()`, które aktualizuje tylko store V2
+(`store.upsertItem`) **bez** inwalidacji cache (`gearQueryKeys.all`). Po nawigacji wstecz
+strona pokazuje stare dane z cache do ręcznego odświeżenia.
+
+**Sugerowana poprawka:** po `createItem` inwalidować cache V2
+(`queryClient.invalidateQueries({ queryKey: gearQueryKeys.all })`) albo użyć
+`useGearMutations().createItem()` (jak w innych miejscach na stronie kontenera — komentarz
+w `ContainerDetailPage.vue` wskazuje, że mutacje z tego composable same inwalidują cache).
+
+**Pliki:** `src/modules/gear/pages/ItemFormPage.vue`,
+`src/modules/gear/composables/useGearV2.ts`,
+`src/modules/gear/pages/ContainerDetailPage.vue`
+
+---
+
+## 8. Brak obrazków przedmiotów na liście w kontenerze — `TODO`
+
+**Strona:** `/gear/:id` (szczegóły kontenera) — tabela przedmiotów i/lub galeria „Item Images"
+
+**Objaw:** Na liście przedmiotów w kontenerze nie widać obrazków (kolumna Image / galeria pod
+tabelą), mimo że przedmiot ma ustawiony obraz główny (main/primary image) — widoczny np.
+na stronie szczegółów przedmiotu lub w edycji obrazków.
+
+**Możliwe przyczyny (do zweryfikowania):**
+
+1. **Brak `primaryImageUrl` w odpowiedzi V2** — `ItemsTableImageCell` renderuje miniaturę z
+   `row.original.primaryImageUrl`, ale API V2 (`schemas_v2.py` / `service_v2.py`) prawdopodobnie
+   nie zwraca tego pola przy liście dzieci kontenera (w V1 było mapowane w `service.py`).
+2. **Kolumna Image ukryta domyślnie** — `ItemsTable.vue` ma w domyślnej widoczności kolumn
+   `image: false` (localStorage `ITEMS_TABLE_COLUMN_VISIBILITY_KEY`); użytkownik może nie
+   widzieć kolumny mimo że dane są.
+3. **Galeria wymaga `showItemImages` na kontenerze** — `ContainerItemImagesGallery` renderuje
+   się tylko gdy `container.showItemImages === true`; obrazy pobierane są osobnymi requestami
+   (`itemImageApiService.getImages` per item), nie z pola itemu na liście.
+4. **Powiązane z bugiem #7** — po dodaniu przedmiotu/obrazka lista może być nieaktualna
+   (stary cache TanStack Query) do ręcznego odświeżenia.
+5. **Problemy kopiowania obrazów z katalogu** — patrz `docs/BUGS_CATALOGUE_IMAGES.md`
+   (FK violation przy `item_images` — obraz może nie trafić do bazy mimo sukcesu API).
+
+**Sugerowana poprawka:** dodać `primaryImageUrl` do odpowiedzi V2 (lista dzieci / batch),
+ew. wzbogacić `useContainerWithChildren`; rozważyć domyślną widoczność kolumny Image gdy
+kontener ma `showItemImages`; po mutacjach inwalidować cache. Powiązane z migracją V2.
+
+**Pliki:** `src/modules/gear/components/ItemsTable.vue`,
+`src/modules/gear/components/items-table/ItemsTableImageCell.vue`,
+`src/modules/gear/components/ContainerItemImagesGallery.vue`,
+`src/modules/gear/pages/ContainerDetailPage.vue`,
+`backend/app/modules/gear/schemas_v2.py`,
+`backend/app/modules/gear/service_v2.py`
