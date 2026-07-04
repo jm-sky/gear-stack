@@ -143,45 +143,31 @@ class GearItemDBV2(Base):
     container_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
     max_weight: Mapped[float | None] = mapped_column(Float, nullable=True)
     max_weight_unit: Mapped[str | None] = mapped_column(String(5), nullable=True)
-    hide_when_nested: Mapped[bool | None] = mapped_column(
-        Boolean, nullable=True, default=False
-    )
-    is_public: Mapped[bool | None] = mapped_column(
-        Boolean, nullable=True, default=False, index=True
-    )
+    # No column defaults — repository sets values for containers; items must stay NULL
+    # (see check_item_fields / check_container_fields DB constraints).
+    hide_when_nested: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    is_public: Mapped[bool | None] = mapped_column(Boolean, nullable=True, index=True)
     is_hidden_by_reports: Mapped[bool | None] = mapped_column(
-        Boolean, nullable=True, default=False, index=True
+        Boolean, nullable=True, index=True
     )
-    favorite: Mapped[bool | None] = mapped_column(
-        Boolean, nullable=True, default=False, index=True
-    )
-    show_item_images: Mapped[bool | None] = mapped_column(
-        Boolean, nullable=True, default=False
-    )
+    favorite: Mapped[bool | None] = mapped_column(Boolean, nullable=True, index=True)
+    show_item_images: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
 
     # Item-specific fields (nullable for containers)
     category: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    quantity: Mapped[int | None] = mapped_column(Integer, nullable=True, default=1)
-    status: Mapped[str | None] = mapped_column(
-        String(20), nullable=True, default="owned"
-    )
-    priority: Mapped[str | None] = mapped_column(
-        String(20), nullable=True, default="medium"
-    )
+    quantity: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    status: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    priority: Mapped[str | None] = mapped_column(String(20), nullable=True)
     expiration_date: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
     shelf_life: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
     quality: Mapped[str | None] = mapped_column(String(20), nullable=True)
-    wearable: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
-    consumable: Mapped[bool | None] = mapped_column(
-        Boolean, nullable=True, default=False
-    )
+    wearable: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    consumable: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
     order_index: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    show_on_container: Mapped[bool | None] = mapped_column(
-        Boolean, nullable=True, default=False
-    )
-    promote_count: Mapped[int | None] = mapped_column(Integer, nullable=True, default=0)
+    show_on_container: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    promote_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     # Linking fields
     linked_item_id: Mapped[str | None] = mapped_column(
