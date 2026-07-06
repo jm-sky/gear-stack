@@ -307,9 +307,9 @@ Expected: Clean build with no errors
 
 - [UI_MIGRATION_PLAN.md](./UI_MIGRATION_PLAN.md) - Initial migration strategy
 - [UNIFIED_MODEL_V2_UI_MIGRATION_SUMMARY.md](./UNIFIED_MODEL_V2_UI_MIGRATION_SUMMARY.md) - Detailed summary
-- [UNIFIED_MODEL_V2_MISSING_FEATURES.md](./plans/UNIFIED_MODEL_V2_MISSING_FEATURES.md) - Backend V2 features
-- [UNIFIED_MODEL_IMPLEMENTATION_PLAN.md](./plans/UNIFIED_MODEL_IMPLEMENTATION_PLAN.md) - Overall plan
-- [CHANGELOG.md](../CHANGELOG.md) - Project changes
+- [UNIFIED_MODEL_V2_MISSING_FEATURES.md](../../plans/UNIFIED_MODEL_V2_MISSING_FEATURES.md) - Backend V2 features
+- [UNIFIED_MODEL_IMPLEMENTATION_PLAN.md](../../plans/UNIFIED_MODEL_IMPLEMENTATION_PLAN.md) - Overall plan
+- [CHANGELOG.md](../../../CHANGELOG.md) - Project changes
 
 ---
 

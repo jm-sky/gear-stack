@@ -23,10 +23,14 @@ Implementation plans for features and larger changes.
 | [global-catalogue-items.md](global-catalogue-items.md) | Global catalogue items (v1 notes) | `done` |
 | [global-catalogue-items-v2.md](global-catalogue-items-v2.md) | Global catalogue items v2 | `in progress` |
 | [implementation-suggestions.md](implementation-suggestions.md) | General implementation suggestions | `done` |
+| [intlayer-migration-plan.md](intlayer-migration-plan.md) | Migration from vue-i18n to Intlayer | `planned` |
 | [MARKDOWN_LINK_SECURITY_PLAN.md](MARKDOWN_LINK_SECURITY_PLAN.md) | Markdown link security | `planned` |
 | [PHASE-5-COMPLETION-SUMMARY.md](PHASE-5-COMPLETION-SUMMARY.md) | Stripe billing phase 5 completion summary | `done` |
 | [PLAN_PAGE_TITLES.md](PLAN_PAGE_TITLES.md) | Page titles plan | `planned` |
+| [REFACTOR_PROGRESS.md](REFACTOR_PROGRESS.md) | Progress tracker for REVIEW_AND_REFACTOR_PLAN | `in progress` |
+| [REVIEW_AND_REFACTOR_PLAN.md](REVIEW_AND_REFACTOR_PLAN.md) | Code review and phased refactor plan (2026-07-03) | `in progress` |
 | [SECURITY_IMPROVEMENT_PLAN.md](SECURITY_IMPROVEMENT_PLAN.md) | Production security audit — CSP, HSTS, WAF, cookies (moved from `docs/security/`) | `in progress` |
+| [security-dependabot-remediation.md](security-dependabot-remediation.md) | GitHub Dependabot alerts remediation (pnpm overrides) | `done` |
 | [stripe-pattern-verification.md](stripe-pattern-verification.md) | Stripe pattern verification | `done` |
 | [stripe-subscription-implementation.md](stripe-subscription-implementation.md) | Stripe subscription implementation | `done` |
 | [stripe-subscription-requirements.md](stripe-subscription-requirements.md) | Stripe subscription requirements | `done` |

@@ -801,7 +801,7 @@ docker-compose restart app
 
 3. **Fail2ban for Intrusion Detection**
    ```bash
-   # Already documented in SECURITY_FIX.md
+   # Already documented in deployment/SECURITY_FIX.md
    sudo apt install fail2ban -y
 
    # Monitor FastAPI access logs

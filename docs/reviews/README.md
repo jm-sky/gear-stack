@@ -20,12 +20,12 @@ Planned review runs — **one AI session per file**. Backend and frontend are se
 
 ## Baseline docs (do not duplicate blindly)
 
-- [REVIEW_AND_REFACTOR_PLAN.md](../REVIEW_AND_REFACTOR_PLAN.md) — security + code quality baseline (2026-07-03)
+- [REVIEW_AND_REFACTOR_PLAN.md](../plans/REVIEW_AND_REFACTOR_PLAN.md) — security + code quality baseline (2026-07-03)
 - [plans/SECURITY_IMPROVEMENT_PLAN.md](../plans/SECURITY_IMPROVEMENT_PLAN.md) — production security roadmap (CSP, HSTS, WAF, cookies)
 - [research/refactor/README.md](../research/refactor/README.md) — code quality refactor analysis program
 - [UX_REVIEW.md](UX_REVIEW.md) — partial UX review (2025-01-20)
 - [research/billing-performance-recommendations.md](../research/billing-performance-recommendations.md) — billing module performance baseline
-- [security-dependabot-remediation.md](../security-dependabot-remediation.md) — dependency alerts
+- [security-dependabot-remediation.md](../plans/security-dependabot-remediation.md) — dependency alerts
 - [issues/](../issues/) — open bugs to cross-check during reviews
 
 ## After each run

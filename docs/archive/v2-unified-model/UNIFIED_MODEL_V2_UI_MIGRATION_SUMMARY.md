@@ -365,9 +365,9 @@ docs/
 ## 📚 Related Documentation
 
 - [UI_MIGRATION_PLAN.md](./UI_MIGRATION_PLAN.md) - Migration strategy
-- [UNIFIED_MODEL_V2_MISSING_FEATURES.md](./plans/UNIFIED_MODEL_V2_MISSING_FEATURES.md) - Backend V2 features
-- [UNIFIED_MODEL_IMPLEMENTATION_PLAN.md](./plans/UNIFIED_MODEL_IMPLEMENTATION_PLAN.md) - Overall plan
-- [CHANGELOG.md](../CHANGELOG.md) - Project changes
+- [UNIFIED_MODEL_V2_MISSING_FEATURES.md](../../plans/UNIFIED_MODEL_V2_MISSING_FEATURES.md) - Backend V2 features
+- [UNIFIED_MODEL_IMPLEMENTATION_PLAN.md](../../plans/UNIFIED_MODEL_IMPLEMENTATION_PLAN.md) - Overall plan
+- [CHANGELOG.md](../../../CHANGELOG.md) - Project changes
 
 ---
 

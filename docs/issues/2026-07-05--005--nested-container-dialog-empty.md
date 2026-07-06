@@ -3,7 +3,7 @@
 **Status:** `todo`  
 **Created:** 2026-07-05  
 **Updated:** 2026-07-06  
-**Related:** V1→V2 migration ([migration-v1-to-v2.md](../migration-v1-to-v2.md))
+**Related:** V1→V2 migration ([migration-v1-to-v2.md](../archive/v2-unified-model/migration-v1-to-v2.md))
 
 **Strona:** `/gear/:id` (np. `/gear/01KAP9SZH1X1F460J6FN06C822` – „Bagażnik") → dialog „Dodaj kontener"
 
@@ -25,7 +25,7 @@ operującego na typach V1.
 
 Zmigrować dialog na V2 (`useGearV2()`/store V2, `containerType`,
 V2-owa wersja wykluczania zagnieżdżeń). Część Kroku 1 migracji V1→V2
-(`docs/migration-v1-to-v2.md`).
+(`docs/archive/v2-unified-model/migration-v1-to-v2.md`).
 
 ## Pliki
 

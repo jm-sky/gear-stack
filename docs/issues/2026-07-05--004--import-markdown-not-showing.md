@@ -3,7 +3,7 @@
 **Status:** `done`  
 **Created:** 2026-07-05  
 **Updated:** 2026-07-06  
-**Related:** V1→V2 migration ([migration-v1-to-v2.md](../migration-v1-to-v2.md))
+**Related:** V1→V2 migration ([migration-v1-to-v2.md](../archive/v2-unified-model/migration-v1-to-v2.md))
 
 **Strona:** `/gear` → dialog „Import z Markdown"
 

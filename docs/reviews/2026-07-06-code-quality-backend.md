@@ -6,9 +6,9 @@
 
 ## Baseline
 
-- [REVIEW_AND_REFACTOR_PLAN.md §4–5](../REVIEW_AND_REFACTOR_PLAN.md#4-solid--architecture)
+- [REVIEW_AND_REFACTOR_PLAN.md §4–5](../plans/REVIEW_AND_REFACTOR_PLAN.md#4-solid--architecture)
 - [research/refactor/README.md](../research/refactor/README.md) — refactor analysis program
-- [migration-v1-to-v2.md](../migration-v1-to-v2.md) (V2 target state)
+- [migration-v1-to-v2.md](../archive/v2-unified-model/migration-v1-to-v2.md) (V2 target state)
 
 ## Checklist
 

@@ -38,13 +38,12 @@ Sesje przeglądu — indeks w [reviews/README.md](./reviews/README.md). Baseline
 Przykładowe pliki i szablony.
 
 ### `archive/`
-Przestarzałe dokumenty przeniesione do archiwum.
+Przestarzałe dokumenty przeniesione do archiwum. Migracja V2: [archive/v2-unified-model/](./archive/v2-unified-model/README.md).
 
 ## Dokumenty operacyjne
 
-- [deployment/](./deployment/) — deployment i produkcja
-- [SECURITY_FIX.md](./SECURITY_FIX.md) — hardening Docker/DB (zaimplementowany)
-- [security-dependabot-remediation.md](./security-dependabot-remediation.md) — alerty zależności
+- [deployment/](./deployment/README.md) — deployment, produkcja, Caddy, hardening Docker/DB
+- [plans/security-dependabot-remediation.md](./plans/security-dependabot-remediation.md) — alerty zależności (Dependabot)
 
 ---
 

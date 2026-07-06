@@ -24,15 +24,15 @@ V1/V2 gotcha: `/gear` renders from TanStack Query (V2 cache); mutations via V1 o
 
 ## Security / Dependencies
 
-Open GitHub Dependabot alerts and their remediation plan (pnpm `overrides` for transitive deps + a direct `axios` bump) live in **[docs/security-dependabot-remediation.md](docs/security-dependabot-remediation.md)**. This project uses **pnpm**, so force transitive fixes via the `pnpm.overrides` block in `package.json` (not `npm`/`yarn` resolutions). Always re-run `pnpm build` after bumping build-toolchain deps (e.g. `serialize-javascript`) because it regenerates the PWA service worker.
+Open GitHub Dependabot alerts and their remediation plan (pnpm `overrides` for transitive deps + a direct `axios` bump) live in **[docs/plans/security-dependabot-remediation.md](docs/plans/security-dependabot-remediation.md)**. This project uses **pnpm**, so force transitive fixes via the `pnpm.overrides` block in `package.json` (not `npm`/`yarn` resolutions). Always re-run `pnpm build` after bumping build-toolchain deps (e.g. `serialize-javascript`) because it regenerates the PWA service worker.
 
 ## Code Review & Refactor Plan
 
-A full code review (best practices, security, SOLID/DRY) and a phased refactor plan live in **[docs/REVIEW_AND_REFACTOR_PLAN.md](docs/REVIEW_AND_REFACTOR_PLAN.md)**. It also documents the **shared core** copied between this repo and **ops-monitor** (`backend/app/core` + `app/common` + `cli`, and frontend `src/shared` + `src/components/ui`) which has drifted — any change to a shared-core file should be mirrored to ops-monitor. See also **[ops-monitor `docs/SHARED_CORE.md`](../ops-monitor/docs/SHARED_CORE.md)**.
+A full code review (best practices, security, SOLID/DRY) and a phased refactor plan live in **[docs/plans/REVIEW_AND_REFACTOR_PLAN.md](docs/plans/REVIEW_AND_REFACTOR_PLAN.md)**. It also documents the **shared core** copied between this repo and **ops-monitor** (`backend/app/core` + `app/common` + `cli`, and frontend `src/shared` + `src/components/ui`) which has drifted — any change to a shared-core file should be mirrored to ops-monitor. See also **[ops-monitor `docs/SHARED_CORE.md`](../ops-monitor/docs/SHARED_CORE.md)**.
 
 ## V1 → V2 migration
 
-The gear module still has a legacy "V1" data layer (`useGear`, `useGearStore`, `gearContainerService`, ...) running in parallel with the target "V2" unified model (`useGearV2`, `useGearStoreV2`, `useGearQueries`, `gearQueryKeys`). The goal is **V2 everywhere**; legacy is not maintained. New code should use V2. The full inventory, V1→V2 mapping, feature gaps, and recommended migration order live in **[docs/migration-v1-to-v2.md](docs/migration-v1-to-v2.md)**.
+The gear module still has a legacy "V1" data layer (`useGear`, `useGearStore`, `gearContainerService`, ...) running in parallel with the target "V2" unified model (`useGearV2`, `useGearStoreV2`, `useGearQueries`, `gearQueryKeys`). The goal is **V2 everywhere**; legacy is not maintained. New code should use V2. The full inventory, V1→V2 mapping, feature gaps, and recommended migration order live in **[docs/archive/v2-unified-model/migration-v1-to-v2.md](docs/archive/v2-unified-model/migration-v1-to-v2.md)**.
 
 ## Commands
 

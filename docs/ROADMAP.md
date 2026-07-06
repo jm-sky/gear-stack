@@ -19,7 +19,7 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
 
 1. **Bezpieczeństwo aplikacji (Security Hardening)** - 🚧 In Progress
    - 📍 Plan: [SECURITY_IMPROVEMENT_PLAN.md](./plans/SECURITY_IMPROVEMENT_PLAN.md)
-   - 📍 Docker Security: [SECURITY_FIX.md](./SECURITY_FIX.md)
+   - 📍 Docker Security: [SECURITY_FIX.md](./deployment/SECURITY_FIX.md)
    - ✅ **Critical:** Implementacja security headers (CSP, HSTS, X-Frame-Options) - Completed (v2.47.0)
    - 📋 **Low:** PostgreSQL SSL/TLS (opcjonalne - Docker network zapewnia izolację)
    - 🔒 **High:** Implementacja WAF (Web Application Firewall)
@@ -171,7 +171,7 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - Status: 🔄 Planned | Priority: Medium | Complexity: Various
 
 7. **Migracja z vue-i18n na Intlayer**
-   - 📍 Plan: [intlayer-migration-plan.md](./intlayer-migration-plan.md)
+   - 📍 Plan: [intlayer-migration-plan.md](./plans/intlayer-migration-plan.md)
    - Pełna migracja z vue-i18n na Intlayer (component-scoped translations)
    - Korzyści: tree-shaking, lazy loading, lepszy TypeScript support, auto-generated types
    - 9 faz implementacji: 221 komponentów, 2401 linii tłumaczeń, 7 modułów

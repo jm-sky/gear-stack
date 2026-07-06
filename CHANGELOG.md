@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Dokumentacja**: konsolidacja katalogów `docs/` — utworzono `research/` i `plans/README.md`; usunięto legacy `analysis/`, `security/`, `optimization/`; treść w `research/`, `plans/`, `reviews/`
-- **Zależności (npm)**: bump in-range (minor/patch) wszystkich pakietów + bezpieczne majory dev-tooling (`@vue/tsconfig` 0.9, `npm-run-all2` 9, `@sentry/vite-plugin` 5, `lucide-vue-next` 1.0). Pozostałe majory wysokiego ryzyka (typescript 6, vite 8, zod 4, vue-router 5, eslint 10) — zaplanowane w `docs/security-dependabot-remediation.md`, do zrobienia z weryfikacją UI
+- **Zależności (npm)**: bump in-range (minor/patch) wszystkich pakietów + bezpieczne majory dev-tooling (`@vue/tsconfig` 0.9, `npm-run-all2` 9, `@sentry/vite-plugin` 5, `lucide-vue-next` 1.0). Pozostałe majory wysokiego ryzyka (typescript 6, vite 8, zod 4, vue-router 5, eslint 10) — zaplanowane w `docs/plans/security-dependabot-remediation.md`, do zrobienia z weryfikacją UI
 - **Gear: migracja V1→V2 ukończona** — cały moduł gear działa na modelu V2 (unified). Wprowadzono `useGearMutations` (mutacje V2 + inwalidacja cache), dobudowano brakujące funkcje na V2 (clone kontenera, import/eksport JSON, odczyt katalogu, generator przykładowego sprzętu) z testami jednostkowymi, a upload danych offline → API (`dataMigrationService`) przepisano na V2 z zachowaniem ID. Zagnieżdżone kontenery używają natywnego re-parentingu (`parentItemId`)
 
 ### Deprecated

@@ -6,9 +6,9 @@
 
 ## Baseline
 
-- [REVIEW_AND_REFACTOR_PLAN.md §3](../REVIEW_AND_REFACTOR_PLAN.md#3-security-review) (§3.1–3.2 especially)
+- [REVIEW_AND_REFACTOR_PLAN.md §3](../plans/REVIEW_AND_REFACTOR_PLAN.md#3-security-review) (§3.1–3.2 especially)
 - [plans/SECURITY_IMPROVEMENT_PLAN.md](../plans/SECURITY_IMPROVEMENT_PLAN.md)
-- [security-dependabot-remediation.md](../security-dependabot-remediation.md) (pnpm overrides)
+- [security-dependabot-remediation.md](../plans/security-dependabot-remediation.md) (pnpm overrides)
 
 ## Checklist
 
