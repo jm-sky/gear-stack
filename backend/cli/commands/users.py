@@ -49,8 +49,12 @@ def users_create(
     ),
     admin: bool = typer.Option(False, "--admin", "-a", help="Create as administrator"),
     owner: bool = typer.Option(False, "--owner", "-o", help="Create as owner"),
-    premium: bool = typer.Option(False, "--premium", "-p", help="Create as premium user"),
-    no_input: bool = typer.Option(False, "--no-input", help="Skip interactive prompts (requires all options)"),
+    premium: bool = typer.Option(
+        False, "--premium", "-p", help="Create as premium user"
+    ),
+    no_input: bool = typer.Option(
+        False, "--no-input", help="Skip interactive prompts (requires all options)"
+    ),
 ) -> None:
     """Create a new user interactively with rich prompts and validation.
 
@@ -74,7 +78,9 @@ def users_create(
             --password "SecurePass123!" \\
             --admin
     """
-    asyncio.run(_users_create_async(email, name, password, admin, owner, premium, no_input))
+    asyncio.run(
+        _users_create_async(email, name, password, admin, owner, premium, no_input)
+    )
 
 
 async def _users_create_async(
@@ -112,13 +118,23 @@ async def _users_create_async(
     # Create user with spinner
     try:
         with console.status("[bold green]Creating user...", spinner="dots"):
-            user = await _create_user_in_db(email_value, name_value, password_value, is_admin, is_owner, is_premium)
+            user = await _create_user_in_db(
+                email_value, name_value, password_value, is_admin, is_owner, is_premium
+            )
 
         # Show success message
         console.print("\n[bold green]✓[/bold green] User created successfully!\n")
 
         # Show user info panel
-        role_str = "Owner" if user.get("isOwner") else ("Administrator" if user.get("isAdmin") else ("Premium" if user.get("isPremium") else "User"))
+        role_str = (
+            "Owner"
+            if user.get("isOwner")
+            else (
+                "Administrator"
+                if user.get("isAdmin")
+                else ("Premium" if user.get("isPremium") else "User")
+            )
+        )
         user_info = f"""[bold]Email:[/bold] {user['email']}
 [bold]Name:[/bold] {user['name']}
 [bold]Role:[/bold] {role_str}
@@ -126,7 +142,9 @@ async def _users_create_async(
 [bold]ID:[/bold] {user['id']}
 [bold]Created:[/bold] {user['createdAt']}"""
 
-        panel = Panel(user_info, title="[bold]User Details[/bold]", border_style="green")
+        panel = Panel(
+            user_info, title="[bold]User Details[/bold]", border_style="green"
+        )
         console.print(panel)
         console.print()
 
@@ -222,9 +240,20 @@ async def _get_admin_status(console: Any, admin: bool, no_input: bool) -> bool:
     return Confirm.ask("[cyan]Create as administrator?[/cyan]", default=admin)
 
 
-def _show_user_summary(console: Any, email: str, name: str, is_admin: bool, is_owner: bool = False, is_premium: bool = False) -> None:
+def _show_user_summary(
+    console: Any,
+    email: str,
+    name: str,
+    is_admin: bool,
+    is_owner: bool = False,
+    is_premium: bool = False,
+) -> None:
     """Show user creation summary."""
-    role_str = "Owner" if is_owner else ("Administrator" if is_admin else ("Premium" if is_premium else "User"))
+    role_str = (
+        "Owner"
+        if is_owner
+        else ("Administrator" if is_admin else ("Premium" if is_premium else "User"))
+    )
     summary = f"""[bold]Email:[/bold] {email}
 [bold]Name:[/bold] {name}
 [bold]Role:[/bold] {role_str}"""
@@ -233,7 +262,14 @@ def _show_user_summary(console: Any, email: str, name: str, is_admin: bool, is_o
     console.print(panel)
 
 
-async def _create_user_in_db(email: str, name: str, password: str, is_admin: bool, is_owner: bool = False, is_premium: bool = False) -> dict[str, Any]:
+async def _create_user_in_db(
+    email: str,
+    name: str,
+    password: str,
+    is_admin: bool,
+    is_owner: bool = False,
+    is_premium: bool = False,
+) -> dict[str, Any]:
     """Create user in database.
 
     Args:
@@ -258,7 +294,9 @@ async def _create_user_in_db(email: str, name: str, password: str, is_admin: boo
 
         try:
             # Create user (create_user only supports is_admin, so we'll update flags after)
-            user = await repo.create_user(email=email, password=password, full_name=name, is_admin=is_admin)
+            user = await repo.create_user(
+                email=email, password=password, full_name=name, is_admin=is_admin
+            )
 
             # Update role flags if needed
             if is_owner or is_premium:
@@ -293,15 +331,27 @@ async def _create_user_in_db(email: str, name: str, password: str, is_admin: boo
 
 @users_app.command("list")
 def users_list(
-    admins_only: bool = typer.Option(False, "--admins", help="Show only administrators"),
+    admins_only: bool = typer.Option(
+        False, "--admins", help="Show only administrators"
+    ),
     users_only: bool = typer.Option(False, "--users", help="Show only regular users"),
     active_only: bool = typer.Option(False, "--active", help="Show only active users"),
-    inactive_only: bool = typer.Option(False, "--inactive", help="Show only inactive users"),
-    limit: int | None = typer.Option(None, "--limit", "-l", help="Maximum number of users to show"),
-    detailed: bool = typer.Option(
-        False,
-        "--detailed",
+    inactive_only: bool = typer.Option(
+        False, "--inactive", help="Show only inactive users"
+    ),
+    limit: int | None = typer.Option(
+        None, "--limit", "-l", help="Maximum number of users to show"
+    ),
+    detailed: bool | None = typer.Option(
+        None,
+        "--detailed/--no-detailed",
         help="Show detailed information (email verified, 2FA status)",
+    ),
+    wide: bool | None = typer.Option(
+        None,
+        "--wide/--no-wide",
+        "-w",
+        help="Show full IDs and emails without truncation",
     ),
     json_output: bool = typer.Option(False, "--json", help="Output as JSON"),
 ) -> None:
@@ -320,9 +370,22 @@ def users_list(
         # Show detailed information
         python -m cli users list --detailed
 
+        # Show full IDs and emails
+        python -m cli users list --wide
+
         # Output as JSON
         python -m cli users list --json
     """
+    if not json_output:
+        if detailed is None:
+            detailed = typer.confirm(
+                "Show detailed info (email verified, 2FA)?", default=False
+            )
+        if wide is None:
+            wide = typer.confirm("Show full IDs and emails?", default=False)
+    else:
+        detailed = detailed or False
+        wide = wide or False
     asyncio.run(
         _users_list_async(
             admins_only,
@@ -331,6 +394,7 @@ def users_list(
             inactive_only,
             limit,
             detailed,
+            wide,
             json_output,
         )
     )
@@ -343,6 +407,7 @@ async def _users_list_async(
     inactive_only: bool,
     limit: int | None,
     detailed: bool,
+    wide: bool,
     json_output: bool,
 ) -> None:
     """Async implementation of user listing."""
@@ -408,7 +473,10 @@ async def _users_list_async(
         )
 
         table.add_column("ID", style="dim", no_wrap=True)
-        table.add_column("Email", style="cyan")
+        if wide:
+            table.add_column("Email", style="cyan", overflow="fold")
+        else:
+            table.add_column("Email", style="cyan", overflow="ellipsis", max_width=40)
         table.add_column("Name", style="white")
         table.add_column("Role", justify="center")
         table.add_column("Status", justify="center")
@@ -422,7 +490,7 @@ async def _users_list_async(
             created = user["createdAt"].strftime("%Y-%m-%d %H:%M")
 
             row = [
-                truncate_id(user["id"]),
+                str(user["id"]) if wide else truncate_id(user["id"]),
                 user["email"],
                 user["name"],
                 format_user_role(
@@ -527,8 +595,16 @@ async def _get_users_from_db(detailed: bool = False) -> list[dict[str, Any]]:
 def users_delete(
     identifier: str | None = typer.Argument(None, help="User email or ID to delete"),
     yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation prompt"),
+    hard: bool = typer.Option(
+        False,
+        "--hard",
+        help="Permanently remove user from database (default: soft delete)",
+    ),
 ) -> None:
     """Delete a user by email or ID with confirmation.
+
+    By default performs a soft delete (deactivates account, anonymizes email).
+    Use --hard to permanently remove the user from the database.
 
     Examples:
         # Interactive mode (will prompt for email/ID)
@@ -539,11 +615,14 @@ def users_delete(
 
         # Delete by ID without confirmation
         python -m cli users delete 01HQX... --yes
+
+        # Permanently remove user from database
+        python -m cli users delete user@example.com --hard --yes
     """
-    asyncio.run(_users_delete_async(identifier, yes))
+    asyncio.run(_users_delete_async(identifier, yes, hard))
 
 
-async def _users_delete_async(identifier: str | None, yes: bool) -> None:
+async def _users_delete_async(identifier: str | None, yes: bool, hard: bool) -> None:
     """Async implementation of user deletion."""
     from rich.console import Console
 
@@ -576,17 +655,33 @@ async def _users_delete_async(identifier: str | None, yes: bool) -> None:
 
         # Confirm deletion
         if not yes:
-            console.print("\n[bold red]Warning:[/bold red] This action cannot be undone!\n")
+            if hard:
+                console.print(
+                    "\n[bold red]Warning:[/bold red] Hard delete permanently removes the user "
+                    "from the database. This cannot be undone!\n"
+                )
+            else:
+                console.print(
+                    "\n[bold yellow]Note:[/bold yellow] Soft delete deactivates the account and "
+                    "anonymizes email (the email can be reused).\n"
+                )
 
-            if not Confirm.ask("Are you sure you want to delete this user?", default=False):
+            if not Confirm.ask(
+                "Are you sure you want to delete this user?", default=False
+            ):
                 console.print("[yellow]Cancelled[/yellow]")
                 return
 
         # Delete user
         with console.status("[bold red]Deleting user...", spinner="dots"):
-            await _delete_user_from_db(user["id"])
+            await _delete_user_from_db(user["id"], hard=hard)
 
-        console.print("\n[bold green]✓[/bold green] User deleted successfully\n")
+        if hard:
+            console.print("\n[bold green]✓[/bold green] User permanently deleted\n")
+        else:
+            console.print(
+                "\n[bold green]✓[/bold green] User soft-deleted successfully\n"
+            )
 
     except Exception as e:
         console.print(f"\n[red]Error deleting user:[/red] {e}\n")
@@ -632,28 +727,22 @@ async def _find_user(identifier: str) -> dict[str, Any] | None:
     return None
 
 
-async def _delete_user_from_db(user_id: str) -> None:
+async def _delete_user_from_db(user_id: str, *, hard: bool = False) -> None:
     """Delete user from database.
 
     Args:
         user_id: User ID to delete
+        hard: If True, permanently remove user; otherwise soft-delete via repository
     """
     from app.core.database import get_db
-    from app.modules.auth.db_models import UserDB
-    from sqlalchemy import select
+    from app.modules.auth.repositories import UserRepository
 
     async for db in get_db():
-        # Find user
-        stmt = select(UserDB).where(UserDB.id == user_id)
-        result = await db.execute(stmt)
-        user_db = result.scalar_one_or_none()
-
-        if not user_db:
+        repo = UserRepository(db)
+        success = await repo.delete_user(user_id, soft_delete=not hard)
+        if not success:
             raise ValueError(f"User with id {user_id} not found")
-
-        # Delete user
-        await db.delete(user_db)
-        await db.commit()
+        break
 
 
 @users_app.command("toggle-admin")
@@ -697,10 +786,12 @@ async def _users_toggle_admin_async(identifier: str | None, yes: bool) -> None:
 
         # Determine new admin status
         new_admin_status = not user["isAdmin"]
-        action = "promote to administrator" if new_admin_status else "demote to regular user"
+        action = (
+            "promote to administrator" if new_admin_status else "demote to regular user"
+        )
 
         # Show user info
-        console.print(f"\n[bold cyan]User to modify:[/bold cyan]\n")
+        console.print("\n[bold cyan]User to modify:[/bold cyan]\n")
 
         user_info = f"""[bold]ID:[/bold] {user['id']}
 [bold]Email:[/bold] {user['email']}
@@ -719,10 +810,12 @@ async def _users_toggle_admin_async(identifier: str | None, yes: bool) -> None:
                 return
 
         # Toggle admin status
-        with console.status(f"[bold green]Updating user...", spinner="dots"):
+        with console.status("[bold green]Updating user...", spinner="dots"):
             await _toggle_admin_in_db(user["id"], new_admin_status)
 
-        console.print(f"\n[bold green]✓[/bold green] User {'promoted to administrator' if new_admin_status else 'demoted to regular user'} successfully\n")
+        console.print(
+            f"\n[bold green]✓[/bold green] User {'promoted to administrator' if new_admin_status else 'demoted to regular user'} successfully\n"
+        )
 
     except Exception as e:
         console.print(f"\n[red]Error toggling admin status:[/red] {e}\n")
@@ -797,10 +890,26 @@ async def _users_toggle_owner_async(identifier: str | None, yes: bool) -> None:
         action = "promote to owner" if new_owner_status else "demote from owner"
 
         # Show user info
-        console.print(f"\n[bold cyan]User to modify:[/bold cyan]\n")
+        console.print("\n[bold cyan]User to modify:[/bold cyan]\n")
 
-        current_role = "Owner" if user.get("isOwner") else ("Administrator" if user.get("isAdmin") else ("Premium" if user.get("isPremium") else "User"))
-        new_role = "Owner" if new_owner_status else ("Administrator" if user.get("isAdmin") else ("Premium" if user.get("isPremium") else "User"))
+        current_role = (
+            "Owner"
+            if user.get("isOwner")
+            else (
+                "Administrator"
+                if user.get("isAdmin")
+                else ("Premium" if user.get("isPremium") else "User")
+            )
+        )
+        new_role = (
+            "Owner"
+            if new_owner_status
+            else (
+                "Administrator"
+                if user.get("isAdmin")
+                else ("Premium" if user.get("isPremium") else "User")
+            )
+        )
 
         user_info = f"""[bold]ID:[/bold] {user['id']}
 [bold]Email:[/bold] {user['email']}
@@ -819,11 +928,13 @@ async def _users_toggle_owner_async(identifier: str | None, yes: bool) -> None:
                 return
 
         # Toggle owner status
-        with console.status(f"[bold green]Updating user...", spinner="dots"):
+        with console.status("[bold green]Updating user...", spinner="dots"):
             await _toggle_owner_in_db(user["id"], new_owner_status)
             await _toggle_admin_in_db(user["id"], new_owner_status)
 
-        console.print(f"\n[bold green]✓[/bold green] User {'promoted to owner' if new_owner_status else 'demoted from owner'} successfully\n")
+        console.print(
+            f"\n[bold green]✓[/bold green] User {'promoted to owner' if new_owner_status else 'demoted from owner'} successfully\n"
+        )
 
     except Exception as e:
         console.print(f"\n[red]Error toggling owner status:[/red] {e}\n")
@@ -880,7 +991,9 @@ def users_set_role(
     asyncio.run(_users_set_role_async(identifier, role, yes))
 
 
-async def _users_set_role_async(identifier: str | None, role: str | None, yes: bool) -> None:
+async def _users_set_role_async(
+    identifier: str | None, role: str | None, yes: bool
+) -> None:
     """Async implementation of set role."""
     from rich.console import Console
 
@@ -932,7 +1045,9 @@ async def _users_set_role_async(identifier: str | None, role: str | None, yes: b
                         role = VALID_ROLES[role_num - 1]
                         break
                     else:
-                        console.print(f"[red]Invalid number. Please enter 1-{len(VALID_ROLES)}[/red]")
+                        console.print(
+                            f"[red]Invalid number. Please enter 1-{len(VALID_ROLES)}[/red]"
+                        )
                         continue
 
                 # Try to parse as role name
@@ -940,17 +1055,29 @@ async def _users_set_role_async(identifier: str | None, role: str | None, yes: b
                     role = role_input
                     break
 
-                console.print(f"[red]Invalid role. Please enter 1-{len(VALID_ROLES)} or one of: {', '.join(VALID_ROLES)}[/red]")
+                console.print(
+                    f"[red]Invalid role. Please enter 1-{len(VALID_ROLES)} or one of: {', '.join(VALID_ROLES)}[/red]"
+                )
         else:
             # Validate provided role
             role = role.lower().strip()
             if role not in VALID_ROLES:
                 console.print(f"\n[red]Invalid role:[/red] {role}\n")
-                console.print(f"[yellow]Valid roles are:[/yellow] {', '.join(VALID_ROLES)}\n")
+                console.print(
+                    f"[yellow]Valid roles are:[/yellow] {', '.join(VALID_ROLES)}\n"
+                )
                 raise typer.Exit(1)
 
         # Determine current and new role display
-        current_role_display = "Owner" if user.get("isOwner") else ("Administrator" if user.get("isAdmin") else ("Premium" if user.get("isPremium") else "User"))
+        current_role_display = (
+            "Owner"
+            if user.get("isOwner")
+            else (
+                "Administrator"
+                if user.get("isAdmin")
+                else ("Premium" if user.get("isPremium") else "User")
+            )
+        )
 
         new_role_display = role.capitalize()
 
@@ -960,7 +1087,7 @@ async def _users_set_role_async(identifier: str | None, role: str | None, yes: b
         is_premium = role == "premium"
 
         # Show user info
-        console.print(f"\n[bold cyan]User to modify:[/bold cyan]\n")
+        console.print("\n[bold cyan]User to modify:[/bold cyan]\n")
 
         user_info = f"""[bold]ID:[/bold] {user['id']}
 [bold]Email:[/bold] {user['email']}
@@ -974,22 +1101,29 @@ async def _users_set_role_async(identifier: str | None, role: str | None, yes: b
         # Confirm change
         if not yes:
             console.print()
-            if not Confirm.ask(f"Are you sure you want to set role to {new_role_display}?", default=True):
+            if not Confirm.ask(
+                f"Are you sure you want to set role to {new_role_display}?",
+                default=True,
+            ):
                 console.print("[yellow]Cancelled[/yellow]")
                 return
 
         # Update role
-        with console.status(f"[bold green]Updating user role...", spinner="dots"):
+        with console.status("[bold green]Updating user role...", spinner="dots"):
             await _set_role_in_db(user["id"], is_admin, is_owner, is_premium)
 
-        console.print(f"\n[bold green]✓[/bold green] User role set to {new_role_display} successfully\n")
+        console.print(
+            f"\n[bold green]✓[/bold green] User role set to {new_role_display} successfully\n"
+        )
 
     except Exception as e:
         console.print(f"\n[red]Error setting user role:[/red] {e}\n")
         raise typer.Exit(1)
 
 
-async def _set_role_in_db(user_id: str, is_admin: bool, is_owner: bool, is_premium: bool) -> None:
+async def _set_role_in_db(
+    user_id: str, is_admin: bool, is_owner: bool, is_premium: bool
+) -> None:
     """Set user role in database.
 
     Args:
@@ -1067,7 +1201,9 @@ async def _users_verify_email_async(
 
     # Validate options
     if show_link and confirm_email:
-        console.print("\n[red]You cannot use --show-link and --confirm together. Choose one option.[/red]\n")
+        console.print(
+            "\n[red]You cannot use --show-link and --confirm together. Choose one option.[/red]\n"
+        )
         raise typer.Exit(1)
 
     try:
@@ -1127,10 +1263,14 @@ async def _users_verify_email_async(
 
         # Execute selected action
         if action == "show_link":
-            with console.status("[bold green]Generating verification link...", spinner="dots"):
+            with console.status(
+                "[bold green]Generating verification link...", spinner="dots"
+            ):
                 link, meta = await _generate_email_verification_link(user["id"])
 
-            console.print("\n[bold green]✓[/bold green] Verification link generated successfully\n")
+            console.print(
+                "\n[bold green]✓[/bold green] Verification link generated successfully\n"
+            )
 
             link_info = f"""[bold]Verification link:[/bold]
 {link}
@@ -1138,7 +1278,11 @@ async def _users_verify_email_async(
 [bold]Token:[/bold] {meta['token']}
 [bold]Expires in:[/bold] {meta['expires_hours']} hours"""
 
-            link_panel = Panel(link_info, title="[bold]Email Verification Link[/bold]", border_style="green")
+            link_panel = Panel(
+                link_info,
+                title="[bold]Email Verification Link[/bold]",
+                border_style="green",
+            )
             console.print(link_panel)
             console.print()
 
@@ -1156,10 +1300,14 @@ async def _users_verify_email_async(
                         console.print("[yellow]Cancelled[/yellow]")
                         return
 
-            with console.status("[bold green]Marking email as verified...", spinner="dots"):
+            with console.status(
+                "[bold green]Marking email as verified...", spinner="dots"
+            ):
                 updated_user = await _mark_email_verified_in_db(user["id"])
 
-            console.print("\n[bold green]✓[/bold green] Email marked as verified successfully\n")
+            console.print(
+                "\n[bold green]✓[/bold green] Email marked as verified successfully\n"
+            )
 
             updated_info = f"""[bold]ID:[/bold] {updated_user.id}
 [bold]Email:[/bold] {updated_user.email}
@@ -1167,7 +1315,9 @@ async def _users_verify_email_async(
 [bold]Email verified:[/bold] {'Yes' if updated_user.isEmailVerified else 'No'}
 [bold]Verified at:[/bold] {updated_user.emailVerifiedAt}"""
 
-            updated_panel = Panel(updated_info, title="[bold]Updated User[/bold]", border_style="green")
+            updated_panel = Panel(
+                updated_info, title="[bold]Updated User[/bold]", border_style="green"
+            )
             console.print(updated_panel)
             console.print()
 
