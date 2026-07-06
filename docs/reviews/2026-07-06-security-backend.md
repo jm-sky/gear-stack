@@ -7,6 +7,7 @@
 ## Baseline
 
 - [REVIEW_AND_REFACTOR_PLAN.md §3](../REVIEW_AND_REFACTOR_PLAN.md#3-security-review)
+- [plans/SECURITY_IMPROVEMENT_PLAN.md](../plans/SECURITY_IMPROVEMENT_PLAN.md)
 - [security-dependabot-remediation.md](../security-dependabot-remediation.md)
 - Shared core drift: `backend/app/core/`, `backend/app/common/` vs ops-monitor
 

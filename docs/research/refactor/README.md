@@ -12,7 +12,7 @@ Systematyczna analiza projektu Gear Stack pod kątem:
 ## Struktura dokumentacji
 
 ```
-docs/analysis/refactor/
+docs/research/refactor/
 ├── 00-MASTER-PLAN.md              # Master plan - strategia analizy
 ├── TEMPLATE.md                    # Szablon dla każdej iteracji
 ├── README.md                      # Ten plik
@@ -225,7 +225,7 @@ Jeśli masz pytania lub sugestie dotyczące procesu analizy:
 
 ```bash
 # 1. Przeczytaj master plan
-cat docs/analysis/refactor/00-MASTER-PLAN.md
+cat docs/research/refactor/00-MASTER-PLAN.md
 
 # 2. Rozpocznij Phase A, Iteration B1
 # Powiedz Claude: "start B1" lub "start iteration B1"

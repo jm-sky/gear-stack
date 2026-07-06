@@ -7,6 +7,8 @@
 ## Baseline
 
 - [migration-v1-to-v2.md](../migration-v1-to-v2.md) (TanStack Query / V2 cache)
+- [research/LIGHTHOUSE_CRITICAL_PATH_ANALYSIS.md](../research/LIGHTHOUSE_CRITICAL_PATH_ANALYSIS.md)
+- [research/PERFORMANCE_ANALYSIS.md](../research/PERFORMANCE_ANALYSIS.md)
 - [issues/README.md](../issues/README.md) (stale cache after mutations)
 
 ## Checklist

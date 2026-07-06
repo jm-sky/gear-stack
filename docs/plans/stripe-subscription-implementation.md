@@ -1244,7 +1244,7 @@ describe('useSubscription', () => {
 - `src/modules/billing/i18n/locales/en.ts` (updated translations)
 - `src/modules/billing/i18n/locales/pl.ts` (updated translations)
 - `docs/testing/billing-cancellation-test-guide.md` (NEW)
-- `docs/optimization/billing-performance-recommendations.md` (NEW)
+- `docs/research/billing-performance-recommendations.md` (NEW)
 - `docs/plans/PHASE-5-COMPLETION-SUMMARY.md` (NEW)
 - `backend/tests/test_billing_service.py` (comprehensive unit tests)
 

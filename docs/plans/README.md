@@ -1,0 +1,43 @@
+# Plans
+
+Implementation plans for features and larger changes.
+
+## Status values
+
+`todo` · `planned` · `in progress` · `done` · `verification needed`
+
+## Index
+
+| File | Summary | Status |
+|------|---------|--------|
+| [AI_PLAN.md](AI_PLAN.md) | AI integration plan | `done` |
+| [API_INTEGRATION_PLAN.md](API_INTEGRATION_PLAN.md) | API integration plan | `done` |
+| [BACKEND_INTEGRATION.md](BACKEND_INTEGRATION.md) | Backend integration plan | `done` |
+| [B2a-CRITICAL-FIXES-PLAN.md](B2a-CRITICAL-FIXES-PLAN.md) | Critical auth/WebAuthn security fixes (from refactor analysis) | `done` |
+| [CLEAN_ITEM_UPDATE_DATA_IMLPEMENTATION_PLAN.md](CLEAN_ITEM_UPDATE_DATA_IMLPEMENTATION_PLAN.md) | Clean item update data implementation | `done` |
+| [COMPONENT_REFACTORING_PLAN.md](COMPONENT_REFACTORING_PLAN.md) | Component refactoring plan | `planned` |
+| [CONTENT_REPORTING_IMPLEMENTATION_PLAN.md](CONTENT_REPORTING_IMPLEMENTATION_PLAN.md) | Content reporting implementation | `done` |
+| [CONTAINER_RATING_IMPLEMENTATION_PLAN.md](CONTAINER_RATING_IMPLEMENTATION_PLAN.md) | Container rating feature | `planned` |
+| [CONTAINER_VIEWS_STATS_PLAN.md](CONTAINER_VIEWS_STATS_PLAN.md) | Container views and stats | `planned` |
+| [GLOBAL_CATALOGUE_IMPLEMENTATION_PLAN.md](GLOBAL_CATALOGUE_IMPLEMENTATION_PLAN.md) | Global catalogue implementation | `in progress` |
+| [global-catalogue-items.md](global-catalogue-items.md) | Global catalogue items (v1 notes) | `done` |
+| [global-catalogue-items-v2.md](global-catalogue-items-v2.md) | Global catalogue items v2 | `in progress` |
+| [implementation-suggestions.md](implementation-suggestions.md) | General implementation suggestions | `done` |
+| [MARKDOWN_LINK_SECURITY_PLAN.md](MARKDOWN_LINK_SECURITY_PLAN.md) | Markdown link security | `planned` |
+| [PHASE-5-COMPLETION-SUMMARY.md](PHASE-5-COMPLETION-SUMMARY.md) | Stripe billing phase 5 completion summary | `done` |
+| [PLAN_PAGE_TITLES.md](PLAN_PAGE_TITLES.md) | Page titles plan | `planned` |
+| [SECURITY_IMPROVEMENT_PLAN.md](SECURITY_IMPROVEMENT_PLAN.md) | Production security audit — CSP, HSTS, WAF, cookies (moved from `docs/security/`) | `in progress` |
+| [stripe-pattern-verification.md](stripe-pattern-verification.md) | Stripe pattern verification | `done` |
+| [stripe-subscription-implementation.md](stripe-subscription-implementation.md) | Stripe subscription implementation | `done` |
+| [stripe-subscription-requirements.md](stripe-subscription-requirements.md) | Stripe subscription requirements | `done` |
+| [stripe-webhook-signature-troubleshooting.md](stripe-webhook-signature-troubleshooting.md) | Stripe webhook signature troubleshooting | `done` |
+| [UNIFIED_MODEL_IMPLEMENTATION_PLAN.md](UNIFIED_MODEL_IMPLEMENTATION_PLAN.md) | Unified model implementation | `in progress` |
+| [UNIFIED_MODEL_V2_MISSING_FEATURES.md](UNIFIED_MODEL_V2_MISSING_FEATURES.md) | V2 missing features inventory | `in progress` |
+
+When adding a new plan: create `YYYY-MM-DD-slug.md` (legacy SCREAMING_SNAKE names are OK for older files — add a row here).
+
+## Related
+
+- [research/README.md](../research/README.md) — analyses and spikes before planning
+- [reviews/README.md](../reviews/README.md) — review sessions that may spawn new plans
+- [issues/README.md](../issues/README.md) — actionable follow-ups from plans and reviews

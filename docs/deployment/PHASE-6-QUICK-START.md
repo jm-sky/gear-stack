@@ -331,7 +331,7 @@ python migrations/047_add_billing_tables.py upgrade
 
 **Testing guides:**
 - Cancellation: `docs/testing/billing-cancellation-test-guide.md`
-- Performance: `docs/optimization/billing-performance-recommendations.md`
+- Performance: `docs/research/billing-performance-recommendations.md`
 
 **Rollback procedures:**
 - See deployment guide Step "Rollback Procedures"

@@ -7,6 +7,7 @@
 ## Baseline
 
 - [REVIEW_AND_REFACTOR_PLAN.md §4, §6](../REVIEW_AND_REFACTOR_PLAN.md)
+- [research/refactor/README.md](../research/refactor/README.md) — refactor analysis program
 - [migration-v1-to-v2.md](../migration-v1-to-v2.md)
 - [V2_CODE_REVIEW_FINDINGS.md](../V2_CODE_REVIEW_FINDINGS.md)
 

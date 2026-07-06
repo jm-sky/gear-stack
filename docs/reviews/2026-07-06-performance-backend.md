@@ -7,6 +7,8 @@
 ## Baseline
 
 - [REVIEW_AND_REFACTOR_PLAN.md](../REVIEW_AND_REFACTOR_PLAN.md) (N+1 mentions in gear service)
+- [research/billing-performance-recommendations.md](../research/billing-performance-recommendations.md)
+- [research/PERFORMANCE_ANALYSIS.md](../research/PERFORMANCE_ANALYSIS.md)
 - [issues/2026-07-05--009--catalogue-images.md](../issues/2026-07-05--009--catalogue-images.md) (transaction/session patterns)
 
 ## Checklist

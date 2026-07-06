@@ -11,6 +11,15 @@ Gear Stack is a Vue 3 application for managing survival gear and bug-out bag equ
 - **Open issues (bugs, improvements):** [docs/issues/README.md](docs/issues/README.md) — statuses: `todo`, `planned`, `in progress`, `done`, `verification needed`.
 - **Planned review runs (security, code quality, UX, performance):** [docs/reviews/README.md](docs/reviews/README.md) — one AI session per review file; update status and findings when complete.
 
+## Docs workflow
+
+- **Issues:** [docs/issues/README.md](docs/issues/README.md)
+- **Reviews:** [docs/reviews/README.md](docs/reviews/README.md)
+- **Research:** [docs/research/README.md](docs/research/README.md)
+- **Plans:** [docs/plans/README.md](docs/plans/README.md)
+
+Statuses: `todo`, `planned`, `in progress`, `done`, `verification needed`. New issues: `YYYY-MM-DD--NNN--slug.md`; reviews/research/plans: `YYYY-MM-DD-slug.md`.
+
 V1/V2 gotcha: `/gear` renders from TanStack Query (V2 cache); mutations via V1 or `useGearV2()` without invalidation need `gearQueryKeys.all` invalidation or the UI stays stale.
 
 ## Security / Dependencies

@@ -2,48 +2,50 @@
 
 Ten katalog zawiera dokumentację projektu Gear Stack.
 
-## 📋 Główne dokumenty
+## Główne dokumenty
 
-- **[ROADMAP.md](./ROADMAP.md)** - 📍 **Punkt wejścia** - przegląd struktury roadmap
-- **[ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md)** - Funkcjonalności offline (localStorage) - 688 linii, ~50+ funkcji
-- **[ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md)** - Funkcjonalności online (backend/DB/auth) - 342 linie, ~30+ funkcji
-- **[features/](./features/)** - Szczegółowe plany implementacji funkcji
+- **[ROADMAP.md](./ROADMAP.md)** — punkt wejścia — przegląd struktury roadmap
+- **[ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md)** — funkcjonalności offline (localStorage)
+- **[ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md)** — funkcjonalności online (backend/DB/auth)
+- **[features/](./features/)** — szczegółowe plany implementacji funkcji
 
-## 📁 Struktura katalogów
+## Workflow (issues, reviews, research, plans)
+
+| Katalog | Przeznaczenie |
+|---------|---------------|
+| [issues/](./issues/README.md) | Błędy, usprawnienia, dług techniczny |
+| [reviews/](./reviews/README.md) | Sesje przeglądu (security, code quality, UX, performance) |
+| [research/](./research/README.md) | Analizy, spike'i, porównania przed decyzją |
+| [plans/](./plans/README.md) | Plany implementacji większych zmian |
+
+Statusy: `todo` · `planned` · `in progress` · `done` · `verification needed`
+
+## Struktura katalogów
 
 ### `features/`
 Szczegółowe plany implementacji poszczególnych funkcji z roadmap.
 
+### `plans/`
+Plany implementacji — indeks w [plans/README.md](./plans/README.md).
+
+### `research/`
+Analizy i porównania — indeks w [research/README.md](./research/README.md). Program refaktoru: [research/refactor/](./research/refactor/README.md).
+
+### `reviews/`
+Sesje przeglądu — indeks w [reviews/README.md](./reviews/README.md). Baseline UX: [reviews/UX_REVIEW.md](./reviews/UX_REVIEW.md).
+
 ### `examples/`
 Przykładowe pliki i szablony.
 
-### `plans/`
-Plany i dokumenty dotyczące przyszłych funkcjonalności:
-- `AI_PLAN.md` - Plan integracji AI
-- `API_INTEGRATION_PLAN.md` - Plan integracji API
-- `BACKEND_INTEGRATION.md` - Plan integracji z backendem
-- `implementation-suggestions.md` - Sugestie implementacji
-
-### `analysis/`
-Analizy i porównania:
-- `SERVICES_ANALYSIS.md` - Analiza serwisów
-- `UX_REVIEW.md` - Przegląd UX/RWD
-- `features-comparison-and-plans.md` - Porównanie z LighterPack
-- `BACKEND_FRONTEND_COMPARISON.md` - Porównanie backend vs frontend
-
 ### `archive/`
-Przestarzałe dokumenty przeniesione do archiwum:
-- `IMPLEMENTATION_COMPLETE.md` - Stary raport implementacji (2025-01-21)
-- `IMPLEMENTATION_STATUS.md` - Stary status implementacji (2025-01-21)
-- `IMPLEMENTATION_PLAN.md` - Stary plan implementacji
-- `ITEM_DETAIL_PAGE_IMPLEMENTATION.md` - Dokumentacja implementacji ItemDetailPage (2025-01-25)
+Przestarzałe dokumenty przeniesione do archiwum.
 
-## 🔧 Dokumenty operacyjne
+## Dokumenty operacyjne
 
-- `deployment-setup.md` - Konfiguracja deploymentu
-- `ssh-troubleshooting.md` - Rozwiązywanie problemów z SSH
+- [deployment/](./deployment/) — deployment i produkcja
+- [SECURITY_FIX.md](./SECURITY_FIX.md) — hardening Docker/DB (zaimplementowany)
+- [security-dependabot-remediation.md](./security-dependabot-remediation.md) — alerty zależności
 
 ---
 
-**Ostatnia aktualizacja:** 2025-01-21
-
+**Ostatnia aktualizacja:** 2026-07-06

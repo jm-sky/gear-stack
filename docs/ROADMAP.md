@@ -18,7 +18,7 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
 ### Wysoki priorytet
 
 1. **Bezpieczeństwo aplikacji (Security Hardening)** - 🚧 In Progress
-   - 📍 Plan: [SECURITY_IMPROVEMENT_PLAN.md](./security/SECURITY_IMPROVEMENT_PLAN.md)
+   - 📍 Plan: [SECURITY_IMPROVEMENT_PLAN.md](./plans/SECURITY_IMPROVEMENT_PLAN.md)
    - 📍 Docker Security: [SECURITY_FIX.md](./SECURITY_FIX.md)
    - ✅ **Critical:** Implementacja security headers (CSP, HSTS, X-Frame-Options) - Completed (v2.47.0)
    - 📋 **Low:** PostgreSQL SSL/TLS (opcjonalne - Docker network zapewnia izolację)
@@ -93,7 +93,7 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - Status: ✅ Completed | Priority: Medium | Complexity: Small
 
 9. **Unifikacja modeli kontenerów i przedmiotów**
-   - 📍 Analiza: [UNIFIED_MODEL_ANALYSIS.md](./analysis/UNIFIED_MODEL_ANALYSIS.md)
+   - 📍 Analiza: [UNIFIED_MODEL_ANALYSIS.md](./research/UNIFIED_MODEL_ANALYSIS.md)
    - Połączenie modeli `IGearContainer` i `IGearItem` w jeden model `IGearEntity` z flagą `isContainer`
    - Uproszczenie zagnieżdżania (plecak → kubek → pudełko → zapałki) - jeden mechanizm `parentId`
    - Wspólne obrazki dla kontenerów i przedmiotów (jedna tabela `entity_images`)
@@ -159,7 +159,7 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - Status: ✅ Completed | Priority: Medium | Complexity: Small
 
 6. **Ulepszenia inspirowane LighterPack**
-   - 📍 Lokalizacja: [LIGHTERPACK_IMPROVEMENTS_TASKS.md](./comparison/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
+   - 📍 Lokalizacja: [LIGHTERPACK_IMPROVEMENTS_TASKS.md](./research/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
    - 📋 **Tryb prosty** - [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-tryb-prosty-simple-mode-inspiracja-lighterpack) - toggle w ustawieniach, ukryte zaawansowane funkcje
    - 📋 **Drag & Drop** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-drag--drop---rozszerzenie-inspiracja-lighterpack) - rozszerzenie kolejności przedmiotów + przenoszenie między kontenerami
    - 📋 **System pomocy / Tutorial** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-system-pomocy--tutorial-inspiracja-lighterpack) - ramki z pomocą, przycisk `?`, AI Chat

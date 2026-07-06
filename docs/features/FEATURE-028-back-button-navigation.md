@@ -3,7 +3,7 @@
 **Status:** ✅ Completed  
 **Priority:** High  
 **Complexity:** Small  
-**Related:** [FEATURE-026-query-params-refactoring.md](./FEATURE-026-query-params-refactoring.md), [query-params-analysis.md](../analysis/query-params-analysis.md)
+**Related:** [FEATURE-026-query-params-refactoring.md](./FEATURE-026-query-params-refactoring.md), [query-params-analysis.md](../research/query-params-analysis.md)
 
 ## 📋 Opis
 
@@ -651,5 +651,5 @@ Użycie parametru `from` podobnie jak w `ItemHeader.vue`:
 ## 🔗 Powiązane dokumenty
 
 - [FEATURE-026: Refaktoryzacja systemu query parametrów](./FEATURE-026-query-params-refactoring.md)
-- [Analiza query parametrów](../analysis/query-params-analysis.md)
+- [Analiza query parametrów](../research/query-params-analysis.md)
 

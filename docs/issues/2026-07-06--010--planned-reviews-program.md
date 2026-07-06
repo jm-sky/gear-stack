@@ -33,7 +33,10 @@ W `docs/reviews/` są szablony do zapełnienia wynikami analiz. Każdy plik to *
 ## Baseline (nie powielać bez weryfikacji)
 
 - [REVIEW_AND_REFACTOR_PLAN.md](../REVIEW_AND_REFACTOR_PLAN.md) — security + code quality (2026-07-03)
-- [analysis/UX_REVIEW.md](../analysis/UX_REVIEW.md) — częściowy UX (2025-01-20)
+- [plans/SECURITY_IMPROVEMENT_PLAN.md](../plans/SECURITY_IMPROVEMENT_PLAN.md) — production security roadmap
+- [research/refactor/README.md](../research/refactor/README.md) — code quality refactor program
+- [UX_REVIEW.md](../reviews/UX_REVIEW.md) — częściowy UX (2025-01-20)
+- [research/billing-performance-recommendations.md](../research/billing-performance-recommendations.md) — billing performance
 - [security-dependabot-remediation.md](../security-dependabot-remediation.md) — alerty zależności
 
 ## Kryterium ukończenia

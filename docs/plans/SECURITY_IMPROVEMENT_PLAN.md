@@ -699,9 +699,9 @@ docker-compose up -d
 
 **Impact:** Medium (reduces exposure window)
 **Complexity:** Low
-**Location:** docs/security/
+**Location:** docs/plans/
 
-**Create:** `docs/security/SECRETS_ROTATION.md`
+**Create:** `docs/plans/SECRETS_ROTATION.md`
 
 **Rotation Schedule:**
 
