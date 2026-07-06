@@ -6,9 +6,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Gear Stack is a Vue 3 application for managing survival gear and bug-out bag equipment. The app uses a hybrid architecture with both client-side localStorage and backend API integration for features like authentication, AI assistance, and admin functionality.
 
-## Known Bugs
+## Issues & reviews
 
-A running list of known bugs (with root causes and status) is kept in **[BUGS.md](BUGS.md)**. Check and update it when fixing or reporting issues. Note the recurring V1/V2 gotcha: the `/gear` page renders from TanStack Query (V2 cache), so any mutation done through V1 (`useGear()`) — or through `useGearV2()` without invalidation — must also invalidate the V2 query cache (`gearQueryKeys.all`) and sync the V2 store, otherwise the UI shows stale data.
+- **Open issues (bugs, improvements):** [docs/issues/README.md](docs/issues/README.md) — statuses: `todo`, `planned`, `in progress`, `done`, `verification needed`.
+- **Planned review runs (security, code quality, UX, performance):** [docs/reviews/README.md](docs/reviews/README.md) — one AI session per review file; update status and findings when complete.
+
+V1/V2 gotcha: `/gear` renders from TanStack Query (V2 cache); mutations via V1 or `useGearV2()` without invalidation need `gearQueryKeys.all` invalidation or the UI stays stale.
 
 ## Security / Dependencies
 

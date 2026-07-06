@@ -52,7 +52,7 @@ sequences them by risk/effort.
   rejection, security-headers middleware, `TrustedHost` in production, rate limits
   per auth action, `send_default_pii=False` in Sentry, secret-key default rejected.
 - **`.env` is git-ignored and not tracked**; `.env.example` documents required vars.
-- **Docs discipline**: `CLAUDE.md`, `BUGS.md`, migration docs, security remediation
+- **Docs discipline**: `CLAUDE.md`, `docs/issues/`, migration docs, security remediation
   doc — this is unusually good and worth preserving.
 
 ---
@@ -174,7 +174,7 @@ shared `AuthServiceProtocol` both implementations satisfy and type against it.
 
 - 🔴 **V1/V2 gear duplication** — per `CLAUDE.md`, `useGear` (V1) and `useGearV2`
   run in parallel, and mutations must manually invalidate the V2 query cache or the
-  UI shows stale data. This is a recurring bug source (`BUGS.md`). Finish the
+  UI shows stale data. This is a recurring bug source (`docs/issues/2026-07-06-bugs.md`). Finish the
   V1→V2 migration (`docs/migration-v1-to-v2.md`) and delete the V1 layer; the dual
   model is the frontend's biggest structural debt.
 - 🟡 **Token handling** — see 3.1. Centralize token read/write in the auth store so

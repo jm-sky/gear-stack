@@ -75,7 +75,7 @@ niezmigrowane działały na V1.
 
 > Główna przyczyna błędów ze „stale UI": mutacje przez V1 (lub przez `useGearV2()`
 > bez inwalidacji) nie odświeżają cache TanStack Query (`gearQueryKeys`). Strona `/gear`
-> renderuje z tego cache. Patrz [BUGS.md](../BUGS.md).
+> renderuje z tego cache. Patrz [docs/issues/2026-07-06-bugs.md](issues/2026-07-06-bugs.md).
 
 ## Architektura (stan obecny)
 
