@@ -7,7 +7,7 @@
 ## Baseline
 
 - [REVIEW_AND_REFACTOR_PLAN.md](../REVIEW_AND_REFACTOR_PLAN.md) (N+1 mentions in gear service)
-- [issues/2026-07-06-catalogue-images.md](../issues/2026-07-06-catalogue-images.md) (transaction/session patterns)
+- [issues/2026-07-05--009--catalogue-images.md](../issues/2026-07-05--009--catalogue-images.md) (transaction/session patterns)
 
 ## Checklist
 

@@ -7,7 +7,7 @@
 ## Baseline
 
 - [migration-v1-to-v2.md](../migration-v1-to-v2.md) (TanStack Query / V2 cache)
-- [issues/2026-07-06-bugs.md](../issues/2026-07-06-bugs.md) (stale cache after mutations)
+- [issues/README.md](../issues/README.md) (stale cache after mutations)
 
 ## Checklist
 

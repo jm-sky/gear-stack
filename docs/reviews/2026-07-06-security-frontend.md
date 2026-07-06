@@ -23,7 +23,7 @@
 
 ## Cross-check
 
-- [issues/2026-07-06-bugs.md](../issues/2026-07-06-bugs.md) (V1/V2 cache — stale UI, not direct security, but mutation paths)
+- [issues/README.md](../issues/README.md) (V1/V2 cache — stale UI, not direct security, but mutation paths)
 
 ## Findings
 

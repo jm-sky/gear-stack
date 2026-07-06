@@ -17,7 +17,7 @@ Utwórz lub doprowadź do standardu cztery katalogi robocze pod `docs/`:
 | Katalog | Przeznaczenie |
 |---------|---------------|
 | `docs/issues/` | Błędy, usprawnienia, dług techniczny — elementy do naprawy |
-| `docs/reviews/` | Zaplanowane przeglądy (security, code quality, UX, performance) — jedna sesja AI na plik |
+| `docs/reviews/` | Wyniki przeglądów (security, code quality, UX, performance) |
 | `docs/research/` | Analizy, spike’i, porównania, notatki przed decyzją |
 | `docs/plans/` | Plany implementacji funkcji i większych zmian |
 
@@ -25,18 +25,35 @@ Każdy katalog MUSI mieć `README.md` jako **indeks** (tabela wszystkich plików
 
 ## Konwencja nazw plików
 
+**Tylko `docs/issues/`** używa numeru ID w nazwie pliku. Pozostałe katalogi — sama data + slug.
+
+### issues
+
 ```
 YYYY-MM-DD--NNN--kebab-tytul.md
 ```
 
 - `YYYY-MM-DD` — data utworzenia wpisu (nie zmieniaj przy drobnych edycjach; opcjonalnie dopisz `Updated: YYYY-MM-DD` w nagłówku pliku)
-- `NNN` — trzycyfrowy numer sekwencyjny **w obrębie danego katalogu** (`001`, `002`, …)
+- `NNN` — trzycyfrowy numer sekwencyjny **w obrębie `docs/issues/`** (`001`, `002`, …)
 - `kebab-tytul` — krótki slug po angielsku lub polsku (bez spacji, małe litery, myślniki)
 
 Przykłady:
 - `2026-07-04--001--v2-cache-invalidation.md`
-- `2026-07-06--002--security-backend-review.md`
-- `2026-07-06--003--stripe-webhook-spike.md`
+- `2026-07-05--002--export-markdown-csv-dropdown.md`
+
+### reviews, research, plans
+
+```
+YYYY-MM-DD-kebab-tytul.md
+```
+
+- `YYYY-MM-DD` — data utworzenia (jak wyżej)
+- `kebab-tytul` — krótki slug (bez `NNN` w nazwie pliku)
+
+Przykłady:
+- `2026-07-06-security-backend.md`
+- `2026-07-06-stripe-webhook-spike.md`
+- `2026-07-06-unified-model-migration.md`
 
 **Nie używaj** GitHub Issues do śledzenia tych elementów — tylko pliki w `docs/`.
 
@@ -56,8 +73,10 @@ Dozwolone wartości (w indeksie i w nagłówku każdego pliku):
 
 Każdy `docs/{issues,reviews,research,plans}/README.md`:
 
+**issues** — kolumna `ID` w indeksie (numer z nazwy pliku):
+
 ```markdown
-# {Issues | Reviews | Research | Plans}
+# Issues
 
 {Jedno zdanie — co trafia do tego katalogu.}
 
@@ -71,7 +90,27 @@ Każdy `docs/{issues,reviews,research,plans}/README.md`:
 |----|------|---------|--------|
 | 001 | [2026-07-04--001--example.md](2026-07-04--001--example.md) | Krótki opis | `todo` |
 
-When adding a new entry: pick next `NNN`, create `YYYY-MM-DD--NNN--slug.md`, add a row here.
+When adding a new issue: pick next `NNN`, create `YYYY-MM-DD--NNN--slug.md`, add a row here.
+```
+
+**reviews, research, plans** — bez kolumny `ID`:
+
+```markdown
+# {Reviews | Research | Plans}
+
+{Jedno zdanie — co trafia do tego katalogu.}
+
+## Status values
+
+`todo` · `planned` · `in progress` · `done` · `verification needed`
+
+## Index
+
+| File | Summary | Status |
+|------|---------|--------|
+| [2026-07-06-security-backend.md](2026-07-06-security-backend.md) | Krótki opis | `todo` |
+
+When adding a new entry: create `YYYY-MM-DD-slug.md`, add a row here.
 ```
 
 ## Szablon pojedynczego pliku
@@ -118,7 +157,7 @@ Dodaj lub zaktualizuj **krótką** sekcję (max ~5 linii), bez duplikowania tre�
 - **Research:** [docs/research/README.md](docs/research/README.md)
 - **Plans:** [docs/plans/README.md](docs/plans/README.md)
 
-Statuses: `todo`, `planned`, `in progress`, `done`, `verification needed`. New files: `YYYY-MM-DD--NNN--slug.md`.
+Statuses: `todo`, `planned`, `in progress`, `done`, `verification needed`. New issues: `YYYY-MM-DD--NNN--slug.md`; reviews/research/plans: `YYYY-MM-DD-slug.md`.
 ```
 
 Zachowaj istniejące sekcje `CLAUDE.md` (komendy, architektura, konwencje kodu) — tylko dodaj/zmień sekcję Docs workflow.
@@ -127,9 +166,9 @@ Zachowaj istniejące sekcje `CLAUDE.md` (komendy, architektura, konwencje kodu) 
 
 1. **Przeskanuj** `docs/`, root (`BUGS.md` itd.) i `CLAUDE.md` pod kątem linków do przenoszonych plików.
 2. **issues** — przenieś znane listy błędów (np. `BUGS.md`, `docs/issues/*.md` bez numeru ID) do `docs/issues/YYYY-MM-DD--NNN--*.md`; scal wiele bugów w jednym pliku tylko jeśli to jeden temat; rozdziel na osobne pliki gdy to osobne zadania.
-3. **reviews** — przenieś / przemianuj pliki z `docs/reviews/` na konwencję z `--NNN--`.
-4. **plans** — **nie przemieniaj masowo** starych `docs/plans/*.md` (SCREAMING_SNAKE); dodaj wiersze w `docs/plans/README.md` wskazujące na legacy pliki. Nowe plany tylko w konwencji daty+ID.
-5. **research** — przenieś odpowiednie pliki z `docs/analysis/` tylko gdy to wyraźnie research (nie roadmap, nie feature spec); resztę zostaw i ewentualnie linkuj z README.
+3. **reviews** — przenieś / przemianuj pliki z `docs/reviews/` na konwencję `YYYY-MM-DD-slug.md` (bez `NNN`).
+4. **plans** — **nie przemieniaj masowo** starych `docs/plans/*.md` (SCREAMING_SNAKE); dodaj wiersze w `docs/plans/README.md` wskazujące na legacy pliki. Nowe plany tylko w konwencji `YYYY-MM-DD-slug.md`.
+5. **research** — przenieś odpowiednie pliki z `docs/analysis/` tylko gdy to wyraźnie research (nie roadmap, nie feature spec); nazwy `YYYY-MM-DD-slug.md`; resztę zostaw i ewentualnie linkuj z README.
 6. Zaktualizuj **wszystkie** linki w repo wskazujące na stare ścieżki.
 7. Stare ścieżki: zostaw **stub** z jednym akapitem redirect (np. root `BUGS.md` → `docs/issues/...`) albo usuń po aktualizacji linków.
 
@@ -144,7 +183,7 @@ Na końcu odpowiedzi podaj:
 2. Tabelę indeksów (ile wpisów w każdym README)
 3. Zmiany w `CLAUDE.md`
 4. Linki wymagające ręcznej weryfikacji (jeśli jakieś)
-5. Sugerowany następny numer `NNN` per katalog
+5. Sugerowany następny numer `NNN` w `docs/issues/` (tylko issues mają ID w nazwie pliku)
 
 Nie twórz commita ani PR — tylko zmiany w working tree.
 ```
@@ -162,14 +201,14 @@ Nie twórz commita ani PR — tylko zmiany w working tree.
 
 - Zawartość `docs/plans/` i `docs/analysis/`
 - Czy istnieje `BUGS.md` / stara struktura `docs/issues/`
-- Numeracja `NNN` — **per repo, per katalog** (nie synchronizuj ID między klonami)
+- Numeracja `NNN` — **tylko w `docs/issues/`**, per repo (nie synchronizuj ID między klonami)
 
 ### Spójność między klonami
 
-- Ta sama konwencja nazw i statusów
+- Ta sama konwencja nazw i statusów (`NNN` tylko w `docs/issues/`)
 - Ta sama struktura README + szablon nagłówka pliku
 - Ta sama sekcja w `CLAUDE.md`
 
 ### Opcjonalnie po wdrożeniu we wszystkich 4
 
-- Przegląd programu reviews: skopiować zestaw plików `docs/reviews/2026-*--*--security-*.md` z gear-stack lub wygenerować na nowo per repo
+- Przegląd programu reviews: skopiować zestaw plików `docs/reviews/2026-*-security-*.md` z gear-stack lub wygenerować na nowo per repo

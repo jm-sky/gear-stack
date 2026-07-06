@@ -25,8 +25,8 @@
 
 ## Cross-check
 
-- [issues/2026-07-06-bugs.md](../issues/2026-07-06-bugs.md)
-- [issues/2026-07-06-catalogue-images.md](../issues/2026-07-06-catalogue-images.md)
+- [issues/README.md](../issues/README.md)
+- [issues/2026-07-05--009--catalogue-images.md](../issues/2026-07-05--009--catalogue-images.md)
 
 ## Findings
 

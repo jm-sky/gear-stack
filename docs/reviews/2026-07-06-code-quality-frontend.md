@@ -24,7 +24,7 @@
 
 ## Cross-check
 
-- [issues/2026-07-06-bugs.md](../issues/2026-07-06-bugs.md) (recurring V1/V2 pattern)
+- [issues/README.md](../issues/README.md) (recurring V1/V2 pattern)
 
 ## Findings
 

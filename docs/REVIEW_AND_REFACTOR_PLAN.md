@@ -174,7 +174,7 @@ shared `AuthServiceProtocol` both implementations satisfy and type against it.
 
 - 🔴 **V1/V2 gear duplication** — per `CLAUDE.md`, `useGear` (V1) and `useGearV2`
   run in parallel, and mutations must manually invalidate the V2 query cache or the
-  UI shows stale data. This is a recurring bug source (`docs/issues/2026-07-06-bugs.md`). Finish the
+  UI shows stale data. This is a recurring bug source (`docs/issues/README.md`). Finish the
   V1→V2 migration (`docs/migration-v1-to-v2.md`) and delete the V1 layer; the dual
   model is the frontend's biggest structural debt.
 - 🟡 **Token handling** — see 3.1. Centralize token read/write in the auth store so

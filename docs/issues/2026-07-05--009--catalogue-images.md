@@ -1,8 +1,9 @@
 # Catalogue image copy issues
 
 **Status:** `in progress`  
+**Created:** 2026-07-05  
 **Updated:** 2026-07-06  
-**Related:** [2026-07-06-bugs.md](2026-07-06-bugs.md) §8
+**Related:** [2026-07-05--008--item-images-missing-on-list.md](2026-07-05--008--item-images-missing-on-list.md)
 
 ## Opis problemów
 
