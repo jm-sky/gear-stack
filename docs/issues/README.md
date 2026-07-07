@@ -28,5 +28,6 @@ Tracked work items (bugs, improvements) live here — not in GitHub Issues.
 | 010 | [2026-07-06--010--planned-reviews-program.md](2026-07-06--010--planned-reviews-program.md) | Wykonać zaplanowane review (security, code quality, UX, performance) | `todo` |
 | 011 | [2026-07-06--011--cli-users-list-wide.md](2026-07-06--011--cli-users-list-wide.md) | CLI `users list` — `--wide` jak ops-monitor | `done` |
 | 012 | [2026-07-06--012--cli-users-delete-soft-hard.md](2026-07-06--012--cli-users-delete-soft-hard.md) | CLI `users delete` — soft/hard jak family-recipes | `done` |
+| 013 | [2026-07-07--013--oauth-facebook-button-visibility.md](2026-07-07--013--oauth-facebook-button-visibility.md) | OAuth Facebook — przycisk widoczny tylko przy własnej konfiguracji | `done` |
 
 When adding a new issue, create `YYYY-MM-DD--NNN--short-slug.md` and add a row to this table.
