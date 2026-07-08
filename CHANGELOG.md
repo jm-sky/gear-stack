@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Backend auth**: JWT access/refresh tokens now include `jti` and `tv` claims from login options — session tracking and `token_version` revocation work as intended (claims were dropped in `create_access_token` / `create_refresh_token`)
+
 ---
 
 ## [2.50.0] - 2026-07-08
