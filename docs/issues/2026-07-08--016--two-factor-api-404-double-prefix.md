@@ -2,6 +2,7 @@
 
 **Status:** `verification needed`  
 **Created:** 2026-07-08  
+**Updated:** 2026-07-08 — dodatkowe błędy kontraktu API (passkey options jako string, lista passkeys, brak registrationToken)  
 **Moduł:** `auth` / `two_factor` (backend + frontend)  
 **Powiązane:** [plan RWD/UX strony 2FA](../../.cursor/plans/2FA%20mobile%20RWD%20UX-0c2df7b5.plan.md)
 
@@ -76,6 +77,32 @@ Wzorzec w projekcie: prefix tylko w `api/router.py` (np. `auth_router` bez włas
 2. Settings → Zarządzaj 2FA → TOTP: QR się ładuje, weryfikacja kodu działa.
 3. Zakładka Passkeys → dodaj passkey (biometria) — bez toastu błędu.
 4. Settings → karta Security pokazuje poprawny status 2FA.
+
+## Dodatkowe błędy (2026-07-08 ~12:00, po fixie prefixu)
+
+### Passkey — dodawanie (500)
+
+```
+ValidationError: PasskeyRegistrationInitiateResponse.options
+  Input should be a valid dictionary [type=dict_type, input_value='{\"rp\": ...}', input_type=str]
+```
+
+**Przyczyna:** `options_to_json()` zwraca string JSON, a schema Pydantic oczekuje `dict`.  
+**Fix:** `json.loads()` w `webauthn_service.initiate_registration`.
+
+### Passkey — usuwanie (404 `/passkeys/undefined`)
+
+```
+DELETE /api/two-factor/webauthn/passkeys/undefined HTTP/1.1" 404
+```
+
+**Przyczyna:** backend zwraca `{ passkeys: [...], total: N }`, frontend traktował całą odpowiedź jako tablicę → `passkey.id` = `undefined`.  
+**Fix:** `twoFactorService.listPasskeys()` → `response.data.passkeys`.
+
+### Kontrakt frontend ↔ backend (WebAuthn)
+
+Frontend oczekiwał `credentialCreationOptions` / `challenge`, backend zwraca `options` + `registrationToken`.  
+**Fix:** dopasowanie typów i `useWebAuthn.ts` — `startRegistration({ optionsJSON: response.options })`, `registrationToken` w complete.
 
 ## Uwagi
 

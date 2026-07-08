@@ -60,8 +60,16 @@ class TwoFactorService implements ITwoFactorService {
   }
 
   async getTotpStatus(): Promise<TotpStatus> {
-    const response = await apiClient.get<TotpStatus>('/two-factor/totp/status')
-    return response.data
+    const response = await apiClient.get<{
+      isEnabled: boolean
+      createdAt?: string
+      lastVerifiedAt?: string
+    }>('/two-factor/totp/status')
+    return {
+      enabled: response.data.isEnabled,
+      createdAt: response.data.createdAt,
+      lastUsedAt: response.data.lastVerifiedAt,
+    }
   }
 
   // WebAuthn Methods
@@ -75,6 +83,7 @@ class TwoFactorService implements ITwoFactorService {
 
   async completePasskeyRegistration(
     name: string,
+    registrationToken: string,
     credential: PublicKeyCredential
   ): Promise<Passkey> {
     // Convert credential to JSON-serializable format
@@ -94,6 +103,7 @@ class TwoFactorService implements ITwoFactorService {
 
     const response = await apiClient.post<Passkey>('/two-factor/webauthn/register/complete', {
       name,
+      registrationToken,
       credential: credentialJSON,
     })
     return response.data
@@ -104,7 +114,10 @@ class TwoFactorService implements ITwoFactorService {
     return response.data
   }
 
-  async completePasskeyVerification(credential: PublicKeyCredential): Promise<TwoFactorVerifyResponse> {
+  async completePasskeyVerification(
+    challengeToken: string,
+    credential: PublicKeyCredential
+  ): Promise<TwoFactorVerifyResponse> {
     // Convert credential to JSON-serializable format
     const credentialJSON = {
       id: credential.id,
@@ -128,14 +141,17 @@ class TwoFactorService implements ITwoFactorService {
     }
 
     const response = await apiClient.post<TwoFactorVerifyResponse>('/two-factor/webauthn/authenticate/complete', {
+      challengeToken,
       credential: credentialJSON,
     })
     return response.data
   }
 
   async listPasskeys(): Promise<Passkey[]> {
-    const response = await apiClient.get<Passkey[]>('/two-factor/webauthn/passkeys')
-    return response.data
+    const response = await apiClient.get<{ passkeys: Passkey[], total: number }>(
+      '/two-factor/webauthn/passkeys'
+    )
+    return response.data.passkeys
   }
 
   async deletePasskey(passkeyId: string): Promise<void> {

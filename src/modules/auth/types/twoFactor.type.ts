@@ -1,4 +1,8 @@
 import type { TDateTime, TULID } from '@/shared/types/base.type'
+import type {
+  PublicKeyCredentialCreationOptionsJSON,
+  PublicKeyCredentialRequestOptionsJSON,
+} from '@simplewebauthn/browser'
 
 // TOTP Types
 export interface TotpSetup {
@@ -33,8 +37,9 @@ export interface WebAuthnRegisterRequest {
 }
 
 export interface WebAuthnRegisterResponse {
-  challenge: string // Challenge to sign
-  credentialCreationOptions: PublicKeyCredentialCreationOptions
+  options: PublicKeyCredentialCreationOptionsJSON
+  registrationToken: string
+  expiresAt: string
 }
 
 export interface WebAuthnVerifyRequest {
@@ -42,8 +47,9 @@ export interface WebAuthnVerifyRequest {
 }
 
 export interface WebAuthnVerifyResponse {
-  challenge: string
-  credentialRequestOptions: PublicKeyCredentialRequestOptions
+  options: PublicKeyCredentialRequestOptionsJSON
+  challengeToken: string
+  expiresAt: string
 }
 
 export interface WebAuthnStatus {
@@ -91,10 +97,14 @@ export interface ITwoFactorService {
   registerPasskey(request: WebAuthnRegisterRequest): Promise<WebAuthnRegisterResponse>
   completePasskeyRegistration(
     name: string,
+    registrationToken: string,
     credential: PublicKeyCredential
   ): Promise<Passkey>
   verifyPasskey(): Promise<WebAuthnVerifyResponse>
-  completePasskeyVerification(credential: PublicKeyCredential): Promise<TwoFactorVerifyResponse>
+  completePasskeyVerification(
+    challengeToken: string,
+    credential: PublicKeyCredential
+  ): Promise<TwoFactorVerifyResponse>
   listPasskeys(): Promise<Passkey[]>
   deletePasskey(passkeyId: string): Promise<void>
   getWebAuthnStatus(): Promise<WebAuthnStatus>
