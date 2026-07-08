@@ -31,5 +31,6 @@ Tracked work items (bugs, improvements) live here — not in GitHub Issues.
 | 013 | [2026-07-07--013--oauth-facebook-button-visibility.md](2026-07-07--013--oauth-facebook-button-visibility.md) | OAuth Facebook — przycisk widoczny tylko przy własnej konfiguracji | `done` |
 | 014 | [2026-07-07--014--oauth-github-login.md](2026-07-07--014--oauth-github-login.md) | OAuth GitHub — logowanie przez GitHub | `done` |
 | 015 | [2026-07-07--015--guest-layout-nav-z-index.md](2026-07-07--015--guest-layout-nav-z-index.md) | GuestLayout — pasek locale/dark mode pod logo (z-index) | `done` |
+| 016 | [2026-07-08--016--two-factor-api-404-double-prefix.md](2026-07-08--016--two-factor-api-404-double-prefix.md) | Konfiguracja 2FA — API 404 przez podwójny prefix `/two-factor` | `verification needed` |
 
 When adding a new issue, create `YYYY-MM-DD--NNN--short-slug.md` and add a row to this table.
