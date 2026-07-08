@@ -8,22 +8,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+---
+
+## [2.49.0] - 2026-07-08
+
+### Added
+- **Auth: OAuth GitHub** — logowanie przez GitHub (`GitHubOAuthProvider`, przycisk na login/register, callback `/auth/github`, zmienne `GITHUB_OAUTH_*` / `VITE_GITHUB_OAUTH_CLIENT_ID`)
+- **Auth**: `PasswordInput` z przełącznikiem widoczności hasła na stronie logowania
+- **CLI**: `users list --wide` (rozszerzona lista użytkowników) oraz `users delete` z opcjami soft/hard
 - **Gear**: `useGearMutations` – ujednolicona warstwa mutacji V2 z automatyczną inwalidacją cache TanStack Query (keystone migracji V1→V2)
+- **Gear**: searchable combobox i responsywny dialog zagnieżdżonego kontenera
 
 ### Changed
 - **Dokumentacja**: konsolidacja katalogów `docs/` — utworzono `research/` i `plans/README.md`; usunięto legacy `analysis/`, `security/`, `optimization/`; treść w `research/`, `plans/`, `reviews/`
 - **Zależności (npm)**: bump in-range (minor/patch) wszystkich pakietów + bezpieczne majory dev-tooling (`@vue/tsconfig` 0.9, `npm-run-all2` 9, `@sentry/vite-plugin` 5, `lucide-vue-next` 1.0). Pozostałe majory wysokiego ryzyka (typescript 6, vite 8, zod 4, vue-router 5, eslint 10) — zaplanowane w `docs/plans/security-dependabot-remediation.md`, do zrobienia z weryfikacją UI
 - **Gear: migracja V1→V2 ukończona** — cały moduł gear działa na modelu V2 (unified). Wprowadzono `useGearMutations` (mutacje V2 + inwalidacja cache), dobudowano brakujące funkcje na V2 (clone kontenera, import/eksport JSON, odczyt katalogu, generator przykładowego sprzętu) z testami jednostkowymi, a upload danych offline → API (`dataMigrationService`) przepisano na V2 z zachowaniem ID. Zagnieżdżone kontenery używają natywnego re-parentingu (`parentItemId`)
 
-### Deprecated
-
 ### Removed
 - **Gear: legacy warstwa V1** — `useGear` + `internal/*`, serwisy V1 (`gearContainerService`, `gearItemService`, `gearItemHybridService`, `gearItemLocalService`, `gearContainerLocalService`, `gearItemApiService`, `migrationV1toV2Service`), `store/useGearStore`, utils V1 (`getAllItems`, `containerCalculations`, `migrationHelpers`). Zachowano `gear.types.ts` (wspólne typy), `gearContainerApiService` (ratingi/raporty public) i `v1ToV2Migration` (transparentna migracja localStorage)
 
 ### Fixed
+- **Auth**: przyciski OAuth (Google/Facebook/GitHub) widoczne tylko gdy dany provider jest skonfigurowany — Facebook niezależny od Google
+- **Gear**: tworzenie itemów V2 — naprawiono naruszenie constraint `check_item_fields` w bazie
+- **Layouts**: `GuestLayoutCentered` — pasek locale/dark mode nad logo (`z-10` na `<nav>`, `relative z-0` na `<main>`)
 
 ### Security
 - Naprawiono 6 alertów Dependabota: `axios` → 1.17.0 (3 CVE: MITM proxy, NO_PROXY bypass, wyciek Proxy-Authorization), oraz `pnpm.overrides` dla `shell-quote` 1.8.4 (Critical), `@babel/plugin-transform-modules-systemjs` 7.29.7, `serialize-javascript` 7.0.5 (RCE)
+- **Backend auth**: hardening z ops-monitor — JWT `iss`/`aud`, security guardrails, upgrade `pip` w Dockerfile (CVE)
 
 ---
 
