@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Backend running in Docker: `docker-compose -f backend/docker-compose.dev.yml up`
+- Backend running in Docker: `docker-compose -f backend/docker-compose.yml up`
 - Frontend running: `pnpm dev`
 - Stripe CLI installed and logged in: `stripe login`
 - Test mode API keys configured in `.env`

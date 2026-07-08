@@ -161,11 +161,11 @@ Wymaga uruchomienia kontenera i `pytest` (zob. CLAUDE.md → Backend Testing). P
 
 ```bash
 # (katalog NIE zaczyna się od '_' → Docker dozwolony)
-docker compose -f backend/docker-compose.dev.yml up -d
+docker compose -f backend/docker-compose.yml up -d
 # przegląd nieaktualnych
 docker exec gear-stack-app pip list --outdated
 # bump w backend/requirements.txt (ostrożnie: FastAPI/Pydantic/SQLAlchemy to majory wysokiego ryzyka)
-docker compose -f backend/docker-compose.dev.yml up -d --build
+docker compose -f backend/docker-compose.yml up -d --build
 docker exec gear-stack-app python -m pytest tests/ -v
 docker exec gear-stack-app python -m black . && docker exec gear-stack-app python -m mypy .
 ```

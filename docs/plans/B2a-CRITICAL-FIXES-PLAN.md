@@ -31,7 +31,7 @@ All 3 critical security issues have been successfully resolved:
 - ✅ `backend/app/core/auth/dependencies.py` - Dependency injection
 - ✅ `backend/app/modules/auth/dependencies.py` - Blacklist check in auth middleware (line 82)
 - ✅ `backend/app/modules/auth/router.py` - Logout endpoint with token blacklisting (lines 204-237)
-- ✅ `backend/docker-compose.dev.yml` - Redis service added (lines 28-49)
+- ✅ `backend/docker-compose.yml` - Redis service added (lines 28-49)
 
 **Verification:**
 - Token blacklist service uses SHA-256 hash for secure storage
@@ -106,7 +106,7 @@ All 3 critical security issues have been successfully resolved:
 
 #### Step 1.1: Add Redis to Docker Compose (15 min)
 
-**File:** `backend/docker-compose.dev.yml`
+**File:** `backend/docker-compose.yml`
 
 ```yaml
 services:
@@ -133,8 +133,8 @@ volumes:
 
 **Test:**
 ```bash
-docker-compose -f backend/docker-compose.dev.yml up -d redis
-docker-compose -f backend/docker-compose.dev.yml exec redis redis-cli ping
+docker-compose -f backend/docker-compose.yml up -d redis
+docker-compose -f backend/docker-compose.yml exec redis redis-cli ping
 # Expected output: PONG
 ```
 
@@ -716,7 +716,7 @@ async def test_logout_blacklists_token(client, test_user, auth_headers):
 - `backend/tests/test_auth/test_token_blacklist.py`
 
 **Modified:**
-- `backend/docker-compose.dev.yml`
+- `backend/docker-compose.yml`
 - `backend/requirements.txt`
 - `backend/app/core/config.py`
 - `backend/app/modules/auth/dependencies.py`

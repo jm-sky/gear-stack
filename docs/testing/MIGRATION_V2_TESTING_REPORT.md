@@ -20,9 +20,7 @@ Successfully deployed and tested the V2 Unified Model migrations on production d
 - ✓ Merged `develop` into `feature/unified-model`
 - **Conflicts:** 5 files (auto-resolved)
   - `CLAUDE.md`
-  - `backend/docker-compose.dev-minio.yml`
-  - `backend/docker-compose.dev.yml`
-  - `backend/docker-compose.yml`
+  - `backend/docker-compose.yml` (and related compose files at the time)
   - `docs/features/FEATURE-015-recaptcha-integration.md`
 
 ### 3. Migrations Executed

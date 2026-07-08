@@ -25,7 +25,7 @@ Docker adds iptables rules that allow this traffic **before** ufw rules are chec
 
 Change all database port bindings to localhost only:
 
-### Update docker-compose.dev.yml
+### Update docker-compose.yml
 
 ```yaml
 services:
@@ -229,13 +229,13 @@ redis-cli -h 127.0.0.1 -p 6379
 ### Step 1: Backup Current State
 ```bash
 cd /home/madeyskij/projects/gear-stack/backend
-docker compose -f docker-compose.dev.yml down
+docker compose -f docker-compose.yml down
 sudo cp -r /var/lib/docker/volumes /var/lib/docker/volumes.backup
 ```
 
 ### Step 2: Update Configuration
 
-1. Edit `docker-compose.dev.yml` - bind ports to 127.0.0.1
+1. Edit `docker-compose.yml` - bind ports to 127.0.0.1
 2. Add `REDIS_PASSWORD` to `.env`
 3. Update `REDIS_URL` in `.env` to include password
 
@@ -243,10 +243,10 @@ sudo cp -r /var/lib/docker/volumes /var/lib/docker/volumes.backup
 
 ```bash
 # Restart services
-docker compose -f docker-compose.dev.yml up -d
+docker compose -f docker-compose.yml up -d
 
 # Check logs
-docker compose -f docker-compose.dev.yml logs -f
+docker compose -f docker-compose.yml logs -f
 ```
 
 ### Step 4: Verify Security
@@ -362,7 +362,7 @@ docker ps --format "table {{.Names}}\t{{.Ports}}" | grep "0.0.0.0"
 ## Checklist
 
 - [ ] Backup current Docker volumes
-- [ ] Update `docker-compose.dev.yml` - bind ports to 127.0.0.1
+- [ ] Update `docker-compose.yml` - bind ports to 127.0.0.1
 - [ ] Generate strong REDIS_PASSWORD
 - [ ] Add REDIS_PASSWORD to .env
 - [ ] Update REDIS_URL with password
@@ -387,9 +387,9 @@ If something breaks:
 
 ```bash
 cd /home/madeyskij/projects/gear-stack/backend
-docker compose -f docker-compose.dev.yml down
-git checkout docker-compose.dev.yml
-docker compose -f docker-compose.dev.yml up -d
+docker compose -f docker-compose.yml down
+git checkout docker-compose.yml
+docker compose -f docker-compose.yml up -d
 ```
 
 ---

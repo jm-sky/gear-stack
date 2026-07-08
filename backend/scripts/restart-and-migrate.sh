@@ -5,7 +5,7 @@
 
 set -e  # Exit on error
 
-COMPOSE_FILE="docker-compose.dev.yml"
+COMPOSE_FILE="docker-compose.yml"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKEND_DIR="$(dirname "$SCRIPT_DIR")"
 

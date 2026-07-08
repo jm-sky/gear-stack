@@ -16,7 +16,7 @@ NC='\033[0m' # No Color
 # Configuration
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BACKEND_DIR="$PROJECT_DIR/backend"
-COMPOSE_FILE="docker-compose.dev.yml"
+COMPOSE_FILE="docker-compose.yml"
 
 echo -e "${GREEN}🐳 Starting backend restart and migration...${NC}"
 
@@ -40,7 +40,7 @@ if [ -d "$BACKEND_DIR" ] && [ -f "$BACKEND_DIR/$COMPOSE_FILE" ]; then
 
   echo -e "${GREEN}✅ Backend restarted and migrations applied${NC}"
 else
-  echo -e "${YELLOW}⚠️  Backend not found or docker-compose.dev.yml missing, skipping backend deployment${NC}"
+  echo -e "${YELLOW}⚠️  Backend not found or docker-compose.yml missing, skipping backend deployment${NC}"
   exit 0
 fi
 
