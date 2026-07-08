@@ -1,4 +1,8 @@
 // modules/auth/services/twoFactorService.ts
+import type {
+  AuthenticationResponseJSON,
+  RegistrationResponseJSON,
+} from '@simplewebauthn/browser'
 import { apiClient } from '@/shared/services/apiClient'
 import type {
   ITwoFactorService,
@@ -84,27 +88,12 @@ class TwoFactorService implements ITwoFactorService {
   async completePasskeyRegistration(
     name: string,
     registrationToken: string,
-    credential: PublicKeyCredential
+    credential: RegistrationResponseJSON
   ): Promise<Passkey> {
-    // Convert credential to JSON-serializable format
-    const credentialJSON = {
-      id: credential.id,
-      rawId: btoa(String.fromCharCode(...new Uint8Array(credential.rawId))),
-      response: {
-        clientDataJSON: btoa(
-          String.fromCharCode(...new Uint8Array((credential.response as AuthenticatorAttestationResponse).clientDataJSON))
-        ),
-        attestationObject: btoa(
-          String.fromCharCode(...new Uint8Array((credential.response as AuthenticatorAttestationResponse).attestationObject))
-        ),
-      },
-      type: credential.type,
-    }
-
     const response = await apiClient.post<Passkey>('/two-factor/webauthn/register/complete', {
       name,
       registrationToken,
-      credential: credentialJSON,
+      credential,
     })
     return response.data
   }
@@ -116,33 +105,11 @@ class TwoFactorService implements ITwoFactorService {
 
   async completePasskeyVerification(
     challengeToken: string,
-    credential: PublicKeyCredential
+    credential: AuthenticationResponseJSON
   ): Promise<TwoFactorVerifyResponse> {
-    // Convert credential to JSON-serializable format
-    const credentialJSON = {
-      id: credential.id,
-      rawId: btoa(String.fromCharCode(...new Uint8Array(credential.rawId))),
-      response: {
-        clientDataJSON: btoa(
-          String.fromCharCode(...new Uint8Array((credential.response as AuthenticatorAssertionResponse).clientDataJSON))
-        ),
-        authenticatorData: btoa(
-          String.fromCharCode(...new Uint8Array((credential.response as AuthenticatorAssertionResponse).authenticatorData))
-        ),
-        signature: btoa(
-          String.fromCharCode(...new Uint8Array((credential.response as AuthenticatorAssertionResponse).signature))
-        ),
-        userHandle: (credential.response as AuthenticatorAssertionResponse).userHandle
-
-          ? btoa(String.fromCharCode(...new Uint8Array((credential.response as AuthenticatorAssertionResponse).userHandle!)))
-          : null,
-      },
-      type: credential.type,
-    }
-
     const response = await apiClient.post<TwoFactorVerifyResponse>('/two-factor/webauthn/authenticate/complete', {
       challengeToken,
-      credential: credentialJSON,
+      credential,
     })
     return response.data
   }

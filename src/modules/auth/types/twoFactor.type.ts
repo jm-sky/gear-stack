@@ -1,7 +1,9 @@
 import type { TDateTime, TULID } from '@/shared/types/base.type'
 import type {
+  AuthenticationResponseJSON,
   PublicKeyCredentialCreationOptionsJSON,
   PublicKeyCredentialRequestOptionsJSON,
+  RegistrationResponseJSON,
 } from '@simplewebauthn/browser'
 
 // TOTP Types
@@ -98,12 +100,12 @@ export interface ITwoFactorService {
   completePasskeyRegistration(
     name: string,
     registrationToken: string,
-    credential: PublicKeyCredential
+    credential: RegistrationResponseJSON
   ): Promise<Passkey>
   verifyPasskey(): Promise<WebAuthnVerifyResponse>
   completePasskeyVerification(
     challengeToken: string,
-    credential: PublicKeyCredential
+    credential: AuthenticationResponseJSON
   ): Promise<TwoFactorVerifyResponse>
   listPasskeys(): Promise<Passkey[]>
   deletePasskey(passkeyId: string): Promise<void>

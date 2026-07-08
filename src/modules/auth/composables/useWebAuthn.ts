@@ -31,7 +31,7 @@ export function useRegisterPasskey(service?: ITwoFactorService) {
       return await svc.completePasskeyRegistration(
         request.name,
         registerResponse.registrationToken,
-        credential as unknown as PublicKeyCredential
+        credential
       )
     },
     onSuccess: async () => {
@@ -60,7 +60,7 @@ export function useVerifyPasskey(service?: ITwoFactorService) {
       // Step 3: Complete verification with backend
       return await svc.completePasskeyVerification(
         verifyResponse.challengeToken,
-        credential as unknown as PublicKeyCredential
+        credential
       )
     },
   })
