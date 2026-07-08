@@ -7,15 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [2.50.0] - 2026-07-08
+
 ### Added
 - **Auth (2FA)**: krótsze etykiety zakładek (`tab_label`) na stronie konfiguracji 2FA
 - **Docs**: issue [#016](docs/issues/2026-07-08--016--two-factor-api-404-double-prefix.md) — konfiguracja 2FA API 404
 
 ### Changed
 - **Auth (2FA)**: responsywny layout strony `/auth/2fa/setup` — bez podwójnego `PageCard`, stackowane akcje na mobile, embedded QR w flow TOTP, lista passkeyów jako karty na `<md`
+- **Docker**: jeden `backend/docker-compose.yml` dla dev i produkcji — usunięto `docker-compose.dev.yml` i `docker-compose.dev-minio.yml`; zaktualizowano `exec.sh`, skrypty migracji i przykłady `.env`
+- **Docs (deployment)**: podział `DEPLOYMENT.md` na `local-development.md`, `production-manual.md` i `production-github-actions.md`
 
 ### Fixed
-- **Auth (2FA)**: konfiguracja TOTP i passkey zwracała błąd — usunięto podwójny prefix `/two-factor` w routerze backendu (endpointy były pod `/api/two-factor/two-factor/...`, frontend wołał `/api/two-factor/...`)
+- **Auth (2FA)**: konfiguracja TOTP i passkey zwracała 404 — usunięto podwójny prefix `/two-factor` w routerze backendu (endpointy były pod `/api/two-factor/two-factor/...`, frontend wołał `/api/two-factor/...`)
+- **Auth (2FA / WebAuthn)**: rejestracja passkey — wyrównano kontrakt API (opcje jako JSON, nie string; poprawny kształt listy passkeyów; naprawiony `DELETE` na `/passkeys/undefined`)
+- **Auth (WebAuthn)**: rejestracja passkey na produkcji — `RP ID` z `settings.webauthn` i `FRONTEND_URL` zamiast błędnego fallbacku na `localhost`; credential JSON wysyłany bezpośrednio do API
 
 ---
 

@@ -1,9 +1,9 @@
+import { apiClient } from '@/shared/services/apiClient'
 // modules/auth/services/twoFactorService.ts
 import type {
   AuthenticationResponseJSON,
   RegistrationResponseJSON,
 } from '@simplewebauthn/browser'
-import { apiClient } from '@/shared/services/apiClient'
 import type {
   ITwoFactorService,
   Passkey,

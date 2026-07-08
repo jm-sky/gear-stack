@@ -1,10 +1,10 @@
-import type { TDateTime, TULID } from '@/shared/types/base.type'
 import type {
   AuthenticationResponseJSON,
   PublicKeyCredentialCreationOptionsJSON,
   PublicKeyCredentialRequestOptionsJSON,
   RegistrationResponseJSON,
 } from '@simplewebauthn/browser'
+import type { TDateTime, TULID } from '@/shared/types/base.type'
 
 // TOTP Types
 export interface TotpSetup {
