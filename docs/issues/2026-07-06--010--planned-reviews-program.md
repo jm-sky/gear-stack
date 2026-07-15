@@ -1,8 +1,8 @@
 # Wykonać zaplanowane review (security, code quality, UX, performance)
 
-**Status:** `todo`  
+**Status:** `in progress`  
 **Created:** 2026-07-06  
-**Updated:** 2026-07-06  
+**Updated:** 2026-07-15 — UX review (sesja 1) ukończona → v2.51.0
 **Related:** [docs/reviews/README.md](../reviews/README.md)
 
 ## Cel
@@ -17,7 +17,7 @@ W `docs/reviews/` są szablony do zapełnienia wynikami analiz. Każdy plik to *
 | 2 | Security | Frontend | [2026-07-06-security-frontend.md](../reviews/2026-07-06-security-frontend.md) | `planned` |
 | 3 | Code quality | Backend | [2026-07-06-code-quality-backend.md](../reviews/2026-07-06-code-quality-backend.md) | `planned` |
 | 4 | Code quality | Frontend | [2026-07-06-code-quality-frontend.md](../reviews/2026-07-06-code-quality-frontend.md) | `planned` |
-| 5 | UX | Full stack (FE primary) | [2026-07-06-ux.md](../reviews/2026-07-06-ux.md) | `planned` |
+| 5 | UX | Full stack (FE primary) | [2026-07-06-ux.md](../reviews/2026-07-06-ux.md) | `done` |
 | 6 | Performance | Backend | [2026-07-06-performance-backend.md](../reviews/2026-07-06-performance-backend.md) | `planned` |
 | 7 | Performance | Frontend | [2026-07-06-performance-frontend.md](../reviews/2026-07-06-performance-frontend.md) | `planned` |
 

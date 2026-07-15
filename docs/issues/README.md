@@ -25,7 +25,7 @@ Tracked work items (bugs, improvements) live here — not in GitHub Issues.
 | 007 | [2026-07-05--007--container-list-not-refreshing-after-add.md](2026-07-05--007--container-list-not-refreshing-after-add.md) | Po dodaniu przedmiotu lista w kontenerze się nie odświeża | `todo` |
 | 008 | [2026-07-05--008--item-images-missing-on-list.md](2026-07-05--008--item-images-missing-on-list.md) | Brak obrazków przedmiotów na liście w kontenerze | `todo` |
 | 009 | [2026-07-05--009--catalogue-images.md](2026-07-05--009--catalogue-images.md) | Catalogue image copy — FK violations, transactions | `in progress` |
-| 010 | [2026-07-06--010--planned-reviews-program.md](2026-07-06--010--planned-reviews-program.md) | Wykonać zaplanowane review (security, code quality, UX, performance) | `todo` |
+| 010 | [2026-07-06--010--planned-reviews-program.md](2026-07-06--010--planned-reviews-program.md) | Wykonać zaplanowane review (security, code quality, UX, performance) | `in progress` |
 | 011 | [2026-07-06--011--cli-users-list-wide.md](2026-07-06--011--cli-users-list-wide.md) | CLI `users list` — `--wide` jak ops-monitor | `done` |
 | 012 | [2026-07-06--012--cli-users-delete-soft-hard.md](2026-07-06--012--cli-users-delete-soft-hard.md) | CLI `users delete` — soft/hard jak family-recipes | `done` |
 | 013 | [2026-07-07--013--oauth-facebook-button-visibility.md](2026-07-07--013--oauth-facebook-button-visibility.md) | OAuth Facebook — przycisk widoczny tylko przy własnej konfiguracji | `done` |

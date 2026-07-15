@@ -7,8 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [2.51.0] - 2026-07-15
+
+### Added
+- **Sidebar**: wyszukiwanie kontenerów (debounced) oraz sekcja **Ulubione** na górze listy
+- **All Items**: kolumna Container pokazuje pełną ścieżkę zagnieżdżenia (`Root › Nested › …`) zamiast samej nazwy rodzica
+- **Docs**: UX review sesja 1 ([2026-07-06-ux.md](docs/reviews/2026-07-06-ux.md)) — 17 issue’ów w `docs/issues/`; program review w `docs/reviews/README.md`
+
+### Changed
+- **UX (a11y)**: etykiety pól logowania (hasło), comboboxy Brand/Color, paginacja „rows per page”, sidebar toggle, dismiss banera premium
+- **UX (auth)**: jeden komunikat błędu logowania (`role="alert"`), poprawiony podtytuł rejestracji (i18n)
+- **UX (gear)**: disambiguatory duplikatów nazw w sidebarze; uproszczony toolbar kontenera; ukryte pole „Show on Container” (dev copy)
+- **UX (dark mode)**: spójne neutralne tokeny tła — usunięty blue-shift (`slate`) z `AuthenticatedLayout` i `--sidebar-primary`
+- **Layout (mobile)**: `min-w-0` na `SidebarInset`/main; kompaktowy header; Edit/Add Container w menu „More actions” poniżej `sm`
+- **Nav**: top bar linki widoczne od `md` (decyzja: zachować redundancję ze sidebar na desktopie — [#031](docs/issues/2026-07-15--031--nav-redundancy-topbar-sidebar.md))
+
 ### Fixed
-- **Backend auth**: JWT access/refresh tokens now include `jti` and `tv` claims from login options — session tracking and `token_version` revocation work as intended (claims were dropped in `create_access_token` / `create_refresh_token`)
+- **Gear**: nawigacja między kontenerami w sidebarze — URL się zmieniał, ale treść strony nie (`containerId` jako `computed` w `ContainerDetailPage`)
+- **Gear**: zduplikowany timestamp Created/Updated w nagłówku kontenera; metadane tylko gdy daty się różnią
+
+---
+
+## [2.50.1] - 2026-07-10
+
+### Changed
+- **Build**: vendor libraries w osobnych manual chunks (`vite.config.ts`) — mniejszy główny bundle produkcyjny
+- **Build**: wyciszone ostrzeżenia Rollup `INVALID_ANNOTATION` z `@vueuse/core`
+
+### Fixed
+- **Backend auth**: JWT access/refresh tokens zawierają `jti` i `tv` z login options — tracking sesji i unieważnianie przez `token_version` (pominięte w changelogu 2.50.0)
 
 ---
 
