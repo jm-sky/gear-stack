@@ -1,8 +1,8 @@
 # UX: dark mode — niespójna temperatura koloru (slate tło vs neutralne tokeny)
 
-**Status:** `todo`  
+**Status:** `verification needed`  
 **Created:** 2026-07-15  
-**Updated:** 2026-07-15  
+**Updated:** 2026-07-15 — fix w branchu `fix/ux-review-simple-medium` (Opcja A: authenticated layout + tokeny)
 **Type:** improvement (visual design)  
 **Severity:** medium  
 **Related:** [UX review 2026-07-15](../reviews/2026-07-06-ux.md)
@@ -37,9 +37,9 @@ Jedna spójna oś kolorystyczna w dark mode: albo **neutralna** (zinc/gray, bez 
 
 ## Zakres
 
-- [ ] `src/layouts/AuthenticatedLayout.vue` — gradient tła
-- [ ] `src/css/style.css` — `.dark` tokeny (`sidebar-primary`, ewentualnie `--muted`)
-- [ ] `src/components/layout/PageCard.vue` i inne hardcoded `dark:bg-gray-*` / `slate-*`
+- [x] `src/layouts/AuthenticatedLayout.vue` — gradient tła
+- [x] `src/css/style.css` — `.dark` tokeny (`sidebar-primary`, ewentualnie `--muted`)
+- [x] `src/components/layout/PageCard.vue` i inne hardcoded `dark:bg-gray-*` / `slate-*`
 - [ ] Guest/landing layouty — spójność z authenticated (opcjonalnie, osobny scope)
 - [ ] Wizualna weryfikacja: dashboard, `/gear`, settings, login (dark)
 

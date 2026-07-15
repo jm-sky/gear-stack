@@ -43,6 +43,7 @@ export const gearEn = {
       readiness: 'Readiness',
       itemsCount: '{count} items | {count} item | {count} items',
       itemsCountLabel: 'Items',
+      editName: 'Edit container name',
       itemImages: {
         title: 'Item Images',
       },
@@ -453,6 +454,9 @@ export const gearEn = {
         withoutImage: 'Only without image',
         removeFilter: 'Remove filter',
       },
+    },
+    sidebar: {
+      containerDisambiguator: '{type} · {count} items',
     },
     shopping: {
       title: 'Shopping Planning',
@@ -981,6 +985,7 @@ export const gearPl = {
       readiness: 'Gotowość',
       itemsCount: '{count} przedmiotów | {count} przedmiot | {count} przedmioty | {count} przedmiotów',
       itemsCountLabel: 'Przedmiotów',
+      editName: 'Edytuj nazwę kontenera',
       itemImages: {
         title: 'Obrazki przedmiotów',
         hidden: 'Obrazki przedmiotów ukryte',
@@ -1393,6 +1398,9 @@ export const gearPl = {
         withoutImage: 'Tylko bez obrazka',
         removeFilter: 'Usuń filtr',
       },
+    },
+    sidebar: {
+      containerDisambiguator: '{type} · {count} przedm.',
     },
     shopping: {
       title: 'Planowanie Zakupów',

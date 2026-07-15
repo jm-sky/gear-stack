@@ -1,8 +1,8 @@
 # A11y: pole hasła na logowaniu — accessible name z placeholdera
 
-**Status:** `todo`  
+**Status:** `verification needed`  
 **Created:** 2026-07-15  
-**Updated:** 2026-07-15  
+**Updated:** 2026-07-15 — fix w branchu `fix/ux-review-simple-medium` (`PasswordInput` inheritAttrs)
 **Type:** bug (accessibility)  
 **Severity:** medium  
 **Related:** [UX review 2026-07-15](../reviews/2026-07-06-ux.md)
@@ -19,7 +19,7 @@ Pole email ma poprawną nazwę **„Email *”**. Pole hasła w accessibility sn
 
 ## Zakres
 
-- [ ] Formularz logowania w module `auth` (komponent password + Label).
+- [x] Formularz logowania w module `auth` (komponent password + Label).
 - [ ] Spójność z innymi formularzami auth (register, reset password).
 
 ## Weryfikacja

@@ -94,6 +94,7 @@ export const en = {
       title: 'Unlock Premium Features',
       description: 'Upgrade to Pro for AI-powered recommendations, advanced features, and more storage.',
       button: 'View Plans',
+      dismiss: 'Dismiss premium banner',
     },
     errors: {
       checkoutFailed: 'Failed to create checkout session. Please try again.',

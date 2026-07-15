@@ -1,8 +1,8 @@
 # UX: checkbox „Show on Container” — widoczny disabled z notką dev
 
-**Status:** `todo`  
+**Status:** `verification needed`  
 **Created:** 2026-07-15  
-**Updated:** 2026-07-15  
+**Updated:** 2026-07-15 — fix w branchu `fix/ux-review-simple-medium` (pole usunięte z `ItemFormFields`)
 **Type:** improvement  
 **Severity:** low  
 **Related:** [UX review 2026-07-15](../reviews/2026-07-06-ux.md)
@@ -19,7 +19,7 @@ Ukryć pole do czasu implementacji lub oznaczyć jako „Coming soon” bez suro
 
 ## Zakres
 
-- [ ] Item form — warunek feature flag / usuń z UI.
+- [x] Item form — warunek feature flag / usuń z UI.
 - [ ] Roadmap — link do planu galerii obrazków jeśli istnieje.
 
 ## Weryfikacja

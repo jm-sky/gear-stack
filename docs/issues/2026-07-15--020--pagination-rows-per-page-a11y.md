@@ -1,8 +1,8 @@
 # A11y: paginacja — przycisk „rows per page” bez opisowej nazwy
 
-**Status:** `todo`  
+**Status:** `verification needed`  
 **Created:** 2026-07-15  
-**Updated:** 2026-07-15  
+**Updated:** 2026-07-15 — fix w branchu `fix/ux-review-simple-medium` (`Pagination.vue` aria-label)
 **Type:** bug (accessibility)  
 **Severity:** medium  
 **Related:** [UX review 2026-07-15](../reviews/2026-07-06-ux.md)
@@ -19,8 +19,8 @@ Trigger wyboru liczby wierszy na stronę jest eksponowany w a11y jako samo **„
 
 ## Zakres
 
-- [ ] Wspólny komponent paginacji / data-table footer.
-- [ ] Wszystkie miejsca używające tego wzorca.
+- [x] Wspólny komponent paginacji / data-table footer.
+- [x] Wszystkie miejsca używające tego wzorca.
 
 ## Weryfikacja
 

@@ -36,6 +36,7 @@ export const authPl = {
     enter_new_password: 'Wprowadź nowe hasło',
     login_with_google: 'Kontynuuj z Google',
     links: {
+      or: 'Lub',
       or_create_account: 'Lub utwórz nowe konto',
       create_new_account: 'Utwórz nowe konto',
       or_sign_in: 'Masz już konto?',

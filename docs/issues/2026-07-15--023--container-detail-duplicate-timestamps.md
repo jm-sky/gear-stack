@@ -1,8 +1,8 @@
 # UX: metadane kontenera — zduplikowany ten sam timestamp
 
-**Status:** `todo`  
+**Status:** `verification needed`  
 **Created:** 2026-07-15  
-**Updated:** 2026-07-15  
+**Updated:** 2026-07-15 — fix w branchu `fix/ux-review-simple-medium` (`hasDistinctUpdate` w `ContainerHeader`)
 **Type:** improvement  
 **Severity:** medium  
 **Related:** [UX review 2026-07-15](../reviews/2026-07-06-ux.md)
@@ -20,8 +20,8 @@ Pod tytułem kontenera wyświetlane są **dwa identyczne** znaczniki czasu (np. 
 
 ## Zakres
 
-- [ ] Komponent metadanych nagłówka kontenera.
-- [ ] i18n: etykiety Created / Updated.
+- [x] Komponent metadanych nagłówka kontenera.
+- [x] i18n: etykiety Created / Updated.
 
 ## Weryfikacja
 

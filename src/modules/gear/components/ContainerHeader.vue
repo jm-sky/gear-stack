@@ -84,6 +84,12 @@ const isCloneDialogOpen = ref(false)
 const isDeleteDialogOpen = ref(false)
 const isDeleting = ref(false)
 
+const hasDistinctUpdate = computed<boolean>(() => {
+  const created = new Date(props.container.createdAt).getTime()
+  const updated = new Date(props.container.updatedAt).getTime()
+  return Number.isFinite(created) && Number.isFinite(updated) && Math.abs(updated - created) > 1000
+})
+
 const backTo = computed<string>(() => {
   const from = getFrom(route)
   if (from === 'all-items') {
@@ -193,15 +199,6 @@ const handlePublish = async () => {
             :aria-label="t('gear.actions.aiAssistant')"
             @click="$emit('aiChat')"
           />
-          <Button
-            v-tooltip.bottom="t('gear.actions.exportToPrompt')"
-            variant="ghost"
-            size="sm"
-            :aria-label="t('gear.actions.exportToPrompt')"
-            @click="handleExportToPrompt"
-          >
-            <ExportToPromptIcon class="size-4" />
-          </Button>
           <FavoriteContainerButton :container />
         </div>
       </div>
@@ -227,7 +224,7 @@ const handlePublish = async () => {
               {{ smallDateTime(container.createdAt) }}
             </Badge>
             <Badge
-              v-if="container.updatedAt !== container.createdAt"
+              v-if="hasDistinctUpdate"
               v-tooltip.bottom="t('common.updated')"
               variant="secondary"
               class="text-xs"

@@ -309,26 +309,6 @@ const handleCancel = () => {
           </FormItem>
         </FormField>
       </div>
-
-      <!-- Show on Container (Implementation postponed - use container.showItemImages instead) -->
-      <FormField v-slot="{ componentField, handleChange }" name="showOnContainer">
-        <FormItem v-slot="{ id }" class="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 opacity-50">
-          <div class="flex-1 space-y-1">
-            <FormLabel :label="t('gear.item.showOnContainer')" class="cursor-not-allowed" />
-            <p class="text-sm text-muted-foreground">
-              {{ t('gear.item.showOnContainerDescription') }}
-              <span class="text-xs italic"> (Implementation postponed)</span>
-            </p>
-          </div>
-          <Checkbox
-            :id
-            :model-value="componentField.modelValue"
-            :disabled="true"
-            @update:model-value="handleChange"
-          />
-          <FormMessage />
-        </FormItem>
-      </FormField>
     </div>
 
     <div class="border-t my-4" />

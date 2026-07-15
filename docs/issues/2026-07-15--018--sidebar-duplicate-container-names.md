@@ -1,8 +1,8 @@
 # UX: sidebar — identyczne nazwy kontenerów (wayfinding)
 
-**Status:** `todo`  
+**Status:** `verification needed`  
 **Created:** 2026-07-15  
-**Updated:** 2026-07-15  
+**Updated:** 2026-07-15 — fix w branchu `fix/ux-review-simple-medium` (disambiguatory w `SidebarMenuContainerItem`)
 **Type:** improvement  
 **Severity:** medium  
 **Related:** [UX review 2026-07-15](../reviews/2026-07-06-ux.md)
@@ -25,9 +25,9 @@ Każdy wpis w sidebarze jest jednoznaczny bez zgadywania.
 
 ## Zakres
 
-- [ ] Komponent listy kontenerów w sidebarze (gear module layout).
-- [ ] i18n — copy dla secondary label jeśli potrzebne.
-- [ ] Nie psuć skróconych nazw gdy są unikalne.
+- [x] Komponent listy kontenerów w sidebarze (gear module layout).
+- [x] i18n — copy dla secondary label jeśli potrzebne.
+- [x] Nie psuć skróconych nazw gdy są unikalne.
 
 ## Weryfikacja
 

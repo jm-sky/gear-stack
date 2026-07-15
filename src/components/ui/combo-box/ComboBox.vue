@@ -1,6 +1,6 @@
 <script setup lang="ts" generic="T = unknown">
 import { CheckIcon, ChevronsUpDownIcon, XIcon } from 'lucide-vue-next'
-import { computed } from 'vue'
+import { computed, useAttrs } from 'vue'
 import { Button } from '@/components/ui/button'
 import {
   Command,
@@ -41,6 +41,10 @@ const props = withDefaults(defineProps<{
   clearable: false,
 })
 
+defineOptions({ inheritAttrs: false })
+
+const attrs = useAttrs()
+
 const open = defineModel<boolean>('open', { default: false })
 const value = defineModel<string>('value', { default: '' })
 
@@ -73,6 +77,7 @@ function onItemSelect(option: ComboBoxOption) {
           variant="outline"
           role="combobox"
           :aria-expanded="open"
+          v-bind="attrs"
           :class="cn('w-full justify-between font-normal', props.class)"
         >
           <slot v-if="value" name="value">

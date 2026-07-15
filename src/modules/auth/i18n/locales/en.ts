@@ -36,6 +36,7 @@ export const authEn = {
     enter_new_password: 'Enter your new password',
     login_with_google: 'Continue with Google',
     links: {
+      or: 'Or',
       or_create_account: 'Or create a new account',
       create_new_account: 'Create new account',
       or_sign_in: 'Already have an account?',

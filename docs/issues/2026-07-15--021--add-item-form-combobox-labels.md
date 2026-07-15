@@ -1,8 +1,8 @@
 # A11y: formularz dodawania przedmiotu — comboboxy Brand/Color bez labeli
 
-**Status:** `todo`  
+**Status:** `verification needed`  
 **Created:** 2026-07-15  
-**Updated:** 2026-07-15  
+**Updated:** 2026-07-15 — fix w branchu `fix/ux-review-simple-medium` (`ComboBox` id forwarding)
 **Type:** bug (accessibility)  
 **Severity:** medium  
 **Related:** [UX review 2026-07-15](../reviews/2026-07-06-ux.md)
@@ -19,8 +19,8 @@ Każdy Combobox ma `<Label>` + `id` / `aria-labelledby` jak pozostałe pola.
 
 ## Zakres
 
-- [ ] `ItemForm` / komponenty pól Brand i Color.
-- [ ] Audyt pozostałych comboboxów w tym formularzu (Currency, Quality tier — sprawdzić).
+- [x] `ItemForm` / komponenty pól Brand i Color.
+- [x] Audyt pozostałych comboboxów w tym formularzu (Currency, Quality tier — sprawdzić).
 
 ## Weryfikacja
 

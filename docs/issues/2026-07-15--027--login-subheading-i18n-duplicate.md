@@ -1,8 +1,8 @@
 # UX: logowanie — zduplikowany tekst w podtytule (i18n)
 
-**Status:** `todo`  
+**Status:** `verification needed`  
 **Created:** 2026-07-15  
-**Updated:** 2026-07-15  
+**Updated:** 2026-07-15 — fix w branchu `fix/ux-review-simple-medium` (klucz `auth.links.or`)
 **Type:** improvement  
 **Severity:** low  
 **Related:** [UX review 2026-07-15](../reviews/2026-07-06-ux.md)
@@ -19,8 +19,8 @@ Naturalne zdanie, np. „Or [create a new account]” — jeden link, bez powtó
 
 ## Zakres
 
-- [ ] Klucze i18n w `auth` (en + pl).
-- [ ] Szablon login page — spacing / interpunkcja.
+- [x] Klucze i18n w `auth` (en + pl).
+- [x] Szablon login page — spacing / interpunkcja.
 
 ## Weryfikacja
 

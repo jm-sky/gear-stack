@@ -1,8 +1,8 @@
 # A11y: baner premium — przycisk zamknięcia bez nazwy
 
-**Status:** `todo`  
+**Status:** `verification needed`  
 **Created:** 2026-07-15  
-**Updated:** 2026-07-15  
+**Updated:** 2026-07-15 — fix w branchu `fix/ux-review-simple-medium` (`UpgradePromptBanner` aria-label)
 **Type:** bug (accessibility)  
 **Severity:** low  
 **Related:** [UX review 2026-07-15](../reviews/2026-07-06-ux.md)
@@ -19,8 +19,8 @@ Przycisk zamknięcia (X) obok „View Plans” nie ma accessible name w snapshot
 
 ## Zakres
 
-- [ ] Komponent premium upsell banner (billing lub shared).
-- [ ] Wzorzec jak inne icon-only buttons (`getActionIcon` / Button variant).
+- [x] Komponent premium upsell banner (billing lub shared).
+- [x] Wzorzec jak inne icon-only buttons (`getActionIcon` / Button variant).
 
 ## Weryfikacja
 

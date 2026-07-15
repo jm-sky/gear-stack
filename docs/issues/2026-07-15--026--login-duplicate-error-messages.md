@@ -1,8 +1,8 @@
 # UX: logowanie — zduplikowany komunikat błędu pod oboma polami
 
-**Status:** `todo`  
+**Status:** `verification needed`  
 **Created:** 2026-07-15  
-**Updated:** 2026-07-15  
+**Updated:** 2026-07-15 — fix w branchu `fix/ux-review-simple-medium` (form-level alert w `LoginForm`)
 **Type:** improvement  
 **Severity:** low  
 **Related:** [UX review 2026-07-15](../reviews/2026-07-06-ux.md)
@@ -19,8 +19,8 @@ Jeden komunikat na poziomie formularza (`role="alert"`) lub przy jednym polu —
 
 ## Zakres
 
-- [ ] Login form error display (vee-validate / FormMessage).
-- [ ] i18n PL/EN.
+- [x] Login form error display (vee-validate / FormMessage).
+- [x] i18n PL/EN.
 
 ## Weryfikacja
 

@@ -1,8 +1,8 @@
 # UX: nagłówek strony kontenera — zduplikowany Edit i przeładowany pasek akcji
 
-**Status:** `todo`  
+**Status:** `verification needed`  
 **Created:** 2026-07-15  
-**Updated:** 2026-07-15  
+**Updated:** 2026-07-15 — fix w branchu `fix/ux-review-simple-medium` (desktop; mobile → #017)
 **Type:** improvement  
 **Severity:** medium  
 **Related:** [UX review 2026-07-15](../reviews/2026-07-06-ux.md), [#017](2026-07-15--017--container-detail-mobile-layout.md)
@@ -21,7 +21,7 @@ W toolbarze kontenera widać **dwa przyciski Edit** (wariant ikona + tekst). Obo
 
 ## Zakres
 
-- [ ] Komponent nagłówka container detail (gear pages).
+- [x] Komponent nagłówka container detail (gear pages).
 - [ ] Uzgodnić z issue #017 (responsive overflow).
 
 ## Weryfikacja

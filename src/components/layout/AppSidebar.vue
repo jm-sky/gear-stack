@@ -73,6 +73,18 @@ const rootContainers = computed<IGearItemV2[]>(() => {
     return a.name.localeCompare(b.name)
   })
 })
+
+const duplicateContainerNames = computed<Set<string>>(() => {
+  const counts = new Map<string, number>()
+  for (const container of rootContainers.value) {
+    counts.set(container.name, (counts.get(container.name) ?? 0) + 1)
+  }
+  return new Set(
+    [...counts.entries()]
+      .filter(([, count]) => count > 1)
+      .map(([name]) => name),
+  )
+})
 </script>
 
 <template>
@@ -137,6 +149,7 @@ const rootContainers = computed<IGearItemV2[]>(() => {
               v-for="container in rootContainers"
               :key="container.id"
               :container="container"
+              :show-disambiguator="duplicateContainerNames.has(container.name)"
             />
           </SidebarMenu>
         </SidebarGroupContent>

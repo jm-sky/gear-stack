@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import Button from '../button/Button.vue'
 
+defineOptions({ inheritAttrs: false })
+
 const props = defineProps<{
   defaultValue?: string
   modelValue?: string
