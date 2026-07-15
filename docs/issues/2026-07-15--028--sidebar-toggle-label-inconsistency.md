@@ -1,8 +1,8 @@
 # A11y: niespójne aria-label przycisków sidebar toggle
 
-**Status:** `verification needed`  
+**Status:** `done`  
 **Created:** 2026-07-15  
-**Updated:** 2026-07-15 — fix w branchu `fix/ux-review-simple-medium` (`SidebarRail` → `common.toggleSidebar`)
+**Updated:** 2026-07-15 — zaakceptowane po review (`fix/ux-review-simple-medium`)
 **Type:** bug (accessibility)  
 **Severity:** low  
 **Related:** [UX review 2026-07-15](../reviews/2026-07-06-ux.md)

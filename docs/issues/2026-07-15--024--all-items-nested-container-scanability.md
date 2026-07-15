@@ -1,8 +1,8 @@
 # UX: All Items — słaba czytelność zagnieżdżonych kontenerów
 
-**Status:** `todo`  
+**Status:** `verification needed`  
 **Created:** 2026-07-15  
-**Updated:** 2026-07-15  
+**Updated:** 2026-07-15 — fix w branchu `fix/ux-review-phase-2-items` (`containerPath` breadcrumb)
 **Type:** improvement  
 **Severity:** medium  
 **Related:** [UX review 2026-07-15](../reviews/2026-07-06-ux.md)
@@ -25,8 +25,8 @@ Użytkownik od razu widzi pełną ścieżkę lub parent kontenera dla każdego w
 
 ## Zakres
 
-- [ ] `AllItemsPage` + kolumny tabeli.
-- [ ] Uzgodnić z issue #018 (nazwy w sidebarze).
+- [x] `AllItemsPage` + kolumny tabeli.
+- [x] Uzgodnić z issue #018 (nazwy w sidebarze).
 
 ## Weryfikacja
 

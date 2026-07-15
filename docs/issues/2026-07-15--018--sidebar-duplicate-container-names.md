@@ -1,8 +1,8 @@
 # UX: sidebar — identyczne nazwy kontenerów (wayfinding)
 
-**Status:** `verification needed`  
+**Status:** `done`  
 **Created:** 2026-07-15  
-**Updated:** 2026-07-15 — fix w branchu `fix/ux-review-simple-medium` (disambiguatory w `SidebarMenuContainerItem`)
+**Updated:** 2026-07-15 — zaakceptowane po review (`fix/ux-review-simple-medium`) (disambiguatory w `SidebarMenuContainerItem`)
 **Type:** improvement  
 **Severity:** medium  
 **Related:** [UX review 2026-07-15](../reviews/2026-07-06-ux.md)

@@ -1,8 +1,8 @@
 # UX: sidebar — brak wyszukiwania przy długiej liście kontenerów
 
-**Status:** `todo`  
+**Status:** `verification needed`  
 **Created:** 2026-07-15  
-**Updated:** 2026-07-15  
+**Updated:** 2026-07-15 — fix w branchu `fix/ux-review-phase-2-items` (search + favorites w sidebar)
 **Type:** improvement  
 **Severity:** medium  
 **Related:** [UX review 2026-07-15](../reviews/2026-07-06-ux.md), [#018](2026-07-15--018--sidebar-duplicate-container-names.md)
@@ -25,8 +25,8 @@ Szybki dostęp do kontenera po nazwie lub z sekcji „Pinned / Favorites”.
 
 ## Zakres
 
-- [ ] Layout sidebar gear module.
-- [ ] Persist pinned/favorites jeśli już istnieje w store — reuse.
+- [x] Layout sidebar gear module.
+- [x] Persist pinned/favorites jeśli już istnieje w store — reuse.
 
 ## Weryfikacja
 

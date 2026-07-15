@@ -32,22 +32,22 @@ Tracked work items (bugs, improvements) live here — not in GitHub Issues.
 | 014 | [2026-07-07--014--oauth-github-login.md](2026-07-07--014--oauth-github-login.md) | OAuth GitHub — logowanie przez GitHub | `done` |
 | 015 | [2026-07-07--015--guest-layout-nav-z-index.md](2026-07-07--015--guest-layout-nav-z-index.md) | GuestLayout — pasek locale/dark mode pod logo (z-index) | `done` |
 | 016 | [2026-07-08--016--two-factor-api-404-double-prefix.md](2026-07-08--016--two-factor-api-404-double-prefix.md) | Konfiguracja 2FA — API 404 przez podwójny prefix `/two-factor` | `verification needed` |
-| 017 | [2026-07-15--017--container-detail-mobile-layout.md](2026-07-15--017--container-detail-mobile-layout.md) | UX: layout strony kontenera na mobile — pusta przestrzeń | `todo` |
-| 018 | [2026-07-15--018--sidebar-duplicate-container-names.md](2026-07-15--018--sidebar-duplicate-container-names.md) | UX: sidebar — identyczne nazwy kontenerów | `verification needed` |
-| 019 | [2026-07-15--019--login-password-field-a11y.md](2026-07-15--019--login-password-field-a11y.md) | A11y: pole hasła na logowaniu — accessible name | `verification needed` |
-| 020 | [2026-07-15--020--pagination-rows-per-page-a11y.md](2026-07-15--020--pagination-rows-per-page-a11y.md) | A11y: paginacja — rows per page bez opisowej nazwy | `verification needed` |
-| 021 | [2026-07-15--021--add-item-form-combobox-labels.md](2026-07-15--021--add-item-form-combobox-labels.md) | A11y: add item — comboboxy Brand/Color bez labeli | `verification needed` |
-| 022 | [2026-07-15--022--container-detail-toolbar-clutter.md](2026-07-15--022--container-detail-toolbar-clutter.md) | UX: nagłówek kontenera — zduplikowany Edit, clutter | `verification needed` |
-| 023 | [2026-07-15--023--container-detail-duplicate-timestamps.md](2026-07-15--023--container-detail-duplicate-timestamps.md) | UX: metadane kontenera — zduplikowany timestamp | `verification needed` |
-| 024 | [2026-07-15--024--all-items-nested-container-scanability.md](2026-07-15--024--all-items-nested-container-scanability.md) | UX: All Items — czytelność zagnieżdżonych kontenerów | `todo` |
-| 025 | [2026-07-15--025--sidebar-container-search.md](2026-07-15--025--sidebar-container-search.md) | UX: sidebar — wyszukiwanie długiej listy kontenerów | `todo` |
-| 026 | [2026-07-15--026--login-duplicate-error-messages.md](2026-07-15--026--login-duplicate-error-messages.md) | UX: logowanie — zduplikowany komunikat błędu | `verification needed` |
-| 027 | [2026-07-15--027--login-subheading-i18n-duplicate.md](2026-07-15--027--login-subheading-i18n-duplicate.md) | UX: logowanie — zduplikowany tekst podtytułu | `verification needed` |
-| 028 | [2026-07-15--028--sidebar-toggle-label-inconsistency.md](2026-07-15--028--sidebar-toggle-label-inconsistency.md) | A11y: niespójne aria-label sidebar toggle | `verification needed` |
-| 029 | [2026-07-15--029--premium-banner-dismiss-a11y.md](2026-07-15--029--premium-banner-dismiss-a11y.md) | A11y: baner premium — dismiss bez nazwy | `verification needed` |
-| 030 | [2026-07-15--030--show-on-container-disabled-ui.md](2026-07-15--030--show-on-container-disabled-ui.md) | UX: checkbox Show on Container — disabled dev copy | `verification needed` |
-| 031 | [2026-07-15--031--nav-redundancy-topbar-sidebar.md](2026-07-15--031--nav-redundancy-topbar-sidebar.md) | UX: redundancja top bar vs sidebar | `todo` |
+| 017 | [2026-07-15--017--container-detail-mobile-layout.md](2026-07-15--017--container-detail-mobile-layout.md) | UX: layout strony kontenera na mobile — pusta przestrzeń | `verification needed` |
+| 018 | [2026-07-15--018--sidebar-duplicate-container-names.md](2026-07-15--018--sidebar-duplicate-container-names.md) | UX: sidebar — identyczne nazwy kontenerów | `done` |
+| 019 | [2026-07-15--019--login-password-field-a11y.md](2026-07-15--019--login-password-field-a11y.md) | A11y: pole hasła na logowaniu — accessible name | `done` |
+| 020 | [2026-07-15--020--pagination-rows-per-page-a11y.md](2026-07-15--020--pagination-rows-per-page-a11y.md) | A11y: paginacja — rows per page bez opisowej nazwy | `done` |
+| 021 | [2026-07-15--021--add-item-form-combobox-labels.md](2026-07-15--021--add-item-form-combobox-labels.md) | A11y: add item — comboboxy Brand/Color bez labeli | `done` |
+| 022 | [2026-07-15--022--container-detail-toolbar-clutter.md](2026-07-15--022--container-detail-toolbar-clutter.md) | UX: nagłówek kontenera — zduplikowany Edit, clutter | `done` |
+| 023 | [2026-07-15--023--container-detail-duplicate-timestamps.md](2026-07-15--023--container-detail-duplicate-timestamps.md) | UX: metadane kontenera — zduplikowany timestamp | `done` |
+| 024 | [2026-07-15--024--all-items-nested-container-scanability.md](2026-07-15--024--all-items-nested-container-scanability.md) | UX: All Items — czytelność zagnieżdżonych kontenerów | `verification needed` |
+| 025 | [2026-07-15--025--sidebar-container-search.md](2026-07-15--025--sidebar-container-search.md) | UX: sidebar — wyszukiwanie długiej listy kontenerów | `verification needed` |
+| 026 | [2026-07-15--026--login-duplicate-error-messages.md](2026-07-15--026--login-duplicate-error-messages.md) | UX: logowanie — zduplikowany komunikat błędu | `done` |
+| 027 | [2026-07-15--027--login-subheading-i18n-duplicate.md](2026-07-15--027--login-subheading-i18n-duplicate.md) | UX: logowanie — zduplikowany tekst podtytułu | `done` |
+| 028 | [2026-07-15--028--sidebar-toggle-label-inconsistency.md](2026-07-15--028--sidebar-toggle-label-inconsistency.md) | A11y: niespójne aria-label sidebar toggle | `done` |
+| 029 | [2026-07-15--029--premium-banner-dismiss-a11y.md](2026-07-15--029--premium-banner-dismiss-a11y.md) | A11y: baner premium — dismiss bez nazwy | `done` |
+| 030 | [2026-07-15--030--show-on-container-disabled-ui.md](2026-07-15--030--show-on-container-disabled-ui.md) | UX: checkbox Show on Container — disabled dev copy | `done` |
+| 031 | [2026-07-15--031--nav-redundancy-topbar-sidebar.md](2026-07-15--031--nav-redundancy-topbar-sidebar.md) | UX: redundancja top bar vs sidebar | `done` |
 | 032 | [2026-07-15--032--ux-review-phase-2.md](2026-07-15--032--ux-review-phase-2.md) | UX review faza 2 — obszary nieobjęte sesją 1 | `planned` |
-| 033 | [2026-07-15--033--dark-mode-color-palette-inconsistency.md](2026-07-15--033--dark-mode-color-palette-inconsistency.md) | UX: dark mode — slate tło vs neutralne tokeny | `verification needed` |
+| 033 | [2026-07-15--033--dark-mode-color-palette-inconsistency.md](2026-07-15--033--dark-mode-color-palette-inconsistency.md) | UX: dark mode — slate tło vs neutralne tokeny | `done` |
 
 When adding a new issue, create `YYYY-MM-DD--NNN--short-slug.md` and add a row to this table.

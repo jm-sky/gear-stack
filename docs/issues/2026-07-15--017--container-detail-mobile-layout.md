@@ -1,8 +1,8 @@
 # UX: layout strony kontenera na mobile — pusta przestrzeń, wąska treść
 
-**Status:** `todo`  
+**Status:** `verification needed`  
 **Created:** 2026-07-15  
-**Updated:** 2026-07-15  
+**Updated:** 2026-07-15 — fix w branchu `fix/ux-review-phase-2-items` (layout + toolbar mobile)
 **Type:** bug (responsive)  
 **Severity:** high  
 **Related:** [UX review 2026-07-15](../reviews/2026-07-06-ux.md)
@@ -21,8 +21,8 @@ Na viewporcie **375×667** główna treść zajmuje ~40% szerokości ekranu. Po 
 
 ## Zakres zmian (propozycja)
 
-- [ ] Zweryfikować `SidebarProvider` + `SidebarInset` / breakpointy w layoutcie authenticated.
-- [ ] Container detail header — responsive stack / ukrycie wtórnych akcji na wąskich ekranach.
+- [x] Zweryfikować `SidebarProvider` + `SidebarInset` / breakpointy w layoutcie authenticated.
+- [x] Container detail header — responsive stack / ukrycie wtórnych akcji na wąskich ekranach.
 - [ ] Test manualny: 375px, 768px, 1920px.
 
 ## Weryfikacja

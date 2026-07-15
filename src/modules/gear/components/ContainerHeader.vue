@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useMediaQuery } from '@vueuse/core'
 import { CalendarPlus, CalendarSync, ExternalLink, Link2, RefreshCcw } from 'lucide-vue-next'
 import { computed, defineAsyncComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -79,6 +80,8 @@ const { canUseAi } = useAi()
 const { shouldUseAPI } = useBackend()
 const { deleteItem, updateItem } = useGearMutations()
 const { handleError } = useHandleError()
+
+const isSmUp = useMediaQuery('(min-width: 640px)')
 
 const isCloneDialogOpen = ref(false)
 const isDeleteDialogOpen = ref(false)
@@ -249,9 +252,10 @@ const handlePublish = async () => {
           </div>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <ItemsTableEditModeToggle />
           <Button
+            v-if="isSmUp"
             variant="outline"
             size="sm"
             class="shrink-0"
@@ -261,6 +265,7 @@ const handlePublish = async () => {
             <span class="hidden sm:inline">{{ t('gear.actions.edit') }}</span>
           </Button>
           <Button
+            v-if="isSmUp"
             variant="outline"
             size="sm"
             class="shrink-0"
@@ -286,6 +291,15 @@ const handlePublish = async () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem v-if="!isSmUp" @click="handleEdit">
+                <EditIcon class="size-4" />
+                {{ t('gear.actions.edit') }}
+              </DropdownMenuItem>
+              <DropdownMenuItem v-if="!isSmUp" @click="handleAddContainer">
+                <AddContainerIcon class="size-4" />
+                {{ t('gear.container.addNested') }}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator v-if="!isSmUp" />
               <DropdownMenuItem @click="handleClone">
                 <CloneIcon class="size-4" />
                 {{ t('gear.container.clone') }}

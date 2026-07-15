@@ -1,8 +1,8 @@
 # UX: checkbox „Show on Container” — widoczny disabled z notką dev
 
-**Status:** `verification needed`  
+**Status:** `done`  
 **Created:** 2026-07-15  
-**Updated:** 2026-07-15 — fix w branchu `fix/ux-review-simple-medium` (pole usunięte z `ItemFormFields`)
+**Updated:** 2026-07-15 — zaakceptowane po review (`fix/ux-review-simple-medium`)
 **Type:** improvement  
 **Severity:** low  
 **Related:** [UX review 2026-07-15](../reviews/2026-07-06-ux.md)

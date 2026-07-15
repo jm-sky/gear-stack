@@ -1,8 +1,8 @@
 # UX: nagłówek strony kontenera — zduplikowany Edit i przeładowany pasek akcji
 
-**Status:** `verification needed`  
+**Status:** `done`  
 **Created:** 2026-07-15  
-**Updated:** 2026-07-15 — fix w branchu `fix/ux-review-simple-medium` (desktop; mobile → #017)
+**Updated:** 2026-07-15 — zaakceptowane po review (`fix/ux-review-simple-medium`)
 **Type:** improvement  
 **Severity:** medium  
 **Related:** [UX review 2026-07-15](../reviews/2026-07-06-ux.md), [#017](2026-07-15--017--container-detail-mobile-layout.md)

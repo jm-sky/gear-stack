@@ -457,6 +457,9 @@ export const gearEn = {
     },
     sidebar: {
       containerDisambiguator: '{type} · {count} items',
+      searchContainers: 'Search containers…',
+      favorites: 'Favorites',
+      noContainersFound: 'No containers found',
     },
     shopping: {
       title: 'Shopping Planning',
@@ -1401,6 +1404,9 @@ export const gearPl = {
     },
     sidebar: {
       containerDisambiguator: '{type} · {count} przedm.',
+      searchContainers: 'Szukaj kontenerów…',
+      favorites: 'Ulubione',
+      noContainersFound: 'Nie znaleziono kontenerów',
     },
     shopping: {
       title: 'Planowanie Zakupów',
