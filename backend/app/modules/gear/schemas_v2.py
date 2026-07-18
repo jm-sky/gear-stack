@@ -271,6 +271,9 @@ class GearItemResponseV2(BaseModel):
     created_at: datetime = Field(..., serialization_alias="createdAt")
     updated_at: datetime = Field(..., serialization_alias="updatedAt")
 
+    # Item image (populated by the service layer, not a DB column)
+    primary_image_url: str | None = Field(None, serialization_alias="primaryImageUrl")
+
     # Optional: nested children (for tree structure responses)
     children: list["GearItemResponseV2"] | None = None
 
@@ -332,6 +335,7 @@ class GearItemResponseV2(BaseModel):
                             "catalogue_item_id",
                             "created_at",
                             "updated_at",
+                            "primary_image_url",
                         ]
                         if hasattr(data, key)
                     }

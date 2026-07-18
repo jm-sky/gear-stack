@@ -6,7 +6,12 @@ This module provides business logic for the unified gear model.
 import logging
 from typing import Sequence
 
+from sqlalchemy.orm.attributes import instance_state
+
+from app.core.storage.factory import get_storage_adapter
+
 from .db_models_v2 import GearItemDBV2
+from .item_image_repository import ItemImageRepository
 from .repository_v2 import GearRepositoryV2
 from .schemas_v2 import GearItemCreateV2, GearItemUpdateV2
 
@@ -27,6 +32,46 @@ class GearServiceV2:
             repository: Gear repository instance
         """
         self.repository = repository
+        self._image_repository = ItemImageRepository(repository.db)
+        self._storage = get_storage_adapter()
+
+    async def _attach_primary_image_urls(
+        self, items: Sequence[GearItemDBV2]
+    ) -> Sequence[GearItemDBV2]:
+        """Batch-fetch and attach primary image URLs to items.
+
+        Sets a transient (non-persisted) `primary_image_url` attribute on each
+        item so `GearItemResponseV2.model_validate` can pick it up. Also walks
+        any eagerly-loaded `children` (see `get_items_with_children`) so nested
+        items get their image URL too; children that aren't eagerly loaded are
+        left untouched to avoid triggering a lazy-load.
+
+        Args:
+            items: Items (and optionally their eagerly-loaded children) to annotate
+
+        Returns:
+            The same items, mutated in place
+        """
+        flattened: list[GearItemDBV2] = []
+        stack = list(items)
+        while stack:
+            current = stack.pop()
+            flattened.append(current)
+            if "children" not in instance_state(current).unloaded and current.children:
+                stack.extend(current.children)
+
+        item_ids = [item.id for item in flattened]
+        primary_images = await self._image_repository.get_primary_images_by_items(
+            item_ids
+        )
+        for item in flattened:
+            image = primary_images.get(item.id)
+            item.primary_image_url = (  # type: ignore[attr-defined]
+                image.external_url or await self._storage.get_url(image.file_path)
+                if image
+                else None
+            )
+        return items
 
     # Create operations
 
@@ -66,7 +111,10 @@ class GearServiceV2:
         Returns:
             Item if found and owned by user, None otherwise
         """
-        return await self.repository.get_item(item_id, user_id)
+        item = await self.repository.get_item(item_id, user_id)
+        if item:
+            await self._attach_primary_image_urls([item])
+        return item
 
     async def get_items(
         self,
@@ -90,9 +138,11 @@ class GearServiceV2:
         Returns:
             List of items matching filters
         """
-        return await self.repository.get_items(
+        items = await self.repository.get_items(
             user_id, item_type, parent_item_id, is_public, favorite, filter_for_null_parent
         )
+        await self._attach_primary_image_urls(items)
+        return items
 
     async def get_items_with_children(
         self,
@@ -112,9 +162,11 @@ class GearServiceV2:
         Returns:
             List of items with children loaded
         """
-        return await self.repository.get_items_with_children(
+        items = await self.repository.get_items_with_children(
             user_id, item_type, parent_item_id, filter_for_null_parent
         )
+        await self._attach_primary_image_urls(items)
+        return items
 
     async def get_children(
         self, parent_item_id: str, user_id: str
@@ -128,7 +180,9 @@ class GearServiceV2:
         Returns:
             List of child items
         """
-        return await self.repository.get_children(parent_item_id, user_id)
+        children = await self.repository.get_children(parent_item_id, user_id)
+        await self._attach_primary_image_urls(children)
+        return children
 
     # Update operations
 
