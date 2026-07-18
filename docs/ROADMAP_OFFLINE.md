@@ -877,6 +877,8 @@ Kombinacja opcji 1 i 2:
 - Loading state podczas zapisywania
 - Error handling z możliwością retry
 
+**Plan / issue (dyskusja 2026-07-15):** [#034](./issues/2026-07-15--034--inline-editing-ux-refinement.md), [plan](./plans/2026-07-15-inline-editing-ux-plan.md)
+
 ### Szybka edycja nazwy kontenera (Inline Editing)
 **Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Small
 

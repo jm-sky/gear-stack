@@ -10,6 +10,7 @@ Implementation plans for features and larger changes.
 
 | File | Summary | Status |
 |------|---------|--------|
+| [2026-07-15-inline-editing-ux-plan.md](2026-07-15-inline-editing-ux-plan.md) | Inline editing UX — LighterPack + Excel (Tab/Enter/Esc, auto-save) | `planned` |
 | [AI_PLAN.md](AI_PLAN.md) | AI integration plan | `done` |
 | [API_INTEGRATION_PLAN.md](API_INTEGRATION_PLAN.md) | API integration plan | `done` |
 | [BACKEND_INTEGRATION.md](BACKEND_INTEGRATION.md) | Backend integration plan | `done` |

@@ -49,5 +49,6 @@ Tracked work items (bugs, improvements) live here — not in GitHub Issues.
 | 031 | [2026-07-15--031--nav-redundancy-topbar-sidebar.md](2026-07-15--031--nav-redundancy-topbar-sidebar.md) | UX: redundancja top bar vs sidebar | `done` |
 | 032 | [2026-07-15--032--ux-review-phase-2.md](2026-07-15--032--ux-review-phase-2.md) | UX review faza 2 — obszary nieobjęte sesją 1 | `planned` |
 | 033 | [2026-07-15--033--dark-mode-color-palette-inconsistency.md](2026-07-15--033--dark-mode-color-palette-inconsistency.md) | UX: dark mode — slate tło vs neutralne tokeny | `done` |
+| 034 | [2026-07-15--034--inline-editing-ux-refinement.md](2026-07-15--034--inline-editing-ux-refinement.md) | UX: dopracowanie inline editing (LighterPack / Excel) | `planned` |
 
 When adding a new issue, create `YYYY-MM-DD--NNN--short-slug.md` and add a row to this table.

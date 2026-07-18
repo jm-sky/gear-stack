@@ -128,6 +128,10 @@
 - Loading state podczas zapisywania
 - Error handling z możliwością retry
 
+**Plan / issue (dyskusja 2026-07-15):**
+- [Issue #034](../issues/2026-07-15--034--inline-editing-ux-refinement.md)
+- [Plan implementacji](../plans/2026-07-15-inline-editing-ux-plan.md)
+
 ---
 
 ### 6. Import / Export CSV i JSON
