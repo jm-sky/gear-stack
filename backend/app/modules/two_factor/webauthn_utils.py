@@ -45,8 +45,23 @@ def _get_rp_name() -> str:
 
 
 def _get_origin() -> str:
-    """Expected WebAuthn origin (frontend URL)."""
-    return settings.webauthn.origin or settings.frontend_url
+    """Expected WebAuthn origin (frontend URL).
+
+    When WEBAUTHN_ORIGIN is still a localhost URL but FRONTEND_URL is a real
+    domain, use FRONTEND_URL so verification matches the browser origin.
+    """
+    configured = settings.webauthn.origin
+    frontend = settings.frontend_url
+    if not configured:
+        return frontend
+    configured_host = urlparse(configured).hostname or ""
+    frontend_host = _frontend_hostname()
+    if configured_host in ("localhost", "127.0.0.1") and frontend_host not in (
+        "localhost",
+        "127.0.0.1",
+    ):
+        return frontend
+    return configured
 
 
 def _get_timeout() -> int:
