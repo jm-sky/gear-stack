@@ -95,6 +95,7 @@ services:
       - ./backend/cli:/app/cli:ro,delegated
       - ./backend/cli.py:/app/cli.py:ro,delegated
       - ./backend/images:/app/images:ro,delegated
+      - ./backend/pyproject.toml:/app/pyproject.toml:ro,delegated
       # Mount uploads directory for persistent file storage
       - gear_stack_uploads:/app/uploads
     logging:
