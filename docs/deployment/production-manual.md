@@ -8,7 +8,7 @@ Current production setup on OVH VPS — deploy as your main user (e.g. `madeyski
 |---------|------|
 | Git repository | `/home/madeyskij/projects/gear-stack` |
 | Frontend (Caddy) | `/var/www/gear-stack` |
-| Backend | Docker Compose in `backend/` |
+| Backend | Docker Compose at repo root (`compose.yaml`) |
 
 ## Deploy
 
@@ -27,16 +27,16 @@ The script asks for **sudo** once (needed to copy frontend build into `/var/www/
    - `pnpm build` → `dist/`
    - `sudo rm` / `sudo cp` / `sudo chown` → `/var/www/gear-stack`
 3. **`scripts/backend_restart_migrate.sh`**
-   - `docker compose -f docker-compose.yml build app`
-   - `docker compose -f docker-compose.yml up -d --force-recreate app`
+   - `docker compose build app`
+   - `docker compose up -d --force-recreate app`
    - `docker compose exec app python cli.py db migrate`
 
 ## Docker Compose on VPS
 
-Production uses the same [`backend/docker-compose.yml`](../../backend/docker-compose.yml) as local WSL, including **source volume mounts** so backend file changes are visible without a full image rebuild. The deploy script still rebuilds and recreates the `app` container when you run a full deploy.
+Production uses the same root [`compose.yaml`](../../compose.yaml) / [`docker-compose.dev.yml`](../../docker-compose.dev.yml) as local WSL, including **source volume mounts** so backend file changes are visible without a full image rebuild. The deploy script still rebuilds and recreates the `app` container when you run a full deploy.
 
 ```bash
-cd backend
+# From repo root
 docker compose ps
 docker compose logs -f app
 ```
@@ -71,7 +71,7 @@ Log out and back in after group changes. Verify: `groups` should include `docker
 |---------|--------|
 | Permission denied on deploy | Group setup above; re-login |
 | Frontend not updating | `ls -la /var/www/gear-stack/`; hard refresh browser |
-| Docker fails | `groups` includes `docker`; `docker compose ps` in `backend/` |
+| Docker fails | `groups` includes `docker`; `docker compose ps` from repo root |
 | Backend not healthy | `docker compose logs -f app` |
 
 ## Related

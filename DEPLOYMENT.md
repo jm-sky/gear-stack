@@ -6,7 +6,7 @@ Gear Stack has three deployment contexts. Full documentation lives in [`docs/dep
 
 | Environment | How | Documentation |
 |-------------|-----|---------------|
-| **Local (WSL)** | `pnpm dev` + `docker compose -f backend/docker-compose.yml up` | [local-development.md](docs/deployment/local-development.md) |
+| **Local (WSL)** | `pnpm dev` + `docker compose up -d` (repo root) | [local-development.md](docs/deployment/local-development.md) |
 | **Production VPS (manual)** | `bash scripts/deploy.sh` as main user | [production-manual.md](docs/deployment/production-manual.md) |
 | **Production VPS (CI)** | GitHub Actions → SSH → same `deploy.sh` | [production-github-actions.md](docs/deployment/production-github-actions.md) (planned) |
 
@@ -14,7 +14,7 @@ Gear Stack has three deployment contexts. Full documentation lives in [`docs/dep
 
 - **Repository:** `/home/madeyskij/projects/gear-stack`
 - **Frontend (Caddy):** `/var/www/gear-stack`
-- **Backend:** `backend/docker-compose.yml` (volume mounts for hot reload on WSL and VPS)
+- **Backend:** root `compose.yaml` / `docker-compose.dev.yml` (volume mounts for hot reload on WSL and VPS)
 
 ## Quick manual deploy
 

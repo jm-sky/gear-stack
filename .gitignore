@@ -40,5 +40,6 @@ test-results/
 
 # Database backups
 backups/
+.backups/
 *.sql
 playwright-report/*

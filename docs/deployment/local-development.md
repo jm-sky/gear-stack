@@ -7,7 +7,7 @@ Development on your machine — no `deploy.sh`, no Caddy, no `/var/www`.
 | Component | Command | URL |
 |-----------|---------|-----|
 | Frontend | `pnpm dev` | `http://localhost:5176` (or `VITE_PORT`) |
-| Backend | `docker compose -f backend/docker-compose.yml up` | `http://localhost:8000` |
+| Backend | `docker compose up -d` (repo root) | `http://localhost:8000` |
 | API proxy | Vite proxies `/api` → backend | configured in `vite.config.ts` |
 
 ## Prerequisites
@@ -22,9 +22,8 @@ Development on your machine — no `deploy.sh`, no Caddy, no `/var/www`.
 ## Quick start
 
 ```bash
-# Terminal 1 — backend
-cd backend
-cp .env.example .env   # first time only; edit as needed
+# Terminal 1 — backend (from repo root)
+cp backend/.env.example backend/.env   # first time only; edit as needed
 docker compose up -d
 
 # Terminal 2 — frontend
@@ -32,7 +31,7 @@ pnpm install
 pnpm dev
 ```
 
-Backend uses [`backend/docker-compose.yml`](../../backend/docker-compose.yml) with **volume mounts** (`./app`, `./migrations`, etc.) so Python changes are visible without rebuilding the image.
+Backend uses root [`compose.yaml`](../../compose.yaml) → [`docker-compose.dev.yml`](../../docker-compose.dev.yml) with **volume mounts** (`./backend/app`, `./backend/migrations`, etc.) so Python changes are visible without rebuilding the image.
 
 ## What is different from production
 

@@ -20,7 +20,7 @@ WEBAUTHN_ORIGIN="http://localhost:5176"
 
 ### Docker Compose
 
-Redis jest dostępny w [`docker-compose.yml`](docker-compose.yml) (WSL i VPS — volume mounty, hot reload).
+Redis jest dostępny w root [`docker-compose.dev.yml`](../docker-compose.dev.yml) (WSL i VPS — volume mounty, hot reload).
 
 ## 🧪 Testowanie
 

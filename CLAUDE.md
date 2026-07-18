@@ -70,13 +70,15 @@ This project uses **pnpm** (version 10.18.3+). Always use `pnpm` instead of `npm
 - If the current working directory starts with `_`, do not execute any `docker` or `docker compose` commands
 
 ```bash
-docker compose -f backend/docker-compose.yml up    # Start backend in development mode
-docker compose -f backend/docker-compose.yml down  # Stop backend
+# From repo root (compose.yaml → docker-compose.dev.yml, name: gear-stack)
+docker compose up -d
+docker compose down
 ```
 
 **Important:**
 - Use `docker compose` (Docker Compose V2 syntax), NOT `docker-compose` (deprecated V1 syntax)
-- In development, the backend typically runs in a Docker container via `docker-compose.yml`. This ensures consistent environment and dependencies. The backend is accessible at `http://localhost:8000` (or the port specified in `VITE_API_PROXY_URL`).
+- Run Compose from the **repo root**, not `backend/`. Project name is set via top-level `name: gear-stack`.
+- In development, the backend typically runs in a Docker container via root `compose.yaml` / `docker-compose.dev.yml`. This ensures consistent environment and dependencies. The backend is accessible at `http://localhost:8000` (or the port specified in `VITE_API_PROXY_URL`).
 - **Auto-reload is enabled** - FastAPI uses WatchFiles to automatically reload when Python files change. No need to restart the container after code changes during development.
 - Only restart the container when changing environment variables (`.env`) or dependencies (`requirements.txt`).
 

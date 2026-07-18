@@ -60,9 +60,9 @@ services:
   # Application (hot reload via volume mounts — WSL and VPS)
   app:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile.dev
-    image: backend:dev
+    image: gear-stack-backend:dev
     container_name: gear-stack-app
     restart: unless-stopped
     depends_on:
@@ -71,59 +71,30 @@ services:
       redis:
         condition: service_healthy
     env_file:
-      - .env
+      # Secrets and app config live here. Do not re-list them under environment:
+      # with ${VAR} — empty host interpolation would override env_file values.
+      - ./backend/.env
     environment:
+      # Docker-network overrides only
       - ENVIRONMENT=${ENVIRONMENT:-development}
-      - PROJECT_NAME=${PROJECT_NAME:-backend}
+      - PROJECT_NAME=${PROJECT_NAME:-gear-stack}
       - APP_PORT=${APP_PORT:-8000}
       - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-backend}:${POSTGRES_PASSWORD:-gear-stack-db-secret}@db:5432/${POSTGRES_DB:-backend}
       - REDIS_URL=redis://:${REDIS_PASSWORD:-gear-stack-redis-secret}@redis:6379/0
-      - SECRET_KEY=${SECRET_KEY}
       - LOG_LEVEL=${LOG_LEVEL:-DEBUG}
-      - CORS_ORIGINS=${CORS_ORIGINS:-["http://localhost:3000"]}
-      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
-      - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID}
-      - GOOGLE_OAUTH_CLIENT_SECRET=${GOOGLE_OAUTH_CLIENT_SECRET}
-      - GOOGLE_OAUTH_REDIRECT_URI=${GOOGLE_OAUTH_REDIRECT_URI}
-      - FACEBOOK_OAUTH_CLIENT_ID=${FACEBOOK_OAUTH_CLIENT_ID}
-      - FACEBOOK_OAUTH_CLIENT_SECRET=${FACEBOOK_OAUTH_CLIENT_SECRET}
-      - FACEBOOK_OAUTH_REDIRECT_URI=${FACEBOOK_OAUTH_REDIRECT_URI}
-      - RECAPTCHA_ENABLED=${RECAPTCHA_ENABLED}
-      - RECAPTCHA_SITE_KEY=${RECAPTCHA_SITE_KEY}
-      - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
-      - RECAPTCHA_MIN_SCORE=${RECAPTCHA_MIN_SCORE}
-      - STORAGE_BASE_URL=${STORAGE_BASE_URL:-http://localhost:8000}
-      # S3-compatible storage (RustFS) — set STORAGE_TYPE=s3 and endpoints in .env
-      - STORAGE_TYPE=${STORAGE_TYPE:-local}
-      - STORAGE_S3_BUCKET=${STORAGE_S3_BUCKET:-uploads}
-      - STORAGE_S3_ACCESS_KEY=${STORAGE_S3_ACCESS_KEY:-}
-      - STORAGE_S3_SECRET_KEY=${STORAGE_S3_SECRET_KEY:-}
-      - STORAGE_S3_REGION=${STORAGE_S3_REGION:-us-east-1}
-      - STORAGE_S3_ENDPOINT_URL=${STORAGE_S3_ENDPOINT_URL:-}
-      - STORAGE_S3_PUBLIC_ENDPOINT_URL=${STORAGE_S3_PUBLIC_ENDPOINT_URL:-}
-      # Stripe Billing Configuration
-      - STRIPE_ENABLED=${STRIPE_ENABLED:-false}
-      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
-      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
-      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
-      - STRIPE_PRO_MONTHLY_PRICE_ID=${STRIPE_PRO_MONTHLY_PRICE_ID}
-      - STRIPE_PRO_ANNUAL_PRICE_ID=${STRIPE_PRO_ANNUAL_PRICE_ID}
-      - STRIPE_PRO_PLUS_MONTHLY_PRICE_ID=${STRIPE_PRO_PLUS_MONTHLY_PRICE_ID}
-      - STRIPE_PRO_PLUS_ANNUAL_PRICE_ID=${STRIPE_PRO_PLUS_ANNUAL_PRICE_ID}
     ports:
       - "127.0.0.1:${APP_PORT:-8000}:8000"  # Only localhost access (Caddy proxy)
     volumes:
-      # Mount source code for hot reload
-      # Paths are relative to docker-compose.yml location (backend/ directory)
+      # Mount source code for hot reload (paths relative to repo root)
       # Using :delegated for better performance on WSL2/macOS
-      - ./app:/app/app:rw,delegated
-      - ./scripts:/app/scripts:rw,delegated
-      - ./tests:/app/tests:rw,delegated
-      - ./migrations:/app/migrations:rw,delegated
-      - ./main.py:/app/main.py:rw,delegated
-      - ./cli:/app/cli:ro,delegated
-      - ./cli.py:/app/cli.py:ro,delegated
-      - ./images:/app/images:ro,delegated
+      - ./backend/app:/app/app:rw,delegated
+      - ./backend/scripts:/app/scripts:rw,delegated
+      - ./backend/tests:/app/tests:rw,delegated
+      - ./backend/migrations:/app/migrations:rw,delegated
+      - ./backend/main.py:/app/main.py:rw,delegated
+      - ./backend/cli:/app/cli:ro,delegated
+      - ./backend/cli.py:/app/cli.py:ro,delegated
+      - ./backend/images:/app/images:ro,delegated
       # Mount uploads directory for persistent file storage
       - gear_stack_uploads:/app/uploads
     logging:
@@ -144,11 +115,9 @@ networks:
 
 volumes:
   gear_stack_postgres_data:
-    name: backend_gear_stack_postgres_data
+    name: gear_stack_postgres_data
     external: true
   gear_stack_redis_data:
-    name: backend_gear_stack_redis_data
-    external: true
+    name: gear_stack_redis_data
   gear_stack_uploads:
-    name: backend_gear_stack_uploads
-    external: true
+    name: gear_stack_uploads
