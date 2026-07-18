@@ -253,7 +253,7 @@ class GearService:
         # Get URLs for all primary images
         image_urls: dict[str, str] = {}
         for item_id, image in primary_images.items():
-            url = await self._storage.get_url(image.file_path)
+            url = image.external_url or await self._storage.get_url(image.file_path)
             image_urls[item_id] = url
 
         # Map items to responses with primary image URLs and container information
@@ -359,7 +359,7 @@ class GearService:
         # Get URLs for all primary images
         image_urls: dict[str, str] = {}
         for item_id, image in primary_images.items():
-            url = await self._storage.get_url(image.file_path)
+            url = image.external_url or await self._storage.get_url(image.file_path)
             image_urls[item_id] = url
 
         # Map items to responses with primary image URLs and container information
@@ -888,7 +888,7 @@ class GearService:
         # Get URLs for all primary images
         image_urls: dict[str, str] = {}
         for item_id, image in primary_images.items():
-            url = await self._storage.get_url(image.file_path)
+            url = image.external_url or await self._storage.get_url(image.file_path)
             image_urls[item_id] = url
 
         # Map items to responses with primary image URLs and container information
@@ -924,7 +924,7 @@ class GearService:
         # Get URLs for all primary images
         image_urls: dict[str, str] = {}
         for item_id, image in primary_images.items():
-            url = await self._storage.get_url(image.file_path)
+            url = image.external_url or await self._storage.get_url(image.file_path)
             image_urls[item_id] = url
 
         # Map items to responses with primary image URLs and container information
