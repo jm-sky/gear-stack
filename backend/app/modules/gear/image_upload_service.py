@@ -493,18 +493,18 @@ class ImageUploadService:
             # Use Pydantic schema to ensure proper field name conversion (is_primary -> isPrimary)
             image_response = ItemImageResponse(
                 id=img.id,
-                item_id=img.item_id,
-                user_id=img.user_id,
+                itemId=img.item_id,
+                userId=img.user_id,
                 url=url,
-                file_name=img.file_name,
-                file_size=img.file_size,
-                mime_type=img.mime_type,
+                fileName=img.file_name,
+                fileSize=img.file_size,
+                mimeType=img.mime_type,
                 width=img.width,
                 height=img.height,
-                is_primary=img.is_primary,
+                isPrimary=img.is_primary,
                 order=img.order,
-                created_at=img.created_at.isoformat(),
-                updated_at=img.updated_at.isoformat(),
+                createdAt=img.created_at.isoformat(),
+                updatedAt=img.updated_at.isoformat(),
             )
             result.append(image_response)
 

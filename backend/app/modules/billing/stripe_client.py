@@ -1,7 +1,7 @@
 """Stripe SDK wrapper for billing operations."""
 
 import logging
-from typing import Any
+from typing import Any, cast
 
 import stripe
 
@@ -231,7 +231,7 @@ class StripeClient:
                 payload, sig_header, self.webhook_secret
             )
             logger.info(f"Webhook signature verified: {event.type} ({event.id})")
-            return event
+            return cast(stripe.Event, event)
         except stripe.error.SignatureVerificationError as e:
             logger.error(f"Webhook signature verification failed: {e}")
             raise

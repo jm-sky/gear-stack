@@ -81,10 +81,10 @@ def create_access_token(
         "tfaMethod": data.get("tfaMethod"),
         "emailVerified": data.get("emailVerified"),
     }
-    extra = cast(dict[str, Any], data)
-    for key in ("jti", "tv"):
-        if key in extra:
-            claims[key] = extra[key]
+    if "jti" in data:
+        claims["jti"] = data["jti"]
+    if "tv" in data:
+        claims["tv"] = data["tv"]
     return _encode_token(
         claims,
         token_type="access",
@@ -153,10 +153,10 @@ def create_refresh_token(data: CreateRefreshTokenOptions) -> str:
         "emailVerified": data.get("emailVerified"),
         # NOTE: tid/trol are NOT preserved in refresh token (security)
     }
-    extra = cast(dict[str, Any], data)
-    for key in ("jti", "tv"):
-        if key in extra:
-            claims[key] = extra[key]
+    if "jti" in data:
+        claims["jti"] = data["jti"]
+    if "tv" in data:
+        claims["tv"] = data["tv"]
     return _encode_token(
         claims,
         token_type="refresh",

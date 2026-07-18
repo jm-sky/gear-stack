@@ -4,7 +4,7 @@ import shutil
 from pathlib import Path
 from typing import Optional
 
-import aiofiles  # type: ignore[import-untyped]
+import aiofiles
 
 from app.core.storage.adapter import StorageAdapter
 

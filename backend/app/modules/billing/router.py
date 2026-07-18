@@ -395,7 +395,7 @@ async def stripe_webhook(
         await repository.create_webhook_event(
             stripe_event_id=event.id,
             event_type=event.type,
-            payload=event.data.object,
+            payload=dict(event.data.object),
         )
 
         # Process event if handler exists
