@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- CLI `users change-password` command to set a user's password by email or ID (admin override; invalidates existing sessions via token version bump).
+
 ---
 
 ## [2.51.0] - 2026-07-15
