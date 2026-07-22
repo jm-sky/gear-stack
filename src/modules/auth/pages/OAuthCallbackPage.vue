@@ -31,7 +31,10 @@ onMounted(async () => {
     const code = route.query.code as string
     const state = route.query.state as string
     const errorParam = route.query.error as string
-    const providerParam = route.params.provider as string
+    const providerParam =
+      (route.params.provider as string)
+      || (route.meta.fixedOAuthProvider as string)
+      || ''
 
     provider.value = providerParam
 
@@ -54,7 +57,7 @@ onMounted(async () => {
     }
 
     // Verify state parameter for CSRF protection
-    const storedState = localStorage.getItem('oauth_state')
+    const storedState = sessionStorage.getItem('oauth_state')
     if (!storedState || storedState !== state) {
       error.value = t('auth.oauth.callback.invalid_state')
       setTimeout(() => {
@@ -64,7 +67,7 @@ onMounted(async () => {
     }
 
     // Clear stored state
-    localStorage.removeItem('oauth_state')
+    sessionStorage.removeItem('oauth_state')
 
     // Get reCAPTCHA token if enabled
     const recaptchaToken = await getToken('oauth_callback')

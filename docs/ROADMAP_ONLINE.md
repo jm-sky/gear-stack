@@ -592,7 +592,7 @@ System limitów liczby przedmiotów i kontenerów w zależności od typu konta (
 - ✅ Możliwość podania własnego URL do awatara
 
 ### 🔄 Tryb prosty (Simple Mode) (inspiracja LighterPack)
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../comparison/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../research/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
 
 **Koncepcja:**
 Dodanie trybu prostego dla użytkowników, którzy chcą prostszy interfejs z ukrytymi zaawansowanymi funkcjami.

@@ -73,6 +73,18 @@ describe('getAllItemsForCatalogV2', () => {
     const result = getAllItemsForCatalogV2([container, item1], 'somethingElse')
     const zebra = result.find(r => r.id === 'i1')!
     expect(zebra.containerName).toBe('Bag')
+    expect(zebra.containerPath).toBe('Bag')
     expect(zebra.containerColor).toBe('olive')
+  })
+
+  it('builds nested container path for items and parent path for nested containers', () => {
+    const root = makeItem({ id: 'r', itemType: 'container', name: 'Root' })
+    const nested = makeItem({ id: 'n', itemType: 'container', name: 'Nested', parentItemId: 'r' })
+    const item = makeItem({ id: 'i', itemType: 'item', name: 'Item', parentItemId: 'n', category: 'tools' })
+    const result = getAllItemsForCatalogV2([root, nested, item])
+
+    expect(result.find(r => r.id === 'i')?.containerPath).toBe('Root › Nested')
+    expect(result.find(r => r.id === 'n')?.containerPath).toBe('Root')
+    expect(result.find(r => r.id === 'n')?.parentItemId).toBe('r')
   })
 })

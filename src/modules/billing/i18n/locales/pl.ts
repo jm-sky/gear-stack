@@ -94,6 +94,7 @@ export const pl = {
       title: 'Odblokuj Funkcje Premium',
       description: 'Przejdź na plan Pro, aby uzyskać rekomendacje AI, zaawansowane funkcje i więcej przestrzeni.',
       button: 'Zobacz Plany',
+      dismiss: 'Zamknij baner premium',
     },
     errors: {
       checkoutFailed: 'Nie udało się utworzyć sesji checkout. Spróbuj ponownie.',

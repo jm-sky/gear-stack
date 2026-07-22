@@ -90,7 +90,7 @@
 - Smart TanStack Query caching
 
 **File:**
-- ✅ `docs/optimization/billing-performance-recommendations.md`
+- ✅ `docs/research/billing-performance-recommendations.md`
 
 ---
 
@@ -114,7 +114,7 @@
 | Upgrade Prompt Banner | ✅ Complete | `src/modules/billing/components/UpgradePromptBanner.vue` |
 | Subscription Badge | ✅ Complete | `src/modules/billing/components/SubscriptionBadge.vue` |
 | Cancellation Test Guide | ✅ Complete | `docs/testing/billing-cancellation-test-guide.md` |
-| Performance Recommendations | ✅ Complete | `docs/optimization/billing-performance-recommendations.md` |
+| Performance Recommendations | ✅ Complete | `docs/research/billing-performance-recommendations.md` |
 | Unit Tests | ✅ Complete | `backend/tests/test_billing_service.py` |
 
 ---

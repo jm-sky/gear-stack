@@ -49,6 +49,7 @@ export default {
     pagination: {
       totalRows: '{total} row(s) total',
       rowsPerPage: 'Rows per page',
+      rowsPerPageValue: 'Rows per page: {count}',
       page: 'Page',
       of: 'of',
       goToFirstPage: 'Go to first page',
@@ -88,6 +89,7 @@ export default {
   },
   errors: {
     generic: 'An error occurred. Please try again',
+    validationError: 'Please check the form for errors',
     network: 'Network error. Please check your connection',
     unauthorized: 'You are not authorized to perform this action',
     not_found: 'Resource not found',

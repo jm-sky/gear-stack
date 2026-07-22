@@ -1,22 +1,19 @@
 """Application configuration using Pydantic Settings with modular structure."""
 
-from enum import Enum
+from enum import StrEnum
 from functools import lru_cache
 from typing import Literal
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from app.core.helpers import parse_list_value
-
+from app.core.helpers import parse_bool_value, parse_list_value
 
 # Shared config for all nested settings
-_base_config = SettingsConfigDict(
-    env_file=".env", env_file_encoding="utf-8", case_sensitive=False, extra="ignore"
-)
+_base_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", case_sensitive=False, extra="ignore")
 
 
-class Environment(str, Enum):
+class Environment(StrEnum):
     """Application environment."""
 
     LOCAL = "local"
@@ -30,9 +27,7 @@ class AppSettings(BaseSettings):
 
     model_config = _base_config
 
-    name: str = Field(
-        default="backend", validation_alias="APP_NAME", description="Application name"
-    )
+    name: str = Field(default="backend", validation_alias="APP_NAME", description="Application name")
     display_name: str = Field(
         default="Gear Stack",
         validation_alias="APP_DISPLAY_NAME",
@@ -43,9 +38,7 @@ class AppSettings(BaseSettings):
         validation_alias="APP_VERSION",
         description="Application version",
     )
-    debug: bool = Field(
-        default=False, validation_alias="DEBUG", description="Debug mode"
-    )
+    debug: bool = Field(default=False, validation_alias="DEBUG", description="Debug mode")
     environment: Environment = Field(
         default=Environment.DEVELOPMENT,
         validation_alias="ENVIRONMENT",
@@ -74,9 +67,7 @@ class ServerSettings(BaseSettings):
 
     model_config = _base_config
 
-    host: str = Field(
-        default="0.0.0.0", validation_alias="HOST", description="Server host"
-    )
+    host: str = Field(default="0.0.0.0", validation_alias="HOST", description="Server host")
     port: int = Field(default=8000, validation_alias="PORT", description="Server port")
     reload: bool = Field(
         default=True,
@@ -109,9 +100,7 @@ class ServerSettings(BaseSettings):
         description="Allowed hosts for TrustedHostMiddleware (production security)",
     )
 
-    @field_validator(
-        "cors_origins", "cors_methods", "cors_headers", "allowed_hosts", mode="after"
-    )
+    @field_validator("cors_origins", "cors_methods", "cors_headers", "allowed_hosts", mode="after")
     @classmethod
     def parse_list_fields(cls, v: str | list[str]) -> list[str]:
         """Parse list fields from JSON array or comma-separated string."""
@@ -151,9 +140,7 @@ class DatabaseSettings(BaseSettings):
         validation_alias="DATABASE_POOL_RECYCLE",
         description="Database pool recycle time (seconds)",
     )
-    echo: bool = Field(
-        default=False, validation_alias="DATABASE_ECHO", description="Echo SQL queries"
-    )
+    echo: bool = Field(default=False, validation_alias="DATABASE_ECHO", description="Echo SQL queries")
 
     @field_validator("url")
     @classmethod
@@ -181,6 +168,16 @@ class SecuritySettings(BaseSettings):
         default="HS256",
         validation_alias="JWT_ALGORITHM",
         description="JWT signing algorithm",
+    )
+    jwt_issuer: str = Field(
+        default="gear-stack",
+        validation_alias="JWT_ISSUER",
+        description="JWT 'iss' claim; verified on decode to bind tokens to this deployment",
+    )
+    jwt_audience: str = Field(
+        default="gear-stack",
+        validation_alias="JWT_AUDIENCE",
+        description="JWT 'aud' claim; verified on decode to bind tokens to this deployment",
     )
     access_token_expires_minutes: int = Field(
         default=30,
@@ -218,23 +215,14 @@ class SecuritySettings(BaseSettings):
     def validate_secret_key(cls, v: str) -> str:
         """Validate secret key strength and security."""
         if "change-me" in v.lower() or "change-this" in v.lower():
-            raise ValueError(
-                "Secret key must be changed from default value in production. "
-                "Set SECRET_KEY environment variable with a secure random string."
-            )
+            raise ValueError("Secret key must be changed from default value in production. " "Set SECRET_KEY environment variable with a secure random string.")
 
         if len(v) < 32:
-            raise ValueError(
-                "Secret key must be at least 32 characters long for security. "
-                "Use a cryptographically secure random string."
-            )
+            raise ValueError("Secret key must be at least 32 characters long for security. " "Use a cryptographically secure random string.")
 
         # Check for basic entropy (not all same character)
         if len(set(v)) < 8:
-            raise ValueError(
-                "Secret key must have sufficient entropy. "
-                "Use a truly random string with varied characters."
-            )
+            raise ValueError("Secret key must have sufficient entropy. " "Use a truly random string with varied characters.")
 
         return v
 
@@ -286,17 +274,13 @@ class LoggingSettings(BaseSettings):
 
     model_config = _base_config
 
-    level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = Field(
-        default="INFO", validation_alias="LOG_LEVEL", description="Logging level"
-    )
+    level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = Field(default="INFO", validation_alias="LOG_LEVEL", description="Logging level")
     format: str = Field(
         default="%(asctime)s | %(name)s | %(levelname)s | %(message)s",
         validation_alias="LOG_FORMAT",
         description="Log format",
     )
-    file: str | None = Field(
-        default=None, validation_alias="LOG_FILE", description="Log file path"
-    )
+    file: str | None = Field(default=None, validation_alias="LOG_FILE", description="Log file path")
 
 
 class RecaptchaSettings(BaseSettings):
@@ -334,21 +318,14 @@ class RecaptchaSettings(BaseSettings):
     @classmethod
     def parse_enabled(cls, v: str | bool) -> bool:
         """Parse enabled field from string or bool."""
-        if isinstance(v, bool):
-            return v
-        if isinstance(v, str):
-            # Handle common boolean string representations
-            return v.lower() in ("true", "1", "yes", "on")
-        return False
+        return parse_bool_value(v)
 
     @field_validator("min_score")
     @classmethod
     def validate_min_score(cls, v: float) -> float:
         """Validate reCAPTCHA score is in valid range."""
         if not 0.0 <= v <= 1.0:
-            raise ValueError(
-                f"reCAPTCHA min_score must be between 0.0 and 1.0, got: {v}"
-            )
+            raise ValueError(f"reCAPTCHA min_score must be between 0.0 and 1.0, got: {v}")
         return v
 
 
@@ -391,6 +368,23 @@ class OAuthSettings(BaseSettings):
         description="Facebook OAuth redirect URI",
     )
 
+    # GitHub OAuth (login callback: /auth/github)
+    github_client_id: str = Field(
+        default="",
+        validation_alias="GITHUB_OAUTH_CLIENT_ID",
+        description="GitHub OAuth client ID for login",
+    )
+    github_client_secret: str = Field(
+        default="",
+        validation_alias="GITHUB_OAUTH_CLIENT_SECRET",
+        description="GitHub OAuth client secret for login",
+    )
+    github_redirect_uri: str = Field(
+        default="",
+        validation_alias="GITHUB_OAUTH_REDIRECT_URI",
+        description="GitHub login callback URL (e.g. /auth/github)",
+    )
+
 
 class EmailSettings(BaseSettings):
     """Email service configuration."""
@@ -417,15 +411,9 @@ class EmailSettings(BaseSettings):
         validation_alias="SMTP_HOST",
         description="SMTP server host",
     )
-    smtp_port: int = Field(
-        default=587, validation_alias="SMTP_PORT", description="SMTP server port"
-    )
-    smtp_user: str = Field(
-        default="", validation_alias="SMTP_USER", description="SMTP username"
-    )
-    smtp_password: str = Field(
-        default="", validation_alias="SMTP_PASSWORD", description="SMTP password"
-    )
+    smtp_port: int = Field(default=587, validation_alias="SMTP_PORT", description="SMTP server port")
+    smtp_user: str = Field(default="", validation_alias="SMTP_USER", description="SMTP username")
+    smtp_password: str = Field(default="", validation_alias="SMTP_PASSWORD", description="SMTP password")
     smtp_from: str = Field(
         default="noreply@example.com",
         validation_alias="SMTP_FROM",
@@ -613,11 +601,7 @@ class SentrySettings(BaseSettings):
     @classmethod
     def parse_enabled(cls, v: str | bool) -> bool:
         """Parse enabled field from string or bool."""
-        if isinstance(v, bool):
-            return v
-        if isinstance(v, str):
-            return v.lower() in ("true", "1", "yes", "on")
-        return False
+        return parse_bool_value(v)
 
     @field_validator("traces_sample_rate", "profiles_sample_rate")
     @classmethod
@@ -633,9 +617,7 @@ class AISettings(BaseSettings):
 
     model_config = _base_config
 
-    enabled: bool = Field(
-        default=True, validation_alias="AI_ENABLED", description="Enable AI features"
-    )
+    enabled: bool = Field(default=True, validation_alias="AI_ENABLED", description="Enable AI features")
     openrouter_api_key: str = Field(
         default="",
         validation_alias="OPENROUTER_API_KEY",
@@ -671,11 +653,7 @@ class AISettings(BaseSettings):
     @classmethod
     def parse_bool_field(cls, v: str | bool) -> bool:
         """Parse boolean field from string or bool."""
-        if isinstance(v, bool):
-            return v
-        if isinstance(v, str):
-            return v.lower() in ("true", "1", "yes", "on")
-        return False
+        return parse_bool_value(v)
 
 
 class RedisSettings(BaseSettings):
@@ -779,11 +757,19 @@ class StripeSettings(BaseSettings):
     @classmethod
     def parse_enabled(cls, v: str | bool) -> bool:
         """Parse enabled field from string or bool."""
-        if isinstance(v, bool):
-            return v
-        if isinstance(v, str):
-            return v.lower() in ("true", "1", "yes", "on")
-        return False
+        return parse_bool_value(v)
+
+
+class HealthSettings(BaseSettings):
+    """Health/monitoring configuration (Ops Monitor integration)."""
+
+    model_config = _base_config
+
+    details_token: str = Field(
+        default="",
+        validation_alias="HEALTH_DETAILS_TOKEN",
+        description="Bearer token required to access GET /api/health/details (Ops Monitor)",
+    )
 
 
 class Settings(BaseSettings):
@@ -812,6 +798,7 @@ class Settings(BaseSettings):
     redis: RedisSettings = Field(default_factory=RedisSettings)
     webauthn: WebAuthnSettings = Field(default_factory=WebAuthnSettings)
     stripe: StripeSettings = Field(default_factory=StripeSettings)
+    health: HealthSettings = Field(default_factory=HealthSettings)
 
     # Legacy compatibility - still accessible at root level
     frontend_url: str = Field(
@@ -832,6 +819,41 @@ class Settings(BaseSettings):
     def is_test(self) -> bool:
         """Check if running in test mode."""
         return self.app.environment == Environment.TEST
+
+    def validate_production(self) -> None:
+        """Assert production-safe invariants; raise ``ValueError`` on violation.
+
+        Call once on startup (see app_factory) when ``is_production()``. This is a
+        defence-in-depth guardrail against deploying with insecure defaults:
+
+        - ``DEBUG`` must be off (leaks stack traces / error details).
+        - ``ALLOWED_HOSTS`` must be a non-empty explicit allow-list (TrustedHost).
+        - ``CORS_ORIGINS`` must be a non-empty explicit allow-list, never ``*``
+          (a wildcard origin with credentials is a real CSRF/exfiltration hole).
+
+        The secret-key strength is already enforced at field-validation time.
+        """
+        if not self.is_production():
+            return
+
+        errors: list[str] = []
+
+        if self.app.debug:
+            errors.append("DEBUG must be false in production (set DEBUG=false).")
+
+        # allowed_hosts / cors_origins are parsed to lists by their validators.
+        allowed_hosts = self.server.allowed_hosts
+        if not allowed_hosts or "*" in allowed_hosts:
+            errors.append("ALLOWED_HOSTS must be a non-empty explicit allow-list " "(no '*') in production.")
+
+        cors_origins = self.server.cors_origins
+        if not cors_origins:
+            errors.append("CORS_ORIGINS must be set to an explicit allow-list.")
+        elif "*" in cors_origins:
+            errors.append("CORS_ORIGINS must not contain '*' in production " "(wildcard origins with credentials are unsafe).")
+
+        if errors:
+            raise ValueError("Insecure production configuration detected:\n- " + "\n- ".join(errors))
 
 
 @lru_cache

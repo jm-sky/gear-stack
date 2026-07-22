@@ -17,6 +17,7 @@ export const useHandleError = () => {
   ) => {
     if (isValidationError(error) && setErrors) {
       setErrors(error.response.data.errors)
+      toast.error(fallbackMessage ?? t('errors.validationError'))
     } else if (isAxiosError(error)) {
       toast.error(error.response?.data.message ?? error.response?.data.detail ?? (fallbackMessage ?? t('errors.generic')))
     } else {

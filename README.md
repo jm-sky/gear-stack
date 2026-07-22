@@ -348,10 +348,13 @@ python migrations/047_add_billing_tables.py upgrade  # Run billing migration
 uvicorn app.main:app --reload
 ```
 
-**Docker (Full Stack):**
+**Docker (Backend stack):**
 ```bash
-docker-compose up -d
+# From repo root
+docker compose up -d
 ```
+
+`compose.yaml` includes `docker-compose.dev.yml` and loads `backend/.env` for interpolation.
 
 ### Environment Variables
 
@@ -412,7 +415,8 @@ gear-stack/
 │   ├── ROADMAP.md            # Roadmap index (entry point)
 │   ├── ROADMAP_OFFLINE.md    # Offline features (localStorage)
 │   └── ROADMAP_ONLINE.md     # Online features (backend/DB/auth)
-└── docker-compose.yml        # Docker configuration
+├── compose.yaml              # Compose entry (include + backend/.env)
+├── docker-compose.dev.yml    # Backend stack
 ```
 
 ---

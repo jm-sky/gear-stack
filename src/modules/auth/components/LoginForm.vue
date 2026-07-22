@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
+import Alert from '@/components/ui/alert/Alert.vue'
+import AlertDescription from '@/components/ui/alert/AlertDescription.vue'
 import { Button } from '@/components/ui/button'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+import { Input, PasswordInput } from '@/components/ui/input'
 import OAuthFacebookButton from '@/modules/auth/components/OAuthFacebookButton.vue'
+import OAuthGitHubButton from '@/modules/auth/components/OAuthGitHubButton.vue'
 import OAuthGoogleButton from '@/modules/auth/components/OAuthGoogleButton.vue'
 import { useAuth } from '@/modules/auth/composables/useAuth'
 import { AuthRouteNames, AuthRoutePaths } from '@/modules/auth/config/routes'
@@ -15,6 +19,7 @@ import { loginSchema } from '@/modules/auth/validation/login.schema'
 import { useHandleError } from '@/shared/composables/useHandleError'
 import { useRecaptcha } from '@/shared/composables/useRecaptcha'
 import { config } from '@/shared/config/config'
+import { isUnauthorizedFormError } from '@/shared/utils/typeGuards'
 import type { IAuthService } from '@/modules/auth/types/auth.type'
 import type { LoginCredentials } from '@/modules/auth/types/user.type'
 
@@ -34,6 +39,8 @@ const { login, isLoggingIn } = useAuth(authService)
 const { getToken } = useRecaptcha()
 const { handleUnauthorizedFormError } = useHandleError()
 
+const formError = ref<string | null>(null)
+
 const { handleSubmit, setErrors } = useForm({
   validationSchema: toTypedSchema(loginSchema),
   initialValues: {
@@ -43,6 +50,7 @@ const { handleSubmit, setErrors } = useForm({
 })
 
 const onSubmit = handleSubmit(async (values: LoginCredentials) => {
+  formError.value = null
   try {
     // Get reCAPTCHA token before login
     const recaptchaToken = await getToken('login')
@@ -74,6 +82,10 @@ const onSubmit = handleSubmit(async (values: LoginCredentials) => {
     const redirectTo = typeof route.query.redirectTo === 'string' ? route.query.redirectTo : undefined
     await router.push(redirectTo ?? AuthRoutePaths.dashboard)
   } catch (err: unknown) {
+    if (isUnauthorizedFormError(err)) {
+      formError.value = t('auth.invalid_credentials')
+      return
+    }
     handleUnauthorizedFormError(err, setErrors)
   }
 })
@@ -99,17 +111,21 @@ const onSubmit = handleSubmit(async (values: LoginCredentials) => {
           {{ t('auth.password') }}
         </FormLabel>
         <FormControl>
-          <Input type="password" :placeholder="t('auth.form.password_placeholder')" v-bind="componentField" />
+          <PasswordInput :placeholder="t('auth.form.password_placeholder')" v-bind="componentField" />
         </FormControl>
         <FormMessage />
       </FormItem>
     </FormField>
 
+    <Alert v-if="formError" variant="destructive" role="alert">
+      <AlertDescription>{{ formError }}</AlertDescription>
+    </Alert>
+
     <Button type="submit" class="w-full" :loading="isLoggingIn">
       {{ t('auth.form.submit_login') }}
     </Button>
 
-    <template v-if="config.oauth.google.enabled">
+    <template v-if="config.oauth.google.enabled || config.oauth.facebook.enabled || config.oauth.github.enabled">
       <div class="relative my-6">
         <div class="absolute inset-0 flex items-center">
           <span class="w-full border-t" />
@@ -121,8 +137,9 @@ const onSubmit = handleSubmit(async (values: LoginCredentials) => {
         </div>
       </div>
 
-      <OAuthGoogleButton />
-      <OAuthFacebookButton />
+      <OAuthGoogleButton v-if="config.oauth.google.enabled" />
+      <OAuthFacebookButton v-if="config.oauth.facebook.enabled" />
+      <OAuthGitHubButton v-if="config.oauth.github.enabled" />
     </template>
   </form>
 </template>

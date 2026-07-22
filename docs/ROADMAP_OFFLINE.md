@@ -98,7 +98,7 @@ Lista planowanych funkcjonalności i ulepszeń aplikacji - **offline features** 
 ## 🎨 UI/UX Ulepszenia
 
 ### 🔄 System pomocy / Tutorial (inspiracja LighterPack)
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small-Medium | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../comparison/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small-Medium | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../research/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
 
 **Koncepcja:**
 Dodanie systemu pomocy i kontekstowych podpowiedzi dla użytkowników, inspirowane prostotą LighterPack.
@@ -122,7 +122,7 @@ Dodanie systemu pomocy i kontekstowych podpowiedzi dla użytkowników, inspirowa
   - Kontekstowe sugestie na podstawie aktualnej strony
 
 ### 🔄 Kontekstowe podpowiedzi (inspiracja LighterPack)
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../comparison/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../research/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
 
 **Wymagania:**
 - Tooltips przy ważnych elementach
@@ -711,7 +711,7 @@ Kombinacja opcji 1 i 2:
 **Lokalizacja:** `src/modules/gear/components/ContainerHeader.vue:186-189`
 
 ### 🔄 Import CSV (inspiracja LighterPack)
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../comparison/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../research/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
 
 **Obecny stan:**
 - ✅ CSV Export już istnieje (`ExportToCSVDialog.vue`, `exportToCSV.ts`)
@@ -857,7 +857,7 @@ Kombinacja opcji 1 i 2:
 - Wzorzec: LighterPack - wszystkie akcje dostępne bezpośrednio z wiersza tabeli
 
 ### 🔄 Quick Add / Inline Editing - dopracowanie (inspiracja LighterPack)
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../comparison/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../research/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
 
 **Obecny stan:**
 - ✅ Inline editing już istnieje dla: nazwa, ilość, waga, priorytet, status, cena, kategoria, notatki
@@ -876,6 +876,8 @@ Kombinacja opcji 1 i 2:
 - Wizualne oznaczenie edytowanych wierszy
 - Loading state podczas zapisywania
 - Error handling z możliwością retry
+
+**Plan / issue (dyskusja 2026-07-15):** [#034](./issues/2026-07-15--034--inline-editing-ux-refinement.md), [plan](./plans/2026-07-15-inline-editing-ux-plan.md)
 
 ### Szybka edycja nazwy kontenera (Inline Editing)
 **Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Small
@@ -900,7 +902,7 @@ Kombinacja opcji 1 i 2:
 - Wizualne wskaźniki podczas przeciągania (highlight, placeholder)
 
 ### 🔄 Drag & Drop - rozszerzenie (inspiracja LighterPack)
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../comparison/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../research/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
 
 **Koncepcja:**
 Rozszerzenie istniejącej funkcjonalności kolejności przedmiotów o pełne wsparcie drag & drop oraz przenoszenie przedmiotów między kontenerami.
@@ -952,7 +954,7 @@ Rozszerzenie istniejącej funkcjonalności kolejności przedmiotów o pełne wsp
 - ✅ Uwzględnienie zagnieżdżonych kontenerów w obliczeniach (opcjonalnie)
 
 ### 🔄 Lepsze wizualizacje (inspiracja LighterPack)
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../comparison/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../research/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
 
 **Koncepcja:**
 Ulepszenie istniejących wykresów donut (nie zmieniamy na pie chart - donut jest lepszy) dla lepszej czytelności i użyteczności.
@@ -1055,7 +1057,7 @@ Ulepszenie istniejących wykresów donut (nie zmieniamy na pie chart - donut jes
 - ✅ Przycisk w wykresie: "Inne / Noszone / Zużywalna" / "Other / Worn / Consumable"
 
 ### 🔄 Natychmiastowe obliczenia wagi (inspiracja LighterPack)
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../comparison/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
+**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Small | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../research/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
 
 **Koncepcja:**
 Obliczanie wagi w czasie rzeczywistym podczas edycji, z wizualnym feedbackiem zmian.
@@ -1126,7 +1128,7 @@ Obliczanie wagi w czasie rzeczywistym podczas edycji, z wizualnym feedbackiem zm
 - Dialog informuje użytkownika o nowej wersji i oferuje odświeżenie strony
 
 ### ✅ Refaktoryzacja systemu query parametrów (`returnTo` i `from`)
-**Status:** ✅ Completed | **Priority:** High | **Complexity:** Medium | **Analysis:** [query-params-analysis.md](../analysis/query-params-analysis.md) | **Implementation:** [FEATURE-026-query-params-refactoring.md](../features/FEATURE-026-query-params-refactoring.md)
+**Status:** ✅ Completed | **Priority:** High | **Complexity:** Medium | **Analysis:** [query-params-analysis.md](../research/query-params-analysis.md) | **Implementation:** [FEATURE-026-query-params-refactoring.md](../features/FEATURE-026-query-params-refactoring.md)
 
 **Problem:**
 - Niespójne użycie query parametrów `returnTo` i `from` w całej aplikacji
@@ -1156,7 +1158,7 @@ Obliczanie wagi w czasie rzeczywistym podczas edycji, z wizualnym feedbackiem zm
 - ✅ Mniej duplikacji kodu
 - ✅ Czyste URL-e w historii przeglądarki
 
-**Szczegóły:** Zobacz [query-params-analysis.md](../analysis/query-params-analysis.md) i [FEATURE-026-query-params-refactoring.md](../features/FEATURE-026-query-params-refactoring.md)
+**Szczegóły:** Zobacz [query-params-analysis.md](../research/query-params-analysis.md) i [FEATURE-026-query-params-refactoring.md](../features/FEATURE-026-query-params-refactoring.md)
 
 ---
 

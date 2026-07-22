@@ -49,6 +49,7 @@ export default {
     pagination: {
       totalRows: 'Łącznie {total} wierszy',
       rowsPerPage: 'Wierszy na stronę',
+      rowsPerPageValue: 'Wierszy na stronę: {count}',
       page: 'Strona',
       of: 'z',
       goToFirstPage: 'Przejdź do pierwszej strony',
@@ -88,6 +89,7 @@ export default {
   },
   errors: {
     generic: 'Wystąpił błąd. Spróbuj ponownie',
+    validationError: 'Sprawdź błędy w formularzu',
     network: 'Błąd sieci. Sprawdź połączenie internetowe',
     unauthorized: 'Nie masz uprawnień do wykonania tej akcji',
     not_found: 'Zasób nie został znaleziony',

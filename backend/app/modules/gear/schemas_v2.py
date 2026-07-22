@@ -16,9 +16,7 @@ from datetime import datetime
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
-from sqlalchemy.orm import object_session
 from sqlalchemy.orm.attributes import instance_state
-
 
 # Type aliases matching frontend
 GearItemType = Literal["container", "item"]
@@ -243,9 +241,7 @@ class GearItemResponseV2(BaseModel):
     max_weight_unit: str | None = Field(None, serialization_alias="maxWeightUnit")
     hide_when_nested: bool | None = Field(None, serialization_alias="hideWhenNested")
     is_public: bool | None = Field(None, serialization_alias="isPublic")
-    is_hidden_by_reports: bool | None = Field(
-        None, serialization_alias="isHiddenByReports"
-    )
+    is_hidden_by_reports: bool | None = Field(None, serialization_alias="isHiddenByReports")
     favorite: bool | None = None
     show_item_images: bool | None = Field(None, serialization_alias="showItemImages")
 
@@ -270,6 +266,9 @@ class GearItemResponseV2(BaseModel):
     # Metadata
     created_at: datetime = Field(..., serialization_alias="createdAt")
     updated_at: datetime = Field(..., serialization_alias="updatedAt")
+
+    # Item image (populated by the service layer, not a DB column)
+    primary_image_url: str | None = Field(None, serialization_alias="primaryImageUrl")
 
     # Optional: nested children (for tree structure responses)
     children: list["GearItemResponseV2"] | None = None
@@ -332,6 +331,7 @@ class GearItemResponseV2(BaseModel):
                             "catalogue_item_id",
                             "created_at",
                             "updated_at",
+                            "primary_image_url",
                         ]
                         if hasattr(data, key)
                     }
@@ -380,9 +380,7 @@ class GearItemBatchUpdateOrderV2(BaseModel):
 class GearItemFiltersV2(BaseModel):
     """Query filters for fetching gear items."""
 
-    itemType: Literal["container", "item", "all"] | None = Field(
-        "all", alias="itemType"
-    )
+    itemType: Literal["container", "item", "all"] | None = Field("all", alias="itemType")
     parentItemId: str | None = Field(None, alias="parentItemId")
     isPublic: bool | None = Field(None, alias="isPublic")
     favorite: bool | None = None

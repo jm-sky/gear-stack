@@ -4,13 +4,10 @@ This module provides reusable pagination functionality including
 request parameters, response models, and helper functions.
 """
 
-from typing import Any, Generic, Self, TypeVar
+from typing import Any, Self
 
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Query
-
-
-T = TypeVar("T")
 
 
 class PaginationParams(BaseModel):
@@ -30,7 +27,7 @@ class PaginationParams(BaseModel):
     limit: int = Field(default=100, ge=1, le=1000, description="Max records to return")
 
 
-class PaginatedResponse(BaseModel, Generic[T]):
+class PaginatedResponse[T](BaseModel):
     """Generic paginated response model.
 
     This provides a consistent pagination structure across all endpoints.

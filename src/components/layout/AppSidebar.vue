@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { BackpackIcon, BookIcon, Globe, Info, LayoutGrid, Package, ShoppingCart } from 'lucide-vue-next'
-import { computed, onMounted } from 'vue'
+import { refDebounced } from '@vueuse/core'
+import { BackpackIcon, BookIcon, Globe, Info, LayoutGrid, Package, Search, ShoppingCart } from 'lucide-vue-next'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import SidebarMenuContainerItem from '@/components/layout/SidebarMenuContainerItem.vue'
+import { Input } from '@/components/ui/input'
 import {
   Sidebar,
   SidebarContent,
@@ -78,6 +80,44 @@ const rootContainers = computed<IGearItemV2[]>(() => {
     return a.name.localeCompare(b.name)
   })
 })
+
+const duplicateContainerNames = computed<Set<string>>(() => {
+  const counts = new Map<string, number>()
+  for (const container of rootContainers.value) {
+    counts.set(container.name, (counts.get(container.name) ?? 0) + 1)
+  }
+  return new Set(
+    [...counts.entries()]
+      .filter(([, count]) => count > 1)
+      .map(([name]) => name),
+  )
+})
+
+const containerSearch = ref<string>('')
+const containerSearchDebounced = refDebounced(containerSearch, 250)
+
+const favoriteContainers = computed<IGearItemV2[]>(() => {
+  return rootContainers.value.filter(container => container.favorite)
+})
+
+const filteredContainers = computed<IGearItemV2[]>(() => {
+  const query = containerSearchDebounced.value.trim().toLowerCase()
+  let list = rootContainers.value
+
+  if (showFavoritesSection.value) {
+    const favoriteIds = new Set(favoriteContainers.value.map(container => container.id))
+    list = list.filter(container => !favoriteIds.has(container.id))
+  }
+
+  if (!query) {
+    return list
+  }
+  return list.filter(container => container.name.toLowerCase().includes(query))
+})
+
+const showFavoritesSection = computed<boolean>(() => {
+  return favoriteContainers.value.length > 0 && !containerSearchDebounced.value.trim()
+})
 </script>
 
 <template>
@@ -134,16 +174,49 @@ const rootContainers = computed<IGearItemV2[]>(() => {
       <SidebarSeparator class="group-data-[collapsible=icon]:w-auto!" />
 
       <!-- Sekcja: Lista kontenerów -->
-      <SidebarGroup class="max-h-[50vh] overflow-y-auto">
+      <SidebarGroup class="max-h-[70vh] overflow-y-auto">
         <SidebarGroupLabel>{{ t('gear.page.containers', 'Containers') }}</SidebarGroupLabel>
         <SidebarGroupContent>
-          <SidebarMenu v-if="rootContainers.length > 0">
+          <div class="px-2 pb-2 group-data-[collapsible=icon]:hidden">
+            <div class="relative">
+              <Search class="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                v-model="containerSearch"
+                type="search"
+                :placeholder="t('gear.sidebar.searchContainers')"
+                class="h-8 pl-8"
+                :aria-label="t('gear.sidebar.searchContainers')"
+              />
+            </div>
+          </div>
+
+          <SidebarMenu v-if="showFavoritesSection">
+            <p class="px-2 pb-1 text-xs font-medium text-muted-foreground">
+              {{ t('gear.sidebar.favorites') }}
+            </p>
             <SidebarMenuContainerItem
-              v-for="container in rootContainers"
-              :key="container.id"
+              v-for="container in favoriteContainers"
+              :key="`favorite-${container.id}`"
               :container="container"
+              :show-disambiguator="duplicateContainerNames.has(container.name)"
             />
           </SidebarMenu>
+
+          <SidebarMenu v-if="filteredContainers.length > 0">
+            <SidebarMenuContainerItem
+              v-for="container in filteredContainers"
+              :key="container.id"
+              :container="container"
+              :show-disambiguator="duplicateContainerNames.has(container.name)"
+            />
+          </SidebarMenu>
+
+          <p
+            v-else-if="containerSearchDebounced.trim()"
+            class="px-4 py-2 text-sm text-muted-foreground"
+          >
+            {{ t('gear.sidebar.noContainersFound') }}
+          </p>
         </SidebarGroupContent>
       </SidebarGroup>
     </SidebarContent>

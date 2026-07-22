@@ -35,9 +35,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     - Vue.js inline styles (style-src 'unsafe-inline')
     """
 
-    async def dispatch(
-        self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
-    ) -> Response:
+    async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
         """
         Process request and add security headers to response.
 
@@ -54,7 +52,11 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         # Matches Caddyfile configuration for consistency
         csp_directives = [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' blob: https://www.google.com https://www.gstatic.com",
+            # NOTE: 'unsafe-inline' intentionally omitted from script-src — it would
+            # largely defeat CSP's XSS protection. reCAPTCHA/Sentry only need the
+            # allow-listed hosts below, not inline scripts. 'unsafe-inline' remains
+            # on style-src because Vue/shadcn emit inline styles.
+            "script-src 'self' blob: https://www.google.com https://www.gstatic.com",
             "style-src 'self' 'unsafe-inline'",
             "img-src 'self' data: https:",
             "font-src 'self' data:",
@@ -79,16 +81,12 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         # HTTP Strict Transport Security (HSTS) - production only
         # Force HTTPS for 1 year, include subdomains, allow preload listing
         if settings.is_production():
-            response.headers["Strict-Transport-Security"] = (
-                "max-age=31536000; includeSubDomains; preload"
-            )
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
 
         # Control information sent in Referer header
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
         # Permissions Policy - disable sensitive features
-        response.headers["Permissions-Policy"] = (
-            "geolocation=(), microphone=(), camera=()"
-        )
+        response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
 
         return response

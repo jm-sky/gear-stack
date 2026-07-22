@@ -54,6 +54,7 @@ const shouldShow = () => {
           size="sm"
           variant="ghost"
           class="shrink-0 text-violet-700 hover:text-violet-900 dark:text-violet-300 dark:hover:text-violet-100"
+          :aria-label="t('billing.upgradeBanner.dismiss')"
           @click="dismissBanner"
         >
           <X class="size-4" />

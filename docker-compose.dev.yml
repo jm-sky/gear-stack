@@ -1,0 +1,123 @@
+name: gear-stack
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:17-alpine
+    container_name: gear-stack-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-backend}
+      - POSTGRES_USER=${POSTGRES_USER:-backend}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-gear-stack-db-secret}
+    volumes:
+      - gear_stack_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:${DB_FORWARD_PORT:-5432}:5432"  # Only localhost access
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-backend}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - gear-stack-network
+
+  # Redis (for token blacklist and challenge storage)
+  redis:
+    image: redis:8-alpine
+    container_name: gear-stack-redis
+    restart: unless-stopped
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-gear-stack-redis-secret}
+    ports:
+      - "127.0.0.1:${REDIS_FORWARD_PORT:-6379}:6379"  # Only localhost access
+    volumes:
+      - gear_stack_redis_data:/data
+    command: >
+      redis-server
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD:-gear-stack-redis-secret}
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "sh", "-c", "redis-cli -a $${REDIS_PASSWORD:-gear-stack-redis-secret} ping | grep PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - gear-stack-network
+
+  # Application (hot reload via volume mounts — WSL and VPS)
+  app:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    image: gear-stack-backend:dev
+    container_name: gear-stack-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      # Secrets and app config live here. Do not re-list them under environment:
+      # with ${VAR} — empty host interpolation would override env_file values.
+      - ./backend/.env
+    environment:
+      # Docker-network overrides only
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - PROJECT_NAME=${PROJECT_NAME:-gear-stack}
+      - APP_PORT=${APP_PORT:-8000}
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-backend}:${POSTGRES_PASSWORD:-gear-stack-db-secret}@db:5432/${POSTGRES_DB:-backend}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-gear-stack-redis-secret}@redis:6379/0
+      - LOG_LEVEL=${LOG_LEVEL:-DEBUG}
+    ports:
+      - "127.0.0.1:${APP_PORT:-8000}:8000"  # Only localhost access (Caddy proxy)
+    volumes:
+      # Mount source code for hot reload (paths relative to repo root)
+      # Using :delegated for better performance on WSL2/macOS
+      - ./backend/app:/app/app:rw,delegated
+      - ./backend/scripts:/app/scripts:rw,delegated
+      - ./backend/tests:/app/tests:rw,delegated
+      - ./backend/migrations:/app/migrations:rw,delegated
+      - ./backend/main.py:/app/main.py:rw,delegated
+      - ./backend/cli:/app/cli:ro,delegated
+      - ./backend/cli.py:/app/cli.py:ro,delegated
+      - ./backend/images:/app/images:ro,delegated
+      - ./backend/pyproject.toml:/app/pyproject.toml:ro,delegated
+      # Mount uploads directory for persistent file storage
+      - gear_stack_uploads:/app/uploads
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - gear-stack-network
+      - rustfs-network
+
+networks:
+  gear-stack-network:
+    name: gear-stack-network
+  rustfs-network:
+    name: rustfs-network
+    external: true
+
+volumes:
+  gear_stack_postgres_data:
+    name: gear_stack_postgres_data
+  gear_stack_redis_data:
+    name: gear_stack_redis_data
+  gear_stack_uploads:
+    name: gear_stack_uploads

@@ -240,7 +240,7 @@ WHERE status = 'active' AND plan_tier != 'free';
 - ✅ `docs/plans/stripe-subscription-implementation.md`
 - ✅ `docs/plans/PHASE-5-COMPLETION-SUMMARY.md`
 - ✅ `docs/testing/billing-cancellation-test-guide.md`
-- ✅ `docs/optimization/billing-performance-recommendations.md`
+- ✅ `docs/research/billing-performance-recommendations.md`
 - ✅ `docs/deployment/phase-6-production-deployment-guide.md`
 - ✅ `docs/deployment/PHASE-6-QUICK-START.md`
 - ✅ `docs/deployment/PHASE-6-COMPLETION.md` (this file)
@@ -344,7 +344,7 @@ Your application is now monetization-ready and can generate recurring revenue. �
 **Internal:**
 - Deployment guide: `docs/deployment/phase-6-production-deployment-guide.md`
 - Test guide: `docs/testing/billing-cancellation-test-guide.md`
-- Performance guide: `docs/optimization/billing-performance-recommendations.md`
+- Performance guide: `docs/research/billing-performance-recommendations.md`
 
 ---
 
