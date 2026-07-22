@@ -73,9 +73,7 @@ async def get_limit_by_role(
     return limit
 
 
-@router.post(
-    "", response_model=FeatureLimitResponse, status_code=status.HTTP_201_CREATED
-)
+@router.post("", response_model=FeatureLimitResponse, status_code=status.HTTP_201_CREATED)
 async def create_limit(
     data: FeatureLimitCreate,
     _: AdminOrOwnerUser,

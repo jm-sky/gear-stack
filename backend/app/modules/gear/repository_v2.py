@@ -17,7 +17,6 @@ from app.common.search import SearchMixin
 from .db_models_v2 import GearItemDBV2
 from .schemas_v2 import GearItemCreateV2, GearItemUpdateV2
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -193,17 +192,11 @@ class GearRepositoryV2(SearchMixin):
             # Explicitly filter for items with no parent (root items)
             conditions.append(GearItemDBV2.parent_item_id.is_(None))
 
-        stmt = (
-            select(GearItemDBV2)
-            .where(and_(*conditions))
-            .options(selectinload(GearItemDBV2.children))
-        )
+        stmt = select(GearItemDBV2).where(and_(*conditions)).options(selectinload(GearItemDBV2.children))
         result = await self.db.execute(stmt)
         return result.scalars().all()
 
-    async def get_children(
-        self, parent_item_id: str, user_id: str
-    ) -> Sequence[GearItemDBV2]:
+    async def get_children(self, parent_item_id: str, user_id: str) -> Sequence[GearItemDBV2]:
         """Get all children of a parent item.
 
         Args:
@@ -224,9 +217,7 @@ class GearRepositoryV2(SearchMixin):
 
     # Update operations
 
-    async def update_item(
-        self, item_id: str, user_id: str, data: GearItemUpdateV2
-    ) -> GearItemDBV2 | None:
+    async def update_item(self, item_id: str, user_id: str, data: GearItemUpdateV2) -> GearItemDBV2 | None:
         """Update a gear item.
 
         Args:
@@ -253,9 +244,7 @@ class GearRepositoryV2(SearchMixin):
         await self.db.refresh(item)
         return item
 
-    async def batch_update_order(
-        self, items: list[dict], user_id: str
-    ) -> Sequence[GearItemDBV2]:
+    async def batch_update_order(self, items: list[dict], user_id: str) -> Sequence[GearItemDBV2]:
         """Batch update order_index for multiple items.
 
         Args:
@@ -300,9 +289,7 @@ class GearRepositoryV2(SearchMixin):
 
     # Move operation
 
-    async def move_item(
-        self, item_id: str, user_id: str, target_parent_id: str | None
-    ) -> GearItemDBV2 | None:
+    async def move_item(self, item_id: str, user_id: str, target_parent_id: str | None) -> GearItemDBV2 | None:
         """Move an item to a different parent.
 
         Args:
@@ -333,9 +320,7 @@ class GearRepositoryV2(SearchMixin):
 
     # Public containers operations
 
-    async def get_public_containers(
-        self, user_id: str | None = None, exclude_hidden: bool = True
-    ) -> Sequence[GearItemDBV2]:
+    async def get_public_containers(self, user_id: str | None = None, exclude_hidden: bool = True) -> Sequence[GearItemDBV2]:
         """Get public containers, optionally excluding hidden ones.
 
         Args:

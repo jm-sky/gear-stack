@@ -15,7 +15,6 @@ from .item_image_repository import ItemImageRepository
 from .repository_v2 import GearRepositoryV2
 from .schemas_v2 import GearItemCreateV2, GearItemUpdateV2
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -35,9 +34,7 @@ class GearServiceV2:
         self._image_repository = ItemImageRepository(repository.db)
         self._storage = get_storage_adapter()
 
-    async def _attach_primary_image_urls(
-        self, items: Sequence[GearItemDBV2]
-    ) -> Sequence[GearItemDBV2]:
+    async def _attach_primary_image_urls(self, items: Sequence[GearItemDBV2]) -> Sequence[GearItemDBV2]:
         """Batch-fetch and attach primary image URLs to items.
 
         Sets a transient (non-persisted) `primary_image_url` attribute on each
@@ -61,16 +58,10 @@ class GearServiceV2:
                 stack.extend(current.children)
 
         item_ids = [item.id for item in flattened]
-        primary_images = await self._image_repository.get_primary_images_by_items(
-            item_ids
-        )
+        primary_images = await self._image_repository.get_primary_images_by_items(item_ids)
         for item in flattened:
             image = primary_images.get(item.id)
-            item.primary_image_url = (  # type: ignore[attr-defined]
-                image.external_url or await self._storage.get_url(image.file_path)
-                if image
-                else None
-            )
+            item.primary_image_url = image.external_url or await self._storage.get_url(image.file_path) if image else None  # type: ignore[attr-defined]
         return items
 
     # Create operations
@@ -138,9 +129,7 @@ class GearServiceV2:
         Returns:
             List of items matching filters
         """
-        items = await self.repository.get_items(
-            user_id, item_type, parent_item_id, is_public, favorite, filter_for_null_parent
-        )
+        items = await self.repository.get_items(user_id, item_type, parent_item_id, is_public, favorite, filter_for_null_parent)
         await self._attach_primary_image_urls(items)
         return items
 
@@ -162,15 +151,11 @@ class GearServiceV2:
         Returns:
             List of items with children loaded
         """
-        items = await self.repository.get_items_with_children(
-            user_id, item_type, parent_item_id, filter_for_null_parent
-        )
+        items = await self.repository.get_items_with_children(user_id, item_type, parent_item_id, filter_for_null_parent)
         await self._attach_primary_image_urls(items)
         return items
 
-    async def get_children(
-        self, parent_item_id: str, user_id: str
-    ) -> Sequence[GearItemDBV2]:
+    async def get_children(self, parent_item_id: str, user_id: str) -> Sequence[GearItemDBV2]:
         """Get all children of a parent item.
 
         Args:
@@ -186,9 +171,7 @@ class GearServiceV2:
 
     # Update operations
 
-    async def update_item(
-        self, item_id: str, user_id: str, data: GearItemUpdateV2
-    ) -> GearItemDBV2 | None:
+    async def update_item(self, item_id: str, user_id: str, data: GearItemUpdateV2) -> GearItemDBV2 | None:
         """Update a gear item.
 
         Args:
@@ -213,9 +196,7 @@ class GearServiceV2:
 
         return await self.repository.update_item(item_id, user_id, data)
 
-    async def batch_update_order(
-        self, items: list[dict], user_id: str
-    ) -> Sequence[GearItemDBV2]:
+    async def batch_update_order(self, items: list[dict], user_id: str) -> Sequence[GearItemDBV2]:
         """Batch update order_index for multiple items.
 
         Args:
@@ -245,9 +226,7 @@ class GearServiceV2:
 
     # Move operation
 
-    async def is_descendant(
-        self, potential_descendant_id: str, ancestor_id: str, user_id: str
-    ) -> bool:
+    async def is_descendant(self, potential_descendant_id: str, ancestor_id: str, user_id: str) -> bool:
         """Check if an item is a descendant of another item (recursive).
 
         Args:
@@ -271,9 +250,7 @@ class GearServiceV2:
 
         return False
 
-    async def move_item(
-        self, item_id: str, user_id: str, target_parent_id: str | None
-    ) -> GearItemDBV2 | None:
+    async def move_item(self, item_id: str, user_id: str, target_parent_id: str | None) -> GearItemDBV2 | None:
         """Move an item to a different parent.
 
         Args:
@@ -298,9 +275,7 @@ class GearServiceV2:
 
     # Content Reporting operations
 
-    async def hide_container_by_reports(
-        self, item_id: str, user_id: str
-    ) -> GearItemDBV2 | None:
+    async def hide_container_by_reports(self, item_id: str, user_id: str) -> GearItemDBV2 | None:
         """Hide a container due to content reports.
 
         Sets is_hidden_by_reports=True. Only applicable to containers.
@@ -325,9 +300,7 @@ class GearServiceV2:
         update_data = GearItemUpdateV2.model_construct(isHiddenByReports=True)
         return await self.repository.update_item(item_id, user_id, update_data)
 
-    async def unhide_container_by_reports(
-        self, item_id: str, user_id: str
-    ) -> GearItemDBV2 | None:
+    async def unhide_container_by_reports(self, item_id: str, user_id: str) -> GearItemDBV2 | None:
         """Unhide a container (clear report flag).
 
         Sets is_hidden_by_reports=False.
@@ -342,9 +315,7 @@ class GearServiceV2:
         update_data = GearItemUpdateV2.model_construct(isHiddenByReports=False)
         return await self.repository.update_item(item_id, user_id, update_data)
 
-    async def get_public_containers(
-        self, user_id: str | None = None, exclude_hidden: bool = True
-    ) -> Sequence[GearItemDBV2]:
+    async def get_public_containers(self, user_id: str | None = None, exclude_hidden: bool = True) -> Sequence[GearItemDBV2]:
         """Get public containers, optionally excluding hidden ones.
 
         Args:
@@ -358,9 +329,7 @@ class GearServiceV2:
 
     # Item Promotion operations
 
-    async def increment_promotion_count(
-        self, item_id: str, user_id: str
-    ) -> GearItemDBV2 | None:
+    async def increment_promotion_count(self, item_id: str, user_id: str) -> GearItemDBV2 | None:
         """Increment promotion count for an item.
 
         Only applicable to items (not containers).
@@ -387,9 +356,7 @@ class GearServiceV2:
         update_data = GearItemUpdateV2.model_construct(promoteCount=current_count + 1)
         return await self.repository.update_item(item_id, user_id, update_data)
 
-    async def get_promotable_items(
-        self, user_id: str, min_count: int = 10
-    ) -> Sequence[GearItemDBV2]:
+    async def get_promotable_items(self, user_id: str, min_count: int = 10) -> Sequence[GearItemDBV2]:
         """Get items that have reached the promotion threshold.
 
         Args:

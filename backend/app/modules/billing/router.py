@@ -412,9 +412,7 @@ async def stripe_webhook(
                 logger.info(f"Processed webhook event: {event.type} ({event.id})")
             except Exception as e:
                 # Log error but don't fail (Stripe retries failed webhooks)
-                logger.error(
-                    f"Failed to process webhook event {event.type}: {e}", exc_info=True
-                )
+                logger.error(f"Failed to process webhook event {event.type}: {e}", exc_info=True)
 
                 # Mark event as failed
                 webhook_event = await repository.get_webhook_event_by_event_id(event.id)
@@ -478,9 +476,7 @@ async def get_all_subscriptions(
         List of subscriptions with user information
     """
     try:
-        subscriptions = await billing_service.get_all_subscriptions(
-            skip=skip, limit=limit
-        )
+        subscriptions = await billing_service.get_all_subscriptions(skip=skip, limit=limit)
         return [AdminSubscriptionResponse(**sub) for sub in subscriptions]
     except BillingException as e:
         logger.error(f"Failed to get all subscriptions: {e}")

@@ -44,12 +44,8 @@ except ImportError:
 
 def get_auth_service(
     user_repository: Annotated[UserRepositoryInterface, Depends(get_user_repository)],
-    blacklist_service: Annotated[
-        TokenBlacklistService, Depends(get_token_blacklist_service)
-    ],
-    two_factor_repository: Any = (
-        Depends(lambda: None) if not HAS_2FA else Depends(get_two_factor_repository)
-    ),
+    blacklist_service: Annotated[TokenBlacklistService, Depends(get_token_blacklist_service)],
+    two_factor_repository: Any = (Depends(lambda: None) if not HAS_2FA else Depends(get_two_factor_repository)),
 ) -> AuthService:
     """Get auth service with 2FA support if available.
 
@@ -65,9 +61,7 @@ def get_auth_service(
             two_factor_repository=two_factor_repository,
             blacklist_service=blacklist_service,
         )
-        logger.debug(
-            f"Created auth service: {type(service).__name__} (2FA enabled: True)"
-        )
+        logger.debug(f"Created auth service: {type(service).__name__} (2FA enabled: True)")
         return service
     else:
         logger.debug("Using regular AuthService (2FA not available)")
@@ -168,9 +162,7 @@ async def _verify_user_token(
                 two_factor_service = TwoFactorService(repository=two_factor_repository)
 
                 # Check if user has 2FA enabled
-                has_2fa_enabled = await two_factor_service.has_two_factor_enabled(
-                    user_id
-                )
+                has_2fa_enabled = await two_factor_service.has_two_factor_enabled(user_id)
 
                 if has_2fa_enabled:
                     # User has 2FA enabled - token MUST have tfaVerified=True
@@ -219,19 +211,13 @@ async def _verify_user_token(
 async def get_current_user(
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
     user_repository: Annotated[UserRepositoryInterface, Depends(get_user_repository)],
-    blacklist_service: Annotated[
-        TokenBlacklistService, Depends(get_token_blacklist_service)
-    ],
-    two_factor_repository: Any = (
-        Depends(lambda: None) if not HAS_2FA else Depends(get_two_factor_repository)
-    ),
+    blacklist_service: Annotated[TokenBlacklistService, Depends(get_token_blacklist_service)],
+    two_factor_repository: Any = (Depends(lambda: None) if not HAS_2FA else Depends(get_two_factor_repository)),
 ) -> User:
     """Get current user with optional 2FA verification check and blacklist validation."""
     token = credentials.credentials
     if HAS_2FA and two_factor_repository is not None:
-        return await _verify_user_token(
-            token, user_repository, blacklist_service, two_factor_repository
-        )
+        return await _verify_user_token(token, user_repository, blacklist_service, two_factor_repository)
     else:
         return await _verify_user_token(token, user_repository, blacklist_service, None)
 

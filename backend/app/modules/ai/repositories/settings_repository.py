@@ -29,9 +29,7 @@ class SettingsRepository:
         Returns:
             Settings or None if not found
         """
-        result = await self.db.execute(
-            select(AIUserSettingsDB).where(AIUserSettingsDB.user_id == user_id)
-        )
+        result = await self.db.execute(select(AIUserSettingsDB).where(AIUserSettingsDB.user_id == user_id))
         return result.scalar_one_or_none()
 
     async def create(self, user_id: str, **kwargs: Any) -> AIUserSettingsDB:
@@ -50,9 +48,7 @@ class SettingsRepository:
         await self.db.refresh(settings)
         return settings
 
-    async def update(
-        self, settings: AIUserSettingsDB, **kwargs: Any
-    ) -> AIUserSettingsDB:
+    async def update(self, settings: AIUserSettingsDB, **kwargs: Any) -> AIUserSettingsDB:
         """Update existing settings.
 
         Args:

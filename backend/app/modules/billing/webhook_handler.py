@@ -34,18 +34,12 @@ async def handle_checkout_session_completed(
         subscription_id = session.subscription
 
         if not customer_id or not subscription_id:
-            raise WebhookProcessingError(
-                "Missing customer_id or subscription_id in checkout session"
-            )
+            raise WebhookProcessingError("Missing customer_id or subscription_id in checkout session")
 
         # Get subscription from database by customer ID
-        subscription = await repository.get_subscription_by_stripe_customer_id(
-            customer_id
-        )
+        subscription = await repository.get_subscription_by_stripe_customer_id(customer_id)
         if not subscription:
-            raise SubscriptionNotFoundError(
-                f"Subscription not found for customer {customer_id}"
-            )
+            raise SubscriptionNotFoundError(f"Subscription not found for customer {customer_id}")
 
         # Get subscription details from Stripe
         stripe_sub = stripe.Subscription.retrieve(subscription_id)
@@ -54,14 +48,10 @@ async def handle_checkout_session_completed(
         if hasattr(stripe_sub, "items") and hasattr(stripe_sub.items, "data"):
             price_obj = stripe_sub.items.data[0].price
             price_id = price_obj.id
-            billing_interval = (
-                price_obj.recurring.interval if price_obj.recurring else "month"
-            )
+            billing_interval = price_obj.recurring.interval if price_obj.recurring else "month"
         else:
             price_id = stripe_sub["items"]["data"][0]["price"]["id"]
-            billing_interval = stripe_sub["items"]["data"][0]["price"]["recurring"][
-                "interval"
-            ]
+            billing_interval = stripe_sub["items"]["data"][0]["price"]["recurring"]["interval"]
 
         # Map price_id to plan_tier
         plan_tier = _get_plan_tier_from_price_id(price_id)
@@ -73,9 +63,7 @@ async def handle_checkout_session_completed(
 
         # Fallback: calculate if not available
         if not period_start:
-            period_start = getattr(stripe_sub, "billing_cycle_anchor", None) or getattr(
-                stripe_sub, "start_date", None
-            )
+            period_start = getattr(stripe_sub, "billing_cycle_anchor", None) or getattr(stripe_sub, "start_date", None)
 
         if not period_end and period_start:
             if billing_interval == "year":
@@ -88,11 +76,7 @@ async def handle_checkout_session_completed(
             logger.warning(f"No period start found in subscription, using current time")
             now = int(datetime.now(UTC).timestamp())
             period_start = now
-            period_end = (
-                now + (30 * 24 * 60 * 60)
-                if billing_interval == "month"
-                else now + (365 * 24 * 60 * 60)
-            )
+            period_end = now + (30 * 24 * 60 * 60) if billing_interval == "month" else now + (365 * 24 * 60 * 60)
 
         # Update subscription in database
         updated_subscription = await repository.update_subscription(
@@ -101,16 +85,8 @@ async def handle_checkout_session_completed(
             plan_tier=plan_tier,
             billing_interval="year" if billing_interval == "year" else "month",
             status="active",
-            current_period_start=(
-                datetime.fromtimestamp(period_start, UTC)
-                if period_start
-                else datetime.now(UTC)
-            ),
-            current_period_end=(
-                datetime.fromtimestamp(period_end, UTC)
-                if period_end
-                else datetime.now(UTC)
-            ),
+            current_period_start=(datetime.fromtimestamp(period_start, UTC) if period_start else datetime.now(UTC)),
+            current_period_end=(datetime.fromtimestamp(period_end, UTC) if period_end else datetime.now(UTC)),
             cancel_at_period_end=False,
             updated_at=datetime.now(UTC),
         )
@@ -124,14 +100,10 @@ async def handle_checkout_session_completed(
             reason=f"Checkout session {session.id} completed",
         )
 
-        logger.info(
-            f"Activated subscription {subscription_id} for customer {customer_id}"
-        )
+        logger.info(f"Activated subscription {subscription_id} for customer {customer_id}")
     except Exception as e:
         logger.error(f"Failed to process checkout.session.completed: {e}")
-        raise WebhookProcessingError(
-            f"Failed to process checkout.session.completed: {e}"
-        )
+        raise WebhookProcessingError(f"Failed to process checkout.session.completed: {e}")
 
 
 async def handle_customer_subscription_updated(
@@ -156,9 +128,7 @@ async def handle_customer_subscription_updated(
         customer_id = stripe_sub.customer
 
         # Get subscription from database
-        subscription = await repository.get_subscription_by_stripe_subscription_id(
-            subscription_id
-        )
+        subscription = await repository.get_subscription_by_stripe_subscription_id(subscription_id)
         if not subscription:
             logger.warning(f"Subscription {subscription_id} not found in database")
             return
@@ -168,15 +138,11 @@ async def handle_customer_subscription_updated(
             # Object/attribute access (from webhook event)
             price_obj = stripe_sub.items.data[0].price
             price_id = price_obj.id
-            billing_interval = (
-                price_obj.recurring.interval if price_obj.recurring else "month"
-            )
+            billing_interval = price_obj.recurring.interval if price_obj.recurring else "month"
         else:
             # Dict access (from Stripe API)
             price_id = stripe_sub["items"]["data"][0]["price"]["id"]
-            billing_interval = stripe_sub["items"]["data"][0]["price"]["recurring"][
-                "interval"
-            ]
+            billing_interval = stripe_sub["items"]["data"][0]["price"]["recurring"]["interval"]
 
         plan_tier = _get_plan_tier_from_price_id(price_id)
 
@@ -189,9 +155,7 @@ async def handle_customer_subscription_updated(
 
         # Fallback: calculate if not available
         if not period_start:
-            period_start = getattr(stripe_sub, "billing_cycle_anchor", None) or getattr(
-                stripe_sub, "start_date", None
-            )
+            period_start = getattr(stripe_sub, "billing_cycle_anchor", None) or getattr(stripe_sub, "start_date", None)
 
         if not period_end and period_start:
             if billing_interval == "year":
@@ -203,11 +167,7 @@ async def handle_customer_subscription_updated(
         if not period_start:
             now = int(datetime.now(UTC).timestamp())
             period_start = now
-            period_end = (
-                now + (30 * 24 * 60 * 60)
-                if billing_interval == "month"
-                else now + (365 * 24 * 60 * 60)
-            )
+            period_end = now + (30 * 24 * 60 * 60) if billing_interval == "month" else now + (365 * 24 * 60 * 60)
 
         sub_status = getattr(stripe_sub, "status", "active")
         cancel_at_end = getattr(stripe_sub, "cancel_at_period_end", False)
@@ -218,24 +178,14 @@ async def handle_customer_subscription_updated(
             plan_tier=plan_tier,
             billing_interval="year" if billing_interval == "year" else "month",
             status=sub_status,
-            current_period_start=(
-                datetime.fromtimestamp(period_start, UTC)
-                if period_start
-                else datetime.now(UTC)
-            ),
-            current_period_end=(
-                datetime.fromtimestamp(period_end, UTC)
-                if period_end
-                else datetime.now(UTC)
-            ),
+            current_period_start=(datetime.fromtimestamp(period_start, UTC) if period_start else datetime.now(UTC)),
+            current_period_end=(datetime.fromtimestamp(period_end, UTC) if period_end else datetime.now(UTC)),
             cancel_at_period_end=cancel_at_end,
             updated_at=datetime.now(UTC),
         )
 
         # Log history
-        change_details = (
-            f"plan: {old_plan} -> {plan_tier}, status: {old_status} -> {sub_status}"
-        )
+        change_details = f"plan: {old_plan} -> {plan_tier}, status: {old_status} -> {sub_status}"
         await repository.create_subscription_history(
             subscription_id=subscription.id,
             change_type="subscription_updated",
@@ -247,9 +197,7 @@ async def handle_customer_subscription_updated(
         logger.info(f"Updated subscription {subscription_id}: {change_details}")
     except Exception as e:
         logger.error(f"Failed to process customer.subscription.updated: {e}")
-        raise WebhookProcessingError(
-            f"Failed to process customer.subscription.updated: {e}"
-        )
+        raise WebhookProcessingError(f"Failed to process customer.subscription.updated: {e}")
 
 
 async def handle_customer_subscription_deleted(
@@ -273,9 +221,7 @@ async def handle_customer_subscription_deleted(
         subscription_id = stripe_sub.id
 
         # Get subscription from database
-        subscription = await repository.get_subscription_by_stripe_subscription_id(
-            subscription_id
-        )
+        subscription = await repository.get_subscription_by_stripe_subscription_id(subscription_id)
         if not subscription:
             logger.warning(f"Subscription {subscription_id} not found in database")
             return
@@ -304,9 +250,7 @@ async def handle_customer_subscription_deleted(
         logger.info(f"Cancelled subscription {subscription_id}, downgraded to free")
     except Exception as e:
         logger.error(f"Failed to process customer.subscription.deleted: {e}")
-        raise WebhookProcessingError(
-            f"Failed to process customer.subscription.deleted: {e}"
-        )
+        raise WebhookProcessingError(f"Failed to process customer.subscription.deleted: {e}")
 
 
 async def handle_invoice_payment_succeeded(
@@ -335,18 +279,14 @@ async def handle_invoice_payment_succeeded(
             if hasattr(subscription_id, "id"):
                 subscription_id = subscription_id.id
         else:
-            subscription_id = (
-                invoice.get("subscription") if isinstance(invoice, dict) else None
-            )
+            subscription_id = invoice.get("subscription") if isinstance(invoice, dict) else None
 
         if not subscription_id:
             # Not a subscription invoice
             return
 
         # Get subscription from database
-        subscription = await repository.get_subscription_by_stripe_subscription_id(
-            subscription_id
-        )
+        subscription = await repository.get_subscription_by_stripe_subscription_id(subscription_id)
         if not subscription:
             logger.warning(f"Subscription {subscription_id} not found in database")
             return
@@ -370,9 +310,7 @@ async def handle_invoice_payment_succeeded(
             logger.info(f"Payment succeeded for subscription {subscription_id}")
     except Exception as e:
         logger.error(f"Failed to process invoice.payment_succeeded: {e}")
-        raise WebhookProcessingError(
-            f"Failed to process invoice.payment_succeeded: {e}"
-        )
+        raise WebhookProcessingError(f"Failed to process invoice.payment_succeeded: {e}")
 
 
 async def handle_invoice_payment_failed(
@@ -401,18 +339,14 @@ async def handle_invoice_payment_failed(
             if hasattr(subscription_id, "id"):
                 subscription_id = subscription_id.id
         else:
-            subscription_id = (
-                invoice.get("subscription") if isinstance(invoice, dict) else None
-            )
+            subscription_id = invoice.get("subscription") if isinstance(invoice, dict) else None
 
         if not subscription_id:
             # Not a subscription invoice
             return
 
         # Get subscription from database
-        subscription = await repository.get_subscription_by_stripe_subscription_id(
-            subscription_id
-        )
+        subscription = await repository.get_subscription_by_stripe_subscription_id(subscription_id)
         if not subscription:
             logger.warning(f"Subscription {subscription_id} not found in database")
             return
