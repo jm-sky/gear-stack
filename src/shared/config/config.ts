@@ -25,6 +25,8 @@ export const config = {
     id: import.meta.env.VITE_APP_ID ?? 'gear-stack',
     name: import.meta.env.VITE_APP_NAME ?? 'Gear Stack',
     description: import.meta.env.VITE_APP_DESCRIPTION ?? 'Gear Stack for managing survival gear and bug-out bag equipment.',
+    // Public repo URL for the footer GitHub link; set to null to hide the link
+    githubUrl: 'https://github.com/jm-sky/gear-stack' as string | null,
   },
   i18n: {
     defaultLocale: (import.meta.env.VITE_DEFAULT_LOCALE ?? 'en') as SupportedLocale,
