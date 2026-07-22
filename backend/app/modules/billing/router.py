@@ -1,7 +1,6 @@
 """FastAPI router for billing and subscription endpoints."""
 
 import logging
-from typing import Annotated, Any
 
 import stripe
 from fastapi import APIRouter, Body, Depends, HTTPException, Request, status
@@ -16,7 +15,6 @@ from .dependencies import BillingRepositoryDep, BillingServiceDep, StripeClientD
 from .exceptions import (
     BillingException,
     CannotDowngradeGrandfatheredError,
-    FreeTrierRequiresBYOKError,
     InvalidBillingIntervalError,
     InvalidPlanTierError,
     StripeAPIError,

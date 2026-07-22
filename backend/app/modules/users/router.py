@@ -8,11 +8,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_db
+from app.modules.admin.authorization import enforce_user_mutation_permissions
 from app.modules.auth.repositories import UserRepository as AuthUserRepository
 from app.modules.auth.repositories import (
     get_user_repository as get_auth_user_repository,
 )
-from app.modules.admin.authorization import enforce_user_mutation_permissions
 from app.modules.gear.item_image_repository import ItemImageRepository
 from app.modules.settings.db_models import UserSettingsDB
 

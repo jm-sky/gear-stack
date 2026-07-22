@@ -13,7 +13,6 @@ Current System:
 import pytest
 
 from app.modules.auth.db_models import UserDB
-from app.modules.gear.schemas import ItemCreate
 from app.modules.gear.service import GearService
 
 from .conftest import create_test_container, create_test_item

@@ -22,16 +22,16 @@ except ImportError:
     logger = logging.getLogger(__name__)
     logger.warning("python-magic not available, will use Pillow for MIME type detection")
 
-from app.common.id_utils import generate_id
+from sqlalchemy import select
+
 from app.core.config import settings
 from app.core.storage.exceptions import CorruptedImageError
 from app.core.storage.factory import get_storage_adapter
-from app.modules.gear.item_image_schemas import ItemImageResponse
 from app.core.storage.image_processor import ImageProcessor
 from app.modules.auth.db_models import UserDB
 from app.modules.gear.item_image_repository import ItemImageRepository
+from app.modules.gear.item_image_schemas import ItemImageResponse
 from app.modules.settings.db_models import UserSettingsDB
-from sqlalchemy import select
 
 logger = logging.getLogger(__name__)
 

@@ -7,10 +7,12 @@ from typing import TYPE_CHECKING
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from app.core.config import EmailSettings, settings
-from .i18n import SupportedLocale, DEFAULT_LOCALE, get_translations
+
+from .i18n import DEFAULT_LOCALE, SupportedLocale, get_translations
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
+
     from .adapter import EmailAdapter
 
 logger = logging.getLogger(__name__)
@@ -405,12 +407,11 @@ def get_email_service() -> EmailService:
     Returns:
         EmailService instance
     """
+
     from .adapter import EmailAdapter
     from .file_adapter import FileEmailAdapter
-    from .smtp_adapter import SMTPEmailAdapter
     from .retry_smtp_adapter import RetrySMTPAdapter
-    from .audit_adapter import AuditEmailAdapter
-    from app.core.database import get_db
+    from .smtp_adapter import SMTPEmailAdapter
 
     # Get email settings from config
     email_settings: EmailSettings | None = getattr(settings, "email", None)
@@ -473,12 +474,12 @@ def get_email_service_with_audit(
     Returns:
         EmailService instance with audit support if enabled
     """
+
     from .adapter import EmailAdapter
-    from .file_adapter import FileEmailAdapter
-    from .smtp_adapter import SMTPEmailAdapter
-    from .retry_smtp_adapter import RetrySMTPAdapter
     from .audit_adapter import AuditEmailAdapter
-    from sqlalchemy.ext.asyncio import AsyncSession
+    from .file_adapter import FileEmailAdapter
+    from .retry_smtp_adapter import RetrySMTPAdapter
+    from .smtp_adapter import SMTPEmailAdapter
 
     # Get email settings from config
     email_settings: EmailSettings | None = getattr(settings, "email", None)

@@ -7,14 +7,14 @@ through automatic retries with exponential backoff for transient errors.
 import asyncio
 import logging
 from smtplib import (
-    SMTPException,
-    SMTPServerDisconnected,
-    SMTPConnectError,
-    SMTPHeloError,
-    SMTPDataError,
     SMTPAuthenticationError,
+    SMTPConnectError,
+    SMTPDataError,
+    SMTPException,
+    SMTPHeloError,
     SMTPRecipientsRefused,
     SMTPSenderRefused,
+    SMTPServerDisconnected,
 )
 
 from .adapter import EmailAdapter

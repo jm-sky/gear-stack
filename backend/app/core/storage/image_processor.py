@@ -2,7 +2,6 @@
 
 import asyncio
 import io
-from typing import Tuple
 
 from PIL import Image
 from PIL.Image import Image as PILImage
@@ -34,7 +33,7 @@ class ImageProcessor:
         self.jpeg_quality = jpeg_quality
         self.convert_to_webp = convert_to_webp
 
-    async def process_image(self, image_bytes: bytes, mime_type: str) -> Tuple[bytes, str, int, int]:
+    async def process_image(self, image_bytes: bytes, mime_type: str) -> tuple[bytes, str, int, int]:
         """
         Process image: resize, compress, optionally convert to WebP.
 
@@ -48,7 +47,7 @@ class ImageProcessor:
         # Run synchronous PIL operations in thread pool to avoid blocking
         return await asyncio.to_thread(self._process_image_sync, image_bytes, mime_type)
 
-    def _process_image_sync(self, image_bytes: bytes, mime_type: str) -> Tuple[bytes, str, int, int]:
+    def _process_image_sync(self, image_bytes: bytes, mime_type: str) -> tuple[bytes, str, int, int]:
         """
         Synchronous image processing implementation.
 

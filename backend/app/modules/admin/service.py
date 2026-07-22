@@ -13,7 +13,7 @@ from app.modules.users.schemas import UserUpdate
 
 from .authorization import enforce_user_mutation_permissions
 from .repository import AdminRepository
-from .schemas import AdminUserResponse, AdminContainerResponse, AdminItemResponse
+from .schemas import AdminContainerResponse, AdminItemResponse, AdminUserResponse
 
 logger = logging.getLogger(__name__)
 

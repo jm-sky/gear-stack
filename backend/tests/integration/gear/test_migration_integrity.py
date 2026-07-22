@@ -12,14 +12,14 @@ Test Coverage:
 """
 
 import pytest
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.auth.db_models import UserDB
 from app.modules.gear.db_models import GearContainerDB, GearItemDB
 from app.modules.gear.db_models_v2 import GearItemDBV2
-from app.modules.gear.service_v2 import GearServiceV2
 from app.modules.gear.schemas_v2 import GearItemCreateV2
+from app.modules.gear.service_v2 import GearServiceV2
 
 
 class TestMigrationIntegrity:

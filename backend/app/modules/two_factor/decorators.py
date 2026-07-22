@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import json
 import logging
+from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from functools import wraps
-from typing import Any, Callable
+from typing import Any
 
 from fastapi import HTTPException, Request, status
 
@@ -35,6 +36,7 @@ def extract_user_from_token(request: Request) -> str | None:
             if token:
                 # Simple JWT decode (just to get user_id, not full verification)
                 import jwt
+
                 from app.core.config import settings
 
                 payload: dict[str, Any] = jwt.decode(

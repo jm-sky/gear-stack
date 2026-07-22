@@ -1,6 +1,6 @@
 """Database repository for catalogue item images."""
 
-from typing import Sequence
+from collections.abc import Sequence
 
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession

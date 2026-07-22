@@ -10,28 +10,30 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.modules.auth.dependencies import AdminOrOwnerUser, AdminUser
 from app.modules.auth.repositories import (
     UserRepository as AuthUserRepository,
+)
+from app.modules.auth.repositories import (
     get_user_repository as get_auth_user_repository,
 )
-from app.modules.auth.dependencies import AdminOrOwnerUser, AdminUser
-from app.modules.users.repositories import UserRepository, get_user_repository
-from app.modules.users.schemas import UserUpdate
-
-from .repository import AdminRepository
-from .schemas import AdminUserResponse, AdminContainerResponse, AdminItemResponse
-from .service import AdminService
 
 # Import gear service for content reports
 from app.modules.gear.repository import GearRepository
-from app.modules.gear.service import GearService
 from app.modules.gear.schemas import (
+    ContainerUpdate,
     ContentReportListResponse,
     ContentReportResponse,
     ContentReportUpdate,
     ReportStatus,
-    ContainerUpdate,
 )
+from app.modules.gear.service import GearService
+from app.modules.users.repositories import UserRepository, get_user_repository
+from app.modules.users.schemas import UserUpdate
+
+from .repository import AdminRepository
+from .schemas import AdminContainerResponse, AdminItemResponse, AdminUserResponse
+from .service import AdminService
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 

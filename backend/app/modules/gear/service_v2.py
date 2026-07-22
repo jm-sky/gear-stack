@@ -4,7 +4,7 @@ This module provides business logic for the unified gear model.
 """
 
 import logging
-from typing import Sequence
+from collections.abc import Sequence
 
 from sqlalchemy.orm.attributes import instance_state
 

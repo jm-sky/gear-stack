@@ -185,13 +185,13 @@ class GearItemDBV2(Base):
     )
 
     # Self-referential relationships
-    parent: Mapped["GearItemDBV2 | None"] = relationship(
+    parent: Mapped[GearItemDBV2 | None] = relationship(
         "GearItemDBV2",
         remote_side=[id],
         foreign_keys=[parent_item_id],
         back_populates="children",
     )
-    children: Mapped[list["GearItemDBV2"]] = relationship(
+    children: Mapped[list[GearItemDBV2]] = relationship(
         "GearItemDBV2",
         back_populates="parent",
         cascade="all, delete-orphan",

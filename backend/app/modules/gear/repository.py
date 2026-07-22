@@ -5,27 +5,25 @@ using SQLAlchemy 2.0+.
 """
 
 import logging
+from collections.abc import Sequence
 from datetime import UTC, datetime
-from typing import Sequence
-
-from sqlalchemy import select, and_, or_, func, true
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload, joinedload
-
 from typing import TypedDict
+
+from sqlalchemy import and_, func, or_, select, true
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload, selectinload
 
 from app.common.id_utils import generate_id
 from app.common.search import SearchMixin
-from app.modules.auth.db_models import UserDB
 
 from .db_models import (
+    ContainerRatingDB,
+    ContainerShareTokenDB,
+    ContentReportDB,
     GearContainerDB,
     GearItemDB,
-    ContainerShareTokenDB,
-    ContainerRatingDB,
     GlobalCatalogueItemDB,
     ItemPromotionDB,
-    ContentReportDB,
 )
 from .schemas import (
     BatchOrderUpdateRequest,
@@ -1122,11 +1120,11 @@ class GearRepository(SearchMixin):
         for key, value in update_dict.items():
             # Handle camelCase to snake_case conversion
             if key == "weightUnit":
-                setattr(item, "weight_unit", value)
+                item.weight_unit = value
             elif key == "priceTier":
-                setattr(item, "price_tier", value)
+                item.price_tier = value
             elif key == "isActive":
-                setattr(item, "is_active", value)
+                item.is_active = value
             else:
                 setattr(item, key, value)
 

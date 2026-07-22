@@ -15,7 +15,7 @@ To disable rate limiting (NOT recommended):
 """
 
 import logging
-from typing import TYPE_CHECKING, Annotated, Any, TypeAlias, Union, cast
+from typing import TYPE_CHECKING, Annotated, TypeAlias
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -26,15 +26,7 @@ from app.core.email.i18n import determine_email_locale, get_translations
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from app.modules.two_factor.schemas import (
-        DisableTotpRequest,
-        InitiatePasskeyRegistrationRequest,
-        CompletePasskeyRegistrationRequest,
-        CompletePasskeyAuthenticationRequest,
-        UpdatePreferredMethodRequest,
-        VerifyTotpSetupRequest,
-    )
-    from app.modules.auth.types.repository import UserRepositoryInterface
+    pass
 
 from app.core.auth.dependencies import get_token_blacklist_service
 from app.core.auth.token_blacklist import TokenBlacklistService
@@ -72,7 +64,7 @@ from .schemas import (
 try:
     from app.modules.two_factor.schemas import TwoFactorRequiredResponse
 
-    LoginResponseType: TypeAlias = Union[LoginResponse, TwoFactorRequiredResponse]
+    LoginResponseType: TypeAlias = LoginResponse | TwoFactorRequiredResponse
 except ImportError:
     LoginResponseType: TypeAlias = LoginResponse  # type: ignore[misc, no-redef]
 
@@ -153,9 +145,9 @@ async def login(credentials: UserLogin, auth_service: AuthServiceDep, request: R
 
         # Debug: Log what we're returning
         if hasattr(result, "requiresTwoFactor"):
-            logger.info(f"Login response: TwoFactorRequiredResponse (2FA required)")
+            logger.info("Login response: TwoFactorRequiredResponse (2FA required)")
         elif hasattr(result, "accessToken"):
-            logger.info(f"Login response: LoginResponse (normal login, no 2FA)")
+            logger.info("Login response: LoginResponse (normal login, no 2FA)")
         else:
             logger.warning(f"Login response: Unknown type: {type(result)}")
 
@@ -594,7 +586,7 @@ async def oauth_callback(
         # Exchange code for token
         logger.info(f"OAuth callback: Exchanging code for token (provider: {provider})")
         token_response = await oauth_service.exchange_code_for_token(provider, callback_data.code)
-        logger.info(f"OAuth callback: Token exchange successful")
+        logger.info("OAuth callback: Token exchange successful")
 
         # Get user info from provider
         logger.info(f"OAuth callback: Fetching user info from {provider}")
@@ -602,12 +594,12 @@ async def oauth_callback(
         logger.info(f"OAuth callback: User info received - email: {user_info.email}, provider_id: {user_info.providerId}")
 
         # Login or register user via OAuth
-        logger.info(f"OAuth callback: Calling auth_service.login_with_oauth")
+        logger.info("OAuth callback: Calling auth_service.login_with_oauth")
         # Convert Pydantic model to dict for compatibility
         user_info_dict = user_info.model_dump()
         logger.debug(f"OAuth callback: user_info_dict = {user_info_dict}")
         result = await auth_service.login_with_oauth(provider, user_info_dict)
-        logger.info(f"OAuth callback: login_with_oauth completed successfully")
+        logger.info("OAuth callback: login_with_oauth completed successfully")
         return result
 
     except Exception as e:

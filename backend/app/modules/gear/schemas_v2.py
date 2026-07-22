@@ -16,7 +16,6 @@ from datetime import datetime
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
-from sqlalchemy.orm import object_session
 from sqlalchemy.orm.attributes import instance_state
 
 # Type aliases matching frontend

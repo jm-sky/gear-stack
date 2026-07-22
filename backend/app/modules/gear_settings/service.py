@@ -1,6 +1,6 @@
 """Business logic service for gear settings."""
 
-from typing import Any, cast
+from typing import cast
 
 from app.modules.gear.schemas import GearWeightUnit
 

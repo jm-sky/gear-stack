@@ -16,14 +16,16 @@ from app.modules.auth.dependencies import AdminUser, CurrentUser
 from app.modules.billing.service import BillingService
 from app.modules.settings.db_models import UserSettingsDB
 
+from .catalogue_item_image_router import router as catalogue_item_image_router
 from .dependencies import OptionalUser
+from .item_image_router import router as item_image_router
 from .repository import GearRepository
 from .schemas import (
     BatchOrderUpdateRequest,
     ContainerCreate,
+    ContainerRatingCreate,
     ContainerResponse,
     ContainerUpdate,
-    ContainerRatingCreate,
     ContentReportCreate,
     ContentReportResponse,
     GlobalCatalogueItemCreate,
@@ -41,8 +43,6 @@ from .schemas import (
     UserLimitsResponse,
 )
 from .service import GearService
-from .catalogue_item_image_router import router as catalogue_item_image_router
-from .item_image_router import router as item_image_router
 
 router = APIRouter(prefix="/gear", tags=["gear"])
 

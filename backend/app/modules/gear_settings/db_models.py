@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from sqlalchemy import Boolean, DateTime, JSON, String
+from sqlalchemy import JSON, DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base

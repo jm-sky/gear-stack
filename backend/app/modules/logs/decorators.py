@@ -7,7 +7,8 @@ to the database when they occur in decorated functions.
 import functools
 import inspect
 import logging
-from typing import Any, Awaitable, Callable, TypeVar, ParamSpec, cast
+from collections.abc import Awaitable, Callable
+from typing import Any, ParamSpec, TypeVar, cast
 
 from fastapi import Request
 

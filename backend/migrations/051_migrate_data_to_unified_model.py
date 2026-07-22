@@ -27,6 +27,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from sqlalchemy import text
+
 from app.core.database import engine
 
 
@@ -187,7 +188,7 @@ async def upgrade() -> None:
         expected_count = container_count + item_count
 
         if v2_count != expected_count:
-            print(f"❌ Error: Migration failed!")
+            print("❌ Error: Migration failed!")
             print(f"   Expected: {expected_count} rows")
             print(f"   Got: {v2_count} rows")
             raise Exception(f"Migration integrity check failed: expected {expected_count} rows, got {v2_count}")
@@ -196,7 +197,7 @@ async def upgrade() -> None:
         v2_container_count = await conn.execute(text("SELECT COUNT(*) FROM gear_items_v2 WHERE item_type = 'container';"))
         v2_container_count = v2_container_count.scalar()
         if v2_container_count != container_count:
-            print(f"❌ Error: Container count mismatch!")
+            print("❌ Error: Container count mismatch!")
             print(f"   Expected: {container_count} containers")
             print(f"   Got: {v2_container_count} containers")
             raise Exception(f"Container migration failed: expected {container_count}, got {v2_container_count}")
@@ -205,7 +206,7 @@ async def upgrade() -> None:
         v2_item_count = await conn.execute(text("SELECT COUNT(*) FROM gear_items_v2 WHERE item_type = 'item';"))
         v2_item_count = v2_item_count.scalar()
         if v2_item_count != item_count:
-            print(f"❌ Error: Item count mismatch!")
+            print("❌ Error: Item count mismatch!")
             print(f"   Expected: {item_count} items")
             print(f"   Got: {v2_item_count} items")
             raise Exception(f"Item migration failed: expected {item_count}, got {v2_item_count}")

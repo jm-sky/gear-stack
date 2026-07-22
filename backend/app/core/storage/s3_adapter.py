@@ -1,7 +1,5 @@
 """AWS S3 storage adapter."""
 
-from typing import Optional
-
 try:
     import aioboto3
     from botocore.exceptions import ClientError
@@ -22,8 +20,8 @@ class S3StorageAdapter(StorageAdapter):
         aws_access_key_id: str,
         aws_secret_access_key: str,
         region_name: str = "us-east-1",
-        endpoint_url: Optional[str] = None,
-        public_endpoint_url: Optional[str] = None,
+        endpoint_url: str | None = None,
+        public_endpoint_url: str | None = None,
     ):
         """
         Initialize S3 storage adapter.
@@ -53,7 +51,7 @@ class S3StorageAdapter(StorageAdapter):
         file_content: bytes,
         destination_path: str,
         content_type: str,
-        metadata: Optional[dict] = None,
+        metadata: dict | None = None,
     ) -> str:
         """Upload file to S3."""
         async with self.session.client(
@@ -133,6 +131,6 @@ class S3StorageAdapter(StorageAdapter):
             )
             return url
 
-    async def get_available_space(self) -> Optional[int]:
+    async def get_available_space(self) -> int | None:
         """S3 has unlimited space (return None)."""
         return None

@@ -5,9 +5,9 @@ where containers are items with item_type='container'.
 """
 
 import logging
-from typing import Sequence
+from collections.abc import Sequence
 
-from sqlalchemy import select, and_, or_, func
+from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 

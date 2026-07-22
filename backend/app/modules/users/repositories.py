@@ -9,19 +9,16 @@ a base class, we wrap and adapt the auth repository to our needs.
 """
 
 import logging
-from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_db
 from app.common.repository_utils import normalize_email
 from app.modules.auth.repositories import UserRepository as AuthUserRepository
 from app.modules.auth.repositories import get_user_repository as get_auth_repository
 
-from .models import User
 from .exceptions import UserAlreadyExistsError
+from .models import User
 
 if TYPE_CHECKING:
     from app.modules.auth.models import User as AuthUser

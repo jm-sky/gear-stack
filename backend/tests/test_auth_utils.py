@@ -2,9 +2,10 @@
 
 from datetime import UTC, datetime, timedelta
 
-import pytest
 import jwt
+import pytest
 
+from app.core.config import settings
 from app.modules.auth.auth_utils import (
     create_access_token,
     create_email_verification_token,
@@ -15,7 +16,6 @@ from app.modules.auth.auth_utils import (
     verify_token,
 )
 from app.modules.auth.exceptions import ExpiredTokenError, InvalidTokenError
-from app.core.config import settings
 
 
 class TestPasswordHashing:

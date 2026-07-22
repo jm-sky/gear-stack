@@ -8,9 +8,9 @@ from urllib.parse import urlparse
 from webauthn import (
     generate_authentication_options,
     generate_registration_options,
+    options_to_json,
     verify_authentication_response,
     verify_registration_response,
-    options_to_json,
 )
 from webauthn.helpers import (
     base64url_to_bytes,
@@ -23,6 +23,7 @@ from webauthn.helpers.structs import (
     PublicKeyCredentialDescriptor,
     UserVerificationRequirement,
 )
+
 from app.core.config import settings
 
 

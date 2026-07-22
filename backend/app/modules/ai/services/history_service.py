@@ -5,7 +5,7 @@ from uuid import UUID
 from app.modules.ai.db_models import AIHistoryDB
 from app.modules.ai.repositories import HistoryRepository
 from app.modules.ai.schemas import AiHistoryDetail, AiHistoryItem, AiHistoryListResponse
-from app.modules.ai.utils.models_config import calculate_cost, get_model_by_id
+from app.modules.ai.utils.models_config import get_model_by_id
 
 
 class HistoryService:

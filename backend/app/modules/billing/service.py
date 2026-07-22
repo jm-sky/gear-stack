@@ -12,7 +12,6 @@ from .exceptions import (
     StripeAPIError,
     StripeCustomerNotFoundError,
     StripeSubscriptionNotFoundError,
-    SubscriptionAlreadyExistsError,
     SubscriptionNotFoundError,
 )
 from .repository import BillingRepository
@@ -350,7 +349,7 @@ class BillingService:
         plan_limits = limits.get(plan_tier, limits["free"])
 
         # Type cast plan_tier to Literal and dict bool values to proper types
-        from typing import cast, Literal
+        from typing import Literal, cast
 
         plan_tier_typed = cast(Literal["free", "pro", "pro_plus"], plan_tier)
 
@@ -452,10 +451,10 @@ class BillingService:
         Returns:
             List of subscriptions with user details
         """
-        from uuid import UUID as PyUUID
+
+        from sqlalchemy import select
 
         from app.modules.auth.db_models import UserDB
-        from sqlalchemy import select
 
         from .db_models import SubscriptionDB
 
@@ -583,8 +582,6 @@ class BillingService:
         """
         from uuid import UUID as PyUUID
 
-        from .db_models import SubscriptionDB
-
         # Get subscription
         subscription = await self.repository.get_subscription_by_id(PyUUID(subscription_id))
         if not subscription:
@@ -668,8 +665,6 @@ class BillingService:
             StripeAPIError: If Stripe API call fails
         """
         from uuid import UUID as PyUUID
-
-        from .db_models import SubscriptionDB
 
         # Try to get subscription - first try as UUID, then as user_id (ULID)
         subscription = None

@@ -18,10 +18,10 @@ from fastapi import Depends
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_db
 from app.common.id_utils import generate_id
 from app.common.repository_utils import normalize_email
 from app.common.search import SearchMixin
+from app.core.database import get_db
 
 from .auth_utils import (
     create_password_reset_token,

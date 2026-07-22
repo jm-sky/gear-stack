@@ -12,10 +12,9 @@ Both systems exist simultaneously, creating complexity that unified model aims t
 """
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.auth.db_models import UserDB
-from app.modules.gear.schemas import ContainerCreate, ItemCreate
+from app.modules.gear.schemas import ItemCreate
 from app.modules.gear.service import GearService
 
 from .conftest import create_test_container, create_test_item

@@ -25,10 +25,10 @@ async def get_optional_user(
     if credentials is None:
         return None
     try:
-        from app.modules.auth.dependencies import _verify_user_token
-        from app.core.redis import get_redis_client
-        from app.core.config import settings
         from app.core.auth.token_blacklist import TokenBlacklistService
+        from app.core.config import settings
+        from app.core.redis import get_redis_client
+        from app.modules.auth.dependencies import _verify_user_token
 
         token = credentials.credentials
         if user_repository is None:

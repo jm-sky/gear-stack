@@ -1,7 +1,8 @@
 """Custom decorators for authentication, rate limiting, and validation."""
 
+from collections.abc import Callable
 from functools import wraps
-from typing import Any, Callable
+from typing import Any
 
 from fastapi import Depends, HTTPException, status
 
@@ -91,6 +92,7 @@ def recaptcha_protected(
         @wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
             import logging
+
             from app.core.recaptcha import RecaptchaError, verify_recaptcha
 
             logger = logging.getLogger(__name__)

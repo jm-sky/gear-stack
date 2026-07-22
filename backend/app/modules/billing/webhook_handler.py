@@ -73,7 +73,7 @@ async def handle_checkout_session_completed(
 
         # Final fallback
         if not period_start:
-            logger.warning(f"No period start found in subscription, using current time")
+            logger.warning("No period start found in subscription, using current time")
             now = int(datetime.now(UTC).timestamp())
             period_start = now
             period_end = now + (30 * 24 * 60 * 60) if billing_interval == "month" else now + (365 * 24 * 60 * 60)

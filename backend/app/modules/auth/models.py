@@ -43,6 +43,7 @@ import logging
 import secrets
 from datetime import datetime
 from typing import Any
+
 from pydantic import BaseModel, EmailStr
 
 from .auth_utils import (  # noqa: E402

@@ -5,14 +5,12 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
-import stripe
 
 from app.modules.billing.db_models import SubscriptionDB
 from app.modules.billing.exceptions import (
     CannotDowngradeGrandfatheredError,
     InvalidBillingIntervalError,
     InvalidPlanTierError,
-    StripeAPIError,
     SubscriptionAlreadyExistsError,
     SubscriptionNotFoundError,
 )

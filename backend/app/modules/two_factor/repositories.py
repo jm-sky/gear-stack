@@ -12,8 +12,8 @@ from fastapi import Depends
 from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_db
 from app.common.id_utils import generate_id
+from app.core.database import get_db
 
 from .db_models import PasskeyDB, TotpConfigDB
 from .types.repository import TwoFactorRepositoryInterface

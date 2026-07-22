@@ -33,7 +33,7 @@ def _load_translations(locale: SupportedLocale) -> dict[str, Any]:
     translations_file = translations_dir / f"{locale}.json"
 
     try:
-        with open(translations_file, "r", encoding="utf-8") as f:
+        with open(translations_file, encoding="utf-8") as f:
             translations: dict[str, Any] = json.load(f)
             _translations_cache[locale] = translations
             return translations
@@ -123,6 +123,7 @@ async def get_user_locale(
 
     try:
         from sqlalchemy import select
+
         from app.modules.settings.db_models import UserSettingsDB
 
         result = await db.execute(select(UserSettingsDB).where(UserSettingsDB.user_id == user_id))

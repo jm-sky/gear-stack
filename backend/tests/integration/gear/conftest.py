@@ -5,22 +5,22 @@ These fixtures establish baseline behavior before unified model migration.
 """
 
 import os
+from collections.abc import AsyncGenerator
 from datetime import UTC, datetime
-from typing import AsyncGenerator
 
 import pytest
 import pytest_asyncio
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.core.database import Base
-from app.modules.auth.db_models import UserDB
 from app.modules.auth.auth_utils import get_password_hash
+from app.modules.auth.db_models import UserDB
 from app.modules.gear.db_models import GearContainerDB, GearItemDB
 from app.modules.gear.repository import GearRepository
-from app.modules.gear.service import GearService
-from app.modules.gear.schemas import ContainerCreate, ItemCreate
 from app.modules.gear.repository_v2 import GearRepositoryV2
+from app.modules.gear.schemas import ContainerCreate, ItemCreate
+from app.modules.gear.service import GearService
 from app.modules.gear.service_v2 import GearServiceV2
 
 

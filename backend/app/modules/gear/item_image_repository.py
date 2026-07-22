@@ -1,8 +1,8 @@
 """Database repository for item images."""
 
-from typing import Sequence
+from collections.abc import Sequence
 
-from sqlalchemy import select, update, func
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.id_utils import generate_id

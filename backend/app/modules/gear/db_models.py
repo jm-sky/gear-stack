@@ -11,6 +11,7 @@ from typing import Any
 
 from sqlalchemy import (
     Boolean,
+    CheckConstraint,
     DateTime,
     Float,
     ForeignKey,
@@ -18,7 +19,6 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
-    CheckConstraint,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -153,7 +153,7 @@ class GearItemDB(Base):
     )
 
     # Relationships
-    container: Mapped["GearContainerDB"] = relationship("GearContainerDB", back_populates="items", foreign_keys=[container_id])
+    container: Mapped[GearContainerDB] = relationship("GearContainerDB", back_populates="items", foreign_keys=[container_id])
 
     def __repr__(self) -> str:
         return f"<GearItemDB(id={self.id}, name={self.name}, category={self.category})>"
@@ -234,7 +234,7 @@ class ItemImageDB(Base):
     )
 
     # Relationships
-    item: Mapped["GearItemDB"] = relationship("GearItemDB", back_populates="images")
+    item: Mapped[GearItemDB] = relationship("GearItemDB", back_populates="images")
 
     def __repr__(self) -> str:
         return f"<ItemImageDB(id={self.id}, item_id={self.item_id}, file_name={self.file_name})>"
@@ -428,7 +428,7 @@ class GlobalCatalogueItemDB(Base):
     )
 
     # Relationships
-    creator: Mapped["UserDB | None"] = relationship("UserDB", foreign_keys=[created_by])
+    creator: Mapped[UserDB | None] = relationship("UserDB", foreign_keys=[created_by])
 
     def __repr__(self) -> str:
         return f"<GlobalCatalogueItemDB(id={self.id}, name={self.name}, version={self.version})>"
@@ -498,8 +498,8 @@ class CatalogueItemImageDB(Base):
     )
 
     # Relationships
-    catalogue_item: Mapped["GlobalCatalogueItemDB"] = relationship("GlobalCatalogueItemDB", back_populates="images")
-    user: Mapped["UserDB"] = relationship("UserDB", foreign_keys=[user_id])
+    catalogue_item: Mapped[GlobalCatalogueItemDB] = relationship("GlobalCatalogueItemDB", back_populates="images")
+    user: Mapped[UserDB] = relationship("UserDB", foreign_keys=[user_id])
 
     def __repr__(self) -> str:
         return f"<CatalogueItemImageDB(id={self.id}, catalogue_item_id={self.catalogue_item_id}, file_name={self.file_name})>"
@@ -549,8 +549,8 @@ class ItemPromotionDB(Base):
     )
 
     # Relationships
-    item: Mapped["GearItemDB"] = relationship("GearItemDB", back_populates="promotions")
-    user: Mapped["UserDB"] = relationship("UserDB")
+    item: Mapped[GearItemDB] = relationship("GearItemDB", back_populates="promotions")
+    user: Mapped[UserDB] = relationship("UserDB")
 
     # Unique constraint: user can promote item only once
     __table_args__ = (UniqueConstraint("item_id", "user_id", name="unique_item_user_promotion"),)
@@ -625,9 +625,9 @@ class ContentReportDB(Base):
     )
 
     # Relationships
-    container: Mapped["GearContainerDB"] = relationship("GearContainerDB", foreign_keys=[container_id], back_populates="reports")
-    reporter: Mapped["UserDB"] = relationship("UserDB", foreign_keys=[reporter_user_id])
-    reviewer: Mapped["UserDB | None"] = relationship("UserDB", foreign_keys=[reviewed_by])
+    container: Mapped[GearContainerDB] = relationship("GearContainerDB", foreign_keys=[container_id], back_populates="reports")
+    reporter: Mapped[UserDB] = relationship("UserDB", foreign_keys=[reporter_user_id])
+    reviewer: Mapped[UserDB | None] = relationship("UserDB", foreign_keys=[reviewed_by])
 
     def __repr__(self) -> str:
         return f"<ContentReportDB(id={self.id}, container_id={self.container_id}, reason={self.reason}, status={self.status})>"

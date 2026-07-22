@@ -1,6 +1,6 @@
 """FastAPI router for TOTP setup (Phase 1 & 2)."""
 
-from typing import Any, cast
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
@@ -8,6 +8,7 @@ from app.core.limiter import rate_limit
 from app.modules.auth.dependencies import CurrentUser
 from app.modules.auth.repositories import get_user_repository
 from app.modules.auth.types.repository import UserRepositoryInterface
+
 from .auth_utils import verify_two_factor_token
 from .repositories import get_two_factor_repository
 from .schemas import (
@@ -17,10 +18,9 @@ from .schemas import (
     DisableTotpRequest,
     InitiatePasskeyAuthenticationRequest,
     InitiatePasskeyRegistrationRequest,
-    InitiateTotpRequest,
+    PasskeyListResponse,
     PasskeyRegistrationInitiateResponse,
     PasskeyResponse,
-    PasskeyListResponse,
     RegenerateBackupCodesRequest,
     TotpInitiateResponse,
     TotpStatusResponse,
@@ -44,8 +44,9 @@ async def get_service(
     challenge_store = None
     try:
         # Try to get Redis-based challenge store
-        from app.core.redis import get_redis_client
         from app.core.config import settings
+        from app.core.redis import get_redis_client
+
         from .challenge_store import WebAuthnChallengeStore
 
         redis_client = await get_redis_client()

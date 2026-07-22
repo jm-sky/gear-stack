@@ -4,11 +4,10 @@ This module contains business logic for gear containers and items,
 including validation, calculations, and orchestration of repository operations.
 """
 
-import asyncio
 import logging
 import secrets
 from datetime import UTC, datetime, timedelta
-from typing import Any, Literal, Sequence, cast
+from typing import Any, Literal, cast
 
 from sqlalchemy import and_, select
 from sqlalchemy.orm import joinedload
@@ -18,6 +17,11 @@ from app.core.storage.factory import get_storage_adapter
 from app.modules.auth.db_models import UserDB
 from app.modules.settings.db_models import UserSettingsDB
 
+from .db_models import (
+    GearContainerDB,
+    GearItemDB,
+    GlobalCatalogueItemDB,
+)
 from .item_image_repository import ItemImageRepository
 from .repository import GearRepository
 from .schemas import (
@@ -26,10 +30,8 @@ from .schemas import (
     ContainerInfo,
     ContainerResponse,
     ContainerUpdate,
-    ContentReportCreate,
     ContentReportListResponse,
     ContentReportResponse,
-    ContentReportUpdate,
     GlobalCatalogueItemCreate,
     GlobalCatalogueItemResponse,
     GlobalCatalogueItemSearchParams,
@@ -40,12 +42,6 @@ from .schemas import (
     ItemUpdate,
     ReportReason,
     ReportStatus,
-)
-from .db_models import (
-    GearContainerDB,
-    GearItemDB,
-    GlobalCatalogueItemDB,
-    ItemPromotionDB,
 )
 
 logger = logging.getLogger(__name__)
@@ -1242,6 +1238,7 @@ class GearService:
         # Verify item exists before starting to copy images
         # This is a safety check to ensure the item is in the database
         from sqlalchemy import select
+
         from app.modules.gear.db_models import GearItemDB
 
         item_check_stmt = select(GearItemDB).where(GearItemDB.id == item_id)
@@ -1486,6 +1483,7 @@ class GearService:
         # Verify item exists in database before copying images
         # This ensures the item is committed and visible in the database
         from sqlalchemy import select
+
         from app.modules.gear.db_models import GearItemDB
 
         item_verify_stmt = select(GearItemDB).where(GearItemDB.id == item_id)
@@ -1586,6 +1584,7 @@ class GearService:
         """
         # Get user
         from sqlalchemy import select
+
         from app.modules.auth.db_models import UserDB as UserDBModel
 
         user_stmt = select(UserDBModel).where(UserDBModel.id == user_id)
@@ -1636,7 +1635,7 @@ class GearService:
             if not owner_can_promote:
                 return (
                     False,
-                    f"Item owner account must be at least 1 month old to allow promotions",
+                    "Item owner account must be at least 1 month old to allow promotions",
                 )
 
         # Check if item or container is reported for inappropriate content

@@ -17,8 +17,8 @@ from sqlalchemy import select
 from app.modules.settings.db_models import UserSettingsDB
 
 from .totp_service import TotpService
-from .webauthn_service import WebAuthnService
 from .types.repository import TwoFactorRepositoryInterface
+from .webauthn_service import WebAuthnService
 
 logger = logging.getLogger(__name__)
 
@@ -102,11 +102,12 @@ class TwoFactorService:
 
         This method combines TOTP verification with token generation.
         """
-        from .auth_utils import verify_two_factor_token
         from app.modules.auth.auth_utils import (
             create_access_token,
             create_refresh_token,
         )
+
+        from .auth_utils import verify_two_factor_token
 
         # Verify 2FA token
         payload = verify_two_factor_token(two_factor_token)

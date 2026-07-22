@@ -5,12 +5,9 @@ from uuid import UUID as PyUUID
 from uuid import uuid4
 
 from sqlalchemy import (
-    BigInteger,
     Boolean,
     CheckConstraint,
     DateTime,
-    ForeignKey,
-    Index,
     String,
     Text,
 )

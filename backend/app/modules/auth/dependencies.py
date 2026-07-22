@@ -9,17 +9,17 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from app.core.auth.dependencies import get_token_blacklist_service
 from app.core.auth.token_blacklist import TokenBlacklistService
 
-from .service import AuthService
-from .types.repository import UserRepositoryInterface
 from .auth_utils import verify_token
 from .exceptions import (
     EmailNotVerifiedError,
     ExpiredTokenError,
-    InvalidTokenError,
     InactiveUserError,
+    InvalidTokenError,
 )
 from .models import User
 from .repositories import get_user_repository
+from .service import AuthService
+from .types.repository import UserRepositoryInterface
 
 logger = logging.getLogger(__name__)
 

@@ -5,11 +5,10 @@ to users, containers, and items across all users.
 """
 
 import logging
-from datetime import datetime
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload, joinedload
+from sqlalchemy.orm import joinedload, selectinload
 
 from app.modules.auth.db_models import UserDB
 from app.modules.gear.db_models import GearContainerDB, GearItemDB
