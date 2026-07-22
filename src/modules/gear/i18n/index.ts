@@ -940,6 +940,19 @@ export const gearEn = {
       success: 'Item promoted successfully',
       addToCatalogueAdmin: 'Add to Catalogue',
     },
+    visualization: {
+      title: 'Visualization',
+      navTitle: 'Visualization',
+      description: 'Visual map of your gear by storage zone',
+      zones: {
+        body: 'On Body',
+        carry: 'Carry',
+        vehicle: 'Vehicle',
+        home: 'Home / Storage',
+        other: 'Other',
+      },
+      zoneEmpty: 'No containers in this zone',
+    },
   },
 }
 
@@ -1886,6 +1899,19 @@ export const gearPl = {
       requirements: 'Tylko zarejestrowani użytkownicy z kontem starszym niż 1 miesiąc mogą promować przedmioty.',
       success: 'Przedmiot został wypromowany',
       addToCatalogueAdmin: 'Dodaj do Katalogu',
+    },
+    visualization: {
+      title: 'Wizualizacja',
+      navTitle: 'Wizualizacja',
+      description: 'Mapa wizualna sprzętu według stref przechowywania',
+      zones: {
+        body: 'Na sobie',
+        carry: 'Noszone',
+        vehicle: 'Pojazd',
+        home: 'Dom / Magazyn',
+        other: 'Inne',
+      },
+      zoneEmpty: 'Brak kontenerów w tej strefie',
     },
   },
 }
