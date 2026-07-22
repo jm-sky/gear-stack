@@ -131,6 +131,7 @@ def init_test_database(
             async with engine.begin() as conn:
                 if force:
                     from sqlalchemy import text
+
                     console.print("[yellow]Dropping existing test database tables...[/yellow]")
                     # Drop all tables with CASCADE to handle foreign keys
                     await conn.execute(text("DROP SCHEMA public CASCADE"))
