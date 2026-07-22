@@ -83,6 +83,26 @@ class ImageUploadService:
         self.allowed_mime_types = settings.storage.allowed_mime_types
         self.repository = ItemImageRepository(db)
 
+    async def _verify_item_ownership(self, item_id: str, user_id: str) -> None:
+        """
+        Ensure the item belongs to the given user, raising 404 if not.
+
+        Returns 404 (not 403) on mismatch to avoid leaking item existence to
+        non-owners.
+
+        Args:
+            item_id: Item ID
+            user_id: Requesting user ID
+
+        Raises:
+            HTTPException: 404 if the item does not exist or belongs to another user.
+        """
+        owner_id = await self.repository.get_item_owner_id(item_id)
+        if owner_id is None or owner_id != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Item not found"
+            )
+
     def _validate_url_for_ssrf(self, url: str) -> None:
         """
         Validate URL to prevent SSRF (Server-Side Request Forgery) attacks.
@@ -297,6 +317,8 @@ class ImageUploadService:
         Raises:
             HTTPException: If validation fails
         """
+        await self._verify_item_ownership(item_id, user_id)
+
         # Check file size (use user-specific limit)
         file.file.seek(0, 2)  # Seek to end
         file_size = file.file.tell()
@@ -351,6 +373,8 @@ class ImageUploadService:
         Raises:
             HTTPException: If upload or processing fails
         """
+        await self._verify_item_ownership(item_id, user_id)
+
         # Read file content
         content = await file.read()
         original_filename = file.filename or "uploaded-image"
@@ -372,8 +396,12 @@ class ImageUploadService:
             user_id: User ID (for authorization check)
 
         Returns:
-            True if deleted successfully, False if not found
+            True if deleted successfully, False if not found or not owned by user
         """
+        owner_id = await self.repository.get_image_owner_id(image_id)
+        if owner_id is None or owner_id != user_id:
+            return False
+
         image = await self.repository.get_by_id(image_id)
 
         if not image:
@@ -428,36 +456,62 @@ class ImageUploadService:
 
         return deleted_count
 
-    async def reorder_images(self, item_id: str, image_orders: list[dict]) -> bool:
+    async def reorder_images(
+        self, item_id: str, image_orders: list[dict], user_id: str
+    ) -> bool:
         """
         Reorder images for an item.
 
         Args:
             item_id: Item ID
             image_orders: List of {"id": "uuid", "order": 0} dictionaries
+            user_id: Requesting user ID (must own the item)
 
         Returns:
             True if successful
+
+        Raises:
+            HTTPException: 404 if the item is not owned by user_id, or any image
+                in image_orders does not belong to item_id.
         """
+        await self._verify_item_ownership(item_id, user_id)
+
+        for item in image_orders:
+            if not await self.repository.image_belongs_to_item(item["id"], item_id):
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Image not found"
+                )
+
         for item in image_orders:
             await self.repository.update(item["id"], {"order": item["order"]})
         return True
 
-    async def toggle_primary_image(self, item_id: str, image_id: str) -> bool:
+    async def toggle_primary_image(
+        self, item_id: str, image_id: str, user_id: str
+    ) -> bool:
         """
         Toggle primary status for image (set if not primary, unset if already primary).
 
         Args:
             item_id: Item ID
             image_id: Image ID to toggle primary status
+            user_id: Requesting user ID (must own the item)
 
         Returns:
             True if image is now primary, False if it was unset
+
+        Raises:
+            HTTPException: 404 if the item is not owned by user_id, or image_id
+                does not belong to item_id.
         """
+        await self._verify_item_ownership(item_id, user_id)
+
         # Get current image to check if it's already primary
         image = await self.repository.get_by_id(image_id)
-        if not image:
-            raise ValueError(f"Image {image_id} not found")
+        if not image or image.item_id != item_id:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Image not found"
+            )
 
         is_currently_primary = image.is_primary
 
@@ -471,16 +525,38 @@ class ImageUploadService:
             await self.repository.update(image_id, {"is_primary": True})
             return True
 
-    async def get_item_images(self, item_id: str) -> list[ItemImageResponse]:
+    async def get_item_images(
+        self, item_id: str, requesting_user_id: str | None = None
+    ) -> list[ItemImageResponse]:
         """
         Get all images for an item with URLs.
 
+        Visible to the owning user, or to anyone if the item's container is
+        public (and not hidden by reports).
+
         Args:
             item_id: Item ID
+            requesting_user_id: ID of the requesting user, if authenticated
 
         Returns:
             List of image response objects with URLs
+
+        Raises:
+            HTTPException: 404 if the item does not exist, or is neither owned
+                by requesting_user_id nor publicly visible.
         """
+        visibility = await self.repository.get_item_owner_and_visibility(item_id)
+        if visibility is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Item not found"
+            )
+        owner_id, is_publicly_visible = visibility
+        is_owner = requesting_user_id is not None and owner_id == requesting_user_id
+        if not is_owner and not is_publicly_visible:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Item not found"
+            )
+
         images = await self.repository.get_by_item(item_id)
 
         result = []
@@ -534,6 +610,8 @@ class ImageUploadService:
         Raises:
             HTTPException: If download or processing fails
         """
+        await self._verify_item_ownership(item_id, user_id)
+
         # Check max images per item
         existing_count = await self.repository.count_by_item(item_id)
         if existing_count >= settings.storage.max_files_per_item:

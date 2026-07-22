@@ -10,7 +10,7 @@ Planned review runs — **one AI session per file**. Backend and frontend are se
 
 | Review | Scope | Status | File |
 |--------|-------|--------|------|
-| Security | Backend | `planned` | [2026-07-06-security-backend.md](2026-07-06-security-backend.md) |
+| Security | Backend | `done` | [2026-07-06-security-backend.md](2026-07-06-security-backend.md) |
 | Security | Frontend | `planned` | [2026-07-06-security-frontend.md](2026-07-06-security-frontend.md) |
 | Code quality | Backend | `planned` | [2026-07-06-code-quality-backend.md](2026-07-06-code-quality-backend.md) |
 | Code quality | Frontend | `planned` | [2026-07-06-code-quality-frontend.md](2026-07-06-code-quality-frontend.md) |

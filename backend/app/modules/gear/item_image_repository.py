@@ -6,7 +6,7 @@ from sqlalchemy import select, update, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.common.id_utils import generate_id
-from app.modules.gear.db_models import ItemImageDB
+from app.modules.gear.db_models import GearContainerDB, GearItemDB, ItemImageDB
 
 
 class ItemImageRepository:
@@ -208,6 +208,87 @@ class ItemImageRepository:
         result = await self.db.execute(stmt)
         total = result.scalar()
         return total or 0
+
+    async def get_item_owner_and_visibility(
+        self, item_id: str
+    ) -> tuple[str, bool] | None:
+        """
+        Resolve the owning user and public-visibility of an item's container.
+
+        Args:
+            item_id: Item ID
+
+        Returns:
+            Tuple of (owner_user_id, is_publicly_visible), or None if the item
+            (or its container) does not exist. `is_publicly_visible` is True
+            only if the container is public and not hidden by reports.
+        """
+        stmt = (
+            select(
+                GearContainerDB.user_id,
+                GearContainerDB.is_public,
+                GearContainerDB.is_hidden_by_reports,
+            )
+            .join(GearItemDB, GearItemDB.container_id == GearContainerDB.id)
+            .where(GearItemDB.id == item_id)
+        )
+        result = await self.db.execute(stmt)
+        row = result.first()
+        if not row:
+            return None
+        owner_id, is_public, is_hidden = row
+        return owner_id, bool(is_public) and not bool(is_hidden)
+
+    async def get_item_owner_id(self, item_id: str) -> str | None:
+        """
+        Resolve the owning user_id of an item via its container.
+
+        Args:
+            item_id: Item ID
+
+        Returns:
+            Owner user_id, or None if the item does not exist.
+        """
+        visibility = await self.get_item_owner_and_visibility(item_id)
+        return visibility[0] if visibility else None
+
+    async def get_image_owner_id(self, image_id: str) -> str | None:
+        """
+        Resolve the owning user_id of an image via its item's container.
+
+        Args:
+            image_id: Image ID
+
+        Returns:
+            Owner user_id, or None if the image does not exist.
+        """
+        stmt = (
+            select(GearContainerDB.user_id)
+            .join(GearItemDB, GearItemDB.container_id == GearContainerDB.id)
+            .join(ItemImageDB, ItemImageDB.item_id == GearItemDB.id)
+            .where(ItemImageDB.id == image_id)
+        )
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def image_belongs_to_item(self, image_id: str, item_id: str) -> bool:
+        """
+        Check whether an image belongs to the given item.
+
+        Args:
+            image_id: Image ID
+            item_id: Item ID
+
+        Returns:
+            True if the image exists and belongs to item_id.
+        """
+        stmt = (
+            select(func.count())
+            .select_from(ItemImageDB)
+            .where(ItemImageDB.id == image_id, ItemImageDB.item_id == item_id)
+        )
+        result = await self.db.execute(stmt)
+        return (result.scalar() or 0) > 0
 
     async def get_all_by_user(self, user_id: str) -> Sequence[ItemImageDB]:
         """
