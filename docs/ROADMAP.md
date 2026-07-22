@@ -21,11 +21,13 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - 📍 Plan: [SECURITY_IMPROVEMENT_PLAN.md](./plans/SECURITY_IMPROVEMENT_PLAN.md)
    - 📍 Docker Security: [SECURITY_FIX.md](./deployment/SECURITY_FIX.md)
    - ✅ **Critical:** Implementacja security headers (CSP, HSTS, X-Frame-Options) - Completed (v2.47.0)
+   - ✅ **Critical:** Item-image IDOR, OAuth session/`jti`/`tv` + 2FA, OAuth CSRF state — Completed (v2.52.0, issues #035–#037)
+   - ✅ **High:** Rate limiting (ostatni hop X-Forwarded-For), admin/users mutation guards, WebAuthn 2FA login verify — Completed (v2.52.0)
    - 📋 **Low:** PostgreSQL SSL/TLS (opcjonalne - Docker network zapewnia izolację)
    - 🔒 **High:** Implementacja WAF (Web Application Firewall)
    - 🔒 **High:** Procedury backup/recovery bazy danych
    - 🔐 **Medium:** Migracja na httpOnly cookies (obecnie localStorage)
-   - 🔐 **Medium:** Implementacja CSRF protection
+   - 🔐 **Medium:** Implementacja CSRF protection (ogólne middleware; OAuth callback state — ✅ v2.52.0)
    - 🛡️ **Medium:** Strict CORS configuration
    - 📋 **Low:** Procedury rotacji sekretów (secrets rotation)
    - 📊 **Low:** Security monitoring & alerting

@@ -7,8 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [2.52.0] - 2026-07-22
+
 ### Added
-- CLI `users change-password` command to set a user's password by email or ID (admin override; invalidates existing sessions via token version bump).
+- **Health**: `GET /api/health/details` — token-protected (`HEALTH_DETAILS_TOKEN`, fail-closed) szczegółowy status komponentów (database, cache, storage, frontend) pod kontrakt Ops Monitor; zwykły `/health` bez zmian
+- **CLI**: `users change-password` — ustawienie hasła użytkownika po emailu lub ID (admin override; unieważnia sesje przez bump `token_version`)
+
+### Changed
+- **Docker**: Compose przeniesiony do roota repo (`compose.yaml` / `docker-compose.dev.yml`, `name: gear-stack`) — `docker compose up` z katalogu projektu zamiast `cd backend`
+- **Docker (dev)**: montowanie `backend/pyproject.toml` do kontenera (black/mypy używają konfiguracji projektu); volume Postgresa zarządzany wewnętrznie (bez `external`)
+- **TSConfig**: usunięte `baseUrl` z `tsconfig.json` / `tsconfig.app.json`
+- **Deploy**: usunięte zagnieżdżone numerowanie kroków z sub-skryptu frontendu (jedna sekwencja Step 1/2/3 w `deploy.sh`)
+
+### Fixed
+- **Auth (WebAuthn)**: weryfikacja passkey używa `FRONTEND_URL` jako origin (zamiast `localhost`) — spójnie z override RP ID na produkcji
+- **Backend**: mypy strict-mode w auth, billing, storage i gear images; czyszczenie black/ruff
+
+### Security
+- **Gear images (IDOR)**: endpointy upload/delete/reorder/toggle-primary/from-url wymuszają ownership przez `GearContainerDB.user_id`; lista obrazków bez auth ograniczona do właściciela lub publicznych kontenerów ([#035](docs/issues/2026-07-21--035--item-image-idor.md))
+- **OAuth login**: tokeny przez `_issue_login_tokens` (`jti`/`tv`/session tracking) + honorowanie 2FA jak przy logowaniu hasłem ([#036](docs/issues/2026-07-21--036--oauth-login-bypasses-session-machinery.md))
+- **OAuth CSRF**: callback weryfikuje serwerowy, jednorazowy, TTL state (`OAuthStateStore`) zamiast ufać tylko kopii z frontendu ([#037](docs/issues/2026-07-21--037--oauth-callback-state-not-verified.md))
+- **Rate limiting**: zaufanie ostatniego hopa `X-Forwarded-For` za Caddy
+- **Admin / users**: wspólne guardy Owner / protected-user dla mutacji
+- **WebAuthn (2FA login)**: weryfikacja passkey przez bibliotekę webauthn (w tym flow tokenów na frontendzie)
+
+---
+
+## [2.51.1] - 2026-07-18
+
+### Fixed
+- **Gear (V2)**: `primaryImageUrl` na endpointach unified items (`get_item`, `get_items`, `get_children`, …) — miniaturki na stronie kontenera znów działają po migracji V1→V2
+- **Gear**: listy kontenerów/itemów preferują `external_url` dla primary image hostowanego poza storage (wcześniej padał placeholder)
+- **UI**: mniejszy prawy margin w `AppHeader` na mobile (`mr-6` → `mr-1`)
+
+### Changed
+- **Docs**: issue [#034](docs/issues/2026-07-15--034--inline-editing-ux-refinement.md) — plan inline editing w tabeli itemów
+- **Repo**: ignorowanie lokalnych plików kontekstu AI (`CLAUDE.local.md`, `AGENTS.local.md`)
 
 ---
 
