@@ -38,6 +38,7 @@ Implementation plans for features and larger changes.
 | [stripe-webhook-signature-troubleshooting.md](stripe-webhook-signature-troubleshooting.md) | Stripe webhook signature troubleshooting | `done` |
 | [UNIFIED_MODEL_IMPLEMENTATION_PLAN.md](UNIFIED_MODEL_IMPLEMENTATION_PLAN.md) | Unified model implementation | `in progress` |
 | [UNIFIED_MODEL_V2_MISSING_FEATURES.md](UNIFIED_MODEL_V2_MISSING_FEATURES.md) | V2 missing features inventory | `in progress` |
+| [2026-07-22-visualization-dnd-zones.md](2026-07-22-visualization-dnd-zones.md) | Container visualization — DnD placements + custom zones (DB) | `done` |
 
 When adding a new plan: create `YYYY-MM-DD-slug.md` (legacy SCREAMING_SNAKE names are OK for older files — add a row here).
 

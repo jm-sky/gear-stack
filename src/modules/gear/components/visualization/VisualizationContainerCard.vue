@@ -24,12 +24,24 @@ const colorBorderClass = computed<string>(() =>
 )
 const ContainerIcon = computed(() => getContainerIcon(container.containerType))
 const detailPath = computed<string>(() => GearRoutePath.ContainerDetailById(container.id))
+
+function handleDragStart(event: DragEvent): void {
+  event.dataTransfer?.setData('text/plain', container.id)
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = 'move'
+  }
+}
 </script>
 
 <template>
-  <RouterLink :to="detailPath" class="block group">
+  <RouterLink
+    :to="detailPath"
+    class="block group"
+    draggable="true"
+    @dragstart="handleDragStart"
+  >
     <div
-      class="border-l-4 border rounded-lg bg-card p-3 transition-all duration-200 group-hover:shadow-md group-hover:bg-accent/30"
+      class="border-l-4 border rounded-lg bg-card p-3 transition-all duration-200 group-hover:shadow-md group-hover:bg-accent/30 cursor-grab active:cursor-grabbing"
       :class="colorBorderClass"
     >
       <div class="flex items-center gap-2 mb-2">

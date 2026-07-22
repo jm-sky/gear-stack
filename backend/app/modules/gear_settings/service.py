@@ -12,6 +12,7 @@ from .schemas import (
     UserBrand,
     UserCategory,
     UserContainerType,
+    VisualizationCustomZone,
 )
 
 
@@ -39,6 +40,7 @@ class GearSettingsService:
         custom_categories = [UserCategory(**item) for item in settings.custom_categories]
         custom_container_types = [UserContainerType(**item) for item in settings.custom_container_types]
         custom_brands = [UserBrand(**item) for item in settings.custom_brands]
+        visualization_custom_zones = [VisualizationCustomZone(**item) for item in settings.visualization_custom_zones]
 
         # Convert preferred_weight_unit to GearWeightUnit if not None
         preferred_weight_unit: GearWeightUnit | None = None
@@ -49,6 +51,8 @@ class GearSettingsService:
             customCategories=custom_categories,
             customContainerTypes=custom_container_types,
             customBrands=custom_brands,
+            visualizationCustomZones=visualization_custom_zones,
+            visualizationPlacements=settings.visualization_placements,
             preferredWeightUnit=preferred_weight_unit,
             defaultCurrency=settings.default_currency,
         )
@@ -83,6 +87,10 @@ class GearSettingsService:
             settings.custom_container_types = [item.model_dump() for item in updates.customContainerTypes]
         if updates.customBrands is not None:
             settings.custom_brands = [item.model_dump() for item in updates.customBrands]
+        if updates.visualizationCustomZones is not None:
+            settings.visualization_custom_zones = [item.model_dump() for item in updates.visualizationCustomZones]
+        if updates.visualizationPlacements is not None:
+            settings.visualization_placements = updates.visualizationPlacements
         if updates.preferredWeightUnit is not None:
             settings.preferred_weight_unit = updates.preferredWeightUnit
         if updates.defaultCurrency is not None:

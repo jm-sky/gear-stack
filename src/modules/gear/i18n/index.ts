@@ -952,6 +952,15 @@ export const gearEn = {
         other: 'Other',
       },
       zoneEmpty: 'No containers in this zone',
+      addZone: 'Add Zone',
+      zoneDialog: {
+        addTitle: 'Add Zone',
+        editTitle: 'Edit Zone',
+        nameLabel: 'Name',
+        namePlaceholder: 'e.g. Boat, Campsite',
+        iconLabel: 'Icon',
+      },
+      confirmDeleteZone: 'Delete this zone? Containers placed here will move back to their default zone.',
     },
   },
 }
@@ -1912,6 +1921,15 @@ export const gearPl = {
         other: 'Inne',
       },
       zoneEmpty: 'Brak kontenerów w tej strefie',
+      addZone: 'Dodaj obszar',
+      zoneDialog: {
+        addTitle: 'Dodaj obszar',
+        editTitle: 'Edytuj obszar',
+        nameLabel: 'Nazwa',
+        namePlaceholder: 'np. Łódź, Obozowisko',
+        iconLabel: 'Ikona',
+      },
+      confirmDeleteZone: 'Usunąć ten obszar? Kontenery w nim umieszczone wrócą do domyślnej strefy.',
     },
   },
 }

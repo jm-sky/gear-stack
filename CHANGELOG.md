@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.53.0] - 2026-07-22
+
+### Added
+- **Gear (Visualization)**: drag-and-drop przenoszenie kontenerów między strefami wizualizacji (override placementu per kontener, zapisywany w `gear_settings`)
+- **Gear (Visualization)**: własne obszary (nazwa + ikona z curated allowlisty lucide) — dodawanie/edycja/usuwanie obok 5 domyślnych stref; usunięcie obszaru czyści wskazujące na niego placementy
+- **Backend**: kolumny `visualization_custom_zones` / `visualization_placements` w `gear_settings` (migracja `056`) + rozszerzone schematy/serwis `/me/gear-settings`
+
+### Fixed
+- **Gear (Visualization)**: kontener typu `trunk` (Bagażnik) trafia domyślnie do strefy „Pojazd” zamiast „Noszone”
+- **Testing**: `vitest.config.ts` wyklucza `tests/e2e/**` i `tests/integration/**` (zestawy Playwright) — `pnpm test:run` nie łapał już ich jako testów Vitest
+
+---
+
 ## [2.52.0] - 2026-07-22
 
 ### Added

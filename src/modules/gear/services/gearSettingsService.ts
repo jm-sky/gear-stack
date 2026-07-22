@@ -8,6 +8,8 @@ import type {
   IUserBrand,
   IUserCategory,
   IUserContainerType,
+  IVisualizationCustomZone,
+  TVisualizationPlacements,
 } from '../types/gearSettings.types'
 import { gearSettingsApiService } from './gearSettingsApiService'
 
@@ -61,6 +63,8 @@ class GearSettingsService implements IGearSettingsService {
           customCategories: migrated.customCategories ?? [],
           customContainerTypes: migrated.customContainerTypes ?? [],
           customBrands: [],
+          visualizationCustomZones: [],
+          visualizationPlacements: {},
         })
       }
     }
@@ -69,6 +73,8 @@ class GearSettingsService implements IGearSettingsService {
       customCategories: settings.customCategories ?? [],
       customContainerTypes: settings.customContainerTypes ?? [],
       customBrands: settings.customBrands ?? [],
+      visualizationCustomZones: settings.visualizationCustomZones ?? [],
+      visualizationPlacements: settings.visualizationPlacements ?? {},
       preferredWeightUnit: settings.preferredWeightUnit,
       defaultCurrency: settings.defaultCurrency,
     })
@@ -83,6 +89,8 @@ class GearSettingsService implements IGearSettingsService {
         customCategories: settings.customCategories,
         customContainerTypes: settings.customContainerTypes,
         customBrands: settings.customBrands,
+        visualizationCustomZones: settings.visualizationCustomZones,
+        visualizationPlacements: settings.visualizationPlacements,
         preferredWeightUnit: settings.preferredWeightUnit,
         defaultCurrency: settings.defaultCurrency,
       }))
@@ -101,6 +109,8 @@ class GearSettingsService implements IGearSettingsService {
       customCategories: updates.customCategories ?? current.customCategories,
       customContainerTypes: updates.customContainerTypes ?? current.customContainerTypes,
       customBrands: updates.customBrands ?? current.customBrands,
+      visualizationCustomZones: updates.visualizationCustomZones ?? current.visualizationCustomZones,
+      visualizationPlacements: updates.visualizationPlacements ?? current.visualizationPlacements,
       preferredWeightUnit: updates.preferredWeightUnit ?? current.preferredWeightUnit,
       defaultCurrency: updates.defaultCurrency ?? current.defaultCurrency,
     }
@@ -114,7 +124,7 @@ class GearSettingsService implements IGearSettingsService {
    */
   private async addToArray<T extends { id: string }>(
     settings: IGearSettings,
-    key: 'customCategories' | 'customContainerTypes' | 'customBrands',
+    key: 'customCategories' | 'customContainerTypes' | 'customBrands' | 'visualizationCustomZones',
     item: T,
   ): Promise<IGearSettings> {
     const updated = {
@@ -130,7 +140,7 @@ class GearSettingsService implements IGearSettingsService {
    */
   private async updateInArray<T extends { id: string }>(
     settings: IGearSettings,
-    key: 'customCategories' | 'customContainerTypes' | 'customBrands',
+    key: 'customCategories' | 'customContainerTypes' | 'customBrands' | 'visualizationCustomZones',
     item: T,
   ): Promise<IGearSettings> {
     const updated = {
@@ -220,6 +230,51 @@ class GearSettingsService implements IGearSettingsService {
     return this.removeFromArray(settings, 'customBrands', brandId)
   }
 
+  /**
+   * Add a custom visualization zone
+   */
+  async addVisualizationZone(settings: IGearSettings, zone: IVisualizationCustomZone): Promise<IGearSettings> {
+    return this.addToArray(settings, 'visualizationCustomZones', zone)
+  }
+
+  /**
+   * Update a custom visualization zone
+   */
+  async updateVisualizationZone(settings: IGearSettings, zone: IVisualizationCustomZone): Promise<IGearSettings> {
+    return this.updateInArray(settings, 'visualizationCustomZones', zone)
+  }
+
+  /**
+   * Remove a custom visualization zone and clear any container placements
+   * pointing to it (they fall back to the containerType default on render)
+   */
+  async removeVisualizationZone(settings: IGearSettings, zoneId: string): Promise<IGearSettings> {
+    const updated: IGearSettings = {
+      ...settings,
+      visualizationCustomZones: settings.visualizationCustomZones.filter(zone => zone.id !== zoneId),
+      visualizationPlacements: Object.fromEntries(
+        Object.entries(settings.visualizationPlacements).filter(([, placedZoneId]) => placedZoneId !== zoneId),
+      ),
+    }
+    await this.saveToStorage(updated)
+    return Promise.resolve(updated)
+  }
+
+  /**
+   * Set (or override) the zone a container is placed in via drag-and-drop
+   */
+  async setContainerZone(settings: IGearSettings, containerId: string, zoneId: string): Promise<IGearSettings> {
+    const updated: IGearSettings = {
+      ...settings,
+      visualizationPlacements: {
+        ...settings.visualizationPlacements,
+        [containerId]: zoneId,
+      },
+    }
+    await this.saveToStorage(updated)
+    return Promise.resolve(updated)
+  }
+
   // Static helper methods for backward compatibility
   // Generic wrapper that creates instance and delegates to instance method
   private static delegate<TArgs extends unknown[], TReturn>(
@@ -243,6 +298,10 @@ class GearSettingsService implements IGearSettingsService {
   static addBrand = GearSettingsService.delegate((inst, settings: IGearSettings, brand: IUserBrand) => inst.addBrand(settings, brand))
   static updateBrand = GearSettingsService.delegate((inst, settings: IGearSettings, brand: IUserBrand) => inst.updateBrand(settings, brand))
   static removeBrand = GearSettingsService.delegate((inst, settings: IGearSettings, brandId: string) => inst.removeBrand(settings, brandId))
+  static addVisualizationZone = GearSettingsService.delegate((inst, settings: IGearSettings, zone: IVisualizationCustomZone) => inst.addVisualizationZone(settings, zone))
+  static updateVisualizationZone = GearSettingsService.delegate((inst, settings: IGearSettings, zone: IVisualizationCustomZone) => inst.updateVisualizationZone(settings, zone))
+  static removeVisualizationZone = GearSettingsService.delegate((inst, settings: IGearSettings, zoneId: string) => inst.removeVisualizationZone(settings, zoneId))
+  static setContainerZone = GearSettingsService.delegate((inst, settings: IGearSettings, containerId: string, zoneId: string) => inst.setContainerZone(settings, containerId, zoneId))
 }
 
 export { GearSettingsService }
@@ -358,6 +417,34 @@ export const gearSettingsService = () => {
           customBrands: settings.customBrands.filter(b => b.id !== brandId),
         }
         return this.updateSettings(settings, { customBrands: updated.customBrands })
+      },
+      async addVisualizationZone(settings: IGearSettings, zone: IVisualizationCustomZone): Promise<IGearSettings> {
+        const updated = {
+          ...settings,
+          visualizationCustomZones: [...settings.visualizationCustomZones, zone],
+        }
+        return this.updateSettings(settings, { visualizationCustomZones: updated.visualizationCustomZones })
+      },
+      async updateVisualizationZone(settings: IGearSettings, zone: IVisualizationCustomZone): Promise<IGearSettings> {
+        const updated = {
+          ...settings,
+          visualizationCustomZones: settings.visualizationCustomZones.map(z => z.id === zone.id ? zone : z),
+        }
+        return this.updateSettings(settings, { visualizationCustomZones: updated.visualizationCustomZones })
+      },
+      async removeVisualizationZone(settings: IGearSettings, zoneId: string): Promise<IGearSettings> {
+        const visualizationCustomZones = settings.visualizationCustomZones.filter(z => z.id !== zoneId)
+        const visualizationPlacements: TVisualizationPlacements = Object.fromEntries(
+          Object.entries(settings.visualizationPlacements).filter(([, placedZoneId]) => placedZoneId !== zoneId),
+        )
+        return this.updateSettings(settings, { visualizationCustomZones, visualizationPlacements })
+      },
+      async setContainerZone(settings: IGearSettings, containerId: string, zoneId: string): Promise<IGearSettings> {
+        const visualizationPlacements: TVisualizationPlacements = {
+          ...settings.visualizationPlacements,
+          [containerId]: zoneId,
+        }
+        return this.updateSettings(settings, { visualizationPlacements })
       },
     }
   }

@@ -47,12 +47,26 @@ class UserBrand(BaseModel):
     model_config = {"populate_by_name": True}
 
 
+class VisualizationCustomZone(BaseModel):
+    """Schema for a user-defined visualization zone."""
+
+    id: str
+    name: str
+    iconKey: str
+    createdAt: datetime
+    updatedAt: datetime
+
+    model_config = {"populate_by_name": True}
+
+
 class GearSettingsResponse(BaseModel):
     """Schema for gear settings response."""
 
     customCategories: list[UserCategory] = Field(default_factory=list, alias="customCategories")
     customContainerTypes: list[UserContainerType] = Field(default_factory=list, alias="customContainerTypes")
     customBrands: list[UserBrand] = Field(default_factory=list, alias="customBrands")
+    visualizationCustomZones: list[VisualizationCustomZone] = Field(default_factory=list, alias="visualizationCustomZones")
+    visualizationPlacements: dict[str, str] = Field(default_factory=dict, alias="visualizationPlacements")
     preferredWeightUnit: GearWeightUnit | None = Field(None, alias="preferredWeightUnit")
     defaultCurrency: str | None = Field(None, alias="defaultCurrency")
 
@@ -65,6 +79,8 @@ class GearSettingsUpdate(BaseModel):
     customCategories: list[UserCategory] | None = Field(None, alias="customCategories")
     customContainerTypes: list[UserContainerType] | None = Field(None, alias="customContainerTypes")
     customBrands: list[UserBrand] | None = Field(None, alias="customBrands")
+    visualizationCustomZones: list[VisualizationCustomZone] | None = Field(None, alias="visualizationCustomZones")
+    visualizationPlacements: dict[str, str] | None = Field(None, alias="visualizationPlacements")
     preferredWeightUnit: GearWeightUnit | None = Field(None, alias="preferredWeightUnit")
     defaultCurrency: str | None = Field(None, alias="defaultCurrency")
 

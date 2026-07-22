@@ -48,6 +48,8 @@ class GearSettingsRepository:
                 custom_categories=[],
                 custom_container_types=[],
                 custom_brands=[],
+                visualization_custom_zones=[],
+                visualization_placements={},
             )
             self.db.add(settings)
             await self.db.commit()

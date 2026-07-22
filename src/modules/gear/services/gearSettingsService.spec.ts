@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { IGearSettings, IUserBrand, IUserCategory, IUserContainerType } from '../types/gearSettings.types'
+import type { IGearSettings, IUserBrand, IUserCategory, IUserContainerType, IVisualizationCustomZone } from '../types/gearSettings.types'
 import { GearSettingsService } from './gearSettingsService'
 
 // Mock localStorage
@@ -35,6 +35,8 @@ describe('gearSettingsService - HIGH PRIORITY Refactoring', () => {
     customBrands: [],
     customCategories: [],
     customContainerTypes: [],
+    visualizationCustomZones: [],
+    visualizationPlacements: {},
   })
 
   const createMockCategory = (id = 'cat-1'): IUserCategory => ({
@@ -56,6 +58,14 @@ describe('gearSettingsService - HIGH PRIORITY Refactoring', () => {
     id,
     updatedAt: '2024-01-01T00:00:00Z',
     value: 'Test Brand',
+  })
+
+  const createMockZone = (id = 'zone-1'): IVisualizationCustomZone => ({
+    createdAt: '2024-01-01T00:00:00Z',
+    iconKey: 'tent',
+    id,
+    name: 'Test Zone',
+    updatedAt: '2024-01-01T00:00:00Z',
   })
 
   describe('H2: Generic Array Helpers (DRY Fix)', () => {
@@ -261,6 +271,69 @@ describe('gearSettingsService - HIGH PRIORITY Refactoring', () => {
         expect(updated.customCategories).toHaveLength(1)
         expect(updated.customCategories[0]!.id).toBe(category2.id)
       })
+    })
+  })
+
+  describe('Visualization custom zones + placements', () => {
+    it('should add a custom visualization zone', async () => {
+      const service = new GearSettingsService()
+      const settings = createDefaultSettings()
+      const zone = createMockZone()
+
+      const updated = await service.addVisualizationZone(settings, zone)
+
+      expect(updated.visualizationCustomZones).toHaveLength(1)
+      expect(updated.visualizationCustomZones[0]).toEqual(zone)
+    })
+
+    it('should update a custom visualization zone', async () => {
+      const service = new GearSettingsService()
+      const zone = createMockZone()
+      const settings: IGearSettings = { ...createDefaultSettings(), visualizationCustomZones: [zone] }
+      const updatedZone = { ...zone, name: 'Renamed Zone' }
+
+      const updated = await service.updateVisualizationZone(settings, updatedZone)
+
+      expect(updated.visualizationCustomZones[0]!.name).toBe('Renamed Zone')
+    })
+
+    it('should remove a custom visualization zone and clear placements pointing to it', async () => {
+      const service = new GearSettingsService()
+      const zone = createMockZone()
+      const settings: IGearSettings = {
+        ...createDefaultSettings(),
+        visualizationCustomZones: [zone],
+        visualizationPlacements: {
+          'container-1': zone.id,
+          'container-2': 'carry',
+        },
+      }
+
+      const updated = await service.removeVisualizationZone(settings, zone.id)
+
+      expect(updated.visualizationCustomZones).toHaveLength(0)
+      expect(updated.visualizationPlacements).toEqual({ 'container-2': 'carry' })
+    })
+
+    it('should set a container placement override', async () => {
+      const service = new GearSettingsService()
+      const settings = createDefaultSettings()
+
+      const updated = await service.setContainerZone(settings, 'container-1', 'vehicle')
+
+      expect(updated.visualizationPlacements).toEqual({ 'container-1': 'vehicle' })
+    })
+
+    it('should overwrite an existing placement without touching others', async () => {
+      const service = new GearSettingsService()
+      const settings: IGearSettings = {
+        ...createDefaultSettings(),
+        visualizationPlacements: { 'container-1': 'body', 'container-2': 'home' },
+      }
+
+      const updated = await service.setContainerZone(settings, 'container-1', 'vehicle')
+
+      expect(updated.visualizationPlacements).toEqual({ 'container-1': 'vehicle', 'container-2': 'home' })
     })
   })
 

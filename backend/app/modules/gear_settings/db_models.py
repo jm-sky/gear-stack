@@ -29,6 +29,8 @@ class GearSettingsDB(Base):
         custom_categories: JSON array of custom categories
         custom_container_types: JSON array of custom container types
         custom_brands: JSON array of custom brands
+        visualization_custom_zones: JSON array of custom visualization zones (id, name, iconKey)
+        visualization_placements: JSON object mapping containerId -> zoneId (DnD override)
         preferred_weight_unit: Preferred weight unit (g, kg, oz, lb, auto-g-kg, auto-oz-lb)
         default_currency: Default currency (PLN, USD, EUR, GBP)
         created_at: Creation timestamp
@@ -42,6 +44,8 @@ class GearSettingsDB(Base):
     custom_categories: Mapped[list[dict]] = mapped_column(JSON, nullable=False, default=list)
     custom_container_types: Mapped[list[dict]] = mapped_column(JSON, nullable=False, default=list)
     custom_brands: Mapped[list[dict]] = mapped_column(JSON, nullable=False, default=list)
+    visualization_custom_zones: Mapped[list[dict]] = mapped_column(JSON, nullable=False, default=list)
+    visualization_placements: Mapped[dict[str, str]] = mapped_column(JSON, nullable=False, default=dict)
     preferred_weight_unit: Mapped[str | None] = mapped_column(String(10), nullable=True)
     default_currency: Mapped[str | None] = mapped_column(String(10), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)

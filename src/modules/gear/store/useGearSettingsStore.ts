@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, reactive } from 'vue'
-import type { IGearSettings, IUpdateGearSettingsDto, IUserBrand, IUserCategory, IUserContainerType } from '../types/gearSettings.types'
+import type { IGearSettings, IUpdateGearSettingsDto, IUserBrand, IUserCategory, IUserContainerType, IVisualizationCustomZone } from '../types/gearSettings.types'
 import { gearSettingsService } from '../services/gearSettingsService'
 
 // Helper to load settings synchronously for initial state
@@ -14,6 +14,8 @@ function loadSettingsSync(): IGearSettings {
         customCategories: parsed.customCategories ?? [],
         customContainerTypes: parsed.customContainerTypes ?? [],
         customBrands: parsed.customBrands ?? [],
+        visualizationCustomZones: parsed.visualizationCustomZones ?? [],
+        visualizationPlacements: parsed.visualizationPlacements ?? {},
         preferredWeightUnit: parsed.preferredWeightUnit,
         defaultCurrency: parsed.defaultCurrency,
       }
@@ -25,6 +27,8 @@ function loadSettingsSync(): IGearSettings {
     customCategories: [],
     customContainerTypes: [],
     customBrands: [],
+    visualizationCustomZones: [],
+    visualizationPlacements: {},
     defaultCurrency: undefined,
   }
 }
@@ -35,6 +39,7 @@ export const useGearSettingsStore = defineStore('gearSettings', () => {
   const getAllCategories = computed<IUserCategory[]>(() => state.customCategories)
   const getAllContainerTypes = computed<IUserContainerType[]>(() => state.customContainerTypes)
   const getAllBrands = computed<IUserBrand[]>(() => state.customBrands)
+  const getAllVisualizationZones = computed<IVisualizationCustomZone[]>(() => state.visualizationCustomZones)
 
   // Actions
   async function updateSettings(updates: IUpdateGearSettingsDto): Promise<void> {
@@ -43,6 +48,8 @@ export const useGearSettingsStore = defineStore('gearSettings', () => {
     state.customCategories = updated.customCategories
     state.customContainerTypes = updated.customContainerTypes
     state.customBrands = updated.customBrands
+    state.visualizationCustomZones = updated.visualizationCustomZones
+    state.visualizationPlacements = updated.visualizationPlacements
     state.preferredWeightUnit = updated.preferredWeightUnit
     state.defaultCurrency = updated.defaultCurrency
   }
@@ -101,12 +108,39 @@ export const useGearSettingsStore = defineStore('gearSettings', () => {
     state.customBrands = updated.customBrands
   }
 
+  async function addVisualizationZone(zone: IVisualizationCustomZone): Promise<void> {
+    const service = gearSettingsService()
+    const updated = await service.addVisualizationZone(state, zone)
+    state.visualizationCustomZones = updated.visualizationCustomZones
+  }
+
+  async function updateVisualizationZone(zone: IVisualizationCustomZone): Promise<void> {
+    const service = gearSettingsService()
+    const updated = await service.updateVisualizationZone(state, zone)
+    state.visualizationCustomZones = updated.visualizationCustomZones
+  }
+
+  async function removeVisualizationZone(zoneId: string): Promise<void> {
+    const service = gearSettingsService()
+    const updated = await service.removeVisualizationZone(state, zoneId)
+    state.visualizationCustomZones = updated.visualizationCustomZones
+    state.visualizationPlacements = updated.visualizationPlacements
+  }
+
+  async function setContainerZone(containerId: string, zoneId: string): Promise<void> {
+    const service = gearSettingsService()
+    const updated = await service.setContainerZone(state, containerId, zoneId)
+    state.visualizationPlacements = updated.visualizationPlacements
+  }
+
   async function loadFromStorageAction(): Promise<void> {
     const service = gearSettingsService()
     const loaded = await service.loadFromStorage()
     state.customCategories = loaded.customCategories
     state.customContainerTypes = loaded.customContainerTypes
     state.customBrands = loaded.customBrands
+    state.visualizationCustomZones = loaded.visualizationCustomZones
+    state.visualizationPlacements = loaded.visualizationPlacements
     state.preferredWeightUnit = loaded.preferredWeightUnit
     state.defaultCurrency = loaded.defaultCurrency
   }
@@ -116,6 +150,8 @@ export const useGearSettingsStore = defineStore('gearSettings', () => {
     customCategories: computed(() => state.customCategories),
     customContainerTypes: computed(() => state.customContainerTypes),
     customBrands: computed(() => state.customBrands),
+    visualizationCustomZones: computed(() => state.visualizationCustomZones),
+    visualizationPlacements: computed(() => state.visualizationPlacements),
     preferredWeightUnit: computed(() => state.preferredWeightUnit),
     defaultCurrency: computed(() => state.defaultCurrency),
 
@@ -123,6 +159,7 @@ export const useGearSettingsStore = defineStore('gearSettings', () => {
     getAllCategories,
     getAllContainerTypes,
     getAllBrands,
+    getAllVisualizationZones,
 
     // Actions
     updateSettings,
@@ -135,6 +172,10 @@ export const useGearSettingsStore = defineStore('gearSettings', () => {
     addBrand,
     updateBrand,
     removeBrand,
+    addVisualizationZone,
+    updateVisualizationZone,
+    removeVisualizationZone,
+    setContainerZone,
     loadFromStorage: loadFromStorageAction,
   }
 })
