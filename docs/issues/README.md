@@ -53,5 +53,6 @@ Tracked work items (bugs, improvements) live here — not in GitHub Issues.
 | 035 | [2026-07-21--035--item-image-idor.md](2026-07-21--035--item-image-idor.md) | Security (High): item image endpoints — IDOR / brak ownership check | `verification needed` |
 | 036 | [2026-07-21--036--oauth-login-bypasses-session-machinery.md](2026-07-21--036--oauth-login-bypasses-session-machinery.md) | Security (Medium): OAuth login omija session tracking / token-version / 2FA | `verification needed` |
 | 037 | [2026-07-21--037--oauth-callback-state-not-verified.md](2026-07-21--037--oauth-callback-state-not-verified.md) | Security (Medium): OAuth callback nie weryfikuje `state` (CSRF) po stronie backendu | `verification needed` |
+| 038 | [2026-07-22--038--2fa-login-and-refresh-bypass-session-machinery.md](2026-07-22--038--2fa-login-and-refresh-bypass-session-machinery.md) | Auth (High): logowanie 2FA (TOTP/passkey) i refresh tokena bez `tv`/`jti` — wylogowanie po chwili | `done` |
 
 When adding a new issue, create `YYYY-MM-DD--NNN--short-slug.md` and add a row to this table.
