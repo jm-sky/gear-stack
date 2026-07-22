@@ -8,6 +8,7 @@ import type { IGearItemV2, TContainerColor, TGearWeightUnit } from '../types/gea
 import type { IItemWithContainer } from './allItemsColumns'
 import { DEFAULT_ITEM_CATEGORY, DEFAULT_ITEM_COLOR, DEFAULT_ITEM_PRIORITY, DEFAULT_ITEM_STATUS } from './constants'
 import { calculateTotalWeightSyncV2 } from './containerCalculationsV2'
+import { buildContainerPath, buildParentContainerPath } from './containerPath'
 import { convertFromGrams } from './formatWeight'
 import type { TUUID } from '@/shared/types/base.type'
 
@@ -41,6 +42,8 @@ export function getAllItemsForCatalogV2(
         category: DEFAULT_ITEM_CATEGORY,
         containerId: item.id,
         containerName: item.name,
+        containerPath: buildParentContainerPath(item.id, byId),
+        parentItemId: item.parentItemId ?? undefined,
         containerColor: (item.color ?? DEFAULT_ITEM_COLOR) as TContainerColor,
         quantity: 1,
         weight: convertFromGrams(totalWeightGrams, displayWeightUnit),
@@ -68,6 +71,7 @@ export function getAllItemsForCatalogV2(
       category: item.category ?? DEFAULT_ITEM_CATEGORY,
       containerId: parent?.id ?? item.parentItemId ?? '',
       containerName: parent?.name ?? '',
+      containerPath: parent ? buildContainerPath(parent.id, byId) : '',
       containerColor: (parent?.color ?? DEFAULT_ITEM_COLOR) as TContainerColor,
       containerType: parent?.containerType ?? undefined,
       quantity: item.quantity ?? 1,

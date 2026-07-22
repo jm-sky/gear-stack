@@ -36,6 +36,7 @@ export const authPl = {
     enter_new_password: 'Wprowadź nowe hasło',
     login_with_google: 'Kontynuuj z Google',
     links: {
+      or: 'Lub',
       or_create_account: 'Lub utwórz nowe konto',
       create_new_account: 'Utwórz nowe konto',
       or_sign_in: 'Masz już konto?',
@@ -93,6 +94,7 @@ export const authPl = {
       },
       totp: {
         title: 'Aplikacja uwierzytelniająca (TOTP)',
+        tab_label: 'TOTP',
         description: 'Użyj aplikacji uwierzytelniającej takiej jak Google Authenticator lub Authy',
         setup: 'Skonfiguruj aplikację uwierzytelniającą',
         cancel: 'Anuluj',
@@ -126,6 +128,7 @@ export const authPl = {
       },
       webauthn: {
         title: 'Klucze dostępu',
+        tab_label: 'Klucze dostępu',
         description: 'Użyj uwierzytelniania biometrycznego lub kluczy bezpieczeństwa',
         register: 'Zarejestruj klucz dostępu',
         register_title: 'Dodaj nowy klucz dostępu',
@@ -180,6 +183,7 @@ export const authPl = {
       button: {
         continue_with_google: 'Google',
         continue_with_facebook: 'Facebook',
+        continue_with_github: 'GitHub',
         redirecting: 'Przekierowywanie...',
       },
       or_continue_with: 'Lub kontynuuj z',

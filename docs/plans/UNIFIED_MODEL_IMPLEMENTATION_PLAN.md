@@ -1197,7 +1197,7 @@ pnpm test:e2e
 
 6. **Dokumentacja**
    - Zaktualizować `CLAUDE.md`
-   - Zaktualizować `UNIFIED_MODEL_ANALYSIS.md`
+   - Zaktualizować [research/UNIFIED_MODEL_ANALYSIS.md](../research/UNIFIED_MODEL_ANALYSIS.md)
    - Migration guide dla użytkowników
    - API documentation
 

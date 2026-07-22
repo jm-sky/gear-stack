@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useMediaQuery } from '@vueuse/core'
 import { CalendarPlus, CalendarSync, ExternalLink, Link2, RefreshCcw } from 'lucide-vue-next'
 import { computed, defineAsyncComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -80,9 +81,17 @@ const { shouldUseAPI } = useBackend()
 const { deleteItem, updateItem } = useGearMutations()
 const { handleError } = useHandleError()
 
+const isSmUp = useMediaQuery('(min-width: 640px)')
+
 const isCloneDialogOpen = ref(false)
 const isDeleteDialogOpen = ref(false)
 const isDeleting = ref(false)
+
+const hasDistinctUpdate = computed<boolean>(() => {
+  const created = new Date(props.container.createdAt).getTime()
+  const updated = new Date(props.container.updatedAt).getTime()
+  return Number.isFinite(created) && Number.isFinite(updated) && Math.abs(updated - created) > 1000
+})
 
 const backTo = computed<string>(() => {
   const from = getFrom(route)
@@ -193,15 +202,6 @@ const handlePublish = async () => {
             :aria-label="t('gear.actions.aiAssistant')"
             @click="$emit('aiChat')"
           />
-          <Button
-            v-tooltip.bottom="t('gear.actions.exportToPrompt')"
-            variant="ghost"
-            size="sm"
-            :aria-label="t('gear.actions.exportToPrompt')"
-            @click="handleExportToPrompt"
-          >
-            <ExportToPromptIcon class="size-4" />
-          </Button>
           <FavoriteContainerButton :container />
         </div>
       </div>
@@ -227,7 +227,7 @@ const handlePublish = async () => {
               {{ smallDateTime(container.createdAt) }}
             </Badge>
             <Badge
-              v-if="container.updatedAt !== container.createdAt"
+              v-if="hasDistinctUpdate"
               v-tooltip.bottom="t('common.updated')"
               variant="secondary"
               class="text-xs"
@@ -252,9 +252,10 @@ const handlePublish = async () => {
           </div>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <ItemsTableEditModeToggle />
           <Button
+            v-if="isSmUp"
             variant="outline"
             size="sm"
             class="shrink-0"
@@ -264,6 +265,7 @@ const handlePublish = async () => {
             <span class="hidden sm:inline">{{ t('gear.actions.edit') }}</span>
           </Button>
           <Button
+            v-if="isSmUp"
             variant="outline"
             size="sm"
             class="shrink-0"
@@ -289,6 +291,15 @@ const handlePublish = async () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem v-if="!isSmUp" @click="handleEdit">
+                <EditIcon class="size-4" />
+                {{ t('gear.actions.edit') }}
+              </DropdownMenuItem>
+              <DropdownMenuItem v-if="!isSmUp" @click="handleAddContainer">
+                <AddContainerIcon class="size-4" />
+                {{ t('gear.container.addNested') }}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator v-if="!isSmUp" />
               <DropdownMenuItem @click="handleClone">
                 <CloneIcon class="size-4" />
                 {{ t('gear.container.clone') }}

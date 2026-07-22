@@ -269,6 +269,7 @@ const globalFilterFn = (row: IItemWithContainer, filterValue: string) => {
   return (
     row.name.toLowerCase().includes(query) ||
     row.containerName.toLowerCase().includes(query) ||
+    (row.containerPath?.toLowerCase().includes(query) ?? false) ||
     getCategoryLabel(row.category).toLowerCase().includes(query) ||
     t(`gear.item.statuses.${row.status}`).toLowerCase().includes(query) ||
     (row.brand?.toLowerCase().includes(query) ?? false) ||
@@ -370,14 +371,24 @@ const globalFilterFn = (row: IItemWithContainer, filterValue: string) => {
 
         <template #container="{ row }">
           <RouterLink
-            v-if="row.original.containerId !== row.original.id"
+            v-if="row.original.isContainer && row.original.containerPath && row.original.parentItemId"
+            :to="{ path: GearRoutePath.ContainerDetailById(row.original.parentItemId), query: createNavigationQuery(undefined, 'all-items') }"
+            class="text-sm text-muted-foreground hover:underline truncate max-w-[200px] sm:max-w-xs block"
+            :title="row.original.containerPath"
+          >
+            {{ row.original.containerPath }}
+          </RouterLink>
+          <RouterLink
+            v-else-if="row.original.containerId !== row.original.id"
             :to="{ path: GearRoutePath.ContainerDetailById(row.original.containerId), query: createNavigationQuery(undefined, 'all-items') }"
-            class="flex items-center gap-2 cursor-pointer hover:underline font-medium"
+            class="flex items-center gap-2 cursor-pointer hover:underline font-medium min-w-0"
             :class="COLOR_TEXT_CLASSES[row.original.containerColor]"
-            :title="JSON.stringify(row.original)"
+            :title="row.original.containerPath || row.original.containerName"
           >
             <ContainerIcon :type="row.original.containerType ?? 'other'" :color="row.original.containerColor" :size="4" />
-            {{ row.original.containerName }}
+            <span class="truncate max-w-[200px] sm:max-w-xs">
+              {{ row.original.containerPath || row.original.containerName }}
+            </span>
           </RouterLink>
           <span v-else>-</span>
         </template>

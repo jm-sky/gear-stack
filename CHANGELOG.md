@@ -7,22 +7,122 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [2.52.0] - 2026-07-22
+
 ### Added
-- **Gear**: `useGearMutations` – ujednolicona warstwa mutacji V2 z automatyczną inwalidacją cache TanStack Query (keystone migracji V1→V2)
+- **Health**: `GET /api/health/details` — token-protected (`HEALTH_DETAILS_TOKEN`, fail-closed) szczegółowy status komponentów (database, cache, storage, frontend) pod kontrakt Ops Monitor; zwykły `/health` bez zmian
+- **CLI**: `users change-password` — ustawienie hasła użytkownika po emailu lub ID (admin override; unieważnia sesje przez bump `token_version`)
 
 ### Changed
-- **Zależności (npm)**: bump in-range (minor/patch) wszystkich pakietów + bezpieczne majory dev-tooling (`@vue/tsconfig` 0.9, `npm-run-all2` 9, `@sentry/vite-plugin` 5, `lucide-vue-next` 1.0). Pozostałe majory wysokiego ryzyka (typescript 6, vite 8, zod 4, vue-router 5, eslint 10) — zaplanowane w `docs/security-dependabot-remediation.md`, do zrobienia z weryfikacją UI
-- **Gear: migracja V1→V2 ukończona** — cały moduł gear działa na modelu V2 (unified). Wprowadzono `useGearMutations` (mutacje V2 + inwalidacja cache), dobudowano brakujące funkcje na V2 (clone kontenera, import/eksport JSON, odczyt katalogu, generator przykładowego sprzętu) z testami jednostkowymi, a upload danych offline → API (`dataMigrationService`) przepisano na V2 z zachowaniem ID. Zagnieżdżone kontenery używają natywnego re-parentingu (`parentItemId`)
+- **Docker**: Compose przeniesiony do roota repo (`compose.yaml` / `docker-compose.dev.yml`, `name: gear-stack`) — `docker compose up` z katalogu projektu zamiast `cd backend`
+- **Docker (dev)**: montowanie `backend/pyproject.toml` do kontenera (black/mypy używają konfiguracji projektu); volume Postgresa zarządzany wewnętrznie (bez `external`)
+- **TSConfig**: usunięte `baseUrl` z `tsconfig.json` / `tsconfig.app.json`
+- **Deploy**: usunięte zagnieżdżone numerowanie kroków z sub-skryptu frontendu (jedna sekwencja Step 1/2/3 w `deploy.sh`)
 
-### Deprecated
+### Fixed
+- **Auth (WebAuthn)**: weryfikacja passkey używa `FRONTEND_URL` jako origin (zamiast `localhost`) — spójnie z override RP ID na produkcji
+- **Backend**: mypy strict-mode w auth, billing, storage i gear images; czyszczenie black/ruff
+
+### Security
+- **Gear images (IDOR)**: endpointy upload/delete/reorder/toggle-primary/from-url wymuszają ownership przez `GearContainerDB.user_id`; lista obrazków bez auth ograniczona do właściciela lub publicznych kontenerów ([#035](docs/issues/2026-07-21--035--item-image-idor.md))
+- **OAuth login**: tokeny przez `_issue_login_tokens` (`jti`/`tv`/session tracking) + honorowanie 2FA jak przy logowaniu hasłem ([#036](docs/issues/2026-07-21--036--oauth-login-bypasses-session-machinery.md))
+- **OAuth CSRF**: callback weryfikuje serwerowy, jednorazowy, TTL state (`OAuthStateStore`) zamiast ufać tylko kopii z frontendu ([#037](docs/issues/2026-07-21--037--oauth-callback-state-not-verified.md))
+- **Rate limiting**: zaufanie ostatniego hopa `X-Forwarded-For` za Caddy
+- **Admin / users**: wspólne guardy Owner / protected-user dla mutacji
+- **WebAuthn (2FA login)**: weryfikacja passkey przez bibliotekę webauthn (w tym flow tokenów na frontendzie)
+
+---
+
+## [2.51.1] - 2026-07-18
+
+### Fixed
+- **Gear (V2)**: `primaryImageUrl` na endpointach unified items (`get_item`, `get_items`, `get_children`, …) — miniaturki na stronie kontenera znów działają po migracji V1→V2
+- **Gear**: listy kontenerów/itemów preferują `external_url` dla primary image hostowanego poza storage (wcześniej padał placeholder)
+- **UI**: mniejszy prawy margin w `AppHeader` na mobile (`mr-6` → `mr-1`)
+
+### Changed
+- **Docs**: issue [#034](docs/issues/2026-07-15--034--inline-editing-ux-refinement.md) — plan inline editing w tabeli itemów
+- **Repo**: ignorowanie lokalnych plików kontekstu AI (`CLAUDE.local.md`, `AGENTS.local.md`)
+
+---
+
+## [2.51.0] - 2026-07-15
+
+### Added
+- **Sidebar**: wyszukiwanie kontenerów (debounced) oraz sekcja **Ulubione** na górze listy
+- **All Items**: kolumna Container pokazuje pełną ścieżkę zagnieżdżenia (`Root › Nested › …`) zamiast samej nazwy rodzica
+- **Docs**: UX review sesja 1 ([2026-07-06-ux.md](docs/reviews/2026-07-06-ux.md)) — 17 issue’ów w `docs/issues/`; program review w `docs/reviews/README.md`
+
+### Changed
+- **UX (a11y)**: etykiety pól logowania (hasło), comboboxy Brand/Color, paginacja „rows per page”, sidebar toggle, dismiss banera premium
+- **UX (auth)**: jeden komunikat błędu logowania (`role="alert"`), poprawiony podtytuł rejestracji (i18n)
+- **UX (gear)**: disambiguatory duplikatów nazw w sidebarze; uproszczony toolbar kontenera; ukryte pole „Show on Container” (dev copy)
+- **UX (dark mode)**: spójne neutralne tokeny tła — usunięty blue-shift (`slate`) z `AuthenticatedLayout` i `--sidebar-primary`
+- **Layout (mobile)**: `min-w-0` na `SidebarInset`/main; kompaktowy header; Edit/Add Container w menu „More actions” poniżej `sm`
+- **Nav**: top bar linki widoczne od `md` (decyzja: zachować redundancję ze sidebar na desktopie — [#031](docs/issues/2026-07-15--031--nav-redundancy-topbar-sidebar.md))
+
+### Fixed
+- **Gear**: nawigacja między kontenerami w sidebarze — URL się zmieniał, ale treść strony nie (`containerId` jako `computed` w `ContainerDetailPage`)
+- **Gear**: zduplikowany timestamp Created/Updated w nagłówku kontenera; metadane tylko gdy daty się różnią
+
+---
+
+## [2.50.1] - 2026-07-10
+
+### Changed
+- **Build**: vendor libraries w osobnych manual chunks (`vite.config.ts`) — mniejszy główny bundle produkcyjny
+- **Build**: wyciszone ostrzeżenia Rollup `INVALID_ANNOTATION` z `@vueuse/core`
+
+### Fixed
+- **Backend auth**: JWT access/refresh tokens zawierają `jti` i `tv` z login options — tracking sesji i unieważnianie przez `token_version` (pominięte w changelogu 2.50.0)
+
+---
+
+## [2.50.0] - 2026-07-08
+
+### Added
+- **Auth (2FA)**: krótsze etykiety zakładek (`tab_label`) na stronie konfiguracji 2FA
+- **Docs**: issue [#016](docs/issues/2026-07-08--016--two-factor-api-404-double-prefix.md) — konfiguracja 2FA API 404
+
+### Changed
+- **Auth (2FA)**: responsywny layout strony `/auth/2fa/setup` — bez podwójnego `PageCard`, stackowane akcje na mobile, embedded QR w flow TOTP, lista passkeyów jako karty na `<md`
+- **Docker**: jeden `backend/docker-compose.yml` dla dev i produkcji — usunięto `docker-compose.dev.yml` i `docker-compose.dev-minio.yml`; zaktualizowano `exec.sh`, skrypty migracji i przykłady `.env`
+- **Docs (deployment)**: podział `DEPLOYMENT.md` na `local-development.md`, `production-manual.md` i `production-github-actions.md`
+
+### Fixed
+- **Auth (2FA)**: konfiguracja TOTP i passkey zwracała 404 — usunięto podwójny prefix `/two-factor` w routerze backendu (endpointy były pod `/api/two-factor/two-factor/...`, frontend wołał `/api/two-factor/...`)
+- **Auth (2FA / WebAuthn)**: rejestracja passkey — wyrównano kontrakt API (opcje jako JSON, nie string; poprawny kształt listy passkeyów; naprawiony `DELETE` na `/passkeys/undefined`)
+- **Auth (WebAuthn)**: rejestracja passkey na produkcji — `RP ID` z `settings.webauthn` i `FRONTEND_URL` zamiast błędnego fallbacku na `localhost`; credential JSON wysyłany bezpośrednio do API
+
+---
+
+## [2.49.0] - 2026-07-08
+
+### Added
+- **Auth: OAuth GitHub** — logowanie przez GitHub (`GitHubOAuthProvider`, przycisk na login/register, callback `/auth/github`, zmienne `GITHUB_OAUTH_*` / `VITE_GITHUB_OAUTH_CLIENT_ID`)
+- **Auth**: `PasswordInput` z przełącznikiem widoczności hasła na stronie logowania
+- **CLI**: `users list --wide` (rozszerzona lista użytkowników) oraz `users delete` z opcjami soft/hard
+- **Gear**: `useGearMutations` – ujednolicona warstwa mutacji V2 z automatyczną inwalidacją cache TanStack Query (keystone migracji V1→V2)
+- **Gear**: searchable combobox i responsywny dialog zagnieżdżonego kontenera
+
+### Changed
+- **Dokumentacja**: konsolidacja katalogów `docs/` — utworzono `research/` i `plans/README.md`; usunięto legacy `analysis/`, `security/`, `optimization/`; treść w `research/`, `plans/`, `reviews/`
+- **Zależności (npm)**: bump in-range (minor/patch) wszystkich pakietów + bezpieczne majory dev-tooling (`@vue/tsconfig` 0.9, `npm-run-all2` 9, `@sentry/vite-plugin` 5, `lucide-vue-next` 1.0). Pozostałe majory wysokiego ryzyka (typescript 6, vite 8, zod 4, vue-router 5, eslint 10) — zaplanowane w `docs/plans/security-dependabot-remediation.md`, do zrobienia z weryfikacją UI
+- **Gear: migracja V1→V2 ukończona** — cały moduł gear działa na modelu V2 (unified). Wprowadzono `useGearMutations` (mutacje V2 + inwalidacja cache), dobudowano brakujące funkcje na V2 (clone kontenera, import/eksport JSON, odczyt katalogu, generator przykładowego sprzętu) z testami jednostkowymi, a upload danych offline → API (`dataMigrationService`) przepisano na V2 z zachowaniem ID. Zagnieżdżone kontenery używają natywnego re-parentingu (`parentItemId`)
 
 ### Removed
 - **Gear: legacy warstwa V1** — `useGear` + `internal/*`, serwisy V1 (`gearContainerService`, `gearItemService`, `gearItemHybridService`, `gearItemLocalService`, `gearContainerLocalService`, `gearItemApiService`, `migrationV1toV2Service`), `store/useGearStore`, utils V1 (`getAllItems`, `containerCalculations`, `migrationHelpers`). Zachowano `gear.types.ts` (wspólne typy), `gearContainerApiService` (ratingi/raporty public) i `v1ToV2Migration` (transparentna migracja localStorage)
 
 ### Fixed
+- **Auth**: przyciski OAuth (Google/Facebook/GitHub) widoczne tylko gdy dany provider jest skonfigurowany — Facebook niezależny od Google
+- **Gear**: tworzenie itemów V2 — naprawiono naruszenie constraint `check_item_fields` w bazie
+- **Layouts**: `GuestLayoutCentered` — pasek locale/dark mode nad logo (`z-10` na `<nav>`, `relative z-0` na `<main>`)
 
 ### Security
 - Naprawiono 6 alertów Dependabota: `axios` → 1.17.0 (3 CVE: MITM proxy, NO_PROXY bypass, wyciek Proxy-Authorization), oraz `pnpm.overrides` dla `shell-quote` 1.8.4 (Critical), `@babel/plugin-transform-modules-systemjs` 7.29.7, `serialize-javascript` 7.0.5 (RCE)
+- **Backend auth**: hardening z ops-monitor — JWT `iss`/`aud`, security guardrails, upgrade `pip` w Dockerfile (CVE)
 
 ---
 

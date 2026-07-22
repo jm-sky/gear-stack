@@ -36,6 +36,7 @@ export const authEn = {
     enter_new_password: 'Enter your new password',
     login_with_google: 'Continue with Google',
     links: {
+      or: 'Or',
       or_create_account: 'Or create a new account',
       create_new_account: 'Create new account',
       or_sign_in: 'Already have an account?',
@@ -93,6 +94,7 @@ export const authEn = {
       },
       totp: {
         title: 'Authenticator App (TOTP)',
+        tab_label: 'Authenticator',
         description: 'Use an authenticator app like Google Authenticator or Authy',
         setup: 'Set up Authenticator',
         cancel: 'Cancel',
@@ -126,6 +128,7 @@ export const authEn = {
       },
       webauthn: {
         title: 'Passkeys',
+        tab_label: 'Passkeys',
         description: 'Use biometric authentication or security keys',
         register: 'Register Passkey',
         register_title: 'Add New Passkey',
@@ -180,6 +183,7 @@ export const authEn = {
       button: {
         continue_with_google: 'Google',
         continue_with_facebook: 'Facebook',
+        continue_with_github: 'GitHub',
         redirecting: 'Redirecting...',
       },
       or_continue_with: 'Or continue with',

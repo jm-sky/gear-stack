@@ -7,6 +7,8 @@ export interface IItemWithContainer {
   category: string
   containerId: string
   containerName: string
+  containerPath?: string
+  parentItemId?: string
   containerColor: TContainerColor
   quantity: number
   weight: number
@@ -50,10 +52,15 @@ export function createAllItemsColumns(
     },
     {
       id: 'container',
-      accessorKey: 'containerName',
+      accessorKey: 'containerPath',
       header: () => t('gear.allItems.container'),
       enableSorting: true,
       enableHiding: true,
+      sortingFn: (rowA, rowB) => {
+        const pathA = rowA.original.containerPath || rowA.original.containerName
+        const pathB = rowB.original.containerPath || rowB.original.containerName
+        return pathA.localeCompare(pathB)
+      },
     },
     {
       id: 'quantity',

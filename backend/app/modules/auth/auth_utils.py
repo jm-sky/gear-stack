@@ -81,11 +81,14 @@ def create_access_token(
         "tfaMethod": data.get("tfaMethod"),
         "emailVerified": data.get("emailVerified"),
     }
+    if "jti" in data:
+        claims["jti"] = data["jti"]
+    if "tv" in data:
+        claims["tv"] = data["tv"]
     return _encode_token(
         claims,
         token_type="access",
-        expires_delta=expires_delta
-        or timedelta(minutes=settings.security.access_token_expires_minutes),
+        expires_delta=expires_delta or timedelta(minutes=settings.security.access_token_expires_minutes),
     )
 
 
@@ -121,9 +124,9 @@ def verify_token(token: str, expected_type: str | None = None) -> JWTPayload:
             issuer=settings.security.jwt_issuer,
         )
     except jwt.ExpiredSignatureError:
-        raise ExpiredTokenError()
+        raise ExpiredTokenError() from None
     except jwt.InvalidTokenError:
-        raise InvalidTokenError()
+        raise InvalidTokenError() from None
 
     if expected_type is not None and payload.get("type") != expected_type:
         raise InvalidTokenError()
@@ -149,6 +152,10 @@ def create_refresh_token(data: CreateRefreshTokenOptions) -> str:
         "emailVerified": data.get("emailVerified"),
         # NOTE: tid/trol are NOT preserved in refresh token (security)
     }
+    if "jti" in data:
+        claims["jti"] = data["jti"]
+    if "tv" in data:
+        claims["tv"] = data["tv"]
     return _encode_token(
         claims,
         token_type="refresh",
@@ -161,9 +168,7 @@ def create_password_reset_token(data: dict[str, str]) -> str:
     return _encode_token(
         dict(data),
         token_type="password_reset",
-        expires_delta=timedelta(
-            hours=settings.security.password_reset_token_expires_hours
-        ),
+        expires_delta=timedelta(hours=settings.security.password_reset_token_expires_hours),
     )
 
 
@@ -172,7 +177,5 @@ def create_email_verification_token(data: dict[str, str]) -> str:
     return _encode_token(
         dict(data),
         token_type="email_verification",
-        expires_delta=timedelta(
-            hours=settings.security.email_verification_token_expires_hours
-        ),
+        expires_delta=timedelta(hours=settings.security.email_verification_token_expires_hours),
     )

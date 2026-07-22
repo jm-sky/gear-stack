@@ -6,21 +6,33 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Gear Stack is a Vue 3 application for managing survival gear and bug-out bag equipment. The app uses a hybrid architecture with both client-side localStorage and backend API integration for features like authentication, AI assistance, and admin functionality.
 
-## Known Bugs
+## Issues & reviews
 
-A running list of known bugs (with root causes and status) is kept in **[BUGS.md](BUGS.md)**. Check and update it when fixing or reporting issues. Note the recurring V1/V2 gotcha: the `/gear` page renders from TanStack Query (V2 cache), so any mutation done through V1 (`useGear()`) — or through `useGearV2()` without invalidation — must also invalidate the V2 query cache (`gearQueryKeys.all`) and sync the V2 store, otherwise the UI shows stale data.
+- **Open issues (bugs, improvements):** [docs/issues/README.md](docs/issues/README.md) — statuses: `todo`, `planned`, `in progress`, `done`, `verification needed`.
+- **Planned review runs (security, code quality, UX, performance):** [docs/reviews/README.md](docs/reviews/README.md) — one AI session per review file; update status and findings when complete.
+
+## Docs workflow
+
+- **Issues:** [docs/issues/README.md](docs/issues/README.md)
+- **Reviews:** [docs/reviews/README.md](docs/reviews/README.md)
+- **Research:** [docs/research/README.md](docs/research/README.md)
+- **Plans:** [docs/plans/README.md](docs/plans/README.md)
+
+Statuses: `todo`, `planned`, `in progress`, `done`, `verification needed`. New issues: `YYYY-MM-DD--NNN--slug.md`; reviews/research/plans: `YYYY-MM-DD-slug.md`.
+
+V1/V2 gotcha: `/gear` renders from TanStack Query (V2 cache); mutations via V1 or `useGearV2()` without invalidation need `gearQueryKeys.all` invalidation or the UI stays stale.
 
 ## Security / Dependencies
 
-Open GitHub Dependabot alerts and their remediation plan (pnpm `overrides` for transitive deps + a direct `axios` bump) live in **[docs/security-dependabot-remediation.md](docs/security-dependabot-remediation.md)**. This project uses **pnpm**, so force transitive fixes via the `pnpm.overrides` block in `package.json` (not `npm`/`yarn` resolutions). Always re-run `pnpm build` after bumping build-toolchain deps (e.g. `serialize-javascript`) because it regenerates the PWA service worker.
+Open GitHub Dependabot alerts and their remediation plan (pnpm `overrides` for transitive deps + a direct `axios` bump) live in **[docs/plans/security-dependabot-remediation.md](docs/plans/security-dependabot-remediation.md)**. This project uses **pnpm**, so force transitive fixes via the `pnpm.overrides` block in `package.json` (not `npm`/`yarn` resolutions). Always re-run `pnpm build` after bumping build-toolchain deps (e.g. `serialize-javascript`) because it regenerates the PWA service worker.
 
 ## Code Review & Refactor Plan
 
-A full code review (best practices, security, SOLID/DRY) and a phased refactor plan live in **[docs/REVIEW_AND_REFACTOR_PLAN.md](docs/REVIEW_AND_REFACTOR_PLAN.md)**. It also documents the **shared core** copied between this repo and **ops-monitor** (`backend/app/core` + `app/common` + `cli`, and frontend `src/shared` + `src/components/ui`) which has drifted — any change to a shared-core file should be mirrored to ops-monitor. See also **[ops-monitor `docs/SHARED_CORE.md`](../ops-monitor/docs/SHARED_CORE.md)**.
+A full code review (best practices, security, SOLID/DRY) and a phased refactor plan live in **[docs/plans/REVIEW_AND_REFACTOR_PLAN.md](docs/plans/REVIEW_AND_REFACTOR_PLAN.md)**. It also documents the **shared core** copied between this repo and **ops-monitor** (`backend/app/core` + `app/common` + `cli`, and frontend `src/shared` + `src/components/ui`) which has drifted — any change to a shared-core file should be mirrored to ops-monitor. See also **[ops-monitor `docs/SHARED_CORE.md`](../ops-monitor/docs/SHARED_CORE.md)**.
 
 ## V1 → V2 migration
 
-The gear module still has a legacy "V1" data layer (`useGear`, `useGearStore`, `gearContainerService`, ...) running in parallel with the target "V2" unified model (`useGearV2`, `useGearStoreV2`, `useGearQueries`, `gearQueryKeys`). The goal is **V2 everywhere**; legacy is not maintained. New code should use V2. The full inventory, V1→V2 mapping, feature gaps, and recommended migration order live in **[docs/migration-v1-to-v2.md](docs/migration-v1-to-v2.md)**.
+The gear module still has a legacy "V1" data layer (`useGear`, `useGearStore`, `gearContainerService`, ...) running in parallel with the target "V2" unified model (`useGearV2`, `useGearStoreV2`, `useGearQueries`, `gearQueryKeys`). The goal is **V2 everywhere**; legacy is not maintained. New code should use V2. The full inventory, V1→V2 mapping, feature gaps, and recommended migration order live in **[docs/archive/v2-unified-model/migration-v1-to-v2.md](docs/archive/v2-unified-model/migration-v1-to-v2.md)**.
 
 ## Commands
 
@@ -58,13 +70,15 @@ This project uses **pnpm** (version 10.18.3+). Always use `pnpm` instead of `npm
 - If the current working directory starts with `_`, do not execute any `docker` or `docker compose` commands
 
 ```bash
-docker compose -f backend/docker-compose.dev.yml up    # Start backend in development mode
-docker compose -f backend/docker-compose.dev.yml down  # Stop backend
+# From repo root (compose.yaml → docker-compose.dev.yml, name: gear-stack)
+docker compose up -d
+docker compose down
 ```
 
 **Important:**
 - Use `docker compose` (Docker Compose V2 syntax), NOT `docker-compose` (deprecated V1 syntax)
-- In development, the backend typically runs in a Docker container via `docker-compose.dev.yml`. This ensures consistent environment and dependencies. The backend is accessible at `http://localhost:8000` (or the port specified in `VITE_API_PROXY_URL`).
+- Run Compose from the **repo root**, not `backend/`. Project name is set via top-level `name: gear-stack`.
+- In development, the backend typically runs in a Docker container via root `compose.yaml` / `docker-compose.dev.yml`. This ensures consistent environment and dependencies. The backend is accessible at `http://localhost:8000` (or the port specified in `VITE_API_PROXY_URL`).
 - **Auto-reload is enabled** - FastAPI uses WatchFiles to automatically reload when Python files change. No need to restart the container after code changes during development.
 - Only restart the container when changing environment variables (`.env`) or dependencies (`requirements.txt`).
 

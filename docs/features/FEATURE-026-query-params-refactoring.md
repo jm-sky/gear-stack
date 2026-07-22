@@ -3,7 +3,7 @@
 **Status:** 🔄 Planned  
 **Priority:** High  
 **Complexity:** Medium  
-**Related:** [ROADMAP_OFFLINE.md](../ROADMAP_OFFLINE.md#-refaktoryzacja-systemu-query-parametrów-returnto-i-from), [query-params-analysis.md](../analysis/query-params-analysis.md)
+**Related:** [ROADMAP_OFFLINE.md](../ROADMAP_OFFLINE.md#-refaktoryzacja-systemu-query-parametrów-returnto-i-from), [query-params-analysis.md](../research/query-params-analysis.md)
 
 ## 📋 Opis
 
@@ -689,7 +689,7 @@ navigateBack()
 ## 🔗 Powiązane dokumenty
 
 - [ROADMAP_OFFLINE.md](../ROADMAP_OFFLINE.md#-refaktoryzacja-systemu-query-parametrów-returnto-i-from)
-- [query-params-analysis.md](../analysis/query-params-analysis.md)
+- [query-params-analysis.md](../research/query-params-analysis.md)
 - [routes.ts](../../src/modules/gear/routes.ts)
 
 ## 📌 Checklist implementacji

@@ -18,14 +18,16 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
 ### Wysoki priorytet
 
 1. **Bezpieczeństwo aplikacji (Security Hardening)** - 🚧 In Progress
-   - 📍 Plan: [SECURITY_IMPROVEMENT_PLAN.md](./security/SECURITY_IMPROVEMENT_PLAN.md)
-   - 📍 Docker Security: [SECURITY_FIX.md](./SECURITY_FIX.md)
+   - 📍 Plan: [SECURITY_IMPROVEMENT_PLAN.md](./plans/SECURITY_IMPROVEMENT_PLAN.md)
+   - 📍 Docker Security: [SECURITY_FIX.md](./deployment/SECURITY_FIX.md)
    - ✅ **Critical:** Implementacja security headers (CSP, HSTS, X-Frame-Options) - Completed (v2.47.0)
+   - ✅ **Critical:** Item-image IDOR, OAuth session/`jti`/`tv` + 2FA, OAuth CSRF state — Completed (v2.52.0, issues #035–#037)
+   - ✅ **High:** Rate limiting (ostatni hop X-Forwarded-For), admin/users mutation guards, WebAuthn 2FA login verify — Completed (v2.52.0)
    - 📋 **Low:** PostgreSQL SSL/TLS (opcjonalne - Docker network zapewnia izolację)
    - 🔒 **High:** Implementacja WAF (Web Application Firewall)
    - 🔒 **High:** Procedury backup/recovery bazy danych
    - 🔐 **Medium:** Migracja na httpOnly cookies (obecnie localStorage)
-   - 🔐 **Medium:** Implementacja CSRF protection
+   - 🔐 **Medium:** Implementacja CSRF protection (ogólne middleware; OAuth callback state — ✅ v2.52.0)
    - 🛡️ **Medium:** Strict CORS configuration
    - 📋 **Low:** Procedury rotacji sekretów (secrets rotation)
    - 📊 **Low:** Security monitoring & alerting
@@ -93,7 +95,7 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - Status: ✅ Completed | Priority: Medium | Complexity: Small
 
 9. **Unifikacja modeli kontenerów i przedmiotów**
-   - 📍 Analiza: [UNIFIED_MODEL_ANALYSIS.md](./analysis/UNIFIED_MODEL_ANALYSIS.md)
+   - 📍 Analiza: [UNIFIED_MODEL_ANALYSIS.md](./research/UNIFIED_MODEL_ANALYSIS.md)
    - Połączenie modeli `IGearContainer` i `IGearItem` w jeden model `IGearEntity` z flagą `isContainer`
    - Uproszczenie zagnieżdżania (plecak → kubek → pudełko → zapałki) - jeden mechanizm `parentId`
    - Wspólne obrazki dla kontenerów i przedmiotów (jedna tabela `entity_images`)
@@ -159,7 +161,7 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - Status: ✅ Completed | Priority: Medium | Complexity: Small
 
 6. **Ulepszenia inspirowane LighterPack**
-   - 📍 Lokalizacja: [LIGHTERPACK_IMPROVEMENTS_TASKS.md](./comparison/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
+   - 📍 Lokalizacja: [LIGHTERPACK_IMPROVEMENTS_TASKS.md](./research/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
    - 📋 **Tryb prosty** - [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#-tryb-prosty-simple-mode-inspiracja-lighterpack) - toggle w ustawieniach, ukryte zaawansowane funkcje
    - 📋 **Drag & Drop** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-drag--drop---rozszerzenie-inspiracja-lighterpack) - rozszerzenie kolejności przedmiotów + przenoszenie między kontenerami
    - 📋 **System pomocy / Tutorial** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-system-pomocy--tutorial-inspiracja-lighterpack) - ramki z pomocą, przycisk `?`, AI Chat
@@ -171,7 +173,7 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - Status: 🔄 Planned | Priority: Medium | Complexity: Various
 
 7. **Migracja z vue-i18n na Intlayer**
-   - 📍 Plan: [intlayer-migration-plan.md](./intlayer-migration-plan.md)
+   - 📍 Plan: [intlayer-migration-plan.md](./plans/intlayer-migration-plan.md)
    - Pełna migracja z vue-i18n na Intlayer (component-scoped translations)
    - Korzyści: tree-shaking, lazy loading, lepszy TypeScript support, auto-generated types
    - 9 faz implementacji: 221 komponentów, 2401 linii tłumaczeń, 7 modułów

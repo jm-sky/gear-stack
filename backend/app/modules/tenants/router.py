@@ -12,7 +12,6 @@ from app.modules.tenants.schemas import (
     TenantResponse,
 )
 
-
 router = APIRouter(prefix="/tenants", tags=["Tenants"])
 
 

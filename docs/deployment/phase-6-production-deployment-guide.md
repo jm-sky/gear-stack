@@ -823,7 +823,7 @@ git checkout <previous-commit>
 
 **Internal Docs:**
 - [Cancellation Test Guide](../testing/billing-cancellation-test-guide.md)
-- [Performance Recommendations](../optimization/billing-performance-recommendations.md)
+- [Performance Recommendations](../research/billing-performance-recommendations.md)
 - [Phase 5 Summary](../plans/PHASE-5-COMPLETION-SUMMARY.md)
 
 **Support:**

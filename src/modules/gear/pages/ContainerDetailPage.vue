@@ -63,7 +63,7 @@ const { canUseAi } = useAi()
 const { setTitle } = usePageTitle()
 const { unlinkItemFromCatalogue } = useCatalogue()
 
-const containerId = route.params.id as string
+const containerId = computed(() => route.params.id as string)
 
 // Fetch container + children from API when using backend
 const {
@@ -71,7 +71,7 @@ const {
   children: childrenFromAPI,
   isLoading: _isLoadingAPI
 } = useContainerWithChildren(
-  computed(() => shouldUseAPI.value ? containerId : undefined)
+  computed(() => shouldUseAPI.value ? containerId.value : undefined)
 )
 
 // Use API data if available, otherwise fall back to store
@@ -197,10 +197,17 @@ const displayItems = computed<IGearItemV2[]>(() => {
 const pendingSortingChanges = ref<IGearItemV2[]>([])
 const isSavingSorting = ref(false)
 
+// Reset page state when navigating between containers (same route, different :id)
+watch(containerId, () => {
+  pendingSortingChanges.value = []
+  itemToMove.value = null
+  isMoveItemDialogOpen.value = false
+})
+
 // Actions
 const handleEditItem = (item: IGearItemV2) => {
   router.push({
-    path: GearRoutePath.ItemEditById(containerId, item.id),
+    path: GearRoutePath.ItemEditById(containerId.value, item.id),
     query: createNavigationQuery('container'),
   })
 }
@@ -336,7 +343,7 @@ const handleAddNestedContainer = async (nestedContainerId: string) => {
 
     // V2-native nesting: re-parent the existing container under this one by setting
     // its parentItemId. No placeholder item is needed (that was the V1 dual model).
-    await updateItem(nestedContainerId, { parentItemId: containerId })
+    await updateItem(nestedContainerId, { parentItemId: containerId.value })
     toast.success(t('common.success'))
   } catch (error) {
     toast.error(t('common.error'))
@@ -357,7 +364,7 @@ const handleExportToCSV = () => {
 const { handleRecognizeParameters, handleRecognizeParametersAll } = useItemsParamRecognition(container, items)
 
 const handleManageShareTokens = () => {
-  router.push(GearRoutePath.ContainerShareTokensById(containerId))
+  router.push(GearRoutePath.ContainerShareTokensById(containerId.value))
 }
 
 const handleRefresh = async () => {

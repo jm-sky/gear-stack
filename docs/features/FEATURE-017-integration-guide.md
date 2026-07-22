@@ -61,7 +61,7 @@ STORAGE_JPEG_QUALITY=85
 The migration has been run successfully:
 
 ```bash
-docker-compose -f docker-compose.dev.yml exec app python migrations/017_add_item_images_table.py upgrade
+docker-compose -f docker-compose.yml exec app python migrations/017_add_item_images_table.py upgrade
 ```
 
 ### 4. Restart Backend
@@ -69,7 +69,7 @@ docker-compose -f docker-compose.dev.yml exec app python migrations/017_add_item
 Restart the backend to load new dependencies:
 
 ```bash
-docker-compose -f docker-compose.dev.yml restart app
+docker-compose -f docker-compose.yml restart app
 ```
 
 ---
@@ -371,7 +371,7 @@ Authorization: Bearer {token}
 
 3. Check file permissions in container:
    ```bash
-   docker-compose -f docker-compose.dev.yml exec app ls -la /app/uploads
+   docker-compose -f docker-compose.yml exec app ls -la /app/uploads
    ```
 
 ### Upload fails with 403
@@ -383,7 +383,7 @@ Authorization: Bearer {token}
 
 ### Images disappear after container restart
 
-- Ensure Docker volume is properly configured in `docker-compose.dev.yml`:
+- Ensure Docker volume is properly configured in `docker-compose.yml`:
   ```yaml
   volumes:
     - gear_stack_uploads:/app/uploads

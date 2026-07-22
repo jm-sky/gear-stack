@@ -83,7 +83,7 @@ const handleKeydown = (event: KeyboardEvent) => {
       variant="ghost"
       size="sm"
       class="opacity-0 group-hover:opacity-100 transition-opacity size-8 p-0 delay-200"
-      :aria-label="t('gear.actions.edit')"
+      :aria-label="t('gear.container.editName')"
       @click.stop="startEditingName"
     >
       <PencilIcon class="size-4" />

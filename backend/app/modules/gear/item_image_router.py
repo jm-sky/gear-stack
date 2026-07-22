@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.modules.auth.dependencies import PremiumOrHigherUser
+from app.modules.gear.dependencies import OptionalUser
 from app.modules.gear.image_upload_service import ImageUploadService
 from app.modules.gear.item_image_schemas import (
     ImageOrdersUpdate,
@@ -20,9 +21,7 @@ async def upload_item_image(
     item_id: str,
     current_user: PremiumOrHigherUser,
     file: UploadFile = File(...),
-    is_primary: bool = Query(
-        False, description="Whether this should be the primary image"
-    ),
+    is_primary: bool = Query(False, description="Whether this should be the primary image"),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """
@@ -51,20 +50,25 @@ async def upload_item_image(
 
 @router.get("/{item_id}/images", response_model=list[ItemImageResponse])
 async def get_item_images(
-    item_id: str, db: AsyncSession = Depends(get_db)
+    item_id: str,
+    current_user: OptionalUser = None,
+    db: AsyncSession = Depends(get_db),
 ) -> list[ItemImageResponse]:
     """
     Get all images for an item.
 
+    Visible to the owning user, or to anyone if the item's container is public.
+
     Args:
         item_id: Item ID
+        current_user: Current authenticated user, if any
         db: Database session
 
     Returns:
         List of images with URLs
     """
     service = ImageUploadService(db)
-    images = await service.get_item_images(item_id)
+    images = await service.get_item_images(item_id, current_user.id if current_user else None)
     return images
 
 
@@ -89,9 +93,7 @@ async def delete_item_image(
     success = await service.delete_image(image_id, current_user.id)
 
     if not success:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Image not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image not found")
 
     return {"message": "Image deleted successfully"}
 
@@ -117,7 +119,7 @@ async def reorder_item_images(
     """
     service = ImageUploadService(db)
     image_orders = [{"id": item.id, "order": item.order} for item in data.image_orders]
-    await service.reorder_images(item_id, image_orders)
+    await service.reorder_images(item_id, image_orders, current_user.id)
     return {"message": "Images reordered successfully"}
 
 
@@ -141,7 +143,7 @@ async def toggle_primary_image(
         Success message with is_primary status
     """
     service = ImageUploadService(db)
-    is_primary = await service.toggle_primary_image(item_id, image_id)
+    is_primary = await service.toggle_primary_image(item_id, image_id, current_user.id)
     return {
         "message": "Primary image toggled successfully",
         "is_primary": is_primary,
@@ -168,7 +170,5 @@ async def upload_item_image_from_url(
         Image metadata
     """
     service = ImageUploadService(db)
-    result = await service.upload_image_from_url(
-        data.url, item_id, current_user.id, data.is_primary, data.host_locally
-    )
+    result = await service.upload_image_from_url(data.url, item_id, current_user.id, data.is_primary, data.host_locally)
     return result
