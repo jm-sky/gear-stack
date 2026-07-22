@@ -1,8 +1,8 @@
 # Po dodaniu przedmiotu lista w kontenerze się nie odświeża
 
-**Status:** `todo`  
+**Status:** `done`  
 **Created:** 2026-07-05  
-**Updated:** 2026-07-06  
+**Updated:** 2026-07-22  
 **Related:** V1→V2 migration ([migration-v1-to-v2.md](../archive/v2-unified-model/migration-v1-to-v2.md))
 
 **Strona:** `/gear/:id` (szczegóły kontenera) → `/gear/:id/items/new` → zapis nowego przedmiotu
@@ -27,6 +27,11 @@ Po `createItem` inwalidować cache V2
 (`queryClient.invalidateQueries({ queryKey: gearQueryKeys.all })`) albo użyć
 `useGearMutations().createItem()` (jak w innych miejscach na stronie kontenera — komentarz
 w `ContainerDetailPage.vue` wskazuje, że mutacje z tego composable same inwalidują cache).
+
+## Fix (2026-07-22)
+
+`ItemFormPage.vue` przełączony na `useGearMutations()` dla `createItem` / `updateItem`
+(automatyczna inwalidacja `gearQueryKeys.all` po mutacji).
 
 ## Pliki
 
