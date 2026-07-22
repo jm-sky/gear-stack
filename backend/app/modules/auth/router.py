@@ -62,7 +62,7 @@ try:
 
     type LoginResponseType = LoginResponse | TwoFactorRequiredResponse
 except ImportError:
-    type LoginResponseType = LoginResponse  # type: ignore[misc, no-redef]
+    type LoginResponseType = LoginResponse  # type: ignore[no-redef]
 
 # Create router
 router = APIRouter()
