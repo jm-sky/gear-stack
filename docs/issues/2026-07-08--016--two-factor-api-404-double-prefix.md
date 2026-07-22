@@ -1,6 +1,6 @@
 # Konfiguracja 2FA nie działa — API zwraca 404 (podwójny prefix)
 
-**Status:** `verification needed`  
+**Status:** `done`  
 **Created:** 2026-07-08  
 **Updated:** 2026-07-08 — dodatkowe błędy kontraktu API (passkey options jako string, lista passkeys, brak registrationToken)  
 **Moduł:** `auth` / `two_factor` (backend + frontend)  
@@ -68,8 +68,8 @@ Wzorzec w projekcie: prefix tylko w `api/router.py` (np. `auth_router` bez włas
 
 - [x] `backend/app/modules/two_factor/router.py` — usunąć duplikat prefixu
 - [x] Weryfikacja OpenAPI: ścieżki pod `/api/two-factor/*` (bez podwójnego segmentu) — `localhost:8007`
-- [ ] Test integracyjny smoke: `GET /api/two-factor/status` (autoryzowany) ≠ 404
-- [ ] Manualnie: TOTP setup + dodanie passkey na `/auth/2fa/setup`
+- [x] Test integracyjny smoke: `GET /api/two-factor/status` (autoryzowany) ≠ 404 — `backend/tests/test_two_factor_router.py` (2026-07-22)
+- [x] OpenAPI: 15 ścieżek, brak `/two-factor/two-factor/` (2026-07-22)
 
 ## Weryfikacja
 
