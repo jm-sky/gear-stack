@@ -28,8 +28,8 @@ async def table_exists(conn, table_name: str) -> bool:
     result = await conn.execute(
         text("""
             SELECT EXISTS (
-                SELECT FROM information_schema.tables 
-                WHERE table_schema = 'public' 
+                SELECT FROM information_schema.tables
+                WHERE table_schema = 'public'
                 AND table_name = :table_name
             );
         """),
@@ -55,27 +55,27 @@ async def upgrade() -> None:
             print("gear_containers table exists, adding missing fields...")
             # Add fields to gear_containers
             await conn.execute(text("""
-                ALTER TABLE gear_containers 
+                ALTER TABLE gear_containers
                 ADD COLUMN IF NOT EXISTS hide_when_nested BOOLEAN DEFAULT FALSE;
             """))
             await conn.execute(text("""
-                ALTER TABLE gear_containers 
+                ALTER TABLE gear_containers
                 ADD COLUMN IF NOT EXISTS weight FLOAT;
             """))
             await conn.execute(text("""
-                ALTER TABLE gear_containers 
+                ALTER TABLE gear_containers
                 ADD COLUMN IF NOT EXISTS weight_unit VARCHAR(5);
             """))
             await conn.execute(text("""
-                ALTER TABLE gear_containers 
+                ALTER TABLE gear_containers
                 ADD COLUMN IF NOT EXISTS max_weight FLOAT;
             """))
             await conn.execute(text("""
-                ALTER TABLE gear_containers 
+                ALTER TABLE gear_containers
                 ADD COLUMN IF NOT EXISTS max_weight_unit VARCHAR(5);
             """))
             await conn.execute(text("""
-                ALTER TABLE gear_containers 
+                ALTER TABLE gear_containers
                 ADD COLUMN IF NOT EXISTS url TEXT;
             """))
 
@@ -87,15 +87,15 @@ async def upgrade() -> None:
             print("gear_items table exists, adding missing fields...")
             # Add fields to gear_items
             await conn.execute(text("""
-                ALTER TABLE gear_items 
+                ALTER TABLE gear_items
                 ADD COLUMN IF NOT EXISTS linked_item_id VARCHAR(36);
             """))
             await conn.execute(text("""
-                ALTER TABLE gear_items 
+                ALTER TABLE gear_items
                 ADD COLUMN IF NOT EXISTS wearable BOOLEAN DEFAULT FALSE;
             """))
             await conn.execute(text("""
-                ALTER TABLE gear_items 
+                ALTER TABLE gear_items
                 ADD COLUMN IF NOT EXISTS consumable BOOLEAN DEFAULT FALSE;
             """))
 
@@ -105,9 +105,9 @@ async def upgrade() -> None:
             try:
                 result = await conn.execute(text("""
                         SELECT EXISTS (
-                            SELECT 1 FROM information_schema.table_constraints 
-                            WHERE constraint_schema = 'public' 
-                            AND table_name = 'gear_items' 
+                            SELECT 1 FROM information_schema.table_constraints
+                            WHERE constraint_schema = 'public'
+                            AND table_name = 'gear_items'
                             AND constraint_name = 'fk_gear_items_linked_item_id'
                         );
                     """))
@@ -115,8 +115,8 @@ async def upgrade() -> None:
 
                 if not constraint_exists:
                     await conn.execute(text("""
-                        ALTER TABLE gear_items 
-                        ADD CONSTRAINT fk_gear_items_linked_item_id 
+                        ALTER TABLE gear_items
+                        ADD CONSTRAINT fk_gear_items_linked_item_id
                         FOREIGN KEY (linked_item_id) REFERENCES gear_items(id) ON DELETE SET NULL;
                     """))
                     print("✓ Added foreign key constraint for linked_item_id")
@@ -136,7 +136,7 @@ async def downgrade() -> None:
         # Remove foreign key first
         try:
             await conn.execute(text("""
-                ALTER TABLE gear_items 
+                ALTER TABLE gear_items
                 DROP CONSTRAINT IF EXISTS fk_gear_items_linked_item_id;
             """))
         except Exception:
@@ -144,41 +144,41 @@ async def downgrade() -> None:
 
         # Remove fields from gear_items
         await conn.execute(text("""
-            ALTER TABLE gear_items 
+            ALTER TABLE gear_items
             DROP COLUMN IF EXISTS consumable;
         """))
         await conn.execute(text("""
-            ALTER TABLE gear_items 
+            ALTER TABLE gear_items
             DROP COLUMN IF EXISTS wearable;
         """))
         await conn.execute(text("""
-            ALTER TABLE gear_items 
+            ALTER TABLE gear_items
             DROP COLUMN IF EXISTS linked_item_id;
         """))
 
         # Remove fields from gear_containers
         await conn.execute(text("""
-            ALTER TABLE gear_containers 
+            ALTER TABLE gear_containers
             DROP COLUMN IF EXISTS url;
         """))
         await conn.execute(text("""
-            ALTER TABLE gear_containers 
+            ALTER TABLE gear_containers
             DROP COLUMN IF EXISTS max_weight_unit;
         """))
         await conn.execute(text("""
-            ALTER TABLE gear_containers 
+            ALTER TABLE gear_containers
             DROP COLUMN IF EXISTS max_weight;
         """))
         await conn.execute(text("""
-            ALTER TABLE gear_containers 
+            ALTER TABLE gear_containers
             DROP COLUMN IF EXISTS weight_unit;
         """))
         await conn.execute(text("""
-            ALTER TABLE gear_containers 
+            ALTER TABLE gear_containers
             DROP COLUMN IF EXISTS weight;
         """))
         await conn.execute(text("""
-            ALTER TABLE gear_containers 
+            ALTER TABLE gear_containers
             DROP COLUMN IF EXISTS hide_when_nested;
         """))
 

@@ -70,13 +70,13 @@ async def get_subscription(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Subscription not found",
-        )
+        ) from None
     except BillingException as e:
         logger.error(f"Failed to get subscription: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve subscription",
-        )
+        ) from None
 
 
 @router.post(
@@ -110,14 +110,6 @@ async def create_checkout_session(
                 detail="User not found",
             )
 
-        # Update Stripe client with user email
-        from .stripe_client import StripeClient
-
-        stripe_client = StripeClient(
-            api_key=settings.stripe.secret_key,
-            webhook_secret=settings.stripe.webhook_secret,
-        )
-
         # Create customer with email if needed
         session = await billing_service.create_checkout_session(
             user_id=current_user.id,
@@ -132,29 +124,29 @@ async def create_checkout_session(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
-        )
+        ) from None
     except InvalidBillingIntervalError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
-        )
+        ) from None
     except SubscriptionAlreadyExistsError as e:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=str(e),
-        )
+        ) from None
     except StripeAPIError as e:
         logger.error(f"Stripe API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Failed to create checkout session",
-        )
+        ) from None
     except BillingException as e:
         logger.error(f"Failed to create checkout session: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create checkout session",
-        )
+        ) from None
 
 
 @router.post(
@@ -187,29 +179,29 @@ async def create_portal_session(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Subscription not found",
-        )
+        ) from None
     except StripeCustomerNotFoundError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Stripe customer not found",
-        )
+        ) from None
     except CannotDowngradeGrandfatheredError as e:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=str(e),
-        )
+        ) from None
     except StripeAPIError as e:
         logger.error(f"Stripe API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Failed to create portal session",
-        )
+        ) from None
     except BillingException as e:
         logger.error(f"Failed to create portal session: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create portal session",
-        )
+        ) from None
 
 
 @router.post(
@@ -235,29 +227,29 @@ async def cancel_subscription(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Subscription not found",
-        )
+        ) from None
     except StripeSubscriptionNotFoundError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Stripe subscription not found",
-        )
+        ) from None
     except CannotDowngradeGrandfatheredError as e:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=str(e),
-        )
+        ) from None
     except StripeAPIError as e:
         logger.error(f"Stripe API error: {e}")
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Failed to cancel subscription",
-        )
+        ) from None
     except BillingException as e:
         logger.error(f"Failed to cancel subscription: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to cancel subscription",
-        )
+        ) from None
 
 
 @router.put(
@@ -301,7 +293,7 @@ async def update_openrouter_token(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to update OpenRouter token",
-        )
+        ) from None
 
 
 @router.get(
@@ -327,13 +319,13 @@ async def get_subscription_limits(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Subscription not found",
-        )
+        ) from None
     except BillingException as e:
         logger.error(f"Failed to get subscription limits: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve subscription limits",
-        )
+        ) from None
 
 
 @router.post(
@@ -417,7 +409,7 @@ async def stripe_webhook(
                 if webhook_event:
                     await repository.mark_webhook_event_failed(webhook_event.id, str(e))
 
-                raise WebhookProcessingError(f"Failed to process webhook: {e}")
+                raise WebhookProcessingError(f"Failed to process webhook: {e}") from e
         else:
             logger.info(f"No handler for webhook event: {event.type}")
 
@@ -427,25 +419,25 @@ async def stripe_webhook(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid webhook signature",
-        )
+        ) from None
     except WebhookProcessingError as e:
         logger.error(f"Webhook processing error: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to process webhook",
-        )
+        ) from None
     except stripe.error.SignatureVerificationError as e:
         logger.error(f"Stripe signature verification error: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid webhook signature: {str(e)}",
-        )
+        ) from None
     except Exception as e:
         logger.error(f"Unexpected webhook error: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Webhook processing failed",
-        )
+        ) from None
 
 
 # ---------------------------------------------------------
@@ -481,7 +473,7 @@ async def get_all_subscriptions(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve subscriptions",
-        )
+        ) from None
 
 
 @router.get(
@@ -510,7 +502,7 @@ async def get_subscription_stats(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve statistics",
-        )
+        ) from None
 
 
 @router.patch(
@@ -552,18 +544,18 @@ async def admin_update_subscription(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Subscription not found",
-        )
+        ) from None
     except InvalidPlanTierError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
-        )
+        ) from None
     except BillingException as e:
         logger.error(f"Failed to update subscription: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to update subscription",
-        )
+        ) from None
 
 
 @router.post(
@@ -609,22 +601,22 @@ async def admin_cancel_subscription(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e),
-        )
+        ) from None
     except ValueError as e:
         logger.error(f"Invalid subscription ID format: {subscription_id}, error: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid subscription ID format: {subscription_id}",
-        )
+        ) from None
     except StripeAPIError as e:
         logger.error(f"Stripe API error while canceling subscription: {e}")
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Failed to cancel Stripe subscription",
-        )
+        ) from None
     except BillingException as e:
         logger.error(f"Failed to cancel subscription: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to cancel subscription",
-        )
+        ) from None

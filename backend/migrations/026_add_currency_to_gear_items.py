@@ -33,8 +33,8 @@ async def table_exists(conn, table_name: str) -> bool:
     result = await conn.execute(
         text("""
             SELECT EXISTS (
-                SELECT FROM information_schema.tables 
-                WHERE table_schema = 'public' 
+                SELECT FROM information_schema.tables
+                WHERE table_schema = 'public'
                 AND table_name = :table_name
             );
         """),
@@ -57,9 +57,9 @@ async def column_exists(conn, table_name: str, column_name: str) -> bool:
     result = await conn.execute(
         text("""
             SELECT EXISTS (
-                SELECT FROM information_schema.columns 
-                WHERE table_schema = 'public' 
-                AND table_name = :table_name 
+                SELECT FROM information_schema.columns
+                WHERE table_schema = 'public'
+                AND table_name = :table_name
                 AND column_name = :column_name
             );
         """),
@@ -89,7 +89,7 @@ async def upgrade() -> None:
         print("gear_items table exists, adding currency field...")
         # Add currency field to gear_items
         await conn.execute(text("""
-                ALTER TABLE gear_items 
+                ALTER TABLE gear_items
                 ADD COLUMN currency VARCHAR(10);
             """))
         print("✓ Added currency field to gear_items table")
@@ -117,7 +117,7 @@ async def downgrade() -> None:
         print("gear_items table exists, removing currency field...")
         # Remove currency field from gear_items
         await conn.execute(text("""
-                ALTER TABLE gear_items 
+                ALTER TABLE gear_items
                 DROP COLUMN currency;
             """))
         print("✓ Removed currency field from gear_items table")

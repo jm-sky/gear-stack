@@ -26,8 +26,8 @@ async def table_exists(conn, table_name: str) -> bool:
     result = await conn.execute(
         text("""
             SELECT EXISTS (
-                SELECT FROM information_schema.tables 
-                WHERE table_schema = 'public' 
+                SELECT FROM information_schema.tables
+                WHERE table_schema = 'public'
                 AND table_name = :table_name
             );
         """),
@@ -41,8 +41,8 @@ async def column_exists(conn, table_name: str, column_name: str) -> bool:
     result = await conn.execute(
         text("""
             SELECT EXISTS (
-                SELECT FROM information_schema.columns 
-                WHERE table_schema = 'public' 
+                SELECT FROM information_schema.columns
+                WHERE table_schema = 'public'
                 AND table_name = :table_name
                 AND column_name = :column_name
             );
@@ -65,7 +65,7 @@ async def upgrade() -> None:
             if not is_public_profile_exists:
                 print("Adding is_public_profile column to user_settings...")
                 await conn.execute(text("""
-                        ALTER TABLE user_settings 
+                        ALTER TABLE user_settings
                         ADD COLUMN is_public_profile BOOLEAN DEFAULT FALSE NOT NULL;
                     """))
                 print("✓ Added is_public_profile column to user_settings")
@@ -77,7 +77,7 @@ async def upgrade() -> None:
             if not is_public_email_exists:
                 print("Adding is_public_email column to user_settings...")
                 await conn.execute(text("""
-                        ALTER TABLE user_settings 
+                        ALTER TABLE user_settings
                         ADD COLUMN is_public_email BOOLEAN DEFAULT FALSE NOT NULL;
                     """))
                 print("✓ Added is_public_email column to user_settings")
@@ -101,7 +101,7 @@ async def downgrade() -> None:
             is_public_profile_exists = await column_exists(conn, "user_settings", "is_public_profile")
             if is_public_profile_exists:
                 await conn.execute(text("""
-                        ALTER TABLE user_settings 
+                        ALTER TABLE user_settings
                         DROP COLUMN IF EXISTS is_public_profile;
                     """))
                 print("✓ Removed is_public_profile column from user_settings")
@@ -112,7 +112,7 @@ async def downgrade() -> None:
             is_public_email_exists = await column_exists(conn, "user_settings", "is_public_email")
             if is_public_email_exists:
                 await conn.execute(text("""
-                        ALTER TABLE user_settings 
+                        ALTER TABLE user_settings
                         DROP COLUMN IF EXISTS is_public_email;
                     """))
                 print("✓ Removed is_public_email column from user_settings")

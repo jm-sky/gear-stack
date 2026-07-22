@@ -26,8 +26,8 @@ async def table_exists(conn, table_name: str) -> bool:
     result = await conn.execute(
         text("""
             SELECT EXISTS (
-                SELECT FROM information_schema.tables 
-                WHERE table_schema = 'public' 
+                SELECT FROM information_schema.tables
+                WHERE table_schema = 'public'
                 AND table_name = :table_name
             );
         """),
@@ -41,8 +41,8 @@ async def column_exists(conn, table_name: str, column_name: str) -> bool:
     result = await conn.execute(
         text("""
             SELECT EXISTS (
-                SELECT FROM information_schema.columns 
-                WHERE table_schema = 'public' 
+                SELECT FROM information_schema.columns
+                WHERE table_schema = 'public'
                 AND table_name = :table_name
                 AND column_name = :column_name
             );
@@ -64,12 +64,12 @@ async def upgrade() -> None:
             if not is_public_exists:
                 print("Adding is_public column to gear_containers...")
                 await conn.execute(text("""
-                    ALTER TABLE gear_containers 
+                    ALTER TABLE gear_containers
                     ADD COLUMN is_public BOOLEAN DEFAULT FALSE NOT NULL;
                 """))
                 # Create index for better query performance
                 await conn.execute(text("""
-                    CREATE INDEX IF NOT EXISTS ix_gear_containers_is_public 
+                    CREATE INDEX IF NOT EXISTS ix_gear_containers_is_public
                     ON gear_containers(is_public);
                 """))
                 print("✓ Added is_public column to gear_containers")
@@ -85,7 +85,7 @@ async def upgrade() -> None:
             if not default_public_exists:
                 print("Adding default_containers_public column to user_settings...")
                 await conn.execute(text("""
-                    ALTER TABLE user_settings 
+                    ALTER TABLE user_settings
                     ADD COLUMN default_containers_public BOOLEAN DEFAULT FALSE NOT NULL;
                 """))
                 print("✓ Added default_containers_public column to user_settings")
@@ -113,7 +113,7 @@ async def downgrade() -> None:
                 """))
                 # Drop column
                 await conn.execute(text("""
-                    ALTER TABLE gear_containers 
+                    ALTER TABLE gear_containers
                     DROP COLUMN IF EXISTS is_public;
                 """))
                 print("✓ Removed is_public column from gear_containers")
@@ -126,7 +126,7 @@ async def downgrade() -> None:
             default_public_exists = await column_exists(conn, "user_settings", "default_containers_public")
             if default_public_exists:
                 await conn.execute(text("""
-                    ALTER TABLE user_settings 
+                    ALTER TABLE user_settings
                     DROP COLUMN IF EXISTS default_containers_public;
                 """))
                 print("✓ Removed default_containers_public column from user_settings")

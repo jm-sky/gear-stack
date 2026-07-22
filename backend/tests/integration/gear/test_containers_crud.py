@@ -367,8 +367,8 @@ class TestContainerNesting:
         """Test retrieving nested containers structure."""
         # Arrange
         parent = await create_test_container(gear_service, test_user.id, "Backpack")
-        child1 = await create_test_container(gear_service, test_user.id, "Pouch 1", parent_id=parent["id"])
-        child2 = await create_test_container(gear_service, test_user.id, "Pouch 2", parent_id=parent["id"])
+        _child1 = await create_test_container(gear_service, test_user.id, "Pouch 1", parent_id=parent["id"])
+        _child2 = await create_test_container(gear_service, test_user.id, "Pouch 2", parent_id=parent["id"])
 
         # Act
         parent_container = await gear_service.get_container(parent["id"], test_user.id)
@@ -387,7 +387,7 @@ class TestContainerNesting:
         """Test that deleting parent container with children fails (FK constraint prevents deletion)."""
         # Arrange
         parent = await create_test_container(gear_service, test_user.id, "Parent")
-        child = await create_test_container(gear_service, test_user.id, "Child", parent_id=parent["id"])
+        _child = await create_test_container(gear_service, test_user.id, "Child", parent_id=parent["id"])
 
         # Act & Assert
         # Current FK constraint prevents deletion of parent with children

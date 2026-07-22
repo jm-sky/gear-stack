@@ -162,7 +162,7 @@ class TestItemNestedContainerReference:
         """
         # Arrange
         main_backpack = await create_test_container(gear_service, test_user.id, "Main Backpack")
-        small_backpack = await create_test_container(gear_service, test_user.id, "Small Backpack")
+        _small_backpack = await create_test_container(gear_service, test_user.id, "Small Backpack")
 
         # Act - Try to create item with nested container reference
         # Note: ItemCreate doesn't have nestedContainerId field

@@ -1253,7 +1253,7 @@ class GearService:
 
         # Copy each image
         # Note: Item was already committed by create_item(), so it exists in the database
-        for idx, catalogue_image in enumerate(catalogue_images):
+        for catalogue_image in catalogue_images:
             # Store catalogue_image attributes before try block to avoid accessing expired object in except
             catalogue_image_id = catalogue_image.id
             catalogue_image_file_path = catalogue_image.file_path
@@ -1876,9 +1876,6 @@ class GearService:
             catalogue_item_id: Target catalogue item ID
             user_id: User ID (for image ownership)
         """
-        from app.modules.gear.catalogue_item_image_repository import (
-            CatalogueItemImageRepository,
-        )
         from app.modules.gear.item_image_repository import ItemImageRepository
 
         # Get item images
@@ -1889,7 +1886,6 @@ class GearService:
             return
 
         # Copy images to catalogue
-        catalogue_image_repo = CatalogueItemImageRepository(self.repository.db)
         for idx, item_image in enumerate(item_images):
             # Download image from storage
             image_data = await self._storage.download(item_image.file_path)

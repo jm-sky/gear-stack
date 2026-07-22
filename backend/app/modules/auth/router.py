@@ -15,21 +15,15 @@ To disable rate limiting (NOT recommended):
 """
 
 import logging
-from typing import TYPE_CHECKING, Annotated, TypeAlias
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_db
-from app.core.email.i18n import determine_email_locale, get_translations
-
-logger = logging.getLogger(__name__)
-
-if TYPE_CHECKING:
-    pass
-
 from app.core.auth.dependencies import get_token_blacklist_service
 from app.core.auth.token_blacklist import TokenBlacklistService
+from app.core.database import get_db
+from app.core.email.i18n import determine_email_locale, get_translations
 
 from .auth_utils import verify_token
 from .decorators import rate_limit, recaptcha_protected
@@ -60,13 +54,15 @@ from .schemas import (
     UserResponse,
 )
 
+logger = logging.getLogger(__name__)
+
 # Import 2FA response type if available for union type
 try:
     from app.modules.two_factor.schemas import TwoFactorRequiredResponse
 
-    LoginResponseType: TypeAlias = LoginResponse | TwoFactorRequiredResponse
+    type LoginResponseType = LoginResponse | TwoFactorRequiredResponse
 except ImportError:
-    LoginResponseType: TypeAlias = LoginResponse  # type: ignore[misc, no-redef]
+    type LoginResponseType = LoginResponse  # type: ignore[misc, no-redef]
 
 # Create router
 router = APIRouter()
@@ -114,7 +110,7 @@ async def register(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="User with this email already exists",
-        )
+        ) from None
 
 
 @router.post(
@@ -157,7 +153,7 @@ async def login(credentials: UserLogin, auth_service: AuthServiceDep, request: R
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=str(e),
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from None
 
 
 @router.post(
@@ -183,7 +179,7 @@ async def refresh_token(token_data: TokenRefresh, auth_service: AuthServiceDep, 
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=str(e),
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from None
 
 
 @router.post(
@@ -302,7 +298,7 @@ async def reset_password(request_data: ResetPasswordRequest, auth_service: AuthS
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid or expired reset token",
-        )
+        ) from None
 
 
 @router.post(
@@ -349,9 +345,9 @@ async def change_password(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Current password is incorrect",
-        )
+        ) from None
     except UserNotFoundError:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found") from None
 
 
 @router.get(
@@ -412,7 +408,7 @@ async def verify_email(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid or expired verification token",
-        )
+        ) from None
 
 
 @router.post(
@@ -514,9 +510,9 @@ async def delete_account(
             logger.info(f"Token blacklisted after account deletion: user_id={current_user.id}")
         return MessageResponse(message="Account has been deleted successfully")
     except InvalidCredentialsError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from None
     except UserNotFoundError:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found") from None
 
 
 # OAuth Endpoints
@@ -607,7 +603,7 @@ async def oauth_callback(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"OAuth authentication failed: {str(e)}",
-        )
+        ) from None
 
 
 @router.get(

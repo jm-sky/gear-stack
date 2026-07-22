@@ -25,8 +25,8 @@ async def table_exists(conn, table_name: str) -> bool:
     result = await conn.execute(
         text("""
             SELECT EXISTS (
-                SELECT FROM information_schema.tables 
-                WHERE table_schema = 'public' 
+                SELECT FROM information_schema.tables
+                WHERE table_schema = 'public'
                 AND table_name = :table_name
             );
         """),
@@ -50,30 +50,30 @@ async def upgrade() -> None:
                         user_id VARCHAR(36) NOT NULL,
                         expires_at TIMESTAMP WITH TIME ZONE,
                         created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'UTC'),
-                        CONSTRAINT fk_container_share_tokens_container 
-                            FOREIGN KEY (container_id) 
-                            REFERENCES gear_containers(id) 
+                        CONSTRAINT fk_container_share_tokens_container
+                            FOREIGN KEY (container_id)
+                            REFERENCES gear_containers(id)
                             ON DELETE CASCADE,
-                        CONSTRAINT fk_container_share_tokens_user 
-                            FOREIGN KEY (user_id) 
+                        CONSTRAINT fk_container_share_tokens_user
+                            FOREIGN KEY (user_id)
                             REFERENCES users(id)
                     );
                 """))
             # Create indexes for better query performance
             await conn.execute(text("""
-                    CREATE INDEX IF NOT EXISTS ix_container_share_tokens_token 
+                    CREATE INDEX IF NOT EXISTS ix_container_share_tokens_token
                     ON container_share_tokens(token);
                 """))
             await conn.execute(text("""
-                    CREATE INDEX IF NOT EXISTS ix_container_share_tokens_container_id 
+                    CREATE INDEX IF NOT EXISTS ix_container_share_tokens_container_id
                     ON container_share_tokens(container_id);
                 """))
             await conn.execute(text("""
-                    CREATE INDEX IF NOT EXISTS ix_container_share_tokens_user_id 
+                    CREATE INDEX IF NOT EXISTS ix_container_share_tokens_user_id
                     ON container_share_tokens(user_id);
                 """))
             await conn.execute(text("""
-                    CREATE INDEX IF NOT EXISTS ix_container_share_tokens_expires_at 
+                    CREATE INDEX IF NOT EXISTS ix_container_share_tokens_expires_at
                     ON container_share_tokens(expires_at);
                 """))
             print("✓ Created container_share_tokens table")

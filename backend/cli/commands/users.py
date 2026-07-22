@@ -111,7 +111,7 @@ async def _users_create_async(
         is_admin, is_owner, is_premium = _resolve_role_flags(role, admin, owner, premium)
     except ValueError as e:
         console.print(f"\n[red]Error:[/red] {e}\n")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
     # Get user details interactively if not provided
     email_value = await _get_email(console, email, no_input)
@@ -152,7 +152,7 @@ async def _users_create_async(
 
     except Exception as e:
         console.print(f"\n[red]Error creating user:[/red] {e}\n")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 async def _get_email(console: Any, email: str | None, no_input: bool) -> str:
@@ -528,7 +528,7 @@ async def _users_list_async(
 
     except Exception as e:
         console.print(f"\n[red]Error listing users:[/red] {e}\n")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 async def _get_users_from_db(detailed: bool = False) -> list[dict[str, Any]]:
@@ -690,7 +690,7 @@ async def _users_delete_async(identifier: str | None, yes: bool, hard: bool) -> 
 
     except Exception as e:
         console.print(f"\n[red]Error deleting user:[/red] {e}\n")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 async def _find_user(identifier: str) -> dict[str, Any] | None:
@@ -821,7 +821,7 @@ async def _users_change_password_async(identifier: str | None, password: str | N
 
     except Exception as e:
         console.print(f"\n[red]Error changing password:[/red] {e}\n")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 async def _change_password_in_db(user_id: str, new_password: str) -> None:
@@ -917,7 +917,7 @@ async def _users_toggle_admin_async(identifier: str | None, yes: bool) -> None:
 
     except Exception as e:
         console.print(f"\n[red]Error toggling admin status:[/red] {e}\n")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 async def _toggle_admin_in_db(user_id: str, is_admin: bool) -> None:
@@ -1018,7 +1018,7 @@ async def _users_toggle_owner_async(identifier: str | None, yes: bool) -> None:
 
     except Exception as e:
         console.print(f"\n[red]Error toggling owner status:[/red] {e}\n")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 async def _toggle_owner_in_db(user_id: str, is_owner: bool) -> None:
@@ -1180,7 +1180,7 @@ async def _users_set_role_async(identifier: str | None, role: str | None, yes: b
 
     except Exception as e:
         console.print(f"\n[red]Error setting user role:[/red] {e}\n")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 async def _set_role_in_db(user_id: str, is_admin: bool, is_owner: bool, is_premium: bool) -> None:
@@ -1371,7 +1371,7 @@ async def _users_verify_email_async(
 
     except Exception as e:
         console.print(f"\n[red]Error managing email verification:[/red] {e}\n")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 async def _generate_email_verification_link(user_id: str) -> tuple[str, dict[str, Any]]:

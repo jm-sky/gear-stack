@@ -4,15 +4,13 @@ Helper functions for common repository operations using composition over inherit
 These functions can be used by any repository without requiring base class inheritance.
 """
 
-from typing import Any, TypeVar
+from typing import Any
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-T = TypeVar("T")
 
-
-async def get_by_id(session: AsyncSession, model: type[T], id: str) -> T | None:
+async def get_by_id[T](session: AsyncSession, model: type[T], id: str) -> T | None:
     """Get entity by ID.
 
     Args:
@@ -29,7 +27,7 @@ async def get_by_id(session: AsyncSession, model: type[T], id: str) -> T | None:
     return result.scalar_one_or_none()
 
 
-async def count_all(session: AsyncSession, model: type[T]) -> int:
+async def count_all[T](session: AsyncSession, model: type[T]) -> int:
     """Count all entities of given model.
 
     Args:
@@ -43,7 +41,7 @@ async def count_all(session: AsyncSession, model: type[T]) -> int:
     return result.scalar_one()
 
 
-async def exists_by_field(session: AsyncSession, model: type[T], field_name: str, value: Any) -> bool:
+async def exists_by_field[T](session: AsyncSession, model: type[T], field_name: str, value: Any) -> bool:
     """Check if entity exists with given field value.
 
     Args:

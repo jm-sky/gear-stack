@@ -150,8 +150,8 @@ class CatalogueItemImageRepository:
         """
         stmt = select(CatalogueItemImageDB).where(
             CatalogueItemImageDB.catalogue_item_id == catalogue_item_id,
-            CatalogueItemImageDB.is_primary == True,
-        )  # noqa: E712
+            CatalogueItemImageDB.is_primary.is_(True),
+        )
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -169,8 +169,8 @@ class CatalogueItemImageRepository:
             return {}
         stmt = select(CatalogueItemImageDB).where(
             CatalogueItemImageDB.catalogue_item_id.in_(catalogue_item_ids),
-            CatalogueItemImageDB.is_primary == True,
-        )  # noqa: E712
+            CatalogueItemImageDB.is_primary.is_(True),
+        )
         result = await self.db.execute(stmt)
         images = result.scalars().all()
         return {img.catalogue_item_id: img for img in images}

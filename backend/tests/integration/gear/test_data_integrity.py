@@ -62,7 +62,7 @@ class TestCascadeDeletion:
         """
         # Arrange
         parent = await create_test_container(gear_service, test_user.id, "Parent")
-        child = await create_test_container(gear_service, test_user.id, "Child", parent_id=parent["id"])
+        _child = await create_test_container(gear_service, test_user.id, "Child", parent_id=parent["id"])
 
         # Act & Assert
         with pytest.raises(IntegrityError):
@@ -83,8 +83,8 @@ class TestCascadeDeletion:
         """
         # Arrange
         parent = await create_test_container(gear_service, test_user.id, "Parent")
-        child1 = await create_test_container(gear_service, test_user.id, "Child 1", parent_id=parent["id"])
-        child2 = await create_test_container(gear_service, test_user.id, "Child 2", parent_id=parent["id"])
+        _child1 = await create_test_container(gear_service, test_user.id, "Child 1", parent_id=parent["id"])
+        _child2 = await create_test_container(gear_service, test_user.id, "Child 2", parent_id=parent["id"])
 
         # Act - delete_all_containers may encounter FK constraint issues
         # depending on deletion order
@@ -392,8 +392,8 @@ class TestBulkOperations:
         but this documents expected behavior.
         """
         # Arrange
-        container1 = await create_test_container(gear_service, test_user.id, "Container 1")
-        container2 = await create_test_container(gear_service, test_user.id, "Container 2")
+        _container1 = await create_test_container(gear_service, test_user.id, "Container 1")
+        _container2 = await create_test_container(gear_service, test_user.id, "Container 2")
 
         # Act
         deleted_count = await gear_service.delete_all_containers(test_user.id)

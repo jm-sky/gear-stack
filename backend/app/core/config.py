@@ -1,6 +1,6 @@
 """Application configuration using Pydantic Settings with modular structure."""
 
-from enum import Enum
+from enum import StrEnum
 from functools import lru_cache
 from typing import Literal
 
@@ -13,7 +13,7 @@ from app.core.helpers import parse_bool_value, parse_list_value
 _base_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", case_sensitive=False, extra="ignore")
 
 
-class Environment(str, Enum):
+class Environment(StrEnum):
     """Application environment."""
 
     LOCAL = "local"

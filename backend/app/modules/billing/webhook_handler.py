@@ -79,7 +79,7 @@ async def handle_checkout_session_completed(
             period_end = now + (30 * 24 * 60 * 60) if billing_interval == "month" else now + (365 * 24 * 60 * 60)
 
         # Update subscription in database
-        updated_subscription = await repository.update_subscription(
+        await repository.update_subscription(
             subscription.id,
             stripe_subscription_id=subscription_id,
             plan_tier=plan_tier,
@@ -103,7 +103,7 @@ async def handle_checkout_session_completed(
         logger.info(f"Activated subscription {subscription_id} for customer {customer_id}")
     except Exception as e:
         logger.error(f"Failed to process checkout.session.completed: {e}")
-        raise WebhookProcessingError(f"Failed to process checkout.session.completed: {e}")
+        raise WebhookProcessingError(f"Failed to process checkout.session.completed: {e}") from e
 
 
 async def handle_customer_subscription_updated(
@@ -125,7 +125,6 @@ async def handle_customer_subscription_updated(
     try:
         stripe_sub = cast(Any, event.data.object)
         subscription_id = stripe_sub.id
-        customer_id = stripe_sub.customer
 
         # Get subscription from database
         subscription = await repository.get_subscription_by_stripe_subscription_id(subscription_id)
@@ -173,7 +172,7 @@ async def handle_customer_subscription_updated(
         cancel_at_end = getattr(stripe_sub, "cancel_at_period_end", False)
 
         # Update subscription
-        updated_subscription = await repository.update_subscription(
+        await repository.update_subscription(
             subscription.id,
             plan_tier=plan_tier,
             billing_interval="year" if billing_interval == "year" else "month",
@@ -197,7 +196,7 @@ async def handle_customer_subscription_updated(
         logger.info(f"Updated subscription {subscription_id}: {change_details}")
     except Exception as e:
         logger.error(f"Failed to process customer.subscription.updated: {e}")
-        raise WebhookProcessingError(f"Failed to process customer.subscription.updated: {e}")
+        raise WebhookProcessingError(f"Failed to process customer.subscription.updated: {e}") from e
 
 
 async def handle_customer_subscription_deleted(
@@ -229,7 +228,7 @@ async def handle_customer_subscription_deleted(
         old_plan = subscription.plan_tier
 
         # Downgrade to free tier
-        updated_subscription = await repository.update_subscription(
+        await repository.update_subscription(
             subscription.id,
             plan_tier="free",
             billing_interval=None,
@@ -250,7 +249,7 @@ async def handle_customer_subscription_deleted(
         logger.info(f"Cancelled subscription {subscription_id}, downgraded to free")
     except Exception as e:
         logger.error(f"Failed to process customer.subscription.deleted: {e}")
-        raise WebhookProcessingError(f"Failed to process customer.subscription.deleted: {e}")
+        raise WebhookProcessingError(f"Failed to process customer.subscription.deleted: {e}") from e
 
 
 async def handle_invoice_payment_succeeded(
@@ -310,7 +309,7 @@ async def handle_invoice_payment_succeeded(
             logger.info(f"Payment succeeded for subscription {subscription_id}")
     except Exception as e:
         logger.error(f"Failed to process invoice.payment_succeeded: {e}")
-        raise WebhookProcessingError(f"Failed to process invoice.payment_succeeded: {e}")
+        raise WebhookProcessingError(f"Failed to process invoice.payment_succeeded: {e}") from e
 
 
 async def handle_invoice_payment_failed(
@@ -369,7 +368,7 @@ async def handle_invoice_payment_failed(
         logger.warning(f"Payment failed for subscription {subscription_id}")
     except Exception as e:
         logger.error(f"Failed to process invoice.payment_failed: {e}")
-        raise WebhookProcessingError(f"Failed to process invoice.payment_failed: {e}")
+        raise WebhookProcessingError(f"Failed to process invoice.payment_failed: {e}") from e
 
 
 def _get_plan_tier_from_price_id(price_id: str) -> str:

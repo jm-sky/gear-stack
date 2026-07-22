@@ -89,7 +89,7 @@ async def verify_totp_setup(
         result = await service.verify_totp_setup(setup_token=body.setupToken, code=body.code)
         return VerifyTotpSetupResponse(**result)
     except Exception as exc:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc))
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc)) from None
 
 
 @router.get("/totp/status", response_model=TotpStatusResponse)
@@ -123,9 +123,9 @@ async def regenerate_backup_codes(
         )
         return BackupCodesResponse(**result) if isinstance(result, dict) else result
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
     except Exception as exc:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc))
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc)) from None
 
 
 @router.post("/totp/disable")
@@ -146,9 +146,9 @@ async def disable_totp(
             user_repository=user_repo,
         )
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
     except Exception as exc:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc))
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc)) from None
 
 
 @router.post("/totp/verify-login", response_model=TwoFactorVerifyResponse)
@@ -179,7 +179,7 @@ async def verify_totp_login(
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=str(exc),
-            )
+            ) from None
 
     return await _verify_with_rate_limit()  # type: ignore[no-any-return]
 
@@ -231,7 +231,7 @@ async def complete_passkey_registration(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),
-        )
+        ) from None
 
 
 @router.get("/webauthn/passkeys", response_model=PasskeyListResponse)
@@ -312,7 +312,7 @@ async def delete_passkey(
     try:
         await service.delete_passkey(passkey_id=passkey_id, user_id=current_user.id)
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from None
 
 
 @router.post("/webauthn/authenticate/initiate")
@@ -332,9 +332,9 @@ async def initiate_passkey_authentication(
         payload = verify_two_factor_token(body.twoFactorToken)
         return await service.initiate_passkey_authentication(user_id=payload["sub"])
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from None
     except Exception as exc:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc))
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc)) from None
 
 
 @router.post("/webauthn/authenticate/complete", response_model=TwoFactorVerifyResponse)
@@ -358,9 +358,9 @@ async def complete_passkey_authentication(
         )
         return TwoFactorVerifyResponse(**result)
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from None
     except Exception as exc:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc))
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc)) from None
 
 
 @router.patch("/preferred-method")
@@ -383,4 +383,4 @@ async def update_preferred_method(
             await service.update_preferred_method(user_id=current_user.id, method=None)
             return {"message": "Preferred 2FA method cleared"}
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from None

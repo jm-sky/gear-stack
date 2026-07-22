@@ -25,8 +25,8 @@ async def table_exists(conn, table_name: str) -> bool:
     result = await conn.execute(
         text("""
             SELECT EXISTS (
-                SELECT FROM information_schema.tables 
-                WHERE table_schema = 'public' 
+                SELECT FROM information_schema.tables
+                WHERE table_schema = 'public'
                 AND table_name = :table_name
             );
         """),
@@ -40,8 +40,8 @@ async def column_exists(conn, table_name: str, column_name: str) -> bool:
     result = await conn.execute(
         text("""
             SELECT EXISTS (
-                SELECT FROM information_schema.columns 
-                WHERE table_schema = 'public' 
+                SELECT FROM information_schema.columns
+                WHERE table_schema = 'public'
                 AND table_name = :table_name
                 AND column_name = :column_name
             );
@@ -72,14 +72,14 @@ async def upgrade() -> None:
         print("gear_items table exists, adding show_on_container field...")
         # Add show_on_container field to gear_items
         await conn.execute(text("""
-                ALTER TABLE gear_items 
+                ALTER TABLE gear_items
                 ADD COLUMN show_on_container BOOLEAN NOT NULL DEFAULT FALSE;
             """))
         print("✓ Added show_on_container field to gear_items table")
 
         # Add index for better query performance
         await conn.execute(text("""
-                CREATE INDEX IF NOT EXISTS ix_gear_items_show_on_container 
+                CREATE INDEX IF NOT EXISTS ix_gear_items_show_on_container
                 ON gear_items(show_on_container);
             """))
         print("✓ Added index on show_on_container field")
@@ -100,7 +100,7 @@ async def downgrade() -> None:
 
         # Remove show_on_container field from gear_items
         await conn.execute(text("""
-                ALTER TABLE gear_items 
+                ALTER TABLE gear_items
                 DROP COLUMN IF EXISTS show_on_container;
             """))
         print("✓ Removed show_on_container field from gear_items table")

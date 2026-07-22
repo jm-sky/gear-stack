@@ -24,8 +24,8 @@ async def table_exists(conn, table_name: str) -> bool:
     result = await conn.execute(
         text("""
             SELECT EXISTS (
-                SELECT FROM information_schema.tables 
-                WHERE table_schema = 'public' 
+                SELECT FROM information_schema.tables
+                WHERE table_schema = 'public'
                 AND table_name = :table_name
             );
         """),
@@ -49,7 +49,7 @@ async def upgrade() -> None:
         print("gear_items table exists, adding order field...")
         # Add order field to gear_items
         await conn.execute(text("""
-                ALTER TABLE gear_items 
+                ALTER TABLE gear_items
                 ADD COLUMN IF NOT EXISTS "order" INTEGER;
             """))
         print("✓ Added order field to gear_items table")
@@ -64,7 +64,7 @@ async def downgrade() -> None:
     async with engine.begin() as conn:
         # Remove order field from gear_items
         await conn.execute(text("""
-                ALTER TABLE gear_items 
+                ALTER TABLE gear_items
                 DROP COLUMN IF EXISTS "order";
             """))
         print("✓ Removed order field from gear_items table")

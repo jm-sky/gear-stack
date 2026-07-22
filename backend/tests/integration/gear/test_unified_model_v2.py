@@ -14,6 +14,7 @@ Test Coverage:
 
 import pytest
 import pytest_asyncio
+from pydantic import ValidationError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -159,7 +160,7 @@ class TestContainerCreateV2:
         """Test that validation prevents invalid container creation."""
         # Arrange: Try to create container without containerType
         # This should be caught by Pydantic validation
-        with pytest.raises(Exception):  # Pydantic ValidationError
+        with pytest.raises(ValidationError):
             GearItemCreateV2(
                 itemType="container",
                 name="Invalid Container",

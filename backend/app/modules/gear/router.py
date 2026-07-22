@@ -485,7 +485,7 @@ async def move_item(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
-        )
+        ) from None
 
 
 @router.delete(
@@ -545,7 +545,7 @@ async def batch_update_item_order(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e),
-        )
+        ) from None
 
 
 # Statistics endpoints

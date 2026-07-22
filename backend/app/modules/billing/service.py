@@ -149,7 +149,7 @@ class BillingService:
                     )
             except Exception as e:
                 logger.error(f"Failed to create Stripe customer: {e}")
-                raise StripeAPIError(f"Failed to create Stripe customer: {e}")
+                raise StripeAPIError(f"Failed to create Stripe customer: {e}") from e
 
         # Get price ID based on plan and billing interval
         price_id = self._get_price_id(plan_tier, billing_interval)
@@ -170,7 +170,7 @@ class BillingService:
             return CheckoutSessionResponse(sessionId=session.id, sessionUrl=session.url)
         except Exception as e:
             logger.error(f"Failed to create checkout session: {e}")
-            raise StripeAPIError(f"Failed to create checkout session: {e}")
+            raise StripeAPIError(f"Failed to create checkout session: {e}") from e
 
     async def create_portal_session(self, user_id: str, return_url: str) -> PortalSessionResponse:
         """
@@ -209,7 +209,7 @@ class BillingService:
             return PortalSessionResponse(sessionUrl=session.url)
         except Exception as e:
             logger.error(f"Failed to create portal session: {e}")
-            raise StripeAPIError(f"Failed to create portal session: {e}")
+            raise StripeAPIError(f"Failed to create portal session: {e}") from e
 
     async def cancel_subscription(self, user_id: str) -> SubscriptionResponse:
         """
@@ -261,7 +261,7 @@ class BillingService:
             return SubscriptionResponse.model_validate(updated_subscription)
         except Exception as e:
             logger.error(f"Failed to cancel subscription: {e}")
-            raise StripeAPIError(f"Failed to cancel subscription: {e}")
+            raise StripeAPIError(f"Failed to cancel subscription: {e}") from e
 
     async def update_openrouter_token(self, user_id: str, token: str | None) -> SubscriptionResponse:
         """

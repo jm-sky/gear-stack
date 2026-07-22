@@ -96,7 +96,7 @@ async def create_item(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
-        )
+        ) from None
 
 
 # ===== Read Operations =====
@@ -229,7 +229,7 @@ async def update_item(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
-        )
+        ) from None
 
 
 @router.patch("/items/batch/order", response_model=list[GearItemResponseV2])
@@ -295,7 +295,7 @@ async def move_item(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
-        )
+        ) from None
 
 
 # ===== Delete Operations =====

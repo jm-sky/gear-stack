@@ -5,7 +5,7 @@ including errors, warnings, and informational messages.
 """
 
 from datetime import UTC, datetime
-from enum import Enum
+from enum import StrEnum
 
 from sqlalchemy import DateTime, Index, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
@@ -13,7 +13,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.core.database import Base
 
 
-class LogLevel(str, Enum):
+class LogLevel(StrEnum):
     """Log level enumeration."""
 
     DEBUG = "DEBUG"
