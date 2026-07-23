@@ -1,6 +1,6 @@
 # Backend gear V1/V2 model duality — item-image ownership/visibility checks broken for V2-native items
 
-**Status:** `in progress`
+**Status:** `done`
 **Created:** 2026-07-23
 **Severity:** High
 **Module:** `gear` (backend — data model / item images)
@@ -207,7 +207,7 @@ failures). User confirmed on production: item images load correctly, container s
 and ratings/reports/promotions are functional — the original #043 symptom (and everything else
 repointed in Phases 3a-3d) is fixed end-to-end, not just in local testing.
 
-**Remaining:** Phase 5 (drop `gear_containers`/`gear_items`, remove the V1 ORM classes) — this
-is the last step of the user's original ask to eliminate the V1/V2 duality entirely, so this
-issue stays `in progress` until that lands. Take a fresh production backup immediately before
-running migration `059`.
+**Phase 5 deployed and verified on production (2026-07-23):** user took a fresh backup, deployed
+migration `059` (drops `gear_containers`/`gear_items`), restarted the backend, and confirmed the
+app works correctly. `gear_items_v2` is now the sole backend gear data model — the V1/V2
+duality this issue was filed about no longer exists. Closed.

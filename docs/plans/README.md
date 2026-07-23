@@ -39,7 +39,7 @@ Implementation plans for features and larger changes.
 | [UNIFIED_MODEL_IMPLEMENTATION_PLAN.md](UNIFIED_MODEL_IMPLEMENTATION_PLAN.md) | Unified model implementation | `in progress` |
 | [UNIFIED_MODEL_V2_MISSING_FEATURES.md](UNIFIED_MODEL_V2_MISSING_FEATURES.md) | V2 missing features inventory | `in progress` |
 | [2026-07-22-visualization-dnd-zones.md](2026-07-22-visualization-dnd-zones.md) | Container visualization — DnD placements + custom zones (DB) | `done` |
-| [2026-07-23-gear-backend-v1-v2-unification.md](2026-07-23-gear-backend-v1-v2-unification.md) | Backend gear V1→V2 unification — drop legacy tables/models, repoint ratings/reports/promotions/stats/admin to `gear_items_v2` | `in progress` |
+| [2026-07-23-gear-backend-v1-v2-unification.md](2026-07-23-gear-backend-v1-v2-unification.md) | Backend gear V1→V2 unification — drop legacy tables/models, repoint ratings/reports/promotions/stats/admin to `gear_items_v2` | `done` |
 
 When adding a new plan: create `YYYY-MM-DD-slug.md` (legacy SCREAMING_SNAKE names are OK for older files — add a row here).
 

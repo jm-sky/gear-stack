@@ -58,7 +58,7 @@ Tracked work items (bugs, improvements) live here — not in GitHub Issues.
 | 040 | [2026-07-23--040--add-container-dialog-ux.md](2026-07-23--040--add-container-dialog-ux.md) | UX: dialog Dodaj kontener — search/recent lub unifikacja z Dodaj przedmiot | `todo` |
 | 041 | [2026-07-23--041--add-item-page-layout-and-form-design.md](2026-07-23--041--add-item-page-layout-and-form-design.md) | UX: Dodaj przedmiot — layout + research designu formularza | `todo` |
 | 042 | [2026-07-23--042--visualization-zones-in-gear-settings.md](2026-07-23--042--visualization-zones-in-gear-settings.md) | UX: własne obszary wizualizacji w /gear/settings | `todo` |
-| 043 | [2026-07-23--043--gear-v1-v2-backend-duality-image-ownership-broken.md](2026-07-23--043--gear-v1-v2-backend-duality-image-ownership-broken.md) | Backend (High): dwoistość modelu gear V1/V2 — ownership/visibility obrazków itemów zepsute dla itemów V2 | `in progress` |
+| 043 | [2026-07-23--043--gear-v1-v2-backend-duality-image-ownership-broken.md](2026-07-23--043--gear-v1-v2-backend-duality-image-ownership-broken.md) | Backend (High): dwoistość modelu gear V1/V2 — ownership/visibility obrazków itemów zepsute dla itemów V2 | `done` |
 | 044 | [2026-07-23--044--container-share-tokens-table-missing-prod.md](2026-07-23--044--container-share-tokens-table-missing-prod.md) | Backend (High): `container_share_tokens` nie istnieje na produkcji — endpointy share-token zwracają 500 | `done` |
 
 When adding a new issue, create `YYYY-MM-DD--NNN--short-slug.md` and add a row to this table.

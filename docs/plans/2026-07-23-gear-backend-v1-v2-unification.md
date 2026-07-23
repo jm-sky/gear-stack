@@ -1,9 +1,7 @@
 # Backend V1→V2 Gear Model Unification — Phased Implementation Plan
 
-**Status:** `in progress` — Phases 0-4 executed and deployed to production 2026-07-23 (migrations
-057/058 live, user-verified: item images, sharing, ratings/reports/promotions all working).
-Phase 5 (migration 059, drop V1 tables) written and verified locally 2026-07-23; deployment to
-production still pending a fresh backup.
+**Status:** `done` — all phases (0-5) executed, deployed to production, and verified 2026-07-23.
+`gear_items_v2` is the sole backend gear data model; `gear_containers`/`gear_items` are dropped.
 **Created:** 2026-07-23
 **Drives:** [docs/issues/2026-07-23--043--gear-v1-v2-backend-duality-image-ownership-broken.md](../issues/2026-07-23--043--gear-v1-v2-backend-duality-image-ownership-broken.md), [docs/issues/2026-07-23--044--container-share-tokens-table-missing-prod.md](../issues/2026-07-23--044--container-share-tokens-table-missing-prod.md)
 **Supersedes the open TODOs in:** [UNIFIED_MODEL_IMPLEMENTATION_PLAN.md](UNIFIED_MODEL_IMPLEMENTATION_PLAN.md) ("❌ Backend routing: V2 API exists but isn't default", "❌ Cleanup V1: old tables/models still exist")
@@ -707,9 +705,10 @@ behavior for context, or the (now-fixed) migration files. No live code reference
 `ruff`/`black`/`mypy` (project-wide) clean; full backend `tests/` suite green (excluding the same
 7 pre-existing unrelated failures noted in Phase 4).
 
-**Not yet deployed to production.** Requires, in order: (1) a fresh production backup taken
-immediately beforehand (user's explicit requirement), (2) running migration `059` there, (3) a
-post-drop smoke test of the full app.
+### Deployed and verified on production (2026-07-23)
+
+User took a fresh backup, deployed migration `059` to production, restarted the backend, and
+confirmed the app works correctly with `gear_containers`/`gear_items` dropped. **Plan complete.**
 
 ---
 
