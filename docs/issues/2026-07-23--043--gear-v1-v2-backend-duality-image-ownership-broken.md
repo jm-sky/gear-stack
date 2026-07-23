@@ -192,7 +192,9 @@ the catalogue-linking subsystem (not originally in scope — found broken by the
 while tracing real call paths) all now correctly resolve V2-native containers/items instead of
 404ing or silently no-op'ing. `stats`/`admin` modules (also not originally in scope, found via
 direct grep for `GearContainerDB`/`GearItemDB` usage) were repointed too, since they'd otherwise
-500 once Phase 5 drops the V1 tables. Full backend test suite green throughout, `black`/`mypy`
-clean. **Still open:** deploy migrations `057`/`058` + this code to production, then Phase 4
-(delete dead V1 CRUD surface) and Phase 5 (drop V1 tables) — issue stays `in progress` until
-production is verified end-to-end.
+500 once Phase 5 drops the V1 tables. Phase 4 (dead V1 CRUD endpoints/methods/tests/frontend
+service methods — zero real callers, confirmed) also done. Full backend test suite green
+throughout (`ruff`/`black`/`mypy` clean; `pnpm type-check`/`pnpm lint` clean), all local/dev-only
+so far. **Still open:** deploy migrations `057`/`058` + all this code to production and verify
+end-to-end there, then Phase 5 (drop V1 tables, remove the ORM classes) — issue stays
+`in progress` until production is verified.
