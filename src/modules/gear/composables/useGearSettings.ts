@@ -1,7 +1,7 @@
 import { computed } from 'vue'
 import { config } from '@/shared/config/config'
 import { useLocale } from '@/shared/i18n'
-import type { IUpdateGearSettingsDto, IUserBrand, IUserCategory, IUserContainerType } from '../types/gearSettings.types'
+import type { IUpdateGearSettingsDto, IUserBrand, IUserCategory, IUserContainerType, IVisualizationCustomZone } from '../types/gearSettings.types'
 import { useGearSettingsStore } from '../store/useGearSettingsStore'
 import { detectDefaultCurrency, type SupportedCurrency } from '../utils/currencyFormatter'
 
@@ -17,6 +17,8 @@ export function useGearSettings() {
     customCategories: store.customCategories,
     customContainerTypes: store.customContainerTypes,
     customBrands: store.customBrands,
+    visualizationCustomZones: store.visualizationCustomZones,
+    visualizationPlacements: store.visualizationPlacements,
     preferredWeightUnit: store.preferredWeightUnit ?? config.defaults.preferredWeightUnit,
     defaultCurrency: store.defaultCurrency,
   }))
@@ -28,6 +30,7 @@ export function useGearSettings() {
   const customCategories = computed<IUserCategory[]>(() => store.getAllCategories)
   const customContainerTypes = computed<IUserContainerType[]>(() => store.getAllContainerTypes)
   const customBrands = computed<IUserBrand[]>(() => store.getAllBrands)
+  const visualizationCustomZones = computed<IVisualizationCustomZone[]>(() => store.getAllVisualizationZones)
 
   const updateSettings = (data: IUpdateGearSettingsDto): void => {
     store.updateSettings(data)
@@ -69,11 +72,28 @@ export function useGearSettings() {
     store.removeBrand(id)
   }
 
+  const addVisualizationZone = (zone: IVisualizationCustomZone): void => {
+    store.addVisualizationZone(zone)
+  }
+
+  const updateVisualizationZone = (zone: IVisualizationCustomZone): void => {
+    store.updateVisualizationZone(zone)
+  }
+
+  const removeVisualizationZone = (zoneId: string): void => {
+    store.removeVisualizationZone(zoneId)
+  }
+
+  const setContainerZone = (containerId: string, zoneId: string): void => {
+    store.setContainerZone(containerId, zoneId)
+  }
+
   return {
     settings,
     customCategories,
     customContainerTypes,
     customBrands,
+    visualizationCustomZones,
     defaultCurrency,
     updateSettings,
     addCategory,
@@ -85,6 +105,10 @@ export function useGearSettings() {
     addBrand,
     updateBrand,
     removeBrand,
+    addVisualizationZone,
+    updateVisualizationZone,
+    removeVisualizationZone,
+    setContainerZone,
   }
 }
 

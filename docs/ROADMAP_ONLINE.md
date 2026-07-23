@@ -572,6 +572,8 @@ System limitów liczby przedmiotów i kontenerów w zależności od typu konta (
   - 📍 Szczegóły implementacji: [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-automatyczny-wybór-jednostki-wagi-auto-i-formatowanie-z-separatorem-tysięcznym)
 - ✅ **Dodawanie nowych kategorii** (zapisywane w DB) - zaimplementowane
 - ✅ **Dodawanie firm / marek (brand)** - zapisywane w DB - zaimplementowane
+- ✅ **Wizualizacja: DnD placement + własne obszary** - zapisywane w DB (`visualization_custom_zones`, `visualization_placements`) - zaimplementowane
+  - 📍 Szczegóły implementacji: [2026-07-22-visualization-dnd-zones.md](./plans/2026-07-22-visualization-dnd-zones.md)
 - 🔄 Uczenie się na podstawie wcześniejszych wyborów użytkownika (dla kategorii) - planowane
 
 **Zaimplementowane funkcjonalności:**

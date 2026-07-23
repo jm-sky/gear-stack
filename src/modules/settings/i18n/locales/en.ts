@@ -154,6 +154,13 @@ export const settingsEn = {
       valueRequired: 'Brand name is required',
       empty: 'No custom brands yet. Add your first one above.',
     },
+    visualizationZones: {
+      title: 'Custom Visualization Zones',
+      description: 'Add and manage your own zones for the container map',
+      add: 'Add Zone',
+      empty: 'No custom zones yet. Add your first one above.',
+      openVisualization: 'Open visualization',
+    },
     oauth: {
       title: 'OAuth Connections',
       description: 'Manage linked OAuth accounts (Google, Facebook, etc.)',

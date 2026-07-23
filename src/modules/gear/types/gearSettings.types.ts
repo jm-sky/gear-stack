@@ -21,10 +21,23 @@ export interface IUserBrand {
   updatedAt: string
 }
 
+export interface IVisualizationCustomZone {
+  id: string
+  name: string
+  iconKey: string
+  createdAt: string
+  updatedAt: string
+}
+
+// containerId -> zoneId (default zone id or custom zone id) DnD override
+export type TVisualizationPlacements = Record<string, string>
+
 export interface IGearSettings {
   customCategories: IUserCategory[]
   customContainerTypes: IUserContainerType[]
   customBrands: IUserBrand[]
+  visualizationCustomZones: IVisualizationCustomZone[]
+  visualizationPlacements: TVisualizationPlacements
   preferredWeightUnit?: TGearWeightUnit
   defaultCurrency?: string
 }
@@ -33,6 +46,8 @@ export interface IUpdateGearSettingsDto {
   customCategories?: IUserCategory[]
   customContainerTypes?: IUserContainerType[]
   customBrands?: IUserBrand[]
+  visualizationCustomZones?: IVisualizationCustomZone[]
+  visualizationPlacements?: TVisualizationPlacements
   preferredWeightUnit?: TGearWeightUnit
   defaultCurrency?: string
 }
@@ -58,5 +73,13 @@ export interface IGearSettingsService {
   addBrand(settings: IGearSettings, brand: IUserBrand): Promise<IGearSettings>
   updateBrand(settings: IGearSettings, brand: IUserBrand): Promise<IGearSettings>
   removeBrand(settings: IGearSettings, brandId: string): Promise<IGearSettings>
+
+  // Visualization custom zone operations
+  addVisualizationZone(settings: IGearSettings, zone: IVisualizationCustomZone): Promise<IGearSettings>
+  updateVisualizationZone(settings: IGearSettings, zone: IVisualizationCustomZone): Promise<IGearSettings>
+  removeVisualizationZone(settings: IGearSettings, zoneId: string): Promise<IGearSettings>
+
+  // Visualization placement (DnD override) operations
+  setContainerZone(settings: IGearSettings, containerId: string, zoneId: string): Promise<IGearSettings>
 }
 

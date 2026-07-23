@@ -1,6 +1,6 @@
 # OAuth login bypasses session tracking, token-version, and 2FA machinery
 
-**Status:** `verification needed`
+**Status:** `done`
 **Created:** 2026-07-21
 **Severity:** Medium
 **Module:** `auth` (backend — OAuth)
@@ -44,7 +44,9 @@ Decision (confirmed with the user): **OAuth honors 2FA the same as password logi
 
 Implementation: split `login_with_oauth` into `_resolve_oauth_user` (lookup/link/create, no tokens) + `login_with_oauth` (calls `_resolve_oauth_user` then `_issue_login_tokens`), so the base `AuthService` path now gets `jti`/`tv`/`emailVerified`/session tracking like password login. Since `login_with_oauth` was never overridden in `AuthServiceWith2FA` (the service actually injected via `AuthServiceDep` — see `auth/dependencies.py:60`), it silently skipped 2FA entirely; added a `login_with_oauth` override there that checks `has_two_factor_enabled` and returns the same challenge `login_user` builds (extracted into a shared `_build_two_factor_challenge` helper) before falling through to `_issue_login_tokens`.
 
-Tests: `backend/tests/test_auth_service.py::TestLoginWithOAuth` (base class: jti/tv present, survives a `tokenVersion` bump) and `backend/tests/test_oauth_2fa_login.py` (2FA-enabled OAuth user gets a challenge, not tokens). Marked `verification needed` rather than `done` since no OAuth provider is configured in this environment to run a live end-to-end login.
+Tests: `backend/tests/test_auth_service.py::TestLoginWithOAuth` (base class: jti/tv present, survives a `tokenVersion` bump) and `backend/tests/test_oauth_2fa_login.py` (2FA-enabled OAuth user gets a challenge, not tokens).
+
+**QA (2026-07-23):** ręczne potwierdzenie — OAuth działa poprawnie → status `done`.
 
 ## Verification
 

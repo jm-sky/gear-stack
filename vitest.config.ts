@@ -1,6 +1,6 @@
 import vue from '@vitejs/plugin-vue'
 import { fileURLToPath } from 'node:url'
-import { defineConfig } from 'vitest/config'
+import { configDefaults, defineConfig } from 'vitest/config'
 
 export default defineConfig({
   plugins: [vue()],
@@ -12,6 +12,9 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'happy-dom',
+    // tests/e2e and tests/integration are Playwright suites (own playwright.config.ts,
+    // run via `pnpm test:e2e` / `pnpm test:integration`) - not Vitest specs.
+    exclude: [...configDefaults.exclude, 'tests/e2e/**', 'tests/integration/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

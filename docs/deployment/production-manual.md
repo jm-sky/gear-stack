@@ -65,6 +65,37 @@ sudo chmod g+s "$DEPLOY_DIR"
 
 Log out and back in after group changes. Verify: `groups` should include `docker`, `caddy`, `deploy`.
 
+## Database backups (local dumps)
+
+Canonical directory for ad-hoc PostgreSQL dumps on this VPS:
+
+| Purpose | Path |
+|---------|------|
+| Dump directory | `.backups/` (repo root) |
+| Git | Ignored via `.gitignore` — do not commit dumps |
+
+Naming convention: `gear-stack-postgres-YYYYMMDD-HHMMSS.sql.gz`.
+
+Do **not** use a top-level `backups/` directory (removed; older dumps lived there).
+
+### Create a dump
+
+```bash
+cd /home/madeyskij/projects/gear-stack
+mkdir -p .backups
+docker exec gear-stack-db pg_dump -U backend backend \
+  | gzip > ".backups/gear-stack-postgres-$(date +%Y%m%d-%H%M%S).sql.gz"
+```
+
+### Restore (destructive — replaces current DB)
+
+```bash
+gunzip -c .backups/gear-stack-postgres-YYYYMMDD-HHMMSS.sql.gz \
+  | docker exec -i gear-stack-db psql -U backend backend
+```
+
+This is a manual, on-host convention only. Automated off-site backup is still an open roadmap item (see [ROADMAP.md](../ROADMAP.md) — security / backup-recovery).
+
 ## Troubleshooting
 
 | Problem | Check |

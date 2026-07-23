@@ -22,6 +22,7 @@ Entry point from repo root: [DEPLOYMENT.md](../../DEPLOYMENT.md).
 | [CADDY_DEPLOYMENT.md](CADDY_DEPLOYMENT.md) | Caddy deployment |
 | [CADDY_ADVANCED_SECURITY.md](CADDY_ADVANCED_SECURITY.md) | Advanced Caddy security |
 | [SECURITY_FIX.md](SECURITY_FIX.md) | Docker/DB hardening (PostgreSQL, Redis) |
+| [production-manual.md](production-manual.md#database-backups-local-dumps) | Local DB dumps in `.backups/` |
 
 ## Phase 6 (billing / Stripe checklist)
 

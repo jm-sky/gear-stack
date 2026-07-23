@@ -31,10 +31,7 @@ onMounted(async () => {
     const code = route.query.code as string
     const state = route.query.state as string
     const errorParam = route.query.error as string
-    const providerParam =
-      (route.params.provider as string)
-      || (route.meta.fixedOAuthProvider as string)
-      || ''
+    const providerParam = (route.params.provider as string) || ''
 
     provider.value = providerParam
 
@@ -56,18 +53,7 @@ onMounted(async () => {
       return
     }
 
-    // Verify state parameter for CSRF protection
-    const storedState = sessionStorage.getItem('oauth_state')
-    if (!storedState || storedState !== state) {
-      error.value = t('auth.oauth.callback.invalid_state')
-      setTimeout(() => {
-        router.push(AuthRoutePaths.login)
-      }, 2000)
-      return
-    }
-
-    // Clear stored state
-    sessionStorage.removeItem('oauth_state')
+    // CSRF `state` is verified server-side (oauth_state_store) on the callback API.
 
     // Get reCAPTCHA token if enabled
     const recaptchaToken = await getToken('oauth_callback')
@@ -80,9 +66,12 @@ onMounted(async () => {
     })
 
     // Handle response
-    if ('requiresTwoFactor' in response) {
-      // 2FA required - redirect to 2FA page
-      toast.info(t('auth.oauth.callback.two_factor_required'))
+    if ('requiresTwoFactor' in response && response.requiresTwoFactor) {
+      authStore.setTwoFactorToken(
+        response.twoFactorToken,
+        response.methods,
+        response.preferredMethod
+      )
       await router.push(AuthRoutePaths.twoFactorVerify)
       return
     }

@@ -20,9 +20,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.auth.db_models import UserDB
 from app.modules.gear.db_models_v2 import GearItemDBV2
+from app.modules.gear.repository import GearRepository
 from app.modules.gear.repository_v2 import GearRepositoryV2
+from app.modules.gear.schemas import GlobalCatalogueItemCreate
 from app.modules.gear.schemas_v2 import GearItemCreateV2, GearItemUpdateV2
+from app.modules.gear.service import GearService
 from app.modules.gear.service_v2 import GearServiceV2
+
+from .conftest import create_test_container_v2, create_test_item_v2
 
 
 @pytest_asyncio.fixture
@@ -683,3 +688,172 @@ class TestDeleteOperationsV2:
         # Assert
         assert deleted is True
         assert await get_item_count(async_db_session, test_user.id) == 0  # All deleted
+
+
+class TestGearServiceRepointedAtV2:
+    """Regression coverage for docs/plans/2026-07-23-gear-backend-v1-v2-unification.md Phase 3b:
+    public browsing, ratings, reports, promotions, and catalogue-linking (GearService/
+    GearRepository -- the "V1" classes that still back these live endpoints) all previously
+    only worked against legacy gear_containers/gear_items, so every one of them 404'd or
+    silently no-op'd for a V2-only container/item -- i.e. anything created through today's app.
+    """
+
+    @pytest_asyncio.fixture
+    async def gear_repository(self, async_db_session: AsyncSession) -> GearRepository:
+        return GearRepository(async_db_session)
+
+    @pytest_asyncio.fixture
+    async def gear_service(self, gear_repository: GearRepository) -> GearService:
+        return GearService(gear_repository)
+
+    @pytest_asyncio.fixture
+    async def author(self, async_db_session: AsyncSession) -> UserDB:
+        from datetime import UTC, datetime, timedelta
+
+        from app.modules.auth.auth_utils import get_password_hash
+        from app.modules.settings.db_models import UserSettingsDB
+
+        user = UserDB(
+            id="v2-author-id",
+            email="v2-author@example.com",
+            name="V2 Author",
+            hashed_password=get_password_hash("password123"),
+            is_active=True,
+            is_email_verified=True,
+            # Older than 1 month: can_promote_item() requires the container owner's account to
+            # meet the same age bar as the promoter (_can_user_promote).
+            created_at=datetime.now(UTC) - timedelta(days=40),
+        )
+        async_db_session.add(user)
+        await async_db_session.flush()
+        async_db_session.add(UserSettingsDB(user_id=user.id, is_public_profile=True))
+        await async_db_session.commit()
+        await async_db_session.refresh(user)
+        return user
+
+    @pytest_asyncio.fixture
+    async def promoter(self, async_db_session: AsyncSession) -> UserDB:
+        from datetime import UTC, datetime, timedelta
+
+        from app.modules.auth.auth_utils import get_password_hash
+
+        user = UserDB(
+            id="v2-promoter-id",
+            email="v2-promoter@example.com",
+            name="V2 Promoter",
+            hashed_password=get_password_hash("password123"),
+            is_active=True,
+            is_email_verified=True,
+            created_at=datetime.now(UTC) - timedelta(days=40),
+        )
+        async_db_session.add(user)
+        await async_db_session.commit()
+        await async_db_session.refresh(user)
+        return user
+
+    @pytest.mark.asyncio
+    async def test_public_browsing_returns_v2_only_container_with_author_name(
+        self,
+        gear_repository_v2: GearRepositoryV2,
+        gear_service: GearService,
+        author: UserDB,
+    ) -> None:
+        gear_service_v2 = GearServiceV2(gear_repository_v2)
+        container = await create_test_container_v2(gear_service_v2, author.id, name="Public V2 Container", is_public=True)
+        await create_test_item_v2(gear_service_v2, author.id, container.id, name="Public V2 Item")
+
+        containers = await gear_service.get_public_containers()
+        matching = [c for c in containers if c.id == container.id]
+        assert len(matching) == 1
+        assert matching[0].authorName == "V2 Author"
+        assert len(matching[0].items) == 1
+        assert matching[0].items[0].name == "Public V2 Item"
+
+        single = await gear_service.get_public_container(container.id)
+        assert single is not None
+        assert single.authorName == "V2 Author"
+
+    @pytest.mark.asyncio
+    async def test_rate_and_report_v2_only_container(
+        self,
+        gear_repository_v2: GearRepositoryV2,
+        gear_repository: GearRepository,
+        gear_service: GearService,
+        author: UserDB,
+        test_user: UserDB,
+    ) -> None:
+        gear_service_v2 = GearServiceV2(gear_repository_v2)
+        container = await create_test_container_v2(gear_service_v2, author.id, name="Rateable V2 Container", is_public=True)
+
+        # A different user rates the container -- exercises get_container_v2_owned_or_public
+        # (router.py) via the repository method it delegates ownership/visibility to.
+        rating = await gear_repository.upsert_container_rating(container.id, test_user.id, rating=5, rating_type="user")
+        assert rating.rating == 5
+
+        avg = await gear_repository.get_container_average_user_rating(container.id)
+        assert avg == 5.0
+
+        # Report the container for inappropriate content -- exercises
+        # get_public_container_for_reporting + create_container_report against gear_items_v2.
+        report = await gear_service.report_container(container.id, test_user.id, reason="spam_fraud")
+        assert report.containerName == "Rateable V2 Container"
+
+        # Auto-hide kicks in at 3 active reports (set_container_hidden_by_reports -> gear_items_v2)
+        reporter_2 = UserDB(id="reporter-2", email="reporter2@example.com", name="Reporter 2", hashed_password="x", is_active=True, is_email_verified=True)
+        reporter_3 = UserDB(id="reporter-3", email="reporter3@example.com", name="Reporter 3", hashed_password="x", is_active=True, is_email_verified=True)
+        gear_repository.db.add_all([reporter_2, reporter_3])
+        await gear_repository.db.commit()
+        await gear_service.report_container(container.id, reporter_2.id, reason="spam_fraud")
+        await gear_service.report_container(container.id, reporter_3.id, reason="spam_fraud")
+
+        hidden_container = await gear_repository_v2.get_item(container.id, author.id)
+        assert hidden_container is not None
+        assert hidden_container.is_hidden_by_reports is True
+
+    @pytest.mark.asyncio
+    async def test_promote_v2_only_item(
+        self,
+        gear_repository_v2: GearRepositoryV2,
+        gear_service: GearService,
+        author: UserDB,
+        promoter: UserDB,
+    ) -> None:
+        gear_service_v2 = GearServiceV2(gear_repository_v2)
+        container = await create_test_container_v2(gear_service_v2, author.id, name="Promotable V2 Container", is_public=True)
+        item = await create_test_item_v2(gear_service_v2, author.id, container.id, name="Promotable V2 Item")
+
+        can_promote, reason = await gear_service.can_promote_item(item.id, promoter.id)
+        assert can_promote is True, reason
+
+        promoted = await gear_service.promote_item(item.id, promoter.id)
+        assert promoted.promoteCount == 1
+
+        status = await gear_service.get_promotion_status(item.id, promoter.id)
+        assert status.user_promoted is True
+        assert status.promote_count == 1
+
+    @pytest.mark.asyncio
+    async def test_add_catalogue_item_to_v2_only_container(
+        self,
+        gear_repository_v2: GearRepositoryV2,
+        gear_repository: GearRepository,
+        gear_service: GearService,
+        test_user: UserDB,
+    ) -> None:
+        gear_service_v2 = GearServiceV2(gear_repository_v2)
+        container = await create_test_container_v2(gear_service_v2, test_user.id, name="Catalogue Target Container")
+
+        catalogue_item = await gear_repository.create_catalogue_item(
+            test_user.id,
+            GlobalCatalogueItemCreate(name="Catalogue Widget", category="tools", weight=100.0, weightUnit="g"),
+        )
+
+        created = await gear_service.add_catalogue_item_to_container(container.id, catalogue_item.id, test_user.id)
+
+        assert created is not None
+        assert created.name == "Catalogue Widget"
+
+        # Confirm it landed in gear_items_v2, parented under the V2-only container.
+        v2_item = await gear_repository_v2.get_item(created.id, test_user.id)
+        assert v2_item is not None
+        assert v2_item.parent_item_id == container.id

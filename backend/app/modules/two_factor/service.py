@@ -18,6 +18,7 @@ from app.modules.settings.db_models import UserSettingsDB
 
 from .totp_service import TotpService
 from .types.repository import TwoFactorRepositoryInterface
+from .types.tokens import LoginTokens, TwoFactorLoginResult
 from .webauthn_service import WebAuthnService
 
 logger = logging.getLogger(__name__)
@@ -30,17 +31,58 @@ class TwoFactorService:
     services while providing a unified API for 2FA operations.
     """
 
-    def __init__(self, repository: TwoFactorRepositoryInterface, challenge_store: Any = None):
+    def __init__(
+        self,
+        repository: TwoFactorRepositoryInterface,
+        challenge_store: Any = None,
+        user_repository: Any = None,
+        token_blacklist_service: Any = None,
+    ):
         """Initialize with repository and create service dependencies.
 
         Args:
             repository: Two-factor repository interface
             challenge_store: WebAuthn challenge store (optional)
+            user_repository: User repository, required by verify_totp_login /
+                complete_passkey_authentication to mint full-claim login tokens
+            token_blacklist_service: Session tracking service (optional)
         """
         self.repository = repository
         # Composition: create specialized services
         self.totp = TotpService(repository)
         self.webauthn = WebAuthnService(repository, challenge_store)
+        self.user_repository = user_repository
+        self.token_blacklist_service = token_blacklist_service
+
+    async def _issue_login_tokens(self, user_id: str, tfa_method: str) -> LoginTokens:
+        """Mint access/refresh tokens for a completed 2FA login.
+
+        Delegates to ``AuthService._issue_login_tokens`` (the same helper the
+        password/OAuth login paths use) so these tokens carry the same `tv`
+        (token version) and `jti` (session id) claims. Without them,
+        `_verify_user_token` rejects every request from a user whose
+        `tokenVersion` isn't 0 (e.g. anyone who ever reset their password)
+        with 401 "Token has been revoked" right after a successful 2FA check.
+        """
+        from app.modules.auth.exceptions import UserNotFoundError
+        from app.modules.auth.service import AuthService
+
+        if self.user_repository is None:
+            raise RuntimeError("TwoFactorService requires user_repository to issue login tokens")
+
+        user = await self.user_repository.get_user_by_id(user_id)
+        if user is None:
+            raise UserNotFoundError("User not found")
+
+        auth_service = AuthService(user_repository=self.user_repository, token_blacklist_service=self.token_blacklist_service)
+        login_response = await auth_service._issue_login_tokens(user, tfa_verified=True, tfa_method=tfa_method)
+
+        return {
+            "accessToken": login_response.accessToken,
+            "refreshToken": login_response.refreshToken,
+            "tokenType": login_response.tokenType,
+            "expiresIn": login_response.expiresIn,
+        }
 
     async def _get_or_create_user_settings(self, user_id: str) -> UserSettingsDB:
         """Get or create user settings.
@@ -97,16 +139,11 @@ class TwoFactorService:
         """Disable TOTP. Delegates to TotpService."""
         return await self.totp.disable(user_id, password, backup_code, user_repository)
 
-    async def verify_totp_login(self, two_factor_token: str, code: str) -> dict[str, Any]:
+    async def verify_totp_login(self, two_factor_token: str, code: str) -> TwoFactorLoginResult:
         """Verify TOTP code during login and return JWT tokens.
 
         This method combines TOTP verification with token generation.
         """
-        from app.modules.auth.auth_utils import (
-            create_access_token,
-            create_refresh_token,
-        )
-
         from .auth_utils import verify_two_factor_token
 
         # Verify 2FA token
@@ -121,17 +158,12 @@ class TwoFactorService:
 
             raise InvalidTwoFactorCodeError("Invalid verification code")
 
-        # Create access and refresh tokens. tfaVerified=True is required here —
-        # without it, _verify_user_token rejects every subsequent request from
-        # this (2FA-enabled) user with 401 "2FA verification required",
-        # effectively locking them out right after a successful TOTP check.
-        access_token = create_access_token(data={"sub": user_id, "tfaVerified": True})
-        refresh_token = create_refresh_token(data={"sub": user_id, "tfaVerified": True})
+        tokens = await self._issue_login_tokens(user_id, tfa_method="totp")
 
         return {
-            "accessToken": access_token,
-            "refreshToken": refresh_token,
-            "tokenType": "bearer",
+            "verified": True,
+            "method": "totp",
+            **tokens,
         }
 
     # ==================================================================
@@ -177,7 +209,7 @@ class TwoFactorService:
         credential_json: dict,
         challenge_data: dict | None = None,
         expected_user_id: str | None = None,
-    ) -> dict[str, Any]:
+    ) -> TwoFactorLoginResult:
         """Complete passkey authentication during login and return JWT tokens.
 
         Delegates credential verification to WebAuthnService, then mints
@@ -186,23 +218,15 @@ class TwoFactorService:
         (verified/method/accessToken/...), not WebAuthnService's internal
         {success, userId, passkeyId} shape.
         """
-        from app.modules.auth.auth_utils import (
-            create_access_token,
-            create_refresh_token,
-        )
-
         result = await self.webauthn.complete_authentication(challenge_token, credential_json, challenge_data, expected_user_id)
         user_id = result["userId"]
 
-        access_token = create_access_token(data={"sub": user_id, "tfaVerified": True})
-        refresh_token = create_refresh_token(data={"sub": user_id, "tfaVerified": True})
+        tokens = await self._issue_login_tokens(user_id, tfa_method="webauthn")
 
         return {
             "verified": True,
             "method": "webauthn",
-            "accessToken": access_token,
-            "refreshToken": refresh_token,
-            "tokenType": "bearer",
+            **tokens,
         }
 
     # ==================================================================

@@ -1,13 +1,15 @@
 """SQLAlchemy database models for gear management.
 
-This module provides SQLAlchemy ORM models for gear containers and items.
+This module provides SQLAlchemy ORM models for the ancillary gear-related tables that survive
+the V1 unified-model migration: item images, container share tokens, container ratings, item
+promotions, content reports, and the global catalogue. The core gear containers/items model is
+`GearItemDBV2` in `db_models_v2.py` (docs/plans/2026-07-23-gear-backend-v1-v2-unification.md).
 Designed to work with async SQLAlchemy sessions.
 """
 
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Any
 
 from sqlalchemy import (
     Boolean,
@@ -24,150 +26,6 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
-
-
-class GearContainerDB(Base):
-    """SQLAlchemy model for gear containers.
-
-    Represents containers like backpacks, bags, or other storage units
-    that hold gear items.
-
-    Attributes:
-        id: Unique identifier (ULID format, 36 chars)
-        user_id: Owner of the container
-        name: Container name
-        description: Optional container description
-        type: Container type (backpack, bag, pouch, etc.)
-        color: Container color theme
-        parent_container_id: Parent container ID for nested containers
-        brand: Manufacturer/brand
-        price: Container price
-        created_at: Creation timestamp
-        updated_at: Last update timestamp
-        items: Relationship to gear items
-    """
-
-    __tablename__ = "gear_containers"
-
-    id: Mapped[str] = mapped_column(String(36), primary_key=True)
-    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), nullable=False, index=True)
-    name: Mapped[str] = mapped_column(String(255), nullable=False)
-    description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    type: Mapped[str] = mapped_column(String(50), nullable=False)
-    color: Mapped[str | None] = mapped_column(String(20), nullable=True, default="default")
-    parent_container_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("gear_containers.id"), nullable=True)
-    brand: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    price: Mapped[float | None] = mapped_column(Float, nullable=True)
-    hide_when_nested: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
-    weight: Mapped[float | None] = mapped_column(Float, nullable=True)
-    weight_unit: Mapped[str | None] = mapped_column(String(5), nullable=True)
-    max_weight: Mapped[float | None] = mapped_column(Float, nullable=True)
-    max_weight_unit: Mapped[str | None] = mapped_column(String(5), nullable=True)
-    url: Mapped[str | None] = mapped_column(Text, nullable=True)
-    is_public: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
-    is_hidden_by_reports: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
-    favorite: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
-    show_item_images: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        onupdate=lambda: datetime.now(UTC),
-        nullable=False,
-    )
-
-    def __repr__(self) -> str:
-        return f"<GearContainerDB(id={self.id}, name={self.name}, type={self.type})>"
-
-
-class GearItemDB(Base):
-    """SQLAlchemy model for gear items.
-
-    Represents individual items stored in gear containers.
-
-    Attributes:
-        id: Unique identifier (ULID format, 36 chars)
-        container_id: Parent container ID
-        name: Item name
-        category: Item category (water, food, shelter, etc.)
-        quantity: Item quantity
-        weight: Item weight value
-        weight_unit: Weight unit (g, kg, oz, or lb)
-        notes: Optional notes
-        expiration_date: Optional expiration date
-        priority: Item priority (critical, high, medium, low)
-        status: Item status (owned, missing, toBuy)
-        nested_container_id: Optional reference to a nested container
-        price: Item price
-        currency: Currency code (PLN, USD, EUR, GBP, etc.)
-        url: Product URL
-        brand: Manufacturer/brand
-        color: Item color
-        quality: Quality tier (low, medium, high)
-        wearable: Whether item is worn/carried on person
-        consumable: Whether item is consumed/used up
-        order: Manual order for items within container
-        show_on_container: Whether to show item image in container view gallery
-        created_at: Creation timestamp
-        updated_at: Last update timestamp
-    """
-
-    __tablename__ = "gear_items"
-
-    id: Mapped[str] = mapped_column(String(36), primary_key=True)
-    container_id: Mapped[str] = mapped_column(String(36), ForeignKey("gear_containers.id"), nullable=False, index=True)
-    name: Mapped[str] = mapped_column(String(255), nullable=False)
-    category: Mapped[str] = mapped_column(String(50), nullable=False)
-    quantity: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
-    weight: Mapped[float] = mapped_column(Float, nullable=False)
-    weight_unit: Mapped[str] = mapped_column(String(5), nullable=False, default="g")
-    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
-    expiration_date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    shelf_life: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
-    priority: Mapped[str] = mapped_column(String(20), nullable=False, default="medium")
-    status: Mapped[str] = mapped_column(String(20), nullable=False, default="owned")
-    nested_container_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("gear_containers.id"), nullable=True)
-    price: Mapped[float | None] = mapped_column(Float, nullable=True)
-    currency: Mapped[str | None] = mapped_column(String(10), nullable=True)
-    url: Mapped[str | None] = mapped_column(Text, nullable=True)
-    brand: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    color: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    quality: Mapped[str | None] = mapped_column(String(20), nullable=True)
-    linked_item_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("gear_items.id"), nullable=True)
-    catalogue_item_id: Mapped[str | None] = mapped_column(
-        String(36),
-        ForeignKey("global_catalogue_items.id", ondelete="SET NULL"),
-        nullable=True,
-    )
-    wearable: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
-    consumable: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
-    order: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    show_on_container: Mapped[bool | None] = mapped_column(Boolean, nullable=True, default=False)
-    promote_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        onupdate=lambda: datetime.now(UTC),
-        nullable=False,
-    )
-
-    # Relationships
-    container: Mapped[GearContainerDB] = relationship("GearContainerDB", back_populates="items", foreign_keys=[container_id])
-
-    def __repr__(self) -> str:
-        return f"<GearItemDB(id={self.id}, name={self.name}, category={self.category})>"
-
-
-# Define relationship after both classes are defined
-# This resolves the AmbiguousForeignKeysError by explicitly specifying
-# which foreign key to use (container_id vs nested_container_id)
-GearContainerDB.items = relationship(
-    "GearItemDB",
-    back_populates="container",
-    foreign_keys=[GearItemDB.container_id],
-    cascade="all, delete-orphan",
-)
 
 
 class ItemImageDB(Base):
@@ -201,7 +59,10 @@ class ItemImageDB(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     item_id: Mapped[str] = mapped_column(
         String(36),
-        ForeignKey("gear_items.id", ondelete="CASCADE"),
+        # Points at gear_items_v2, not legacy gear_items -- see migration 058
+        # (docs/plans/2026-07-23-gear-backend-v1-v2-unification.md, Phase 2/3a /
+        # docs/issues/2026-07-23--043--gear-v1-v2-backend-duality-image-ownership-broken.md).
+        ForeignKey("gear_items_v2.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -233,20 +94,11 @@ class ItemImageDB(Base):
         nullable=False,
     )
 
-    # Relationships
-    item: Mapped[GearItemDB] = relationship("GearItemDB", back_populates="images")
+    # No ORM relationship to the parent item -- item_id now targets gear_items_v2 (not
+    # GearItemDB/V1), and nothing in this codebase navigates it; all lookups are explicit joins.
 
     def __repr__(self) -> str:
         return f"<ItemImageDB(id={self.id}, item_id={self.item_id}, file_name={self.file_name})>"
-
-
-# Add images relationship to GearItemDB
-GearItemDB.images = relationship(
-    "ItemImageDB",
-    back_populates="item",
-    cascade="all, delete-orphan",
-    order_by="ItemImageDB.order",
-)
 
 
 class ContainerShareTokenDB(Base):
@@ -269,7 +121,10 @@ class ContainerShareTokenDB(Base):
     token: Mapped[str] = mapped_column(String(255), primary_key=True, index=True)
     container_id: Mapped[str] = mapped_column(
         String(36),
-        ForeignKey("gear_containers.id", ondelete="CASCADE"),
+        # Points at gear_items_v2, not legacy gear_containers -- see migration 057
+        # (docs/plans/2026-07-23-gear-backend-v1-v2-unification.md, Phase 1 /
+        # docs/issues/2026-07-23--044--container-share-tokens-table-missing-prod.md).
+        ForeignKey("gear_items_v2.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -281,14 +136,13 @@ class ContainerShareTokenDB(Base):
         return f"<ContainerShareTokenDB(token={self.token[:8]}..., container_id={self.container_id})>"
 
 
-# Add user relationship for public containers
 from app.modules.auth.db_models import UserDB  # noqa: E402
+from app.modules.gear.db_models_v2 import GearItemDBV2  # noqa: E402
 
-GearContainerDB.user = relationship("UserDB", foreign_keys=[GearContainerDB.user_id])
 ItemImageDB.user = relationship("UserDB", foreign_keys=[ItemImageDB.user_id])
 
 # Add relationships for share tokens
-ContainerShareTokenDB.container = relationship("GearContainerDB", foreign_keys=[ContainerShareTokenDB.container_id])
+ContainerShareTokenDB.container = relationship("GearItemDBV2", foreign_keys=[ContainerShareTokenDB.container_id])
 ContainerShareTokenDB.user = relationship("UserDB", foreign_keys=[ContainerShareTokenDB.user_id])
 
 
@@ -314,7 +168,9 @@ class ContainerRatingDB(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     container_id: Mapped[str] = mapped_column(
         String(36),
-        ForeignKey("gear_containers.id", ondelete="CASCADE"),
+        # Points at gear_items_v2, not legacy gear_containers -- see migration 058
+        # (docs/plans/2026-07-23-gear-backend-v1-v2-unification.md, Phase 2/3b).
+        ForeignKey("gear_items_v2.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -352,15 +208,9 @@ class ContainerRatingDB(Base):
 
 
 # Add relationships for container ratings
-GearContainerDB.ratings = relationship(
-    "ContainerRatingDB",
-    back_populates="container",
-    cascade="all, delete-orphan",
-)
-ContainerRatingDB.container = relationship(
-    "GearContainerDB",
-    back_populates="ratings",
-)
+# One-way to GearItemDBV2 -- gear_items_v2 (not GearContainerDB/V1) owns ratings going forward,
+# and nothing in this codebase navigates .container, so there's no back_populates to keep in sync.
+ContainerRatingDB.container = relationship("GearItemDBV2", foreign_keys=[ContainerRatingDB.container_id])
 ContainerRatingDB.user = relationship("UserDB", foreign_keys=[ContainerRatingDB.user_id])
 
 
@@ -532,7 +382,9 @@ class ItemPromotionDB(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     item_id: Mapped[str] = mapped_column(
         String(36),
-        ForeignKey("gear_items.id", ondelete="CASCADE"),
+        # Points at gear_items_v2, not legacy gear_items -- see migration 058
+        # (docs/plans/2026-07-23-gear-backend-v1-v2-unification.md, Phase 2/3b).
+        ForeignKey("gear_items_v2.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -549,7 +401,9 @@ class ItemPromotionDB(Base):
     )
 
     # Relationships
-    item: Mapped[GearItemDB] = relationship("GearItemDB", back_populates="promotions")
+    # One-way to GearItemDBV2 -- nothing in this codebase navigates .item, so there's no
+    # back_populates target to keep in sync.
+    item: Mapped[GearItemDBV2] = relationship("GearItemDBV2", foreign_keys=[item_id])
     user: Mapped[UserDB] = relationship("UserDB")
 
     # Unique constraint: user can promote item only once
@@ -557,14 +411,6 @@ class ItemPromotionDB(Base):
 
     def __repr__(self) -> str:
         return f"<ItemPromotionDB(id={self.id}, item_id={self.item_id}, user_id={self.user_id})>"
-
-
-# Add promotions relationship to GearItemDB
-GearItemDB.promotions = relationship(
-    "ItemPromotionDB",
-    back_populates="item",
-    cascade="all, delete-orphan",
-)
 
 
 class ContentReportDB(Base):
@@ -590,7 +436,9 @@ class ContentReportDB(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     container_id: Mapped[str] = mapped_column(
         String(36),
-        ForeignKey("gear_containers.id", ondelete="CASCADE"),
+        # Points at gear_items_v2, not legacy gear_containers -- see migration 058
+        # (docs/plans/2026-07-23-gear-backend-v1-v2-unification.md, Phase 2/3b).
+        ForeignKey("gear_items_v2.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -625,18 +473,11 @@ class ContentReportDB(Base):
     )
 
     # Relationships
-    container: Mapped[GearContainerDB] = relationship("GearContainerDB", foreign_keys=[container_id], back_populates="reports")
+    # One-way to GearItemDBV2 -- nothing in this codebase navigates .container, so there's no
+    # back_populates target to keep in sync.
+    container: Mapped[GearItemDBV2] = relationship("GearItemDBV2", foreign_keys=[container_id])
     reporter: Mapped[UserDB] = relationship("UserDB", foreign_keys=[reporter_user_id])
     reviewer: Mapped[UserDB | None] = relationship("UserDB", foreign_keys=[reviewed_by])
 
     def __repr__(self) -> str:
         return f"<ContentReportDB(id={self.id}, container_id={self.container_id}, reason={self.reason}, status={self.status})>"
-
-
-# Add reports relationship to GearContainerDB
-GearContainerDB.reports = relationship(
-    "ContentReportDB",
-    foreign_keys=[ContentReportDB.container_id],
-    back_populates="container",
-    cascade="all, delete-orphan",
-)

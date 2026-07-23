@@ -4,6 +4,22 @@ Naprawa 6 alertów Dependabota (5 unikalnych pakietów). Status: **DONE** (2026-
 zweryfikowane `type-check` + `lint` + `test:run` (414 zielonych) + `pnpm build` (PWA OK).
 `pnpm audit` potwierdza: żaden z 6 alertów nie pozostał. Menedżer pakietów: **pnpm 10.18.3**.
 
+> **2026-07-22** — GitHub zgłosił kolejną falę: 5 nowych alertów (**5 high**), wszystkie
+> tranzytywne, potwierdzone lokalnie przez `pnpm audit`:
+> - `brace-expansion` <1.1.16 (via `eslint`→`minimatch`) — DoS (GHSA-3jxr-9vmj-r5cp)
+> - `brace-expansion` ≥3.0.0 <5.0.7 (via `@sentry/vite-plugin`/`vite-plugin-pwa`→`glob`→`minimatch`) — tenże GHSA, druga gałąź wersji
+> - `js-yaml` ≥4.0.0 <4.3.0 (via `eslint`→`@eslint/eslintrc`) — DoS przez YAML merge-key (GHSA-52cp-r559-cp3m)
+> - `shell-quote` ≤1.8.4 (via `npm-run-all2`) — DoS w `parse()` (GHSA-395f-4hp3-45gv); poprzedni override (`<1.8.4`→`^1.8.4`) już nie wystarczał, nowy patch to `1.9.0`
+> - `linkify-it` ≤5.0.1 (via **prod** `markdown-it`, używane w AI chat/markdown rendering) — DoS w skanerze `mailto:` (GHSA-v245-v573-v5vm)
+>
+> Wszystkie naprawione przez rozszerzenie `pnpm.overrides` (patch/minor bumpy, bez majorów):
+> `brace-expansion@<1.1.16→^1.1.16`, `brace-expansion@>=3.0.0 <5.0.7→^5.0.7`,
+> `js-yaml@>=4.0.0 <4.3.0→^4.3.0`, `shell-quote@<1.9.0→^1.9.0` (zastępuje stary wpis),
+> `linkify-it@<5.0.2→^5.0.2`. Zweryfikowane: `pnpm audit` → **No known vulnerabilities found**,
+> `type-check`, `lint`, `test:run` (375 zielonych), `pnpm build` (PWA precache 230 wpisów, OK).
+> Uwaga przy okazji `pnpm install`: `axios` podbił się w zakresie caret `^1.17.0` → `1.18.0`
+> (lockfile refresh, nie ręczna zmiana) — brak zmian w `package.json`.
+
 > Zastosowane: `axios` → `^1.17.0` (bezpośredni) oraz `pnpm.overrides` dla shell-quote
 > (1.8.4), @babel/plugin-transform-modules-systemjs (7.29.7), serialize-javascript (7.0.5),
 > esbuild (0.28.1, via vite — patrz aktualizacja 2026-07-02 niżej).

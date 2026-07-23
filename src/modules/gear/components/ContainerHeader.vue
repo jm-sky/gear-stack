@@ -169,6 +169,29 @@ const handlePublish = async () => {
     handleError(error, { fallbackMessage: t('common.error') })
   }
 }
+
+const handleUnpublish = async () => {
+  try {
+    await updateItem(props.container.id, { isPublic: false })
+    toast.success(t('common.success'))
+    emit('refresh')
+  } catch (error) {
+    console.error('Error unpublishing container:', error)
+    handleError(error, { fallbackMessage: t('common.error') })
+  }
+}
+
+const handleCopyPublicLink = async () => {
+  try {
+    const path = GearRoutePath.PublicContainerDetailById(props.container.id)
+    const url = `${window.location.origin}${path}`
+    await navigator.clipboard.writeText(url)
+    toast.success(t('gear.actions.copyPublicLinkSuccess'))
+  } catch (error) {
+    console.error('Error copying public link:', error)
+    handleError(error, { fallbackMessage: t('common.error') })
+  }
+}
 </script>
 
 <template>
@@ -217,7 +240,31 @@ const handlePublish = async () => {
           </div>
           <div class="flex items-center gap-2 flex-wrap">
             <ContainerTypeBadge :container />
-            <PublicContainerBadge v-if="container.isPublic" />
+            <DropdownMenu v-if="container.isPublic && shouldUseAPI">
+              <DropdownMenuTrigger as-child>
+                <button
+                  type="button"
+                  class="inline-flex rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  :aria-label="t('gear.actions.publicBadgeActions')"
+                >
+                  <PublicContainerBadge />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuItem @click="handleCopyPublicLink">
+                  <Link2 class="size-4" />
+                  {{ t('gear.actions.copyPublicLink') }}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  class="text-destructive focus:text-destructive"
+                  @click="handleUnpublish"
+                >
+                  <PublishIcon class="size-4" />
+                  {{ t('gear.actions.unpublishContainer') }}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <PublicContainerBadge v-else-if="container.isPublic" />
             <Badge
               v-tooltip.bottom="t('common.created')"
               variant="secondary"

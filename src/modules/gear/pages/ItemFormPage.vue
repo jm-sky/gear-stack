@@ -19,7 +19,7 @@ import type { IItemWithContainer } from '../utils/allItemsColumns'
 import ItemCatalogSelector from '../components/ItemCatalogSelector.vue'
 import ItemFormFields from '../components/ItemFormFields.vue'
 import { useContainerV2 } from '../composables/useContainerV2'
-import { useGearV2 } from '../composables/useGearV2'
+import { useGearMutations } from '../composables/useGearMutations'
 import { useNavigationReturn } from '../composables/useNavigationReturn'
 import { GearRoutePath } from '../routes'
 import { recognizeCategory } from '../utils/categoryRecognition'
@@ -39,7 +39,7 @@ import { toBasicWeightUnit } from '../utils/weightUnits'
 const router = useRouter()
 const route = useRoute()
 const { t } = useI18n()
-const { createItem, updateItem, getItemById } = useGearV2()
+const { createItem, updateItem, getItemById } = useGearMutations()
 const { handleError } = useHandleError()
 const { setTitle } = usePageTitle()
 
@@ -313,7 +313,7 @@ const handleRecognizeParameters = () => {
 
 <template>
   <AuthenticatedLayout>
-    <div v-if="container" class="max-w-2xl mx-auto space-y-6">
+    <div v-if="container" class="max-w-4xl mx-auto space-y-6">
       <!-- Header - always visible -->
       <div>
         <h1 class="text-3xl font-bold">

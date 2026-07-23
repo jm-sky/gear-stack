@@ -9,7 +9,7 @@ import secrets
 from datetime import UTC, datetime, timedelta
 from typing import Any, Literal, cast
 
-from sqlalchemy import and_, select
+from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
 from app.core.config import get_settings
@@ -18,31 +18,27 @@ from app.modules.auth.db_models import UserDB
 from app.modules.settings.db_models import UserSettingsDB
 
 from .db_models import (
-    GearContainerDB,
-    GearItemDB,
     GlobalCatalogueItemDB,
 )
+from .db_models_v2 import GearItemDBV2
 from .item_image_repository import ItemImageRepository
 from .repository import GearRepository
+from .repository_v2 import GearRepositoryV2
 from .schemas import (
-    BatchOrderUpdateRequest,
-    ContainerCreate,
     ContainerInfo,
     ContainerResponse,
-    ContainerUpdate,
     ContentReportListResponse,
     ContentReportResponse,
     GlobalCatalogueItemCreate,
     GlobalCatalogueItemResponse,
     GlobalCatalogueItemSearchParams,
     GlobalCatalogueItemUpdate,
-    ItemCreate,
     ItemPromotionStatus,
     ItemResponse,
-    ItemUpdate,
     ReportReason,
     ReportStatus,
 )
+from .schemas_v2 import GearItemCreateV2, GearItemUpdateV2
 
 logger = logging.getLogger(__name__)
 
@@ -84,6 +80,7 @@ class GearService:
         self.repository = repository
         self._image_repository = ItemImageRepository(repository.db)
         self._storage = get_storage_adapter()
+        self._repository_v2 = GearRepositoryV2(repository.db)
 
     async def _delete_all_item_images(self, item_id: str) -> int:
         """Delete all images for an item from storage and database.
@@ -155,134 +152,6 @@ class GearService:
 
         return deleted_count
 
-    def _map_item_to_response(
-        self,
-        item: GearItemDB,
-        primary_image_url: str | None = None,
-        container: GearContainerDB | None = None,
-    ) -> ItemResponse:
-        """Map database item to response schema.
-
-        Args:
-            item: Database item model
-            primary_image_url: Optional primary image URL for the item
-            container: Optional container model (if not provided, will try to use item.container)
-
-        Returns:
-            Item response schema
-        """
-        # Use provided container or fallback to item.container if available
-        container_obj = container or (item.container if hasattr(item, "container") and item.container else None)
-        container_info = None
-        if container_obj:
-            container_info = ContainerInfo(
-                id=container_obj.id,
-                name=container_obj.name,
-                type=container_obj.type,
-                color=cast(ContainerColor | None, container_obj.color),
-            )
-
-        # Cast database string fields to their Literal types
-        return ItemResponse(
-            id=item.id,
-            name=item.name,
-            category=item.category,
-            quantity=item.quantity,
-            weight=item.weight,
-            weightUnit=cast(WeightUnit, item.weight_unit),
-            notes=item.notes,
-            expirationDate=item.expiration_date,
-            shelfLife=item.shelf_life,
-            priority=cast(Priority, item.priority),
-            status=cast(ItemStatus, item.status),
-            containerId=item.nested_container_id,  # Reference to nested container if item is a container
-            container=container_info,  # Information about parent container where item is located
-            price=item.price,
-            currency=item.currency,
-            url=item.url,
-            brand=item.brand,
-            color=item.color,
-            quality=cast(Quality | None, item.quality),
-            linkedItemId=item.linked_item_id,
-            catalogueItemId=item.catalogue_item_id,
-            wearable=item.wearable,
-            consumable=item.consumable,
-            order=item.order,
-            showOnContainer=item.show_on_container,
-            primaryImageUrl=primary_image_url,
-            promote_count=item.promote_count,
-            createdAt=item.created_at,
-            updatedAt=item.updated_at,
-        )
-
-    async def _map_container_to_response(self, container: GearContainerDB, ratings_data: dict[str, Any] | None = None) -> ContainerResponse:
-        """Map database container to response schema.
-
-        Args:
-            container: Database container model
-            ratings_data: Optional ratings data from repository
-
-        Returns:
-            Container response schema
-        """
-        # Access items through the relationship - mypy doesn't know about SQLAlchemy relationships
-        container_items = container.items  # type: ignore[attr-defined]
-
-        # Batch fetch primary images for all items
-        item_ids = [item.id for item in container_items]
-        primary_images = await self._image_repository.get_primary_images_by_items(item_ids)
-
-        # Get URLs for all primary images
-        image_urls: dict[str, str] = {}
-        for item_id, image in primary_images.items():
-            url = image.external_url or await self._storage.get_url(image.file_path)
-            image_urls[item_id] = url
-
-        # Map items to responses with primary image URLs and container information
-        items = [self._map_item_to_response(item, image_urls.get(item.id), container=container) for item in container_items]
-
-        # Map rating fields if provided
-        owner_rating = None
-        user_rating = None
-        average_user_rating = None
-        user_rating_count = 0
-
-        if ratings_data:
-            owner_rating = ratings_data.get("owner_rating")
-            user_rating = ratings_data.get("user_rating")
-            average_user_rating = ratings_data.get("average_user_rating")
-            user_rating_count = ratings_data.get("user_rating_count", 0)
-
-        # Cast database string fields to their Literal types
-        return ContainerResponse(
-            id=container.id,
-            name=container.name,
-            description=container.description,
-            type=container.type,
-            color=cast(ContainerColor | None, container.color),
-            parentContainerId=container.parent_container_id,
-            brand=container.brand,
-            price=container.price,
-            hideWhenNested=container.hide_when_nested,
-            weight=container.weight,
-            weightUnit=cast(WeightUnit | None, container.weight_unit),
-            maxWeight=container.max_weight,
-            maxWeightUnit=cast(WeightUnit | None, container.max_weight_unit),
-            url=container.url,
-            isPublic=container.is_public,
-            favorite=container.favorite,
-            showItemImages=container.show_item_images,
-            authorName=None,  # Not populated for private containers
-            authorId=None,  # Not populated for private containers (user already knows they own it)
-            items=items,
-            ownerRating=owner_rating,
-            userRating=user_rating,
-            averageUserRating=(float(average_user_rating) if average_user_rating else None),
-            userRatingCount=user_rating_count,
-            createdAt=container.created_at,
-            updatedAt=container.updated_at,
-        )
-
     async def _get_catalogue_item_creator_name(self, item: GlobalCatalogueItemDB) -> str | None:
         """Get creator name for catalogue item if profile is public.
 
@@ -306,46 +175,104 @@ class GearService:
 
         return None
 
-    async def _map_container_to_response_with_author(self, container: GearContainerDB, ratings_data: dict[str, Any] | None = None) -> ContainerResponse:
-        """Map database container to response schema with author name.
+    def _map_item_v2_to_response(
+        self,
+        item: GearItemDBV2,
+        primary_image_url: str | None = None,
+        container: GearItemDBV2 | None = None,
+    ) -> ItemResponse:
+        """Map a gear_items_v2 item row to the (V1-shaped) ItemResponse schema.
+
+        Counterpart to _map_item_to_response, for the public-browsing/share-token paths that
+        have been repointed at gear_items_v2 (docs/plans/2026-07-23-gear-backend-v1-v2-unification.md,
+        Phase 3b). Field names differ from GearItemDB in a few places (order_index vs order,
+        container_type vs type); there is no V2 equivalent of the legacy nested_container_id
+        field (V2 represents nested containers as ordinary child rows via parent_item_id, not a
+        separate item field), so containerId is always None here.
 
         Args:
-            container: Database container model (must have user relationship loaded)
+            item: gear_items_v2 row (item_type='item')
+            primary_image_url: Optional primary image URL for the item
+            container: Optional parent container row (item_type='container'), for ContainerInfo
+
+        Returns:
+            Item response schema
+        """
+        container_info = None
+        if container is not None:
+            container_info = ContainerInfo(
+                id=container.id,
+                name=container.name,
+                type=cast(str, container.container_type),
+                color=cast(ContainerColor | None, container.color),
+            )
+
+        # weight/weightUnit are nullable on gear_items_v2 (GearItemCreateV2 doesn't require or
+        # default them, unlike category/quantity/status/priority) but required by the V1-shaped
+        # ItemResponse schema -- default to "unknown weight" rather than raising a validation
+        # error on every item created without one.
+        return ItemResponse(
+            id=item.id,
+            name=item.name,
+            category=cast(str, item.category),
+            quantity=cast(int, item.quantity),
+            weight=item.weight if item.weight is not None else 0.0,
+            weightUnit=cast(WeightUnit, item.weight_unit) if item.weight_unit else "g",
+            notes=item.notes,
+            expirationDate=item.expiration_date,
+            shelfLife=item.shelf_life,
+            priority=cast(Priority, item.priority),
+            status=cast(ItemStatus, item.status),
+            containerId=None,  # No V2 equivalent of legacy nested_container_id
+            container=container_info,
+            price=item.price,
+            currency=item.currency,
+            url=item.url,
+            brand=item.brand,
+            color=item.color,
+            quality=cast(Quality | None, item.quality),
+            linkedItemId=item.linked_item_id,
+            catalogueItemId=item.catalogue_item_id,
+            wearable=item.wearable,
+            consumable=item.consumable,
+            order=item.order_index,
+            showOnContainer=item.show_on_container,
+            primaryImageUrl=primary_image_url,
+            promote_count=item.promote_count or 0,
+            createdAt=item.created_at,
+            updatedAt=item.updated_at,
+        )
+
+    async def _map_container_v2_to_response_with_author(self, container: GearItemDBV2, ratings_data: dict[str, Any] | None = None) -> ContainerResponse:
+        """Map a gear_items_v2 container row to ContainerResponse, with author name.
+
+        Counterpart to _map_container_to_response_with_author, for the public-browsing/
+        share-token paths repointed at gear_items_v2 (Phase 3b of
+        docs/plans/2026-07-23-gear-backend-v1-v2-unification.md). `container.children` must be
+        eager-loaded by the caller's query (selectinload) -- unlike GearContainerDB.items, it
+        includes both nested sub-containers and items, so it's filtered to item_type='item' here
+        to match the shape GearContainerDB.items always had.
+
+        Args:
+            container: gear_items_v2 row (item_type='container'), with .children and .user
+                eager-loaded
             ratings_data: Optional ratings data from repository
 
         Returns:
             Container response schema with author name
         """
-        # Access items through the relationship - mypy doesn't know about SQLAlchemy relationships
-        container_items = container.items  # type: ignore[attr-defined]
+        container_items = [child for child in container.children if child.item_type == "item"]
 
-        # Batch fetch primary images for all items
         item_ids = [item.id for item in container_items]
         primary_images = await self._image_repository.get_primary_images_by_items(item_ids)
 
-        # Get URLs for all primary images
         image_urls: dict[str, str] = {}
         for item_id, image in primary_images.items():
             url = image.external_url or await self._storage.get_url(image.file_path)
             image_urls[item_id] = url
 
-        # Map items to responses with primary image URLs and container information
-        items = [self._map_item_to_response(item, image_urls.get(item.id), container=container) for item in container_items]
+        items = [self._map_item_v2_to_response(item, image_urls.get(item.id), container=container) for item in container_items]
 
-        # Filter nested containers - only show items if nested container is public
-        filtered_items = []
-        for item in items:
-            if item.containerId:  # This is a nested container reference
-                # We need to check if the nested container is public
-                # For now, we'll include it and let the frontend handle filtering
-                # In a full implementation, we'd join and check is_public
-                filtered_items.append(item)
-            else:
-                filtered_items.append(item)
-
-        # Get author name and ID from user relationship
-        # For public containers, user relationship is always loaded via joinedload
-        # Respect user's public profile settings: only expose author info if profile is public
         author_name = None
         author_id = None
         if hasattr(container, "user") and container.user:
@@ -357,7 +284,6 @@ class GearService:
                 author_name = container.user.name
                 author_id = container.user.id
 
-        # Map rating fields if provided
         owner_rating = None
         user_rating = None
         average_user_rating = None
@@ -369,14 +295,13 @@ class GearService:
             average_user_rating = ratings_data.get("average_user_rating")
             user_rating_count = ratings_data.get("user_rating_count", 0)
 
-        # Cast database string fields to their Literal types
         return ContainerResponse(
             id=container.id,
             name=container.name,
             description=container.description,
-            type=container.type,
+            type=cast(str, container.container_type),
             color=cast(ContainerColor | None, container.color),
-            parentContainerId=container.parent_container_id,
+            parentContainerId=container.parent_item_id,
             brand=container.brand,
             price=container.price,
             hideWhenNested=container.hide_when_nested,
@@ -385,12 +310,12 @@ class GearService:
             maxWeight=container.max_weight,
             maxWeightUnit=cast(WeightUnit | None, container.max_weight_unit),
             url=container.url,
-            isPublic=container.is_public,
-            favorite=container.favorite,
+            isPublic=cast(bool, container.is_public),
+            favorite=cast(bool, container.favorite),
             showItemImages=container.show_item_images,
             authorName=author_name,
             authorId=author_id,
-            items=filtered_items,
+            items=items,
             ownerRating=owner_rating,
             userRating=user_rating,
             averageUserRating=(float(average_user_rating) if average_user_rating else None),
@@ -398,95 +323,6 @@ class GearService:
             createdAt=container.created_at,
             updatedAt=container.updated_at,
         )
-
-    async def create_container(
-        self,
-        user_id: str,
-        data: ContainerCreate,
-        default_public: bool = False,
-        billing_service: Any = None,
-    ) -> ContainerResponse:
-        """Create a new gear container.
-
-        Args:
-            user_id: Owner user ID
-            data: Container creation data
-            default_public: Default public setting from user preferences
-            billing_service: Optional billing service for limit validation
-
-        Returns:
-            Created container response
-
-        Raises:
-            HTTPException: If container limit is reached
-        """
-        # Check limits if billing service is provided
-        if billing_service:
-            try:
-                limits = await billing_service.get_subscription_limits(user_id)
-                containers_count = await self.repository.count_user_containers(user_id)
-                if containers_count >= limits.containersLimit:
-                    from fastapi import HTTPException
-
-                    raise HTTPException(
-                        status_code=403,
-                        detail=f"Container limit reached ({containers_count}/{limits.containersLimit}). Upgrade to premium for more containers.",
-                    )
-            except Exception as e:
-                # If limit check fails, log but don't block creation (graceful degradation)
-                logger.warning(f"Failed to check container limits: {e}")
-
-        # Use default_public if isPublic is not explicitly set
-        if data.isPublic is None:
-            data.isPublic = default_public
-        container = await self.repository.create_container(user_id, data)
-
-        # New container has no ratings yet
-        ratings_data = {
-            "owner_rating": None,
-            "user_rating": None,
-            "average_user_rating": None,
-            "user_rating_count": 0,
-        }
-
-        return await self._map_container_to_response(container, dict(ratings_data) if ratings_data else None)
-
-    async def get_container(self, container_id: str, user_id: str) -> ContainerResponse | None:
-        """Get a container by ID.
-
-        Args:
-            container_id: Container ID
-            user_id: Owner user ID
-
-        Returns:
-            Container response if found, None otherwise
-        """
-        container = await self.repository.get_container(container_id, user_id)
-        if not container:
-            return None
-
-        is_owner = container.user_id == user_id
-        ratings_data = await self.repository.get_container_ratings_data(container_id, requesting_user_id=user_id, is_owner=is_owner)
-
-        return await self._map_container_to_response(container, dict(ratings_data) if ratings_data else None)
-
-    async def get_containers(self, user_id: str, skip: int = 0, limit: int = 100) -> list[ContainerResponse]:
-        """Get all containers for a user.
-
-        Args:
-            user_id: Owner user ID
-            skip: Number of records to skip
-            limit: Maximum number of records to return
-
-        Returns:
-            List of container responses
-        """
-        containers = await self.repository.get_containers(user_id, skip, limit)
-        results = []
-        for container in containers:
-            ratings_data = await self.repository.get_container_ratings_data(container.id, requesting_user_id=user_id, is_owner=True)
-            results.append(await self._map_container_to_response(container, dict(ratings_data) if ratings_data else None))
-        return results
 
     async def get_public_containers(self, skip: int = 0, limit: int = 100, requesting_user_id: str | None = None) -> list[ContainerResponse]:
         """Get all public containers from all users.
@@ -504,7 +340,7 @@ class GearService:
         for container in containers:
             try:
                 ratings_data = await self.repository.get_container_ratings_data(container.id, requesting_user_id=requesting_user_id, is_owner=False)
-                mapped = await self._map_container_to_response_with_author(container, dict(ratings_data) if ratings_data else None)
+                mapped = await self._map_container_v2_to_response_with_author(container, dict(ratings_data) if ratings_data else None)
                 results.append(mapped)
             except Exception as e:
                 # Log error but continue - one container error shouldn't prevent others from being returned
@@ -530,7 +366,7 @@ class GearService:
 
         ratings_data = await self.repository.get_container_ratings_data(container_id, requesting_user_id=requesting_user_id, is_owner=False)
 
-        return await self._map_container_to_response_with_author(container, dict(ratings_data) if ratings_data else None)
+        return await self._map_container_v2_to_response_with_author(container, dict(ratings_data) if ratings_data else None)
 
     async def get_container_by_share_token(self, token: str, requesting_user_id: str | None = None) -> ContainerResponse | None:
         """Get a container by share token.
@@ -548,7 +384,7 @@ class GearService:
 
         ratings_data = await self.repository.get_container_ratings_data(container.id, requesting_user_id=requesting_user_id, is_owner=False)
 
-        return await self._map_container_to_response_with_author(container, dict(ratings_data) if ratings_data else None)
+        return await self._map_container_v2_to_response_with_author(container, dict(ratings_data) if ratings_data else None)
 
     async def create_share_token(self, container_id: str, user_id: str, expires_at: datetime | None = None) -> str:
         """Create a share token for a container.
@@ -564,9 +400,11 @@ class GearService:
         Raises:
             ValueError: If container not found or user doesn't own it
         """
-        # Verify container ownership
-        container = await self.repository.get_container(container_id, user_id)
-        if not container:
+        # Verify container ownership (gear_items_v2) -- checking legacy gear_containers here
+        # would always fail for V2-native containers, i.e. any container created through
+        # today's app (see #043).
+        container = await self._repository_v2.get_item(container_id, user_id)
+        if not container or container.item_type != "container":
             raise ValueError("Container not found or access denied")
 
         # Generate unique token
@@ -614,363 +452,6 @@ class GearService:
             True if token was revoked, False otherwise
         """
         return await self.repository.revoke_share_token(token, user_id)
-
-    async def update_container(self, container_id: str, user_id: str, data: ContainerUpdate) -> ContainerResponse | None:
-        """Update a container.
-
-        Args:
-            container_id: Container ID
-            user_id: Owner user ID
-            data: Update data
-
-        Returns:
-            Updated container response if found, None otherwise
-        """
-        container = await self.repository.update_container(container_id, user_id, data)
-        if not container:
-            return None
-
-        ratings_data = await self.repository.get_container_ratings_data(container_id, requesting_user_id=user_id, is_owner=True)
-
-        return await self._map_container_to_response(container, dict(ratings_data) if ratings_data else None)
-
-    async def delete_container(self, container_id: str, user_id: str) -> bool:
-        """Delete a container and all its items.
-
-        Args:
-            container_id: Container ID
-            user_id: Owner user ID
-
-        Returns:
-            True if deleted, False if not found
-        """
-        # Get container with items to delete images before deletion
-        container = await self.repository.get_container(container_id, user_id)
-        if not container:
-            return False
-
-        # Get all items in the container (including nested containers' items)
-        items = await self.repository.get_items(container_id, user_id, skip=0, limit=10000)
-        item_ids = [item.id for item in items]
-
-        # Delete images for all items
-        for item_id in item_ids:
-            await self._delete_all_item_images(item_id)
-
-        # Delete container (cascade delete will handle items and images in database)
-        return await self.repository.delete_container(container_id, user_id)
-
-    async def delete_all_containers(self, user_id: str) -> int:
-        """Delete all containers for a user.
-
-        Args:
-            user_id: Owner user ID
-
-        Returns:
-            Number of deleted containers
-        """
-        # Get all containers with items to delete images before deletion
-        # Use a high limit to get all containers (or fetch in batches if needed)
-        containers = await self.repository.get_containers(user_id, skip=0, limit=10000)
-
-        # Collect all item IDs from all containers
-        all_item_ids = []
-        for container in containers:
-            # Get items for this container (use high limit to get all items)
-            items = await self.repository.get_items(container.id, user_id, skip=0, limit=10000)
-            all_item_ids.extend([item.id for item in items])
-
-        # Delete images for all items
-        for item_id in all_item_ids:
-            await self._delete_all_item_images(item_id)
-
-        # Delete containers (cascade delete will handle items and images in database)
-        return await self.repository.delete_all_containers(user_id)
-
-    async def create_item(
-        self,
-        container_id: str,
-        user_id: str,
-        data: ItemCreate,
-        billing_service: Any = None,
-    ) -> ItemResponse | None:
-        """Create a new gear item in a container.
-
-        Args:
-            container_id: Parent container ID
-            user_id: Owner user ID
-            data: Item creation data
-            billing_service: Optional billing service for limit validation
-
-        Returns:
-            Created item response if container exists, None otherwise
-
-        Raises:
-            HTTPException: If item limit is reached
-        """
-        # Check limits if billing service is provided
-        if billing_service:
-            try:
-                limits = await billing_service.get_subscription_limits(user_id)
-                items_count = await self.repository.count_user_items(user_id)
-                if items_count >= limits.itemsLimit:
-                    from fastapi import HTTPException
-
-                    raise HTTPException(
-                        status_code=403,
-                        detail=f"Item limit reached ({items_count}/{limits.itemsLimit}). Upgrade to premium for more items.",
-                    )
-            except Exception as e:
-                # If limit check fails, log but don't block creation (graceful degradation)
-                logger.warning(f"Failed to check item limits: {e}")
-
-        item = await self.repository.create_item(container_id, user_id, data)
-        if not item:
-            return None
-
-        # Get primary image URL (if exists)
-        primary_image = await self._image_repository.get_primary_image(item.id)
-        primary_image_url = None
-        if primary_image:
-            # If external_url exists, use it. Otherwise, get URL from storage.
-            if primary_image.external_url:
-                primary_image_url = primary_image.external_url
-            else:
-                primary_image_url = await self._storage.get_url(primary_image.file_path)
-
-        # Load container for the created item
-        container = await self.repository.get_container(container_id, user_id)
-        return self._map_item_to_response(item, primary_image_url, container=container)
-
-    async def get_item(self, item_id: str, user_id: str) -> ItemResponse | None:
-        """Get an item by ID.
-
-        Args:
-            item_id: Item ID
-            user_id: Owner user ID
-
-        Returns:
-            Item response if found, None otherwise (with container information)
-        """
-        item = await self.repository.get_item(item_id, user_id)
-        if not item:
-            return None
-
-        # Get primary image URL
-        primary_image = await self._image_repository.get_primary_image(item_id)
-        primary_image_url = None
-        if primary_image:
-            # If external_url exists, use it. Otherwise, get URL from storage.
-            if primary_image.external_url:
-                primary_image_url = primary_image.external_url
-            else:
-                primary_image_url = await self._storage.get_url(primary_image.file_path)
-
-        # Container is already loaded via joinedload in repository.get_item
-        return self._map_item_to_response(item, primary_image_url, container=item.container)
-
-    async def get_items(self, container_id: str, user_id: str, skip: int = 0, limit: int = 100) -> list[ItemResponse]:
-        """Get all items in a container.
-
-        Args:
-            container_id: Parent container ID
-            user_id: Owner user ID
-            skip: Number of records to skip
-            limit: Maximum number of records to return
-
-        Returns:
-            List of item responses with primary image URLs and container information
-        """
-        items = await self.repository.get_items(container_id, user_id, skip, limit)
-
-        # Batch fetch primary images for all items
-        item_ids = [item.id for item in items]
-        primary_images = await self._image_repository.get_primary_images_by_items(item_ids)
-
-        # Get URLs for all primary images
-        image_urls: dict[str, str] = {}
-        for item_id, image in primary_images.items():
-            url = image.external_url or await self._storage.get_url(image.file_path)
-            image_urls[item_id] = url
-
-        # Map items to responses with primary image URLs and container information
-        # Container is already loaded via joinedload in repository.get_items
-        return [self._map_item_to_response(item, image_urls.get(item.id), container=item.container) for item in items]
-
-    async def get_all_items(self, user_id: str, skip: int = 0, limit: int = 100) -> list[ItemResponse]:
-        """Get all items for a user across all containers.
-
-        Args:
-            user_id: Owner user ID
-            skip: Number of records to skip
-            limit: Maximum number of records to return
-
-        Returns:
-            List of item responses with primary image URLs and container information
-        """
-        items = await self.repository.get_all_items(user_id, skip, limit)
-
-        # Batch fetch primary images for all items
-        item_ids = [item.id for item in items]
-        primary_images = await self._image_repository.get_primary_images_by_items(item_ids)
-
-        # Get URLs for all primary images
-        image_urls: dict[str, str] = {}
-        for item_id, image in primary_images.items():
-            url = image.external_url or await self._storage.get_url(image.file_path)
-            image_urls[item_id] = url
-
-        # Map items to responses with primary image URLs and container information
-        # Container is already loaded via joinedload in repository.get_all_items
-        return [self._map_item_to_response(item, image_urls.get(item.id), container=item.container) for item in items]
-
-    async def update_item(self, item_id: str, user_id: str, data: ItemUpdate) -> ItemResponse | None:
-        """Update a gear item.
-
-        Args:
-            item_id: Item ID
-            user_id: Owner user ID
-            data: Update data
-
-        Returns:
-            Updated item response if found, None otherwise
-        """
-        item = await self.repository.update_item(item_id, user_id, data)
-        if not item:
-            return None
-
-        # Get primary image URL (if exists)
-        primary_image = await self._image_repository.get_primary_image(item_id)
-        primary_image_url = None
-        if primary_image:
-            # If external_url exists, use it. Otherwise, get URL from storage.
-            if primary_image.external_url:
-                primary_image_url = primary_image.external_url
-            else:
-                primary_image_url = await self._storage.get_url(primary_image.file_path)
-
-        # Container is already loaded via get_item in repository.update_item
-        return self._map_item_to_response(item, primary_image_url, container=item.container)
-
-    async def move_item(self, item_id: str, user_id: str, target_container_id: str) -> ItemResponse | None:
-        """Move a gear item to a different container.
-
-        Args:
-            item_id: Item ID to move
-            user_id: Owner user ID
-            target_container_id: Target container ID
-
-        Returns:
-            Updated item response if found and moved, None if item not found
-
-        Raises:
-            ValueError: If target container not found or doesn't belong to user
-        """
-        item = await self.repository.move_item(item_id, user_id, target_container_id)
-        if not item:
-            return None
-
-        # Get primary image URL (if exists)
-        primary_image = await self._image_repository.get_primary_image(item_id)
-        primary_image_url = None
-        if primary_image:
-            if primary_image.external_url:
-                primary_image_url = primary_image.external_url
-            else:
-                primary_image_url = await self._storage.get_url(primary_image.file_path)
-
-        # Container is already loaded via move_item in repository
-        return self._map_item_to_response(item, primary_image_url, container=item.container)
-
-    async def delete_item(self, item_id: str, user_id: str) -> bool:
-        """Delete a gear item.
-
-        Args:
-            item_id: Item ID
-            user_id: Owner user ID
-
-        Returns:
-            True if deleted, False if not found
-        """
-        # Delete all item images from storage before deleting the item
-        # (database records will be deleted by cascade, but we need to clean up storage)
-        await self._delete_all_item_images(item_id)
-
-        return await self.repository.delete_item(item_id, user_id)
-
-    async def batch_update_item_order(self, user_id: str, data: BatchOrderUpdateRequest) -> list[ItemResponse]:
-        """Batch update items' order values.
-
-        Args:
-            user_id: Owner user ID
-            data: Batch order update request with list of item IDs and their new order values
-
-        Returns:
-            List of updated item responses
-
-        Raises:
-            ValueError: If any item ID is not found or doesn't belong to the user
-        """
-        items = await self.repository.batch_update_item_order(user_id, data)
-        return [self._map_item_to_response(item) for item in items]
-
-    def calculate_container_weight(self, container: ContainerResponse) -> dict[str, float]:
-        """Calculate total weight of a container in grams and kilograms.
-
-        Args:
-            container: Container response with items
-
-        Returns:
-            Dictionary with weight in grams and kilograms
-        """
-        total_grams = 0.0
-        for item in container.items:
-            if item.weightUnit == "kg":
-                total_grams += item.weight * 1000 * item.quantity
-            elif item.weightUnit == "oz":
-                # 1 oz = 28.3495 g
-                total_grams += item.weight * 28.3495 * item.quantity
-            elif item.weightUnit == "lb":
-                # 1 lb = 453.592 g
-                total_grams += item.weight * 453.592 * item.quantity
-            else:  # g (default)
-                total_grams += item.weight * item.quantity
-
-        return {
-            "grams": total_grams,
-            "kilograms": total_grams / 1000,
-        }
-
-    def calculate_container_readiness(self, container: ContainerResponse) -> dict[str, int | float]:
-        """Calculate container readiness statistics.
-
-        Args:
-            container: Container response with items
-
-        Returns:
-            Dictionary with readiness statistics
-        """
-        if not container.items:
-            return {
-                "totalItems": 0,
-                "ownedItems": 0,
-                "missingItems": 0,
-                "toBuyItems": 0,
-                "readinessPercentage": 0.0,
-            }
-
-        owned = sum(1 for item in container.items if item.status == "owned")
-        missing = sum(1 for item in container.items if item.status == "missing")
-        to_buy = sum(1 for item in container.items if item.status == "toBuy")
-        total = len(container.items)
-
-        return {
-            "totalItems": total,
-            "ownedItems": owned,
-            "missingItems": missing,
-            "toBuyItems": to_buy,
-            "readinessPercentage": (owned / total * 100) if total > 0 else 0.0,
-        }
 
     # Global Catalogue Methods
     async def get_catalogue_items(
@@ -1073,7 +554,6 @@ class GearService:
         """
         item = await self.repository.create_catalogue_item(user_id, data)
         # Reload item with creator relationship
-        from sqlalchemy.orm import joinedload
 
         reload_stmt = select(GlobalCatalogueItemDB).where(GlobalCatalogueItemDB.id == item.id).options(joinedload(GlobalCatalogueItemDB.creator))
         reload_result = await self.repository.db.execute(reload_stmt)
@@ -1106,7 +586,6 @@ class GearService:
         if not item:
             return None
         # Reload item with creator relationship
-        from sqlalchemy.orm import joinedload
 
         reload_stmt = select(GlobalCatalogueItemDB).where(GlobalCatalogueItemDB.id == item.id).options(joinedload(GlobalCatalogueItemDB.creator))
         reload_result = await self.repository.db.execute(reload_stmt)
@@ -1167,13 +646,17 @@ class GearService:
         if not catalogue_item or not catalogue_item.is_active:
             return None
 
-        # Verify container belongs to user
-        container = await self.repository.get_container(container_id, user_id)
-        if not container:
+        # Verify container belongs to user (gear_items_v2) -- checking legacy gear_containers
+        # here would always fail for V2-native containers, i.e. any container created through
+        # today's app (see #043).
+        container = await self._repository_v2.get_item(container_id, user_id)
+        if not container or container.item_type != "container":
             return None
 
         # Create item from catalogue data
-        item_data = ItemCreate(  # type: ignore[call-arg]
+        item_data = GearItemCreateV2(  # type: ignore[call-arg]
+            itemType="item",
+            parentItemId=container_id,
             name=catalogue_item.name,
             category=catalogue_item.category,
             weight=catalogue_item.weight,
@@ -1188,9 +671,8 @@ class GearService:
         )
 
         # Create item
-        created_item = await self.create_item(container_id, user_id, item_data)
-        if not created_item:
-            return None
+        created_item_db = await self._repository_v2.create_item(user_id, item_data)
+        created_item = self._map_item_v2_to_response(created_item_db)
 
         # Copy images if requested
         # Note: We copy images before verifying item exists to avoid transaction isolation issues
@@ -1236,12 +718,10 @@ class GearService:
             return False
 
         # Verify item exists before starting to copy images
-        # This is a safety check to ensure the item is in the database
-        from sqlalchemy import select
-
-        from app.modules.gear.db_models import GearItemDB
-
-        item_check_stmt = select(GearItemDB).where(GearItemDB.id == item_id)
+        # This is a safety check to ensure the item is in the database. item_images.item_id FK
+        # targets gear_items_v2 (migration 058), so the check must too -- checking legacy
+        # gear_items here would always fail for V2-native items (see #043).
+        item_check_stmt = select(GearItemDBV2).where(GearItemDBV2.id == item_id)
         item_check_result = await self.repository.db.execute(item_check_stmt)
         initial_item_check = item_check_result.scalar_one_or_none()
         if not initial_item_check:
@@ -1366,8 +846,8 @@ class GearService:
         Returns:
             Updated item if successful, None otherwise
         """
-        # Get user item
-        item = await self.repository.get_item(item_id, user_id)
+        # Get user item (gear_items_v2)
+        item = await self._repository_v2.get_item(item_id, user_id)
         if not item or not item.catalogue_item_id:
             return None
 
@@ -1420,8 +900,11 @@ class GearService:
             update_data_dict["url"] = catalogue_item.url
 
         # Preserve: quantity, status, priority, notes, expirationDate, etc.
-        update_data = ItemUpdate(**update_data_dict)
-        return await self.update_item(item_id, user_id, update_data)
+        update_data = GearItemUpdateV2(**update_data_dict)
+        updated_item = await self._repository_v2.update_item(item_id, user_id, update_data)
+        if not updated_item:
+            return None
+        return self._map_item_v2_to_response(updated_item)
 
     async def link_item_to_catalogue(
         self,
@@ -1439,8 +922,8 @@ class GearService:
         Returns:
             Updated item if successful, None otherwise
         """
-        # Verify item belongs to user
-        item = await self.repository.get_item(item_id, user_id)
+        # Verify item belongs to user (gear_items_v2)
+        item = await self._repository_v2.get_item(item_id, user_id)
         if not item:
             return None
 
@@ -1450,8 +933,11 @@ class GearService:
             return None
 
         # Set catalogue_item_id
-        update_data = ItemUpdate(catalogueItemId=catalogue_item_id)  # type: ignore[call-arg]
-        return await self.update_item(item_id, user_id, update_data)
+        update_data = GearItemUpdateV2(catalogueItemId=catalogue_item_id)  # type: ignore[call-arg]
+        updated_item = await self._repository_v2.update_item(item_id, user_id, update_data)
+        if not updated_item:
+            return None
+        return self._map_item_v2_to_response(updated_item)
 
     async def fetch_images_from_catalogue(
         self,
@@ -1470,30 +956,15 @@ class GearService:
         Returns:
             Updated item if successful, None otherwise
         """
-        # Get user item
-        item = await self.repository.get_item(item_id, user_id)
+        # Get user item (gear_items_v2) -- this doubles as the "item exists" check that used to
+        # be a separate V1 query below (item is already committed by the time we get here).
+        item = await self._repository_v2.get_item(item_id, user_id)
         if not item or not item.catalogue_item_id:
             return None
 
         # Get catalogue item to verify it exists and is active
         catalogue_item = await self.repository.get_catalogue_item(item.catalogue_item_id)
         if not catalogue_item or not catalogue_item.is_active:
-            return None
-
-        # Verify item exists in database before copying images
-        # This ensures the item is committed and visible in the database
-        from sqlalchemy import select
-
-        from app.modules.gear.db_models import GearItemDB
-
-        item_verify_stmt = select(GearItemDB).where(GearItemDB.id == item_id)
-        item_verify_result = await self.repository.db.execute(item_verify_stmt)
-        item_verify = item_verify_result.scalar_one_or_none()
-        if not item_verify:
-            logger.error(
-                "Item %s does not exist in database. Cannot fetch images from catalogue.",
-                item_id,
-            )
             return None
 
         # Copy images from catalogue to item
@@ -1507,7 +978,14 @@ class GearService:
             )
 
         # Return updated item
-        return await self.get_item(item_id, user_id)
+        refreshed_item = await self._repository_v2.get_item(item_id, user_id)
+        if not refreshed_item:
+            return None
+        primary_image = await self._image_repository.get_primary_image(item_id)
+        primary_image_url = None
+        if primary_image:
+            primary_image_url = primary_image.external_url or await self._storage.get_url(primary_image.file_path)
+        return self._map_item_v2_to_response(refreshed_item, primary_image_url)
 
     async def unlink_item_from_catalogue(
         self,
@@ -1523,13 +1001,16 @@ class GearService:
         Returns:
             Updated item if successful, None otherwise
         """
-        item = await self.repository.get_item(item_id, user_id)
+        item = await self._repository_v2.get_item(item_id, user_id)
         if not item:
             return None
 
         # Clear catalogue_item_id
-        update_data = ItemUpdate(catalogueItemId=None)  # type: ignore[call-arg]
-        return await self.update_item(item_id, user_id, update_data)
+        update_data = GearItemUpdateV2(catalogueItemId=None)  # type: ignore[call-arg]
+        updated_item = await self._repository_v2.update_item(item_id, user_id, update_data)
+        if not updated_item:
+            return None
+        return self._map_item_v2_to_response(updated_item)
 
     # Item promotion methods
     def _can_user_promote(self, user: UserDB) -> tuple[bool, str]:
@@ -1593,18 +1074,16 @@ class GearService:
         if not user:
             return False, "User not found"
 
-        # Get item with container - try with user_id first, if not found, try without ownership check
-        item = await self.repository.get_item(item_id, user_id)
+        # Get item (gear_items_v2) -- promotion isn't limited to items the requester owns;
+        # eligibility for someone else's item is gated below by container.is_public.
+        item_stmt = select(GearItemDBV2).where(GearItemDBV2.id == item_id, GearItemDBV2.item_type == "item")
+        item_result = await self.repository.db.execute(item_stmt)
+        item = item_result.scalar_one_or_none()
         if not item:
-            # Try to get item without ownership check (might be public container from another user)
-            item_stmt = select(GearItemDB).where(GearItemDB.id == item_id)
-            item_result = await self.repository.db.execute(item_stmt)
-            item = item_result.scalar_one_or_none()
-            if not item:
-                return False, "Item not found"
+            return False, "Item not found"
 
         # Load container to check if it's public
-        container_stmt = select(GearContainerDB).where(GearContainerDB.id == item.container_id)
+        container_stmt = select(GearItemDBV2).where(GearItemDBV2.id == item.parent_item_id, GearItemDBV2.item_type == "container")
         container_result = await self.repository.db.execute(container_stmt)
         container = container_result.scalar_one_or_none()
         if not container:
@@ -1672,13 +1151,11 @@ class GearService:
         if not can_promote:
             raise ValueError(reason)
 
-        # Get item - try with user_id first, if not found, try without ownership check
-        item = await self.repository.get_item(item_id, user_id)
-        if not item:
-            # Try to get item without ownership check (might be public container from another user)
-            item_stmt = select(GearItemDB).where(GearItemDB.id == item_id).options(joinedload(GearItemDB.container))
-            item_result = await self.repository.db.execute(item_stmt)
-            item = item_result.unique().scalar_one_or_none()
+        # Get item (gear_items_v2) -- promotion isn't limited to items the requester owns,
+        # eligibility was already gated by can_promote_item() above.
+        item_stmt = select(GearItemDBV2).where(GearItemDBV2.id == item_id, GearItemDBV2.item_type == "item")
+        item_result = await self.repository.db.execute(item_stmt)
+        item = item_result.scalar_one_or_none()
         if not item:
             raise ValueError("Item not found")
 
@@ -1686,7 +1163,7 @@ class GearService:
         await self.repository.create_promotion(item_id, user_id)
 
         # Increment promote_count
-        item.promote_count += 1
+        item.promote_count = (item.promote_count or 0) + 1
         await self.repository.db.commit()
         await self.repository.db.refresh(item)
 
@@ -1698,7 +1175,7 @@ class GearService:
             await self._add_item_to_catalogue(item_id, user_id)
 
         # Return updated item
-        return self._map_item_to_response(item)
+        return self._map_item_v2_to_response(item)
 
     async def get_promotion_status(self, item_id: str, user_id: str | None = None) -> ItemPromotionStatus:
         """Get promotion status for an item.
@@ -1710,17 +1187,20 @@ class GearService:
         Returns:
             ItemPromotionStatus with promotion status
         """
-        # Get item - try to get as user's item first, then as public
-        item = None
-        if user_id:
-            item = await self.repository.get_item(item_id, user_id)
-        if not item:
-            # Try to get from public container
-            from sqlalchemy import select
+        # Get item (gear_items_v2) -- visible to its owner regardless of container visibility,
+        # otherwise only if the parent container is public.
+        item_stmt = select(GearItemDBV2).where(GearItemDBV2.id == item_id, GearItemDBV2.item_type == "item")
+        item_result = await self.repository.db.execute(item_stmt)
+        item = item_result.scalar_one_or_none()
 
-            item_stmt = select(GearItemDB).join(GearContainerDB, GearItemDB.container_id == GearContainerDB.id).where(and_(GearItemDB.id == item_id, GearContainerDB.is_public == True))  # noqa: E712
-            item_result = await self.repository.db.execute(item_stmt)
-            item = item_result.scalar_one_or_none()
+        if item and not (user_id and item.user_id == user_id):
+            parent_stmt = select(GearItemDBV2.is_public).where(
+                GearItemDBV2.id == item.parent_item_id,
+                GearItemDBV2.item_type == "container",
+            )
+            parent_result = await self.repository.db.execute(parent_stmt)
+            if not parent_result.scalar_one_or_none():
+                item = None
 
         if not item:
             raise ValueError("Item not found")
@@ -1739,11 +1219,12 @@ class GearService:
         if user_id:
             can_promote, _ = await self.can_promote_item(item_id, user_id)
 
-        remaining = max(0, threshold - item.promote_count)
-        percentage = (item.promote_count / threshold * 100) if threshold > 0 else 0
+        promote_count = item.promote_count or 0
+        remaining = max(0, threshold - promote_count)
+        percentage = (promote_count / threshold * 100) if threshold > 0 else 0
 
         return ItemPromotionStatus(
-            promoteCount=item.promote_count,
+            promoteCount=promote_count,
             threshold=threshold,
             remaining=remaining,
             percentage=min(100, percentage),
@@ -1762,13 +1243,11 @@ class GearService:
         Returns:
             Created catalogue item response
         """
-        # Get item - try with admin_user_id first, if not found, try without ownership check
-        item = await self.repository.get_item(item_id, admin_user_id)
-        if not item:
-            # Try to get item without ownership check (might be public container from another user)
-            item_stmt = select(GearItemDB).where(GearItemDB.id == item_id).options(joinedload(GearItemDB.container))
-            item_result = await self.repository.db.execute(item_stmt)
-            item = item_result.unique().scalar_one_or_none()
+        # Get item (gear_items_v2) -- not limited to items admin_user_id owns; admins can add
+        # items from any user's (public) container to the catalogue.
+        item_stmt = select(GearItemDBV2).where(GearItemDBV2.id == item_id, GearItemDBV2.item_type == "item")
+        item_result = await self.repository.db.execute(item_stmt)
+        item = item_result.scalar_one_or_none()
         if not item:
             raise ValueError("Item not found")
 
@@ -1800,18 +1279,17 @@ class GearService:
             The created_by field in the catalogue item is set to the owner of the container,
             not the user_id parameter (which may be an admin promoting the item).
         """
-        # Get item with container to access container owner
-        from sqlalchemy import select
-        from sqlalchemy.orm import joinedload
-
-        item_stmt = select(GearItemDB).where(GearItemDB.id == item_id).options(joinedload(GearItemDB.container))
+        # Get item (gear_items_v2) with its container to access container owner
+        item_stmt = select(GearItemDBV2).where(GearItemDBV2.id == item_id, GearItemDBV2.item_type == "item")
         item_result = await self.repository.db.execute(item_stmt)
-        item = item_result.unique().scalar_one_or_none()
+        item = item_result.scalar_one_or_none()
         if not item:
             raise ValueError("Item not found")
 
         # Get container owner ID (this is the actual creator of the item)
-        container = item.container
+        container_stmt = select(GearItemDBV2).where(GearItemDBV2.id == item.parent_item_id, GearItemDBV2.item_type == "container")
+        container_result = await self.repository.db.execute(container_stmt)
+        container = container_result.scalar_one_or_none()
         if not container:
             raise ValueError("Item container not found")
 
@@ -1844,7 +1322,7 @@ class GearService:
         # (update_item requires ownership, but admin should be able to link items from public containers)
         from sqlalchemy import update as sql_update
 
-        update_stmt = sql_update(GearItemDB).where(GearItemDB.id == item_id).values(catalogue_item_id=catalogue_item.id)
+        update_stmt = sql_update(GearItemDBV2).where(GearItemDBV2.id == item_id).values(catalogue_item_id=catalogue_item.id)
         await self.repository.db.execute(update_stmt)
         await self.repository.db.commit()
         # Refresh item to get updated catalogue_item_id
@@ -1857,7 +1335,6 @@ class GearService:
             logger.warning(f"Failed to copy images to catalogue item: {e}")
 
         # Reload catalogue item with creator relationship
-        from sqlalchemy.orm import joinedload
 
         reload_stmt = select(GlobalCatalogueItemDB).where(GlobalCatalogueItemDB.id == catalogue_item.id).options(joinedload(GlobalCatalogueItemDB.creator))
         reload_result = await self.repository.db.execute(reload_stmt)

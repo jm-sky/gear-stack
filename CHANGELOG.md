@@ -9,6 +9,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.54.0] - 2026-07-23
+
+### Changed
+- **Auth (OAuth)**: jeden pattern callbacku `/auth/callback/:provider` dla Google i GitHub — usunięta specjalna trasa `/auth/github` oraz `fixedOAuthProvider`; redirect URI: `/auth/callback/google` i `/auth/callback/github`
+- **Gear**: usunięta dualność V1/V2 — CRUD i ownership na `gear_items_v2`; drop legacy tabel V1 (migracje `057`/`058`, Phase 4–5) ([#043](docs/issues/), [#044](docs/issues/))
+
+### Fixed
+- **Auth (2FA)**: mint `tv`/`jti` przy logowaniu 2FA i refresh; `verified`/`method` w odpowiedzi TOTP; obsługa 2FA w OAuth callback i UI wylogowania
+- **Auth (WebAuthn)**: dekodowanie credential ID jako base64url; `mark_backup_code_used` haszuje znormalizowany kod (SEC-5)
+
+### Security
+- **CodeQL**: utwardzenie path traversal w storage, SSRF, OAuth state cleanup, noop handlers
+- **Deps**: pnpm overrides dla `brace-expansion`, `fast-uri` i innych alertów Dependabot
+
+---
+
+## [2.53.0] - 2026-07-22
+
+### Added
+- **Gear (Visualization)**: drag-and-drop przenoszenie kontenerów między strefami wizualizacji (override placementu per kontener, zapisywany w `gear_settings`)
+- **Gear (Visualization)**: własne obszary (nazwa + ikona z curated allowlisty lucide) — dodawanie/edycja/usuwanie obok 5 domyślnych stref; usunięcie obszaru czyści wskazujące na niego placementy
+- **Backend**: kolumny `visualization_custom_zones` / `visualization_placements` w `gear_settings` (migracja `056`) + rozszerzone schematy/serwis `/me/gear-settings`
+
+### Fixed
+- **Gear (Visualization)**: kontener typu `trunk` (Bagażnik) trafia domyślnie do strefy „Pojazd” zamiast „Noszone”
+- **Testing**: `vitest.config.ts` wyklucza `tests/e2e/**` i `tests/integration/**` (zestawy Playwright) — `pnpm test:run` nie łapał już ich jako testów Vitest
+
+---
+
 ## [2.52.0] - 2026-07-22
 
 ### Added

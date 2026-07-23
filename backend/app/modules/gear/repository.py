@@ -14,35 +14,29 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
 from app.common.id_utils import generate_id
-from app.common.search import SearchMixin
 
 from .db_models import (
     ContainerRatingDB,
     ContainerShareTokenDB,
     ContentReportDB,
-    GearContainerDB,
-    GearItemDB,
     GlobalCatalogueItemDB,
     ItemPromotionDB,
 )
+from .db_models_v2 import GearItemDBV2
 from .schemas import (
-    BatchOrderUpdateRequest,
-    ContainerCreate,
-    ContainerUpdate,
     GlobalCatalogueItemCreate,
     GlobalCatalogueItemUpdate,
-    ItemCreate,
-    ItemUpdate,
 )
 
 logger = logging.getLogger(__name__)
 
 
-class GearRepository(SearchMixin):
-    """Repository for gear containers and items.
+class GearRepository:
+    """Repository for gear ancillary features: ratings, reports, promotions, share tokens,
+    public browsing, and the global catalogue.
 
-    Provides async database operations for managing gear containers and items.
-    Supports search across container names and item names.
+    Container/item CRUD lives on GearRepositoryV2 (gear_items_v2) -- see
+    docs/plans/2026-07-23-gear-backend-v1-v2-unification.md.
     """
 
     def __init__(self, db: AsyncSession):
@@ -52,91 +46,8 @@ class GearRepository(SearchMixin):
             db: Async SQLAlchemy session
         """
         self.db = db
-        # Configure SearchMixin for gear search
-        self._search_columns = [GearContainerDB.name, GearItemDB.name]
-        self._case_sensitive = False
 
     # Container operations
-    async def create_container(self, user_id: str, data: ContainerCreate) -> GearContainerDB:
-        """Create a new gear container.
-
-        Args:
-            user_id: Owner user ID
-            data: Container creation data
-
-        Returns:
-            Created container
-        """
-        container = GearContainerDB(
-            id=(data.id if data.id else generate_id()),  # Use provided UUID if available, otherwise generate new one
-            user_id=user_id,
-            name=data.name,
-            description=data.description,
-            type=data.type,
-            color=data.color,
-            parent_container_id=data.parentContainerId,
-            brand=data.brand,
-            price=data.price,
-            hide_when_nested=data.hideWhenNested,
-            weight=data.weight,
-            weight_unit=data.weightUnit,
-            max_weight=data.maxWeight,
-            max_weight_unit=data.maxWeightUnit,
-            url=data.url,
-            is_public=data.isPublic if data.isPublic is not None else False,
-            favorite=data.favorite if data.favorite is not None else False,
-            show_item_images=(data.showItemImages if data.showItemImages is not None else False),
-        )
-        self.db.add(container)
-        await self.db.commit()
-        await self.db.refresh(container)
-        # Reload container with items relationship to avoid lazy loading issues
-        # For a newly created container, items will be empty, but we need to load the relationship
-        stmt = select(GearContainerDB).where(GearContainerDB.id == container.id).options(selectinload(GearContainerDB.items))  # type: ignore[attr-defined]
-        result = await self.db.execute(stmt)
-        container = result.scalar_one()
-        return container
-
-    async def get_container(self, container_id: str, user_id: str) -> GearContainerDB | None:
-        """Get a container by ID for a specific user.
-
-        Args:
-            container_id: Container ID
-            user_id: Owner user ID
-
-        Returns:
-            Container if found, None otherwise
-        """
-        stmt = (
-            select(GearContainerDB)
-            .where(
-                and_(
-                    GearContainerDB.id == container_id,
-                    GearContainerDB.user_id == user_id,
-                )
-            )
-            .options(selectinload(GearContainerDB.items))  # type: ignore[attr-defined]
-        )
-        result = await self.db.execute(stmt)
-        return result.scalar_one_or_none()
-
-    async def get_containers(self, user_id: str, skip: int = 0, limit: int = 100) -> Sequence[GearContainerDB]:
-        """Get all containers for a user.
-
-        Args:
-            user_id: Owner user ID
-            skip: Number of records to skip
-            limit: Maximum number of records to return
-
-        Returns:
-            List of containers
-        """
-        stmt = (
-            select(GearContainerDB).where(GearContainerDB.user_id == user_id).options(selectinload(GearContainerDB.items)).offset(skip).limit(limit).order_by(GearContainerDB.favorite.desc(), GearContainerDB.created_at.desc())  # type: ignore[attr-defined]
-        )
-        result = await self.db.execute(stmt)
-        return result.scalars().all()
-
     async def count_user_containers(self, user_id: str) -> int:
         """Count all containers for a user.
 
@@ -146,7 +57,10 @@ class GearRepository(SearchMixin):
         Returns:
             Number of containers
         """
-        stmt = select(func.count(GearContainerDB.id)).where(GearContainerDB.user_id == user_id)
+        stmt = select(func.count(GearItemDBV2.id)).where(
+            GearItemDBV2.user_id == user_id,
+            GearItemDBV2.item_type == "container",
+        )
         result = await self.db.execute(stmt)
         return result.scalar_one() or 0
 
@@ -159,11 +73,14 @@ class GearRepository(SearchMixin):
         Returns:
             Number of items
         """
-        stmt = select(func.count(GearItemDB.id)).join(GearContainerDB, GearItemDB.container_id == GearContainerDB.id).where(GearContainerDB.user_id == user_id)
+        stmt = select(func.count(GearItemDBV2.id)).where(
+            GearItemDBV2.user_id == user_id,
+            GearItemDBV2.item_type == "item",
+        )
         result = await self.db.execute(stmt)
         return result.scalar_one() or 0
 
-    async def get_public_containers(self, skip: int = 0, limit: int = 100) -> Sequence[GearContainerDB]:
+    async def get_public_containers(self, skip: int = 0, limit: int = 100) -> Sequence[GearItemDBV2]:
         """Get all public containers from all users.
 
         Args:
@@ -171,54 +88,65 @@ class GearRepository(SearchMixin):
             limit: Maximum number of records to return
 
         Returns:
-            List of public containers with user relationship loaded
+            List of public containers (gear_items_v2, item_type='container') with children and
+            user relationships loaded
         """
         stmt = (
-            select(GearContainerDB)
+            select(GearItemDBV2)
             .where(
                 and_(
-                    GearContainerDB.is_public == True,  # noqa: E712
-                    GearContainerDB.is_hidden_by_reports == False,  # noqa: E712
+                    GearItemDBV2.item_type == "container",
+                    GearItemDBV2.is_public == True,  # noqa: E712
+                    # is_hidden_by_reports is nullable on gear_items_v2 (unlike V1's NOT NULL
+                    # default False) -- NULL means "never reported", i.e. not hidden.
+                    or_(
+                        GearItemDBV2.is_hidden_by_reports == False,  # noqa: E712
+                        GearItemDBV2.is_hidden_by_reports.is_(None),
+                    ),
                 )
             )
             .options(
-                selectinload(GearContainerDB.items),  # type: ignore[attr-defined]
-                joinedload(GearContainerDB.user),  # type: ignore[attr-defined]
+                selectinload(GearItemDBV2.children),
+                joinedload(GearItemDBV2.user),  # type: ignore[attr-defined]
             )
             .offset(skip)
             .limit(limit)
-            .order_by(GearContainerDB.created_at.desc())
+            .order_by(GearItemDBV2.created_at.desc())
         )
         result = await self.db.execute(stmt)
         return result.unique().scalars().all()
 
-    async def get_public_container(self, container_id: str) -> GearContainerDB | None:
+    async def get_public_container(self, container_id: str) -> GearItemDBV2 | None:
         """Get a public container by ID.
 
         Args:
             container_id: Container ID
 
         Returns:
-            Container if found and public, None otherwise (with user relationship loaded)
+            Container if found and public, None otherwise (with children/user loaded)
         """
         stmt = (
-            select(GearContainerDB)
+            select(GearItemDBV2)
             .where(
                 and_(
-                    GearContainerDB.id == container_id,
-                    GearContainerDB.is_public == True,  # noqa: E712
-                    GearContainerDB.is_hidden_by_reports == False,  # noqa: E712
+                    GearItemDBV2.id == container_id,
+                    GearItemDBV2.item_type == "container",
+                    GearItemDBV2.is_public == True,  # noqa: E712
+                    or_(
+                        GearItemDBV2.is_hidden_by_reports == False,  # noqa: E712
+                        GearItemDBV2.is_hidden_by_reports.is_(None),
+                    ),
                 )
             )
             .options(
-                selectinload(GearContainerDB.items),  # type: ignore[attr-defined]
-                joinedload(GearContainerDB.user),  # type: ignore[attr-defined]
+                selectinload(GearItemDBV2.children),
+                joinedload(GearItemDBV2.user),  # type: ignore[attr-defined]
             )
         )
         result = await self.db.execute(stmt)
         return result.unique().scalar_one_or_none()
 
-    async def get_public_container_for_reporting(self, container_id: str) -> GearContainerDB | None:
+    async def get_public_container_for_reporting(self, container_id: str) -> GearItemDBV2 | None:
         """Get a public container by ID for reporting purposes.
 
         This method does NOT filter by is_hidden_by_reports, allowing reports
@@ -231,409 +159,45 @@ class GearRepository(SearchMixin):
             Container if found and public, None otherwise
         """
         stmt = (
-            select(GearContainerDB)
+            select(GearItemDBV2)
             .where(
                 and_(
-                    GearContainerDB.id == container_id,
-                    GearContainerDB.is_public == True,  # noqa: E712
+                    GearItemDBV2.id == container_id,
+                    GearItemDBV2.item_type == "container",
+                    GearItemDBV2.is_public == True,  # noqa: E712
                 )
             )
             .options(
-                selectinload(GearContainerDB.items),  # type: ignore[attr-defined]
-                joinedload(GearContainerDB.user),  # type: ignore[attr-defined]
+                selectinload(GearItemDBV2.children),
+                joinedload(GearItemDBV2.user),  # type: ignore[attr-defined]
             )
         )
         result = await self.db.execute(stmt)
         return result.unique().scalar_one_or_none()
 
-    async def update_container(self, container_id: str, user_id: str, data: ContainerUpdate) -> GearContainerDB | None:
-        """Update a container.
+    async def get_container_v2_owned_or_public(self, container_id: str, user_id: str) -> GearItemDBV2 | None:
+        """Get a container (gear_items_v2) if the requesting user owns it, or it's public.
+
+        Used by the rating endpoints: the owner may rate a container regardless of its
+        visibility, other users only if it's public. Replaces the old two-step fallback of
+        `get_container` (V1 ownership) then `get_public_container` (V2 public) -- that chain
+        404'd for a private V2-only container even for its own owner, since get_container never
+        found it in V1 (the same pattern as #043).
 
         Args:
             container_id: Container ID
-            user_id: Owner user ID
-            data: Update data
+            user_id: Requesting user ID
 
         Returns:
-            Updated container if found, None otherwise
+            Container if the user owns it or it's public, None otherwise
         """
-        container = await self.get_container(container_id, user_id)
-        if not container:
-            return None
-
-        update_data = data.model_dump(exclude_unset=True)
-        # Map camelCase to snake_case
-        field_mapping = {
-            "parentContainerId": "parent_container_id",
-            "hideWhenNested": "hide_when_nested",
-            "weightUnit": "weight_unit",
-            "maxWeight": "max_weight",
-            "maxWeightUnit": "max_weight_unit",
-            "isPublic": "is_public",
-            "favorite": "favorite",
-            "showItemImages": "show_item_images",
-        }
-
-        for key, value in update_data.items():
-            db_key = field_mapping.get(key, key)
-            if hasattr(container, db_key):
-                setattr(container, db_key, value)
-
-        await self.db.commit()
-        await self.db.refresh(container)
-        # Reload container with items relationship to avoid lazy loading issues
-        stmt = select(GearContainerDB).where(GearContainerDB.id == container.id).options(selectinload(GearContainerDB.items))  # type: ignore[attr-defined]
-        result = await self.db.execute(stmt)
-        container = result.scalar_one()
-        return container
-
-    async def delete_container(self, container_id: str, user_id: str) -> bool:
-        """Delete a container and all its items.
-
-        Args:
-            container_id: Container ID
-            user_id: Owner user ID
-
-        Returns:
-            True if deleted, False if not found
-        """
-        container = await self.get_container(container_id, user_id)
-        if not container:
-            return False
-
-        await self.db.delete(container)
-        await self.db.commit()
-        return True
-
-    async def delete_all_containers(self, user_id: str) -> int:
-        """Delete all containers for a user.
-
-        Args:
-            user_id: Owner user ID
-
-        Returns:
-            Number of deleted containers
-        """
-        stmt = select(GearContainerDB).where(GearContainerDB.user_id == user_id)
-        result = await self.db.execute(stmt)
-        containers = result.scalars().all()
-
-        for container in containers:
-            await self.db.delete(container)
-
-        await self.db.commit()
-        return len(containers)
-
-    # Item operations
-    async def create_item(self, container_id: str, user_id: str, data: ItemCreate) -> GearItemDB | None:
-        """Create a new gear item in a container.
-
-        Args:
-            container_id: Parent container ID
-            user_id: Owner user ID
-            data: Item creation data
-
-        Returns:
-            Created item if container exists, None otherwise
-        """
-        # Verify container exists and belongs to user
-        container = await self.get_container(container_id, user_id)
-        if not container:
-            return None
-
-        # Calculate order if not provided
-        order = data.order
-        if order is None:
-            # Get max order in container
-            stmt = select(func.max(GearItemDB.order)).where(GearItemDB.container_id == container_id)
-            result = await self.db.execute(stmt)
-            max_order = result.scalar()
-            order = (max_order + 1) if max_order is not None else 0
-
-        item = GearItemDB(
-            id=(data.id if data.id else generate_id()),  # Use provided UUID if available, otherwise generate new one
-            container_id=container_id,
-            name=data.name,
-            category=data.category,
-            quantity=data.quantity,
-            weight=data.weight,
-            weight_unit=data.weightUnit,
-            notes=data.notes,
-            expiration_date=data.expirationDate,
-            shelf_life=data.shelfLife,
-            priority=data.priority,
-            status=data.status,
-            nested_container_id=data.containerId,
-            price=data.price,
-            currency=data.currency,
-            url=data.url,
-            brand=data.brand,
-            color=data.color,
-            quality=data.quality,
-            linked_item_id=data.linkedItemId,
-            catalogue_item_id=data.catalogueItemId,
-            wearable=data.wearable,
-            consumable=data.consumable,
-            order=order,
-            show_on_container=data.showOnContainer,
-        )
-        self.db.add(item)
-        await self.db.commit()
-        await self.db.refresh(item)
-        # Reload container relationship after refresh
-        reload_stmt = select(GearItemDB).where(GearItemDB.id == item.id).options(joinedload(GearItemDB.container))
-        reload_result = await self.db.execute(reload_stmt)
-        return reload_result.unique().scalar_one()
-
-    async def get_item(self, item_id: str, user_id: str) -> GearItemDB | None:
-        """Get an item by ID for a specific user.
-
-        Args:
-            item_id: Item ID
-            user_id: Owner user ID
-
-        Returns:
-            Item if found, None otherwise (with container relationship loaded)
-        """
-        stmt = select(GearItemDB).join(GearContainerDB, GearItemDB.container_id == GearContainerDB.id).where(and_(GearItemDB.id == item_id, GearContainerDB.user_id == user_id)).options(joinedload(GearItemDB.container))
-        result = await self.db.execute(stmt)
-        return result.unique().scalar_one_or_none()
-
-    async def get_items(self, container_id: str, user_id: str, skip: int = 0, limit: int = 100) -> Sequence[GearItemDB]:
-        """Get all items in a container.
-
-        Args:
-            container_id: Parent container ID
-            user_id: Owner user ID
-            skip: Number of records to skip
-            limit: Maximum number of records to return
-
-        Returns:
-            List of items (with container relationship loaded)
-        """
-        # Verify container belongs to user
-        container = await self.get_container(container_id, user_id)
-        if not container:
-            return []
-
-        # Sort by order (nulls last), then by created_at
-        # Load container relationship for each item
-        stmt = select(GearItemDB).where(GearItemDB.container_id == container_id).options(joinedload(GearItemDB.container)).offset(skip).limit(limit).order_by(GearItemDB.order.asc().nulls_last(), GearItemDB.created_at.desc())
-        result = await self.db.execute(stmt)
-        return result.unique().scalars().all()
-
-    async def get_all_items(self, user_id: str, skip: int = 0, limit: int = 100) -> Sequence[GearItemDB]:
-        """Get all items for a user across all containers.
-
-        Args:
-            user_id: Owner user ID
-            skip: Number of records to skip
-            limit: Maximum number of records to return
-
-        Returns:
-            List of items (with container relationship loaded)
-        """
-        # Join with containers to filter by user_id
-        # Load container relationship for each item
-        stmt = (
-            select(GearItemDB)
-            .join(GearContainerDB, GearItemDB.container_id == GearContainerDB.id)
-            .where(GearContainerDB.user_id == user_id)
-            .options(joinedload(GearItemDB.container))
-            .offset(skip)
-            .limit(limit)
-            .order_by(GearItemDB.order.asc().nulls_last(), GearItemDB.created_at.desc())
+        stmt = select(GearItemDBV2).where(
+            GearItemDBV2.id == container_id,
+            GearItemDBV2.item_type == "container",
+            or_(GearItemDBV2.user_id == user_id, GearItemDBV2.is_public == True),  # noqa: E712
         )
         result = await self.db.execute(stmt)
-        return result.unique().scalars().all()
-
-    async def update_item(self, item_id: str, user_id: str, data: ItemUpdate) -> GearItemDB | None:
-        """Update a gear item and propagate changes to all linked items.
-
-        When updating an item, if it's part of a linked group (via linked_item_id),
-        all items in that group will be updated with the same changes.
-
-        Args:
-            item_id: Item ID
-            user_id: Owner user ID
-            data: Update data
-
-        Returns:
-            Updated item if found, None otherwise
-        """
-        item = await self.get_item(item_id, user_id)
-        if not item:
-            return None
-
-        # Determine master item ID: if item has linked_item_id, use that; otherwise use item.id
-        master_item_id = item.linked_item_id if item.linked_item_id else item.id
-
-        # Find all items that belong to the same linked group:
-        # - The master item itself (id == master_item_id)
-        # - All items that link to it (linked_item_id == master_item_id)
-        # All must belong to the user (via container.user_id)
-        stmt = (
-            select(GearItemDB)
-            .join(GearContainerDB, GearItemDB.container_id == GearContainerDB.id)
-            .where(
-                and_(
-                    GearContainerDB.user_id == user_id,
-                    or_(
-                        GearItemDB.id == master_item_id,
-                        GearItemDB.linked_item_id == master_item_id,
-                    ),
-                ),
-            )
-        )
-        result = await self.db.execute(stmt)
-        linked_items = result.scalars().all()
-
-        # Prepare update data
-        update_data = data.model_dump(exclude_unset=True)
-        # Map camelCase to snake_case
-        field_mapping = {
-            "weightUnit": "weight_unit",
-            "expirationDate": "expiration_date",
-            "shelfLife": "shelf_life",
-            "containerId": "nested_container_id",
-            "linkedItemId": "linked_item_id",
-            "catalogueItemId": "catalogue_item_id",
-            "showOnContainer": "show_on_container",
-        }
-
-        # Update all linked items with the same data
-        # Note: We don't update linked_item_id itself (it should remain unchanged)
-        updated_item = None
-        for linked_item in linked_items:
-            for key, value in update_data.items():
-                # Skip linkedItemId - don't change the linking relationship
-                if key == "linkedItemId":
-                    continue
-                db_key = field_mapping.get(key, key)
-                if hasattr(linked_item, db_key):
-                    setattr(linked_item, db_key, value)
-
-            # Track the originally requested item for return
-            if linked_item.id == item_id:
-                updated_item = linked_item
-
-        await self.db.commit()
-        if updated_item:
-            await self.db.refresh(updated_item)
-            # Reload container relationship after refresh
-            reload_stmt = select(GearItemDB).where(GearItemDB.id == updated_item.id).options(joinedload(GearItemDB.container))
-            reload_result = await self.db.execute(reload_stmt)
-            updated_item = reload_result.unique().scalar_one()
-        return updated_item
-
-    async def move_item(self, item_id: str, user_id: str, target_container_id: str) -> GearItemDB | None:
-        """Move a gear item to a different container.
-
-        Only moves the single specified item, not linked items.
-        The item's linked_item_id relationship is preserved.
-
-        Args:
-            item_id: Item ID to move
-            user_id: Owner user ID
-            target_container_id: Target container ID
-
-        Returns:
-            Updated item if found and moved, None if item not found
-
-        Raises:
-            ValueError: If target container not found or doesn't belong to user
-        """
-        # Get and verify item ownership
-        item = await self.get_item(item_id, user_id)
-        if not item:
-            return None
-
-        # Verify target container exists and belongs to user
-        target_container = await self.get_container(target_container_id, user_id)
-        if not target_container:
-            raise ValueError("Target container not found or access denied")
-
-        # Update container_id
-        item.container_id = target_container_id
-
-        await self.db.commit()
-        await self.db.refresh(item)
-
-        # Reload with container relationship
-        reload_stmt = select(GearItemDB).where(GearItemDB.id == item.id).options(joinedload(GearItemDB.container))
-        reload_result = await self.db.execute(reload_stmt)
-        updated_item = reload_result.unique().scalar_one()
-
-        return updated_item
-
-    async def delete_item(self, item_id: str, user_id: str) -> bool:
-        """Delete a gear item.
-
-        Args:
-            item_id: Item ID
-            user_id: Owner user ID
-
-        Returns:
-            True if deleted, False if not found
-        """
-        item = await self.get_item(item_id, user_id)
-        if not item:
-            return False
-
-        await self.db.delete(item)
-        await self.db.commit()
-        return True
-
-    async def batch_update_item_order(self, user_id: str, data: BatchOrderUpdateRequest) -> list[GearItemDB]:
-        """Batch update items' order values.
-
-        Args:
-            user_id: Owner user ID
-            data: Batch order update request with list of item IDs and their new order values
-
-        Returns:
-            List of updated items
-
-        Raises:
-            ValueError: If any item ID is not found or doesn't belong to the user
-        """
-        # Get all item IDs from the request
-        item_ids = [item_order.id for item_order in data.items]
-
-        # Fetch all items and verify they belong to the user
-        stmt = (
-            select(GearItemDB)
-            .join(GearContainerDB, GearItemDB.container_id == GearContainerDB.id)
-            .where(
-                and_(
-                    GearItemDB.id.in_(item_ids),
-                    GearContainerDB.user_id == user_id,
-                )
-            )
-        )
-        result = await self.db.execute(stmt)
-        items = result.scalars().all()
-
-        # Verify all items were found
-        found_item_ids = {item.id for item in items}
-        missing_item_ids = set(item_ids) - found_item_ids
-        if missing_item_ids:
-            raise ValueError(f"Items not found or access denied: {missing_item_ids}")
-
-        # Create a map of item_id -> new order
-        order_map = {item_order.id: item_order.order for item_order in data.items}
-
-        # Update order for each item
-        for item in items:
-            item.order = order_map[item.id]
-
-        await self.db.commit()
-
-        # Refresh all items
-        for item in items:
-            await self.db.refresh(item)
-
-        return list(items)
+        return result.scalar_one_or_none()
 
     # Item promotion operations
     async def get_promotion_by_item_and_user(self, item_id: str, user_id: str) -> ItemPromotionDB | None:
@@ -718,14 +282,15 @@ class GearRepository(SearchMixin):
         await self.db.refresh(share_token)
         return share_token
 
-    async def get_container_by_token(self, token: str) -> GearContainerDB | None:
+    async def get_container_by_token(self, token: str) -> GearItemDBV2 | None:
         """Get a container by share token.
 
         Args:
             token: Share token
 
         Returns:
-            Container if token is valid and not expired, None otherwise (with user relationship loaded)
+            Container if token is valid and not expired, None otherwise (with children/user
+            relationships loaded)
         """
         # Check if token exists and is not expired
         token_stmt = (
@@ -744,13 +309,13 @@ class GearRepository(SearchMixin):
         if not share_token:
             return None
 
-        # Get container with items and user relationship
+        # Get container with children and user relationship
         stmt = (
-            select(GearContainerDB)
-            .where(GearContainerDB.id == share_token.container_id)
+            select(GearItemDBV2)
+            .where(GearItemDBV2.id == share_token.container_id)
             .options(
-                selectinload(GearContainerDB.items),  # type: ignore[attr-defined]
-                joinedload(GearContainerDB.user),  # type: ignore[attr-defined]
+                selectinload(GearItemDBV2.children),
+                joinedload(GearItemDBV2.user),  # type: ignore[attr-defined]
             )
         )
         result = await self.db.execute(stmt)
@@ -766,9 +331,14 @@ class GearRepository(SearchMixin):
         Returns:
             List of share tokens for the container
         """
-        # Verify container ownership
-        container = await self.get_container(container_id, user_id)
-        if not container:
+        # Verify container ownership against gear_items_v2 (the container may not have a
+        # V1 gear_containers counterpart -- see #043/#044).
+        owner_stmt = select(GearItemDBV2.id).where(
+            GearItemDBV2.id == container_id,
+            GearItemDBV2.user_id == user_id,
+        )
+        owner_result = await self.db.execute(owner_stmt)
+        if owner_result.scalar_one_or_none() is None:
             return []
 
         stmt = select(ContainerShareTokenDB).where(ContainerShareTokenDB.container_id == container_id).order_by(ContainerShareTokenDB.created_at.desc())
@@ -1342,7 +912,7 @@ class GearRepository(SearchMixin):
         await self.db.refresh(report)
         return report
 
-    async def set_container_hidden_by_reports(self, container_id: str, is_hidden: bool) -> GearContainerDB | None:
+    async def set_container_hidden_by_reports(self, container_id: str, is_hidden: bool) -> GearItemDBV2 | None:
         """Set is_hidden_by_reports flag for a container.
 
         Args:
@@ -1352,7 +922,7 @@ class GearRepository(SearchMixin):
         Returns:
             Updated container if found, None otherwise
         """
-        stmt = select(GearContainerDB).where(GearContainerDB.id == container_id)
+        stmt = select(GearItemDBV2).where(GearItemDBV2.id == container_id, GearItemDBV2.item_type == "container")
         result = await self.db.execute(stmt)
         container = result.scalar_one_or_none()
 
