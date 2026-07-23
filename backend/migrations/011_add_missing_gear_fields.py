@@ -7,6 +7,15 @@ This migration adds the following fields:
 Usage:
     python migrations/003_add_missing_gear_fields.py upgrade
     python migrations/003_add_missing_gear_fields.py downgrade
+
+Note:
+    The "table doesn't exist yet" fallback below originally created it via
+    `GearContainerDB.metadata.create_all`/`GearItemDB.metadata.create_all` (SQLAlchemy ORM
+    metadata). Rewritten to raw SQL as part of
+    docs/plans/2026-07-23-gear-backend-v1-v2-unification.md Phase 5, which removes those classes
+    from db_models.py entirely -- this migration must not depend on them to remain replayable on
+    a fresh database. In practice this fallback is unreachable in a normal sequential replay
+    (migration 010 always creates the tables first), but it must not reference deleted classes.
 """
 
 import asyncio
@@ -19,7 +28,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from sqlalchemy import text
 
 from app.core.database import engine
-from app.modules.gear.db_models import GearContainerDB, GearItemDB  # noqa: F401
 
 
 async def table_exists(conn, table_name: str) -> bool:
@@ -49,7 +57,31 @@ async def upgrade() -> None:
 
         if not containers_exist:
             print("gear_containers table does not exist, creating it with all fields...")
-            await conn.run_sync(GearContainerDB.metadata.create_all)
+            await conn.execute(text("""
+                    CREATE TABLE gear_containers (
+                        id VARCHAR(36) PRIMARY KEY,
+                        user_id VARCHAR(36) NOT NULL REFERENCES users(id),
+                        name VARCHAR(255) NOT NULL,
+                        description TEXT,
+                        type VARCHAR(50) NOT NULL,
+                        color VARCHAR(20) DEFAULT 'default',
+                        parent_container_id VARCHAR(36) REFERENCES gear_containers(id),
+                        brand VARCHAR(255),
+                        price FLOAT,
+                        hide_when_nested BOOLEAN DEFAULT FALSE,
+                        weight FLOAT,
+                        weight_unit VARCHAR(5),
+                        max_weight FLOAT,
+                        max_weight_unit VARCHAR(5),
+                        url TEXT,
+                        is_public BOOLEAN NOT NULL DEFAULT FALSE,
+                        is_hidden_by_reports BOOLEAN NOT NULL DEFAULT FALSE,
+                        favorite BOOLEAN NOT NULL DEFAULT FALSE,
+                        show_item_images BOOLEAN DEFAULT FALSE,
+                        created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'UTC'),
+                        updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'UTC')
+                    );
+                """))
             print("✓ gear_containers table created with all fields")
         else:
             print("gear_containers table exists, adding missing fields...")
@@ -81,7 +113,33 @@ async def upgrade() -> None:
 
         if not items_exist:
             print("gear_items table does not exist, creating it with all fields...")
-            await conn.run_sync(GearItemDB.metadata.create_all)
+            await conn.execute(text("""
+                    CREATE TABLE gear_items (
+                        id VARCHAR(36) PRIMARY KEY,
+                        container_id VARCHAR(36) NOT NULL REFERENCES gear_containers(id),
+                        name VARCHAR(255) NOT NULL,
+                        category VARCHAR(50) NOT NULL,
+                        quantity INTEGER NOT NULL DEFAULT 1,
+                        weight FLOAT NOT NULL,
+                        weight_unit VARCHAR(5) NOT NULL DEFAULT 'g',
+                        notes TEXT,
+                        expiration_date TIMESTAMP WITH TIME ZONE,
+                        priority VARCHAR(20) NOT NULL DEFAULT 'medium',
+                        status VARCHAR(20) NOT NULL DEFAULT 'owned',
+                        nested_container_id VARCHAR(36) REFERENCES gear_containers(id),
+                        price FLOAT,
+                        currency VARCHAR(10),
+                        url TEXT,
+                        brand VARCHAR(255),
+                        color VARCHAR(50),
+                        quality VARCHAR(20),
+                        linked_item_id VARCHAR(36),
+                        wearable BOOLEAN DEFAULT FALSE,
+                        consumable BOOLEAN DEFAULT FALSE,
+                        created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'UTC'),
+                        updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'UTC')
+                    );
+                """))
             print("✓ gear_items table created with all fields")
         else:
             print("gear_items table exists, adding missing fields...")

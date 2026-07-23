@@ -1,8 +1,9 @@
 # Backend V1→V2 Gear Model Unification — Phased Implementation Plan
 
 **Status:** `in progress` — Phases 0-4 executed and deployed to production 2026-07-23 (migrations
-057/058 live, user-verified: item images, sharing, ratings/reports/promotions all working);
-Phase 5 (drop V1 tables) remaining
+057/058 live, user-verified: item images, sharing, ratings/reports/promotions all working).
+Phase 5 (migration 059, drop V1 tables) written and verified locally 2026-07-23; deployment to
+production still pending a fresh backup.
 **Created:** 2026-07-23
 **Drives:** [docs/issues/2026-07-23--043--gear-v1-v2-backend-duality-image-ownership-broken.md](../issues/2026-07-23--043--gear-v1-v2-backend-duality-image-ownership-broken.md), [docs/issues/2026-07-23--044--container-share-tokens-table-missing-prod.md](../issues/2026-07-23--044--container-share-tokens-table-missing-prod.md)
 **Supersedes the open TODOs in:** [UNIFIED_MODEL_IMPLEMENTATION_PLAN.md](UNIFIED_MODEL_IMPLEMENTATION_PLAN.md) ("❌ Backend routing: V2 API exists but isn't default", "❌ Cleanup V1: old tables/models still exist")
@@ -650,6 +651,65 @@ failures. Not fixed here (out of scope); full suite is otherwise green.
 (excluding the 7 pre-existing unrelated failures). `pnpm type-check`/`pnpm lint` clean.
 
 **Phase 4 complete.**
+
+### Production deploy of Phases 0-4 (2026-07-23)
+
+User deployed migrations `057`/`058` to production and restarted the backend. Output matched
+the local dry run exactly (same FKs dropped/added per table, zero orphan-row failures). Verified
+live on production: item images, container sharing, ratings/reports/promotions all working —
+the original #043 symptom and everything else repointed in Phase 3 confirmed fixed end-to-end,
+not just in local testing. See #043/#044 for the verification record; #044 closed.
+
+### Phase 5 — migration written and verified locally 2026-07-23, not yet deployed
+
+**Two historical migrations had to be fixed first**, discovered only by attempting the deletion:
+`migrations/010_add_gear_tables.py` and `migrations/011_add_missing_gear_fields.py` both
+imported `GearContainerDB`/`GearItemDB` directly from `db_models.py` (using
+`GearContainerDB.metadata.create_all`/`GearItemDB.metadata.create_all` to create the tables on a
+fresh database). Deleting those classes would break replaying the full migration history on any
+new environment (a fresh `db init-test`, or bootstrapping a new deployment from scratch) with an
+`ImportError`, regardless of whether the "table already exists" branch is actually taken.
+Rewrote both to plain `CREATE TABLE` SQL matching the pre-011 and post-011 shapes respectively,
+with no dependency on live ORM classes. **Verified by the real test this matters for**: created a
+fully empty database and ran `cli db migrate` through the entire history (010 → 059) from
+scratch — succeeded end to end.
+
+**`migrations/059_drop_v1_gear_tables.py`**: safety-gated drop of `gear_items`/`gear_containers`.
+Before dropping, queries `information_schema` for any FK from a table *other than* these two
+still pointing into them (self-references between the two are expected and fine) — aborts with
+`sys.exit(1)` and a list of offending constraints rather than dropping blind, since that's
+exactly the kind of thing Phase 2 was written to catch and fix, and this is the point of no
+return. Order: `gear_items` first (references `gear_containers`), then `gear_containers`, both
+`CASCADE` (cleans up the internal self-referential FKs — `parent_container_id`,
+`nested_container_id`, `linked_item_id` on `gear_items` — automatically). `downgrade()`
+recreates the empty table shape only; real recovery is the pre-drop backup.
+
+**Verified twice locally:**
+1. Against a freshly-bootstrapped empty database (0 rows) — clean drop.
+2. Against the Phase-0 restored-production-backup copy (20 `gear_containers` + 143 `gear_items`,
+   already migrated into `gear_items_v2`'s 165 rows) — dropped cleanly; confirmed
+   `gear_items_v2` still has all 165 rows intact afterward, and both V1 tables are genuinely
+   gone (`\dt` finds neither).
+
+**ORM cleanup in `db_models.py`:** removed the `GearContainerDB`/`GearItemDB` classes entirely,
+along with the `GearContainerDB.items = relationship(...)` wiring that sat between them. Found
+and fixed one more stray reference while sweeping the file: `GearContainerDB.user =
+relationship(...)` was a *separate* assignment further down the file (grouped with
+`ItemImageDB.user`, not adjacent to the class body), missed on first pass -- removed.
+`GearRepository`'s dead `SearchMixin` inheritance and `_search_columns = [GearContainerDB.name,
+GearItemDB.name]` config (confirmed zero call sites for `.search()` anywhere on this repository)
+also removed rather than repointed, since it was unused before Phase 5 too.
+
+**Full verification sweep:** `grep -rn "GearContainerDB\|GearItemDB\b"` across `app/`, `tests/`,
+`migrations/`, `cli/` — every remaining hit is either the new `GearContainerDBV2` class (V2,
+unrelated name collision on substring match), a docstring/comment documenting the historical V1
+behavior for context, or the (now-fixed) migration files. No live code references remain.
+`ruff`/`black`/`mypy` (project-wide) clean; full backend `tests/` suite green (excluding the same
+7 pre-existing unrelated failures noted in Phase 4).
+
+**Not yet deployed to production.** Requires, in order: (1) a fresh production backup taken
+immediately beforehand (user's explicit requirement), (2) running migration `059` there, (3) a
+post-drop smoke test of the full app.
 
 ---
 

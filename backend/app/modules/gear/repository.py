@@ -14,14 +14,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
 from app.common.id_utils import generate_id
-from app.common.search import SearchMixin
 
 from .db_models import (
     ContainerRatingDB,
     ContainerShareTokenDB,
     ContentReportDB,
-    GearContainerDB,
-    GearItemDB,
     GlobalCatalogueItemDB,
     ItemPromotionDB,
 )
@@ -34,11 +31,12 @@ from .schemas import (
 logger = logging.getLogger(__name__)
 
 
-class GearRepository(SearchMixin):
-    """Repository for gear containers and items.
+class GearRepository:
+    """Repository for gear ancillary features: ratings, reports, promotions, share tokens,
+    public browsing, and the global catalogue.
 
-    Provides async database operations for managing gear containers and items.
-    Supports search across container names and item names.
+    Container/item CRUD lives on GearRepositoryV2 (gear_items_v2) -- see
+    docs/plans/2026-07-23-gear-backend-v1-v2-unification.md.
     """
 
     def __init__(self, db: AsyncSession):
@@ -48,9 +46,6 @@ class GearRepository(SearchMixin):
             db: Async SQLAlchemy session
         """
         self.db = db
-        # Configure SearchMixin for gear search
-        self._search_columns = [GearContainerDB.name, GearItemDB.name]
-        self._case_sensitive = False
 
     # Container operations
     async def count_user_containers(self, user_id: str) -> int:
