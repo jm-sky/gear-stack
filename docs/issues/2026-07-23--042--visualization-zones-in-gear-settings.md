@@ -1,6 +1,6 @@
 # UX: własne obszary wizualizacji — sekcja w `/gear/settings`
 
-**Status:** `todo`  
+**Status:** `done`  
 **Created:** 2026-07-23  
 **Updated:** 2026-07-23  
 **Type:** improvement  
@@ -21,10 +21,10 @@ W ustawieniach gear są już karty: **Własne typy kontenerów**, **Własne kate
 
 ## Zakres
 
-- [ ] Nowa karta settings (wzór: `ContainerTypesSettingsCard` / `CategoriesSettingsCard`).
-- [ ] Podpięcie pod `useGearSettings` / dual-path persistence.
-- [ ] i18n PL/EN.
-- [ ] Edge case: usunięcie strefy używanej w `visualizationPlacements` — komunikat / fallback do default zone (jak na stronie wizualizacji).
+- [x] Nowa karta settings (wzór: `ContainerTypesSettingsCard` / `CategoriesSettingsCard`).
+- [x] Podpięcie pod `useGearSettings` / dual-path persistence.
+- [x] i18n PL/EN.
+- [x] Edge case: usunięcie strefy używanej w `visualizationPlacements` — komunikat / fallback do default zone (jak na stronie wizualizacji).
 
 ## Weryfikacja
 

@@ -4,6 +4,7 @@ import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue'
 import BrandsSettingsCard from '@/modules/settings/components/BrandsSettingsCard.vue'
 import CategoriesSettingsCard from '@/modules/settings/components/CategoriesSettingsCard.vue'
 import ContainerTypesSettingsCard from '@/modules/settings/components/ContainerTypesSettingsCard.vue'
+import VisualizationZonesSettingsCard from '@/modules/settings/components/VisualizationZonesSettingsCard.vue'
 import GearPreferencesCard from '../components/GearPreferencesCard.vue'
 
 const { t } = useI18n()
@@ -37,6 +38,9 @@ const { t } = useI18n()
 
           <!-- Custom Brands -->
           <BrandsSettingsCard />
+
+          <!-- Custom Visualization Zones -->
+          <VisualizationZonesSettingsCard />
         </div>
       </div>
     </div>

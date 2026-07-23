@@ -1,6 +1,6 @@
 # UX: badge `Public` — szybkie cofnięcie publikacji
 
-**Status:** `todo`  
+**Status:** `done`  
 **Created:** 2026-07-23  
 **Updated:** 2026-07-23  
 **Type:** improvement  
@@ -16,17 +16,17 @@ Gdy kontener jest publiczny, w nagłówku pojawia się badge `Public` (`PublicCo
 
 Jedna z opcji (do wyboru przy implementacji):
 
-1. **Dropdown na badge** — klik otwiera menu z akcją „Cofnij publikację” (ew. „Skopiuj link publiczny”).
+1. **Dropdown na badge** — klik otwiera menu z akcją „Cofnij publikację” (ew. „Skopiuj link publiczny”). ✅ zaimplementowane
 2. **Hover / focus: `X`** — dyskretny dismiss na badge, z potwierdzeniem lub toastem undo.
 
 Badge nadal komunikuje status; akcja unpublish jest 1–2 kliknięcia od widoku kontenera.
 
 ## Zakres
 
-- [ ] `PublicContainerBadge.vue` + nagłówek (`ContainerHeader.vue`) — interakcja badge.
-- [ ] Wywołanie istniejącego update `isPublic: false` (API / V2).
-- [ ] i18n (PL/EN) dla akcji i ewentualnego potwierdzenia.
-- [ ] A11y: klawiatura / `aria-label` na dismiss lub trigger dropdownu.
+- [x] `PublicContainerBadge.vue` + nagłówek (`ContainerHeader.vue`) — interakcja badge.
+- [x] Wywołanie istniejącego update `isPublic: false` (API / V2).
+- [x] i18n (PL/EN) dla akcji i ewentualnego potwierdzenia.
+- [x] A11y: klawiatura / `aria-label` na dismiss lub trigger dropdownu.
 
 ## Weryfikacja
 

@@ -154,6 +154,13 @@ export const settingsPl = {
       valueRequired: 'Nazwa marki jest wymagana',
       empty: 'Brak własnych marek. Dodaj pierwszą powyżej.',
     },
+    visualizationZones: {
+      title: 'Własne Obszary Wizualizacji',
+      description: 'Dodawaj i zarządzaj własnymi obszarami na mapie kontenerów',
+      add: 'Dodaj Obszar',
+      empty: 'Brak własnych obszarów. Dodaj pierwszy powyżej.',
+      openVisualization: 'Otwórz wizualizację',
+    },
     oauth: {
       title: 'Połączenia OAuth',
       description: 'Zarządzaj powiązanymi kontami OAuth (Google, Facebook itp.)',

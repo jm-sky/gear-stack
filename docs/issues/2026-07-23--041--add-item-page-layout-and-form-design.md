@@ -1,6 +1,6 @@
 # UX: strona „Dodaj przedmiot” — layout (marginesy) + research designu formularza
 
-**Status:** `todo`  
+**Status:** `done`  
 **Created:** 2026-07-23  
 **Updated:** 2026-07-23  
 **Type:** improvement  
@@ -14,22 +14,16 @@
 1. **Layout:** treść formularza jest wyśrodkowana na środku karty — po bokach powstają szerokie białe (puste) marginesy; na desktopie marnuje się szerokość viewportu.
 2. **Design formularza:** długi, gęsty formularz; warto sprawdzić, czy sekcje / inny układ poprawią skanowalność i tempo wypełniania.
 
-## Oczekiwane zachowanie
+## Research
 
-- Formularz wykorzystuje dostępną szerokość sensowniej (np. pełniejszy kontener, dwukolumnowy układ pól na `md+`, mniej „wąskiej kolumny na środku”).
-- Hierarchia pól czytelna (grupy: tożsamość, waga/ilość, status, opcjonalne…).
+- [x] Diagnoza + rekomendacja: [`docs/research/2026-07-23-item-form-layout.md`](../research/2026-07-23-item-form-layout.md)
+- [x] Porównanie z wzorcami (LighterPack / inventory) — sekcje, 2-col, bez collapsible w v1
 
-## Research (przed implementacją)
+## Zakres implementacji
 
-- [ ] Screenshots obecnego UI (desktop + mobile).
-- [ ] Porównanie z 1–2 wzorcami (LighterPack, inne gear/inventory forms) — sekcje, sticky submit, progressive disclosure.
-- [ ] Krótka notatka w `docs/research/` lub w tym issue: rekomendowany układ + co zostaje bez zmian.
-
-## Zakres implementacji (po research)
-
-- [ ] Layout wrapper strony / karty — szerokość, padding, grid.
-- [ ] Ewentualne sekcje / collapsible grupy pól (bez zmiany modelu danych).
-- [ ] Spójność z edycją przedmiotu (ten sam `ItemFormPage`).
+- [x] Layout wrapper strony / karty — `max-w-4xl`, sekcje, sticky CTA.
+- [x] Sekcje pól (bez zmiany modelu danych).
+- [x] Spójność z edycją przedmiotu (ten sam `ItemFormPage` / `ItemFormFields`).
 
 ## Weryfikacja
 

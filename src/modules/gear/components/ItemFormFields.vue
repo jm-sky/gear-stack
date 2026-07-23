@@ -50,34 +50,33 @@ const handleCancel = () => {
 
 <template>
   <div class="space-y-6">
-    <!-- Name -->
-    <FormField
-      v-if="!hideName"
-      v-slot="{ componentField }"
-      name="name"
-    >
-      <FormItem>
-        <FormLabel :label="t('gear.item.name')" required />
-        <Input
-          ref="nameInputRef"
-          v-bind="componentField"
-          :placeholder="t('gear.item.name')"
-          @blur="emit('nameBlur')"
-        />
-        <FormMessage />
-      </FormItem>
-    </FormField>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <FormField
+        v-if="!hideName"
+        v-slot="{ componentField }"
+        name="name"
+      >
+        <FormItem>
+          <FormLabel :label="t('gear.item.name')" required />
+          <Input
+            ref="nameInputRef"
+            v-bind="componentField"
+            :placeholder="t('gear.item.name')"
+            @blur="emit('nameBlur')"
+          />
+          <FormMessage />
+        </FormItem>
+      </FormField>
 
-    <!-- Category -->
-    <FormField v-slot="{ value, handleChange }" name="category">
-      <FormItem>
-        <FormLabel :label="t('gear.item.category')" required />
-        <CategorySelect :model-value="value" @update:model-value="handleChange" />
-        <FormMessage />
-      </FormItem>
-    </FormField>
+      <FormField v-slot="{ value, handleChange }" name="category">
+        <FormItem>
+          <FormLabel :label="t('gear.item.category')" required />
+          <CategorySelect :model-value="value" @update:model-value="handleChange" />
+          <FormMessage />
+        </FormItem>
+      </FormField>
+    </div>
 
-    <!-- Quantity and Weight -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <FormField v-slot="{ componentField }" name="quantity">
         <FormItem>
@@ -110,7 +109,6 @@ const handleCancel = () => {
       </FormField>
     </div>
 
-    <!-- Priority and Status -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <FormField v-slot="{ value, handleChange }" name="priority">
         <FormItem>
@@ -129,9 +127,7 @@ const handleCancel = () => {
       </FormField>
     </div>
 
-    <!-- Expiration Date and Shelf Life -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <!-- Expiration Date -->
       <FormField v-slot="{ componentField }" name="expirationDate">
         <FormItem>
           <FormLabel :label="t('gear.item.expirationDate')" />
@@ -144,7 +140,6 @@ const handleCancel = () => {
         </FormItem>
       </FormField>
 
-      <!-- Shelf Life -->
       <FormField v-slot="{ value: shelfLifeValue, handleChange: handleShelfLifeValueChange }" name="shelfLifeValue">
         <FormField v-slot="{ value: shelfLifeUnit, handleChange: handleShelfLifeUnitChange }" name="shelfLifeUnit">
           <FormItem>
@@ -162,7 +157,6 @@ const handleCancel = () => {
       </FormField>
     </div>
 
-    <!-- Set Expiration Date Button -->
     <FormField v-slot="{ value: shelfLifeValue }" name="shelfLifeValue">
       <FormField v-slot="{ value: shelfLifeUnit }" name="shelfLifeUnit">
         <div v-if="shelfLifeValue && shelfLifeUnit">
@@ -181,7 +175,6 @@ const handleCancel = () => {
       </FormField>
     </FormField>
 
-    <!-- Notes -->
     <FormField v-slot="{ componentField }" name="notes">
       <FormItem>
         <FormLabel :label="t('gear.item.notes')" />
@@ -311,31 +304,30 @@ const handleCancel = () => {
       </div>
     </div>
 
-    <div class="border-t my-4" />
-
     <!-- Actions -->
-    <div class="flex flex-col sm:flex-row justify-between gap-3">
-      <Button
-        type="button"
-        variant="outline"
-        @click="$emit('recognizeParameters')"
-      >
-        {{ t('gear.actions.recognizeParameters') }}
-      </Button>
-      <div class="flex gap-3">
+    <div class="sticky bottom-0 z-10 -mx-6 border-t bg-card/95 px-6 py-4 backdrop-blur supports-[backdrop-filter]:bg-card/80">
+      <div class="flex flex-col sm:flex-row justify-between gap-3">
         <Button
           type="button"
           variant="outline"
-          class="flex-1"
-          @click="handleCancel"
+          @click="$emit('recognizeParameters')"
         >
-          {{ t('gear.actions.cancel') }}
+          {{ t('gear.actions.recognizeParameters') }}
         </Button>
-        <Button type="submit" class="flex-1" :loading>
-          {{ t('gear.actions.save') }}
-        </Button>
+        <div class="flex gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            class="flex-1"
+            @click="handleCancel"
+          >
+            {{ t('gear.actions.cancel') }}
+          </Button>
+          <Button type="submit" class="flex-1" :loading>
+            {{ t('gear.actions.save') }}
+          </Button>
+        </div>
       </div>
     </div>
   </div>
 </template>
-

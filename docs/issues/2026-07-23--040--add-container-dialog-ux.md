@@ -1,6 +1,6 @@
 # UX: dialog „Dodaj kontener” — wyszukiwanie i recent / unifikacja z „Dodaj przedmiot”
 
-**Status:** `todo`  
+**Status:** `done`  
 **Created:** 2026-07-23  
 **Updated:** 2026-07-23  
 **Type:** improvement  
@@ -13,22 +13,16 @@
 
 Dialog zagnieżdżania istniejącego kontenera jest mało wygodny: ComboBox wymaga otwarcia, brak szybkiego podglądu ostatnio używanych kontenerów. Przy dłuższej liście trudno znaleźć cel.
 
-## Do ustalenia (kierunek)
+## Decyzja
 
-**A)** Ujednolicić ścieżkę: dodawanie kontenerów i przedmiotów z jednego miejsca — strona „Dodaj przedmiot” (`/gear/:containerId/items/new`), w duchu #006 (zakładka „Mój istniejący…”) — wtedy dialog na stronie kontenera staje się zbędny lub cienkim wrapperem.
+**B)** Zostawiony dialog, poprawiony UX (quick win). Unifikacja A / zakładka kontenerów na `ItemFormPage` zostaje przy #006.
 
-**B)** Zostawić dialog, ale go poprawić:
+## Zakres
 
-- Wyszukiwarka **widoczna od razu** (nie dopiero po otwarciu ComboBox).
-- Sekcja **3 ostatnio dodane / zmienione** kontenery (po `updatedAt` / `createdAt`), klik = wybór.
-- Reszta listy poniżej (filtrowana).
-
-## Zakres (po wyborze A lub B)
-
-- [ ] Decyzja produktowa: A vs B (ew. A długoterminowo + B jako quick win).
-- [ ] Implementacja wybranej ścieżki.
-- [ ] Spójność z #006 (nie dublować dwóch pełnych UI do tej samej akcji).
-- [ ] Empty / „brak dostępnych” — powiązane z #005.
+- [x] Decyzja produktowa: B (quick win); A długoterminowo przy #006.
+- [x] Wyszukiwarka widoczna od razu + sekcja 3 ostatnie + lista filtrowana.
+- [x] Spójność z #006 (nie dublować pełnego UI — dialog pozostaje ścieżką nest).
+- [x] Empty / „brak dostępnych” — zachowane `noContainersAvailable` + subtree exclusion.
 
 ## Weryfikacja
 

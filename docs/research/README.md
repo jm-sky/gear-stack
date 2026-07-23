@@ -14,6 +14,7 @@ Analyses, spikes, comparisons, and notes collected before implementation decisio
 | [billing-performance-recommendations.md](billing-performance-recommendations.md) | Billing module performance assessment and optional optimizations | `done` |
 | [CLEAN_ITEM_UPDATE_DATA_ANALYSIS.md](CLEAN_ITEM_UPDATE_DATA_ANALYSIS.md) | Analysis of clean item update data flow | `done` |
 | [features-comparison-and-plans.md](features-comparison-and-plans.md) | LighterPack feature comparison | `done` |
+| [2026-07-23-item-form-layout.md](2026-07-23-item-form-layout.md) | Item form layout width + section hierarchy for create/edit | `done` |
 | [LIGHTERPACK_COMPARISON.md](LIGHTERPACK_COMPARISON.md) | LighterPack vs Gear Stack comparison | `done` |
 | [LIGHTERPACK_IMPROVEMENTS_TASKS.md](LIGHTERPACK_IMPROVEMENTS_TASKS.md) | LighterPack-inspired improvement tasks | `planned` |
 | [LIGHTHOUSE_CRITICAL_PATH_ANALYSIS.md](LIGHTHOUSE_CRITICAL_PATH_ANALYSIS.md) | Lighthouse critical path analysis | `done` |

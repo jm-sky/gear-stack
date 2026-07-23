@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { Package } from 'lucide-vue-next'
+import { Package, Search } from 'lucide-vue-next'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@/components/ui/button'
-import ComboBox, { type ComboBoxOption } from '@/components/ui/combo-box/ComboBox.vue'
 import {
   Dialog,
   DialogContent,
@@ -12,6 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { cn } from '@/lib/utils'
 import type { IGearItemV2 } from '../types/gear.types.v2'
 import { useGearV2 } from '../composables/useGearV2'
 
@@ -61,36 +62,72 @@ const collectSubtreeIds = (rootId: string, all: IGearItemV2[]): Set<string> => {
   return ids
 }
 
-// Get available containers for selection (exclude current container and its nested containers)
+const sortByRecency = (a: IGearItemV2, b: IGearItemV2): number => {
+  const aTime = new Date(a.updatedAt || a.createdAt).getTime()
+  const bTime = new Date(b.updatedAt || b.createdAt).getTime()
+  return bTime - aTime
+}
+
 const availableContainers = computed<IGearItemV2[]>(() => {
   const allContainers = containers.value
   if (!props.currentContainerId) {
-    return allContainers
+    return [...allContainers].sort(sortByRecency)
   }
 
   const excludedIds = collectSubtreeIds(props.currentContainerId, allContainers)
-  return allContainers.filter(c => !excludedIds.has(c.id))
+  return allContainers.filter(c => !excludedIds.has(c.id)).sort(sortByRecency)
 })
 
-// Combo-box options (search matches the rendered text: name + type label)
-const containerOptions = computed<ComboBoxOption<IGearItemV2>[]>(() =>
-  availableContainers.value.map(c => ({ value: c.id, label: c.name, data: c })),
-)
-
+const searchQuery = ref<string>('')
 const selectedContainerId = ref<string>('')
 
-const containerTypeLabel = (option: ComboBoxOption<IGearItemV2>): string => {
-  return t(`gear.container.types.${option.data?.containerType ?? 'other'}`)
+const normalizedQuery = computed<string>(() => searchQuery.value.trim().toLowerCase())
+
+const filteredContainers = computed<IGearItemV2[]>(() => {
+  const query = normalizedQuery.value
+  if (!query) {
+    return availableContainers.value
+  }
+  return availableContainers.value.filter((c) => {
+    const name = c.name.toLowerCase()
+    const typeLabel = t(`gear.container.types.${c.containerType ?? 'other'}`).toLowerCase()
+    return name.includes(query) || typeLabel.includes(query)
+  })
+})
+
+const recentContainers = computed<IGearItemV2[]>(() => {
+  if (normalizedQuery.value) {
+    return []
+  }
+  return availableContainers.value.slice(0, 3)
+})
+
+const recentIds = computed<Set<string>>(() => new Set(recentContainers.value.map(c => c.id)))
+
+const remainingContainers = computed<IGearItemV2[]>(() => {
+  if (normalizedQuery.value) {
+    return filteredContainers.value
+  }
+  return filteredContainers.value.filter(c => !recentIds.value.has(c.id))
+})
+
+const containerTypeLabel = (container: IGearItemV2): string => {
+  return t(`gear.container.types.${container.containerType ?? 'other'}`)
 }
 
-const handleOpenChange = (open: boolean) => {
+const selectContainer = (id: string): void => {
+  selectedContainerId.value = id
+}
+
+const handleOpenChange = (open: boolean): void => {
   emit('update:open', open)
   if (!open) {
     selectedContainerId.value = ''
+    searchQuery.value = ''
   }
 }
 
-const handleConfirm = () => {
+const handleConfirm = (): void => {
   if (selectedContainerId.value) {
     emit('confirm', selectedContainerId.value)
     handleOpenChange(false)
@@ -100,7 +137,7 @@ const handleConfirm = () => {
 
 <template>
   <Dialog :open="props.open" @update:open="handleOpenChange">
-    <DialogContent class="w-full sm:max-w-md">
+    <DialogContent class="w-full sm:max-w-lg">
       <DialogHeader>
         <DialogTitle>{{ t('gear.container.addNested') }}</DialogTitle>
         <DialogDescription>
@@ -108,41 +145,108 @@ const handleConfirm = () => {
         </DialogDescription>
       </DialogHeader>
 
-      <div class="space-y-2">
-        <label class="text-sm font-medium">
-          {{ t('gear.container.selectContainer') }}
-        </label>
-        <ComboBox
-          v-model:value="selectedContainerId"
-          :options="containerOptions"
-          class="w-full"
-          :placeholder="t('gear.container.selectContainerPlaceholder')"
-          :search-placeholder="t('gear.container.searchContainers', 'Search containers...')"
-          :empty-message="t('gear.container.noContainersAvailable')"
-          clearable
-          popover-content-class="w-[calc(100vw-3rem)] sm:w-[var(--reka-popper-anchor-width)] p-0"
-        >
-          <template #option-before>
-            <Package :size="16" class="text-muted-foreground" />
-          </template>
-          <template #option-content="{ option }">
-            <span class="truncate">{{ option.label }}</span>
-            <span class="text-xs text-muted-foreground ml-1 shrink-0">
-              ({{ containerTypeLabel(option as ComboBoxOption<IGearItemV2>) }})
-            </span>
-          </template>
-        </ComboBox>
+      <div class="space-y-4">
+        <div class="relative">
+          <Search class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            v-model="searchQuery"
+            class="pl-9"
+            :placeholder="t('gear.container.searchContainers')"
+            :aria-label="t('gear.container.searchContainers')"
+            :disabled="availableContainers.length === 0"
+          />
+        </div>
 
-        <p v-if="availableContainers.length === 0" class="text-sm text-muted-foreground">
+        <p
+          v-if="availableContainers.length === 0"
+          class="text-sm text-muted-foreground"
+        >
           {{ t('gear.container.noContainersAvailable') }}
         </p>
+
+        <div
+          v-else
+          class="max-h-72 space-y-4 overflow-y-auto"
+        >
+          <div
+            v-if="recentContainers.length > 0"
+            class="space-y-2"
+          >
+            <h4 class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              {{ t('gear.container.recentContainers') }}
+            </h4>
+            <div class="space-y-1">
+              <button
+                v-for="container in recentContainers"
+                :key="`recent-${container.id}`"
+                type="button"
+                :class="cn(
+                  'flex w-full items-center gap-2 rounded-md border px-3 py-2 text-left text-sm transition-colors hover:bg-accent',
+                  selectedContainerId === container.id && 'border-primary bg-primary/10',
+                )"
+                @click="selectContainer(container.id)"
+              >
+                <Package class="size-4 shrink-0 text-muted-foreground" />
+                <span class="min-w-0 truncate font-medium">{{ container.name }}</span>
+                <span class="shrink-0 text-xs text-muted-foreground">
+                  ({{ containerTypeLabel(container) }})
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div
+            v-if="remainingContainers.length > 0"
+            class="space-y-2"
+          >
+            <h4
+              v-if="!normalizedQuery"
+              class="text-xs font-medium uppercase tracking-wide text-muted-foreground"
+            >
+              {{ t('gear.container.allContainers') }}
+            </h4>
+            <div class="space-y-1">
+              <button
+                v-for="container in remainingContainers"
+                :key="container.id"
+                type="button"
+                :class="cn(
+                  'flex w-full items-center gap-2 rounded-md border px-3 py-2 text-left text-sm transition-colors hover:bg-accent',
+                  selectedContainerId === container.id && 'border-primary bg-primary/10',
+                )"
+                @click="selectContainer(container.id)"
+              >
+                <Package class="size-4 shrink-0 text-muted-foreground" />
+                <span class="min-w-0 truncate font-medium">{{ container.name }}</span>
+                <span class="shrink-0 text-xs text-muted-foreground">
+                  ({{ containerTypeLabel(container) }})
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <p
+            v-else-if="normalizedQuery && filteredContainers.length === 0"
+            class="text-sm text-muted-foreground"
+          >
+            {{ t('gear.container.noContainersAvailable') }}
+          </p>
+        </div>
       </div>
 
       <DialogFooter class="flex-col-reverse gap-2 sm:flex-row">
-        <Button variant="outline" class="w-full sm:w-auto" @click="handleOpenChange(false)">
+        <Button
+          variant="outline"
+          class="w-full sm:w-auto"
+          @click="handleOpenChange(false)"
+        >
           {{ t('gear.actions.cancel') }}
         </Button>
-        <Button class="w-full sm:w-auto" :disabled="!selectedContainerId" @click="handleConfirm">
+        <Button
+          class="w-full sm:w-auto"
+          :disabled="!selectedContainerId"
+          @click="handleConfirm"
+        >
           {{ t('gear.actions.add') }}
         </Button>
       </DialogFooter>

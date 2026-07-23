@@ -313,7 +313,7 @@ const handleRecognizeParameters = () => {
 
 <template>
   <AuthenticatedLayout>
-    <div v-if="container" class="max-w-2xl mx-auto space-y-6">
+    <div v-if="container" class="max-w-4xl mx-auto space-y-6">
       <!-- Header - always visible -->
       <div>
         <h1 class="text-3xl font-bold">
