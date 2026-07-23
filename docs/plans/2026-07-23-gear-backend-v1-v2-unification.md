@@ -1,6 +1,6 @@
 # Backend V1→V2 Gear Model Unification — Phased Implementation Plan
 
-**Status:** `in progress` — Phase 0 executed 2026-07-23
+**Status:** `in progress` — Phases 0-4 executed 2026-07-23; Phase 5 (drop V1 tables) remaining
 **Created:** 2026-07-23
 **Drives:** [docs/issues/2026-07-23--043--gear-v1-v2-backend-duality-image-ownership-broken.md](../issues/2026-07-23--043--gear-v1-v2-backend-duality-image-ownership-broken.md), [docs/issues/2026-07-23--044--container-share-tokens-table-missing-prod.md](../issues/2026-07-23--044--container-share-tokens-table-missing-prod.md)
 **Supersedes the open TODOs in:** [UNIFIED_MODEL_IMPLEMENTATION_PLAN.md](UNIFIED_MODEL_IMPLEMENTATION_PLAN.md) ("❌ Backend routing: V2 API exists but isn't default", "❌ Cleanup V1: old tables/models still exist")
@@ -593,6 +593,61 @@ stats); `grep -rn "GearContainerDB\|GearItemDB\b" app/` returns only `db_models.
 and migration files (no live query sites); frontend build passes with the pruned service.
 
 **Rollback:** git revert. Tables still present, so no data risk.
+
+### Phase 4 — executed 2026-07-23
+
+`router.py`: deleted the container/item CRUD block (`create_container` through
+`batch_update_item_order`, ~500 lines) and the two stats endpoints
+(`/containers/{id}/stats/weight`, `/stats/readiness`), plus the now-dead
+`get_optional_billing_service`/`OptionalBillingServiceDep` helper (only those deleted endpoints
+used it). `repository.py`/`service.py`: deleted the corresponding CRUD methods and the
+now-fully-dead V1 mappers (`_map_item_to_response`, `_map_container_to_response`,
+`_map_container_to_response_with_author` — the latter was already orphaned since Phase 3b
+repointed every caller onto `_map_container_v2_to_response_with_author`), plus
+`calculate_container_weight`/`calculate_container_readiness` (no callers left once the stats
+endpoints were gone — confirmed backend has no V2 equivalent either; weight/readiness
+calculation is a frontend-only concern for V2, per `containerCalculationsV2.ts`).
+
+**One more #043-pattern bug found only by `mypy`, after deletion:** `create_share_token`
+(service.py) still verified ownership via the now-deleted `self.repository.get_container()` (a
+different code path than the ones audited in 3b, since it called the repository method by name
+rather than a raw `GearContainerDB` query, so it didn't show up in the `grep -rn GearContainerDB`
+sweep). Would have always raised "Container not found or access denied" for a V2-only
+container's own owner. Fixed by switching to `self._repository_v2.get_item(container_id,
+user_id)`. **Lesson:** the `GearContainerDB`/`GearItemDB` grep sweep this plan relied on
+throughout finds *direct model usage*, not calls to repository methods that wrap them — deleting
+the V1 repository methods (this phase) forced mypy to surface the ones the grep missed.
+
+**Verification before deleting anything:** re-confirmed zero frontend callers of the 8 dead
+`gearContainerApiService.ts` methods (`grep` across `src/`, not just the assumption from
+Phase 3b's inventory) and zero direct calls to the 12 V1 REST paths bypassing that service
+class — both clean, matching the plan.
+
+**Frontend:** pruned `gearContainerApiService.ts` down to the 5 live methods
+(`rateContainer`/`deleteContainerRating`/`reportPublicContainer`/`getReportStatus`/
+`withdrawReport`); removed the now-unused `cleanContainerData` helper and V1 DTO imports.
+`pnpm type-check` and `pnpm lint` clean.
+
+**Test files:** deleted `test_containers_crud.py`, `test_data_integrity.py`,
+`test_items_crud.py`, `test_nesting_relationships.py`, `test_weight_calculations.py` — all five
+were 100% V1-only ("PHASE 0: pre-migration baseline" suites per their own docstrings), testing
+methods that no longer exist. Verified `test_unified_model_v2.py` already has equivalent V2
+coverage (create/read/update/move/delete, nesting, cascade delete) before deleting — no coverage
+gap. Removed the three vacuous V1-vs-V2 row-count comparison tests from
+`test_migration_integrity.py` (`test_all_containers_migrated`, `test_all_items_migrated`,
+`test_total_count_preserved`) since there's no longer a way to write V1 data to compare against;
+kept the V2 field-mapping tests and the Phase 2 FK regression test.
+
+**Full-suite verification caught 7 failures** (`test_billing_service.py` x5, `test_main.py` x2,
+`test_convert_empty_strings_middleware.py` x2) — confirmed **pre-existing and unrelated**: none
+of the three files reference gear code at all, and re-running them against the Phase 0-3
+committed state (via `git stash` of Phase 4's uncommitted changes) reproduced the identical
+failures. Not fixed here (out of scope); full suite is otherwise green.
+
+`ruff check`/`black`/`mypy` (project-wide) clean throughout. Full backend `tests/` suite green
+(excluding the 7 pre-existing unrelated failures). `pnpm type-check`/`pnpm lint` clean.
+
+**Phase 4 complete.**
 
 ---
 

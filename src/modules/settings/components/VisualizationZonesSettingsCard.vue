@@ -8,8 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import AddVisualizationZoneDialog from '@/modules/gear/components/visualization/AddVisualizationZoneDialog.vue'
 import { useGearSettings } from '@/modules/gear/composables/useGearSettings'
 import { GearRoutePath } from '@/modules/gear/routes'
-import type { IVisualizationCustomZone } from '@/modules/gear/types/gearSettings.types'
 import { getZoneIcon } from '@/modules/gear/utils/visualizationZones'
+import type { IVisualizationCustomZone } from '@/modules/gear/types/gearSettings.types'
 
 const { t } = useI18n()
 const { visualizationCustomZones, removeVisualizationZone } = useGearSettings()

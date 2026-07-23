@@ -708,9 +708,7 @@ class TestGearServiceRepointedAtV2:
 
     @pytest_asyncio.fixture
     async def author(self, async_db_session: AsyncSession) -> UserDB:
-        from datetime import UTC, datetime
-
-        from datetime import timedelta
+        from datetime import UTC, datetime, timedelta
 
         from app.modules.auth.auth_utils import get_password_hash
         from app.modules.settings.db_models import UserSettingsDB

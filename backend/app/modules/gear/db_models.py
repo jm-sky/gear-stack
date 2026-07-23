@@ -547,7 +547,7 @@ class ItemPromotionDB(Base):
     # Relationships
     # One-way to GearItemDBV2 -- nothing in this codebase navigates .item, so there's no
     # back_populates target to keep in sync.
-    item: Mapped["GearItemDBV2"] = relationship("GearItemDBV2", foreign_keys=[item_id])
+    item: Mapped[GearItemDBV2] = relationship("GearItemDBV2", foreign_keys=[item_id])
     user: Mapped[UserDB] = relationship("UserDB")
 
     # Unique constraint: user can promote item only once
@@ -619,7 +619,7 @@ class ContentReportDB(Base):
     # Relationships
     # One-way to GearItemDBV2 -- nothing in this codebase navigates .container, so there's no
     # back_populates target to keep in sync.
-    container: Mapped["GearItemDBV2"] = relationship("GearItemDBV2", foreign_keys=[container_id])
+    container: Mapped[GearItemDBV2] = relationship("GearItemDBV2", foreign_keys=[container_id])
     reporter: Mapped[UserDB] = relationship("UserDB", foreign_keys=[reporter_user_id])
     reviewer: Mapped[UserDB | None] = relationship("UserDB", foreign_keys=[reviewed_by])
 
