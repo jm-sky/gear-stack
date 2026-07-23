@@ -4,9 +4,11 @@ from collections.abc import Sequence
 
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import aliased
 
 from app.common.id_utils import generate_id
-from app.modules.gear.db_models import GearContainerDB, GearItemDB, ItemImageDB
+from app.modules.gear.db_models import ItemImageDB
+from app.modules.gear.db_models_v2 import GearItemDBV2
 
 
 class ItemImageRepository:
@@ -188,22 +190,28 @@ class ItemImageRepository:
         """
         Resolve the owning user and public-visibility of an item's container.
 
+        Unlike V1 (where only containers carried user_id, so ownership had to be resolved
+        through a container join), every gear_items_v2 row -- item or container -- has its own
+        user_id. Visibility is still a container-level property, so it's resolved via a self-join
+        to the item's immediate parent container.
+
         Args:
             item_id: Item ID
 
         Returns:
             Tuple of (owner_user_id, is_publicly_visible), or None if the item
-            (or its container) does not exist. `is_publicly_visible` is True
+            (or its parent container) does not exist. `is_publicly_visible` is True
             only if the container is public and not hidden by reports.
         """
+        parent = aliased(GearItemDBV2)
         stmt = (
             select(
-                GearContainerDB.user_id,
-                GearContainerDB.is_public,
-                GearContainerDB.is_hidden_by_reports,
+                GearItemDBV2.user_id,
+                parent.is_public,
+                parent.is_hidden_by_reports,
             )
-            .join(GearItemDB, GearItemDB.container_id == GearContainerDB.id)
-            .where(GearItemDB.id == item_id)
+            .join(parent, GearItemDBV2.parent_item_id == parent.id)
+            .where(GearItemDBV2.id == item_id)
         )
         result = await self.db.execute(stmt)
         row = result.first()
@@ -227,7 +235,7 @@ class ItemImageRepository:
 
     async def get_image_owner_id(self, image_id: str) -> str | None:
         """
-        Resolve the owning user_id of an image via its item's container.
+        Resolve the owning user_id of an image via its item.
 
         Args:
             image_id: Image ID
@@ -235,7 +243,7 @@ class ItemImageRepository:
         Returns:
             Owner user_id, or None if the image does not exist.
         """
-        stmt = select(GearContainerDB.user_id).join(GearItemDB, GearItemDB.container_id == GearContainerDB.id).join(ItemImageDB, ItemImageDB.item_id == GearItemDB.id).where(ItemImageDB.id == image_id)
+        stmt = select(GearItemDBV2.user_id).join(ItemImageDB, ItemImageDB.item_id == GearItemDBV2.id).where(ItemImageDB.id == image_id)
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 

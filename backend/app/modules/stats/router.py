@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.modules.auth.db_models import UserDB
-from app.modules.gear.db_models import GearContainerDB, GearItemDB
+from app.modules.gear.db_models_v2 import GearItemDBV2
 
 from .schemas import ContainerStatsResponse, ItemStatsResponse, UserStatsResponse
 
@@ -70,12 +70,15 @@ async def get_container_stats(
     month_start = get_current_month_start()
 
     # Count total containers
-    total_stmt = select(func.count(GearContainerDB.id))
+    total_stmt = select(func.count(GearItemDBV2.id)).where(GearItemDBV2.item_type == "container")
     total_result = await db.execute(total_stmt)
     total = total_result.scalar() or 0
 
     # Count new containers this month
-    new_this_month_stmt = select(func.count(GearContainerDB.id)).where(GearContainerDB.created_at >= month_start)
+    new_this_month_stmt = select(func.count(GearItemDBV2.id)).where(
+        GearItemDBV2.item_type == "container",
+        GearItemDBV2.created_at >= month_start,
+    )
     new_this_month_result = await db.execute(new_this_month_stmt)
     new_this_month = new_this_month_result.scalar() or 0
 
@@ -100,12 +103,15 @@ async def get_item_stats(
     month_start = get_current_month_start()
 
     # Count total items
-    total_stmt = select(func.count(GearItemDB.id))
+    total_stmt = select(func.count(GearItemDBV2.id)).where(GearItemDBV2.item_type == "item")
     total_result = await db.execute(total_stmt)
     total = total_result.scalar() or 0
 
     # Count new items this month
-    new_this_month_stmt = select(func.count(GearItemDB.id)).where(GearItemDB.created_at >= month_start)
+    new_this_month_stmt = select(func.count(GearItemDBV2.id)).where(
+        GearItemDBV2.item_type == "item",
+        GearItemDBV2.created_at >= month_start,
+    )
     new_this_month_result = await db.execute(new_this_month_stmt)
     new_this_month = new_this_month_result.scalar() or 0
 

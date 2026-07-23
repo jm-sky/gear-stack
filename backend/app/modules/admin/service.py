@@ -257,9 +257,9 @@ class AdminService:
                     id=container_db.id,
                     name=container_db.name,
                     description=container_db.description,
-                    type=container_db.type,
+                    type=container_db.container_type or "",
                     color=container_db.color,
-                    isPublic=container_db.is_public,
+                    isPublic=bool(container_db.is_public),
                     authorId=author_id,
                     authorName=author_name,
                     itemCount=item_count or 0,
@@ -286,15 +286,17 @@ class AdminService:
 
         author_name = container_db.user.name if hasattr(container_db, "user") and container_db.user else None
         author_id = container_db.user.id if hasattr(container_db, "user") and container_db.user else None
-        items_count = len(container_db.items) if hasattr(container_db, "items") else 0
+        # .children includes nested sub-containers, unlike V1's GearContainerDB.items which only
+        # ever held item_type='item' rows -- filter to match.
+        items_count = len([c for c in container_db.children if c.item_type == "item"]) if hasattr(container_db, "children") else 0
 
         return AdminContainerResponse(
             id=container_db.id,
             name=container_db.name,
             description=container_db.description,
-            type=container_db.type,
+            type=container_db.container_type or "",
             color=container_db.color,
-            isPublic=container_db.is_public,
+            isPublic=bool(container_db.is_public),
             authorId=author_id,
             authorName=author_name,
             itemCount=items_count,
@@ -312,9 +314,9 @@ class AdminService:
         Returns:
             Updated admin container response or None if not found
         """
-        # Map camelCase to snake_case
+        # Map camelCase to snake_case (gear_items_v2 field names)
         field_mapping = {
-            "parentContainerId": "parent_container_id",
+            "parentContainerId": "parent_item_id",
             "hideWhenNested": "hide_when_nested",
             "weightUnit": "weight_unit",
             "maxWeight": "max_weight",
@@ -335,15 +337,15 @@ class AdminService:
 
         author_name = container_db.user.name if hasattr(container_db, "user") and container_db.user else None
         author_id = container_db.user.id if hasattr(container_db, "user") and container_db.user else None
-        items_count = len(container_db.items) if hasattr(container_db, "items") else 0
+        items_count = len([c for c in container_db.children if c.item_type == "item"]) if hasattr(container_db, "children") else 0
 
         return AdminContainerResponse(
             id=container_db.id,
             name=container_db.name,
             description=container_db.description,
-            type=container_db.type,
+            type=container_db.container_type or "",
             color=container_db.color,
-            isPublic=container_db.is_public,
+            isPublic=bool(container_db.is_public),
             authorId=author_id,
             authorName=author_name,
             itemCount=items_count,
@@ -381,13 +383,15 @@ class AdminService:
                 AdminItemResponse(
                     id=item_db.id,
                     name=item_db.name,
-                    category=item_db.category,
-                    quantity=item_db.quantity,
-                    weight=item_db.weight,
-                    weightUnit=item_db.weight_unit,
-                    status=item_db.status,
-                    priority=item_db.priority,
-                    containerId=item_db.container_id,
+                    category=item_db.category or "",
+                    quantity=item_db.quantity if item_db.quantity is not None else 1,
+                    # weight/weightUnit are nullable on gear_items_v2 (unlike V1's NOT NULL
+                    # columns) -- default rather than fail response validation.
+                    weight=item_db.weight if item_db.weight is not None else 0.0,
+                    weightUnit=item_db.weight_unit or "g",
+                    status=item_db.status or "owned",
+                    priority=item_db.priority or "medium",
+                    containerId=item_db.parent_item_id or "",
                     containerName=container_db.name,
                     authorId=user_db.id,
                     authorName=user_db.name,
@@ -415,13 +419,13 @@ class AdminService:
         return AdminItemResponse(
             id=item_db.id,
             name=item_db.name,
-            category=item_db.category,
-            quantity=item_db.quantity,
-            weight=item_db.weight,
-            weightUnit=item_db.weight_unit,
-            status=item_db.status,
-            priority=item_db.priority,
-            containerId=item_db.container_id,
+            category=item_db.category or "",
+            quantity=item_db.quantity if item_db.quantity is not None else 1,
+            weight=item_db.weight if item_db.weight is not None else 0.0,
+            weightUnit=item_db.weight_unit or "g",
+            status=item_db.status or "owned",
+            priority=item_db.priority or "medium",
+            containerId=item_db.parent_item_id or "",
             containerName=container_db.name if container_db else "",
             authorId=user_db.id if user_db else "",
             authorName=user_db.name if user_db else "",

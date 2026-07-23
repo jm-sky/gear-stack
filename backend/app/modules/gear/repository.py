@@ -25,6 +25,7 @@ from .db_models import (
     GlobalCatalogueItemDB,
     ItemPromotionDB,
 )
+from .db_models_v2 import GearItemDBV2
 from .schemas import (
     BatchOrderUpdateRequest,
     ContainerCreate,
@@ -146,7 +147,10 @@ class GearRepository(SearchMixin):
         Returns:
             Number of containers
         """
-        stmt = select(func.count(GearContainerDB.id)).where(GearContainerDB.user_id == user_id)
+        stmt = select(func.count(GearItemDBV2.id)).where(
+            GearItemDBV2.user_id == user_id,
+            GearItemDBV2.item_type == "container",
+        )
         result = await self.db.execute(stmt)
         return result.scalar_one() or 0
 
@@ -159,11 +163,14 @@ class GearRepository(SearchMixin):
         Returns:
             Number of items
         """
-        stmt = select(func.count(GearItemDB.id)).join(GearContainerDB, GearItemDB.container_id == GearContainerDB.id).where(GearContainerDB.user_id == user_id)
+        stmt = select(func.count(GearItemDBV2.id)).where(
+            GearItemDBV2.user_id == user_id,
+            GearItemDBV2.item_type == "item",
+        )
         result = await self.db.execute(stmt)
         return result.scalar_one() or 0
 
-    async def get_public_containers(self, skip: int = 0, limit: int = 100) -> Sequence[GearContainerDB]:
+    async def get_public_containers(self, skip: int = 0, limit: int = 100) -> Sequence[GearItemDBV2]:
         """Get all public containers from all users.
 
         Args:
@@ -171,54 +178,65 @@ class GearRepository(SearchMixin):
             limit: Maximum number of records to return
 
         Returns:
-            List of public containers with user relationship loaded
+            List of public containers (gear_items_v2, item_type='container') with children and
+            user relationships loaded
         """
         stmt = (
-            select(GearContainerDB)
+            select(GearItemDBV2)
             .where(
                 and_(
-                    GearContainerDB.is_public == True,  # noqa: E712
-                    GearContainerDB.is_hidden_by_reports == False,  # noqa: E712
+                    GearItemDBV2.item_type == "container",
+                    GearItemDBV2.is_public == True,  # noqa: E712
+                    # is_hidden_by_reports is nullable on gear_items_v2 (unlike V1's NOT NULL
+                    # default False) -- NULL means "never reported", i.e. not hidden.
+                    or_(
+                        GearItemDBV2.is_hidden_by_reports == False,  # noqa: E712
+                        GearItemDBV2.is_hidden_by_reports.is_(None),
+                    ),
                 )
             )
             .options(
-                selectinload(GearContainerDB.items),  # type: ignore[attr-defined]
-                joinedload(GearContainerDB.user),  # type: ignore[attr-defined]
+                selectinload(GearItemDBV2.children),
+                joinedload(GearItemDBV2.user),  # type: ignore[attr-defined]
             )
             .offset(skip)
             .limit(limit)
-            .order_by(GearContainerDB.created_at.desc())
+            .order_by(GearItemDBV2.created_at.desc())
         )
         result = await self.db.execute(stmt)
         return result.unique().scalars().all()
 
-    async def get_public_container(self, container_id: str) -> GearContainerDB | None:
+    async def get_public_container(self, container_id: str) -> GearItemDBV2 | None:
         """Get a public container by ID.
 
         Args:
             container_id: Container ID
 
         Returns:
-            Container if found and public, None otherwise (with user relationship loaded)
+            Container if found and public, None otherwise (with children/user loaded)
         """
         stmt = (
-            select(GearContainerDB)
+            select(GearItemDBV2)
             .where(
                 and_(
-                    GearContainerDB.id == container_id,
-                    GearContainerDB.is_public == True,  # noqa: E712
-                    GearContainerDB.is_hidden_by_reports == False,  # noqa: E712
+                    GearItemDBV2.id == container_id,
+                    GearItemDBV2.item_type == "container",
+                    GearItemDBV2.is_public == True,  # noqa: E712
+                    or_(
+                        GearItemDBV2.is_hidden_by_reports == False,  # noqa: E712
+                        GearItemDBV2.is_hidden_by_reports.is_(None),
+                    ),
                 )
             )
             .options(
-                selectinload(GearContainerDB.items),  # type: ignore[attr-defined]
-                joinedload(GearContainerDB.user),  # type: ignore[attr-defined]
+                selectinload(GearItemDBV2.children),
+                joinedload(GearItemDBV2.user),  # type: ignore[attr-defined]
             )
         )
         result = await self.db.execute(stmt)
         return result.unique().scalar_one_or_none()
 
-    async def get_public_container_for_reporting(self, container_id: str) -> GearContainerDB | None:
+    async def get_public_container_for_reporting(self, container_id: str) -> GearItemDBV2 | None:
         """Get a public container by ID for reporting purposes.
 
         This method does NOT filter by is_hidden_by_reports, allowing reports
@@ -231,20 +249,45 @@ class GearRepository(SearchMixin):
             Container if found and public, None otherwise
         """
         stmt = (
-            select(GearContainerDB)
+            select(GearItemDBV2)
             .where(
                 and_(
-                    GearContainerDB.id == container_id,
-                    GearContainerDB.is_public == True,  # noqa: E712
+                    GearItemDBV2.id == container_id,
+                    GearItemDBV2.item_type == "container",
+                    GearItemDBV2.is_public == True,  # noqa: E712
                 )
             )
             .options(
-                selectinload(GearContainerDB.items),  # type: ignore[attr-defined]
-                joinedload(GearContainerDB.user),  # type: ignore[attr-defined]
+                selectinload(GearItemDBV2.children),
+                joinedload(GearItemDBV2.user),  # type: ignore[attr-defined]
             )
         )
         result = await self.db.execute(stmt)
         return result.unique().scalar_one_or_none()
+
+    async def get_container_v2_owned_or_public(self, container_id: str, user_id: str) -> GearItemDBV2 | None:
+        """Get a container (gear_items_v2) if the requesting user owns it, or it's public.
+
+        Used by the rating endpoints: the owner may rate a container regardless of its
+        visibility, other users only if it's public. Replaces the old two-step fallback of
+        `get_container` (V1 ownership) then `get_public_container` (V2 public) -- that chain
+        404'd for a private V2-only container even for its own owner, since get_container never
+        found it in V1 (the same pattern as #043).
+
+        Args:
+            container_id: Container ID
+            user_id: Requesting user ID
+
+        Returns:
+            Container if the user owns it or it's public, None otherwise
+        """
+        stmt = select(GearItemDBV2).where(
+            GearItemDBV2.id == container_id,
+            GearItemDBV2.item_type == "container",
+            or_(GearItemDBV2.user_id == user_id, GearItemDBV2.is_public == True),  # noqa: E712
+        )
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
 
     async def update_container(self, container_id: str, user_id: str, data: ContainerUpdate) -> GearContainerDB | None:
         """Update a container.
@@ -718,14 +761,15 @@ class GearRepository(SearchMixin):
         await self.db.refresh(share_token)
         return share_token
 
-    async def get_container_by_token(self, token: str) -> GearContainerDB | None:
+    async def get_container_by_token(self, token: str) -> GearItemDBV2 | None:
         """Get a container by share token.
 
         Args:
             token: Share token
 
         Returns:
-            Container if token is valid and not expired, None otherwise (with user relationship loaded)
+            Container if token is valid and not expired, None otherwise (with children/user
+            relationships loaded)
         """
         # Check if token exists and is not expired
         token_stmt = (
@@ -744,13 +788,13 @@ class GearRepository(SearchMixin):
         if not share_token:
             return None
 
-        # Get container with items and user relationship
+        # Get container with children and user relationship
         stmt = (
-            select(GearContainerDB)
-            .where(GearContainerDB.id == share_token.container_id)
+            select(GearItemDBV2)
+            .where(GearItemDBV2.id == share_token.container_id)
             .options(
-                selectinload(GearContainerDB.items),  # type: ignore[attr-defined]
-                joinedload(GearContainerDB.user),  # type: ignore[attr-defined]
+                selectinload(GearItemDBV2.children),
+                joinedload(GearItemDBV2.user),  # type: ignore[attr-defined]
             )
         )
         result = await self.db.execute(stmt)
@@ -766,9 +810,14 @@ class GearRepository(SearchMixin):
         Returns:
             List of share tokens for the container
         """
-        # Verify container ownership
-        container = await self.get_container(container_id, user_id)
-        if not container:
+        # Verify container ownership against gear_items_v2 (the container may not have a
+        # V1 gear_containers counterpart -- see #043/#044).
+        owner_stmt = select(GearItemDBV2.id).where(
+            GearItemDBV2.id == container_id,
+            GearItemDBV2.user_id == user_id,
+        )
+        owner_result = await self.db.execute(owner_stmt)
+        if owner_result.scalar_one_or_none() is None:
             return []
 
         stmt = select(ContainerShareTokenDB).where(ContainerShareTokenDB.container_id == container_id).order_by(ContainerShareTokenDB.created_at.desc())
@@ -1342,7 +1391,7 @@ class GearRepository(SearchMixin):
         await self.db.refresh(report)
         return report
 
-    async def set_container_hidden_by_reports(self, container_id: str, is_hidden: bool) -> GearContainerDB | None:
+    async def set_container_hidden_by_reports(self, container_id: str, is_hidden: bool) -> GearItemDBV2 | None:
         """Set is_hidden_by_reports flag for a container.
 
         Args:
@@ -1352,7 +1401,7 @@ class GearRepository(SearchMixin):
         Returns:
             Updated container if found, None otherwise
         """
-        stmt = select(GearContainerDB).where(GearContainerDB.id == container_id)
+        stmt = select(GearItemDBV2).where(GearItemDBV2.id == container_id, GearItemDBV2.item_type == "container")
         result = await self.db.execute(stmt)
         container = result.scalar_one_or_none()
 

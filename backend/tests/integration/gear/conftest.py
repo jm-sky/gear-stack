@@ -17,9 +17,11 @@ from app.core.database import Base
 from app.modules.auth.auth_utils import get_password_hash
 from app.modules.auth.db_models import UserDB
 from app.modules.gear.db_models import GearContainerDB, GearItemDB
+from app.modules.gear.db_models_v2 import GearItemDBV2
 from app.modules.gear.repository import GearRepository
 from app.modules.gear.repository_v2 import GearRepositoryV2
 from app.modules.gear.schemas import ContainerCreate, ItemCreate
+from app.modules.gear.schemas_v2 import GearItemCreateV2
 from app.modules.gear.service import GearService
 from app.modules.gear.service_v2 import GearServiceV2
 
@@ -209,6 +211,72 @@ async def create_test_item(
     )
     item = await service.create_item(container_id, user_id, data)
     return item.model_dump()
+
+
+async def create_test_container_v2(
+    service: GearServiceV2,
+    user_id: str,
+    name: str = "Test Container",
+    container_type: str = "backpack",
+    parent_id: str | None = None,
+    is_public: bool = False,
+) -> GearItemDBV2:
+    """Helper function to create a V2-native test container (item_type='container').
+
+    Use this (instead of create_test_container) for tests exercising code that has been
+    repointed at gear_items_v2 -- e.g. item-image ownership/visibility
+    (docs/plans/2026-07-23-gear-backend-v1-v2-unification.md, Phase 3a).
+
+    Args:
+        service: Gear service V2 instance
+        user_id: User ID
+        name: Container name
+        container_type: Container type
+        parent_id: Parent container ID for nesting
+        is_public: Whether the container is public
+
+    Returns:
+        Created container (GearItemDBV2, item_type='container')
+    """
+    data = GearItemCreateV2(
+        itemType="container",
+        name=name,
+        containerType=container_type,
+        parentItemId=parent_id,
+        isPublic=is_public,
+    )
+    return await service.create_item(user_id, data)
+
+
+async def create_test_item_v2(
+    service: GearServiceV2,
+    user_id: str,
+    container_id: str,
+    name: str = "Test Item",
+    category: str = "tools",
+    quantity: int = 1,
+) -> GearItemDBV2:
+    """Helper function to create a V2-native test item (item_type='item').
+
+    Args:
+        service: Gear service V2 instance
+        user_id: User ID
+        container_id: Parent container ID
+        name: Item name
+        category: Item category
+        quantity: Item quantity
+
+    Returns:
+        Created item (GearItemDBV2, item_type='item')
+    """
+    data = GearItemCreateV2(
+        itemType="item",
+        name=name,
+        category=category,
+        quantity=quantity,
+        parentItemId=container_id,
+    )
+    return await service.create_item(user_id, data)
 
 
 async def get_container_count(session: AsyncSession, user_id: str) -> int:

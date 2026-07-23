@@ -208,6 +208,12 @@ class GearItemDBV2(Base):
         return f"<GearItemDBV2(id={self.id}, name={self.name}, type={self.item_type})>"
 
 
+# Added for public-container author-name lookups (docs/plans/2026-07-23-gear-backend-v1-v2-unification.md,
+# Phase 3b) -- mirrors GearContainerDB.user in db_models.py (V1). String target resolves via the
+# shared mapper registry once app.modules.auth.db_models is imported elsewhere at startup.
+GearItemDBV2.user = relationship("UserDB", foreign_keys=[GearItemDBV2.user_id])
+
+
 # Type-specific subclasses for better type hints and behavior
 
 

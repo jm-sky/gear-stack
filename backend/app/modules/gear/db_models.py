@@ -201,7 +201,10 @@ class ItemImageDB(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     item_id: Mapped[str] = mapped_column(
         String(36),
-        ForeignKey("gear_items.id", ondelete="CASCADE"),
+        # Points at gear_items_v2, not legacy gear_items -- see migration 058
+        # (docs/plans/2026-07-23-gear-backend-v1-v2-unification.md, Phase 2/3a /
+        # docs/issues/2026-07-23--043--gear-v1-v2-backend-duality-image-ownership-broken.md).
+        ForeignKey("gear_items_v2.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -233,20 +236,11 @@ class ItemImageDB(Base):
         nullable=False,
     )
 
-    # Relationships
-    item: Mapped[GearItemDB] = relationship("GearItemDB", back_populates="images")
+    # No ORM relationship to the parent item -- item_id now targets gear_items_v2 (not
+    # GearItemDB/V1), and nothing in this codebase navigates it; all lookups are explicit joins.
 
     def __repr__(self) -> str:
         return f"<ItemImageDB(id={self.id}, item_id={self.item_id}, file_name={self.file_name})>"
-
-
-# Add images relationship to GearItemDB
-GearItemDB.images = relationship(
-    "ItemImageDB",
-    back_populates="item",
-    cascade="all, delete-orphan",
-    order_by="ItemImageDB.order",
-)
 
 
 class ContainerShareTokenDB(Base):
@@ -269,7 +263,10 @@ class ContainerShareTokenDB(Base):
     token: Mapped[str] = mapped_column(String(255), primary_key=True, index=True)
     container_id: Mapped[str] = mapped_column(
         String(36),
-        ForeignKey("gear_containers.id", ondelete="CASCADE"),
+        # Points at gear_items_v2, not legacy gear_containers -- see migration 057
+        # (docs/plans/2026-07-23-gear-backend-v1-v2-unification.md, Phase 1 /
+        # docs/issues/2026-07-23--044--container-share-tokens-table-missing-prod.md).
+        ForeignKey("gear_items_v2.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -283,12 +280,13 @@ class ContainerShareTokenDB(Base):
 
 # Add user relationship for public containers
 from app.modules.auth.db_models import UserDB  # noqa: E402
+from app.modules.gear.db_models_v2 import GearItemDBV2  # noqa: E402
 
 GearContainerDB.user = relationship("UserDB", foreign_keys=[GearContainerDB.user_id])
 ItemImageDB.user = relationship("UserDB", foreign_keys=[ItemImageDB.user_id])
 
 # Add relationships for share tokens
-ContainerShareTokenDB.container = relationship("GearContainerDB", foreign_keys=[ContainerShareTokenDB.container_id])
+ContainerShareTokenDB.container = relationship("GearItemDBV2", foreign_keys=[ContainerShareTokenDB.container_id])
 ContainerShareTokenDB.user = relationship("UserDB", foreign_keys=[ContainerShareTokenDB.user_id])
 
 
@@ -314,7 +312,9 @@ class ContainerRatingDB(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     container_id: Mapped[str] = mapped_column(
         String(36),
-        ForeignKey("gear_containers.id", ondelete="CASCADE"),
+        # Points at gear_items_v2, not legacy gear_containers -- see migration 058
+        # (docs/plans/2026-07-23-gear-backend-v1-v2-unification.md, Phase 2/3b).
+        ForeignKey("gear_items_v2.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -352,15 +352,9 @@ class ContainerRatingDB(Base):
 
 
 # Add relationships for container ratings
-GearContainerDB.ratings = relationship(
-    "ContainerRatingDB",
-    back_populates="container",
-    cascade="all, delete-orphan",
-)
-ContainerRatingDB.container = relationship(
-    "GearContainerDB",
-    back_populates="ratings",
-)
+# One-way to GearItemDBV2 -- gear_items_v2 (not GearContainerDB/V1) owns ratings going forward,
+# and nothing in this codebase navigates .container, so there's no back_populates to keep in sync.
+ContainerRatingDB.container = relationship("GearItemDBV2", foreign_keys=[ContainerRatingDB.container_id])
 ContainerRatingDB.user = relationship("UserDB", foreign_keys=[ContainerRatingDB.user_id])
 
 
@@ -532,7 +526,9 @@ class ItemPromotionDB(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     item_id: Mapped[str] = mapped_column(
         String(36),
-        ForeignKey("gear_items.id", ondelete="CASCADE"),
+        # Points at gear_items_v2, not legacy gear_items -- see migration 058
+        # (docs/plans/2026-07-23-gear-backend-v1-v2-unification.md, Phase 2/3b).
+        ForeignKey("gear_items_v2.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -549,7 +545,9 @@ class ItemPromotionDB(Base):
     )
 
     # Relationships
-    item: Mapped[GearItemDB] = relationship("GearItemDB", back_populates="promotions")
+    # One-way to GearItemDBV2 -- nothing in this codebase navigates .item, so there's no
+    # back_populates target to keep in sync.
+    item: Mapped["GearItemDBV2"] = relationship("GearItemDBV2", foreign_keys=[item_id])
     user: Mapped[UserDB] = relationship("UserDB")
 
     # Unique constraint: user can promote item only once
@@ -557,14 +555,6 @@ class ItemPromotionDB(Base):
 
     def __repr__(self) -> str:
         return f"<ItemPromotionDB(id={self.id}, item_id={self.item_id}, user_id={self.user_id})>"
-
-
-# Add promotions relationship to GearItemDB
-GearItemDB.promotions = relationship(
-    "ItemPromotionDB",
-    back_populates="item",
-    cascade="all, delete-orphan",
-)
 
 
 class ContentReportDB(Base):
@@ -590,7 +580,9 @@ class ContentReportDB(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     container_id: Mapped[str] = mapped_column(
         String(36),
-        ForeignKey("gear_containers.id", ondelete="CASCADE"),
+        # Points at gear_items_v2, not legacy gear_containers -- see migration 058
+        # (docs/plans/2026-07-23-gear-backend-v1-v2-unification.md, Phase 2/3b).
+        ForeignKey("gear_items_v2.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -625,18 +617,11 @@ class ContentReportDB(Base):
     )
 
     # Relationships
-    container: Mapped[GearContainerDB] = relationship("GearContainerDB", foreign_keys=[container_id], back_populates="reports")
+    # One-way to GearItemDBV2 -- nothing in this codebase navigates .container, so there's no
+    # back_populates target to keep in sync.
+    container: Mapped["GearItemDBV2"] = relationship("GearItemDBV2", foreign_keys=[container_id])
     reporter: Mapped[UserDB] = relationship("UserDB", foreign_keys=[reporter_user_id])
     reviewer: Mapped[UserDB | None] = relationship("UserDB", foreign_keys=[reviewed_by])
 
     def __repr__(self) -> str:
         return f"<ContentReportDB(id={self.id}, container_id={self.container_id}, reason={self.reason}, status={self.status})>"
-
-
-# Add reports relationship to GearContainerDB
-GearContainerDB.reports = relationship(
-    "ContentReportDB",
-    foreign_keys=[ContentReportDB.container_id],
-    back_populates="container",
-    cascade="all, delete-orphan",
-)

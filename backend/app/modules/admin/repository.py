@@ -6,12 +6,12 @@ to users, containers, and items across all users.
 
 import logging
 
-from sqlalchemy import func, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy.orm import aliased, joinedload, selectinload
 
 from app.modules.auth.db_models import UserDB
-from app.modules.gear.db_models import GearContainerDB, GearItemDB
+from app.modules.gear.db_models_v2 import GearItemDBV2
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +71,7 @@ class AdminRepository:
         return (user, user)
 
     # Container operations
-    async def get_all_containers(self, skip: int = 0, limit: int = 100) -> list[tuple[GearContainerDB, int]]:
+    async def get_all_containers(self, skip: int = 0, limit: int = 100) -> list[tuple[GearItemDBV2, int]]:
         """Get all containers with item counts.
 
         Args:
@@ -79,23 +79,28 @@ class AdminRepository:
             limit: Maximum number of records to return
 
         Returns:
-            List of tuples (GearContainerDB, item_count)
+            List of tuples (GearItemDBV2, item_count)
         """
+        children = aliased(GearItemDBV2)
         stmt = (
-            select(GearContainerDB, func.count(GearItemDB.id).label("item_count"))
-            .outerjoin(GearItemDB, GearContainerDB.id == GearItemDB.container_id)
-            .options(selectinload(GearContainerDB.user))  # type: ignore[attr-defined]
-            .group_by(GearContainerDB.id)
+            select(GearItemDBV2, func.count(children.id).label("item_count"))
+            .outerjoin(
+                children,
+                and_(children.parent_item_id == GearItemDBV2.id, children.item_type == "item"),
+            )
+            .where(GearItemDBV2.item_type == "container")
+            .options(selectinload(GearItemDBV2.user))  # type: ignore[attr-defined]
+            .group_by(GearItemDBV2.id)
             .offset(skip)
             .limit(limit)
-            .order_by(GearContainerDB.created_at.desc())
+            .order_by(GearItemDBV2.created_at.desc())
         )
         result = await self.db.execute(stmt)
         rows = result.unique().all()
         # Convert to list for type checker
         return [(row[0], row[1]) for row in rows]
 
-    async def get_container_by_id(self, container_id: str) -> GearContainerDB | None:
+    async def get_container_by_id(self, container_id: str) -> GearItemDBV2 | None:
         """Get container by ID with items and user.
 
         Args:
@@ -104,11 +109,11 @@ class AdminRepository:
         Returns:
             Container if found, None otherwise
         """
-        stmt = select(GearContainerDB).where(GearContainerDB.id == container_id).options(selectinload(GearContainerDB.items), joinedload(GearContainerDB.user))  # type: ignore[attr-defined]
+        stmt = select(GearItemDBV2).where(GearItemDBV2.id == container_id, GearItemDBV2.item_type == "container").options(selectinload(GearItemDBV2.children), joinedload(GearItemDBV2.user))  # type: ignore[attr-defined]
         result = await self.db.execute(stmt)
         return result.unique().scalar_one_or_none()
 
-    async def update_container(self, container_id: str, data: dict) -> GearContainerDB | None:
+    async def update_container(self, container_id: str, data: dict) -> GearItemDBV2 | None:
         """Update container by ID (admin only).
 
         Args:
@@ -118,7 +123,7 @@ class AdminRepository:
         Returns:
             Updated container if found, None otherwise
         """
-        stmt = select(GearContainerDB).where(GearContainerDB.id == container_id).options(selectinload(GearContainerDB.items), joinedload(GearContainerDB.user))  # type: ignore[attr-defined]
+        stmt = select(GearItemDBV2).where(GearItemDBV2.id == container_id, GearItemDBV2.item_type == "container").options(selectinload(GearItemDBV2.children), joinedload(GearItemDBV2.user))  # type: ignore[attr-defined]
         result = await self.db.execute(stmt)
         container_db = result.unique().scalar_one_or_none()
 
@@ -131,7 +136,10 @@ class AdminRepository:
                 setattr(container_db, key, value)
 
         await self.db.commit()
-        await self.db.refresh(container_db)
+        # Limit refresh to plain columns -- refreshing without attribute_names would expire
+        # (and force a lazy, sync-unsafe reload of) the eagerly-loaded .children/.user
+        # relationships set up by the SELECT above.
+        await self.db.refresh(container_db, attribute_names=["updated_at", *data.keys()])
         return container_db
 
     async def delete_container(self, container_id: str) -> bool:
@@ -143,7 +151,7 @@ class AdminRepository:
         Returns:
             True if deleted, False if not found
         """
-        stmt = select(GearContainerDB).where(GearContainerDB.id == container_id)
+        stmt = select(GearItemDBV2).where(GearItemDBV2.id == container_id, GearItemDBV2.item_type == "container")
         result = await self.db.execute(stmt)
         container_db = result.scalar_one_or_none()
 
@@ -155,7 +163,7 @@ class AdminRepository:
         return True
 
     # Item operations
-    async def get_all_items(self, skip: int = 0, limit: int = 100) -> list[tuple[GearItemDB, GearContainerDB, UserDB]]:
+    async def get_all_items(self, skip: int = 0, limit: int = 100) -> list[tuple[GearItemDBV2, GearItemDBV2, UserDB]]:
         """Get all items with container and user data.
 
         Args:
@@ -163,23 +171,33 @@ class AdminRepository:
             limit: Maximum number of records to return
 
         Returns:
-            List of tuples (GearItemDB, GearContainerDB, UserDB)
+            List of tuples (GearItemDBV2, GearItemDBV2 [parent container], UserDB)
         """
-        stmt = select(GearItemDB, GearContainerDB, UserDB).join(GearContainerDB, GearItemDB.container_id == GearContainerDB.id).join(UserDB, GearContainerDB.user_id == UserDB.id).offset(skip).limit(limit).order_by(GearItemDB.created_at.desc())
+        parent = aliased(GearItemDBV2)
+        stmt = (
+            select(GearItemDBV2, parent, UserDB)
+            .join(parent, GearItemDBV2.parent_item_id == parent.id)
+            .join(UserDB, GearItemDBV2.user_id == UserDB.id)
+            .where(GearItemDBV2.item_type == "item")
+            .offset(skip)
+            .limit(limit)
+            .order_by(GearItemDBV2.created_at.desc())
+        )
         result = await self.db.execute(stmt)
         # Convert rows to typed tuples
         return [(row[0], row[1], row[2]) for row in result.all()]
 
-    async def get_item_by_id(self, item_id: str) -> tuple[GearItemDB | None, GearContainerDB | None, UserDB | None]:
+    async def get_item_by_id(self, item_id: str) -> tuple[GearItemDBV2 | None, GearItemDBV2 | None, UserDB | None]:
         """Get item by ID with container and user data.
 
         Args:
             item_id: Item ID
 
         Returns:
-            Tuple of (GearItemDB, GearContainerDB, UserDB) or (None, None, None)
+            Tuple of (GearItemDBV2, GearItemDBV2 [parent container], UserDB) or (None, None, None)
         """
-        stmt = select(GearItemDB, GearContainerDB, UserDB).join(GearContainerDB, GearItemDB.container_id == GearContainerDB.id).join(UserDB, GearContainerDB.user_id == UserDB.id).where(GearItemDB.id == item_id)
+        parent = aliased(GearItemDBV2)
+        stmt = select(GearItemDBV2, parent, UserDB).join(parent, GearItemDBV2.parent_item_id == parent.id).join(UserDB, GearItemDBV2.user_id == UserDB.id).where(GearItemDBV2.id == item_id, GearItemDBV2.item_type == "item")
         result = await self.db.execute(stmt)
         row = result.first()
 
@@ -197,7 +215,7 @@ class AdminRepository:
         Returns:
             True if deleted, False if not found
         """
-        stmt = select(GearItemDB).where(GearItemDB.id == item_id)
+        stmt = select(GearItemDBV2).where(GearItemDBV2.id == item_id, GearItemDBV2.item_type == "item")
         result = await self.db.execute(stmt)
         item_db = result.scalar_one_or_none()
 

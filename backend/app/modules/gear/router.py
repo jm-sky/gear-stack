@@ -814,13 +814,10 @@ async def rate_container(
     """
     repository = GearRepository(db)
 
-    # Verify container exists
-    container = await repository.get_container(container_id, current_user.id)
+    # Verify container exists (owner in any visibility, or anyone if public)
+    container = await repository.get_container_v2_owned_or_public(container_id, current_user.id)
     if not container:
-        # Try public container
-        container = await repository.get_public_container(container_id)
-        if not container:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Container not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Container not found")
 
     # Validate rating type
     is_owner = container.user_id == current_user.id
@@ -882,12 +879,10 @@ async def delete_container_rating(
     """Delete user's rating for a container."""
     repository = GearRepository(db)
 
-    # Verify container exists
-    container = await repository.get_container(container_id, current_user.id)
+    # Verify container exists (owner in any visibility, or anyone if public)
+    container = await repository.get_container_v2_owned_or_public(container_id, current_user.id)
     if not container:
-        container = await repository.get_public_container(container_id)
-        if not container:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Container not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Container not found")
 
     # Validate rating type
     is_owner = container.user_id == current_user.id

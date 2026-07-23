@@ -1,10 +1,11 @@
 # Backend gear V1/V2 model duality — item-image ownership/visibility checks broken for V2-native items
 
-**Status:** `todo`
+**Status:** `in progress`
 **Created:** 2026-07-23
 **Severity:** High
 **Module:** `gear` (backend — data model / item images)
 **Source:** Manual verification of [#035](2026-07-21--035--item-image-idor.md) by the user
+**Plan:** [docs/plans/2026-07-23-gear-backend-v1-v2-unification.md](../plans/2026-07-23-gear-backend-v1-v2-unification.md)
 
 ## Problem
 
@@ -107,8 +108,91 @@ that's scoped into a plan (likely belongs in `docs/plans/`, given the size).
 - [ ] Remove `db_models.py` (V1), `repository.py` (V1), V1 endpoints in `router.py`
 - [ ] Re-verify [#035](2026-07-21--035--item-image-idor.md) end-to-end once item images run on V2
 
+## Production DB recon (2026-07-23)
+
+Before scoping the migration plan, checked actual schema state on both the local dev DB and
+production (VPS, `gear-stack-db`). This corrects and extends the analysis above.
+
+**Migrations 050–054 (create `gear_items_v2`, migrate data, repoint FKs) are applied on both
+dev and prod** (`schema_migrations`, prod `applied_at` 2026-01-08). But the two environments
+diverge in an important way:
+
+| | dev (local) | production |
+|---|---|---|
+| `gear_containers` rows | 0 | 20 |
+| `gear_items` rows | 0 | 143 |
+| `gear_items_v2` rows | 9 | 165 |
+
+**On production, V1 tables are NOT empty** — migration `051_migrate_data_to_unified_model`
+*copied* V1 rows into `gear_items_v2` but never deleted the originals. 20 + 143 = 163, vs. 165
+in `gear_items_v2` — **at least 2 rows exist only in V2** (created after the app's cutover to
+V2, with no V1 counterpart), which is itself proof that any "V1 is still the source of truth"
+framing is wrong going forward — V1 is now a stale, partially-diverged copy, not a live twin.
+
+**FK state is worse than originally described** — the original "Problem" section above says
+`item_images.item_id` has an FK to `gear_items.id`. On production it actually has **two FK
+constraints on the same column simultaneously**:
+- `fk_item_images_item_id → gear_items` (old, V1)
+- `item_images_item_id_fkey → gear_items_v2` (new, added by migration 052)
+
+Same double-FK pattern on `container_ratings.container_id`. Root cause: migration 052 ran
+`DROP CONSTRAINT IF EXISTS item_images_item_id_fkey` / `..._container_ratings_container_id_fkey`
+to remove the old FK before adding the new one — but the *actual* old constraint names in
+production were `fk_item_images_item_id` / `fk_container_ratings_container` (different naming
+convention, likely from an earlier hand-written migration). `DROP CONSTRAINT IF EXISTS` with the
+wrong name silently no-ops, so the old FK was never dropped — both now co-exist on the same
+column.
+
+**Practical consequence:** because both FKs are enforced, `item_images.item_id` /
+`container_ratings.container_id` must currently satisfy *both* — the referenced row must exist
+in **both** `gear_items` (V1) and `gear_items_v2` (V2). Any of the ≥2 V2-only items (created
+post-cutover, no V1 row) would hit an **FK constraint violation** (not just the ownership-check
+404 described above) if an image or rating were attempted for them — a second, more severe bug
+than the app-level 404, currently masked because the broken V1-only ownership check 404s first
+and the code never reaches the INSERT.
+
+**`item_promotions` and `content_reports` were never repointed at all** — migration 052 only
+touched `item_images`, `container_share_tokens`, and `container_ratings`. On production:
+- `item_promotions.item_id` → still only `gear_items` (V1), 0 rows
+- `content_reports.container_id` → still only `gear_containers` (V1), 0 rows
+
+**`container_share_tokens` does not exist on production at all**, despite migrations that
+create it being recorded as applied — filed separately as
+[#044](2026-07-23--044--container-share-tokens-table-missing-prod.md) since it's an independent
+anomaly (live 500s, not part of the V1/V2 duality itself), but it also means the recorded-applied
+state in `schema_migrations` can't be fully trusted when scoping the fix below.
+
+**Revised understanding for the plan:** this is no longer "finish a migration that still needs a
+data backfill" — the data copy already happened. What's actually needed:
+1. Reconcile the ≥2 V2-only rows and confirm `gear_items_v2` is a complete, correct superset of
+   the 163 V1 rows (no silent field-mapping loss from migration 051) before anything is dropped.
+2. Drop the *actual* old FK constraints by their real names (`fk_item_images_item_id`,
+   `fk_container_ratings_container`, ...) — don't trust migration 052's constraint names.
+3. Add the missing new FKs for `item_promotions` and `content_reports` → `gear_items_v2`.
+4. Re-point the ownership/visibility/read code (`item_image_repository.py`, ratings, reports,
+   promotions, public browsing, share tokens) at V2 — the part originally scoped above.
+5. Only then, once V2 is verified authoritative and nothing references V1 anymore, drop
+   `gear_containers` / `gear_items` and the dead V1 code.
+6. Spot-check whether other `schema_migrations`-recorded migrations have similar drift, given
+   `container_share_tokens` was found to silently not match its recorded state.
+
 ## Verification
 
 Blocked on the fix above. Once done: repeat the #035 verification steps (owner/cross-user
 access, public/private visibility) against V2-native containers and items, plus a regression
-pass on public browsing, ratings, reports, and promotions.
+pass on public browsing, ratings, reports, and promotions. Also verify the FK cleanup directly
+against production's actual constraint names, not just dev.
+
+## Code repointing landed (2026-07-23, not yet deployed to production)
+
+Phases 0-3 of [the plan](../plans/2026-07-23-gear-backend-v1-v2-unification.md) are done and
+verified against a local restored copy of the production backup: item-image ownership/visibility
+(the original symptom here), public browsing, ratings, reports (incl. auto-hide), promotions, and
+the catalogue-linking subsystem (not originally in scope — found broken by the same root cause
+while tracing real call paths) all now correctly resolve V2-native containers/items instead of
+404ing or silently no-op'ing. `stats`/`admin` modules (also not originally in scope, found via
+direct grep for `GearContainerDB`/`GearItemDB` usage) were repointed too, since they'd otherwise
+500 once Phase 5 drops the V1 tables. Full backend test suite green throughout, `black`/`mypy`
+clean. **Still open:** deploy migrations `057`/`058` + this code to production, then Phase 4
+(delete dead V1 CRUD surface) and Phase 5 (drop V1 tables) — issue stays `in progress` until
+production is verified end-to-end.

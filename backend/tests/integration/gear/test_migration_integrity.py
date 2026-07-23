@@ -12,7 +12,7 @@ Test Coverage:
 """
 
 import pytest
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.auth.db_models import UserDB
@@ -343,3 +343,45 @@ class TestMigrationIntegrity:
         assert item_v2.is_public is None or item_v2.is_public is False  # Default
         assert item_v2.favorite is None or item_v2.favorite is False  # Default
         assert item_v2.show_item_images is None or item_v2.show_item_images is False  # Default
+
+    @pytest.mark.asyncio
+    async def test_container_share_tokens_fk_only_gear_items_v2(
+        self,
+        async_db_session: AsyncSession,
+    ) -> None:
+        """Guard against a repeat of the migration-052 bug (docs/issues/2026-07-23--043...).
+
+        052 tried to drop item_images/container_ratings' old V1 FK by a guessed constraint
+        name, which silently no-op'd on production, leaving a stale FK to gear_items/
+        gear_containers coexisting alongside the correct one to gear_items_v2. Migration 058
+        (docs/plans/2026-07-23-gear-backend-v1-v2-unification.md, Phase 2) fixed this on the
+        real database by looking up actual constraint names instead of guessing -- verified
+        manually against a restored production copy (see the plan doc's Phase 2 section).
+
+        This test only covers `container_share_tokens`, the one ancillary table whose ORM model
+        (`ContainerShareTokenDB` in db_models.py) already declares the gear_items_v2 FK, because
+        `backend_test` (this test's database) is built from `Base.metadata.create_all()` --
+        i.e. from the ORM model declarations, not from the raw-SQL migrations. `item_images`,
+        `container_ratings`, `item_promotions`, and `content_reports` still declare V1-pointing
+        `ForeignKey(...)`/`relationship(...)` in their ORM models on purpose: those relationships
+        (e.g. `GearContainerDB.items`, used throughout the still-live V1 repository methods) are
+        only safe to repoint once Phase 3 has moved the query code off them. Extend this test to
+        cover the other four once Phase 3e updates their ORM declarations to match.
+        """
+        result = await async_db_session.execute(text("""
+                SELECT ccu.table_name AS referenced_table
+                FROM information_schema.table_constraints tc
+                JOIN information_schema.key_column_usage kcu
+                    ON tc.constraint_name = kcu.constraint_name
+                    AND tc.table_schema = kcu.table_schema
+                JOIN information_schema.constraint_column_usage ccu
+                    ON tc.constraint_name = ccu.constraint_name
+                    AND tc.table_schema = ccu.table_schema
+                WHERE tc.constraint_type = 'FOREIGN KEY'
+                    AND tc.table_schema = 'public'
+                    AND tc.table_name = 'container_share_tokens'
+                    AND kcu.column_name = 'container_id';
+            """))
+        referenced_tables = [row.referenced_table for row in result.fetchall()]
+
+        assert referenced_tables == ["gear_items_v2"], f"container_share_tokens.container_id should have exactly one FK, to gear_items_v2, " f"but found: {referenced_tables}"
