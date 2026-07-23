@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Auth (OAuth)**: jeden pattern callbacku `/auth/callback/:provider` dla Google i GitHub — usunięta specjalna trasa `/auth/github` oraz `fixedOAuthProvider`; redirect URI: `/auth/callback/google` i `/auth/callback/github`
+
 ---
 
 ## [2.53.0] - 2026-07-22
