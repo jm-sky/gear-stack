@@ -7,8 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [2.54.0] - 2026-07-23
+
 ### Changed
 - **Auth (OAuth)**: jeden pattern callbacku `/auth/callback/:provider` dla Google i GitHub — usunięta specjalna trasa `/auth/github` oraz `fixedOAuthProvider`; redirect URI: `/auth/callback/google` i `/auth/callback/github`
+- **Gear**: usunięta dualność V1/V2 — CRUD i ownership na `gear_items_v2`; drop legacy tabel V1 (migracje `057`/`058`, Phase 4–5) ([#043](docs/issues/), [#044](docs/issues/))
+
+### Fixed
+- **Auth (2FA)**: mint `tv`/`jti` przy logowaniu 2FA i refresh; `verified`/`method` w odpowiedzi TOTP; obsługa 2FA w OAuth callback i UI wylogowania
+- **Auth (WebAuthn)**: dekodowanie credential ID jako base64url; `mark_backup_code_used` haszuje znormalizowany kod (SEC-5)
+
+### Security
+- **CodeQL**: utwardzenie path traversal w storage, SSRF, OAuth state cleanup, noop handlers
+- **Deps**: pnpm overrides dla `brace-expansion`, `fast-uri` i innych alertów Dependabot
 
 ---
 
