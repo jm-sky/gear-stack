@@ -173,7 +173,7 @@ function translateItems(
     const translatedName = translateWithFallback(t, nameKey, fallbackName)
 
     // Get translated notes using new nested structure: gear.sampleSet.items.{itemKey}.notes
-    const notesKey = item.notesKey ? item.notesKey.replace('.notes', '.notes') : undefined
+    const notesKey = item.notesKey
     const translatedNotes = notesKey
       ? translateWithFallback(t, notesKey, '')
       : undefined

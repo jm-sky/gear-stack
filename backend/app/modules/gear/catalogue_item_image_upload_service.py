@@ -1,11 +1,8 @@
 """Service for handling catalogue item image uploads."""
 
-import ipaddress
 import logging
-import socket
 import uuid
 from io import BytesIO
-from urllib.parse import urlparse
 
 from fastapi import HTTPException, UploadFile, status
 from PIL import Image
@@ -13,6 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.core.http_ssrf import UnsafeRemoteUrlError, prepare_safe_http_url
 from app.core.storage.exceptions import CorruptedImageError
 from app.core.storage.factory import get_storage_adapter
 from app.core.storage.image_processor import ImageProcessor
@@ -77,84 +75,13 @@ class CatalogueItemImageUploadService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Catalogue item not found")
 
     def _validate_url_for_ssrf(self, url: str) -> None:
-        """Validate URL to prevent SSRF (copy of ImageUploadService logic)."""
+        """Validate URL to prevent SSRF (shared with item image uploads)."""
         try:
-            parsed = urlparse(url)
-        except Exception as exc:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid URL format") from exc
-
-        if parsed.scheme not in ("http", "https"):
+            prepare_safe_http_url(url)
+        except UnsafeRemoteUrlError as exc:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Only HTTP and HTTPS URLs are allowed",
-            )
-
-        if not parsed.netloc:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid URL format: missing hostname",
-            )
-
-        hostname = parsed.netloc.split(":")[0].lower()
-
-        blocked_hostnames = {
-            "localhost",
-            "127.0.0.1",
-            "0.0.0.0",
-            "::1",
-            "[::1]",
-        }
-        if hostname in blocked_hostnames:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Localhost URLs are not allowed",
-            )
-
-        try:
-            addr_info = socket.getaddrinfo(hostname, None, socket.AF_UNSPEC, socket.SOCK_STREAM)
-            if not addr_info:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Could not resolve hostname",
-                )
-
-            for family, _, _, _, sockaddr in addr_info:
-                if family == socket.AF_INET:
-                    ip_str = sockaddr[0]
-                elif family == socket.AF_INET6:
-                    ip_str = sockaddr[0]
-                else:
-                    continue
-
-                try:
-                    ip = ipaddress.ip_address(ip_str)
-                except ValueError:
-                    continue
-
-                if ip.is_private:
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="Private IP addresses are not allowed",
-                    )
-                if ip.is_link_local:
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="Link-local addresses are not allowed",
-                    )
-                if ip.is_loopback:
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="Loopback addresses are not allowed",
-                    )
-                if ip.is_reserved:
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="Reserved IP addresses are not allowed",
-                    )
-        except socket.gaierror as exc:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Could not resolve hostname",
+                detail=str(exc),
             ) from exc
 
     async def _get_max_file_size_for_user(self, user_id: str) -> int:
