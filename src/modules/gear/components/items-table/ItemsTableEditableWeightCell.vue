@@ -121,7 +121,7 @@ watch(
       min="0"
       step="0.01"
       :aria-label="t('gear.item.weight')"
-      class="h-[2.1rem]! rounded-r-none w-20 border-transparent bg-transparent py-1! shadow-none focus-visible:border-input focus-visible:bg-background focus-visible:ring-1"
+      class="h-[2.1rem]! text-end rounded-r-none w-20 border-transparent bg-transparent py-1! shadow-none focus-visible:border-input focus-visible:bg-background focus-visible:ring-1"
       @focus="isFocused = true"
       @blur="handleBlur"
       @keydown="handleKeydown"
