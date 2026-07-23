@@ -18,25 +18,29 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  change: [updates: IUpdateGearItemV2Dto]
+  change: [updates: IUpdateGearItemV2Dto, options?: { immediate?: boolean }]
+  navigate: [direction: 'next' | 'prev' | 'down']
 }>()
 
-// In edit mode, always show select
 const editedPriority = ref<TGearItemPriority>(props.item.priority ?? DEFAULT_ITEM_PRIORITY)
 
 const priorities: TGearItemPriority[] = ['critical', 'high', 'medium', 'low']
 
-// Handle priority change
 function handlePriorityChange(newPriority: unknown) {
   if (newPriority === props.item.priority) {
     emit('change', {})
     return
   }
 
-  emit('change', { priority: newPriority as TGearItemPriority })
+  editedPriority.value = newPriority as TGearItemPriority
+  emit('change', { priority: newPriority as TGearItemPriority }, { immediate: true })
 }
 
-// Watch for external changes to item
+function handleTab(event: KeyboardEvent) {
+  event.preventDefault()
+  emit('navigate', event.shiftKey ? 'prev' : 'next')
+}
+
 watch(
   () => props.item.priority,
   (newPriority) => {
@@ -46,25 +50,31 @@ watch(
 </script>
 
 <template>
-  <Select
-    :model-value="editedPriority"
-    @update:model-value="handlePriorityChange"
+  <div
+    data-editable-cell
+    data-field="priority"
+    :data-item-id="item.id"
   >
-    <SelectTrigger
-      :aria-label="t('gear.item.priority')"
-      class="h-[2.1rem]! min-w-[120px] border-transparent"
+    <Select
+      :model-value="editedPriority"
+      @update:model-value="handlePriorityChange"
     >
-      <SelectValue />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectItem
-        v-for="priority in priorities"
-        :key="priority"
-        :value="priority"
+      <SelectTrigger
+        :aria-label="t('gear.item.priority')"
+        class="h-[2.1rem]! min-w-[120px] border-transparent bg-transparent shadow-none focus:ring-1"
+        @keydown.tab="handleTab"
       >
-        {{ t(`gear.item.priorities.${priority}`) }}
-      </SelectItem>
-    </SelectContent>
-  </Select>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem
+          v-for="priority in priorities"
+          :key="priority"
+          :value="priority"
+        >
+          {{ t(`gear.item.priorities.${priority}`) }}
+        </SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
 </template>
-

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { UndoIcon } from 'lucide-vue-next'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Input } from '@/components/ui/input'
 import { DEFAULT_ITEM_QUANTITY } from '../../utils/constants'
@@ -13,17 +13,22 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  change: [updates: IUpdateGearItemV2Dto]
+  change: [updates: IUpdateGearItemV2Dto, options?: { immediate?: boolean }]
+  navigate: [direction: 'next' | 'prev' | 'down']
 }>()
 
-// In edit mode, always show input
 const editedQuantity = ref((props.item.quantity ?? DEFAULT_ITEM_QUANTITY).toString())
+const isFocused = ref(false)
+const suppressBlurSave = ref(false)
 
-// Handle change - emit updates to parent
-function handleChange() {
+const hasLocalChanges = computed<boolean>(() => {
+  const quantityValue = parseInt(editedQuantity.value, 10)
+  return !isNaN(quantityValue) && quantityValue !== (props.item.quantity ?? DEFAULT_ITEM_QUANTITY)
+})
+
+function emitChange(immediate = false) {
   const quantityValue = parseInt(editedQuantity.value, 10)
 
-  // Validation - quantity must be >= 1
   if (isNaN(quantityValue) || quantityValue < 1) {
     editedQuantity.value = (props.item.quantity ?? DEFAULT_ITEM_QUANTITY).toString()
     emit('change', {})
@@ -31,34 +36,75 @@ function handleChange() {
   }
 
   if (quantityValue !== props.item.quantity) {
-    emit('change', { quantity: quantityValue })
+    emit('change', { quantity: quantityValue }, { immediate })
   } else {
     emit('change', {})
   }
 }
 
-// Handle Enter - same as blur
-function handleEnter() {
-  handleChange()
+function handleBlur() {
+  isFocused.value = false
+  if (suppressBlurSave.value) return
+  emitChange(false)
 }
 
-// Watch for external changes to item
-watch(
-  () => props.item.quantity,
-  (newQuantity) => {
-    editedQuantity.value = (newQuantity ?? DEFAULT_ITEM_QUANTITY).toString()
-  },
-)
+function handleKeydown(event: KeyboardEvent) {
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    suppressBlurSave.value = true
+    emitChange(true)
+    emit('navigate', 'down')
+    queueMicrotask(() => {
+      suppressBlurSave.value = false
+    })
+    return
+  }
 
-// Reset value
+  if (event.key === 'Tab') {
+    event.preventDefault()
+    suppressBlurSave.value = true
+    emitChange(false)
+    emit('navigate', event.shiftKey ? 'prev' : 'next')
+    queueMicrotask(() => {
+      suppressBlurSave.value = false
+    })
+    return
+  }
+
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    suppressBlurSave.value = true
+    editedQuantity.value = (props.item.quantity ?? DEFAULT_ITEM_QUANTITY).toString()
+    emit('change', {})
+    ;(document.activeElement as HTMLElement | null)?.blur()
+    queueMicrotask(() => {
+      suppressBlurSave.value = false
+    })
+  }
+}
+
 function handleReset() {
   editedQuantity.value = (props.item.quantity ?? DEFAULT_ITEM_QUANTITY).toString()
   emit('change', {})
 }
+
+watch(
+  () => props.item.quantity,
+  (newQuantity) => {
+    if (!isFocused.value) {
+      editedQuantity.value = (newQuantity ?? DEFAULT_ITEM_QUANTITY).toString()
+    }
+  },
+)
 </script>
 
 <template>
-  <div class="relative w-20">
+  <div
+    class="relative w-20"
+    data-editable-cell
+    data-field="quantity"
+    :data-item-id="item.id"
+  >
     <Input
       :id="`item-quantity-${item.id}`"
       v-model="editedQuantity"
@@ -67,19 +113,20 @@ function handleReset() {
       min="1"
       step="1"
       :aria-label="t('gear.item.quantity')"
-      class="py-1! h-[2.1rem]! border-0"
-      @keyup.enter="handleEnter"
-      @blur="handleChange"
+      class="h-[2.1rem]! border-transparent bg-transparent py-1! shadow-none focus-visible:border-input focus-visible:bg-background focus-visible:ring-1"
+      @focus="isFocused = true"
+      @blur="handleBlur"
+      @keydown="handleKeydown"
     />
-    <!-- Reset button -->
     <button
-      v-if="editedQuantity && parseInt(editedQuantity, 10) !== props.item.quantity"
+      v-if="hasLocalChanges && isFocused"
       type="button"
-      class="absolute right-8 top-0 bottom-0 my-auto p-0"
+      class="absolute top-0 right-8 bottom-0 my-auto p-0"
+      :aria-label="t('gear.actions.undo')"
+      @mousedown.prevent
       @click.stop.prevent="handleReset"
     >
       <UndoIcon class="size-4" />
     </button>
   </div>
 </template>
-

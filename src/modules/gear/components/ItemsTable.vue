@@ -1,19 +1,22 @@
 <script setup lang="ts">
 import { useDebounceFn } from '@vueuse/core'
-import { Check, Package } from 'lucide-vue-next'
+import { Package } from 'lucide-vue-next'
 import { computed, defineAsyncComponent, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
 import DataTable from '@/components/data-table/DataTable.vue'
 import Badge from '@/components/ui/badge/Badge.vue'
-import { Button } from '@/components/ui/button'
 import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
 import { ITEMS_TABLE_COLUMN_VISIBILITY_KEY } from '@/shared/config/config'
+import type { EditableCellField } from '../types/inlineEditing.types'
 import type { IGearItemV2, IUpdateGearItemV2Dto, TGearItemPriority } from '../types/gear.types.v2'
 import { useCategoryLabel } from '../composables/useCategoryLabel'
 import { formatItemPriceV2 } from '../composables/useFormattedItemPriceV2'
 import { useGearSettings } from '../composables/useGearSettings'
 import { useGearV2 } from '../composables/useGearV2'
+import { useInlineRowSave } from '../composables/useInlineRowSave'
+import { useItemsTableCellNavigation } from '../composables/useItemsTableCellNavigation'
 import { useItemsTableEditMode } from '../composables/useItemsTableEditMode'
 import { GearRoutePath } from '../routes'
 import { useGearStoreV2 } from '../store/useGearStoreV2'
@@ -33,6 +36,8 @@ import ItemsTableEditableStatusCell from './items-table/ItemsTableEditableStatus
 import ItemsTableEditableWeightCell from './items-table/ItemsTableEditableWeightCell.vue'
 import ItemsTableImageCell from './items-table/ItemsTableImageCell.vue'
 import ItemsTableNameCell from './items-table/ItemsTableNameCell.vue'
+import ItemsTableQuickAddRow from './items-table/ItemsTableQuickAddRow.vue'
+import ItemsTableRowSaveIndicator from './items-table/ItemsTableRowSaveIndicator.vue'
 import ItemsTableWeightCell from './items-table/ItemsTableWeightCell.vue'
 import ItemsTableNestedContainerRow from './ItemsTableNestedContainerRow.vue'
 import ItemStatusBadge from './ItemStatusBadge.vue'
@@ -173,7 +178,7 @@ function loadColumnVisibility(): Record<string, boolean> {
   } catch (error) {
     console.error('Error loading column visibility from storage:', error)
   }
-  // Default: hide brand, color, wearable, and consumable by default
+  // Default: hide advanced / noisy columns; keep LighterPack-like core visible
   return {
     image: false,
     brand: false,
@@ -182,6 +187,8 @@ function loadColumnVisibility(): Record<string, boolean> {
     consumable: false,
     order: false,
     price: false,
+    priority: false,
+    status: false,
   }
 }
 
@@ -457,57 +464,41 @@ function canMoveDown(item: IGearItemV2): boolean {
   return currentIndex >= 0 && currentIndex < sortedItems.value.length - 1
 }
 
-// Track dirty state per row - Map<itemId, IUpdateGearItemV2Dto>
-const dirtyChanges = ref<Map<string, IUpdateGearItemV2Dto>>(new Map())
-const savingItems = ref<Set<TUUID>>(new Set())
+const {
+  getStatus,
+  handleCellChange: applyCellChange,
+  retrySave,
+} = useInlineRowSave({
+  onSaved: (updated) => emit('update', updated),
+  onError: () => {
+    toast.error(t('gear.actions.saveError'))
+  },
+})
 
-// Handle cell change - accumulate changes per row
-function handleCellChange(item: IGearItemV2, updates: IUpdateGearItemV2Dto, save?: boolean) {
-  const itemId = item.id
-  const currentChanges = dirtyChanges.value.get(itemId) ?? {}
+const { focusNextCell, focusPrevCell, focusDownCell } = useItemsTableCellNavigation()
 
-  // Merge updates with existing changes
-  const mergedChanges: IUpdateGearItemV2Dto = { ...currentChanges, ...updates }
+const editableItemIds = computed<TUUID[]>(() => sortedItems.value.map(item => item.id))
 
-  // Remove empty updates (no actual changes)
-  const hasChanges = Object.keys(mergedChanges).some(key => {
-    const value = mergedChanges[key as keyof IUpdateGearItemV2Dto]
-    return value !== undefined && value !== null
-  })
+function handleCellChange(
+  item: IGearItemV2,
+  updates: IUpdateGearItemV2Dto,
+  options?: { immediate?: boolean },
+) {
+  applyCellChange(item, updates, options)
+}
 
-  if (hasChanges) {
-    dirtyChanges.value.set(itemId, mergedChanges)
+function handleCellNavigate(
+  item: IGearItemV2,
+  field: EditableCellField,
+  direction: 'next' | 'prev' | 'down',
+) {
+  const ids = editableItemIds.value
+  if (direction === 'next') {
+    focusNextCell(item.id, field, ids)
+  } else if (direction === 'prev') {
+    focusPrevCell(item.id, field, ids)
   } else {
-    dirtyChanges.value.delete(itemId)
-  }
-
-  if (save && hasChanges) {
-    handleSaveRow(item)
-  }
-}
-
-// Check if row has dirty changes
-function hasDirtyChanges(itemId: string): boolean {
-  return dirtyChanges.value.has(itemId)
-}
-
-// Save all changes for a row
-async function handleSaveRow(item: IGearItemV2) {
-  const changes = dirtyChanges.value.get(item.id)
-  if (!changes || Object.keys(changes).length === 0) return
-
-  const { updateItem } = useGearV2()
-  try {
-    savingItems.value.add(item.id)
-    const updated = await updateItem(item.id, changes)
-    // Clear dirty state for this row
-    dirtyChanges.value.delete(item.id)
-    emit('update', updated)
-    savingItems.value.delete(item.id)
-  } catch (error) {
-    console.error('Failed to save row changes:', error)
-  } finally {
-    savingItems.value.delete(item.id)
+    focusDownCell(item.id, field, ids)
   }
 }
 
@@ -557,10 +548,11 @@ async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority)
         :item="row.original"
         :is-expired="isExpired(row.original)"
         :is-expiring-soon="isExpiringSoon(row.original)"
-        :is-saving="savingItems.has(row.original.id)"
+        :is-saving="getStatus(row.original.id) === 'saving'"
         :can-move-up="canMoveUp(row.original)"
         :can-move-down="canMoveDown(row.original)"
-        @change="(updates, save) => handleCellChange(row.original, updates, save)"
+        @change="(updates, options) => handleCellChange(row.original, updates, options)"
+        @navigate="(direction) => handleCellNavigate(row.original, 'name', direction)"
         @move-up="handleMoveUp(row.original)"
         @move-down="handleMoveDown(row.original)"
       />
@@ -596,7 +588,8 @@ async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority)
       <ItemsTableEditableCategoryCell
         v-if="editMode && !publicMode"
         :item="row.original"
-        @change="(updates) => handleCellChange(row.original, updates)"
+        @change="(updates, options) => handleCellChange(row.original, updates, options)"
+        @navigate="(direction) => handleCellNavigate(row.original, 'category', direction)"
       />
       <ItemsTableCategoryCell
         v-else-if="row.original.category"
@@ -608,7 +601,8 @@ async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority)
       <ItemsTableEditableQuantityCell
         v-if="editMode && !publicMode"
         :item="row.original"
-        @change="(updates) => handleCellChange(row.original, updates)"
+        @change="(updates, options) => handleCellChange(row.original, updates, options)"
+        @navigate="(direction) => handleCellNavigate(row.original, 'quantity', direction)"
       />
       <span v-else>{{ row.original.quantity }}</span>
     </template>
@@ -617,7 +611,8 @@ async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority)
       <ItemsTableEditableWeightCell
         v-if="editMode && !publicMode && !isNestedContainer(row.original)"
         :item="row.original"
-        @change="(updates) => handleCellChange(row.original, updates)"
+        @change="(updates, options) => handleCellChange(row.original, updates, options)"
+        @navigate="(direction) => handleCellNavigate(row.original, 'weight', direction)"
       />
       <ItemsTableWeightCell
         v-else
@@ -632,7 +627,8 @@ async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority)
       <ItemsTableEditablePriorityCell
         v-if="editMode && !publicMode"
         :item="row.original"
-        @change="(updates) => handleCellChange(row.original, updates)"
+        @change="(updates, options) => handleCellChange(row.original, updates, options)"
+        @navigate="(direction) => handleCellNavigate(row.original, 'priority', direction)"
       />
       <ItemPriorityBadge
         v-else-if="row.original.priority"
@@ -644,7 +640,8 @@ async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority)
       <ItemsTableEditableStatusCell
         v-if="editMode && !publicMode"
         :item="row.original"
-        @change="(updates) => handleCellChange(row.original, updates)"
+        @change="(updates, options) => handleCellChange(row.original, updates, options)"
+        @navigate="(direction) => handleCellNavigate(row.original, 'status', direction)"
       />
       <ItemStatusBadge
         v-else-if="row.original.status"
@@ -656,7 +653,8 @@ async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority)
       <ItemsTableEditablePriceCell
         v-if="editMode && !publicMode"
         :item="row.original"
-        @change="(updates) => handleCellChange(row.original, updates)"
+        @change="(updates, options) => handleCellChange(row.original, updates, options)"
+        @navigate="(direction) => handleCellNavigate(row.original, 'price', direction)"
       />
       <div v-else-if="row.original.price != null" class="text-end px-4">
         {{ formatItemPriceV2(row.original, false, defaultCurrency) }}
@@ -696,19 +694,16 @@ async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority)
     </template>
 
     <template #actions="{ row }">
-      <div v-if="!publicMode" class="flex items-center gap-2">
-        <Button
+      <div
+        v-if="!publicMode"
+        class="flex items-center gap-2"
+        :data-save-status="getStatus(row.original.id)"
+      >
+        <ItemsTableRowSaveIndicator
           v-if="editMode"
-          v-tooltip="t('gear.actions.save')"
-          size="sm"
-          :disabled="!hasDirtyChanges(row.original.id)"
-          variant="ghost"
-          class="size-8 p-0"
-          :aria-label="t('gear.actions.save')"
-          @click="handleSaveRow(row.original)"
-        >
-          <Check class="size-4" />
-        </Button>
+          :status="getStatus(row.original.id)"
+          @retry="retrySave(row.original)"
+        />
         <ItemsTableRowActions
           :row="row.original"
           @edit="emit('edit', row.original)"
@@ -734,6 +729,17 @@ async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority)
       />
     </template>
 
+    <template
+      v-if="editMode && !publicMode && containerId"
+      #after-rows="{ columnCount }"
+    >
+      <ItemsTableQuickAddRow
+        :container-id="containerId"
+        :column-count="columnCount"
+        @created="(item) => emit('update', item)"
+      />
+    </template>
+
     <template #empty>
       <TableEmptyDecorated
         :colspan="columns.length"
@@ -747,7 +753,33 @@ async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority)
 
 <style scoped>
 .items-table-edit-mode :deep([data-slot="table-cell"]) {
-  padding: .5rem .5rem;
+  padding: .35rem .5rem;
+}
+
+.items-table-edit-mode :deep(tr[data-slot="table-row"]) {
+  transition: background-color 150ms ease;
+}
+
+.items-table-edit-mode :deep(tr:has([data-save-status="pending"])) {
+  background-color: color-mix(in oklab, var(--color-amber-500) 6%, transparent);
+}
+
+.items-table-edit-mode :deep(tr:has([data-save-status="saving"])) {
+  background-color: color-mix(in oklab, var(--color-muted) 40%, transparent);
+}
+
+.items-table-edit-mode :deep(tr:has([data-save-status="saved"])) {
+  background-color: color-mix(in oklab, var(--color-emerald-500) 7%, transparent);
+}
+
+.items-table-edit-mode :deep(tr:has([data-save-status="error"])) {
+  background-color: color-mix(in oklab, var(--color-destructive) 8%, transparent);
+}
+
+.items-table-edit-mode :deep([data-editable-cell]:focus-within) {
+  outline: 1px solid color-mix(in oklab, var(--color-ring) 70%, transparent);
+  outline-offset: -1px;
+  border-radius: 0.375rem;
 }
 </style>
 

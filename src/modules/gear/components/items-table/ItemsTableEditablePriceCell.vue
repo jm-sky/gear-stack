@@ -22,18 +22,29 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  change: [updates: IUpdateGearItemV2Dto]
+  change: [updates: IUpdateGearItemV2Dto, options?: { immediate?: boolean }]
+  navigate: [direction: 'next' | 'prev' | 'down']
 }>()
 
-// In edit mode, always show input
 const editedPrice = ref(props.item.price?.toString() ?? '')
 const editedCurrency = ref<string>(props.item.currency ?? defaultCurrency.value)
+const isFocused = ref(false)
+const suppressBlurSave = ref(false)
 
-// Handle change - emit updates to parent
-function handleChange() {
+const hasChanges = computed<boolean>(() => {
   const priceValue = editedPrice.value.trim() === '' ? null : parseFloat(editedPrice.value)
-  
-  // Validation - price must be >= 0 if provided
+  const originalPrice = props.item.price ?? null
+  const originalCurrency = props.item.currency ?? defaultCurrency.value
+
+  return (
+    priceValue !== originalPrice ||
+    editedCurrency.value !== originalCurrency
+  )
+})
+
+function emitChange(immediate = false) {
+  const priceValue = editedPrice.value.trim() === '' ? null : parseFloat(editedPrice.value)
+
   if (priceValue !== null && (isNaN(priceValue) || priceValue < 0)) {
     editedPrice.value = props.item.price?.toString() ?? ''
     editedCurrency.value = props.item.currency ?? defaultCurrency.value
@@ -48,47 +59,82 @@ function handleChange() {
     emit('change', {
       price: priceValue,
       currency: editedCurrency.value,
-    })
+    }, { immediate })
   } else {
     emit('change', {})
   }
 }
 
-// Handle Enter - same as blur
-function handleEnter() {
-  handleChange()
+function handleBlur() {
+  isFocused.value = false
+  if (suppressBlurSave.value) return
+  emitChange(false)
 }
 
-// Watch for external changes to item
-watch(
-  () => [props.item.price, props.item.currency],
-  ([newPrice, newCurrency]) => {
-    editedPrice.value = newPrice?.toString() ?? ''
-    editedCurrency.value = (newCurrency ?? defaultCurrency.value) as string
-  },
-)
+function handleKeydown(event: KeyboardEvent) {
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    suppressBlurSave.value = true
+    emitChange(true)
+    emit('navigate', 'down')
+    queueMicrotask(() => {
+      suppressBlurSave.value = false
+    })
+    return
+  }
 
-// Reset value
+  if (event.key === 'Tab') {
+    event.preventDefault()
+    suppressBlurSave.value = true
+    emitChange(false)
+    emit('navigate', event.shiftKey ? 'prev' : 'next')
+    queueMicrotask(() => {
+      suppressBlurSave.value = false
+    })
+    return
+  }
+
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    suppressBlurSave.value = true
+    editedPrice.value = props.item.price?.toString() ?? ''
+    editedCurrency.value = props.item.currency ?? defaultCurrency.value
+    emit('change', {})
+    ;(document.activeElement as HTMLElement | null)?.blur()
+    queueMicrotask(() => {
+      suppressBlurSave.value = false
+    })
+  }
+}
+
 function handleReset() {
   editedPrice.value = props.item.price?.toString() ?? ''
   editedCurrency.value = props.item.currency ?? defaultCurrency.value
   emit('change', {})
 }
 
-const hasChanges = computed(() => {
-  const priceValue = editedPrice.value.trim() === '' ? null : parseFloat(editedPrice.value)
-  const originalPrice = props.item.price ?? null
-  const originalCurrency = props.item.currency ?? defaultCurrency.value
-  
-  return (
-    priceValue !== originalPrice ||
-    editedCurrency.value !== originalCurrency
-  )
-})
+function handleCurrencyChange() {
+  emitChange(true)
+}
+
+watch(
+  () => [props.item.price, props.item.currency],
+  ([newPrice, newCurrency]) => {
+    if (!isFocused.value) {
+      editedPrice.value = newPrice?.toString() ?? ''
+      editedCurrency.value = (newCurrency ?? defaultCurrency.value) as string
+    }
+  },
+)
 </script>
 
 <template>
-  <div class="flex items-center gap-2">
+  <div
+    class="flex items-center gap-1"
+    data-editable-cell
+    data-field="price"
+    :data-item-id="item.id"
+  >
     <div class="relative flex-1">
       <Input
         :id="`item-price-${item.id}`"
@@ -99,15 +145,17 @@ const hasChanges = computed(() => {
         step="0.01"
         :aria-label="t('gear.item.price')"
         :placeholder="t('gear.item.price')"
-        class="pr-8 py-1! h-[2.1rem]! border-0"
-        @keyup.enter="handleEnter"
-        @blur="handleChange"
+        class="h-[2.1rem]! border-transparent bg-transparent py-1! pr-8 shadow-none focus-visible:border-input focus-visible:bg-background focus-visible:ring-1"
+        @focus="isFocused = true"
+        @blur="handleBlur"
+        @keydown="handleKeydown"
       />
-      <!-- Reset button -->
       <button
-        v-if="hasChanges"
+        v-if="hasChanges && isFocused"
         type="button"
-        class="absolute right-2 top-0 bottom-0 my-auto p-0"
+        class="absolute top-0 right-2 bottom-0 my-auto p-0"
+        :aria-label="t('gear.actions.undo')"
+        @mousedown.prevent
         @click.stop.prevent="handleReset"
       >
         <XIcon class="size-4" />
@@ -115,11 +163,11 @@ const hasChanges = computed(() => {
     </div>
     <Select
       v-model="editedCurrency"
-      @update:model-value="handleChange"
+      @update:model-value="handleCurrencyChange"
     >
       <SelectTrigger
         :aria-label="t('gear.item.currency')"
-        class="w-[100px] h-[2.1rem]! border-transparent"
+        class="h-[2.1rem]! w-[100px] border-transparent bg-transparent shadow-none focus:ring-1"
       >
         <SelectValue />
       </SelectTrigger>

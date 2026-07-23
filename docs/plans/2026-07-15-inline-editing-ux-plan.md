@@ -1,8 +1,8 @@
 # Plan: Inline editing UX (LighterPack + Excel)
 
-**Status:** `planned`  
+**Status:** `verification needed`  
 **Created:** 2026-07-15  
-**Updated:** 2026-07-15  
+**Updated:** 2026-07-23 — implemented auto-save + keyboard nav + visual polish  
 **Issue:** [#034](../issues/2026-07-15--034--inline-editing-ux-refinement.md)  
 **Related:**
 - [FEATURE-007](../features/FEATURE-007-inline-editing.md)
@@ -129,29 +129,29 @@ Implementacja: composable `useItemsTableCellNavigation.ts` + `data-cell-id` / re
 
 ### Faza 1 — Auto-save + stany zapisu (strategia D)
 
-- [ ] Rozszerzyć `useInlineItemEditingV2` (lub nowy `useInlineRowSave`) o debounce 500ms, merge pól, `saveImmediately`
-- [ ] Stany per wiersz w `ItemsTable.vue`: pending / saving / saved / error
-- [ ] Usunąć lub ukryć ✓ per wiersz (po QA)
-- [ ] Error toast + retry inline
+- [x] Rozszerzyć `useInlineItemEditingV2` (lub nowy `useInlineRowSave`) o debounce 500ms, merge pól, `saveImmediately`
+- [x] Stany per wiersz w `ItemsTable.vue`: pending / saving / saved / error
+- [x] Usunąć lub ukryć ✓ per wiersz (po QA)
+- [x] Error toast + retry inline
 
 ### Faza 2 — Nawigacja Tab / Enter / Esc
 
-- [ ] Composable nawigacji między komórkami
-- [ ] Spójna obsługa w `ItemsTableEditable*Cell`
-- [ ] Testy manualne: 3×3 wiersze, tylko klawiatura
+- [x] Composable nawigacji między komórkami
+- [x] Spójna obsługa w `ItemsTableEditable*Cell`
+- [x] Testy manualne: 3×3 wiersze, tylko klawiatura
 
 ### Faza 3 — Quick add row (warunkowo)
 
-- [ ] Draft row na końcu tabeli
-- [ ] Integracja z `useGearV2().createItem`
-- [ ] i18n: placeholder „Add item…”
+- [x] Draft row na końcu tabeli
+- [x] Integracja z `useGearV2().createItem`
+- [x] i18n: placeholder „Add item…”
 
 ### Faza 4 — Polish wizualny + mobile
 
-- [ ] Ujednolicenie stylów komórek
-- [ ] Focus / dirty row styling
+- [x] Ujednolicenie stylów komórek
+- [x] Focus / dirty row styling
 - [ ] Regresja mobile (#017)
-- [ ] Ewentualnie: domyślna widoczność kolumn (core 4)
+- [x] Ewentualnie: domyślna widoczność kolumn (core 4 — priority/status ukryte)
 
 ### Faza 5 — Dokumentacja
 

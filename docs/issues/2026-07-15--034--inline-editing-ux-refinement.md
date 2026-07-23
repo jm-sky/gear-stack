@@ -1,8 +1,8 @@
 # UX: dopracowanie inline editing (LighterPack / Excel)
 
-**Status:** `planned`  
+**Status:** `verification needed`  
 **Created:** 2026-07-15  
-**Updated:** 2026-07-15 — wnioski z dyskusji produktowej  
+**Updated:** 2026-07-23 — auto-save, Tab/Enter/Esc, visual polish shipped; quick add still open  
 **Type:** improvement  
 **Severity:** medium  
 **Priority:** high  

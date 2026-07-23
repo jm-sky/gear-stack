@@ -20,18 +20,18 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  change: [updates: IUpdateGearItemV2Dto]
+  change: [updates: IUpdateGearItemV2Dto, options?: { immediate?: boolean }]
+  navigate: [direction: 'next' | 'prev' | 'down']
 }>()
 
-// In edit mode, always show input
 const editedWeight = ref((props.item.weight ?? DEFAULT_ITEM_WEIGHT).toString())
 const editedWeightUnit = ref<TGearWeightUnit>(props.item.weightUnit ?? 'g')
+const isFocused = ref(false)
+const suppressBlurSave = ref(false)
 
-// Handle change - emit updates to parent
-function handleChange() {
+function emitChange(immediate = false) {
   const weightValue = parseFloat(editedWeight.value)
 
-  // Validation - weight must be >= 0
   if (isNaN(weightValue) || weightValue < 0) {
     editedWeight.value = (props.item.weight ?? DEFAULT_ITEM_WEIGHT).toString()
     editedWeightUnit.value = props.item.weightUnit ?? 'g'
@@ -43,29 +43,76 @@ function handleChange() {
     emit('change', {
       weight: weightValue,
       weightUnit: editedWeightUnit.value,
-    })
+    }, { immediate })
   } else {
     emit('change', {})
   }
 }
 
-// Handle Enter - same as blur
-function handleEnter() {
-  handleChange()
+function handleBlur() {
+  isFocused.value = false
+  if (suppressBlurSave.value) return
+  emitChange(false)
 }
 
-// Watch for external changes to item
+function handleKeydown(event: KeyboardEvent) {
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    suppressBlurSave.value = true
+    emitChange(true)
+    emit('navigate', 'down')
+    queueMicrotask(() => {
+      suppressBlurSave.value = false
+    })
+    return
+  }
+
+  if (event.key === 'Tab') {
+    event.preventDefault()
+    suppressBlurSave.value = true
+    emitChange(false)
+    emit('navigate', event.shiftKey ? 'prev' : 'next')
+    queueMicrotask(() => {
+      suppressBlurSave.value = false
+    })
+    return
+  }
+
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    suppressBlurSave.value = true
+    editedWeight.value = (props.item.weight ?? DEFAULT_ITEM_WEIGHT).toString()
+    editedWeightUnit.value = props.item.weightUnit ?? 'g'
+    emit('change', {})
+    ;(document.activeElement as HTMLElement | null)?.blur()
+    queueMicrotask(() => {
+      suppressBlurSave.value = false
+    })
+  }
+}
+
+function handleUnitChange() {
+  emitChange(true)
+}
+
 watch(
   () => [props.item.weight, props.item.weightUnit],
   ([newWeight, newUnit]) => {
-    editedWeight.value = newWeight?.toString() ?? ''
-    editedWeightUnit.value = (newUnit ?? 'g') as TGearWeightUnit
+    if (!isFocused.value) {
+      editedWeight.value = newWeight?.toString() ?? ''
+      editedWeightUnit.value = (newUnit ?? 'g') as TGearWeightUnit
+    }
   },
 )
 </script>
 
 <template>
-  <div class="flex items-center gap-2">
+  <div
+    class="flex items-center gap-1"
+    data-editable-cell
+    data-field="weight"
+    :data-item-id="item.id"
+  >
     <Input
       :id="`item-weight-${item.id}`"
       v-model="editedWeight"
@@ -74,17 +121,18 @@ watch(
       min="0"
       step="0.01"
       :aria-label="t('gear.item.weight')"
-      class="py-1! h-[2.1rem]! w-20 border-0"
-      @keyup.enter="handleEnter"
-      @blur="handleChange"
+      class="h-[2.1rem]! rounded-r-none w-20 border-transparent bg-transparent py-1! shadow-none focus-visible:border-input focus-visible:bg-background focus-visible:ring-1"
+      @focus="isFocused = true"
+      @blur="handleBlur"
+      @keydown="handleKeydown"
     />
     <Select
       v-model="editedWeightUnit"
-      @update:model-value="handleChange"
+      @update:model-value="handleUnitChange"
     >
       <SelectTrigger
         :aria-label="t('gear.item.weightUnit')"
-        class="w-[70px] h-[2.1rem]! border-transparent"
+        class="h-[2.1rem]! rounded-l-none w-17.5 border-transparent bg-transparent shadow-none focus:ring-1"
       >
         <SelectValue />
       </SelectTrigger>
@@ -100,4 +148,3 @@ watch(
     </Select>
   </div>
 </template>
-

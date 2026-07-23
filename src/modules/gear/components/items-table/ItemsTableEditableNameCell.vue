@@ -19,13 +19,15 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  change: [updates: IUpdateGearItemV2Dto, save?: boolean]
+  change: [updates: IUpdateGearItemV2Dto, options?: { immediate?: boolean }]
   moveUp: []
   moveDown: []
+  navigate: [direction: 'next' | 'prev' | 'down']
 }>()
 
-// In edit mode, always show input
 const editedName = ref(props.item.name)
+const isFocused = ref(false)
+const suppressBlurSave = ref(false)
 
 const textClass = computed<string>(() => {
   if (props.isExpired) return 'text-destructive font-semibold'
@@ -33,45 +35,87 @@ const textClass = computed<string>(() => {
   return ''
 })
 
-// Handle change - emit updates to parent
-function handleChange(save: boolean = false) {
+const hasLocalChanges = computed<boolean>(() => {
+  return editedName.value.trim() !== props.item.name
+})
+
+function emitChange(immediate = false) {
   if (editedName.value.trim() === '') {
-    // Validation - name is required, reset to original
     editedName.value = props.item.name
+    emit('change', {})
     return
   }
 
   if (editedName.value.trim() !== props.item.name) {
-    emit('change', { name: editedName.value.trim() }, save)
+    emit('change', { name: editedName.value.trim() }, { immediate })
   } else {
-    // No changes - emit empty to clear dirty state
-    emit('change', {}, save)
+    emit('change', {})
   }
 }
 
-// Handle Enter - same as blur
-function handleEnter() {
-  handleChange(true)
+function handleBlur() {
+  isFocused.value = false
+  if (suppressBlurSave.value) return
+  emitChange(false)
 }
 
-// Watch for external changes to item
-watch(
-  () => props.item.name,
-  (newName) => {
-    editedName.value = newName
-  },
-)
+function handleKeydown(event: KeyboardEvent) {
+  if (event.key === 'Enter') {
+    event.preventDefault()
+    suppressBlurSave.value = true
+    emitChange(true)
+    emit('navigate', 'down')
+    queueMicrotask(() => {
+      suppressBlurSave.value = false
+    })
+    return
+  }
 
-// Reset value
+  if (event.key === 'Tab') {
+    event.preventDefault()
+    suppressBlurSave.value = true
+    emitChange(false)
+    emit('navigate', event.shiftKey ? 'prev' : 'next')
+    queueMicrotask(() => {
+      suppressBlurSave.value = false
+    })
+    return
+  }
+
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    suppressBlurSave.value = true
+    editedName.value = props.item.name
+    emit('change', {})
+    ;(document.activeElement as HTMLElement | null)?.blur()
+    queueMicrotask(() => {
+      suppressBlurSave.value = false
+    })
+  }
+}
+
 function handleReset() {
   editedName.value = props.item.name
   emit('change', {})
 }
+
+watch(
+  () => props.item.name,
+  (newName) => {
+    if (!isFocused.value) {
+      editedName.value = newName
+    }
+  },
+)
 </script>
 
 <template>
-  <div class="flex items-center gap-1 min-w-48">
-    <!-- Move up/down buttons -->
+  <div
+    class="group flex min-w-48 items-center gap-1"
+    data-editable-cell
+    data-field="name"
+    :data-item-id="item.id"
+  >
     <ItemsTableMoveButtons
       v-if="canMoveUp !== undefined && canMoveDown !== undefined"
       :can-move-up="canMoveUp"
@@ -86,28 +130,31 @@ function handleReset() {
         v-tooltip="isExpiringSoon ? t('gear.item.expiration.expiringSoon') : ''"
         :name="`item-name-${item.id}`"
         :aria-label="t('gear.item.name')"
-        class="pl-2 py-1! h-[2.1rem]!"
-        :class="[textClass, isExpiringSoon ? 'border border-yellow-600' : 'border-transparent']"
+        class="h-[2.1rem]! rounded-l-none border-transparent bg-transparent py-1! pl-2 shadow-none focus-visible:border-input focus-visible:bg-background focus-visible:ring-1"
+        :class="[textClass, isExpiringSoon ? 'border border-yellow-600' : '']"
         :disabled="isSaving"
-        @keydown.enter.prevent="handleEnter"
-        @blur="handleChange"
+        @focus="isFocused = true"
+        @blur="handleBlur"
+        @keydown="handleKeydown"
       />
-      <!-- Reset button -->
       <button
-        v-if="editedName && editedName !== props.item.name"
+        v-if="hasLocalChanges && isFocused"
         v-tooltip.bottom="t('gear.actions.undo')"
         type="button"
         :aria-label="t('gear.actions.undo')"
-        class="absolute right-2 top-0 bottom-0 my-auto p-0"
+        class="absolute top-0 right-2 bottom-0 my-auto p-0"
+        @mousedown.prevent
         @click.stop.prevent="handleReset"
       >
         <UndoIcon class="size-4" />
       </button>
     </div>
-    <!-- Badges for expired/expiring items -->
-    <Badge v-if="isExpired" variant="destructive" class="text-xs">
+    <Badge
+      v-if="isExpired"
+      variant="destructive"
+      class="text-xs"
+    >
       {{ t('gear.item.expiration.expired') }}
     </Badge>
   </div>
 </template>
-

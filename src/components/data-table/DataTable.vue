@@ -423,6 +423,11 @@ const handlePageSizeChange = (newPageSize: number) => {
               <!-- Slot for content after each row (e.g., expandable content) -->
               <slot name="row-after" :row="row" :columns="columns" />
             </template>
+            <slot
+              name="after-rows"
+              :columns="columns"
+              :column-count="table.getVisibleLeafColumns().length"
+            />
           </template>
           <!-- Empty State -->
           <template v-else>
@@ -433,6 +438,11 @@ const handlePageSizeChange = (newPageSize: number) => {
                 @action="$emit('empty-action')"
               />
             </slot>
+            <slot
+              name="after-rows"
+              :columns="columns"
+              :column-count="table.getVisibleLeafColumns().length"
+            />
           </template>
         </TableBody>
       </Table>
