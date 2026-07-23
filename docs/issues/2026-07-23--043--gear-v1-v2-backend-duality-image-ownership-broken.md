@@ -198,3 +198,16 @@ throughout (`ruff`/`black`/`mypy` clean; `pnpm type-check`/`pnpm lint` clean), a
 so far. **Still open:** deploy migrations `057`/`058` + all this code to production and verify
 end-to-end there, then Phase 5 (drop V1 tables, remove the ORM classes) — issue stays
 `in progress` until production is verified.
+
+## Deployed and verified on production (2026-07-23)
+
+Migrations `057`/`058` deployed; backend restarted. Output matched the local dry run exactly
+(same FKs dropped/added, same "already correct, nothing to add" results, zero orphan-row
+failures). User confirmed on production: item images load correctly, container sharing works,
+and ratings/reports/promotions are functional — the original #043 symptom (and everything else
+repointed in Phases 3a-3d) is fixed end-to-end, not just in local testing.
+
+**Remaining:** Phase 5 (drop `gear_containers`/`gear_items`, remove the V1 ORM classes) — this
+is the last step of the user's original ask to eliminate the V1/V2 duality entirely, so this
+issue stays `in progress` until that lands. Take a fresh production backup immediately before
+running migration `059`.

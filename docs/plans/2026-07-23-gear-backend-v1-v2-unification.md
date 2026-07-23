@@ -1,6 +1,8 @@
 # Backend V1→V2 Gear Model Unification — Phased Implementation Plan
 
-**Status:** `in progress` — Phases 0-4 executed 2026-07-23; Phase 5 (drop V1 tables) remaining
+**Status:** `in progress` — Phases 0-4 executed and deployed to production 2026-07-23 (migrations
+057/058 live, user-verified: item images, sharing, ratings/reports/promotions all working);
+Phase 5 (drop V1 tables) remaining
 **Created:** 2026-07-23
 **Drives:** [docs/issues/2026-07-23--043--gear-v1-v2-backend-duality-image-ownership-broken.md](../issues/2026-07-23--043--gear-v1-v2-backend-duality-image-ownership-broken.md), [docs/issues/2026-07-23--044--container-share-tokens-table-missing-prod.md](../issues/2026-07-23--044--container-share-tokens-table-missing-prod.md)
 **Supersedes the open TODOs in:** [UNIFIED_MODEL_IMPLEMENTATION_PLAN.md](UNIFIED_MODEL_IMPLEMENTATION_PLAN.md) ("❌ Backend routing: V2 API exists but isn't default", "❌ Cleanup V1: old tables/models still exist")

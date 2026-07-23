@@ -1,6 +1,6 @@
 # `container_share_tokens` table missing on production — share-token endpoints 500
 
-**Status:** `in progress`
+**Status:** `done`
 **Created:** 2026-07-23
 **Severity:** High
 **Module:** `gear` (backend — container share tokens)
@@ -87,5 +87,10 @@ copy of the production backup (see Phase 1 in
 Table recreated with `container_id` FK → `gear_items_v2` (not legacy `gear_containers`).
 `db_models.py`'s `ContainerShareTokenDB` ORM annotation updated to match. Integration tests added
 (`test_share_tokens.py`, 3 passing) and full `tests/integration/gear/` suite (135 tests) still
-green. **Still open:** deploy migration `057` to production — this issue stays `in progress`
-until that's done and the endpoints are confirmed live.
+green.
+
+## Deployed and verified on production (2026-07-23)
+
+Migrations `057`/`058` deployed to production; output matched the local dry run exactly
+(table created, FK → `gear_items_v2`). User confirmed sharing a container works end-to-end on
+production. Closed.
