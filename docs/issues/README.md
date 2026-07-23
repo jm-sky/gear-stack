@@ -51,12 +51,13 @@ Tracked work items (bugs, improvements) live here — not in GitHub Issues.
 | 033 | [2026-07-15--033--dark-mode-color-palette-inconsistency.md](2026-07-15--033--dark-mode-color-palette-inconsistency.md) | UX: dark mode — slate tło vs neutralne tokeny | `done` |
 | 034 | [2026-07-15--034--inline-editing-ux-refinement.md](2026-07-15--034--inline-editing-ux-refinement.md) | UX: dopracowanie inline editing (LighterPack / Excel) | `planned` |
 | 035 | [2026-07-21--035--item-image-idor.md](2026-07-21--035--item-image-idor.md) | Security (High): item image endpoints — IDOR / brak ownership check | `verification needed` |
-| 036 | [2026-07-21--036--oauth-login-bypasses-session-machinery.md](2026-07-21--036--oauth-login-bypasses-session-machinery.md) | Security (Medium): OAuth login omija session tracking / token-version / 2FA | `verification needed` |
-| 037 | [2026-07-21--037--oauth-callback-state-not-verified.md](2026-07-21--037--oauth-callback-state-not-verified.md) | Security (Medium): OAuth callback nie weryfikuje `state` (CSRF) po stronie backendu | `verification needed` |
+| 036 | [2026-07-21--036--oauth-login-bypasses-session-machinery.md](2026-07-21--036--oauth-login-bypasses-session-machinery.md) | Security (Medium): OAuth login omija session tracking / token-version / 2FA | `done` |
+| 037 | [2026-07-21--037--oauth-callback-state-not-verified.md](2026-07-21--037--oauth-callback-state-not-verified.md) | Security (Medium): OAuth callback nie weryfikuje `state` (CSRF) po stronie backendu | `done` |
 | 038 | [2026-07-22--038--2fa-login-and-refresh-bypass-session-machinery.md](2026-07-22--038--2fa-login-and-refresh-bypass-session-machinery.md) | Auth (High): logowanie 2FA (TOTP/passkey) i refresh tokena bez `tv`/`jti` — wylogowanie po chwili | `done` |
 | 039 | [2026-07-23--039--public-badge-quick-unpublish.md](2026-07-23--039--public-badge-quick-unpublish.md) | UX: badge Public — szybkie cofnięcie publikacji | `todo` |
 | 040 | [2026-07-23--040--add-container-dialog-ux.md](2026-07-23--040--add-container-dialog-ux.md) | UX: dialog Dodaj kontener — search/recent lub unifikacja z Dodaj przedmiot | `todo` |
 | 041 | [2026-07-23--041--add-item-page-layout-and-form-design.md](2026-07-23--041--add-item-page-layout-and-form-design.md) | UX: Dodaj przedmiot — layout + research designu formularza | `todo` |
 | 042 | [2026-07-23--042--visualization-zones-in-gear-settings.md](2026-07-23--042--visualization-zones-in-gear-settings.md) | UX: własne obszary wizualizacji w /gear/settings | `todo` |
+| 043 | [2026-07-23--043--gear-v1-v2-backend-duality-image-ownership-broken.md](2026-07-23--043--gear-v1-v2-backend-duality-image-ownership-broken.md) | Backend (High): dwoistość modelu gear V1/V2 — ownership/visibility obrazków itemów zepsute dla itemów V2 | `todo` |
 
 When adding a new issue, create `YYYY-MM-DD--NNN--short-slug.md` and add a row to this table.

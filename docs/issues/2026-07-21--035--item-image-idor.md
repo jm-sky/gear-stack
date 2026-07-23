@@ -66,3 +66,20 @@ Automated tests cover all "Verification" scenarios below at the service layer (r
 1. Two premium users; confirm each of the five operations above returns 404/403 across users. — covered by `test_item_images_authorization.py`.
 2. `GET /api/items/{item_id}/images` unauthenticated → 404 for a private container, 200 for a public one. — covered.
 3. Owner still succeeds on their own items/images. — covered.
+
+### Manual verification (2026-07-23) — found a new bug, not yet fixed
+
+Manual click-through against prod surfaced a real problem: the ownership/visibility checks added
+above (`item_image_repository.py`) join exclusively against the **legacy V1** `gear_containers` /
+`gear_items` tables. Containers/items created through today's V2-backed UI don't exist in those
+tables at all, so `GET .../images` returns `404` regardless of the container's public toggle, and
+the same broken lookup backs the ownership check used by upload/delete/reorder/toggle-primary too
+— the feature appears non-functional for any V2-native item. Pre-migration items (still present in
+the V1 tables) behaved correctly, which is why this wasn't caught in the automated tests (fixtures
+presumably exercise the V1 tables the repository actually joins against).
+
+Full analysis, repro, and the fix direction (finish the V1 → V2 backend migration rather than
+re-patching the V1 join) are tracked in
+[#043 — Backend gear V1/V2 model duality](2026-07-23--043--gear-v1-v2-backend-duality-image-ownership-broken.md).
+Keeping this issue at `verification needed` (not `done`) until #043 is resolved and this is
+re-verified against V2-native containers/items.

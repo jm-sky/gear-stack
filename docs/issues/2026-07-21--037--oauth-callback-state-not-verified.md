@@ -1,6 +1,6 @@
 # OAuth callback does not verify the CSRF `state` server-side
 
-**Status:** `verification needed`
+**Status:** `done`
 **Created:** 2026-07-21
 **Severity:** Medium
 **Module:** `auth` / `core.oauth` (backend — OAuth)
@@ -41,7 +41,9 @@ Added `OAuthStateStore` (`backend/app/core/oauth_state_store.py`), modeled on th
 
 The frontend half (moving `state` out of `localStorage`) was already done in an earlier session — `useOAuth.ts`/`OAuthCallbackPage.vue` use `sessionStorage`. This closes the remaining backend-verification gap the earlier fix explicitly called out as incomplete.
 
-Tests cover all three "Verification" scenarios below directly against `OAuthStateStore` (no live Redis in this environment; used an in-memory fake matching the real `redis.asyncio` pipeline contract). Marked `verification needed` pending a manual click-through of the real `/oauth/auth-url` → `/oauth/callback` round trip.
+Tests cover all three "Verification" scenarios below directly against `OAuthStateStore` (no live Redis in this environment; used an in-memory fake matching the real `redis.asyncio` pipeline contract).
+
+**QA (2026-07-23):** ręczne potwierdzenie — OAuth callback / `state` działa poprawnie → status `done`.
 
 ## Verification
 
