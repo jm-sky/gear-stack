@@ -40,8 +40,7 @@ __screenshots__/
 .env
 test-results/
 
-# Database backups
-backups/
+# Database backups (local dumps — see docs/deployment/production-manual.md)
 .backups/
 *.sql
 playwright-report/*
