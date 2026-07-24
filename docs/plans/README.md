@@ -22,7 +22,7 @@ Implementation plans for features and larger changes.
 | [CONTAINER_VIEWS_STATS_PLAN.md](CONTAINER_VIEWS_STATS_PLAN.md) | Container views and stats | `planned` |
 | [GLOBAL_CATALOGUE_IMPLEMENTATION_PLAN.md](GLOBAL_CATALOGUE_IMPLEMENTATION_PLAN.md) | Global catalogue implementation | `done` |
 | [global-catalogue-items.md](global-catalogue-items.md) | Global catalogue items (v1 notes) | `done` |
-| [global-catalogue-items-v2.md](global-catalogue-items-v2.md) | Catalogue content v2 — seed new items + example sets (not feature code) | `in progress` |
+| [global-catalogue-items-v2.md](global-catalogue-items-v2.md) | Catalogue content v2 — seed new items + example sets (not feature code) | `done` |
 | [implementation-suggestions.md](implementation-suggestions.md) | General implementation suggestions | `done` |
 | [MARKDOWN_LINK_SECURITY_PLAN.md](MARKDOWN_LINK_SECURITY_PLAN.md) | Markdown link security (Phase 1 done; Phase 2: homograph / confirm dialog / external images) | `in progress` |
 | [PHASE-5-COMPLETION-SUMMARY.md](PHASE-5-COMPLETION-SUMMARY.md) | Stripe billing phase 5 completion summary | `done` |

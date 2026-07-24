@@ -1,255 +1,78 @@
 # Nowe przedmioty katalogu globalnego
 
-> **Status:** `in progress` (2026-07-24)  
+> **Status:** `done` (2026-07-24)  
 > **Co to jest:** praca **content/seed** — dopisanie realnych przedmiotów do globalnego katalogu i powiązanie ich z example sets.  
 > **To nie jest:** refaktor kodu funkcji „Global Catalogue” (ta jest już ✅ Completed w ROADMAP).  
 > Plan / indeks: [plans/README.md](./README.md)
 
-Chcę zrobić te tematy:  
-1. Wygenerować przykładowe zestawy (np. wersja budżetowa i medium),
-2. Uzupełnić globalny katalog o brakujące przedmioty (które będą w example sets),
-3. Powiązać istniejące example sets z catalogue.
+## Zakres (zrealizowany)
 
-Chcę tylko realne przedmioty, polecane. Powinny mieć w miarę możliwości markę, nazwę, model, url strony producenta, kolor, orientacyjną cenę w USD lub PLN, wagę.
+1. Przykładowe zestawy Budget EDC + Medium EDC (kod, i18n, generator).
+2. Uzupełnienie seedu katalogu o brakujące realne produkty.
+3. Powiązanie example sets z `catalogueItemId` (wszystkie warianty).
 
-## New catalogue items
-```jsonc
-[
-  {
-    "id": "NEW0001",
-    "name": "Mil-Tec Emergency Thermal Blanket (foil)",
-    "category": "shelter",
-    "brand": "Mil-Tec",
-    "model": "Thermal Blanket",
-    "description": "Lekka folia ratunkowa / koc termoizolacyjny – przydatna do ochrony przed wychłodzeniem lub jako awaryjne schronienie.",
-    "price_tier": "low",
-    "quality": "medium",
-    "weight": 50.0,
-    "weight_unit": "g"
-  },
-  {
-    "id": "NEW0002",
-    "name": "CNOC Vecto Collapsible Water Bottle 1L",
-    "category": "water",
-    "brand": "CNOC",
-    "model": "Vecto 1L",
-    "description": "Składana, lekka butelka na wodę – dobra do noszenia przefiltrowanej wody lub transportu wody pitnej.",
-    "price_tier": "low",
-    "quality": "medium",
-    "weight": 40.0,
-    "weight_unit": "g"
-  },
-  {
-    "id": "NEW0003",
-    "name": "Aquamira Water Purification Tablets (30 tabs)",
-    "category": "water",
-    "brand": "Aquamira",
-    "model": "Water Treatment Tablets",
-    "description": "Tabletki do chemicznego uzdatniania wody – backup lub alternatywa do filtra.",
-    "price_tier": "low",
-    "quality": "medium",
-    "weight": 30.0,
-    "weight_unit": "g"
-  },
-  {
-    "id": "NEW0004",
-    "name": "GSI Outdoors Stainless Steel Cup 700 ml",
-    "category": "other",
-    "brand": "GSI Outdoors",
-    "model": "Stainless Steel Cup 700 ml",
-    "description": "Metalowy kubek / menażka – do gotowania wody lub posiłków w terenie.",
-    "price_tier": "low",
-    "quality": "medium",
-    "weight": 150.0,
-    "weight_unit": "g"
-  },
-  {
-    "id": "NEW0005",
-    "name": "UCO Stormproof Matches – 25 szt.",
-    "category": "fire",
-    "brand": "UCO",
-    "model": "Stormproof Matches",
-    "description": "Wodoodporne, wiatroszczelne zapałki – dobre zabezpieczenie awaryjne dla ognia.",
-    "price_tier": "low",
-    "quality": "medium",
-    "weight": 25.0,
-    "weight_unit": "g"
-  },
-  {
-    "id": "NEW0006",
-    "name": "Compact Duct Tape (10 m roll)",
-    "category": "tools",
-    "brand": "Generic",
-    "model": "10m Duct Tape",
-    "description": "Uniwersalna taśma naprawcza – przydatna do napraw, improwizacji, uszczelniania, zabezpieczeń.",
-    "price_tier": "low",
-    "quality": "medium",
-    "weight": 100.0,
-    "weight_unit": "g"
-  },
-  {
-    "id": "NEW0007",
-    "name": "Metal Spork (Titanium / Stainless)",
-    "category": "tools",
-    "brand": "Generic",
-    "model": "Folding Spork",
-    "description": "Składana łyżko-widelec – lekki element do jedzenia / gotowania w terenie.",
-    "price_tier": "low",
-    "quality": "medium",
-    "weight": 25.0,
-    "weight_unit": "g"
-  },
-  {
-    "id": "NEW0008",
-    "name": "Emergency Poncho (nylon / waterproof)",
-    "category": "shelter",
-    "brand": "Generic",
-    "model": "Emergency Poncho",
-    "description": "Lekki wodoodporny poncho – zabezpieczenie przed deszczem / wilgocią, może służyć jako prowizoryczne schronienie.",
-    "price_tier": "low",
-    "quality": "medium",
-    "weight": 120.0,
-    "weight_unit": "g"
-  },
-  {
-    "id": "NEW0009",
-    "name": "Olight i3T EOS 2",
-    "category": "light",
-    "brand": "Olight",
-    "model": "i3T 2 EOS",
-    "color": "Black",
-    "price": 25,
-    "price_currency": "USD",
-    "weight": 40,
-    "weight_unit": "g",
-    "url": "https://www.olightstore.com/i3t-eos",
-    "description": "Mała, niezawodna latarka EDC na jedną baterię AAA (180 lm, momentary tail switch)."
-  },
-  {
-    "id": "NEW0010",
-    "name": "Light My Fire Swedish FireSteel 2.0",
-    "category": "fire",
-    "brand": "Light My Fire",
-    "model": "Swedish FireSteel 2.0",
-    "price": 15,
-    "price_currency": "USD",
-    "weight": 50,
-    "weight_unit": "g",
-    "url": "https://lightmyfire.com/products/swedish-firesteel",
-    "description": "Klasyczne ferro rod — iskry 3000°C, bardzo niezawodne w warunkach terenowych."
-  },
-  {
-    "id": "NEW0011",
-    "name": "Victorinox Huntsman",
-    "category": "tools",
-    "brand": "Victorinox",
-    "model": "Huntsman",
-    "color": "Red",
-    "price": 45,
-    "price_currency": "USD",
-    "weight": 97,
-    "weight_unit": "g",
-    "url": "https://www.victorinox.com/global/en/products/Swiss-Army-Knives/Medium-Pocket-Knives/Huntsman/p/1.3713",
-    "description": "Klasyczny scyzoryk z piłką, nożyczkami i ostrzem — świetny do EDC i outdoor."
-  },
-  {
-    "id": "NEW0012",
-    "name": "Ferrocerium Rod 8 mm",
-    "category": "fire",
-    "brand": "Generic",
-    "model": "Ferro Rod 8mm",
-    "price": 8,
-    "price_currency": "USD",
-    "weight": 35,
-    "weight_unit": "g",
-    "url": "https://www.amazon.com",
-    "description": "Standardowy ferro rod 8 mm — lekka alternatywa do większych prętów."
-  },
-  {
-    "id": "NEW0013",
-    "name": "Rite in the Rain All-Weather Notepad 3x5",
-    "category": "other",
-    "brand": "Rite in the Rain",
-    "model": "3x5 Top-Spiral",
-    "color": "Yellow",
-    "price": 6,
-    "price_currency": "USD",
-    "weight": 70,
-    "weight_unit": "g",
-    "url": "https://riteintherain.com/products/top-spiral-notepad-3x5",
-    "description": "Notes wodoodporny — działa w deszczu, śniegu, błocie; klasyk w survivalu."
-  },
-  {
-    "id": "NEW0014",
-    "name": "Sharpie Permanent Marker (Fine Tip)",
-    "category": "other",
-    "brand": "Sharpie",
-    "model": "Fine Black",
-    "color": "Black",
-    "price": 2,
-    "price_currency": "USD",
-    "weight": 9,
-    "weight_unit": "g",
-    "url": "https://www.sharpie.com",
-    "description": "Marker permanentny — podpisywanie, notatki awaryjne, oznaczanie sprzętu."
-  },
-  {
-    "id": "NEW0015",
-    "name": "Fenix E01 V2.0",
-    "category": "light",
-    "brand": "Fenix",
-    "model": "E01 V2.0",
-    "price": 20,
-    "price_currency": "USD",
-    "color": "Black",
-    "weight": 13,
-    "weight_unit": "g",
-    "url": "https://www.fenixlighting.com/product/e01-v2-flashlight/",
-    "description": "Ultra-lekka latarka AAA, idealna jako backup."
-  }
-]
+## Mapowanie plan NEW000x → seed ULID
+
+| Plan ID | Produkt | Seed ULID |
+|---------|---------|-----------|
+| NEW0001 | Mil-Tec Emergency Thermal Blanket | `01KBQ9MKG500FXNVND2X3J4AYW` |
+| NEW0002 | CNOC Vecto 1L | `01KBQ9MKG500FXNVND2X3J4AYX` |
+| NEW0003 | Aquamira Water Purification Tablets | `01KBQ9MKG500FXNVND2X3J4AYY` |
+| NEW0004 | GSI Stainless Steel Cup 700 ml | `01KBQ9MKG500FXNVND2X3J4AYZ` |
+| NEW0005 | UCO Stormproof Matches | `01KBQ9MKG500FXNVND2X3J4AZ0` |
+| NEW0006 | Compact Duct Tape 10 m | `01KBQ9MKG500FXNVND2X3J4AZ1` |
+| NEW0007 | Metal Spork | `01KBQ9MKG500FXNVND2X3J4AZ2` |
+| NEW0008 | Emergency Poncho | `01KBQ9MKG500FXNVND2X3J4AZ3` |
+| NEW0009 | Olight i3T EOS 2 | `01KBQ9MKG500FXNVND2X3J4AZ4` |
+| NEW0010 | Light My Fire Swedish FireSteel 2.0 | `01KBJXFP7WMDKNJ8HNMBW1CZZG` |
+| NEW0011 | Victorinox Huntsman | `01KBQ9MKG50801WW461XE4JJA4` |
+| NEW0012 | Ferrocerium Rod 8 mm | `01KBQ9MKG60801WW461XE4JJA5` |
+| NEW0013 | Rite in the Rain Notepad 3x5 | `01KBQ9MKG60801WW461XE4JJA6` |
+| NEW0014 | Sharpie Permanent Marker | `01KBQ9MKG60801WW461XE4JJA7` |
+| NEW0015 | Fenix E01 V2.0 | `01KBQ9MKG60801WW461XE4JJA8` |
+| FA001 | Adventure Medical Kits Ultralight/.5 | `01KY9VGB98ARP029M07P4Q5J5N` |
+
+## Dodatkowe produkty (P2 — starsze zestawy)
+
+| Produkt | Seed ULID | Użyte w |
+|---------|-----------|---------|
+| Coghlan's Tinder Quik | `01KY9VGB99XSMGPPVG37Y0DXJ0` | Fire Pouch, BOB fire pouch |
+| SOL Emergency Bivvy | `01KY9VGB99CCE53TV6XQJ88X4Y` | Bug Out Bag |
+| Victorinox Classic SD | `01KY9VGB9981K988Q7V8ZBDW70` | EDC |
+| Zippo Classic Lighter | `01KY9VGB99YGBS8K37VZZD4HSK` | EDC |
+| Field Notes Original Kraft | `01KY9VGB99TYV40Y1T91MQCKCN` | EDC |
+| Fisher Space Pen Bullet | `01KY9VGB99D51F4EM2W3A3QJ5G` | EDC |
+| Fenix PD36R | `01KY9VGB99Y8FMPMPNEPV8AYN5` | Bug Out Bag |
+
+Istniejące linki bez nowych seedów: Morakniv Companion, Paracord Badger Outdoor 500.
+
+## Pliki
+
+- Seed: `backend/app/seeders/catalogue_items.json`
+- Example sets: `src/modules/gear/services/exampleSets.ts`
+- Generator: `src/modules/gear/services/sampleSetGenerator.ts` (`budgetEdc` / `mediumEdc`)
+- i18n: `src/modules/gear/i18n/index.ts` (`sampleSet.items` + variants)
+
+## Seed CLI
+
+```bash
+docker exec gear-stack-app python -m cli db seed catalogue
 ```
 
-## Example sets
+(tylko jeśli CWD projektu **nie** zaczyna się od `_`)
 
-### Budget EDC Survival Kit
+## Example sets (docelowe)
 
-```jsonc
-{
-  "id": "SET_EDC_BUDGET_01",
-  "name": "Budget EDC Survival Kit",
-  "items": [
-    { "item_id": "NEW0009", "qty": 1 },   // Olight i3T EOS 2
-    { "item_id": "NEW0010", "qty": 1 },   // Light My Fire FireSteel 2.0
-    { "item_id": "NEW0013", "qty": 1 },   // Rite in the Rain Notepad 3x5
-    { "item_id": "NEW0014", "qty": 1 },   // Sharpie Fine Tip
-    { "item_id": "NEW0006", "qty": 1 },   // Compact Duct Tape (10m)
-    { "item_id": "NEW0007", "qty": 1 },   // Metal Spork
-    { "item_id": "NEW0002", "qty": 1 },   // CNOC Vecto 1L
-    { "item_id": "NEW0005", "qty": 1 },   // UCO Stormproof Matches
-    { "item_id": "NEW0015", "qty": 1 }    // Fenix E01 V2.0 (backup light)
-  ]
-}
-```
+### Budget EDC Survival Kit — 9/9 linked
 
-### Medium EDC / Urban Survival Kit
+Olight i3T, FireSteel, Rite in the Rain, Sharpie, Duct Tape, Spork, CNOC Vecto, UCO Matches, Fenix E01.
 
-```jsonc
-{
-  "id": "SET_EDC_MEDIUM_01",
-  "name": "Medium EDC / Urban Survival Kit",
-  "items": [
-    { "item_id": "NEW0009", "qty": 1 },   // Olight i3T EOS 2
-    { "item_id": "NEW0011", "qty": 1 },   // Victorinox Huntsman
-    { "item_id": "NEW0010", "qty": 1 },   // Swedish FireSteel 2.0
-    { "item_id": "NEW0013", "qty": 1 },   // Rite in the Rain Notepad
-    { "item_id": "NEW0014", "qty": 1 },   // Sharpie
-    { "item_id": "NEW0006", "qty": 1 },   // Compact Duct Tape
-    { "item_id": "NEW0002", "qty": 1 },   // CNOC Vecto Bottle
-    { "item_id": "NEW0001", "qty": 1 },   // Mil-Tec Emergency Blanket
-    { "item_id": "NEW0012", "qty": 1 },   // Ferro Rod 8mm
-    { "item_id": "NEW0004", "qty": 1 },   // GSI Stainless Cup 700 ml
-    { "item_id": "FA001", "qty": 1 }      // Basic Mini First Aid Kit (zakładam że masz w katalogu)
-  ]
-}
-```
+### Medium EDC / Urban Survival Kit — 11/11 linked
+
+Olight i3T, Huntsman, FireSteel, Rite in the Rain, Sharpie, Duct Tape, CNOC Vecto, Mil-Tec blanket, Ferro 8 mm, GSI cup, AMK Ultralight/.5.
+
+## Notes
+
+- Drafty `NEW000x` w tym pliku są historyczne — kanoniczne ID to ULID w seedzie.
+- Anker w EDC nadal wskazuje PowerCore **20100** (najbliższy match w katalogu; zestaw ma nazwę 10000).
+- Po wdrożeniu: re-seed katalogu na środowisku docelowym.

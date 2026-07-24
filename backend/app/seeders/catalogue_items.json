@@ -728,7 +728,15 @@
     "weight": 50,
     "weight_unit": "g",
     "url": "https://www.mil-tec.com/",
-    "shops": []
+    "shops": [
+      {
+        "url": "https://www.mil-tec.com/",
+        "price": 8,
+        "currency": "USD",
+        "updated_at": "2026-07-24"
+      }
+    ],
+    "color": "Silver"
   },
   {
     "id": "01KBQ9MKG500FXNVND2X3J4AYX",
@@ -742,7 +750,15 @@
     "weight": 40,
     "weight_unit": "g",
     "url": "https://cnocoutdoors.com/products/vecto-collapsible-water-container",
-    "shops": []
+    "shops": [
+      {
+        "url": "https://cnocoutdoors.com/products/vecto-collapsible-water-container",
+        "price": 12,
+        "currency": "USD",
+        "updated_at": "2026-07-24"
+      }
+    ],
+    "color": "Blue"
   },
   {
     "id": "01KBQ9MKG500FXNVND2X3J4AYY",
@@ -756,7 +772,14 @@
     "weight": 30,
     "weight_unit": "g",
     "url": "https://www.aquamira.com/",
-    "shops": []
+    "shops": [
+      {
+        "url": "https://www.aquamira.com/",
+        "price": 15,
+        "currency": "USD",
+        "updated_at": "2026-07-24"
+      }
+    ]
   },
   {
     "id": "01KBQ9MKG500FXNVND2X3J4AYZ",
@@ -770,7 +793,15 @@
     "weight": 150,
     "weight_unit": "g",
     "url": "https://www.gsioutdoors.com/",
-    "shops": []
+    "shops": [
+      {
+        "url": "https://www.gsioutdoors.com/",
+        "price": 15,
+        "currency": "USD",
+        "updated_at": "2026-07-24"
+      }
+    ],
+    "color": "Silver"
   },
   {
     "id": "01KBQ9MKG500FXNVND2X3J4AZ0",
@@ -784,7 +815,15 @@
     "weight": 25,
     "weight_unit": "g",
     "url": "https://www.ucogear.com/",
-    "shops": []
+    "shops": [
+      {
+        "url": "https://www.ucogear.com/",
+        "price": 8,
+        "currency": "USD",
+        "updated_at": "2026-07-24"
+      }
+    ],
+    "color": "Orange"
   },
   {
     "id": "01KBQ9MKG500FXNVND2X3J4AZ1",
@@ -798,7 +837,15 @@
     "weight": 100,
     "weight_unit": "g",
     "url": "https://www.amazon.com/s?k=duct+tape+10m",
-    "shops": []
+    "shops": [
+      {
+        "url": "https://www.amazon.com/s?k=duct+tape+10m",
+        "price": 5,
+        "currency": "USD",
+        "updated_at": "2026-07-24"
+      }
+    ],
+    "color": "Silver"
   },
   {
     "id": "01KBQ9MKG500FXNVND2X3J4AZ2",
@@ -812,7 +859,15 @@
     "weight": 25,
     "weight_unit": "g",
     "url": "https://www.amazon.com/s?k=titanium+spork",
-    "shops": []
+    "shops": [
+      {
+        "url": "https://www.amazon.com/s?k=titanium+spork",
+        "price": 8,
+        "currency": "USD",
+        "updated_at": "2026-07-24"
+      }
+    ],
+    "color": "Silver"
   },
   {
     "id": "01KBQ9MKG500FXNVND2X3J4AZ3",
@@ -826,7 +881,15 @@
     "weight": 120,
     "weight_unit": "g",
     "url": "https://www.amazon.com/s?k=emergency+poncho",
-    "shops": []
+    "shops": [
+      {
+        "url": "https://www.amazon.com/s?k=emergency+poncho",
+        "price": 10,
+        "currency": "USD",
+        "updated_at": "2026-07-24"
+      }
+    ],
+    "color": "Orange"
   },
   {
     "id": "01KC2C9M9BNYBJY74WCR1DD1G9",
@@ -936,9 +999,13 @@
     "url": "https://www.amazon.com",
     "shops": [
       {
-        "url": "https://militaria.pl/p/krzesiwo-badger-outdoor-fire-rod-20712"
+        "url": "https://militaria.pl/p/krzesiwo-badger-outdoor-fire-rod-20712",
+        "price": 8,
+        "currency": "USD",
+        "updated_at": "2026-07-24"
       }
-    ]
+    ],
+    "color": "Black"
   },
   {
     "id": "01KBQ9MKG60801WW461XE4JJA6",
@@ -955,7 +1022,17 @@
     "color": "Yellow",
     "shops": [
       {
-        "url": "https://militaria.pl/p/notes-wodoodporny-rite-in-the-rain-3x5-tan-24620?pref_q=notes+wodoodporny+rite+in+the+rain+3x5%22+-+tan"
+        "url": "https://riteintherain.com/products/top-spiral-notepad-3x5",
+        "price": 6,
+        "currency": "USD",
+        "updated_at": "2026-07-24"
+      },
+      {
+        "url": "https://militaria.pl/p/notes-wodoodporny-rite-in-the-rain-3x5-tan-24620",
+        "price": 29.95,
+        "currency": "PLN",
+        "updated_at": "2026-07-24",
+        "variant": "Tan"
       }
     ]
   },
@@ -972,7 +1049,14 @@
     "weight_unit": "g",
     "url": "https://www.sharpie.com",
     "color": "Black",
-    "shops": []
+    "shops": [
+      {
+        "url": "https://www.sharpie.com",
+        "price": 2,
+        "currency": "USD",
+        "updated_at": "2026-07-24"
+      }
+    ]
   },
   {
     "id": "01KBQ9MKG60801WW461XE4JJA8",
@@ -990,7 +1074,17 @@
     "color": "Black",
     "shops": [
       {
-        "url": "https://militaria.pl/p/latarka-fenix-e01-v2-0-black-100-lumenow-2839708?pref_q=latarka+fenix+e01+v2.0+black+-+100+lumen%c3%b3w"
+        "url": "https://www.fenixlighting.com/product/e01-v2-flashlight/",
+        "price": 20,
+        "currency": "USD",
+        "updated_at": "2026-07-24"
+      },
+      {
+        "url": "https://militaria.pl/p/latarka-fenix-e01-v2-0-black-100-lumenow-2839708",
+        "price": 79.95,
+        "currency": "PLN",
+        "updated_at": "2026-07-24",
+        "variant": "Black"
       }
     ]
   },
@@ -1241,6 +1335,182 @@
         "price": 269,
         "currency": "PLN",
         "updated_at": "2025-12-10"
+      }
+    ]
+  },
+  {
+    "id": "01KY9VGB98ARP029M07P4Q5J5N",
+    "name": "Adventure Medical Kits Ultralight/.5",
+    "category": "firstAid",
+    "brand": "Adventure Medical Kits",
+    "model": "Ultralight/.5",
+    "description": "Kompaktowa apteczka pierwszej pomocy na 1–2 osoby — idealna do EDC i lekkiego BOB.",
+    "price_tier": "medium",
+    "quality": "high",
+    "weight": 99,
+    "weight_unit": "g",
+    "url": "https://www.adventuremedicalkits.com/ultralight-watertight-.5.html",
+    "color": "Yellow",
+    "shops": [
+      {
+        "url": "https://www.adventuremedicalkits.com/ultralight-watertight-.5.html",
+        "price": 25,
+        "currency": "USD",
+        "updated_at": "2026-07-24"
+      }
+    ]
+  },
+  {
+    "id": "01KY9VGB99XSMGPPVG37Y0DXJ0",
+    "name": "Coghlan's Tinder Quik",
+    "category": "fire",
+    "brand": "Coghlan's",
+    "model": "Tinder Quik",
+    "description": "Tabliczki rozpałkowe — łatwo się zapalają, dobre do wet/cold startów.",
+    "price_tier": "low",
+    "quality": "medium",
+    "weight": 15,
+    "weight_unit": "g",
+    "url": "https://coghlans.com/",
+    "color": "Yellow",
+    "shops": [
+      {
+        "url": "https://coghlans.com/",
+        "price": 5,
+        "currency": "USD",
+        "updated_at": "2026-07-24"
+      }
+    ]
+  },
+  {
+    "id": "01KY9VGB99CCE53TV6XQJ88X4Y",
+    "name": "SOL Emergency Bivvy",
+    "category": "shelter",
+    "brand": "SOL (Survive Outdoors Longer)",
+    "model": "Emergency Bivvy",
+    "description": "Lekki, odblaskowy śpiwór awaryjny — ochrona przed wychłodzeniem i wiatrem.",
+    "price_tier": "medium",
+    "quality": "high",
+    "weight": 99,
+    "weight_unit": "g",
+    "url": "https://surviveoutdoorslonger.com/products/emergency-bivvy",
+    "color": "Orange",
+    "shops": [
+      {
+        "url": "https://surviveoutdoorslonger.com/products/emergency-bivvy",
+        "price": 15,
+        "currency": "USD",
+        "updated_at": "2026-07-24"
+      }
+    ]
+  },
+  {
+    "id": "01KY9VGB9981K988Q7V8ZBDW70",
+    "name": "Victorinox Classic SD",
+    "category": "blades",
+    "brand": "Victorinox",
+    "model": "Classic SD",
+    "description": "Kieszonkowy scyzoryk EDC — ostrze, nożyczki, pilnik, pęseta, wykałaczka.",
+    "price_tier": "medium",
+    "quality": "high",
+    "weight": 21,
+    "weight_unit": "g",
+    "url": "https://www.victorinox.com/global/en/products/Swiss-Army-Knives/Small-Pocket-Knives/Classic-SD/p/0.6223",
+    "color": "Red",
+    "shops": [
+      {
+        "url": "https://www.victorinox.com/global/en/products/Swiss-Army-Knives/Small-Pocket-Knives/Classic-SD/p/0.6223",
+        "price": 20,
+        "currency": "USD",
+        "updated_at": "2026-07-24"
+      }
+    ]
+  },
+  {
+    "id": "01KY9VGB99YGBS8K37VZZD4HSK",
+    "name": "Zippo Classic Lighter",
+    "category": "fire",
+    "brand": "Zippo",
+    "model": "Classic",
+    "description": "Klasyczna wiatroszczelna zapalniczka benzynowa — refillable EDC fire source.",
+    "price_tier": "medium",
+    "quality": "high",
+    "weight": 55,
+    "weight_unit": "g",
+    "url": "https://www.zippo.com/collections/classic-lighters",
+    "color": "Chrome",
+    "shops": [
+      {
+        "url": "https://www.zippo.com/collections/classic-lighters",
+        "price": 20,
+        "currency": "USD",
+        "updated_at": "2026-07-24"
+      }
+    ]
+  },
+  {
+    "id": "01KY9VGB99TYV40Y1T91MQCKCN",
+    "name": "Field Notes Original Kraft Memo Book",
+    "category": "tools",
+    "brand": "Field Notes",
+    "model": "Original Kraft",
+    "description": "Kieszonkowy notes 3.5×5.5\" — klasyk EDC do szybkich notatek.",
+    "price_tier": "low",
+    "quality": "medium",
+    "weight": 48,
+    "weight_unit": "g",
+    "url": "https://fieldnotesbrand.com/products/original-kraft",
+    "color": "Tan",
+    "shops": [
+      {
+        "url": "https://fieldnotesbrand.com/products/original-kraft",
+        "price": 10,
+        "currency": "USD",
+        "updated_at": "2026-07-24"
+      }
+    ]
+  },
+  {
+    "id": "01KY9VGB99D51F4EM2W3A3QJ5G",
+    "name": "Fisher Space Pen Bullet",
+    "category": "tools",
+    "brand": "Fisher",
+    "model": "Bullet",
+    "description": "Długopis ciśnieniowy — pisze pod dowolnym kątem, w zimnie i wilgoci.",
+    "price_tier": "medium",
+    "quality": "high",
+    "weight": 21,
+    "weight_unit": "g",
+    "url": "https://www.spacepen.com/bullet.aspx",
+    "color": "Black",
+    "shops": [
+      {
+        "url": "https://www.spacepen.com/bullet.aspx",
+        "price": 25,
+        "currency": "USD",
+        "updated_at": "2026-07-24"
+      }
+    ]
+  },
+  {
+    "id": "01KY9VGB99Y8FMPMPNEPV8AYN5",
+    "name": "Fenix PD36R",
+    "category": "light",
+    "brand": "Fenix",
+    "model": "PD36R",
+    "description": "Latarka EDC USB-C, ~1600 lm — mocne światło do BOB / outdoor.",
+    "price_tier": "high",
+    "quality": "high",
+    "weight": 145,
+    "weight_unit": "g",
+    "url": "https://www.fenixlighting.com/product/pd36r-flashlight/",
+    "color": "Black",
+    "shops": [
+      {
+        "url": "https://www.fenixlighting.com/product/pd36r-flashlight/",
+        "price": 90,
+        "currency": "USD",
+        "updated_at": "2026-07-24"
       }
     ]
   }

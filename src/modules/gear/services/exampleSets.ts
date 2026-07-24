@@ -45,6 +45,7 @@ export const firePouchItems: IExampleSetItem[] = [
   },
   {
     nameKey: 'gear.sampleSet.items.coghlansTinderQuik',
+    catalogueItemId: '01KY9VGB99XSMGPPVG37Y0DXJ0', // Coghlan's Tinder Quik
     category: 'fire',
     weight: 15,
     weightUnit: 'g',
@@ -98,6 +99,7 @@ export const firePouchItems: IExampleSetItem[] = [
 export const bugOutBagItems: IExampleSetItem[] = [
   {
     nameKey: 'gear.sampleSet.items.moraknivCompanion',
+    catalogueItemId: '01KBJXKQ1M2N3P4Q5R6S7T8U9V0', // Morakniv Companion
     category: 'blades',
     weight: 120,
     weightUnit: 'g',
@@ -127,6 +129,7 @@ export const bugOutBagItems: IExampleSetItem[] = [
   },
   {
     nameKey: 'gear.sampleSet.items.fenixPD36R',
+    catalogueItemId: '01KY9VGB99Y8FMPMPNEPV8AYN5', // Fenix PD36R
     category: 'light',
     weight: 145,
     weightUnit: 'g',
@@ -141,29 +144,31 @@ export const bugOutBagItems: IExampleSetItem[] = [
   },
   {
     nameKey: 'gear.sampleSet.items.adventureMedicalKitsUltralight',
+    catalogueItemId: '01KY9VGB98ARP029M07P4Q5J5N', // Adventure Medical Kits Ultralight/.5
     category: 'firstAid',
-    weight: 340,
+    weight: 99,
     weightUnit: 'g',
     priority: 'critical',
     status: 'owned',
     brand: 'Adventure Medical Kits',
     notesKey: 'gear.sampleSet.items.adventureMedicalKitsUltralight.notes',
-    color: 'Red',
+    color: 'Yellow',
     price: 25,
     currency: 'USD',
     quality: 'high',
   },
   {
     nameKey: 'gear.sampleSet.items.paracord550',
+    catalogueItemId: '01KBJXHEW5ECFZVXQFB4E539E5', // Paracord Badger Outdoor 500 30m
     category: 'tools',
     weight: 50,
     weightUnit: 'g',
     quantity: 1,
     priority: 'high',
     status: 'owned',
-    brand: 'Generic',
+    brand: 'Badger Outdoor',
     notesKey: 'gear.sampleSet.items.paracord550.notes',
-    color: 'Black',
+    color: 'Olive',
     price: 8,
     currency: 'USD',
     quality: 'medium',
@@ -185,8 +190,9 @@ export const bugOutBagItems: IExampleSetItem[] = [
   },
   {
     nameKey: 'gear.sampleSet.items.solEmergencyBivvy',
+    catalogueItemId: '01KY9VGB99CCE53TV6XQJ88X4Y', // SOL Emergency Bivvy
     category: 'shelter',
-    weight: 85,
+    weight: 99,
     weightUnit: 'g',
     priority: 'high',
     status: 'owned',
@@ -232,6 +238,7 @@ export const bugOutBagFirePouchItems: IExampleSetItem[] = [
   },
   {
     nameKey: 'gear.sampleSet.items.coghlansTinderQuik',
+    catalogueItemId: '01KY9VGB99XSMGPPVG37Y0DXJ0', // Coghlan's Tinder Quik
     category: 'fire',
     weight: 15,
     weightUnit: 'g',
@@ -251,6 +258,7 @@ export const bugOutBagFirePouchItems: IExampleSetItem[] = [
 export const edcItems: IExampleSetItem[] = [
   {
     nameKey: 'gear.sampleSet.items.victorinoxClassicSD',
+    catalogueItemId: '01KY9VGB9981K988Q7V8ZBDW70', // Victorinox Classic SD
     category: 'blades',
     weight: 21,
     weightUnit: 'g',
@@ -280,6 +288,7 @@ export const edcItems: IExampleSetItem[] = [
   },
   {
     nameKey: 'gear.sampleSet.items.zippoLighter',
+    catalogueItemId: '01KY9VGB99YGBS8K37VZZD4HSK', // Zippo Classic Lighter
     category: 'fire',
     weight: 55,
     weightUnit: 'g',
@@ -295,8 +304,9 @@ export const edcItems: IExampleSetItem[] = [
   },
   {
     nameKey: 'gear.sampleSet.items.fieldNotesNotebook',
+    catalogueItemId: '01KY9VGB99TYV40Y1T91MQCKCN', // Field Notes Original Kraft
     category: 'tools',
-    weight: 80,
+    weight: 48,
     weightUnit: 'g',
     priority: 'low',
     status: 'owned',
@@ -310,8 +320,9 @@ export const edcItems: IExampleSetItem[] = [
   },
   {
     nameKey: 'gear.sampleSet.items.fisherSpacePen',
+    catalogueItemId: '01KY9VGB99D51F4EM2W3A3QJ5G', // Fisher Space Pen Bullet
     category: 'tools',
-    weight: 8,
+    weight: 21,
     weightUnit: 'g',
     priority: 'medium',
     status: 'owned',
@@ -358,7 +369,7 @@ export const budgetEdcSurvivalKitItems: IExampleSetItem[] = [
   },
   {
     nameKey: 'gear.sampleSet.items.lightMyFireFiresteel',
-    catalogueItemId: '01KBQ9MKG500FXNVND2X3J4AZ5', // Light My Fire Swedish FireSteel 2.0
+    catalogueItemId: '01KBJXFP7WMDKNJ8HNMBW1CZZG', // Swedish FireSteel 2.0
     category: 'fire',
     weight: 50,
     weightUnit: 'g',
@@ -508,7 +519,7 @@ export const mediumEdcSurvivalKitItems: IExampleSetItem[] = [
   },
   {
     nameKey: 'gear.sampleSet.items.lightMyFireFiresteel',
-    catalogueItemId: '01KBQ9MKG500FXNVND2X3J4AZ5', // Light My Fire Swedish FireSteel 2.0
+    catalogueItemId: '01KBJXFP7WMDKNJ8HNMBW1CZZG', // Swedish FireSteel 2.0
     category: 'fire',
     weight: 50,
     weightUnit: 'g',
@@ -621,18 +632,19 @@ export const mediumEdcSurvivalKitItems: IExampleSetItem[] = [
     quality: 'medium',
   },
   {
-    // Note: FA001 (Basic Mini First Aid Kit) - assuming this exists in catalogue or will be added
+    catalogueItemId: '01KY9VGB98ARP029M07P4Q5J5N', // Adventure Medical Kits Ultralight/.5
     nameKey: 'gear.sampleSet.items.basicMiniFirstAidKit',
     category: 'firstAid',
-    weight: 100,
+    weight: 99,
     weightUnit: 'g',
     quantity: 1,
     priority: 'critical',
     status: 'owned',
-    brand: 'Generic',
-    price: 15,
+    brand: 'Adventure Medical Kits',
+    color: 'Yellow',
+    price: 25,
     currency: 'USD',
-    quality: 'medium',
+    quality: 'high',
   },
 ]
 

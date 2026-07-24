@@ -702,6 +702,50 @@ export const gearEn = {
           name: 'Anker PowerCore 10000',
           notes: 'Portable power bank',
         },
+        riteInTheRainNotepad: {
+          name: 'Rite in the Rain All-Weather Notepad 3x5',
+          notes: 'Waterproof notepad',
+        },
+        sharpieMarker: {
+          name: 'Sharpie Permanent Marker',
+          notes: 'Fine tip permanent marker',
+        },
+        ductTape: {
+          name: 'Compact Duct Tape (10 m)',
+          notes: 'Repair and improvisation tape',
+        },
+        metalSpork: {
+          name: 'Metal Spork',
+          notes: 'Folding titanium / stainless spork',
+        },
+        cnocVectoBottle: {
+          name: 'CNOC Vecto Collapsible Water Bottle 1L',
+          notes: 'Collapsible water bottle',
+        },
+        fenixE01: {
+          name: 'Fenix E01 V2.0',
+          notes: 'Ultra-light AAA backup flashlight',
+        },
+        victorinoxHuntsman: {
+          name: 'Victorinox Huntsman',
+          notes: 'Swiss Army knife with saw and scissors',
+        },
+        ferroRod8mm: {
+          name: 'Ferrocerium Rod 8 mm',
+          notes: 'Compact ferro rod fire starter',
+        },
+        gsiStainlessCup: {
+          name: 'GSI Outdoors Stainless Steel Cup 700 ml',
+          notes: 'Metal cup for boiling water or meals',
+        },
+        milTecEmergencyBlanket: {
+          name: 'Mil-Tec Emergency Thermal Blanket',
+          notes: 'Emergency foil blanket',
+        },
+        basicMiniFirstAidKit: {
+          name: 'Adventure Medical Kits Ultralight/.5',
+          notes: 'Compact first aid kit for 1–2 people',
+        },
       },
     },
     migration: {
@@ -1683,6 +1727,50 @@ export const gearPl = {
         ankerPowerCore10000: {
           name: 'Power bank Anker PowerCore 10000',
           notes: 'Przenośny power bank',
+        },
+        riteInTheRainNotepad: {
+          name: 'Notes wodoodporny Rite in the Rain 3x5',
+          notes: 'Wodoodporny notes kieszonkowy',
+        },
+        sharpieMarker: {
+          name: 'Marker permanentny Sharpie',
+          notes: 'Marker permanentny z cienką końcówką',
+        },
+        ductTape: {
+          name: 'Kompaktowa taśma duct tape (10 m)',
+          notes: 'Taśma do napraw i improwizacji',
+        },
+        metalSpork: {
+          name: 'Metalowy spork',
+          notes: 'Składana łyżko-widelec (tytan / stal)',
+        },
+        cnocVectoBottle: {
+          name: 'Butelka składana CNOC Vecto 1L',
+          notes: 'Składana butelka na wodę',
+        },
+        fenixE01: {
+          name: 'Fenix E01 V2.0',
+          notes: 'Ultra-lekka latarka AAA jako backup',
+        },
+        victorinoxHuntsman: {
+          name: 'Victorinox Huntsman',
+          notes: 'Scyzoryk z piłką i nożyczkami',
+        },
+        ferroRod8mm: {
+          name: 'Krzesiwo ferrocerowe 8 mm',
+          notes: 'Kompaktowe krzesiwo do rozpalania ognia',
+        },
+        gsiStainlessCup: {
+          name: 'Kubek stalowy GSI Outdoors 700 ml',
+          notes: 'Metalowy kubek do gotowania wody lub posiłków',
+        },
+        milTecEmergencyBlanket: {
+          name: 'Koc termiczny Mil-Tec',
+          notes: 'Awaryjna folia ratunkowa',
+        },
+        basicMiniFirstAidKit: {
+          name: 'Apteczka Adventure Medical Kits Ultralight/.5',
+          notes: 'Kompaktowa apteczka na 1–2 osoby',
         },
       },
     },

@@ -8,10 +8,12 @@ import type {
 } from '../types/gear.types'
 import type { ICreateGearItemV2Dto, IGearItemV2 } from '../types/gear.types.v2'
 import {
+  budgetEdcSurvivalKitItems,
   bugOutBagFirePouchItems,
   bugOutBagItems,
   edcItems,
   firePouchItems,
+  mediumEdcSurvivalKitItems,
   type IExampleSetItem,
 } from './exampleSets'
 import type { TUUID } from '@/shared/types/base.type'
@@ -274,6 +276,38 @@ function getSampleSetDefinition(
           'Minimalist fire starting kit'
         ),
         items: translateItems(firePouchItems, t),
+      }
+
+    case 'budgetEdc':
+      return {
+        name: translateWithFallback(
+          t,
+          'gear.sampleSet.variants.budgetEdc.name',
+          'Budget EDC Survival Kit'
+        ),
+        type: 'bag',
+        description: translateWithFallback(
+          t,
+          'gear.sampleSet.variants.budgetEdc.description',
+          'Affordable everyday carry survival essentials'
+        ),
+        items: translateItems(budgetEdcSurvivalKitItems, t),
+      }
+
+    case 'mediumEdc':
+      return {
+        name: translateWithFallback(
+          t,
+          'gear.sampleSet.variants.mediumEdc.name',
+          'Medium EDC / Urban Survival Kit'
+        ),
+        type: 'bag',
+        description: translateWithFallback(
+          t,
+          'gear.sampleSet.variants.mediumEdc.description',
+          'Mid-range everyday carry with urban survival focus'
+        ),
+        items: translateItems(mediumEdcSurvivalKitItems, t),
       }
 
     default:
