@@ -26,7 +26,7 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - 📋 **Low:** PostgreSQL SSL/TLS (opcjonalne - Docker network zapewnia izolację)
    - 🔒 **High:** Implementacja WAF (Web Application Firewall)
    - 🔒 **High:** Procedury backup/recovery bazy danych
-   - 🔐 **Medium:** Migracja refresh tokena na httpOnly cookie (obecnie localStorage) — **następne** ([REFACTOR_PROGRESS](./plans/REFACTOR_PROGRESS.md) §3.1, [REVIEW_AND_REFACTOR_PLAN](./plans/REVIEW_AND_REFACTOR_PLAN.md))
+   - ✅ **Medium:** Migracja refresh tokena na httpOnly cookie — Completed (2026-07-24): access token w pamięci (nie localStorage), refresh token w httpOnly/secure/samesite=strict cookie, refresh token rotation + jti revocation przy logout ([REFACTOR_PROGRESS](./plans/REFACTOR_PROGRESS.md) §3.1, [REVIEW_AND_REFACTOR_PLAN](./plans/REVIEW_AND_REFACTOR_PLAN.md))
    - 🔐 **Medium:** Implementacja CSRF protection (ogólne middleware; OAuth callback state — ✅ v2.52.0)
    - 🛡️ **Medium:** Strict CORS configuration
    - 📋 **Low:** Procedury rotacji sekretów (secrets rotation)

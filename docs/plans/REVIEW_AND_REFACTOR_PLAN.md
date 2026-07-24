@@ -238,7 +238,7 @@ duplication that lets a fix land in one repo and silently miss the other.
 - [ ] Document shared-core paths + "mirror changes" rule in both repos. *(§7)*
 
 ### Phase 1 — Security hardening (1–2 weeks)
-- [ ] Move refresh token to HttpOnly cookie; access token in memory. *(§3.1)*
+- [x] Move refresh token to HttpOnly cookie; access token in memory. *(§3.1, done 2026-07-24, see [REFACTOR_PROGRESS.md](REFACTOR_PROGRESS.md))*
 - [ ] Add `iss`/`aud` to JWTs and verify; assert `type` in reset/verify flows. *(§3.3)*
 - [ ] Extract `is_expected_error()` used by both Sentry filter paths. *(§3.6)*
 
