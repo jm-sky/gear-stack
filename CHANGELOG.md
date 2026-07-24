@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.56.0] - 2026-07-24
+
+### Security
+- **Auth**: refresh token przeniesiony z `localStorage` do ciasteczka HttpOnly/Secure/SameSite=Strict (scope `/api/auth`); access token trzymany tylko w pamięci frontendu, nie w `localStorage` — ogranicza ryzyko kradzieży tokenów przez XSS
+- **Auth**: `refresh_access_token` sprawdza teraz blacklistę `jti` — refresh token z unieważnionej sesji (np. po wylogowaniu) przestaje działać natychmiast; wcześniej logout blacklistował tylko access token ([REFACTOR_PROGRESS](docs/plans/REFACTOR_PROGRESS.md) §3.1)
+
+### Changed
+- **Auth**: `/auth/refresh` czyta refresh token z ciasteczka zamiast z body; `refreshToken` usunięty z odpowiedzi JSON (login, refresh, OAuth callback, weryfikacja 2FA)
+- **Auth**: ciche odświeżanie sesji przy starcie aplikacji (`useAuthBootstrap`, wołane z `authGuard`) — hard reload nie wylogowuje użytkownika, jeśli cookie refresh tokena jest wciąż ważne
+
+---
+
 ## [2.55.0] - 2026-07-24
 
 ### Added
