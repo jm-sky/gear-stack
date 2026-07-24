@@ -268,6 +268,7 @@ export const gearEn = {
     },
     itemsTable: {
       title: 'Items table',
+      quickAddPlaceholder: 'Add item…',
       imageCell: {
         uploadSuccess: 'Image uploaded successfully',
         deleteSuccess: 'Image deleted successfully',
@@ -320,6 +321,10 @@ export const gearEn = {
       starItem: 'Star Item',
       manage: 'Manage',
       saving: 'Saving...',
+      saved: 'Saved',
+      pendingSave: 'Unsaved changes',
+      saveError: 'Failed to save changes',
+      retrySave: 'Retry save',
       setExpirationDate: 'Set Expiration Date',
     },
     imageSearch: {
@@ -1243,6 +1248,7 @@ export const gearPl = {
     },
     itemsTable: {
       title: 'Tabela przedmiotów',
+      quickAddPlaceholder: 'Dodaj przedmiot…',
       imageCell: {
         uploadSuccess: 'Obrazek został dodany',
         deleteSuccess: 'Obrazek został usunięty',
@@ -1295,6 +1301,10 @@ export const gearPl = {
       starItem: 'Oznacz jako ulubiony',
       manage: 'Zarządzaj',
       saving: 'Zapisywanie...',
+      saved: 'Zapisano',
+      pendingSave: 'Niezapisane zmiany',
+      saveError: 'Nie udało się zapisać zmian',
+      retrySave: 'Ponów zapis',
       setExpirationDate: 'Ustaw Termin Ważności',
     },
     imageSearch: {

@@ -23,10 +23,10 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  change: [updates: IUpdateGearItemV2Dto]
+  change: [updates: IUpdateGearItemV2Dto, options?: { immediate?: boolean }]
+  navigate: [direction: 'next' | 'prev' | 'down']
 }>()
 
-// In edit mode, always show select
 const editedCategory = ref<TGearItemCategory>(props.item.category ?? DEFAULT_ITEM_CATEGORY)
 
 const defaultCategories = [
@@ -45,17 +45,21 @@ const defaultCategories = [
   'other',
 ] as const
 
-// Handle category change
 function handleCategoryChange(newCategory: unknown) {
   if (newCategory === props.item.category) {
     emit('change', {})
     return
   }
 
-  emit('change', { category: newCategory as TGearItemCategory })
+  editedCategory.value = newCategory as TGearItemCategory
+  emit('change', { category: newCategory as TGearItemCategory }, { immediate: true })
 }
 
-// Watch for external changes to item
+function handleTab(event: KeyboardEvent) {
+  event.preventDefault()
+  emit('navigate', event.shiftKey ? 'prev' : 'next')
+}
+
 watch(
   () => props.item.category,
   (newCategory) => {
@@ -65,51 +69,64 @@ watch(
 </script>
 
 <template>
-  <Select
-    :model-value="editedCategory"
-    @update:model-value="handleCategoryChange"
+  <div
+    data-editable-cell
+    data-field="category"
+    :data-item-id="item.id"
   >
-    <SelectTrigger
-      :aria-label="t('gear.item.category')"
-      class="h-[2.1rem]! min-w-[140px] border-transparent"
+    <Select
+      :model-value="editedCategory"
+      @update:model-value="handleCategoryChange"
     >
-      <SelectValue>
-        <div class="flex items-center gap-2">
-          <CategoryIcon :category="editedCategory" :size="16" />
-          <span>{{ getCategoryLabel(editedCategory) }}</span>
-        </div>
-      </SelectValue>
-    </SelectTrigger>
-    <SelectContent>
-      <!-- Default Categories -->
-      <SelectItem
-        v-for="category in defaultCategories"
-        :key="category"
-        :value="category"
+      <SelectTrigger
+        :aria-label="t('gear.item.category')"
+        class="h-10 sm:h-[2.1rem]! min-w-24 sm:min-w-35 w-full border-transparent bg-transparent shadow-none focus:ring-1"
+        @keydown.tab="handleTab"
       >
-        <div class="flex items-center gap-2">
-          <CategoryIcon :category="category" :size="16" />
-          <span>{{ t(`gear.item.categories.${category}`) }}</span>
-        </div>
-      </SelectItem>
-
-      <!-- Custom Categories -->
-      <template v-if="customCategories.length > 0">
-        <div class="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-          {{ t('settings.categories.title') }}
-        </div>
+        <SelectValue>
+          <div class="flex items-center gap-2">
+            <CategoryIcon
+              :category="editedCategory"
+              :size="16"
+            />
+            <span>{{ getCategoryLabel(editedCategory) }}</span>
+          </div>
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
         <SelectItem
-          v-for="category in customCategories"
-          :key="category.id"
-          :value="category.value"
+          v-for="category in defaultCategories"
+          :key="category"
+          :value="category"
         >
           <div class="flex items-center gap-2">
-            <CategoryIcon :category="category.value" :size="16" />
-            <span>{{ getCategoryLabel(category.value) }}</span>
+            <CategoryIcon
+              :category="category"
+              :size="16"
+            />
+            <span>{{ t(`gear.item.categories.${category}`) }}</span>
           </div>
         </SelectItem>
-      </template>
-    </SelectContent>
-  </Select>
-</template>
 
+        <template v-if="customCategories.length > 0">
+          <div class="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+            {{ t('settings.categories.title') }}
+          </div>
+          <SelectItem
+            v-for="category in customCategories"
+            :key="category.id"
+            :value="category.value"
+          >
+            <div class="flex items-center gap-2">
+              <CategoryIcon
+                :category="category.value"
+                :size="16"
+              />
+              <span>{{ getCategoryLabel(category.value) }}</span>
+            </div>
+          </SelectItem>
+        </template>
+      </SelectContent>
+    </Select>
+  </div>
+</template>

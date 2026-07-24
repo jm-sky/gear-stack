@@ -61,7 +61,7 @@ const containerColor = computed<string>(() => {
 
 <template>
   <div
-    class="flex items-center gap-2"
+    class="flex min-w-32 sm:min-w-48 items-center gap-1"
     :class="textClass"
   >
     <!-- Move up/down buttons (only in non-public mode) -->
@@ -103,7 +103,7 @@ const containerColor = computed<string>(() => {
     <!-- Regular item display -->
     <div
       v-else
-      class="flex items-center gap-1.5 cursor-pointer hover:text-primary transition-colors"
+      class="flex items-center gap-1.5 pl-2 cursor-pointer hover:text-primary transition-colors"
       @click="emit('navigate')"
     >
       <span>

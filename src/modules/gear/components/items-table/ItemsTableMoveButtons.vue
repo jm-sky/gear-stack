@@ -17,7 +17,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="flex flex-col gap-0.5 shrink-0">
+  <div class="hidden sm:flex flex-col gap-0.5 shrink-0">
     <Button
       v-tooltip.bottom="t('gear.actions.moveUp')"
       variant="ghost"

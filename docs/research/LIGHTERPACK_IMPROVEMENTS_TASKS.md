@@ -105,30 +105,19 @@
 
 ### 5. Quick Add / Inline Editing - dopracowanie
 
-**Status:** 🔄 Planned  
+**Status:** ✅ Completed  
 **Priorytet:** High  
 **Złożoność:** Medium
 
 **Obecny stan:**
-- ✅ Inline editing już istnieje dla: nazwa, ilość, waga, priorytet, status, cena, kategoria, notatki
-- ✅ Edit mode toggle już istnieje
-- ⚠️ Trzeba dopracować UX aby osiągnąć efekt podobny do LighterPack
+- ✅ Inline editing: nazwa, ilość, waga, priorytet, status, cena, kategoria, notatki
+- ✅ Edit mode toggle
+- ✅ Debounced auto-save + feedback pending/saving/saved/error
+- ✅ Quick add row
+- ✅ Tab / Enter / Esc
+- ✅ Mobile polish (sticky columns, touch targets)
 
-**Wymagania do dopracowania:**
-- ✅ Opis requirements aby osiągnąć efekt UX podobny w LighterPack
-- ✅ Szybsze dodawanie przedmiotów (quick add bez otwierania formularza)
-- ✅ Lepsze wizualne feedback podczas edycji
-- ✅ Natychmiastowe zapisywanie zmian (debounce)
-- ✅ Możliwość dodania nowego przedmiotu bezpośrednio w tabeli (pusty wiersz na końcu)
-
-**Szczegóły implementacji:**
-- Quick add: pusty wiersz na końcu tabeli w trybie edycji
-- Wypełnienie podstawowych pól → automatyczne zapisanie
-- Wizualne oznaczenie edytowanych wierszy
-- Loading state podczas zapisywania
-- Error handling z możliwością retry
-
-**Plan / issue (dyskusja 2026-07-15):**
+**Plan / issue:**
 - [Issue #034](../issues/2026-07-15--034--inline-editing-ux-refinement.md)
 - [Plan implementacji](../plans/2026-07-15-inline-editing-ux-plan.md)
 
@@ -214,7 +203,7 @@
 | 2 | Drag & Drop | 🔄 Planned | High | Medium | Nowa funkcjonalność |
 | 3 | System pomocy | 🔄 Planned | Medium | Small-Medium | Nowa funkcjonalność |
 | 4 | Kontekstowe podpowiedzi | 🔄 Planned | Medium | Small | Ulepszenie istniejących |
-| 5 | Quick Add / Inline Editing | 🔄 Planned | High | Medium | Dopracowanie istniejących |
+| 5 | Quick Add / Inline Editing | ✅ Completed | High | Medium | Dopracowanie UX 2026-07-23 |
 | 6 | Import/Export CSV/JSON | 🔄 Planned | Medium | Medium | CSV Import - nowe, reszta istnieje |
 | 7 | Lepsze wizualizacje | 🔄 Planned | Low | Small | Ulepszenie istniejących |
 | 8 | Natychmiastowe obliczenia | 🔄 Planned | Low | Small | Ulepszenie istniejących |
@@ -226,7 +215,7 @@
 ### Faza 1 (Wysoki priorytet):
 1. Tryb prosty
 2. Drag & Drop
-3. Quick Add / Inline Editing - dopracowanie
+3. ~~Quick Add / Inline Editing - dopracowanie~~ ✅
 
 ### Faza 2 (Średni priorytet):
 4. System pomocy / Tutorial

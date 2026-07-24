@@ -856,28 +856,18 @@ Kombinacja opcji 1 i 2:
   - Zmiana priorytetu
 - Wzorzec: LighterPack - wszystkie akcje dostępne bezpośrednio z wiersza tabeli
 
-### 🔄 Quick Add / Inline Editing - dopracowanie (inspiracja LighterPack)
-**Status:** 🔄 Planned | **Priority:** Medium | **Complexity:** Medium | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../research/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
+### ✅ Quick Add / Inline Editing - dopracowanie (inspiracja LighterPack)
+**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../research/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
 
 **Obecny stan:**
-- ✅ Inline editing już istnieje dla: nazwa, ilość, waga, priorytet, status, cena, kategoria, notatki
-- ✅ Edit mode toggle już istnieje
-- ⚠️ Trzeba dopracować UX aby osiągnąć efekt podobny do LighterPack
+- ✅ Inline editing: nazwa, ilość, waga, priorytet, status, cena, kategoria, notatki
+- ✅ Edit mode toggle
+- ✅ Debounced auto-save + stany pending/saving/saved/error
+- ✅ Quick add row w trybie edycji
+- ✅ Nawigacja Tab / Enter / Esc
+- ✅ Mobile: sticky name + actions, touch targets, horizontal scroll
 
-**Wymagania do dopracowania:**
-- Szybsze dodawanie przedmiotów (quick add bez otwierania formularza)
-- Lepsze wizualne feedback podczas edycji
-- Natychmiastowe zapisywanie zmian (debounce)
-- Możliwość dodania nowego przedmiotu bezpośrednio w tabeli (pusty wiersz na końcu)
-
-**Szczegóły implementacji:**
-- Quick add: pusty wiersz na końcu tabeli w trybie edycji
-- Wypełnienie podstawowych pól → automatyczne zapisanie
-- Wizualne oznaczenie edytowanych wierszy
-- Loading state podczas zapisywania
-- Error handling z możliwością retry
-
-**Plan / issue (dyskusja 2026-07-15):** [#034](./issues/2026-07-15--034--inline-editing-ux-refinement.md), [plan](./plans/2026-07-15-inline-editing-ux-plan.md)
+**Plan / issue:** [#034](./issues/2026-07-15--034--inline-editing-ux-refinement.md), [plan](./plans/2026-07-15-inline-editing-ux-plan.md)
 
 ### Szybka edycja nazwy kontenera (Inline Editing)
 **Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Small

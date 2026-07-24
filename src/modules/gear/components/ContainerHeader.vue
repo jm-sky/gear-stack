@@ -299,7 +299,7 @@ const handleCopyPublicLink = async () => {
           </div>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+        <div class="flex flex-nowrap items-center gap-2 w-full sm:w-auto overflow-x-auto">
           <ItemsTableEditModeToggle />
           <Button
             v-if="isSmUp"
@@ -321,7 +321,7 @@ const handleCopyPublicLink = async () => {
             <AddContainerIcon class="size-4" />
             <span class="hidden sm:inline">{{ t('gear.container.addNested') }}</span>
           </Button>
-          <Button size="sm" class="shrink-0 flex-1 sm:flex-none" @click="handleAddItem">
+          <Button size="sm" class="shrink-0" @click="handleAddItem">
             <AddItemIcon class="size-4" />
             {{ t('gear.item.create') }}
           </Button>

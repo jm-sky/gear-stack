@@ -70,7 +70,7 @@ const formattedMaxWeight = computed<string>(() => {
 </script>
 
 <template>
-  <div class="grid grid-cols-1 gap-4" :class="showTotalPrice ? 'md:grid-cols-4' : 'md:grid-cols-3'">
+  <div class="grid grid-cols-2 gap-4" :class="showTotalPrice ? 'md:grid-cols-4' : 'md:grid-cols-3'">
     <!-- Items Count -->
     <div class="bg-card rounded-lg border p-4">
       <div class="text-sm text-muted-foreground mb-1">
@@ -104,7 +104,7 @@ const formattedMaxWeight = computed<string>(() => {
     </div>
 
     <!-- Readiness -->
-    <div class="bg-card rounded-lg border p-4">
+    <div class="col-span-2 md:col-span-1 bg-card rounded-lg border p-4">
       <div class="text-sm text-muted-foreground mb-1">
         {{ t('gear.container.readiness') }}
       </div>

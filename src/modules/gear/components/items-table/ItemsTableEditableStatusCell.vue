@@ -18,25 +18,29 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  change: [updates: IUpdateGearItemV2Dto]
+  change: [updates: IUpdateGearItemV2Dto, options?: { immediate?: boolean }]
+  navigate: [direction: 'next' | 'prev' | 'down']
 }>()
 
-// In edit mode, always show select
 const editedStatus = ref<TGearItemStatus>(props.item.status ?? DEFAULT_ITEM_STATUS)
 
 const statuses: TGearItemStatus[] = ['owned', 'missing', 'toBuy']
 
-// Handle status change
 function handleStatusChange(newStatus: unknown) {
   if (newStatus === props.item.status) {
     emit('change', {})
     return
   }
 
-  emit('change', { status: newStatus as TGearItemStatus })
+  editedStatus.value = newStatus as TGearItemStatus
+  emit('change', { status: newStatus as TGearItemStatus }, { immediate: true })
 }
 
-// Watch for external changes to item
+function handleTab(event: KeyboardEvent) {
+  event.preventDefault()
+  emit('navigate', event.shiftKey ? 'prev' : 'next')
+}
+
 watch(
   () => props.item.status,
   (newStatus) => {
@@ -46,25 +50,31 @@ watch(
 </script>
 
 <template>
-  <Select
-    :model-value="editedStatus"
-    @update:model-value="handleStatusChange"
+  <div
+    data-editable-cell
+    data-field="status"
+    :data-item-id="item.id"
   >
-    <SelectTrigger
-      :aria-label="t('gear.item.status')"
-      class="h-[2.1rem]! min-w-[120px] border-transparent"
+    <Select
+      :model-value="editedStatus"
+      @update:model-value="handleStatusChange"
     >
-      <SelectValue />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectItem
-        v-for="status in statuses"
-        :key="status"
-        :value="status"
+      <SelectTrigger
+        :aria-label="t('gear.item.status')"
+        class="h-10 sm:h-[2.1rem]! min-w-[110px] sm:min-w-[120px] border-transparent bg-transparent shadow-none focus:ring-1"
+        @keydown.tab="handleTab"
       >
-        {{ t(`gear.item.statuses.${status}`) }}
-      </SelectItem>
-    </SelectContent>
-  </Select>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem
+          v-for="status in statuses"
+          :key="status"
+          :value="status"
+        >
+          {{ t(`gear.item.statuses.${status}`) }}
+        </SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
 </template>
-
