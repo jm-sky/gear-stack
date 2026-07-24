@@ -352,9 +352,12 @@ gear-stack.ovh {
 - [ ] Monitor and tune false positives
 - [ ] Gradually increase paranoia level
 
-### Phase 4: Advanced Monitoring 🔄 Planned
-- [ ] Integrate WAF logs with Sentry
-- [ ] Set up alerting for attack patterns
+### Phase 4: Advanced Monitoring 🔄
+
+> **2026-07-24:** Application + uptime monitoring are covered by **Sentry** (in gear-stack) and **Ops Monitor** (`../ops-monitor`). WAF-log integration below applies only if Coraza/Cloudflare WAF is adopted later.
+
+- [ ] Integrate WAF logs with Sentry (only if WAF is enabled)
+- [ ] Set up alerting for attack patterns (prefer Ops Monitor / Sentry alerts)
 - [ ] Configure automated blocking
 - [ ] Create WAF dashboard
 

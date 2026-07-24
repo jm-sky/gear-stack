@@ -5,7 +5,10 @@
 **Ostatnia aktualizacja statusu:** 2026-07-24
 **Based On:** Production Security Audit (VPS + Caddy environment)
 
-> **Status audit (2026-07-24):** Done in code — CSP/HSTS headers, rate limiting, prod CORS forbid `*`, httpOnly refresh cookie + access in memory. Still open — WAF, backup/recovery, general CSRF middleware, secrets rotation, security monitoring. Checklisty w body mogą być nieodhaczone mimo wdrożenia.
+> **Status audit (2026-07-24):** Done in code — CSP/HSTS headers, rate limiting, prod CORS forbid `*`, httpOnly refresh cookie + access in memory.  
+> **Monitoring:** covered outside this plan — app errors via **Sentry** (BE+FE); uptime / infra / service health via **Ops Monitor** (`../ops-monitor`, see that repo’s docs / deployment). Do not rebuild a separate SIEM here.  
+> **WAF:** deferred (custom `xcaddy`+Coraza has high ops cost for Caddy upgrades; revisit only if traffic/risk justifies Cloudflare or custom build).  
+> **Still open in this plan:** backup/recovery, general CSRF middleware, secrets rotation. Checklisty w body mogą być nieodhaczone mimo wdrożenia.
 
 ---
 
@@ -782,46 +785,19 @@ docker-compose restart app
 **Impact:** Medium (early threat detection)
 **Complexity:** Medium
 **Location:** Infrastructure
+**Status (2026-07-24):** ✅ Covered — no separate Gear Stack implementation needed
 
-**Tools to Implement:**
+**Current stack:**
 
-1. **Sentry (Already Implemented)**
-   - Monitor application errors
-   - Track security-related exceptions
-
-2. **Log Aggregation**
-   ```bash
-   # Configure Docker logging to file
-   # docker-compose.yml
-   services:
-     app:
-       logging:
-         driver: "json-file"
-         options:
-           max-size: "10m"
-           max-file: "3"
-   ```
-
-3. **Fail2ban for Intrusion Detection**
-   ```bash
-   # Already documented in deployment/SECURITY_FIX.md
-   sudo apt install fail2ban -y
-
-   # Monitor FastAPI access logs
-   # Create custom filter for API abuse
-   ```
-
-4. **Uptime Monitoring**
-   - Use external service (UptimeRobot, Pingdom, Better Uptime)
-   - Alert on downtime or elevated response times
+1. **Sentry (in this repo)** — application errors, traces, replay (BE `init_sentry` / FE `src/shared/services/sentry.ts`). Configure product alerts in Sentry UI as needed.
+2. **Ops Monitor (`../ops-monitor`)** — project-level / infra monitoring (uptime, health, ops dashboards). Source of truth for “is the service up / healthy?” lives there, not in a duplicate Gear Stack monitoring plan.
+3. **Optional later:** Fail2ban / centralized Caddy logs — only if Ops Monitor gaps appear; not a blocker for closing this item.
 
 **Checklist:**
-- [ ] Configure centralized logging
-- [ ] Set up fail2ban for SSH and API
-- [ ] Configure Sentry alerts
-- [ ] Set up uptime monitoring
-- [ ] Create incident response runbook
-- [ ] Test alerting mechanisms
+- [x] Application error monitoring (Sentry)
+- [x] Uptime / ops monitoring (Ops Monitor — sibling project)
+- [ ] (Optional) Sentry alert rules tuned for auth spikes
+- [ ] (Optional) Incident response runbook cross-link to Ops Monitor
 
 ---
 
@@ -924,18 +900,18 @@ curl -X POST https://yourdomain.com/api/containers \
 
 | Item | Priority | Status | Completed |
 |------|----------|--------|-----------|
-| Security Headers | Critical | 🔄 Planned | - |
-| CSP Implementation | Critical | 🔄 Planned | - |
+| Security Headers | Critical | ✅ Done | v2.47.0 |
+| CSP Implementation | Critical | ✅ Done | v2.47.0 |
 | PostgreSQL SSL | Low | ✅ Not Required | - |
-| WAF Implementation | High | 🔄 Planned | - |
-| httpOnly Cookies | Medium | 🔄 Planned | - |
-| CSRF Protection | Medium | 🔄 Planned | - |
-| Strict CORS | Medium | 🔄 Planned | - |
-| Backup Procedures | Low | 🔄 Planned | - |
-| Secrets Rotation | Low | 🔄 Planned | - |
-| Monitoring & Alerting | Low | 🔄 Planned | - |
+| WAF Implementation | High | ⏸️ Deferred | Custom Caddy/Coraza ops cost; revisit later |
+| httpOnly Cookies | Medium | ✅ Done | 2026-07-24 |
+| CSRF Protection | Medium | 🔄 Open | General middleware (OAuth state done) |
+| Strict CORS | Medium | ✅ Done | `validate_production()` |
+| Backup Procedures | Low | 🔄 Open | - |
+| Secrets Rotation | Low | 🔄 Open | - |
+| Monitoring & Alerting | Low | ✅ Covered | Sentry + Ops Monitor (`../ops-monitor`) |
 
 ---
 
-**Last Updated:** 2024-12-24
-**Next Review:** 2025-01-24
+**Last Updated:** 2026-07-24
+**Next Review:** when backup / CSRF / secrets land, or if WAF is reconsidered
