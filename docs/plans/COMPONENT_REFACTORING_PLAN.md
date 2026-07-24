@@ -1,7 +1,7 @@
 # Plan Refaktoringu Komponentów Vue
 
-> **Data utworzenia:** 2025-11-26
-> **Status:** W trakcie
+> **Data utworzenia:** 2025-11-26  
+> **Status:** W trakcie (ostatnie commity: 2025-12-01; opcjonalne resztki: CategoryPieChart + wspólne komponenty)  
 > **Cel:** Podział dużych komponentów Vue na mniejsze, bardziej zarządzalne części
 
 ## Spis treści

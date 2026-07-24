@@ -1,5 +1,10 @@
 # Nowe przedmioty katalogu globalnego
 
+> **Status:** `in progress` (2026-07-24)  
+> **Co to jest:** praca **content/seed** — dopisanie realnych przedmiotów do globalnego katalogu i powiązanie ich z example sets.  
+> **To nie jest:** refaktor kodu funkcji „Global Catalogue” (ta jest już ✅ Completed w ROADMAP).  
+> Plan / indeks: [plans/README.md](./README.md)
+
 Chcę zrobić te tematy:  
 1. Wygenerować przykładowe zestawy (np. wersja budżetowa i medium),
 2. Uzupełnić globalny katalog o brakujące przedmioty (które będą w example sets),

@@ -1,3 +1,9 @@
+---
+status: cancelled
+cancelled: 2026-07-24
+reason: Decided not to migrate; staying on vue-i18n
+---
+
 # Plan migracji z vue-i18n na Intlayer
 
 ## Podsumowanie

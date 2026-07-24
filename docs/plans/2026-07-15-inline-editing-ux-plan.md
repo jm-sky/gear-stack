@@ -1,8 +1,8 @@
 # Plan: Inline editing UX (LighterPack + Excel)
 
-**Status:** `verification needed`  
+**Status:** `done`  
 **Created:** 2026-07-15  
-**Updated:** 2026-07-23 — auto-save, Tab/Enter/Esc, quick add, mobile polish (sticky name/actions, touch targets)  
+**Updated:** 2026-07-24 — marked done (Faza 0 always-on optional)  
 **Issue:** [#034](../issues/2026-07-15--034--inline-editing-ux-refinement.md)  
 **Related:**
 - [FEATURE-007](../features/FEATURE-007-inline-editing.md)
@@ -158,7 +158,7 @@ Implementacja: composable `useItemsTableCellNavigation.ts` + `data-cell-id` / re
 - [x] Zaktualizować FEATURE-007 (status, acceptance criteria)
 - [x] Zaktualizować LIGHTERPACK_IMPROVEMENTS_TASKS §5
 - [x] ROADMAP_OFFLINE — sekcja dopracowania → ✅ po weryfikacji
-- [x] Issue #034 → `verification needed`
+- [x] Issue #034 → `done`
 
 ---
 

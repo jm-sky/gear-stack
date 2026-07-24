@@ -1,8 +1,8 @@
 # UX: dopracowanie inline editing (LighterPack / Excel)
 
-**Status:** `verification needed`  
+**Status:** `done`  
 **Created:** 2026-07-15  
-**Updated:** 2026-07-23 — auto-save, Tab/Enter/Esc, quick add, mobile polish (sticky name/actions, touch targets) shipped  
+**Updated:** 2026-07-24 — marked done (shipped 2026-07-23; remaining Faza 0 always-on toggle optional/out of scope)  
 **Type:** improvement  
 **Severity:** medium  
 **Priority:** high  

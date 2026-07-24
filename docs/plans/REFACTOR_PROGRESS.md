@@ -8,12 +8,19 @@ Tracking implementation of [REVIEW_AND_REFACTOR_PLAN.md](REVIEW_AND_REFACTOR_PLA
 
 Focus on the **concrete, safe, verifiable backend items** from Phase 0, Phase 1,
 Phase 3 (DRY), and the Quick-wins checklist. The large multi-week efforts
-(refresh-token-to-cookie, god-file splits, V1→V2 completion, package extraction)
-are **out of scope** for this pass and remain tracked in the plan.
+(god-file splits, V1→V2 completion, package extraction) are **out of scope**
+for the previous pass and remain tracked in the plan.
+
+**Next (2026-07-24):**
+- 🔜 Refresh token → HttpOnly cookie (§3.1) — **do now** (frontend + backend)
+
+**Deferred for later:**
+- ⏭️ Split gear **god files** (§4.1) — `service.py` / `repository.py` / `router.py` too large; strangler split by subdomain
 
 ## Status legend
 - ✅ done
 - 🚧 in progress
+- 🔜 next (queued to start)
 - ⏭️ deferred (too large / out of scope this pass)
 
 ## Phase 0 — Guardrails
@@ -33,7 +40,7 @@ are **out of scope** for this pass and remain tracked in the plan.
 - ✅ Extract `is_expected_error()` shared by both Sentry paths (§3.6) —
       `app_factory.py`: `is_expected_auth_error` / `is_expected_image_error` /
       `is_expected_error`, used by both `before_send` and the global handler.
-- ⏭️ Move refresh token to HttpOnly cookie (§3.1) — deferred (frontend+backend, large)
+- 🔜 Move refresh token to HttpOnly cookie (§3.1) — **next** (frontend+backend)
 
 ## Phase 3 — DRY extractions
 - ✅ Extract shared JWT `_encode_token(claims, *, token_type, expires_delta)` (§5)

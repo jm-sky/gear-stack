@@ -49,7 +49,7 @@ Tracked work items (bugs, improvements) live here — not in GitHub Issues.
 | 031 | [2026-07-15--031--nav-redundancy-topbar-sidebar.md](2026-07-15--031--nav-redundancy-topbar-sidebar.md) | UX: redundancja top bar vs sidebar | `done` |
 | 032 | [2026-07-15--032--ux-review-phase-2.md](2026-07-15--032--ux-review-phase-2.md) | UX review faza 2 — obszary nieobjęte sesją 1 | `planned` |
 | 033 | [2026-07-15--033--dark-mode-color-palette-inconsistency.md](2026-07-15--033--dark-mode-color-palette-inconsistency.md) | UX: dark mode — slate tło vs neutralne tokeny | `done` |
-| 034 | [2026-07-15--034--inline-editing-ux-refinement.md](2026-07-15--034--inline-editing-ux-refinement.md) | UX: dopracowanie inline editing (LighterPack / Excel) | `verification needed` |
+| 034 | [2026-07-15--034--inline-editing-ux-refinement.md](2026-07-15--034--inline-editing-ux-refinement.md) | UX: dopracowanie inline editing (LighterPack / Excel) | `done` |
 | 035 | [2026-07-21--035--item-image-idor.md](2026-07-21--035--item-image-idor.md) | Security (High): item image endpoints — IDOR / brak ownership check | `verification needed` |
 | 036 | [2026-07-21--036--oauth-login-bypasses-session-machinery.md](2026-07-21--036--oauth-login-bypasses-session-machinery.md) | Security (Medium): OAuth login omija session tracking / token-version / 2FA | `done` |
 | 037 | [2026-07-21--037--oauth-callback-state-not-verified.md](2026-07-21--037--oauth-callback-state-not-verified.md) | Security (Medium): OAuth callback nie weryfikuje `state` (CSRF) po stronie backendu | `done` |

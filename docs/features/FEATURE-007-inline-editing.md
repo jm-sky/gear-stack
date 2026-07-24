@@ -1,8 +1,8 @@
 # FEATURE-007: Inline Editing (Edycja bezpośrednio na liście)
 
-**Status:** ✅ Completed (UX refinement 2026-07-23 — verification needed) | **Priority:** High | **Complexity:** Large
+**Status:** ✅ Completed | **Priority:** High | **Complexity:** Large
 **Category:** ✏️ Editing / 🎨 UI/UX
-**Related:** [#034](../issues/2026-07-15--034--inline-editing-ux-refinement.md), [plan](../plans/2026-07-15-inline-editing-ux-plan.md)
+**Related:** [#034](../issues/2026-07-15--034--inline-editing-ux-refinement.md) (`done`), [plan](../plans/2026-07-15-inline-editing-ux-plan.md)
 
 ---
 

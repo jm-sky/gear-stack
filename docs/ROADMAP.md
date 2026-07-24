@@ -26,7 +26,7 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - 📋 **Low:** PostgreSQL SSL/TLS (opcjonalne - Docker network zapewnia izolację)
    - 🔒 **High:** Implementacja WAF (Web Application Firewall)
    - 🔒 **High:** Procedury backup/recovery bazy danych
-   - 🔐 **Medium:** Migracja na httpOnly cookies (obecnie localStorage)
+   - 🔐 **Medium:** Migracja refresh tokena na httpOnly cookie (obecnie localStorage) — **następne** ([REFACTOR_PROGRESS](./plans/REFACTOR_PROGRESS.md) §3.1, [REVIEW_AND_REFACTOR_PLAN](./plans/REVIEW_AND_REFACTOR_PLAN.md))
    - 🔐 **Medium:** Implementacja CSRF protection (ogólne middleware; OAuth callback state — ✅ v2.52.0)
    - 🛡️ **Medium:** Strict CORS configuration
    - 📋 **Low:** Procedury rotacji sekretów (secrets rotation)
@@ -172,15 +172,6 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - 📋 **Natychmiastowe obliczenia wagi** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-natychmiastowe-obliczenia-wagi-inspiracja-lighterpack) - real-time podczas edycji
    - Status: 🔄 Planned | Priority: Medium | Complexity: Various
 
-7. **Migracja z vue-i18n na Intlayer**
-   - 📍 Plan: [intlayer-migration-plan.md](./plans/intlayer-migration-plan.md)
-   - Pełna migracja z vue-i18n na Intlayer (component-scoped translations)
-   - Korzyści: tree-shaking, lazy loading, lepszy TypeScript support, auto-generated types
-   - 9 faz implementacji: 221 komponentów, 2401 linii tłumaczeń, 7 modułów
-   - Szacowany czas: 3.5-5 tygodni (17-26 dni roboczych)
-   - Status: 🔄 Planned | Priority: Medium | Complexity: Large
-   - **Uwaga:** Wymaga refaktoryzacji wszystkich komponentów używających `useI18n()` → `useIntlayer()`
-
 ### Obniżony priorytet (trudne zadania)
 
 1. **Warianty kontenera**
@@ -214,7 +205,7 @@ Funkcjonalności działające z **localStorage**, bez potrzeby backendu (offline
 - ✅ Wykresy i analityka (kategorie, cena, priorytet)
 - ✅ Kolorowanie kontenerów
 - ✅ Rozpoznawanie kategorii i parametrów
-- ✅ Inline editing (częściowo zakończone - v2.25.0: edycja nazwy przedmiotu)
+- ✅ Inline editing / Quick Add — zakończone (v2.55.0; UX #034)
 - ✅ Custom brand management
 - ✅ Strona z listą wszystkich przedmiotów
 - ✅ Strona planowania zakupów
@@ -326,5 +317,5 @@ Uwaga: Większość funkcji jest w ROADMAP_OFFLINE.md (offline-first approach)
 
 ---
 
-**Ostatnia aktualizacja:** 2025-12-29
+**Ostatnia aktualizacja:** 2026-07-24
 
