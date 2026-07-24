@@ -22,7 +22,9 @@ Entry point from repo root: [DEPLOYMENT.md](../../DEPLOYMENT.md).
 | [CADDY_DEPLOYMENT.md](CADDY_DEPLOYMENT.md) | Caddy deployment |
 | [CADDY_ADVANCED_SECURITY.md](CADDY_ADVANCED_SECURITY.md) | Advanced Caddy security |
 | [SECURITY_FIX.md](SECURITY_FIX.md) | Docker/DB hardening (PostgreSQL, Redis) |
-| [production-manual.md](production-manual.md#database-backups-local-dumps) | Local DB dumps in `.backups/` |
+| [BACKUP_RECOVERY.md](BACKUP_RECOVERY.md) | Postgres (+ optional S3/media) backup & safe restore |
+| [SECRETS_ROTATION.md](SECRETS_ROTATION.md) | Rotate JWT, OAuth, DB, Redis, S3 secrets |
+| [production-manual.md](production-manual.md#database-backups-local-dumps) | VPS manual deploy + short dump pointer |
 
 ## Phase 6 (billing / Stripe checklist)
 

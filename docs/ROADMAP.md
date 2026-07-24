@@ -17,7 +17,7 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
 
 ### Wysoki priorytet
 
-1. **Bezpieczeństwo aplikacji (Security Hardening)** - 🚧 In Progress
+1. **Bezpieczeństwo aplikacji (Security Hardening)** - ✅ Done (WAF deferred)
    - 📍 Plan: [SECURITY_IMPROVEMENT_PLAN.md](./plans/SECURITY_IMPROVEMENT_PLAN.md)
    - 📍 Docker Security: [SECURITY_FIX.md](./deployment/SECURITY_FIX.md)
    - ✅ **Critical:** Implementacja security headers (CSP, HSTS, X-Frame-Options) - Completed (v2.47.0)
@@ -25,15 +25,14 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - ✅ **High:** Rate limiting (ostatni hop X-Forwarded-For), admin/users mutation guards, WebAuthn 2FA login verify — Completed (v2.52.0)
    - 📋 **Low:** PostgreSQL SSL/TLS (opcjonalne - Docker network zapewnia izolację)
    - ⏸️ **High:** WAF (Web Application Firewall) — deferred (koszt utrzymania custom Caddy/Coraza; opcjonalnie Cloudflare później)
-   - 🔒 **High:** Procedury backup/recovery bazy danych
+   - ✅ **High:** Procedury backup/recovery bazy danych — [BACKUP_RECOVERY.md](./deployment/BACKUP_RECOVERY.md) (2026-07-24); cron/off-site = ops
    - ✅ **Medium:** Migracja refresh tokena na httpOnly cookie — Completed (2026-07-24): access token w pamięci (nie localStorage), refresh token w httpOnly/secure/samesite=strict cookie, refresh token rotation + jti revocation przy logout ([REFACTOR_PROGRESS](./plans/REFACTOR_PROGRESS.md) §3.1, [REVIEW_AND_REFACTOR_PLAN](./plans/REVIEW_AND_REFACTOR_PLAN.md))
-   - 🔐 **Medium:** Implementacja CSRF protection (ogólne middleware; OAuth callback state — ✅ v2.52.0)
+   - ✅ **Medium:** CSRF protection (ogólne double-submit middleware + FE `X-CSRF-Token`; OAuth callback state — ✅ v2.52.0) — Completed (2026-07-24)
    - ✅ **Medium:** Strict CORS configuration — Completed (`validate_production()` rejects `*` in prod)
-   - 📋 **Low:** Procedury rotacji sekretów (secrets rotation)
+   - ✅ **Low:** Procedury rotacji sekretów — [SECRETS_ROTATION.md](./deployment/SECRETS_ROTATION.md) (2026-07-24)
    - ✅ **Low:** Security monitoring & alerting — Covered: **Sentry** (app) + **Ops Monitor** (`../ops-monitor`, uptime/infra)
-   - Status: 🚧 In Progress | Priority: Critical | Complexity: Large
-   - **Uwaga:** Otwarte w tej chwili: backup/recovery, CSRF middleware, secrets rotation
-
+   - Status: ✅ Done (WAF deferred) | Priority: Critical | Complexity: Large
+   - **Uwaga:** Z planu hardeningu otwarte tylko WAF (deferred). Ops follow-up: cron/off-site backup, quarterly drills.
 2. ✅ **UUID support dla update workflow** - Zakończone
    - 📍 Lokalizacja: [ROADMAP_ONLINE.md](./ROADMAP_ONLINE.md#uuid-support-dla-update-workflow)
    - Wykorzystanie istniejącego UUID (`id`) do aktualizacji istniejących kontenerów/przedmiotów podczas importu markdown

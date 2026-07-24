@@ -13,8 +13,8 @@ import {
   bugOutBagItems,
   edcItems,
   firePouchItems,
-  mediumEdcSurvivalKitItems,
   type IExampleSetItem,
+  mediumEdcSurvivalKitItems,
 } from './exampleSets'
 import type { TUUID } from '@/shared/types/base.type'
 
@@ -206,6 +206,22 @@ function getSampleSetDefinition(
   variant: SampleSetVariant
 ): ISampleSetContainer {
   switch (variant) {
+    case 'budgetEdc':
+      return {
+        name: translateWithFallback(
+          t,
+          'gear.sampleSet.variants.budgetEdc.name',
+          'Budget EDC Survival Kit'
+        ),
+        type: 'bag',
+        description: translateWithFallback(
+          t,
+          'gear.sampleSet.variants.budgetEdc.description',
+          'Affordable everyday carry survival essentials'
+        ),
+        items: translateItems(budgetEdcSurvivalKitItems, t),
+      }
+
     case 'bugOutBag': {
       const firePouchName = translateWithFallback(
         t,
@@ -276,22 +292,6 @@ function getSampleSetDefinition(
           'Minimalist fire starting kit'
         ),
         items: translateItems(firePouchItems, t),
-      }
-
-    case 'budgetEdc':
-      return {
-        name: translateWithFallback(
-          t,
-          'gear.sampleSet.variants.budgetEdc.name',
-          'Budget EDC Survival Kit'
-        ),
-        type: 'bag',
-        description: translateWithFallback(
-          t,
-          'gear.sampleSet.variants.budgetEdc.description',
-          'Affordable everyday carry survival essentials'
-        ),
-        items: translateItems(budgetEdcSurvivalKitItems, t),
       }
 
     case 'mediumEdc':

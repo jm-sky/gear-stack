@@ -64,15 +64,7 @@ class SafeHttpUrl:
 
 def _reject_ip(ip: ipaddress.IPv4Address | ipaddress.IPv6Address) -> None:
     """Raise if *ip* is not a safe public (global) destination."""
-    if (
-        ip.is_private
-        or ip.is_loopback
-        or ip.is_link_local
-        or ip.is_multicast
-        or ip.is_reserved
-        or ip.is_unspecified
-        or not ip.is_global
-    ):
+    if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_multicast or ip.is_reserved or ip.is_unspecified or not ip.is_global:
         raise UnsafeRemoteUrlError("Non-public IP addresses are not allowed")
 
 
@@ -89,13 +81,15 @@ def _resolve_public_ips(hostname: str) -> list[str]:
     for family, _, _, _, sockaddr in addr_info:
         if family not in (socket.AF_INET, socket.AF_INET6):
             continue
-        ip_str = sockaddr[0]
+        host = sockaddr[0]
+        if not isinstance(host, str):
+            continue
         try:
-            ip = ipaddress.ip_address(ip_str)
+            ip = ipaddress.ip_address(host)
         except ValueError:
             continue
         _reject_ip(ip)
-        public_ips.append(ip_str)
+        public_ips.append(host)
 
     if not public_ips:
         raise UnsafeRemoteUrlError("Could not resolve hostname to a public IP")

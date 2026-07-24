@@ -67,35 +67,18 @@ Log out and back in after group changes. Verify: `groups` should include `docker
 
 ## Database backups (local dumps)
 
-Canonical directory for ad-hoc PostgreSQL dumps on this VPS:
+**Canonical runbook:** [BACKUP_RECOVERY.md](BACKUP_RECOVERY.md) (safe restore checklist, cron, optional S3/media).
 
-| Purpose | Path |
-|---------|------|
-| Dump directory | `.backups/` (repo root) |
-| Git | Ignored via `.gitignore` — do not commit dumps |
-
-Naming convention: `gear-stack-postgres-YYYYMMDD-HHMMSS.sql.gz`.
-
-Do **not** use a top-level `backups/` directory (removed; older dumps lived there).
-
-### Create a dump
+Short reference — dump directory `.backups/` (repo root, gitignored). Naming: `gear-stack-postgres-YYYYMMDD-HHMMSS.sql.gz`.
 
 ```bash
-cd /home/madeyskij/projects/gear-stack
+cd /path/to/gear-stack   # directory name must NOT start with _
 mkdir -p .backups
 docker exec gear-stack-db pg_dump -U backend backend \
   | gzip > ".backups/gear-stack-postgres-$(date +%Y%m%d-%H%M%S).sql.gz"
 ```
 
-### Restore (destructive — replaces current DB)
-
-```bash
-gunzip -c .backups/gear-stack-postgres-YYYYMMDD-HHMMSS.sql.gz \
-  | docker exec -i gear-stack-db psql -U backend backend
-```
-
-This is a manual, on-host convention only. Automated off-site backup is still an open roadmap item (see [ROADMAP.md](../ROADMAP.md) — security / backup-recovery).
-
+Destructive restore into the live DB is documented in [BACKUP_RECOVERY.md](BACKUP_RECOVERY.md) § Production cutover — prefer restore-into-`backend_restore_test` first.
 ## Troubleshooting
 
 | Problem | Check |

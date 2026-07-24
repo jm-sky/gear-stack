@@ -1,14 +1,15 @@
 # Security Improvement Plan
 
 **Created:** 2024-12-24
-**Status:** 🚧 In Progress
+**Status:** ✅ Done (WAF deferred)
 **Ostatnia aktualizacja statusu:** 2026-07-24
 **Based On:** Production Security Audit (VPS + Caddy environment)
 
-> **Status audit (2026-07-24):** Done in code — CSP/HSTS headers, rate limiting, prod CORS forbid `*`, httpOnly refresh cookie + access in memory.  
+> **Status audit (2026-07-24):** Done in code — CSP/HSTS headers, rate limiting, prod CORS forbid `*`, httpOnly refresh cookie + access in memory, general CSRF double-submit middleware.  
+> **Docs (2026-07-24):** [BACKUP_RECOVERY.md](../deployment/BACKUP_RECOVERY.md), [SECRETS_ROTATION.md](../deployment/SECRETS_ROTATION.md).  
 > **Monitoring:** covered outside this plan — app errors via **Sentry** (BE+FE); uptime / infra / service health via **Ops Monitor** (`../ops-monitor`, see that repo’s docs / deployment). Do not rebuild a separate SIEM here.  
 > **WAF:** deferred (custom `xcaddy`+Coraza has high ops cost for Caddy upgrades; revisit only if traffic/risk justifies Cloudflare or custom build).  
-> **Still open in this plan:** backup/recovery, general CSRF middleware, secrets rotation. Checklisty w body mogą być nieodhaczone mimo wdrożenia.
+> **Still open in this plan:** none of the three leftovers (backup/CSRF/secrets) — WAF remains deferred only.
 
 ---
 
@@ -521,23 +522,22 @@ class CSRFMiddleware(BaseHTTPMiddleware):
 ```
 
 **Checklist:**
-- [ ] Implement cookie-based auth in backend
-- [ ] Add CSRF protection middleware
-- [ ] Update frontend to use cookies
-- [ ] Remove localStorage token storage
-- [ ] Add CSRF token to request headers
-- [ ] Test authentication flow
-- [ ] Test token refresh flow
-- [ ] Update documentation
-
+- [x] Implement cookie-based auth in backend (refresh HttpOnly; access in memory)
+- [x] Add CSRF protection middleware
+- [x] Update frontend to use cookies (refresh) + CSRF header
+- [x] Remove localStorage token storage (access in memory)
+- [x] Add CSRF token to request headers
+- [x] Test authentication flow (cookie router tests + CSRF unit tests)
+- [x] Test token refresh flow
+- [ ] Update documentation (ops notes optional)
 ---
 
 #### 6. Implement CSRF Protection
 
 **Impact:** Medium - Required if using cookie-based auth
 **Complexity:** Low-Medium
-**Location:** Backend middleware
-
+**Location:** Backend middleware + frontend interceptor
+**Status (2026-07-24):** ✅ Done — `CSRFMiddleware` + `GET /api/auth/csrf-token` + FE `X-CSRF-Token`
 **Implementation:** See section #5 above (included in httpOnly cookie migration)
 
 **Additional Endpoint:**
@@ -565,13 +565,12 @@ axios.defaults.headers.common['X-CSRF-Token'] = csrfToken
 ```
 
 **Checklist:**
-- [ ] Implement CSRF middleware
-- [ ] Add CSRF token endpoint
-- [ ] Configure token in frontend
-- [ ] Exempt safe methods (GET, HEAD, OPTIONS)
-- [ ] Test CSRF protection
-- [ ] Handle token expiration
-
+- [x] Implement CSRF middleware (`backend/app/core/csrf.py`)
+- [x] Add CSRF token endpoint (`GET /api/auth/csrf-token`)
+- [x] Configure token in frontend (`csrf.ts` + auth interceptor)
+- [x] Exempt safe methods (GET, HEAD, OPTIONS) + Stripe webhooks
+- [x] Test CSRF protection (`tests/test_csrf_middleware.py`)
+- [x] Handle token bootstrap (ensure on app boot / before mutating calls)
 ---
 
 #### 7. Enable Strict CORS
@@ -635,149 +634,32 @@ app.add_middleware(
 **Impact:** Medium (disaster recovery)
 **Complexity:** Low
 **Location:** docs/deployment/
+**Status (2026-07-24):** ✅ Done — [BACKUP_RECOVERY.md](../deployment/BACKUP_RECOVERY.md)
 
-**Create:** `docs/deployment/BACKUP_RECOVERY.md`
-
-**Content:**
-
-```markdown
-# Database Backup and Recovery Procedures
-
-## Automated Backups
-
-### Daily PostgreSQL Backups
-
-# Create backup script
-cat > /opt/gear-stack/backup.sh <<'EOF'
-#!/bin/bash
-BACKUP_DIR="/opt/gear-stack/backups"
-DATE=$(date +%Y%m%d_%H%M%S)
-RETENTION_DAYS=30
-
-# Create backup
-docker exec gear-stack-db pg_dump -U $POSTGRES_USER $POSTGRES_DB | gzip > "$BACKUP_DIR/backup_$DATE.sql.gz"
-
-# Remove old backups
-find "$BACKUP_DIR" -name "backup_*.sql.gz" -mtime +$RETENTION_DAYS -delete
-
-# Upload to S3 (optional)
-aws s3 cp "$BACKUP_DIR/backup_$DATE.sql.gz" s3://your-backup-bucket/
-EOF
-
-chmod +x /opt/gear-stack/backup.sh
-
-# Add to crontab (daily at 2 AM)
-echo "0 2 * * * /opt/gear-stack/backup.sh" | crontab -
-
-## Recovery Procedure
-
-### Restore from Backup
-
-# 1. Stop application
-docker-compose down
-
-# 2. Restore database
-gunzip -c /opt/gear-stack/backups/backup_YYYYMMDD_HHMMSS.sql.gz | \
-  docker exec -i gear-stack-db psql -U $POSTGRES_USER $POSTGRES_DB
-
-# 3. Restart application
-docker-compose up -d
-
-### Point-in-Time Recovery (if WAL archiving enabled)
-
-# Configure WAL archiving in PostgreSQL
-# See: https://www.postgresql.org/docs/current/continuous-archiving.html
-```
+**Create:** `docs/deployment/BACKUP_RECOVERY.md` (canonical; short pointer in `production-manual.md`)
 
 **Checklist:**
-- [ ] Create backup script
-- [ ] Test backup creation
-- [ ] Configure automated backups (cron)
-- [ ] Test restore procedure
-- [ ] Configure off-site backup (S3/Backblaze)
-- [ ] Document recovery SLA
-- [ ] Create runbook for disaster recovery
-- [ ] Test full recovery at least quarterly
-
+- [x] Document backup procedure (`.backups/`, `pg_dump`, naming)
+- [x] Document safe restore (throwaway `backend_restore_test` — no prod wipe)
+- [x] Document optional cron + off-site copy
+- [x] Document S3/media backup when `STORAGE_TYPE=s3`
+- [ ] Configure automated backups on the VPS (ops — cron from runbook)
+- [ ] Configure off-site backup bucket (ops)
+- [ ] Run quarterly restore drill and record date
 ---
 
 #### 9. Implement Secrets Rotation Procedures
 
 **Impact:** Medium (reduces exposure window)
 **Complexity:** Low
-**Location:** docs/plans/
-
-**Create:** `docs/plans/SECRETS_ROTATION.md`
-
-**Rotation Schedule:**
-
-| Secret | Rotation Frequency | Priority |
-|--------|-------------------|----------|
-| PostgreSQL password | Every 90 days | High |
-| Redis password | Every 90 days | High |
-| SECRET_KEY (JWT) | Every 180 days | Medium |
-| AI API keys | Every 180 days | Low |
-| S3 access keys | Every 90 days | High |
-
-**Procedure:**
-
-```markdown
-# Secrets Rotation Procedure
-
-## PostgreSQL Password Rotation
-
-1. Generate new password
-openssl rand -base64 32 > new_postgres_pass.txt
-
-2. Update database password
-docker exec -it gear-stack-db psql -U postgres
-ALTER USER backend WITH PASSWORD 'new_password_here';
-
-3. Update .env file
-nano /opt/gear-stack/backend/.env
-# Update POSTGRES_PASSWORD
-
-4. Restart application
-docker-compose restart app
-
-5. Verify connectivity
-docker-compose logs app | grep "database"
-
-6. Delete temporary password file
-shred -u new_postgres_pass.txt
-
-## JWT SECRET_KEY Rotation
-
-⚠️ **WARNING:** Rotating JWT secret will invalidate all existing tokens
-
-1. Generate new secret
-openssl rand -base64 64
-
-2. Update .env
-SECRET_KEY=new_secret_here
-
-3. Restart application
-docker-compose restart app
-
-4. Notify users to re-login
-# All users will be logged out
-
-## S3 Access Key Rotation
-
-1. Create new access key in S3 console
-2. Update .env with new keys
-3. Test upload functionality
-4. Deactivate old access key
-5. After 7 days, delete old access key
-```
+**Location:** docs/deployment/
+**Status (2026-07-24):** ✅ Done — [SECRETS_ROTATION.md](../deployment/SECRETS_ROTATION.md)
 
 **Checklist:**
-- [ ] Document rotation procedures for all secrets
-- [ ] Create calendar reminders for rotation schedule
-- [ ] Test rotation procedures in staging
-- [ ] Implement automated rotation (where possible)
-- [ ] Document rollback procedures
-
+- [x] Document rotation procedures for JWT, OAuth, DB, Redis, S3 (+ Stripe/reCAPTCHA notes)
+- [x] Document rollback and “no secrets in git/docs” rules
+- [ ] Create calendar reminders for rotation schedule (ops)
+- [ ] Test rotation procedures in non-prod when convenient (ops)
 ---
 
 #### 10. Security Monitoring & Alerting
@@ -817,18 +699,17 @@ docker-compose restart app
 - [ ] Test WAF rules
 
 ### Phase 3: Authentication Security (Week 3-4)
-- [ ] Implement httpOnly cookie auth
-- [ ] Add CSRF protection
-- [ ] Migrate frontend to cookie-based auth
-- [ ] Test authentication flows
+- [x] Implement httpOnly cookie auth (refresh)
+- [x] Add CSRF protection
+- [x] Access token in memory (not localStorage)
+- [x] Test authentication / refresh / CSRF flows
 
 ### Phase 4: Operational Security (Week 5-6)
-- [ ] Document backup/recovery procedures
-- [ ] Implement automated backups
-- [ ] Create secrets rotation procedures
-- [ ] Set up security monitoring
-- [ ] Test all procedures
-
+- [x] Document backup/recovery procedures
+- [ ] Implement automated backups on VPS (ops — see runbook)
+- [x] Create secrets rotation procedures
+- [x] Security monitoring covered (Sentry + Ops Monitor)
+- [ ] Quarterly restore / rotation drills (ops)
 ### Phase 5: Continuous Improvement (Ongoing)
 - [ ] Quarterly security audits
 - [ ] Regular dependency updates
@@ -905,13 +786,13 @@ curl -X POST https://yourdomain.com/api/containers \
 | PostgreSQL SSL | Low | ✅ Not Required | - |
 | WAF Implementation | High | ⏸️ Deferred | Custom Caddy/Coraza ops cost; revisit later |
 | httpOnly Cookies | Medium | ✅ Done | 2026-07-24 |
-| CSRF Protection | Medium | 🔄 Open | General middleware (OAuth state done) |
+| CSRF Protection | Medium | ✅ Done | 2026-07-24 (double-submit + FE header) |
 | Strict CORS | Medium | ✅ Done | `validate_production()` |
-| Backup Procedures | Low | 🔄 Open | - |
-| Secrets Rotation | Low | 🔄 Open | - |
+| Backup Procedures | Low | ✅ Done (docs) | [BACKUP_RECOVERY.md](../deployment/BACKUP_RECOVERY.md) — cron/off-site still ops |
+| Secrets Rotation | Low | ✅ Done (docs) | [SECRETS_ROTATION.md](../deployment/SECRETS_ROTATION.md) |
 | Monitoring & Alerting | Low | ✅ Covered | Sentry + Ops Monitor (`../ops-monitor`) |
 
 ---
 
 **Last Updated:** 2026-07-24
-**Next Review:** when backup / CSRF / secrets land, or if WAF is reconsidered
+**Next Review:** ops cron/off-site backup + quarterly drills; WAF only if reconsidered

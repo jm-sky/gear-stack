@@ -29,7 +29,7 @@ Implementation plans for features and larger changes.
 | [PLAN_PAGE_TITLES.md](PLAN_PAGE_TITLES.md) | Page titles plan | `done` |
 | [REFACTOR_PROGRESS.md](REFACTOR_PROGRESS.md) | Progress tracker for REVIEW_AND_REFACTOR_PLAN | `in progress` |
 | [REVIEW_AND_REFACTOR_PLAN.md](REVIEW_AND_REFACTOR_PLAN.md) | Code review and phased refactor plan (2026-07-03) | `in progress` |
-| [SECURITY_IMPROVEMENT_PLAN.md](SECURITY_IMPROVEMENT_PLAN.md) | Production security — open: backup, CSRF, secrets rotation (WAF deferred; monitoring = Sentry + Ops Monitor) | `in progress` |
+| [SECURITY_IMPROVEMENT_PLAN.md](SECURITY_IMPROVEMENT_PLAN.md) | Production security — leftovers closed (backup/CSRF/secrets docs+code); WAF deferred; monitoring = Sentry + Ops Monitor | `done` |
 | [security-dependabot-remediation.md](security-dependabot-remediation.md) | GitHub Dependabot alerts remediation (pnpm overrides) | `done` |
 | [stripe-pattern-verification.md](stripe-pattern-verification.md) | Stripe pattern verification | `done` |
 | [stripe-subscription-implementation.md](stripe-subscription-implementation.md) | Stripe subscription implementation | `done` |
