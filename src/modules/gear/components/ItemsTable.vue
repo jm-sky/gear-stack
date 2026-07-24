@@ -10,8 +10,8 @@ import Badge from '@/components/ui/badge/Badge.vue'
 import { Button } from '@/components/ui/button'
 import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
 import { ITEMS_TABLE_COLUMN_VISIBILITY_KEY } from '@/shared/config/config'
-import type { EditableCellField } from '../types/inlineEditing.types'
 import type { IGearItemV2, IUpdateGearItemV2Dto, TGearItemPriority } from '../types/gear.types.v2'
+import type { EditableCellField } from '../types/inlineEditing.types'
 import { useCategoryLabel } from '../composables/useCategoryLabel'
 import { formatItemPriceV2 } from '../composables/useFormattedItemPriceV2'
 import { useGearSettings } from '../composables/useGearSettings'
@@ -21,6 +21,7 @@ import { useItemsTableCellNavigation } from '../composables/useItemsTableCellNav
 import { useItemsTableEditMode } from '../composables/useItemsTableEditMode'
 import { GearRoutePath } from '../routes'
 import { useGearStoreV2 } from '../store/useGearStoreV2'
+import { GEAR_ITEM_CATEGORIES, type TGearItemCategory } from '../types/gear.types'
 import { calculateTotalWeightSyncV2 } from '../utils/containerCalculationsV2'
 import { isExpiringSoon } from '../utils/isExpiringSoon'
 import { createItemsColumns } from '../utils/itemsColumns'
@@ -28,6 +29,7 @@ import { createNavigationQuery } from '../utils/navigationParams'
 import { DEFAULT_COLOR, getColorHex } from '../utils/suggestedValues'
 import ItemPriorityBadge from './badges/ItemPriorityBadge.vue'
 import ItemsTableCategoryCell from './items-table/ItemsTableCategoryCell.vue'
+import ItemsTableCategoryQuickFilters from './items-table/ItemsTableCategoryQuickFilters.vue'
 import ItemsTableEditableCategoryCell from './items-table/ItemsTableEditableCategoryCell.vue'
 import ItemsTableEditableNameCell from './items-table/ItemsTableEditableNameCell.vue'
 import ItemsTableEditablePriceCell from './items-table/ItemsTableEditablePriceCell.vue'
@@ -306,6 +308,34 @@ function calculateTotalWeight(containerId: string): number {
 // Sorting state from DataTable
 const tableSorting = ref<SortingState>([])
 
+// Category quick filters (desktop): multi-select OR; empty = show all
+const selectedCategories = ref<TGearItemCategory[]>([])
+
+const availableCategories = computed<TGearItemCategory[]>(() => {
+  const present = new Set<TGearItemCategory>()
+  for (const item of props.items) {
+    if (item.category) {
+      present.add(item.category)
+    }
+  }
+
+  const orderedDefaults = GEAR_ITEM_CATEGORIES.filter(category => present.has(category))
+  const custom = [...present]
+    .filter(category => !GEAR_ITEM_CATEGORIES.includes(category))
+    .toSorted((a, b) => a.localeCompare(b))
+
+  return [...orderedDefaults, ...custom]
+})
+
+watch(
+  availableCategories,
+  (categories) => {
+    selectedCategories.value = selectedCategories.value.filter(category =>
+      categories.includes(category),
+    )
+  },
+)
+
 // Sort items by order (default sorting) or by table sorting
 // Using toSorted() instead of sort() to avoid mutating the array
 const sortedItems = computed<IGearItemV2[]>(() => {
@@ -348,6 +378,17 @@ const sortedItems = computed<IGearItemV2[]>(() => {
     const orderB = b.orderIndex ?? Number.MAX_SAFE_INTEGER
     return orderA - orderB
   })
+})
+
+const displayItems = computed<IGearItemV2[]>(() => {
+  if (selectedCategories.value.length === 0) {
+    return sortedItems.value
+  }
+
+  const selected = new Set(selectedCategories.value)
+  return sortedItems.value.filter(item =>
+    item.category != null && selected.has(item.category),
+  )
 })
 
 // Track previous sorting to detect changes
@@ -533,7 +574,7 @@ async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority)
     v-model:page="pageModel"
     v-model:page-size="pageSizeModel"
     :columns="columns"
-    :data="sortedItems"
+    :data="displayItems"
     :search-placeholder="t('gear.filters.search')"
     :global-filter-fn="globalFilterFn"
     :enable-sorting="true"
@@ -543,6 +584,13 @@ async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority)
     :aria-label="t('gear.items.table.title', 'Items table')"
     :class="{ 'items-table-edit-mode': editMode && !publicMode }"
   >
+    <template #toolbar-filters>
+      <ItemsTableCategoryQuickFilters
+        v-model="selectedCategories"
+        :categories="availableCategories"
+      />
+    </template>
+
     <template #name="{ row }">
       <ItemsTableEditableNameCell
         v-if="editMode && !publicMode"
