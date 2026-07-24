@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.55.0] - 2026-07-24
+
+### Added
+- **Gear (ItemsTable)**: category quick filters — multi-select chips nad tabelą przedmiotów (desktop `lg+`) do szybkiego filtrowania po kategorii
+- **Gear (Inline Editing)**: wiersz quick-add w trybie edycji (`ItemsTableQuickAddRow`) — dodawanie przedmiotu bez osobnego formularza
+- **Gear (Inline Editing)**: debounced auto-save wiersza (`useInlineRowSave`) ze wskaźnikiem pending/saving/saved/error
+- **Gear (Inline Editing)**: nawigacja klawiaturą Tab / Shift+Tab / Enter / Esc między komórkami (`useItemsTableCellNavigation`)
+
+### Changed
+- **Gear (Inline Editing)**: dopracowanie UX w stylu LighterPack — cichszy tryb edycji, sticky name/actions na mobile, wyrównanie wagi do prawej ([#034](docs/issues/2026-07-15--034--inline-editing-ux-refinement.md))
+
+---
+
 ## [2.54.0] - 2026-07-23
 
 ### Changed

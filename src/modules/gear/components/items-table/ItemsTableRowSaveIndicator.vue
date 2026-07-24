@@ -17,14 +17,14 @@ const emit = defineEmits<{
 
 const tooltip = computed<string>(() => {
   switch (props.status) {
-    case 'pending':
-      return t('gear.actions.pendingSave')
-    case 'saving':
-      return t('gear.actions.saving')
-    case 'saved':
-      return t('gear.actions.saved')
     case 'error':
       return t('gear.actions.saveError')
+    case 'pending':
+      return t('gear.actions.pendingSave')
+    case 'saved':
+      return t('gear.actions.saved')
+    case 'saving':
+      return t('gear.actions.saving')
     default:
       return ''
   }

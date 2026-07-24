@@ -166,7 +166,7 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - 📋 **Drag & Drop** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-drag--drop---rozszerzenie-inspiracja-lighterpack) - rozszerzenie kolejności przedmiotów + przenoszenie między kontenerami
    - 📋 **System pomocy / Tutorial** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-system-pomocy--tutorial-inspiracja-lighterpack) - ramki z pomocą, przycisk `?`, AI Chat
    - 📋 **Kontekstowe podpowiedzi** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-kontekstowe-podpowiedzi-inspiracja-lighterpack) - tooltips, empty states, podpowiedzi w formularzach
-   - 📋 **Quick Add / Inline Editing** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-quick-add--inline-editing---dopracowanie-inspiracja-lighterpack) - dopracowanie UX, quick add bez formularza
+   - ✅ **Quick Add / Inline Editing** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-quick-add--inline-editing---dopracowanie-inspiracja-lighterpack) - Completed (v2.55.0): auto-save, Tab/Enter/Esc, quick add, category quick filters
    - 📋 **Import CSV** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-import-csv-inspiracja-lighterpack) - nowa funkcjonalność (export już istnieje)
    - 📋 **Lepsze wizualizacje** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-lepsze-wizualizacje-inspiracja-lighterpack) - ulepszenie wykresów donut
    - 📋 **Natychmiastowe obliczenia wagi** - [ROADMAP_OFFLINE.md](./ROADMAP_OFFLINE.md#-natychmiastowe-obliczenia-wagi-inspiracja-lighterpack) - real-time podczas edycji

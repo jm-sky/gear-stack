@@ -857,7 +857,7 @@ Kombinacja opcji 1 i 2:
 - Wzorzec: LighterPack - wszystkie akcje dostępne bezpośrednio z wiersza tabeli
 
 ### ✅ Quick Add / Inline Editing - dopracowanie (inspiracja LighterPack)
-**Status:** ✅ Completed | **Priority:** Medium | **Complexity:** Medium | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../research/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
+**Status:** ✅ Completed (v2.55.0) | **Priority:** Medium | **Complexity:** Medium | **Source:** [LIGHTERPACK_IMPROVEMENTS_TASKS.md](../research/LIGHTERPACK_IMPROVEMENTS_TASKS.md)
 
 **Obecny stan:**
 - ✅ Inline editing: nazwa, ilość, waga, priorytet, status, cena, kategoria, notatki
@@ -866,6 +866,7 @@ Kombinacja opcji 1 i 2:
 - ✅ Quick add row w trybie edycji
 - ✅ Nawigacja Tab / Enter / Esc
 - ✅ Mobile: sticky name + actions, touch targets, horizontal scroll
+- ✅ Category quick filters (multi-select chips, desktop)
 
 **Plan / issue:** [#034](./issues/2026-07-15--034--inline-editing-ux-refinement.md), [plan](./plans/2026-07-15-inline-editing-ux-plan.md)
 
