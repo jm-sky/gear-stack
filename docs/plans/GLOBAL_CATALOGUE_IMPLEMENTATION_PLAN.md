@@ -1,5 +1,8 @@
 # Plan Implementacji: Globalny Katalog Przedmiotów
 
+**Status:** ✅ Completed (feature code; content seed v2: [global-catalogue-items-v2.md](./global-catalogue-items-v2.md))
+**Ostatnia aktualizacja statusu:** 2026-07-24
+
 ## 📋 Przegląd
 
 Plan implementacji globalnego katalogu przedmiotów zgodnie z wymaganiami z ROADMAP_ONLINE.md. Globalny katalog to baza szablonów przedmiotów, które użytkownicy mogą dodawać do swoich kontenerów.

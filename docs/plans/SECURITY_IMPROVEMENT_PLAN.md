@@ -2,7 +2,10 @@
 
 **Created:** 2024-12-24
 **Status:** 🚧 In Progress
+**Ostatnia aktualizacja statusu:** 2026-07-24
 **Based On:** Production Security Audit (VPS + Caddy environment)
+
+> **Status audit (2026-07-24):** Done in code — CSP/HSTS headers, rate limiting, prod CORS forbid `*`, httpOnly refresh cookie + access in memory. Still open — WAF, backup/recovery, general CSRF middleware, secrets rotation, security monitoring. Checklisty w body mogą być nieodhaczone mimo wdrożenia.
 
 ---
 

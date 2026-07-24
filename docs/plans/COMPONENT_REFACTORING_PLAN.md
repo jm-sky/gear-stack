@@ -1,7 +1,8 @@
 # Plan Refaktoringu Komponentów Vue
 
 > **Data utworzenia:** 2025-11-26  
-> **Status:** W trakcie (ostatnie commity: 2025-12-01; opcjonalne resztki: CategoryPieChart + wspólne komponenty)  
+> **Status:** W trakcie (ostatni audit statusu: 2026-07-24)  
+> **Uwaga (2026-07-24):** Część splitów istnieje, ale niektóre orkiestratory urosły ponownie (np. `ItemsTable.vue` ~848 LOC przez inline-edit). Plan linii „after” jest niedoszacowany względem aktualnego kodu.  
 > **Cel:** Podział dużych komponentów Vue na mniejsze, bardziej zarządzalne części
 
 ## Spis treści

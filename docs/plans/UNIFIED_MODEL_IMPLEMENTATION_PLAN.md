@@ -1,15 +1,17 @@
 # Plan Implementacji: Unifikacja Modeli Kontenerów i Przedmiotów
 
 **Data utworzenia:** 2025-12-03
-**Ostatnia aktualizacja:** 2025-12-18 (18:30)
-**Status:** ⚡ W trakcie implementacji (~90% gotowe)
+**Ostatnia aktualizacja:** 2026-07-24
+**Status:** ✅ Completed (frontend V2-only + backend V1 tables/models dropped 2026-07-23)
 **Priorytet:** Wysoki
 **Złożoność:** Duża
-**Szacowany czas:** 18-28 dni (~4-6 tygodni)
+**Szacowany czas:** 18-28 dni (~4-6 tygodni) — zrealizowane
+
+> **Status audit (2026-07-24):** Sekcje poniżej („~90%”, „Cleanup V1”, „Nowe funkcje 0%”) są **historyczne**. Źródło prawdy: [2026-07-23-gear-backend-v1-v2-unification.md](./2026-07-23-gear-backend-v1-v2-unification.md), [archive/v2-unified-model/](../archive/v2-unified-model/), ROADMAP § Unifikacja. Follow-up: create-time account limits w `service_v2` — [UNIFIED_MODEL_V2_MISSING_FEATURES.md](./UNIFIED_MODEL_V2_MISSING_FEATURES.md).
 
 ---
 
-## 📊 AKTUALNY STAN IMPLEMENTACJI (2025-12-25)
+## 📊 AKTUALNY STAN IMPLEMENTACJI (2025-12-25) — archiwalne
 
 ```
 BACKEND V2:  ████████████████████ 100% ✅

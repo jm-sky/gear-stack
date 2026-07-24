@@ -20,7 +20,7 @@ Gear Stack is a Vue 3 application for managing survival gear and bug-out bag equ
 
 Statuses: `todo`, `planned`, `in progress`, `done`, `verification needed`. New issues: `YYYY-MM-DD--NNN--slug.md`; reviews/research/plans: `YYYY-MM-DD-slug.md`.
 
-V1/V2 gotcha: `/gear` renders from TanStack Query (V2 cache); mutations via V1 or `useGearV2()` without invalidation need `gearQueryKeys.all` invalidation or the UI stays stale.
+V2 cache gotcha: `/gear` renders from TanStack Query (`gearQueryKeys`); mutations via `useGearV2()` / `useGearMutations` without invalidating `gearQueryKeys.all` leave the UI stale.
 
 ## Security / Dependencies
 
@@ -30,9 +30,9 @@ Open GitHub Dependabot alerts and their remediation plan (pnpm `overrides` for t
 
 A full code review (best practices, security, SOLID/DRY) and a phased refactor plan live in **[docs/plans/REVIEW_AND_REFACTOR_PLAN.md](docs/plans/REVIEW_AND_REFACTOR_PLAN.md)**. It also documents the **shared core** copied between this repo and **ops-monitor** (`backend/app/core` + `app/common` + `cli`, and frontend `src/shared` + `src/components/ui`) which has drifted — any change to a shared-core file should be mirrored to ops-monitor. See also **[ops-monitor `docs/SHARED_CORE.md`](../ops-monitor/docs/SHARED_CORE.md)**.
 
-## V1 → V2 migration
+## V1 → V2 migration (completed)
 
-The gear module still has a legacy "V1" data layer (`useGear`, `useGearStore`, `gearContainerService`, ...) running in parallel with the target "V2" unified model (`useGearV2`, `useGearStoreV2`, `useGearQueries`, `gearQueryKeys`). The goal is **V2 everywhere**; legacy is not maintained. New code should use V2. The full inventory, V1→V2 mapping, feature gaps, and recommended migration order live in **[docs/archive/v2-unified-model/migration-v1-to-v2.md](docs/archive/v2-unified-model/migration-v1-to-v2.md)**.
+Gear data is **V2-only**: frontend uses `useGearV2` / `useGearStoreV2` / `useGearQueries` / `gearQueryKeys`; backend stores containers and items in `gear_items_v2` (`GearItemDBV2`). Legacy V1 services, stores, ORM models, and tables were removed (frontend archive June 2026; backend drop July 2026 — [docs/plans/2026-07-23-gear-backend-v1-v2-unification.md](docs/plans/2026-07-23-gear-backend-v1-v2-unification.md)). Historical inventory: **[docs/archive/v2-unified-model/migration-v1-to-v2.md](docs/archive/v2-unified-model/migration-v1-to-v2.md)**. New gear code must use V2 APIs and invalidate `gearQueryKeys` after mutations.
 
 ## Commands
 

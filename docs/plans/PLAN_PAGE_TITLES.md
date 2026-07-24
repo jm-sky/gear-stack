@@ -1,5 +1,8 @@
 # Plan implementacji Page Titles
 
+**Status:** ✅ Completed (`usePageTitle` + route `meta.title` + router `afterEach`)
+**Ostatnia aktualizacja statusu:** 2026-07-24
+
 ## Format tytułu
 Format: `{Page Title} | {App Name}`
 

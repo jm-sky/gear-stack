@@ -13,7 +13,8 @@ Dokumentacja ukończonej migracji warstwy danych gear z V1 (osobne kontenery/prz
 | [V2_CODE_REVIEW_FINDINGS.md](V2_CODE_REVIEW_FINDINGS.md) | Wyniki code review migracji V2 | `done` |
 | [V2_COMPREHENSIVE_REVIEW_PROMPT.md](V2_COMPREHENSIVE_REVIEW_PROMPT.md) | Prompt do kompleksowego review V2 | `done` |
 
-## Related (aktywne)
+## Related (archiwalne / completed)
 
-- [plans/UNIFIED_MODEL_IMPLEMENTATION_PLAN.md](../../plans/UNIFIED_MODEL_IMPLEMENTATION_PLAN.md) — plan implementacji (w toku)
-- [plans/UNIFIED_MODEL_V2_MISSING_FEATURES.md](../../plans/UNIFIED_MODEL_V2_MISSING_FEATURES.md) — luki feature V2
+- [plans/UNIFIED_MODEL_IMPLEMENTATION_PLAN.md](../../plans/UNIFIED_MODEL_IMPLEMENTATION_PLAN.md) — plan implementacji (`done`; treść częściowo historyczna)
+- [plans/UNIFIED_MODEL_V2_MISSING_FEATURES.md](../../plans/UNIFIED_MODEL_V2_MISSING_FEATURES.md) — integracja feature’ów V2 (`done`; follow-up: create-time account limits)
+- [plans/2026-07-23-gear-backend-v1-v2-unification.md](../../plans/2026-07-23-gear-backend-v1-v2-unification.md) — drop tabel V1 / repoint FKs (`done`)

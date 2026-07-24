@@ -1,7 +1,9 @@
 # Zabezpieczenie linków w markdown (rozszerzona wersja)
 
-> **⚠️ UWAGA: Plan do weryfikacji**  
-> Ten plan wymaga przeglądu przed implementacją. Proszę zweryfikować wszystkie założenia i szczegóły techniczne.
+**Status:** 🚧 In Progress (Phase 1: protokoły / limity / `rel` / sanityzacja zapisu — w kodzie; Phase 2: homograph, dialog potwierdzenia, zewnętrzne obrazy — open)
+**Ostatnia aktualizacja statusu:** 2026-07-24
+
+> **Uwaga:** Checklisty poniżej mogą być nieodhaczone mimo istniejącego kodu (`linkSecurity.ts`, `markdownSecurity.ts`, `markdownPostProcess.ts`, backend validators).
 
 ## Cel
 Implementacja kompleksowych mechanizmów bezpieczeństwa dla markdown: walidacja linków, ochrona przed atakami homograph, limity długości, blokowanie zewnętrznych obrazów oraz sanityzacja Unicode.

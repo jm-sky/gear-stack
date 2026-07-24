@@ -4,7 +4,7 @@
 AI_METADATA:
 - Type: Roadmap index/overview
 - Purpose: Entry point for understanding project roadmap structure
-- Last Updated: 2025-01-21
+- Last Updated: 2026-07-24
 -->
 
 Ten dokument jest punktem wejścia do roadmap projektu Gear Stack. Projekt ma **2 osobne roadmapy** ze względu na architekturę aplikacji (offline-first z opcjonalnym backendem).
@@ -28,7 +28,7 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - 🔒 **High:** Procedury backup/recovery bazy danych
    - ✅ **Medium:** Migracja refresh tokena na httpOnly cookie — Completed (2026-07-24): access token w pamięci (nie localStorage), refresh token w httpOnly/secure/samesite=strict cookie, refresh token rotation + jti revocation przy logout ([REFACTOR_PROGRESS](./plans/REFACTOR_PROGRESS.md) §3.1, [REVIEW_AND_REFACTOR_PLAN](./plans/REVIEW_AND_REFACTOR_PLAN.md))
    - 🔐 **Medium:** Implementacja CSRF protection (ogólne middleware; OAuth callback state — ✅ v2.52.0)
-   - 🛡️ **Medium:** Strict CORS configuration
+   - ✅ **Medium:** Strict CORS configuration — Completed (`validate_production()` rejects `*` in prod)
    - 📋 **Low:** Procedury rotacji sekretów (secrets rotation)
    - 📊 **Low:** Security monitoring & alerting
    - Status: 🚧 In Progress | Priority: Critical | Complexity: Large
@@ -94,14 +94,15 @@ Lista zadań, którymi chcę się zająć w najbliższym czasie:
    - ✅ Composable `useHorizontalScroll` do śledzenia stanu scrolla
    - Status: ✅ Completed | Priority: Medium | Complexity: Small
 
-9. **Unifikacja modeli kontenerów i przedmiotów**
+9. ✅ **Unifikacja modeli kontenerów i przedmiotów** - Zakończone
    - 📍 Analiza: [UNIFIED_MODEL_ANALYSIS.md](./research/UNIFIED_MODEL_ANALYSIS.md)
-   - Połączenie modeli `IGearContainer` i `IGearItem` w jeden model `IGearEntity` z flagą `isContainer`
-   - Uproszczenie zagnieżdżania (plecak → kubek → pudełko → zapałki) - jeden mechanizm `parentId`
-   - Wspólne obrazki dla kontenerów i przedmiotów (jedna tabela `entity_images`)
-   - Prostsze zapytania SQL (jedna tabela zamiast dwóch)
-   - Status: 🔄 Analysis Complete | Priority: High | Complexity: Large
-   - **Uwaga:** Wymaga migracji danych i refaktoryzacji ~80-150 plików (2-4 tygodnie pracy)
+   - 📍 Archiwum migracji FE: [archive/v2-unified-model/](./archive/v2-unified-model/)
+   - 📍 Backend V1 drop: [2026-07-23-gear-backend-v1-v2-unification.md](./plans/2026-07-23-gear-backend-v1-v2-unification.md)
+   - ✅ Jeden model V2 (`gear_items_v2` / `useGearV2`) — kontenery i przedmioty z `isContainer` + `parentId`
+   - ✅ Frontend: warstwa V1 usunięta; strony i mutacje na V2 + TanStack Query
+   - ✅ Backend: tabele/modele V1 usunięte (migracja `059`); ratings/reports/promotions/stats/admin na `gear_items_v2`
+   - 📋 Follow-up: egzekwowanie account limits przy `create_item` w `service_v2` ([UNIFIED_MODEL_V2_MISSING_FEATURES](./plans/UNIFIED_MODEL_V2_MISSING_FEATURES.md))
+   - Status: ✅ Completed | Priority: High | Complexity: Large
 
 10. **Pełna analiza backend i frontend + refaktoryzacja**
    - Pełna analiza architektury backend i frontend

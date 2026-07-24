@@ -1,10 +1,12 @@
 # Unified Model V2 - Missing Features Integration
 
 **Date Created:** 2025-12-25
-**Last Updated:** 2025-12-25 (Implementation Complete)
-**Status:** ✅ Completed
+**Last Updated:** 2026-07-24 (status audit)
+**Status:** ✅ Completed (reporting / promotion / shelf life / limits UI + GET limits)
 **Priority:** HIGH
 **Complexity:** Medium
+
+> **Status audit (2026-07-24):** Tabele „❌ Missing” poniżej są **przestarzałe** — pola i UI są w V2. Jedyna znana luka: **egzekwowanie account limits przy `create_item`** w `service_v2` (GET `/gear/me/limits` + `AccountLimitsCard` istnieją). Promote żyje na `/gear/.../promote` (nie `router_v2`) — intentional po unifikacji backendu.
 
 ---
 
