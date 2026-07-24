@@ -18,6 +18,9 @@ export function createItemsColumns(
       header: () => t('gear.item.name'),
       enableSorting: true,
       enableHiding: true,
+      meta: {
+        pinned: 'left',
+      },
     },
     {
       id: 'category',

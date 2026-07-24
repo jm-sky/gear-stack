@@ -111,7 +111,7 @@ watch(
 
 <template>
   <div
-    class="group flex min-w-48 items-center gap-1"
+    class="group flex min-w-32 sm:min-w-48 items-center gap-1"
     data-editable-cell
     data-field="name"
     :data-item-id="item.id"
@@ -130,7 +130,7 @@ watch(
         v-tooltip="isExpiringSoon ? t('gear.item.expiration.expiringSoon') : ''"
         :name="`item-name-${item.id}`"
         :aria-label="t('gear.item.name')"
-        class="h-[2.1rem]! rounded-l-none border-transparent bg-transparent py-1! pl-2 shadow-none focus-visible:border-input focus-visible:bg-background focus-visible:ring-1"
+        class="h-10 sm:h-[2.1rem]! rounded-l-none border-transparent bg-transparent py-1! pl-2 shadow-none focus-visible:border-input focus-visible:bg-background focus-visible:ring-1"
         :class="[textClass, isExpiringSoon ? 'border border-yellow-600' : '']"
         :disabled="isSaving"
         @focus="isFocused = true"

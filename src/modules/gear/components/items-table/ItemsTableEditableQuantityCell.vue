@@ -17,9 +17,14 @@ const emit = defineEmits<{
   navigate: [direction: 'next' | 'prev' | 'down']
 }>()
 
-const editedQuantity = ref((props.item.quantity ?? DEFAULT_ITEM_QUANTITY).toString())
+const editedQuantity = ref<string>((props.item.quantity ?? DEFAULT_ITEM_QUANTITY).toString())
 const isFocused = ref(false)
 const suppressBlurSave = ref(false)
+
+/** type="number" + v-model can emit numbers — keep a string for parseInt. */
+function setEditedQuantity(value: string | number | null | undefined) {
+  editedQuantity.value = value == null || value === '' ? '' : String(value)
+}
 
 const hasLocalChanges = computed<boolean>(() => {
   const quantityValue = parseInt(editedQuantity.value, 10)
@@ -30,7 +35,7 @@ function emitChange(immediate = false) {
   const quantityValue = parseInt(editedQuantity.value, 10)
 
   if (isNaN(quantityValue) || quantityValue < 1) {
-    editedQuantity.value = (props.item.quantity ?? DEFAULT_ITEM_QUANTITY).toString()
+    setEditedQuantity(props.item.quantity ?? DEFAULT_ITEM_QUANTITY)
     emit('change', {})
     return
   }
@@ -74,7 +79,7 @@ function handleKeydown(event: KeyboardEvent) {
   if (event.key === 'Escape') {
     event.preventDefault()
     suppressBlurSave.value = true
-    editedQuantity.value = (props.item.quantity ?? DEFAULT_ITEM_QUANTITY).toString()
+    setEditedQuantity(props.item.quantity ?? DEFAULT_ITEM_QUANTITY)
     emit('change', {})
     ;(document.activeElement as HTMLElement | null)?.blur()
     queueMicrotask(() => {
@@ -84,7 +89,7 @@ function handleKeydown(event: KeyboardEvent) {
 }
 
 function handleReset() {
-  editedQuantity.value = (props.item.quantity ?? DEFAULT_ITEM_QUANTITY).toString()
+  setEditedQuantity(props.item.quantity ?? DEFAULT_ITEM_QUANTITY)
   emit('change', {})
 }
 
@@ -92,7 +97,7 @@ watch(
   () => props.item.quantity,
   (newQuantity) => {
     if (!isFocused.value) {
-      editedQuantity.value = (newQuantity ?? DEFAULT_ITEM_QUANTITY).toString()
+      setEditedQuantity(newQuantity ?? DEFAULT_ITEM_QUANTITY)
     }
   },
 )
@@ -100,20 +105,22 @@ watch(
 
 <template>
   <div
-    class="relative w-20"
+    class="relative ml-auto w-16 sm:w-20"
     data-editable-cell
     data-field="quantity"
     :data-item-id="item.id"
   >
     <Input
       :id="`item-quantity-${item.id}`"
-      v-model="editedQuantity"
+      :model-value="editedQuantity"
       :name="`item-quantity-${item.id}`"
       type="number"
       min="1"
       step="1"
+      inputmode="numeric"
       :aria-label="t('gear.item.quantity')"
-      class="h-[2.1rem]! border-transparent bg-transparent py-1! shadow-none focus-visible:border-input focus-visible:bg-background focus-visible:ring-1"
+      class="h-10 sm:h-[2.1rem]! text-end border-transparent bg-transparent py-1! shadow-none focus-visible:border-input focus-visible:bg-background focus-visible:ring-1"
+      @update:model-value="setEditedQuantity"
       @focus="isFocused = true"
       @blur="handleBlur"
       @keydown="handleKeydown"

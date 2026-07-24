@@ -61,7 +61,7 @@ watch(
     >
       <SelectTrigger
         :aria-label="t('gear.item.priority')"
-        class="h-[2.1rem]! min-w-[120px] border-transparent bg-transparent shadow-none focus:ring-1"
+        class="h-10 sm:h-[2.1rem]! min-w-[110px] sm:min-w-[120px] border-transparent bg-transparent shadow-none focus:ring-1"
         @keydown.tab="handleTab"
       >
         <SelectValue />

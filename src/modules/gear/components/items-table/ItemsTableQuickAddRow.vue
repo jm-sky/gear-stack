@@ -119,7 +119,7 @@ function setInputRef(el: unknown) {
           :disabled="isCreating"
           :placeholder="t('gear.itemsTable.quickAddPlaceholder')"
           :aria-label="t('gear.itemsTable.quickAddPlaceholder')"
-          class="h-[2.1rem]! border-transparent bg-transparent py-1! shadow-none placeholder:text-muted-foreground/70 focus-visible:border-input focus-visible:bg-background focus-visible:ring-1"
+          class="h-10 sm:h-[2.1rem]! border-transparent bg-transparent py-1! shadow-none placeholder:text-muted-foreground/70 focus-visible:border-input focus-visible:bg-background focus-visible:ring-1"
           data-editable-cell
           data-field="name"
           data-item-id="__quick-add__"

@@ -2,7 +2,7 @@
 
 **Status:** `verification needed`  
 **Created:** 2026-07-15  
-**Updated:** 2026-07-23 — auto-save, Tab/Enter/Esc, visual polish shipped; quick add still open  
+**Updated:** 2026-07-23 — auto-save, Tab/Enter/Esc, quick add, mobile polish (sticky name/actions, touch targets) shipped  
 **Type:** improvement  
 **Severity:** medium  
 **Priority:** high  
@@ -19,15 +19,15 @@
 
 ## Kontekst
 
-Fundament inline editing jest zaimplementowany (toggle, edytowalne komórki, dirty state, zapis blur/Enter). UX nadal odbiega od LighterPack i od oczekiwań „excelowych” — wymaga dopracowania, nie budowy od zera.
+Fundament inline editing był zaimplementowany wcześniej; ten issue dotyczy dopracowania UX (LighterPack + Excel).
 
-**Stan w kodzie (2026-07-15):**
-- Toggle „Enable Inline Editing” w toolbarze kontenera
-- Pola inline: nazwa, ilość, waga, priorytet, status, cena, kategoria, notatki
-- W trybie edycji inputy zawsze widoczne; zapis per wiersz (✓) + blur/Enter
-- Brak: debounced auto-save, quick add row, nawigacja Tab/Enter/Esc między komórkami
-
-**Rozjazd dokumentacji:** ROADMAP_OFFLINE oznacza podstawowy inline editing jako ✅ Completed; FEATURE-007 nadal 🔄 Planned; osobne zadanie „dopracowanie UX” w LIGHTERPACK_IMPROVEMENTS_TASKS — **to issue dotyczy tego drugiego etapu**.
+**Stan w kodzie (2026-07-23):**
+- ✅ Toggle „Enable Inline Editing”
+- ✅ Pola inline + debounced auto-save (`useInlineRowSave`) + wskaźnik pending/saving/saved/error
+- ✅ Nawigacja Tab / Shift+Tab / Enter (w dół) / Esc
+- ✅ Quick add row (`ItemsTableQuickAddRow`)
+- ✅ Domyślne kolumny: name, category, qty, weight (+ actions); priority/status/price ukryte
+- ✅ Mobile: kompaktowy toggle, ukryte chevrons reorder, touch targets `h-10`, sticky name + actions, horizontal scroll
 
 ---
 
@@ -35,54 +35,32 @@ Fundament inline editing jest zaimplementowany (toggle, edytowalne komórki, dir
 
 | # | Temat | Decyzja | Uwagi |
 |---|--------|---------|-------|
-| 1 | Tryb edycji (toggle vs zawsze ON) | **TBD — trzeba zobaczyć** | Wymaga prototypu / side-by-side; decyzja po ocenie w UI |
-| 2 | Strategia zapisu | **Prawdopodobnie D** | Auto-save (debounce) + stany wizualne: zapisuję / zapisano / błąd |
-| 3 | Quick add row | **Prawdopodobnie tak** | Pusty wiersz na końcu tabeli; do potwierdzenia po prototypie |
-| 4 | Klawiatura | **Tab, Enter, Esc** | Must-have; bez paste / strzałek na start |
-| 5 | Problemy wizualne | **Prawdopodobnie wszystkie razem** | Hałas inputów, niespójne obramowania, wąskie kolumny, Save+Undo per wiersz, brak focus na komórce |
-| 6 | Mobile | **Jak LighterPack** | Prosta siatka / scroll; bez osobnego widoku kart (na razie) |
-| 7 | Zakres pól w siatce | **Jak LighterPack** | Rdzeń: nazwa, qty, waga, kategoria; reszta poza główną siatką lub w menu wiersza |
-
-**Inspiracje:** LighterPack (prostota, auto-save, quick add) + Excel (Tab/Enter/Esc, siatka).
-
----
-
-## Oczekiwane zachowanie (docelowe)
-
-1. Edycja przedmiotów w tabeli jest **płynna i przewidywalna** — bez konieczności ręcznego „Save” per wiersz (przy strategii D).
-2. **Tab** — następna edytowalna komórka; **Enter** — zatwierdzenie + ruch w dół (lub następna komórka — do ustalenia w planie); **Esc** — anulowanie bieżącej komórki.
-3. **Quick add row** — dodanie przedmiotu bez formularza `/items/new` (jeśli potwierdzone po prototypie).
-4. **Feedback zapisu** — widoczny stan wiersza/komórki (pending / saving / saved / error + retry).
-5. **Wygląd** — spójna siatka komórek, czytelny focus, mniej wizualnego szumu niż obecny tryb edycji.
-6. **Mobile** — używalna tabela z horizontal scroll (wzór LighterPack), spójna z #017.
-
----
-
-## Otwarte pytania (blokery przed pełną implementacją)
-
-- [ ] **Toggle vs always-on** — po prototypie A/B (lub demo w dev)
-- [ ] **Quick add row** — ostateczne tak/nie po zobaczeniu flow
-- [ ] **Enter** — zapis + w dół (Excel) vs zapis + blur (LighterPack)?
-- [ ] Czy usunąć przycisk ✓ per wiersz po wdrożeniu auto-save?
+| 1 | Tryb edycji (toggle vs zawsze ON) | **Na razie toggle** | Always-on odłożone (Faza 0 prototyp nieblokujący) |
+| 2 | Strategia zapisu | **D** | Debounce ~450ms + stany wizualne |
+| 3 | Quick add row | **Tak** | Wdrożone |
+| 4 | Klawiatura | **Tab, Enter, Esc** | Enter = zapis + wiersz poniżej (Excel) |
+| 5 | Problemy wizualne | **Razem** | Transparent inputs, focus-within, tint wiersza |
+| 6 | Mobile | **Jak LighterPack** | Horizontal scroll + sticky kolumny |
+| 7 | Zakres pól w siatce | **Jak LighterPack** | Rdzeń 4 kolumny |
 
 ---
 
 ## Zakres implementacji
 
-- [ ] Plan: [2026-07-15-inline-editing-ux-plan.md](../plans/2026-07-15-inline-editing-ux-plan.md)
-- [ ] Faza 0: prototyp / demo do decyzji (toggle, quick add, wizual)
-- [ ] Faza 1: auto-save + stany zapisu (strategia D)
-- [ ] Faza 2: nawigacja Tab / Enter / Esc
-- [ ] Faza 3: quick add row (jeśli potwierdzone)
-- [ ] Faza 4: polish wizualny siatki + mobile
-- [ ] Aktualizacja FEATURE-007 i LIGHTERPACK_IMPROVEMENTS_TASKS po wdrożeniu
+- [x] Plan: [2026-07-15-inline-editing-ux-plan.md](../plans/2026-07-15-inline-editing-ux-plan.md)
+- [ ] Faza 0: prototyp / demo do decyzji (toggle always-on) — opcjonalne, nieblokujące
+- [x] Faza 1: auto-save + stany zapisu (strategia D)
+- [x] Faza 2: nawigacja Tab / Enter / Esc
+- [x] Faza 3: quick add row
+- [x] Faza 4: polish wizualny siatki + mobile
+- [x] Aktualizacja FEATURE-007 i LIGHTERPACK_IMPROVEMENTS_TASKS
 
 ---
 
 ## Weryfikacja
 
-1. Desktop — edycja 5+ pól w wielu wierszach bez klikania „Save”; Tab/Enter/Esc działają intuicyjnie.
-2. Quick add (jeśli wdrożone) — nowy przedmiot z pustego wiersza bez nawigacji do formularza.
-3. Stany zapisu — widać saving/saved/error; błąd sieci umożliwia retry.
-4. Mobile 375px — tabela używalna (scroll); br regresji względem #017.
-5. Porównanie z LighterPack — subiektywna ocena „nie gorzej niż LP” na core fields.
+1. Desktop — edycja wielu pól bez „Save”; Tab/Enter/Esc działają.
+2. Quick add — nowy przedmiot z pustego wiersza.
+3. Stany zapisu — pending/saving/saved/error + retry.
+4. Mobile 375px — full-width main; tabela scroll + sticky name/actions; brak pustego panelu (#017).
+5. Porównanie z LighterPack — core fields używalne.

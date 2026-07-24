@@ -2,7 +2,7 @@
 
 **Status:** `verification needed`  
 **Created:** 2026-07-15  
-**Updated:** 2026-07-23 — implemented auto-save + keyboard nav + visual polish  
+**Updated:** 2026-07-23 — auto-save, Tab/Enter/Esc, quick add, mobile polish (sticky name/actions, touch targets)  
 **Issue:** [#034](../issues/2026-07-15--034--inline-editing-ux-refinement.md)  
 **Related:**
 - [FEATURE-007](../features/FEATURE-007-inline-editing.md)
@@ -150,15 +150,15 @@ Implementacja: composable `useItemsTableCellNavigation.ts` + `data-cell-id` / re
 
 - [x] Ujednolicenie stylów komórek
 - [x] Focus / dirty row styling
-- [ ] Regresja mobile (#017)
+- [x] Regresja mobile (#017) — full-width main, touch targets h-10, sticky name+actions, horizontal scroll
 - [x] Ewentualnie: domyślna widoczność kolumn (core 4 — priority/status ukryte)
 
 ### Faza 5 — Dokumentacja
 
-- [ ] Zaktualizować FEATURE-007 (status, acceptance criteria)
-- [ ] Zaktualizować LIGHTERPACK_IMPROVEMENTS_TASKS §5
-- [ ] ROADMAP_OFFLINE — sekcja dopracowania → ✅ po weryfikacji
-- [ ] Issue #034 → `verification needed` → `done`
+- [x] Zaktualizować FEATURE-007 (status, acceptance criteria)
+- [x] Zaktualizować LIGHTERPACK_IMPROVEMENTS_TASKS §5
+- [x] ROADMAP_OFFLINE — sekcja dopracowania → ✅ po weryfikacji
+- [x] Issue #034 → `verification needed`
 
 ---
 

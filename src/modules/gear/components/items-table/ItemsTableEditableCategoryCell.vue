@@ -80,7 +80,7 @@ watch(
     >
       <SelectTrigger
         :aria-label="t('gear.item.category')"
-        class="h-[2.1rem]! min-w-35 w-full border-transparent bg-transparent shadow-none focus:ring-1"
+        class="h-10 sm:h-[2.1rem]! min-w-24 sm:min-w-35 w-full border-transparent bg-transparent shadow-none focus:ring-1"
         @keydown.tab="handleTab"
       >
         <SelectValue>

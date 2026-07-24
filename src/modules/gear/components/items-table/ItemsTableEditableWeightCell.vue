@@ -24,16 +24,21 @@ const emit = defineEmits<{
   navigate: [direction: 'next' | 'prev' | 'down']
 }>()
 
-const editedWeight = ref((props.item.weight ?? DEFAULT_ITEM_WEIGHT).toString())
+const editedWeight = ref<string>((props.item.weight ?? DEFAULT_ITEM_WEIGHT).toString())
 const editedWeightUnit = ref<TGearWeightUnit>(props.item.weightUnit ?? 'g')
 const isFocused = ref(false)
 const suppressBlurSave = ref(false)
+
+/** type="number" + v-model can emit numbers — keep a string for parseFloat. */
+function setEditedWeight(value: string | number | null | undefined) {
+  editedWeight.value = value == null || value === '' ? '' : String(value)
+}
 
 function emitChange(immediate = false) {
   const weightValue = parseFloat(editedWeight.value)
 
   if (isNaN(weightValue) || weightValue < 0) {
-    editedWeight.value = (props.item.weight ?? DEFAULT_ITEM_WEIGHT).toString()
+    setEditedWeight(props.item.weight ?? DEFAULT_ITEM_WEIGHT)
     editedWeightUnit.value = props.item.weightUnit ?? 'g'
     emit('change', {})
     return
@@ -81,7 +86,7 @@ function handleKeydown(event: KeyboardEvent) {
   if (event.key === 'Escape') {
     event.preventDefault()
     suppressBlurSave.value = true
-    editedWeight.value = (props.item.weight ?? DEFAULT_ITEM_WEIGHT).toString()
+    setEditedWeight(props.item.weight ?? DEFAULT_ITEM_WEIGHT)
     editedWeightUnit.value = props.item.weightUnit ?? 'g'
     emit('change', {})
     ;(document.activeElement as HTMLElement | null)?.blur()
@@ -99,7 +104,7 @@ watch(
   () => [props.item.weight, props.item.weightUnit],
   ([newWeight, newUnit]) => {
     if (!isFocused.value) {
-      editedWeight.value = newWeight?.toString() ?? ''
+      setEditedWeight(newWeight ?? DEFAULT_ITEM_WEIGHT)
       editedWeightUnit.value = (newUnit ?? 'g') as TGearWeightUnit
     }
   },
@@ -115,13 +120,15 @@ watch(
   >
     <Input
       :id="`item-weight-${item.id}`"
-      v-model="editedWeight"
+      :model-value="editedWeight"
       :name="`item-weight-${item.id}`"
       type="number"
       min="0"
       step="0.01"
       :aria-label="t('gear.item.weight')"
-      class="h-[2.1rem]! text-end rounded-r-none w-20 border-transparent bg-transparent py-1! shadow-none focus-visible:border-input focus-visible:bg-background focus-visible:ring-1"
+      class="h-10 sm:h-[2.1rem]! text-end rounded-r-none pr-2 w-16 sm:w-20 border-transparent bg-transparent py-1! shadow-none focus-visible:border-input focus-visible:bg-background focus-visible:ring-1"
+      inputmode="decimal"
+      @update:model-value="setEditedWeight"
       @focus="isFocused = true"
       @blur="handleBlur"
       @keydown="handleKeydown"
@@ -132,7 +139,7 @@ watch(
     >
       <SelectTrigger
         :aria-label="t('gear.item.weightUnit')"
-        class="h-[2.1rem]! rounded-l-none w-17.5 border-transparent bg-transparent shadow-none focus:ring-1"
+        class="h-10 sm:h-[2.1rem]! rounded-l-none pl-2 w-17.5 border-transparent bg-transparent shadow-none focus:ring-1"
       >
         <SelectValue />
       </SelectTrigger>

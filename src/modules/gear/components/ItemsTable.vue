@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { useDebounceFn } from '@vueuse/core'
-import { Package } from 'lucide-vue-next'
+import { ArrowUpDown, Package } from 'lucide-vue-next'
 import { computed, defineAsyncComponent, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import DataTable from '@/components/data-table/DataTable.vue'
 import Badge from '@/components/ui/badge/Badge.vue'
+import { Button } from '@/components/ui/button'
 import TableEmptyDecorated from '@/components/ui/table/TableEmptyDecorated.vue'
 import { ITEMS_TABLE_COLUMN_VISIBILITY_KEY } from '@/shared/config/config'
 import type { EditableCellField } from '../types/inlineEditing.types'
@@ -597,6 +598,22 @@ async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority)
       />
     </template>
 
+    <template #header-quantity="{ column }">
+      <div class="flex justify-end">
+        <Button
+          variant="ghost"
+          class="group -mr-3 h-8 data-[state=open]:bg-accent"
+          @click="column.toggleSorting(column.getIsSorted() === 'asc')"
+        >
+          {{ t('gear.item.quantity') }}
+          <ArrowUpDown
+            class="ml-2 size-4 group-hover:opacity-100 transition-opacity"
+            :class="column.getIsSorted() ? 'opacity-60' : 'opacity-0'"
+          />
+        </Button>
+      </div>
+    </template>
+
     <template #quantity="{ row }">
       <ItemsTableEditableQuantityCell
         v-if="editMode && !publicMode"
@@ -604,7 +621,9 @@ async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority)
         @change="(updates, options) => handleCellChange(row.original, updates, options)"
         @navigate="(direction) => handleCellNavigate(row.original, 'quantity', direction)"
       />
-      <span v-else>{{ row.original.quantity }}</span>
+      <div v-else class="text-end">
+        {{ row.original.quantity }}
+      </div>
     </template>
 
     <template #weight="{ row }">
@@ -696,7 +715,7 @@ async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority)
     <template #actions="{ row }">
       <div
         v-if="!publicMode"
-        class="flex items-center gap-2"
+        class="flex items-center gap-1"
         :data-save-status="getStatus(row.original.id)"
       >
         <ItemsTableRowSaveIndicator
@@ -752,10 +771,6 @@ async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority)
 </template>
 
 <style scoped>
-.items-table-edit-mode :deep([data-slot="table-cell"]) {
-  padding: .35rem .5rem;
-}
-
 .items-table-edit-mode :deep(tr[data-slot="table-row"]) {
   transition: background-color 150ms ease;
 }
