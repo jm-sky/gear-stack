@@ -1,6 +1,6 @@
 # UX: layout strony kontenera na mobile — pusta przestrzeń, wąska treść
 
-**Status:** `verification needed`  
+**Status:** `done`  
 **Created:** 2026-07-15  
 **Updated:** 2026-07-23 — re-verified at 375px with inline-edit polish (sticky name/actions, compact toolbar)
 **Type:** bug (responsive)  
