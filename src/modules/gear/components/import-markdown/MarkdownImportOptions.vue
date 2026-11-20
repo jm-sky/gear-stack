@@ -7,8 +7,6 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 const { t } = useI18n()
 
 defineProps<{
-  recognizeFromName: boolean
-  importMode: 'create' | 'update'
   hasUuids: boolean
   showPreview: boolean
 }>()

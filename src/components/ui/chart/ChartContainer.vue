@@ -1,6 +1,6 @@
 <script lang="ts">
 import { useId } from 'reka-ui'
-import { computed, defineSlots, toRefs } from 'vue'
+import { computed, toRefs } from 'vue'
 import { cn } from '@/lib/utils'
 import type { ChartConfig } from '.'
 import { provideChartContext } from '.'

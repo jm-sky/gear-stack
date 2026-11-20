@@ -33,6 +33,20 @@ zweryfikowane `type-check` + `lint` + `test:run` (414 zielonych) + `pnpm build` 
 > naprawione przy okazji wcześniejszych bumpów tranzytywnych). Vite 8 (rolldown-based,
 > major) świadomie pominięty — zbyt ryzykowny bump dla jednego low-severity alertu.
 
+> **2026-11-20** — aktualizacja lockfile'a (`pnpm-lock.yaml`): tranzytywne poprawki są już
+> rozwiązywane bez pomocy overrides, więc usunięto **9 wpisów** `pnpm.overrides`: `shell-quote`,
+> `@babel/plugin-transform-modules-systemjs`, `esbuild`, `brace-expansion` (3 zakresy), `js-yaml`,
+> `linkify-it`, `fast-uri`. Lockfile rozwiązuje je do: shell-quote 1.12.0, babel systemjs 7.29.8,
+> esbuild 0.28.2, brace-expansion 1.1.22 / 2.1.8 / 5.0.13, js-yaml 4.3.2, linkify-it 6.1.0,
+> fast-uri 3.1.4. Pozostał **jeden** override: `serialize-javascript@<7.0.0` → `^7.0.5` (bez niego
+> zostaje podatna 6.0.2; lockfile ma 7.1.4). `axios` w `package.json`: `^1.21.1` (lockfile: 1.21.1).
+> Backend (Python): w working tree niecommitowany bump `backend/requirements.txt` (sekcja „Python"
+> poniżej nadal `TODO`). Przy teście wstecznym 7 testów backendu (`test_billing_service.py` ×5,
+> `test_convert_empty_strings_middleware.py` ×2) pada zarówno na HEAD, jak i na working tree
+> z pinami dolnych granic z HEAD — błędy nie wynikają z podbicia zależności (fixture `billing_interval`
+> = `monthly` vs. oczekiwane `month`/`year`; `Invalid plan tier: business`; parsowanie JSON w teście
+> middleware), więc są wcześniejsze niż ten plan.
+
 > Tylko `axios` jest zależnością bezpośrednią — resztę naprawiamy przez `pnpm.overrides`
 > w `package.json` (wymuszenie wersji w zależnościach tranzytywnych).
 
@@ -73,40 +87,33 @@ zweryfikowane `type-check` + `lint` + `test:run` (414 zielonych) + `pnpm build` 
   `serialize-javascript` jest używany tylko do serializacji opcji w czasie buildu; API stabilne,
   ale po zmianie uruchomić pełny `pnpm build` (z generacją service workera PWA).
 
-## Proponowana zmiana w `package.json`
+## Stan `package.json` (2026-11-20)
 
 ```jsonc
 {
   "dependencies": {
     // ...
-    "axios": "^1.17.0"
+    "axios": "^1.21.1"
   },
   "pnpm": {
     "overrides": {
-      "shell-quote@<1.8.4": "^1.8.4",
-      "@babel/plugin-transform-modules-systemjs@<7.29.4": "^7.29.7",
       "serialize-javascript@<7.0.0": "^7.0.5"
     }
   }
 }
 ```
 
-> Uwaga: w repo nie ma jeszcze sekcji `pnpm.overrides` — dodajemy ją.
+> Poprzednie overrides (shell-quote, @babel/plugin-transform-modules-systemjs, esbuild,
+> brace-expansion, js-yaml, linkify-it, fast-uri) usunięte — lockfile rozwiązuje je w bezpiecznych
+> wersjach (patrz aktualizacja 2026-11-20).
 
 ## Procedura wykonania
 
 ```bash
-# 1. axios (bezpośredni)
-pnpm add axios@^1.17.0
-
-# 2. overrides (po dodaniu sekcji pnpm.overrides do package.json)
-pnpm install
-
-# 3. Weryfikacja, że wersje się podbiły
-pnpm why shell-quote
-pnpm why serialize-javascript
-pnpm why @babel/plugin-transform-modules-systemjs
-pnpm ls axios
+# Weryfikacja wersji po zmianach (stan 2026-11-20)
+pnpm why serialize-javascript     # oczekiwane: 7.x (7.1.4)
+pnpm why shell-quote              # oczekiwane: 1.12.0
+pnpm ls axios                     # oczekiwane: 1.21.1
 ```
 
 ## Weryfikacja (gate przed mergem)
