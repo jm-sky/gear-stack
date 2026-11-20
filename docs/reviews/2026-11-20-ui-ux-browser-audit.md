@@ -1,11 +1,11 @@
 # UI/UX browser audit — Gear Stack (2026-11-20)
 
-**Status:** `in progress` (session 2 checkpoint — stop here; resume with prompt below / next chat)  
+**Status:** `in progress` (session 3 checkpoint — S20/S21/S27 done; resume remaining P1/P2 below)  
 **Date:** 2026-11-20  
-**Commit:** `12df1c7`  
+**Commit:** `4fb8847` (session 3)  
 **Plan:** [2026-11-20-ui-ux-browser-audit-cursor.md](../plans/2026-11-20-ui-ux-browser-audit-cursor.md)  
 **Scenarios:** [2026-11-20-ui-ux-browser-audit-scenarios.md](2026-11-20-ui-ux-browser-audit-scenarios.md)  
-**Assets:** [assets/2026-11-ui-ux/](assets/2026-11-ui-ux/) (16 PNGs; **no** 2FA secret screenshots)  
+**Assets:** [assets/2026-11-ui-ux/](assets/2026-11-ui-ux/) (25+ PNGs; **no** 2FA secret screenshots)  
 **Legend:** ✅ confirmed · 🟡 assumption · ❓ open  
 **Issue proposals:** listed only — **user has not accepted** creating `docs/issues/*` yet.
 
@@ -15,45 +15,45 @@
 
 | Item | Value |
 |------|-------|
-| Frontend | `http://localhost:5177` |
+| Frontend | `http://localhost:5177` (restarted mid-session 3) |
 | Backend | Docker: `gear-stack-app` (host **8001**), db, redis |
 | Browser | Cursor Browser MCP + CDP |
 | Accounts | `ux-audit@` (regular, used); premium/admin prepared, admin UI not fully exercised |
-| Dataset | Bug Out Bag (+ Fire Pouch) + Petzl + inline “Duct tape” (deleted); **Weekend hike** created; Realistic/Stress still thin |
+| Dataset | After MD import: **14 containers / 55 items** (BOB + Weekend hike + Samochód/Plecak/… from `example-gear.md`); Realistic denser; Stress/40+ sidebar still thin |
 | Viewports | 375, 768, ~1280 |
 | Themes / locales | light+dark; en+pl |
-| Sessions | 1 (~1.5–2 h) + 2 (~1 h) |
+| Sessions | 1 (~1.5–2 h) + 2 (~1 h) + 3 (~1.5 h) |
 
 ### Coverage
 
 | Priority | Done / partial | Remaining |
 |----------|----------------|-----------|
-| P0 | S01–S03 partial, S05 partial, S06 ✅ (inline+Enter add), S08/S10/S11 partial/done, S12 partial (create @768), S15 ✅ (delete), S26 partial | S04 timed catalogue-add; S07 bulk (missing); S09 edge text; S13–S14 stress; deepen timings |
-| P1 | S22 smoke, S25 empty, S26 tokens, S30 404, S42 2FA | S20–S21 import/export, S23–S24, S27–S29, S31–S32 |
-| P2 | S40 AI history empty (regular), S41 admin blank as non-admin, S42 settings/2FA | billing, PWA, micro-polish depth |
-| Cross | S50 largely done | S60 competitive pass to finish |
+| P0 | S01–S03 partial, S05 partial, S06 ✅, S08/S10/S11 partial/done, S12 partial, S15 ✅, S26 partial | S04 timed catalogue-add; S07 bulk; S09 edge text; S13–S14 stress 40+; deepen timings |
+| P1 | S20 ✅, S21 ✅, S22 smoke, S25 empty, S26 tokens, S27 ✅ (#039 fixed), S30 404, S42 2FA | S23–S24, S28–S29, S31–S32 |
+| P2 | S40 AI history empty (regular), S41 admin blank as non-admin, S42 settings/2FA | admin as `ux-audit-admin@`; premium AI gate; billing; PWA; micro-polish |
+| Cross | S50 largely done (#039 now fixed) | S60 competitive pass to finish |
 
 ---
 
-## 2. Executive summary (provisional after session 2)
+## 2. Executive summary (provisional after session 3)
 
 **Top problems**
 
-1. **F001 Shared list broken** (owner + guest) — Items 0 / empty table + wrong “Add your first item” CTA; guest also sees authenticated chrome / stale sidebar.  
+1. **F001 + F019 Shared/public item lists broken** — Items 0 + wrong “Add your first item” CTA on token share **and** `/gear/public/:id` (charts/weight still show).  
 2. **F012 Delete item without confirm** — row More → Delete removes immediately (**S1** data-safety).  
-3. **Add-item full form still slow** (#041/#006) — though **inline editing + “Add item…” + Enter** is strong LighterPack-like path when enabled.  
-4. **Base/worn/consumable not in header** (F003); chart vs header totals diverge (F007).  
-5. **Unit mismatch** — Gear Settings preferred unit **g**, new-item form defaults to **kg** (F013).
+3. **Add-item full form still slow** (#041/#006) — mitigated by inline + Enter when enabled.  
+4. **Base/worn/consumable not in header** (F003); chart vs header totals diverge (F007; also on public detail 955 g vs chart 885 g).  
+5. **Unit mismatch** — settings **g** vs new-item default **kg** (F013).
 
 **Top strengths**
 
-1. #017 mobile fixed; #024 nested path; #025 sidebar search.  
-2. Inline edit mode with bottom quick-add row.  
-3. #016 2FA setup API/QR works (verified; screenshot with secret **not** kept).  
-4. #042 visualization zones UI present in `/gear/settings`.  
-5. Sample sets + catalogue browse; Wearable/Consumable copy; 404 PL.
+1. Markdown import (paste → preview → progress) + export MD/CSV/JSON are solid migrator paths (S20/S21).  
+2. Inline edit + Enter-to-add; #017/#024/#025; #039 unpublish via Public badge (1–2 clicks).  
+3. #016 2FA setup; #042 viz zones; CSV export options (BOM, columns, nested).  
+4. Sample sets + catalogue; Wearable/Consumable copy.  
+5. Public list browse works once published.
 
-**Competitor readiness (🟡):** Inline edit narrows the LighterPack gap for power users who find the toggle; share/public view and one-click share still block replacement. Finish S60 next session.
+**Competitor readiness (🟡):** Import/export and inline edit help vs LighterPack migrators; **public/shared list views still unusable for items** — blocks share persona. Finish S23–S24, P2 smoke, S60 next.
 
 ---
 
@@ -79,6 +79,9 @@
 | F011 | Dashboard vs `/gear` empty | **S4** | Wayfinding | S | Clarify | S01 | — | 🟡 |
 | F017 | Missing weight shown as `0` | **S3** | Clarity | S | Show “—” / empty, not 0 g | inline Duct tape | — | ✅ |
 | F018 | Guest shared layout | **S2** | Share UX | M | Public/guest layout for token links | F001 guest | F001 | ✅ |
+| F019 | Import container name keeps `**md**` | **S3** | Polish / trust | S | Strip bold markers from heading names on import | [S20-result](assets/2026-11-ui-ux/S20-import-result-1280-light-en.png) | S20 | ✅ |
+| F020 | `/gear/public/:id` items empty | **S1** | Public list unusable | M | Same fix class as F001; read-only empty copy (no “Add first item”) | [S27-detail](assets/2026-11-ui-ux/S27-public-detail-1280-light-en.png) | F001 #039 | ✅ |
+| F021 | Export/copy no success toast | **S4** | Feedback | S | Toast or button “Copied” after MD Copy / file export | S21 | — | 🟡 |
 
 ---
 
@@ -93,7 +96,7 @@
 | 017 mobile layout | **fixed** | S11 |
 | 024 nested scanability | **fixed** | S50-all-items |
 | 025 sidebar search | **fixed** | sidebar searchbox |
-| 039 public unpublish | ❓ not tested | — |
+| 039 public unpublish | **fixed** — Public badge → Unpublish / Copy public link (1–2 clicks) | [S27-badge](assets/2026-11-ui-ux/S27-published-badge-1280-light-en.png); unpublish removes badge |
 | 040 add-container dialog | **still present** (no create-new in dialog) | S50-005 |
 | 041 add-item layout | **still present** (full form); mitigated by inline | S03, S06 |
 | 042 viz zones settings | **fixed** — Custom Visualization Zones + Add Zone | `/gear/settings` |
@@ -104,13 +107,15 @@
 ## 5. Quick wins (provisional)
 
 1. Confirm dialog on item delete (F012).  
-2. Fix shared view item list + guest layout (F001/F018).  
+2. Fix shared **and** public item lists + guest layout (F001/F018/F020) — one root cause likely.  
 3. Wire new-item unit to gear settings (F013).  
 4. One-click copy absolute share link (F005/F006).  
 5. Header base/worn/consumable chips (F003).  
 6. PL pluralisation for stars (F014).  
 7. Empty nest dialog → “Create nested container” (#040).  
-8. Missing weight as “—” not 0 (F017).
+8. Missing weight as “—” not 0 (F017).  
+9. Strip `**` from imported container names (F019).  
+10. Toast / “Copied” after MD Copy and file exports (F021).
 
 ---
 
@@ -119,7 +124,8 @@
 | Direction | Verdict | Notes |
 |-----------|---------|-------|
 | LighterPack fast entry | **parity when inline ON** / behind if form-only | S06 Enter-to-add; discoverability of toggle |
-| Share ≤2 clicks + public list | **behind** | F001, F005, F018 |
+| Share ≤2 clicks + public list | **behind** | Publish/unpublish OK (#039); **item table empty** F001/F020; F005/F018 |
+| Import / export | **parity / ahead** | S20 paste+preview; S21 MD/CSV/JSON (CSV options strong) |
 | Base/worn/consumable totals | **behind** | F003 |
 | Nested containers | **ahead** | Fire Pouch |
 | Catalogue | **ahead** capability / polish gaps | S22, F015 |
@@ -131,19 +137,21 @@
 ## 7. Positive / keep
 
 - Inline editing + “Add item…” row (Enter creates item).  
+- Markdown import preview + progress; export MD (AI options) / CSV (columns, BOM) / JSON.  
+- Public badge → Copy link / Unpublish (#039).  
 - Sample sets; sidebar search; All Items `›` path.  
 - 2FA setup flow; viz zones in gear settings.  
-- Mobile container layout; 16px inputs; Wearable/Consumable help text.  
-- Preferred weight unit control in gear settings (once honored by forms).
+- Mobile container layout; Wearable/Consumable help text.
 
 ---
 
 ## 8. Cross-cutting themes
 
-1. Share/public trust (F001/F018).  
+1. Share/public trust — empty item tables on token + public routes (F001/F018/F020).  
 2. Destructive safety (F012).  
 3. Weight truthfulness (F003/F007/F013/F017).  
-4. Dual add paths (inline vs long form) — teach or default to inline.
+4. Dual add paths (inline vs long form) — teach or default to inline.  
+5. Import polish (raw markdown in names F019; paste-only vs file pick).
 
 ---
 
@@ -157,25 +165,37 @@
 | **048** | One-click absolute share link | UX | S2 | F005 F006 |
 | **049** | Confirm before item delete | bug/UX | S1 | F012 |
 | **050** | Guest layout for share tokens | UX | S2 | F018 |
-| — | #006 #008 #039 #040 | existing | — | do not duplicate; #042/#016 can close after formal QA |
+| **051** | Public container detail items empty + wrong CTA | bug | S1 | F020 (group with 045 if same root) |
+| **052** | Strip markdown markers from import names | bug | S3 | F019 |
+| — | #006 #008 #040 | existing | — | do not duplicate; #039/#042/#016 can close after formal QA |
 
 ---
 
 ## 10. Open questions
 
-1. Root cause of F001 (API payload vs client filter vs store)?  
-2. Accept proposals 045–050?  
+1. Root cause of F001/F020 (API payload vs client filter vs store)? Same bug for shared + public?  
+2. Accept proposals 045–052?  
 3. Should inline editing default **on** for new users?  
-4. Close #016 and #042 after this audit?
+4. Close #016, #039, and #042 after this audit?
+
+---
+
+## Session 3 notes (S20 / S21 / S27)
+
+| ID | Result | Evidence |
+|----|--------|----------|
+| S20 | ✅ Paste import from `example-gear.md` → preview → import (~11 containers); More actions discoverable; malformed keeps Import disabled | [dialog](assets/2026-11-ui-ux/S20-import-dialog-1280-light-en.png), [preview](assets/2026-11-ui-ux/S20-import-preview-1280-light-en.png), [result](assets/2026-11-ui-ux/S20-import-result-1280-light-en.png), [malformed](assets/2026-11-ui-ux/S20-import-malformed-1280-light-en.png) |
+| S21 | ✅ MD export dialog + Copy; JSON `gear-export-all-YYYY-MM-DD.json`; CSV config “Will export 55 items” + BOM | [MD](assets/2026-11-ui-ux/S21-export-markdown-1280-light-en.png), [CSV](assets/2026-11-ui-ux/S21-export-csv-1280-light-en.png) |
+| S27 | ✅ Publish → public list → public detail (items empty F020); #039 Unpublish works | [badge](assets/2026-11-ui-ux/S27-published-badge-1280-light-en.png), [list](assets/2026-11-ui-ux/S27-public-list-1280-light-en.png), [detail](assets/2026-11-ui-ux/S27-public-detail-1280-light-en.png) |
 
 ---
 
 ## Checkpoint — next session
 
-1. Markdown import S20 + export S21; publish/public S27/#039.  
-2. Realistic/stress data; S14 sidebar 40+.  
-3. Admin as `ux-audit-admin@`; premium AI chat gate.  
-4. Finish S60 competitive; mark report `done`; propose close #032.  
-5. **No issue files / no commit** until user accepts.
+1. S23–S24 search/filter + visualization; S28–S29 theme/PL; S31–S32 forms/session.  
+2. Stress: S14 sidebar 40+ (import more / clone); deepen S08 on Realistic.  
+3. P2: admin as `ux-audit-admin@`; premium AI chat gate; billing/PWA smoke.  
+4. Finish S50 + S60; mark report `done`; propose close #032 / #039.  
+5. **No issue files / no commit** until user accepts 045–052.
 
 **Env reminder:** `pnpm dev` :5177; `docker compose` from repo root (no `_` prefix); password in `/tmp/gear-stack-ux-audit/pass.txt` (not in repo).

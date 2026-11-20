@@ -1,6 +1,6 @@
 # UI/UX browser audit — scenario list (2026-11-20)
 
-**Status:** `accepted` — session 2 checkpoint (see report); resume P1/P2 + S60 next session  
+**Status:** `accepted` — session 3 checkpoint (S20/S21/S27 done; see report); resume S23–S24, P2, S60 next session  
 **Plan:** [2026-11-20-ui-ux-browser-audit-cursor.md](../plans/2026-11-20-ui-ux-browser-audit-cursor.md)  
 **Commit at prep:** `12df1c7` · Frontend `http://localhost:5177` · API proxy `http://localhost:8001`  
 **Accounts:** `ux-audit@` (regular), `ux-audit-premium@` (premium), `ux-audit-admin@` (admin) — passwords out of repo  
@@ -98,14 +98,14 @@ Status: `todo` until execution starts.
 
 | ID | Title | Persona | Start | Observe | VP / theme / locale | Status |
 |----|-------|---------|-------|---------|---------------------|--------|
-| S20 | Import Markdown (`example-gear.md`) + malformed file | P-E | `/gear?import=true` | Discoverability; preview; errors; summary; #004 spot | 1280+375, light, en | todo |
-| S21 | Export JSON/MD/CSV naming & units | P-E | `/gear` More actions | Content correctness; feedback; #002/#003 spot | 1280, light, en | todo |
+| S20 | Import Markdown (`example-gear.md`) + malformed file | P-E | `/gear?import=true` | Discoverability; preview; errors; summary; #004 spot | 1280+375, light, en | done (F019 name `**`; paste-only) |
+| S21 | Export JSON/MD/CSV naming & units | P-E | `/gear` More actions | Content correctness; feedback; #002/#003 spot | 1280, light, en | done (F021 weak copy toast) |
 | S22 | Catalogue browse/search/add + admin manage smoke | P-A/G | `/gear/catalogue` | Relevance; empty search; #009 images if present; #040 dialog | 1280+375, light, en | todo |
 | S23 | Search/filter/sort on `/gear`, `/gear/items`, shopping | P-C | those routes | Placeholder; clear; URL persistence; empty results; `/` shortcut? | 1280+375, light, pl | todo |
 | S24 | Visualization DnD + gear settings zones (#042) | P-C | `/gear/visualization`, `/gear/settings` | Touch alternative; empty; dark contrast | 1280+375, dark, en | todo |
 | S25 | Shopping planning totals by priority/currency | P-C | `/gear/shopping` | Legibility; empty; mobile | 1280+375, light, pl | todo |
 | S26 | Share tokens UI + anonymous `/shared/container/:token` | P-D | share page + guest | ≤2 clicks to link; phone public view; #044 UI | 375+1280, light, en | partial (token OK; shared list broken F001; guest/incognito TBD) |
-| S27 | Public containers browse/rate/report + badge unpublish (#039) | P-D | `/gear/public` | Guest vs auth; unpublish speed | 1280+375, light, en | todo |
+| S27 | Public containers browse/rate/report + badge unpublish (#039) | P-D | `/gear/public` | Guest vs auth; unpublish speed | 1280+375, light, en | done (#039 fixed; F020 public items empty) |
 | S28 | Theme islands: dialogs, toasts, dropdowns, charts | — | core pages | Un-themed islands; #033 palette spot | 1280, toggle live | todo |
 | S29 | PL overflow stress (buttons, tabs, headers, badges) | — | main nav + forms | Truncation; mixed lang; pluralisation; formats | 375+1280, light, pl | todo |
 | S30 | Empty / 404 / 403 / expired token / offline message | — | bad IDs, DevTools offline | Retry; CLS; copy quality | 1280+375, light, en | todo |

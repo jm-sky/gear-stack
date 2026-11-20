@@ -1,6 +1,6 @@
 # Plan: hands-on UI/UX browser audit (for Cursor)
 
-**Status:** `in progress` (session 2 checkpoint; resume next chat — see report §Checkpoint)
+**Status:** `in progress` (session 3 checkpoint — S20/S21/S27 done; resume next chat — see report §Checkpoint)
 **Created:** 2026-11-20
 **Executor:** Cursor (AI agent with a browser tool; Cursor Browser MCP primary, Playwright as fallback)
 **Output:** [docs/reviews/2026-11-20-ui-ux-browser-audit.md](../reviews/README.md) + screenshots + proposed issues
