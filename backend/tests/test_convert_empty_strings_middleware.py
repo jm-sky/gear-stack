@@ -18,26 +18,17 @@ def test_app() -> FastAPI:
     """Create a test FastAPI app with the middleware."""
     app = FastAPI()
 
-    @app.post("/test")
-    async def test_endpoint(request: Request) -> JSONResponse:
-        """Test endpoint that returns the request body."""
+    async def _echo(request: Request) -> JSONResponse:
+        """Echo the parsed body; reply 422 when the body that reaches the endpoint is not valid JSON."""
         body = await request.body()
-        data = json.loads(body) if body else {}
-        return JSONResponse(content={"received": data})
+        if not body:
+            return JSONResponse(content={"received": {}})
+        try:
+            return JSONResponse(content={"received": json.loads(body)})
+        except json.JSONDecodeError:
+            return JSONResponse(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, content={"detail": "invalid json"})
 
-    @app.put("/test")
-    async def test_put_endpoint(request: Request) -> JSONResponse:
-        """Test PUT endpoint."""
-        body = await request.body()
-        data = json.loads(body) if body else {}
-        return JSONResponse(content={"received": data})
-
-    @app.patch("/test")
-    async def test_patch_endpoint(request: Request) -> JSONResponse:
-        """Test PATCH endpoint."""
-        body = await request.body()
-        data = json.loads(body) if body else {}
-        return JSONResponse(content={"received": data})
+    app.add_api_route("/test", _echo, methods=["POST", "PUT", "PATCH"])
 
     @app.get("/test")
     async def test_get_endpoint() -> JSONResponse:
@@ -182,7 +173,7 @@ class TestConvertEmptyStringsToNoneMiddleware:
         )
         # Should return error, but not crash
         assert response.status_code in (
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
             status.HTTP_400_BAD_REQUEST,
         )
 
@@ -203,7 +194,7 @@ class TestConvertEmptyStringsToNoneMiddleware:
         )
         # Should return error because endpoint expects JSON
         assert response.status_code in (
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
             status.HTTP_400_BAD_REQUEST,
         )
 

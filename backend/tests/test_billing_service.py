@@ -11,8 +11,6 @@ from app.modules.billing.exceptions import (
     CannotDowngradeGrandfatheredError,
     InvalidBillingIntervalError,
     InvalidPlanTierError,
-    SubscriptionAlreadyExistsError,
-    SubscriptionNotFoundError,
 )
 from app.modules.billing.repository import BillingRepository
 from app.modules.billing.service import BillingService
@@ -40,7 +38,7 @@ def sample_subscription() -> SubscriptionDB:
         stripe_customer_id="cus_test123",
         stripe_subscription_id="sub_test123",
         plan_tier="pro",
-        billing_interval="monthly",
+        billing_interval="month",
         status="active",
         current_period_start=datetime.now(UTC),
         current_period_end=datetime.now(UTC),
@@ -78,12 +76,22 @@ class TestGetSubscription:
         mock_repository.get_subscription_by_user_id.assert_called_once_with("user123")
 
     @pytest.mark.asyncio
-    async def test_get_subscription_not_found(self, billing_service: BillingService, mock_repository: AsyncMock) -> None:
-        """Test subscription not found."""
+    async def test_get_subscription_not_found_creates_free(
+        self,
+        billing_service: BillingService,
+        mock_repository: AsyncMock,
+        sample_subscription: SubscriptionDB,
+    ) -> None:
+        """Missing subscription is auto-created as FREE tier."""
+        sample_subscription.plan_tier = "free"
+        sample_subscription.billing_interval = None
         mock_repository.get_subscription_by_user_id.return_value = None
+        mock_repository.create_subscription.return_value = sample_subscription
 
-        with pytest.raises(SubscriptionNotFoundError):
-            await billing_service.get_subscription("user123")
+        response = await billing_service.get_subscription("user123")
+
+        assert response.planTier == "free"
+        mock_repository.create_subscription.assert_called_once_with(user_id="user123", plan_tier="free", status="active")
 
 
 class TestCreateCheckoutSession:
@@ -154,23 +162,35 @@ class TestCreateCheckoutSession:
             )
 
     @pytest.mark.asyncio
-    async def test_create_checkout_session_already_subscribed(
+    async def test_create_checkout_session_replaces_active_subscription(
         self,
         billing_service: BillingService,
         mock_repository: AsyncMock,
+        mock_stripe_client: AsyncMock,
         sample_subscription: SubscriptionDB,
     ) -> None:
-        """Test checkout session when user already has active subscription."""
+        """An active paid subscription is canceled and reset to free to allow plan change."""
         mock_repository.get_subscription_by_user_id.return_value = sample_subscription
+        mock_session = MagicMock()
+        mock_session.id = "cs_test123"
+        mock_session.url = "https://checkout.stripe.com/test"
+        mock_stripe_client.create_checkout_session.return_value = mock_session
 
-        with pytest.raises(SubscriptionAlreadyExistsError):
-            await billing_service.create_checkout_session(
+        with patch("app.modules.billing.service.settings") as mock_settings:
+            mock_settings.stripe.pro_plus_monthly_price_id = "price_pro_plus_monthly"
+
+            response = await billing_service.create_checkout_session(
                 user_id="user123",
-                plan_tier="business",
+                plan_tier="pro_plus",
                 billing_interval="monthly",
                 success_url="https://example.com/success",
                 cancel_url="https://example.com/cancel",
             )
+
+        assert response.sessionId == "cs_test123"
+        mock_stripe_client.cancel_subscription.assert_called_once_with("sub_test123", cancel_at_period_end=False)
+        mock_repository.update_subscription.assert_called_once()
+        assert mock_repository.update_subscription.call_args.kwargs["plan_tier"] == "free"
 
 
 class TestCancelSubscription:
@@ -264,13 +284,13 @@ class TestGetSubscriptionLimits:
         mock_repository: AsyncMock,
         sample_subscription: SubscriptionDB,
     ) -> None:
-        """Test limits for business tier."""
-        sample_subscription.plan_tier = "business"
+        """Test limits for pro_plus tier."""
+        sample_subscription.plan_tier = "pro_plus"
         mock_repository.get_subscription_by_user_id.return_value = sample_subscription
 
         response = await billing_service.get_subscription_limits("user123")
 
-        assert response.planTier == "business"
+        assert response.planTier == "pro_plus"
         assert response.aiMonthlyTokenLimit == 10_000_000
         assert response.requiresByok is False
         assert response.canUseAdvancedFeatures is True

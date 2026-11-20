@@ -78,7 +78,7 @@ class BillingService:
 
         Args:
             user_id: User ID
-            plan_tier: Subscription plan tier (pro or business)
+            plan_tier: Subscription plan tier (pro or pro_plus)
             billing_interval: Billing interval (monthly or annual)
             success_url: URL to redirect after successful payment
             cancel_url: URL to redirect if payment is cancelled
@@ -399,7 +399,7 @@ class BillingService:
         Get Stripe price ID for plan tier and billing interval.
 
         Args:
-            plan_tier: Plan tier (pro or business)
+            plan_tier: Plan tier (pro or pro_plus)
             billing_interval: Billing interval (monthly or annual)
 
         Returns:
@@ -524,14 +524,14 @@ class BillingService:
         for sub in subscriptions:
             if sub.status == "active" and not sub.is_grandfathered:
                 if sub.plan_tier == "pro":
-                    if sub.billing_interval == "monthly":
+                    if sub.billing_interval == "month":
                         monthly_revenue += 5.0
-                    elif sub.billing_interval == "annual":
+                    elif sub.billing_interval == "year":
                         annual_revenue += 50.0
                 elif sub.plan_tier == "pro_plus":
-                    if sub.billing_interval == "monthly":
+                    if sub.billing_interval == "month":
                         monthly_revenue += 15.0
-                    elif sub.billing_interval == "annual":
+                    elif sub.billing_interval == "year":
                         annual_revenue += 150.0
 
         # Get total users count
