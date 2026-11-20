@@ -32,7 +32,7 @@ Tracked work items (bugs, improvements) live here — not in GitHub Issues.
 | 014 | [2026-07-07--014--oauth-github-login.md](2026-07-07--014--oauth-github-login.md) | OAuth GitHub — logowanie przez GitHub | `done` |
 | 015 | [2026-07-07--015--guest-layout-nav-z-index.md](2026-07-07--015--guest-layout-nav-z-index.md) | GuestLayout — pasek locale/dark mode pod logo (z-index) | `done` |
 | 016 | [2026-07-08--016--two-factor-api-404-double-prefix.md](2026-07-08--016--two-factor-api-404-double-prefix.md) | Konfiguracja 2FA — API 404 przez podwójny prefix `/two-factor` | `verification needed` |
-| 017 | [2026-07-15--017--container-detail-mobile-layout.md](2026-07-15--017--container-detail-mobile-layout.md) | UX: layout strony kontenera na mobile — pusta przestrzeń | `verification needed` |
+| 017 | [2026-07-15--017--container-detail-mobile-layout.md](2026-07-15--017--container-detail-mobile-layout.md) | UX: layout strony kontenera na mobile — pusta przestrzeń | `done` |
 | 018 | [2026-07-15--018--sidebar-duplicate-container-names.md](2026-07-15--018--sidebar-duplicate-container-names.md) | UX: sidebar — identyczne nazwy kontenerów | `done` |
 | 019 | [2026-07-15--019--login-password-field-a11y.md](2026-07-15--019--login-password-field-a11y.md) | A11y: pole hasła na logowaniu — accessible name | `done` |
 | 020 | [2026-07-15--020--pagination-rows-per-page-a11y.md](2026-07-15--020--pagination-rows-per-page-a11y.md) | A11y: paginacja — rows per page bez opisowej nazwy | `done` |
