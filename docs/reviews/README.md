@@ -19,6 +19,7 @@ Planned review runs — **one AI session per file**. Backend and frontend are se
 | Performance | Backend | `planned` | [2026-07-06-performance-backend.md](2026-07-06-performance-backend.md) |
 | Performance | Frontend | `planned` | [2026-07-06-performance-frontend.md](2026-07-06-performance-frontend.md) |
 | Claude docs audit | CLAUDE.md / docs for agent context | `done` | [2026-11-20-claude-docs-audit.md](2026-11-20-claude-docs-audit.md) |
+| Security: shared-core cross-check (osowiec-house audit) | Backend + deploy | `done` | [2026-11-20-security-shared-core-crosscheck.md](2026-11-20-security-shared-core-crosscheck.md) — fixed: 2FA fail-open, logs auth, bcrypt 72B; open: G3–G9, H5/H6 |
 
 ## Baseline docs (do not duplicate blindly)
 
