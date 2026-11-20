@@ -10,6 +10,7 @@ from app.core.health_details import build_health_details, verify_health_details_
 from app.modules.admin.router import router as admin_router
 from app.modules.ai.router import router as ai_router
 from app.modules.auth.router import router as auth_router
+from app.modules.auth.dependencies import require_admin_or_owner
 from app.modules.billing.router import router as billing_router
 from app.modules.feature_limits.router import router as feature_limits_router
 from app.modules.gear.router import router as gear_router
@@ -66,7 +67,8 @@ api_router.include_router(feature_limits_router)
 api_router.include_router(gear_router)
 api_router.include_router(gear_router_v2)
 api_router.include_router(gear_settings_router, prefix="/me")
-api_router.include_router(logs_router, prefix="/logs", tags=["Logs", "Monitoring"])
+# Logs contain internal diagnostics and expose destructive cleanup: admin/owner only.
+api_router.include_router(logs_router, prefix="/logs", tags=["Logs", "Monitoring"], dependencies=[Depends(require_admin_or_owner)])
 api_router.include_router(stats_router, prefix="/stats", tags=["Statistics"])
 api_router.include_router(users_router, prefix="/users", tags=["Users"])
 api_router.include_router(settings_router, prefix="/me/settings", tags=["Settings"])
