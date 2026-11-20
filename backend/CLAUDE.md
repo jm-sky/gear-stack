@@ -5,6 +5,7 @@ FastAPI + PostgreSQL + Redis, async. Layout: `app/core`, `app/common` (shared co
 - Run Docker from the **repo root**; never if the dir name starts with `_` (see root CLAUDE.md). Dev container: `gear-stack-app`; auto-reload on, restart only for `.env` / `requirements.txt` changes.
 - Before committing Python, in `backend/`: `python -m black .` and `python -m mypy .`.
 - Gear data lives in `gear_items_v2` (`GearItemDBV2`); no V1 models/tables.
+- Deps: `backend/requirements.txt` uses bounded ranges `>=X.Y.Z,<next major` (0.x: `<0.next-minor`); bump floor and ceiling together, rebuild (`docker compose up -d --build`) and run the full pytest suite. No lockfile (single file also holds dev tools).
 
 ## Tests (pytest + pytest-asyncio, real PostgreSQL `backend_test`)
 
