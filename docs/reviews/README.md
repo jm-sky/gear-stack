@@ -15,7 +15,7 @@ Planned review runs — **one AI session per file**. Backend and frontend are se
 | Code quality | Backend | `planned` | [2026-07-06-code-quality-backend.md](2026-07-06-code-quality-backend.md) |
 | Code quality | Frontend | `planned` | [2026-07-06-code-quality-frontend.md](2026-07-06-code-quality-frontend.md) |
 | UX | Full stack (FE primary) | `done` | [2026-07-06-ux.md](2026-07-06-ux.md) |
-| UX (browser audit, hands-on) | Frontend; plan: [2026-11-20-ui-ux-browser-audit-cursor.md](../plans/2026-11-20-ui-ux-browser-audit-cursor.md) | `planned` | `2026-11-XX-ui-ux-browser-audit.md` (to be created by the run) |
+| UX (browser audit, hands-on) | Frontend; plan: [2026-11-20-ui-ux-browser-audit-cursor.md](../plans/2026-11-20-ui-ux-browser-audit-cursor.md) | `in progress` | [2026-11-20-ui-ux-browser-audit.md](2026-11-20-ui-ux-browser-audit.md) (session 1 checkpoint) · [scenarios](2026-11-20-ui-ux-browser-audit-scenarios.md) |
 | Performance | Backend | `planned` | [2026-07-06-performance-backend.md](2026-07-06-performance-backend.md) |
 | Performance | Frontend | `planned` | [2026-07-06-performance-frontend.md](2026-07-06-performance-frontend.md) |
 | Claude docs audit | CLAUDE.md / docs for agent context | `done` | [2026-11-20-claude-docs-audit.md](2026-11-20-claude-docs-audit.md) |

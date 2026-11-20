@@ -1,10 +1,23 @@
 # Plan: hands-on UI/UX browser audit (for Cursor)
 
-**Status:** `planned`
+**Status:** `in progress` (session 2 checkpoint; resume next chat — see report §Checkpoint)
 **Created:** 2026-11-20
 **Executor:** Cursor (AI agent with a browser tool; Cursor Browser MCP primary, Playwright as fallback)
-**Output:** [docs/reviews/2026-11-XX-ui-ux-browser-audit.md](../reviews/README.md) (replace `XX` with the run day) + screenshots + proposed issues
+**Output:** [docs/reviews/2026-11-20-ui-ux-browser-audit.md](../reviews/README.md) + screenshots + proposed issues
+**Scenarios (accept before run):** [docs/reviews/2026-11-20-ui-ux-browser-audit-scenarios.md](../reviews/2026-11-20-ui-ux-browser-audit-scenarios.md)
 **Legend:** ✅ confirmed (read in repo) · 🟡 assumption (not verified) · ❓ open
+
+### Prep snapshot (2026-11-20)
+
+| Item | Value |
+|------|-------|
+| Commit | `12df1c7` |
+| Directory | `gear-stack` (no `_` prefix — Docker OK) |
+| Backend | `docker compose` Up: `gear-stack-app` (host **8001**→8000), db, redis |
+| Frontend | `pnpm dev` → **http://localhost:5177** (`VITE_PORT=5177`, proxy → 8001) |
+| Accounts | `ux-audit@example.com`, `ux-audit-premium@example.com`, `ux-audit-admin@example.com` (verified; passwords not in docs) |
+| Catalogue | seeded (71 items) |
+| Demo gear data | ❓ to build after scenario acceptance |
 
 ---
 
