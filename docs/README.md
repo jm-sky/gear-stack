@@ -40,6 +40,17 @@ Przykładowe pliki i szablony.
 ### `archive/`
 Przestarzałe dokumenty przeniesione do archiwum. Migracja V2: [archive/v2-unified-model/](./archive/v2-unified-model/README.md).
 
+## Dla agentów AI: co czytać, czego nie
+
+- Start: [../CLAUDE.md](../CLAUDE.md) (+ `src/CLAUDE.md`, `backend/CLAUDE.md` ładowane przy pracy w tych katalogach). Architektura: [claude/architecture.md](./claude/architecture.md).
+- **Historyczne / ukończone — pomijaj, chyba że zadanie dotyczy historii:**
+  - `archive/` (w tym `archive/cancelled/`, `archive/v2-unified-model/`) — zamknięte
+  - `../V2_MIGRATION_STATUS.md` — status ukończonej migracji V1 -> V2 (kandydat do przeniesienia do `archive/v2-unified-model/`)
+  - `deployment/PHASE-6-*.md`, `plans/PHASE-5-COMPLETION-SUMMARY.md`, `testing/MIGRATION_V2_TESTING_REPORT.md` — raporty faz/migracji (sprawdź status w indeksie przed użyciem)
+  - `../CHANGELOG.md` (~130KB) — nie czytaj w całości
+- Aktualne punkty wejścia: `issues/`, `reviews/`, `plans/`, `deployment/` (indeksy README w każdym).
+- Uwaga: `ROADMAP_OFFLINE.md` opisuje tryb localStorage; dane gear są dziś V2 (backend + cache lokalny `gear-stack:items-v2`).
+
 ## Dokumenty operacyjne
 
 - [deployment/](./deployment/README.md) — deployment, produkcja, Caddy, hardening Docker/DB
