@@ -9,15 +9,26 @@ import jwt
 from ...core.config import settings
 from .types.jwt import CreateAccessTokenOptions, CreateRefreshTokenOptions, JWTPayload
 
+_BCRYPT_MAX_BYTES = 72
+
+
+def _password_bytes(password: str) -> bytes:
+    """Encode a password for bcrypt.
+
+    bcrypt only uses the first 72 bytes and bcrypt>=5 raises ValueError for longer
+    input. Truncating keeps hashes created with older bcrypt versions valid.
+    """
+    return password.encode()[:_BCRYPT_MAX_BYTES]
+
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash."""
-    return bcrypt.checkpw(plain_password.encode(), hashed_password.encode())
+    return bcrypt.checkpw(_password_bytes(plain_password), hashed_password.encode())
 
 
 def get_password_hash(password: str) -> str:
     """Hash a password."""
-    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+    return bcrypt.hashpw(_password_bytes(password), bcrypt.gensalt()).decode()
 
 
 def _encode_token(

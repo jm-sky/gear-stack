@@ -100,7 +100,7 @@ class StripeClient:
             Stripe Checkout Session object
         """
         try:
-            session = stripe.checkout.Session.create(
+            session = stripe.checkout.Session.create(  # type: ignore[call-arg]
                 customer=customer_id,
                 mode="subscription",
                 payment_method_types=["card"],

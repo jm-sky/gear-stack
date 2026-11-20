@@ -90,7 +90,7 @@ def log_errors(message: str | None = None, reraise: bool = True, level: LogLevel
 
                     if reraise:
                         raise
-                    return None  # type: ignore[return-value]  # type: ignore
+                    return None  # type: ignore[return-value]
 
             return async_wrapper  # type: ignore
         else:

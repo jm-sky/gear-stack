@@ -204,7 +204,7 @@ class AdminRepository:
         if not row:
             return (None, None, None)
 
-        return tuple(row)
+        return (row[0], row[1], row[2])
 
     async def delete_item(self, item_id: str) -> bool:
         """Delete item by ID.
