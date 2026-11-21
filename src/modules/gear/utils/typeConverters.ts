@@ -77,6 +77,7 @@ export function convertV2ItemToV1(v2Item: IGearItemV2): IGearItem {
     quality: v2Item.quality ?? undefined,
     notes: v2Item.notes || undefined,
     order: v2Item.orderIndex ?? undefined,
+    primaryImageUrl: v2Item.primaryImageUrl ?? undefined,
     createdAt: v2Item.createdAt,
     updatedAt: v2Item.updatedAt,
   }
@@ -179,6 +180,7 @@ export function convertV1ItemToV2(
     showItemImages: false,
     quality: v1Item.quality ?? null,
     notes: v1Item.notes ?? null,
+    primaryImageUrl: v1Item.primaryImageUrl ?? null,
   }
 
   return v2Item
