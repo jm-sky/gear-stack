@@ -42,7 +42,7 @@ const route = useRoute()
 const store = useGearStoreV2()
 const { createItem, updateItem } = useGearMutations()
 const { getItems } = useGearV2()
-const { defaultCurrency } = useGearSettings()
+const { defaultCurrency, settings: gearSettings } = useGearSettings()
 
 // V1-shaped view (containers with nested items) built from the flat V2 store, so the
 // existing shopping logic (which iterates container.items) and the V1-typed shopping
@@ -473,7 +473,7 @@ const firstContainerId = computed(() => containers.value[0]?.id)
 
 const getInitialAddItemValues = (): ItemFormData => {
   return {
-    ...getDefaultItemValues(),
+    ...getDefaultItemValues(gearSettings.value.preferredWeightUnit),
     status: 'toBuy', // Default to "To Buy" status
   } as ItemFormData
 }

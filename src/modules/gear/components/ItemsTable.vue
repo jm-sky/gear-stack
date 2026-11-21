@@ -811,8 +811,8 @@ async function handleStarItem(item: IGearItemV2, newPriority: TGearItemPriority)
       <TableEmptyDecorated
         :colspan="columns.length"
         :icon="Package"
-        :title="t('gear.item.empty')"
-        :description="t('gear.item.emptyDescription')"
+        :title="publicMode ? t('gear.item.emptyReadOnly') : t('gear.item.empty')"
+        :description="publicMode ? t('gear.item.emptyReadOnlyDescription') : t('gear.item.emptyDescription')"
       />
     </template>
   </DataTable>

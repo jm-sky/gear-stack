@@ -20,6 +20,7 @@ import ItemCatalogSelector from '../components/ItemCatalogSelector.vue'
 import ItemFormFields from '../components/ItemFormFields.vue'
 import { useContainerV2 } from '../composables/useContainerV2'
 import { useGearMutations } from '../composables/useGearMutations'
+import { useGearSettings } from '../composables/useGearSettings'
 import { useNavigationReturn } from '../composables/useNavigationReturn'
 import { GearRoutePath } from '../routes'
 import { recognizeCategory } from '../utils/categoryRecognition'
@@ -42,6 +43,7 @@ const { t } = useI18n()
 const { createItem, updateItem, getItemById } = useGearMutations()
 const { handleError } = useHandleError()
 const { setTitle } = usePageTitle()
+const { settings: gearSettings } = useGearSettings()
 
 const containerId = route.params.containerId as string
 const itemId = route.params.itemId as string | undefined
@@ -98,7 +100,7 @@ const getInitialValues = (): ItemFormData => {
     }
   }
   return {
-    ...getDefaultItemValues(),
+    ...getDefaultItemValues(gearSettings.value.preferredWeightUnit),
   } as ItemFormData
 }
 
@@ -171,7 +173,7 @@ onMounted(async () => {
 // Reset form when switching tabs
 watch(tabMode, () => {
   resetForm({
-    values: getDefaultItemValues() as ItemFormData,
+    values: getDefaultItemValues(gearSettings.value.preferredWeightUnit) as ItemFormData,
   })
   selectedCatalogItemId.value = ''
 })

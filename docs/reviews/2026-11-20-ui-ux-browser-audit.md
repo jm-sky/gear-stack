@@ -1,12 +1,13 @@
 # UI/UX browser audit — Gear Stack (2026-11-20)
 
-**Status:** `in progress` (session 3 checkpoint — S20/S21/S27 done; resume remaining P1/P2 below)  
+**Status:** `in progress` (functional fixes F001/F020/F013/F019 applied 2026-11-21 — see "Fix status"; session 3 checkpoint — S20/S21/S27 done; resume remaining P1/P2 below)  
 **Date:** 2026-11-20  
 **Commit:** `4fb8847` (session 3)  
 **Plan:** [2026-11-20-ui-ux-browser-audit-cursor.md](../plans/2026-11-20-ui-ux-browser-audit-cursor.md)  
 **Scenarios:** [2026-11-20-ui-ux-browser-audit-scenarios.md](2026-11-20-ui-ux-browser-audit-scenarios.md)  
 **Assets:** [assets/2026-11-ui-ux/](assets/2026-11-ui-ux/) (25+ PNGs; **no** 2FA secret screenshots)  
 **Legend:** ✅ confirmed · 🟡 assumption · ❓ open  
+**Fix status:** see [§ Fix status (2026-11-21)](#fix-status-2026-11-21) below.  
 **Issue proposals:** listed only — **user has not accepted** creating `docs/issues/*` yet.
 
 ---
@@ -61,26 +62,26 @@
 
 | ID | Area / route | Sev | Impact | Effort | Recommendation | Screenshot | Related | Cert |
 |----|--------------|-----|--------|--------|----------------|------------|---------|------|
-| F001 | `/shared/container/:token` | **S1** | Shared packing list unusable | M | Fix item load; read-only empty copy; guest layout without owner chrome | [F001-…](assets/2026-11-ui-ux/F001-shared-empty-1280-dark-en.png), [guest](assets/2026-11-ui-ux/F001-shared-guest-1280-light-en.png) | #044 | ✅ |
-| F012 | Item delete (row menu) | **S1** | Accidental data loss | S | Confirm dialog with item name; undo toast | — (repro: More → Delete) | S15 | ✅ |
+| F001 ✅ **fixed** | `/shared/container/:token` | **S1** | Shared packing list unusable | M | Fix item load; read-only empty copy; guest layout without owner chrome | [F001-…](assets/2026-11-ui-ux/F001-shared-empty-1280-dark-en.png), [guest](assets/2026-11-ui-ux/F001-shared-guest-1280-light-en.png) | #044 | ✅ |
+| F012 ⚪ **not reproducible in code** | Item delete (row menu) | **S1** | Accidental data loss | S | Confirm dialog with item name; undo toast | — (repro: More → Delete) | S15 | ✅ |
 | F002 | `/items/new` form | **S2** | Slow adds if not using inline | M | Respect settings unit; collapse advanced; save-and-add-next | [S03](assets/2026-11-ui-ux/S03-add-item-375-dark-en.png) | #041 #006 | ✅ |
 | F003 | Container header stats | **S2** | Weight comprehension | M | Show base/worn/consumable + Readiness tooltip | [S08](assets/2026-11-ui-ux/S08-container-detail-1280-light-en.png) | calc V2 | ✅ |
 | F005 | Share discoverability | **S2** | Sharing persona | S | One-click copy share link | [S26](assets/2026-11-ui-ux/S26-share-tokens-1280-dark-en.png) | — | ✅ |
-| F013 | Unit default vs settings | **S2** | Wrong weights | S | New item unit = preferredWeightUnit from gear settings | S03 vs `/gear/settings` | — | ✅ |
+| F013 ✅ **fixed** | Unit default vs settings | **S2** | Wrong weights | S | New item unit = preferredWeightUnit from gear settings | S03 vs `/gear/settings` | — | ✅ |
 | F014 | PL star rating copy | **S3** | i18n polish | S | Fix pluralisation (`Oceń 1 gwiazdką` / `2 gwiazdki` / `5 gwiazdek`) | PL container | S29 | ✅ |
 | F015 | Catalogue card images | **S3** | Trust/polish | M | Broken/missing catalogue images | [S22](assets/2026-11-ui-ux/S22-catalogue-1280-light-en.png) | #009 | ✅ |
 | F016 | `/admin` as non-admin | **S3** | Confusing blank | S | Redirect or 403 page, not empty document | — | S41 | 🟡 |
 | F004 | List thumbnails | **S3** | Visual scan | M | Default-on or discoverable “Show Item Images” (exists on create) | S08 | #008 | ✅ |
 | F006 | Relative share URL | **S3** | Copy UX | S | Absolute URL in UI | S26 | — | ✅ |
-| F007 | Weight total mismatch | **S3** | Trust | M | Align header vs chart | F001/S08 | — | ✅ |
+| F007 🟠 **partly fixed** (public/shared) | Weight total mismatch | **S3** | Trust | M | Align header vs chart | F001/S08 | — | ✅ |
 | F008 | Sample sets discoverability | **S3** | Mid-journey | S | Expose beyond empty dashboard | — | — | ✅ |
 | F009 | Brand/Color a11y names | **S3** | SR | S | Labels on comboboxes | S03 | #021 | 🟡 |
 | F010 | Dual sidebar toggle | **S4** | Clutter | S | One control | S11 | — | ✅ |
 | F011 | Dashboard vs `/gear` empty | **S4** | Wayfinding | S | Clarify | S01 | — | 🟡 |
 | F017 | Missing weight shown as `0` | **S3** | Clarity | S | Show “—” / empty, not 0 g | inline Duct tape | — | ✅ |
 | F018 | Guest shared layout | **S2** | Share UX | M | Public/guest layout for token links | F001 guest | F001 | ✅ |
-| F019 | Import container name keeps `**md**` | **S3** | Polish / trust | S | Strip bold markers from heading names on import | [S20-result](assets/2026-11-ui-ux/S20-import-result-1280-light-en.png) | S20 | ✅ |
-| F020 | `/gear/public/:id` items empty | **S1** | Public list unusable | M | Same fix class as F001; read-only empty copy (no “Add first item”) | [S27-detail](assets/2026-11-ui-ux/S27-public-detail-1280-light-en.png) | F001 #039 | ✅ |
+| F019 ✅ **fixed** | Import container name keeps `**md**` | **S3** | Polish / trust | S | Strip bold markers from heading names on import | [S20-result](assets/2026-11-ui-ux/S20-import-result-1280-light-en.png) | S20 | ✅ |
+| F020 ✅ **fixed** | `/gear/public/:id` items empty | **S1** | Public list unusable | M | Same fix class as F001; read-only empty copy (no “Add first item”) | [S27-detail](assets/2026-11-ui-ux/S27-public-detail-1280-light-en.png) | F001 #039 | ✅ |
 | F021 | Export/copy no success toast | **S4** | Feedback | S | Toast or button “Copied” after MD Copy / file export | S21 | — | 🟡 |
 
 ---
@@ -199,3 +200,21 @@
 5. **No issue files / no commit** until user accepts 045–052.
 
 **Env reminder:** `pnpm dev` :5177; `docker compose` from repo root (no `_` prefix); password in `/tmp/gear-stack-ux-audit/pass.txt` (not in repo).
+
+
+---
+
+## Fix status (2026-11-21)
+
+Root causes verified in code (not taken from the audit at face value). Branch `claude/gear-stack-audit-fixes-70xa40`. Verified by unit tests + `pnpm type-check` + full `pnpm test:run` (386 passed); **not** re-verified in a browser.
+
+| ID | Verdict | Root cause (verified) | Fix | Regression test |
+|----|---------|-----------------------|-----|-----------------|
+| F001 / F020 | ✅ fixed (one root cause) | API (`/gear/shared/containers/:token`, `/gear/public/containers/:id`) returns `items` correctly. `convertV1ContainerToV2` dropped `items`, but both pages read `container.children` → always 0 items, plus the "Add your first item" CTA from `ItemsTable`'s empty slot. | New `utils/containerTree.ts` (`buildContainerTreeFromApi`) turns API `items` into `children`; both pages use it. Empty table in `publicMode` shows read-only copy (`gear.item.emptyReadOnly*`, en+pl). | `utils/containerTree.spec.ts` |
+| F007 (public/shared) | 🟠 partly fixed | Header weight/readiness and `CategoryPieChart` read the **viewer's own gear store** (which doesn't hold someone else's container), so totals were wrong/inconsistent. | Pages compute weight/readiness from the fetched tree; `CategoryPieChart` got optional `items` prop and uses local accessors. | `containerTree.spec.ts` (weight 2500 g, readiness 50 %) |
+| F007 (own container header vs chart) | ❓ not investigated | Not reproduced/analysed in this pass. | — | — |
+| F013 | ✅ fixed | `DEFAULT_ITEM_VALUES` hard-coded `0.1 kg`; form ignored `preferredWeightUnit`. | `getDefaultItemValues(preferredUnit?)` (auto-* → base unit, default ≈100 g in that unit); used in `ItemFormPage` (new item + tab reset) and `ShoppingPlanningPage` add-item dialog. | `utils/defaultValues.spec.ts` |
+| F019 | ✅ fixed | Container name regex took the whole heading incl. `**MFH**`, in both sync and async parser. | `stripInlineMarkdown()` applied to container names. | `markdownImportService.spec.ts` ("F019 regression") |
+| F012 | ⚪ not a code bug | Row More → Delete → `ContainerDetailPage.handleDeleteItem` already calls `confirm(t('gear.item.deleteConfirm'))` (present since 2026-07-08; same on `ItemDetailPage`). The audit's CDP browser most likely auto-accepted the **native** dialog. | None. Remaining UX gap (native `confirm` doesn't name the item; no undo toast) stays in the UX backlog (proposal 049, downgraded S1 → S3). | — (native `confirm`; no cheap unit seam) |
+
+**Still open / left for later (UX, per scope):** F002, F003, F005, F006, F008–F011, F014–F018 (F018 guest layout), F021, #006/#008/#040/#041. Note: public/shared items still lose `primaryImageUrl` in the V1→V2 conversion (not part of this fix).

@@ -15,6 +15,7 @@ import { useGearSettings } from '../composables/useGearSettings'
 import { usePieChartGeometry } from '../composables/usePieChartGeometry'
 import { useGearStoreV2 } from '../store/useGearStoreV2'
 import { calculateItemsByPriorityV2, calculatePriceByCategoryV2, calculateWeightBreakdownV2 } from '../utils/containerCalculationsV2'
+import { createTreeAccessors } from '../utils/containerTree'
 import { formatCurrency, getCurrency } from '../utils/currencyFormatter'
 import CategoryPieChartLabels from './CategoryPieChartLabels.vue'
 import CategoryPieChartLegend from './CategoryPieChartLegend.vue'
@@ -39,25 +40,31 @@ interface CategoryData {
 const props = withDefaults(defineProps<{
   container: IGearItemV2
   includeNested?: boolean
+  /** Explicit items (public/shared views, where the viewer's store doesn't hold the data) */
+  items?: IGearItemV2[]
 }>(), {
   includeNested: false,
+  items: undefined,
 })
 
 const { t } = useI18n()
 const store = useGearStoreV2()
 const { defaultCurrency } = useGearSettings()
 
+// Use local data when items are passed explicitly, otherwise the gear store
+const accessors = computed(() => (props.items ? createTreeAccessors(props.container, props.items) : store))
+
 const chartMode = ref<ChartMode>('weight')
 
 const categoryData = computed<CategoryData[]>(() => {
   // Get all items including nested containers if enabled
-  let allItems: IGearItemV2[] = store.getChildrenOfItem(props.container.id)
+  let allItems: IGearItemV2[] = accessors.value.getChildrenOfItem(props.container.id)
     .filter(child => child.itemType === 'item')
 
   if (props.includeNested) {
     // Get all nested containers recursively
     const collectNestedItems = (containerId: string): IGearItemV2[] => {
-      const children = store.getChildrenOfItem(containerId)
+      const children = accessors.value.getChildrenOfItem(containerId)
       let items: IGearItemV2[] = []
 
       for (const child of children) {
@@ -79,7 +86,7 @@ const categoryData = computed<CategoryData[]>(() => {
 
   // Handle weight-breakdown mode
   if (mode === 'weight-breakdown') {
-    const breakdown = calculateWeightBreakdownV2(props.container.id, store.getItemById, store.getChildrenOfItem)
+    const breakdown = calculateWeightBreakdownV2(props.container.id, accessors.value.getItemById, accessors.value.getChildrenOfItem)
     const total = breakdown.total
 
     const breakdownData: CategoryData[] = [
@@ -113,7 +120,7 @@ const categoryData = computed<CategoryData[]>(() => {
   // Handle price mode
   // Note: V2 function already recurses into nested containers, so includeNested prop is not needed
   if (mode === 'price') {
-    const priceData = calculatePriceByCategoryV2(props.container.id, store.getItemById, store.getChildrenOfItem)
+    const priceData = calculatePriceByCategoryV2(props.container.id, accessors.value.getItemById, accessors.value.getChildrenOfItem)
     return priceData.map(({ category, totalPrice, percentage }) => ({
       category,
       weight: 0,
@@ -127,7 +134,7 @@ const categoryData = computed<CategoryData[]>(() => {
   // Handle priority mode
   // Note: V2 function already recurses into nested containers, so includeNested prop is not needed
   if (mode === 'priority') {
-    const priorityData = calculateItemsByPriorityV2(props.container.id, store.getItemById, store.getChildrenOfItem)
+    const priorityData = calculateItemsByPriorityV2(props.container.id, accessors.value.getItemById, accessors.value.getChildrenOfItem)
     return priorityData.map(({ priority, count, percentage }) => ({
       category: priority, // Use priority as category key for chart
       weight: 0,
@@ -345,7 +352,7 @@ const valueFormatter = (value: number) => {
   }
   if (mode === 'price') {
     // Use first item's currency or default currency
-    const children = store.getChildrenOfItem(props.container.id)
+    const children = accessors.value.getChildrenOfItem(props.container.id)
     const firstItem = children
       .filter(child => child.itemType === 'item')
       .find(item => item.price != null && item.price > 0)
