@@ -882,3 +882,15 @@ This description should be ignored.
     })
   })
 })
+
+describe('Container heading markdown markers (F019 regression)', () => {
+  it('strips **bold** markers from container names', () => {
+    const result = markdownImportService.parseMarkdown('## Wodoodporne pudełko **MFH**\n- **Apaszka** x1\n')
+    expect(result.containers[0]?.name).toBe('Wodoodporne pudełko MFH')
+  })
+
+  it('strips bold markers placed before the parenthesised type/params', () => {
+    const result = markdownImportService.parseMarkdown('## **Plecak** (Backpack)\n- **Item**\n')
+    expect(result.containers[0]?.name).toBe('Plecak')
+  })
+})

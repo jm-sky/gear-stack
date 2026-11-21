@@ -17,18 +17,16 @@ import { useGearSettings } from '../composables/useGearSettings'
 import { GearRoutePath } from '../routes'
 import { gearContainerApiService } from '../services/gearContainerApiService'
 import { publicContainersService } from '../services/publicContainersService'
-import { useGearStoreV2 } from '../store/useGearStoreV2'
 import {
   calculateReadinessPercentageSyncV2,
   calculateTotalWeightSyncV2,
 } from '../utils/containerCalculationsV2'
+import { buildContainerTreeFromApi, type IContainerTreeAccessors } from '../utils/containerTree'
 import { formatWeightToPreferredUnit } from '../utils/formatWeight'
-import { convertV1ContainerToV2 } from '../utils/typeConverters'
 
 const route = useRoute()
 const router = useRouter()
 const { t, locale } = useI18n()
-const storeV2 = useGearStoreV2()
 const { settings: gearSettings } = useGearSettings()
 const { user } = useAuth()
 
@@ -37,6 +35,7 @@ const settings = computed(() => ({ preferredWeightUnit: gearSettings.value.prefe
 const containerId = route.params.id as string
 const container = ref<IGearItemV2 | null>(null)
 const isLoading = ref(true)
+const accessors = ref<IContainerTreeAccessors | null>(null)
 const isRatingLoading = ref(false)
 
 const isOwner = computed(() => {
@@ -57,19 +56,9 @@ const isPublic = computed(() => {
 const loadContainer = async () => {
   try {
     const loadedContainer = await publicContainersService.getPublicContainer(containerId)
-    // Convert to V2 and filter nested containers - only show items if nested container is public
-    const containerV2Temp = convertV1ContainerToV2(loadedContainer)
-    if (containerV2Temp && containerV2Temp.children) {
-      containerV2Temp.children = containerV2Temp.children.filter(item => {
-        if (item.itemType === 'container') {
-          // Check if nested container is public
-          const nestedContainer = storeV2.getItemById(item.id)
-          return nestedContainer?.isPublic ?? false
-        }
-        return true
-      })
-    }
-    container.value = containerV2Temp
+    const tree = buildContainerTreeFromApi(loadedContainer)
+    container.value = tree.container
+    accessors.value = tree
   } catch (error) {
     console.error('Failed to load public container:', error)
     toast.error(t('common.error'))
@@ -86,20 +75,20 @@ onMounted(async () => {
 const items = computed<IGearItemV2[]>(() => container.value?.children ?? [])
 
 const totalWeight = computed<number>(() => {
-  if (!container.value) return 0
+  if (!container.value || !accessors.value) return 0
   return calculateTotalWeightSyncV2(
     container.value.id,
-    storeV2.getItemById,
-    storeV2.getChildrenOfItem,
+    accessors.value.getItemById,
+    accessors.value.getChildrenOfItem,
   )
 })
 
 const readinessPercentage = computed<number>(() => {
-  if (!container.value) return 0
+  if (!container.value || !accessors.value) return 0
   return calculateReadinessPercentageSyncV2(
     container.value.id,
-    storeV2.getItemById,
-    storeV2.getChildrenOfItem,
+    accessors.value.getItemById,
+    accessors.value.getChildrenOfItem,
   )
 })
 
@@ -224,7 +213,11 @@ const handleDeleteRating = async (type: TRatingType) => {
       </Card>
 
       <!-- Category Pie Chart -->
-      <CategoryPieChart v-if="container" :container="container" />
+      <CategoryPieChart
+        v-if="container"
+        :container="container"
+        :items="items"
+      />
     </div>
   </AuthenticatedLayout>
 </template>

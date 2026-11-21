@@ -114,6 +114,14 @@ export interface IMarkdownImportResult {
 }
 
 /**
+ * Strip inline emphasis markers (**bold**, __bold__) from a heading so container names
+ * don't keep raw markdown (e.g. "Box **MFH**" -> "Box MFH").
+ */
+export function stripInlineMarkdown(text: string): string {
+  return text.replace(/(\*\*|__)(.+?)\1/g, '$2').replace(/\s{2,}/g, ' ').trim()
+}
+
+/**
  * Parsed item parameters from parentheses
  */
 interface IItemParams {
@@ -315,7 +323,7 @@ class MarkdownImportService {
 
           // Extract container name (remove type in parentheses if present)
           const nameMatch = headerText.match(/^([^(]+)/)
-          const containerName = (nameMatch ? nameMatch[1]?.trim() : headerText) || headerText
+          const containerName = stripInlineMarkdown((nameMatch ? nameMatch[1]?.trim() : headerText) || headerText)
 
           currentContainer = {
             name: containerName,
@@ -569,7 +577,7 @@ class MarkdownImportService {
 
         // Extract container name (remove type in parentheses if present)
         const nameMatch = headerText.match(/^([^(]+)/)
-        const containerName = (nameMatch ? nameMatch[1]?.trim() : headerText) || headerText
+        const containerName = stripInlineMarkdown((nameMatch ? nameMatch[1]?.trim() : headerText) || headerText)
 
         currentContainer = {
           name: containerName,
