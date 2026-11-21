@@ -29,6 +29,16 @@ const makeContainer = (items: IGearItem[]): IGearContainer => ({
 })
 
 describe('buildContainerTreeFromApi (F001/F020 regression)', () => {
+  it('preserves primaryImageUrl when converting API items', () => {
+    const tree = buildContainerTreeFromApi(makeContainer([
+      makeItem({ id: 'a', primaryImageUrl: 'https://example.com/a.jpg' }),
+      makeItem({ id: 'b' }),
+    ]))
+
+    expect(tree.items[0]?.primaryImageUrl).toBe('https://example.com/a.jpg')
+    expect(tree.items[1]?.primaryImageUrl).toBeNull()
+  })
+
   it('exposes API items as children of the container (previously dropped)', () => {
     const tree = buildContainerTreeFromApi(makeContainer([
       makeItem({ id: 'a', name: 'Tent' }),
